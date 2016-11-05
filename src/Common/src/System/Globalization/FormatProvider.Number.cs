@@ -314,7 +314,6 @@ namespace System.Globalization
                 {
                     return null;
                 }
-			
                 // We only hurt the failure case
                 // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 as a
                 // space character we use 0x20 space character instead to mean the same.
@@ -324,7 +323,6 @@ namespace System.Globalization
                     str++;
                     if (*str == '\0') return p;
                 }
-                
                 return null;
             }
 
@@ -379,73 +377,72 @@ namespace System.Globalization
                             state |= StateSign;
                             p = next - 1;
                         }
-                        else if (ch == '(' && ((options & NumberStyles.AllowParentheses) != 0) && ((state & StateSign) == 0)) 
+                        else if (ch == '(' && ((options & NumberStyles.AllowParentheses) != 0) && ((state & StateSign) == 0))
                         {
                             state |= StateSign | StateParens;
                             number.sign = true;
                         }
-                        else if ((currSymbol != null && (next = MatchChars(p, currSymbol)) != null)) 
+                        else if ((currSymbol != null && (next = MatchChars(p, currSymbol)) != null))
                         {
                             state |= StateCurrency;
-                            currSymbol = null;  
+                            currSymbol = null;
                             // We already found the currency symbol. There should not be more currency symbols. Set
                             // currSymbol to NULL so that we won't search it again in the later code path.
                             p = next - 1;
                         }
-                        else 
+                        else
                         {
                             break;
                         }
                     }
-                    ch = *++p;    
+                    ch = *++p;
                 }
-                
                 int digCount = 0;
                 int digEnd = 0;
-                while (true) 
+                while (true)
                 {
-                    if ((ch >= '0' && ch <= '9') || (((options & NumberStyles.AllowHexSpecifier) != 0) && ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')))) 
+                    if ((ch >= '0' && ch <= '9') || (((options & NumberStyles.AllowHexSpecifier) != 0) && ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'))))
                     {
                         state |= StateDigits;
 
-                        if (ch != '0' || (state & StateNonZero) != 0 || (bigNumber && ((options & NumberStyles.AllowHexSpecifier) != 0))) 
+                        if (ch != '0' || (state & StateNonZero) != 0 || (bigNumber && ((options & NumberStyles.AllowHexSpecifier) != 0)))
                         {
-                            if (digCount < maxParseDigits) 
+                            if (digCount < maxParseDigits)
                             {
                                 if (bigNumber)
                                     sb.Append(ch);
                                 else
                                     number.digits[digCount++] = ch;
-                                if (ch != '0' || parseDecimal) 
+                                if (ch != '0' || parseDecimal)
                                 {
                                     digEnd = digCount;
                                 }
                             }
-                            if ((state & StateDecimal) == 0) 
+                            if ((state & StateDecimal) == 0)
                             {
                                 number.scale++;
                             }
                             state |= StateNonZero;
                         }
-                        else if ((state & StateDecimal) != 0) 
+                        else if ((state & StateDecimal) != 0)
                         {
                             number.scale--;
                         }
                     }
-                    else if (((options & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberDecimalSeparator)) != null)) 
+                    else if (((options & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberDecimalSeparator)) != null))
                     {
                         state |= StateDecimal;
                         p = next - 1;
                     }
-                    else if (((options & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberGroupSeparator)) != null)) 
+                    else if (((options & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberGroupSeparator)) != null))
                     {
                         p = next - 1;
                     }
-                    else 
+                    else
                     {
                         break;
                     }
-                    ch = *++p;            
+                    ch = *++p;
                 }
 
                 bool negExp = false;
@@ -497,28 +494,28 @@ namespace System.Globalization
                             ch = *p;
                         }
                     }
-                    while (true) 
+                    while (true)
                     {
                         if (!IsWhite(ch) || (options & NumberStyles.AllowTrailingWhite) == 0)
                         {
-                            if (((options & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, numfmt.PositiveSign)) != null || (((next = MatchChars(p, numfmt.NegativeSign)) != null) && (number.sign = true)))) 
+                            if (((options & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, numfmt.PositiveSign)) != null || (((next = MatchChars(p, numfmt.NegativeSign)) != null) && (number.sign = true))))
                             {
                                 state |= StateSign;
                                 p = next - 1;
                             }
-                            else if (ch == ')' && ((state & StateParens) != 0)) 
+                            else if (ch == ')' && ((state & StateParens) != 0))
                             {
                                 state &= ~StateParens;
                             }
-                            else if (currSymbol != null && (next = MatchChars(p, currSymbol)) != null) 
+                            else if (currSymbol != null && (next = MatchChars(p, currSymbol)) != null)
                             {
                                 currSymbol = null;
-                                p = next - 1;	
+                                p = next - 1;
                             }
-                            else 
+                            else
                             {
                                 break;
-                            }	
+                            }
                         }
                         ch = *++p;
                     }
