@@ -9,7 +9,7 @@ namespace System.IO.Tests
 {
     public class BufferedStreamFlushTests
     {
-        [Theory]
+        [Fact]
         public async void ShouldNotFlushUnderlyingStreamIfReadOnly()
         {
             var underlying = new DelegateStream(
