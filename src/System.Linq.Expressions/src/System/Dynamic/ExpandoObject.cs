@@ -305,7 +305,7 @@ namespace System.Dynamic
         // open types (from MSDN http://msdn.microsoft.com/en-us/library/d8eyd8zc.aspx).
         private sealed class KeyCollectionDebugView
         {
-            private ICollection<string> _collection;
+            private readonly ICollection<string> _collection;
 
             public KeyCollectionDebugView(ICollection<string> collection)
             {
@@ -444,7 +444,7 @@ namespace System.Dynamic
         // open types (from MSDN http://msdn.microsoft.com/en-us/library/d8eyd8zc.aspx).
         private sealed class ValueCollectionDebugView
         {
-            private ICollection<object> _collection;
+            private readonly ICollection<object> _collection;
 
             public ValueCollectionDebugView(ICollection<object> collection)
             {
@@ -1007,7 +1007,7 @@ namespace System.Dynamic
         /// </summary>
         private class ExpandoData
         {
-            internal static ExpandoData Empty = new ExpandoData();
+            internal static readonly ExpandoData Empty = new ExpandoData();
 
             /// <summary>
             /// the dynamically assigned class associated with the Expando object
