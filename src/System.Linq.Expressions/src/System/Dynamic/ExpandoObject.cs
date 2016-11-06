@@ -1007,7 +1007,7 @@ namespace System.Dynamic
         /// </summary>
         private class ExpandoData
         {
-            internal static readonly ExpandoData Empty = new ExpandoData();
+            internal static ExpandoData Empty = new ExpandoData();
 
             /// <summary>
             /// the dynamically assigned class associated with the Expando object
