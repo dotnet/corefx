@@ -526,7 +526,10 @@ namespace System.IO
                 _byteBuffer[2] == 0xFE && _byteBuffer[3] == 0xFF)
             {
                 // Big Endian UTF32
-                _encoding = new UTF32Encoding(bigEndian: true, byteOrderMark: true);
+                // Unfortunately, there is no public Encoding.BigEndianUTF32 property, so instead
+                // we call Encoding.GetEncoding, which will retrieve a cached instance.
+                const int CodePageUTF32BE = 12001;
+                _encoding = Encoding.GetEncoding(CodePageUTF32BE);
                 CompressBuffer(4);
                 changedEncoding = true;
             }
