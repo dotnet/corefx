@@ -18,15 +18,11 @@ namespace System.IO
         private const int FileAccess_Read = 1;
         private const int FileAccess_Write = 2;
 
-        private static FileOpenDelegate s_fileOpen;
+        private static readonly FileOpenDelegate s_fileOpen = GetFileOpenFunction();
         private delegate Stream FileOpenDelegate(string path, int fileMode, int fileAccess);
 
         public static Stream CreateFileStream(string path, bool write, bool append)
         {
-            if (s_fileOpen == null)
-            {
-                s_fileOpen = GetFileOpenFunction();
-            }
             int filemode = !write ? FileMode_Open : append ? FileMode_Append : FileMode_Create;
             int fileaccess = write ? FileAccess_Write : FileAccess_Read;
             return s_fileOpen(path, filemode, fileaccess);
