@@ -351,7 +351,7 @@ def osShortName = ['Windows 10': 'win10',
 // **************************
 [true, false].each { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
-        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', `Ubuntu16.10', 'Debian8.4', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1, 'Fedora23', 'Fedora24', 'RHEL7.2', 'OSX'].each { osName ->
+        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'Debian8.4', 'CentOS7.1', 'OpenSUSE13.2', 'OpenSUSE42.1, 'Fedora23', 'Fedora24', 'RHEL7.2', 'OSX'].each { osName ->
             def osGroup = osGroupMap[osName]
             def newJobName = "${osName.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
