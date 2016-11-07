@@ -9,6 +9,7 @@
 '
 
 Imports System.Resources
+Imports System.Resources.Diagnostics
 Imports System.Text
 
 Namespace System
@@ -16,9 +17,13 @@ Namespace System
     Friend Class SR
 
         Private Shared s_resourceManager As ResourceManager
+
+        <ExcludeFromCodeCoverage>
         Private Sub New()
         End Sub
+
         Private Shared ReadOnly Property ResourceManager As ResourceManager
+            <ExcludeFromCodeCoverage>
             Get
 
                 If SR.s_resourceManager Is Nothing Then
@@ -34,11 +39,13 @@ Namespace System
         ' This method is used to decide if we need to append the exception message parameters to the message when calling SR.Format. 
         ' by default it returns false. We overwrite the implementation of this method to return true through IL transformer 
         ' when compiling ProjectN app as retail build. 
+        <ExcludeFromCodeCoverage>
         <Global.System.Runtime.CompilerServices.MethodImpl(Global.System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>
         Public Shared Function UsingResourceKeys() As Boolean
             Return False
         End Function
 
+        <ExcludeFromCodeCoverage>
         Friend Shared Function GetResourceString(ByVal resourceKey As String, ByVal defaultString As String) As String
 
             Dim resourceString As String = Nothing
@@ -56,6 +63,7 @@ Namespace System
             Return resourceString
         End Function
 
+        <ExcludeFromCodeCoverage>
         Friend Shared Function Format(ByVal resourceFormat As String, ParamArray args() As Object) As String
             If args IsNot Nothing Then
                 If (UsingResourceKeys()) Then
@@ -66,6 +74,7 @@ Namespace System
             Return resourceFormat
         End Function
 
+        <ExcludeFromCodeCoverage>
         <Global.System.Runtime.CompilerServices.MethodImpl(Global.System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>
         Friend Shared Function Format(ByVal resourceFormat As String, p1 As Object) As String
             If (UsingResourceKeys()) Then
@@ -75,6 +84,7 @@ Namespace System
             Return String.Format(resourceFormat, p1)
         End Function
 
+        <ExcludeFromCodeCoverage>
         <Global.System.Runtime.CompilerServices.MethodImpl(Global.System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>
         Friend Shared Function Format(ByVal resourceFormat As String, p1 As Object, p2 As Object) As String
             If (UsingResourceKeys()) Then
@@ -84,6 +94,7 @@ Namespace System
             Return String.Format(resourceFormat, p1, p2)
         End Function
 
+        <ExcludeFromCodeCoverage>
         <Global.System.Runtime.CompilerServices.MethodImpl(Global.System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>
         Friend Shared Function Format(ByVal resourceFormat As String, p1 As Object, p2 As Object, p3 As Object) As String
             If (UsingResourceKeys()) Then
@@ -92,4 +103,24 @@ Namespace System
             Return String.Format(resourceFormat, p1, p2, p3)
         End Function
     End Class
+End Namespace
+
+Namespace System.Resources.Diagnostics
+
+    <AttributeUsage(AttributeTargets.All)>
+    <ExcludeFromCodeCoverage>
+    Friend Class ExcludeFromCodeCoverageAttribute
+        Inherits Attribute
+
+        ' The code in the partial SR above is injected into all assemblies with resources, regardless of
+        ' whether those assemblies use this functionality.  As such, it should be excluded from code coverage.
+        ' The code coverage tools are configured to ignore any code attributed with an attribute
+        ' named ExcludeFromCodeCoverage, regardless of its namespace.  We have it in a specialized namespace
+        ' so as to avoid conflicts with other ExcludeFromCodeCoverageAttribute types used elsewhere in corefx.
+        ' It's applied to the individual members in SR rather than to SR as a whole because we still
+        ' want code coverage to include the individual resource keys; doing so helps to highlight whether
+        ' we're exercising all error paths, whether any resource strings are stale and can be removed, etc.
+
+    End Class
+
 End Namespace
