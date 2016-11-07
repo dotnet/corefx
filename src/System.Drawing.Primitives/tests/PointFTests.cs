@@ -148,7 +148,7 @@ namespace System.Drawing.PrimitivesTests
         public void ToStringTest(float x, float y)
         {
             PointF p = new PointF(x, y);
-            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{X={0}, Y={1}}}", p.X, p.Y), p.ToString());
+            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{X={0},Y={1}}}", p.X, p.Y), p.ToString());
         }
     }
 }
