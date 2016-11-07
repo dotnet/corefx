@@ -15,8 +15,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="CompressedStackTests.cs" />
     <Compile Include="ExceptionTests.cs" />
     <Compile Include="ThreadExceptionEventArgsTests.cs" />
+    <Compile Include="ThreadTests.netstandard1.7.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
@@ -31,7 +33,8 @@
     <ProjectReference Include="..\pkg\System.Threading.Thread.pkgproj">
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Threading\tests\System.Threading.Tests.csproj" />
+    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
+    <ProjectReference Include="..\..\System.Runtime.InteropServices\pkg\System.Runtime.InteropServices.pkgproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
