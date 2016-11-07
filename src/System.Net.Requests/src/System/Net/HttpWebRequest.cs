@@ -61,6 +61,7 @@ namespace System.Net
         private X509CertificateCollection _clientCertificates;
         private Booleans _Booleans = Booleans.Default;        
         private bool _pipelined = true;
+        private bool _preAuthenticate;
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
 
         //these should be safe.
@@ -129,7 +130,7 @@ namespace System.Net
             _originVerb = serializationInfo.GetString("_OriginVerb");
             ConnectionGroupName = serializationInfo.GetString("_ConnectionGroupName");
             ProtocolVersion = (Version)serializationInfo.GetValue("_Version", typeof(Version));
-            _requestUri = (Uri)serializationInfo.GetValue("_OriginUri", typeof(Uri));            
+            _requestUri = (Uri)serializationInfo.GetValue("_OriginUri", typeof(Uri));
 #if DEBUG
             }
 #endif
@@ -157,7 +158,7 @@ namespace System.Net
             serializationInfo.AddValue("_KeepAlive", KeepAlive);
             serializationInfo.AddValue("_Pipelined", Pipelined);
             serializationInfo.AddValue("_AllowAutoRedirect", AllowAutoRedirect);
-            serializationInfo.AddValue("_AllowWriteStreamBuffering", AllowWriteStreamBuffering);            
+            serializationInfo.AddValue("_AllowWriteStreamBuffering", AllowWriteStreamBuffering);
             serializationInfo.AddValue("_MaximumAllowedRedirections", AllowAutoRedirect);
             serializationInfo.AddValue("_AutoRedirects", AllowAutoRedirect);
             serializationInfo.AddValue("_Timeout", Timeout);
@@ -516,6 +517,18 @@ namespace System.Net
             set
             {
                 throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
+        }
+
+        public override bool PreAuthenticate
+        {
+            get
+            {
+                return _preAuthenticate;
+            }
+            set
+            {
+                _preAuthenticate = value;
             }
         }
 
@@ -1137,6 +1150,7 @@ namespace System.Net
                 handler.AllowAutoRedirect = AllowAutoRedirect;
                 handler.MaxAutomaticRedirections = MaximumAutomaticRedirections;
                 handler.MaxResponseHeadersLength = MaximumResponseHeadersLength;
+                handler.PreAuthenticate = PreAuthenticate;
                 if (_cookieContainer != null)
                 {
                     handler.CookieContainer = _cookieContainer;

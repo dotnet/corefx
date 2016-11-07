@@ -5,7 +5,6 @@
 using System.Net.Http;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
-
 using Xunit;
 using Xunit.Abstractions;
 
@@ -100,6 +99,46 @@ namespace System.Net.Tests
             using (httpWebRequest.EndGetRequestStream(httpWebRequest.BeginGetRequestStream(null, null), out context))
             {
                 Assert.Equal(null, context);
+            }
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_Connection_Validate(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.UseDefaultCredentials = true;
+            Assert.Throws<ArgumentException>(() => { request.Connection = "Close;keep-alive"; });
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_DefaultCachePolicy_Validate(Uri remoteServer)
+        {
+            Assert.Equal(Cache.RequestCacheLevel.BypassCache, HttpWebRequest.DefaultCachePolicy.Level);
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_Proxy_Validate(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.UseDefaultCredentials = true;
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                Assert.Throws<InvalidOperationException>(() => { request.Proxy = WebRequest.DefaultWebProxy; });
+            }
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_PreAuthenticate_Test(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.PreAuthenticate = true;
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                Assert.True(request.PreAuthenticate);
             }
         }
     }
