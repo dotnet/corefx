@@ -1644,8 +1644,7 @@ namespace System.Collections.Generic
                 return false;
             }
 
-            // all comparers are the same; this is faster
-            if (AreEqualityComparersEqual(set1, set2))
+            if (comparer.Equals(set1._comparer))
             {
                 if (set1.Count != set2.Count)
                 {
