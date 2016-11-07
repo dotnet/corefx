@@ -15,9 +15,6 @@ namespace System.Xml.Serialization
     using System.Security;
     using System.Xml.Serialization.Configuration;
     using System.Diagnostics;
-#if CODEDOM
-    using System.CodeDom.Compiler;
-#endif
     using System.Collections.Generic;
     using System.Runtime.Versioning;
 
@@ -820,58 +817,6 @@ namespace System.Xml.Serialization
 
             return serializers;
         }
-
-#if CODEDOM
-        /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.GenerateSerializer"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public static Assembly GenerateSerializer(Type[] types, XmlMapping[] mappings)
-        {
-            CompilerParameters parameters = new CompilerParameters();
-            parameters.TempFiles = new TempFileCollection();
-            parameters.GenerateInMemory = false;
-            parameters.IncludeDebugInformation = false;
-            return GenerateSerializer(types, mappings, parameters);
-        }
-
-        /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.GenerateSerializer1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        // SxS: This method does not take any resource name and does not expose any resources to the caller.
-        // It's OK to suppress the SxS warning.
-        internal static Assembly GenerateSerializer(Type[] types, XmlMapping[] mappings, CompilerParameters parameters)
-        {
-            if (types == null || types.Length == 0)
-                return null;
-
-            if (mappings == null)
-                throw new ArgumentNullException(nameof(mappings));
-
-            if (XmlMapping.IsShallow(mappings))
-            {
-                throw new InvalidOperationException(SR.XmlMelformMapping);
-            }
-
-            Assembly assembly = null;
-            for (int i = 0; i < types.Length; i++)
-            {
-                Type type = types[i];
-                if (DynamicAssemblies.IsTypeDynamic(type))
-                {
-                    throw new InvalidOperationException(SR.Format(SR.XmlPregenTypeDynamic, type.FullName));
-                }
-                if (assembly == null)
-                    assembly = type.GetTypeInfo().Assembly;
-                else if (type.GetTypeInfo().Assembly != assembly)
-                {
-                    throw new ArgumentException(SR.Format(SR.XmlPregenOrphanType, type.FullName/*, assembly.Location*/), nameof(types));
-                }
-            }
-            return TempAssembly.GenerateAssembly(mappings, types, null, null, XmlSerializerCompilerParameters.Create(parameters, /* needTempDirAccess = */ true), assembly, new Hashtable());
-        }
-#endif
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.FromTypes"]/*' />
         /// <devdoc>

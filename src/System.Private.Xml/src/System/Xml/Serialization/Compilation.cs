@@ -84,7 +84,7 @@ namespace System.Xml.Serialization
 
             if (fallbackToCSharpAssemblyGeneration)
             {
-                throw new PlatformNotSupportedException();
+                throw new PlatformNotSupportedException("Compiling JScript/CSharp scripts is not supported");
             }
 #endif
 

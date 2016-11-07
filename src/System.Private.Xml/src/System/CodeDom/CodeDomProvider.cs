@@ -15,7 +15,6 @@ namespace System.CodeDom.Compiler
 
 namespace Microsoft.CSharp
 {
-    // Ported from \ndp\fx\src\CompMod\Microsoft\CSharp\CSharpCodeProvider.cs
     internal class CSharpCodeProvider : CodeDomProvider
     {
         private static Dictionary<string, object> s_fixedStringLookup;

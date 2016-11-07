@@ -17,15 +17,6 @@ namespace System.Xml
             _resolver = resolver;
         }
 
-#if CAS
-        internal XmlSecureResolver(XmlResolver resolver, Evidence evidence) : this(resolver, SecurityManager.GetStandardSandbox(evidence)) { }
-
-        internal XmlSecureResolver(XmlResolver resolver, PermissionSet permissionSet)
-        {
-            _resolver = resolver;
-        }
-#endif
-
         public override ICredentials Credentials
         {
             set { _resolver.Credentials = value; }
@@ -40,12 +31,5 @@ namespace System.Xml
         {
             return _resolver.ResolveUri(baseUri, relativeUri);
         }
-
-#if CAS
-        internal static Evidence CreateEvidenceForUrl(string securityUrl)
-        {
-            return new Evidence();
-        }
-#endif
     }
 }

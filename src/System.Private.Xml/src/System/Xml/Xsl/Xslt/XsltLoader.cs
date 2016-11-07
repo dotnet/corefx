@@ -1315,7 +1315,7 @@ namespace System.Xml.Xsl.Xslt
                 return;
             }
 
-            throw new PlatformNotSupportedException(); // Not adding any scripts as script compilation is not available
+            throw new PlatformNotSupportedException("Compiling JScript/CSharp scripts is not supported"); // Not adding any scripts as script compilation is not available
         }
 
         private XsltAttribute[] _assemblyAttributes = {
