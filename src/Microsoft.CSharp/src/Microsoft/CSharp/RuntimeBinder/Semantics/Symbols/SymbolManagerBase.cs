@@ -175,19 +175,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         default:
                             Debug.Assert(false, "Bad kind in CompareTypes");
                             break;
-                        case TypeKind.TK_TypeParameterType:
-                        case TypeKind.TK_ErrorType:
+                        case TypeKind.TypeParameterType:
+                        case TypeKind.ErrorType:
                             break;
 
-                        case TypeKind.TK_PointerType:
-                        case TypeKind.TK_ParameterModifierType:
-                        case TypeKind.TK_ArrayType:
-                        case TypeKind.TK_NullableType:
+                        case TypeKind.PointerType:
+                        case TypeKind.ParameterModifierType:
+                        case TypeKind.ArrayType:
+                        case TypeKind.NullableType:
                             type1 = type1.GetBaseOrParameterOrElementType();
                             type2 = type2.GetBaseOrParameterOrElementType();
                             goto LAgain;
 
-                        case TypeKind.TK_AggregateType:
+                        case TypeKind.AggregateType:
                             nParam = CompareTypes(type1.AsAggregateType().GetTypeArgsAll(), type2.AsAggregateType().GetTypeArgsAll());
                             break;
                     }

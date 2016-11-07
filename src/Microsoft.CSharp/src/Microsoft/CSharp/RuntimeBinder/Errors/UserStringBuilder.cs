@@ -533,7 +533,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
             switch (pType.GetTypeKind())
             {
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     {
                         AggregateType pAggType = pType.AsAggregateType();
 
@@ -568,7 +568,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     if (null == pType.GetName())
                     {
                         // It's a standard type variable.
@@ -585,7 +585,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (pType.AsErrorType().HasParent())
                     {
                         Debug.Assert(pType.AsErrorType().nameText != null && pType.AsErrorType().typeArgs != null);
@@ -601,32 +601,32 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_NullType:
+                case TypeKind.NullType:
                     // Load the string "<null>".
                     ErrAppendId(MessageID.NULL);
                     break;
 
-                case TypeKind.TK_OpenTypePlaceholderType:
+                case TypeKind.OpenTypePlaceholderType:
                     // Leave blank.
                     break;
 
-                case TypeKind.TK_BoundLambdaType:
+                case TypeKind.BoundLambdaType:
                     ErrAppendId(MessageID.AnonMethod);
                     break;
 
-                case TypeKind.TK_UnboundLambdaType:
+                case TypeKind.UnboundLambdaType:
                     ErrAppendId(MessageID.Lambda);
                     break;
 
-                case TypeKind.TK_MethodGroupType:
+                case TypeKind.MethodGroupType:
                     ErrAppendId(MessageID.MethodGroup);
                     break;
 
-                case TypeKind.TK_ArgumentListType:
+                case TypeKind.ArgumentListType:
                     ErrAppendString(TokenFacts.GetText(TokenKind.ArgList));
                     break;
 
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     {
                         CType elementType = pType.AsArrayType().GetBaseElementType();
                         int rank;
@@ -670,11 +670,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case TypeKind.TK_VoidType:
+                case TypeKind.VoidType:
                     ErrAppendName(GetNameManager().Lookup(TokenFacts.GetText(TokenKind.Void)));
                     break;
 
-                case TypeKind.TK_ParameterModifierType:
+                case TypeKind.ParameterModifierType:
                     // add ref or out
                     ErrAppendString(pType.AsParameterModifierType().isOut ? "out " : "ref ");
 
@@ -682,7 +682,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendType(pType.AsParameterModifierType().GetParameterType(), pctx);
                     break;
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     // Generate the base type.
                     ErrAppendType(pType.AsPointerType().GetReferentType(), pctx);
                     {
@@ -691,12 +691,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     ErrAppendType(pType.AsNullableType().GetUnderlyingType(), pctx);
                     ErrAppendChar('?');
                     break;
 
-                case TypeKind.TK_NaturalIntegerType:
+                case TypeKind.NaturalIntegerType:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad type kind");

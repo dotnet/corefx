@@ -94,7 +94,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (src.GetTypeKind())
             {
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     ArrayType a = src.AsArrayType();
                     Type elementType = a.GetElementType().AssociatedSystemType;
                     if (a.rank == 1)
@@ -107,29 +107,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     NullableType n = src.AsNullableType();
                     Type underlyingType = n.GetUnderlyingType().AssociatedSystemType;
                     result = typeof(Nullable<>).MakeGenericType(underlyingType);
                     break;
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     PointerType p = src.AsPointerType();
                     Type referentType = p.GetReferentType().AssociatedSystemType;
                     result = referentType.MakePointerType();
                     break;
 
-                case TypeKind.TK_ParameterModifierType:
+                case TypeKind.ParameterModifierType:
                     ParameterModifierType r = src.AsParameterModifierType();
                     Type parameterType = r.GetParameterType().AssociatedSystemType;
                     result = parameterType.MakeByRefType();
                     break;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     result = CalculateAssociatedSystemTypeForAggregate(src.AsAggregateType());
                     break;
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     TypeParameterType t = src.AsTypeParameterType();
                     Type parentType = null;
                     if (t.IsMethodTypeParameter())
@@ -144,21 +144,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
 
-                case TypeKind.TK_ArgumentListType:
-                case TypeKind.TK_BoundLambdaType:
-                case TypeKind.TK_ErrorType:
-                case TypeKind.TK_MethodGroupType:
-                case TypeKind.TK_NaturalIntegerType:
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_OpenTypePlaceholderType:
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_VoidType:
+                case TypeKind.ArgumentListType:
+                case TypeKind.BoundLambdaType:
+                case TypeKind.ErrorType:
+                case TypeKind.MethodGroupType:
+                case TypeKind.NaturalIntegerType:
+                case TypeKind.NullType:
+                case TypeKind.OpenTypePlaceholderType:
+                case TypeKind.UnboundLambdaType:
+                case TypeKind.VoidType:
 
                 default:
                     break;
             }
 
-            Debug.Assert(result != null || src.GetTypeKind() == TypeKind.TK_AggregateType);
+            Debug.Assert(result != null || src.GetTypeKind() == TypeKind.AggregateType);
             return result;
         }
 
@@ -229,21 +229,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (GetTypeKind())
             {
-                case TypeKind.TK_ParameterModifierType:
-                case TypeKind.TK_PointerType:
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_NullableType:
+                case TypeKind.ParameterModifierType:
+                case TypeKind.PointerType:
+                case TypeKind.ArrayType:
+                case TypeKind.NullableType:
                     if (GetBaseOrParameterOrElementType() != null)
                     {
                         fBogus = GetBaseOrParameterOrElementType().computeCurrentBogusState();
                     }
                     break;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     setBogus(false);
                     break;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     fBogus = AsAggregateType().getAggregate().computeCurrentBogusState();
                     for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().size; i++)
                     {
@@ -251,12 +251,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
 
-                case TypeKind.TK_TypeParameterType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_OpenTypePlaceholderType:
-                case TypeKind.TK_ArgumentListType:
-                case TypeKind.TK_NaturalIntegerType:
+                case TypeKind.TypeParameterType:
+                case TypeKind.VoidType:
+                case TypeKind.NullType:
+                case TypeKind.OpenTypePlaceholderType:
+                case TypeKind.ArgumentListType:
+                case TypeKind.NaturalIntegerType:
                     setBogus(false);
                     break;
 
@@ -282,16 +282,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (GetTypeKind())
             {
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     return AsArrayType().GetElementType();
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     return AsPointerType().GetReferentType();
 
-                case TypeKind.TK_ParameterModifierType:
+                case TypeKind.ParameterModifierType:
                     return AsParameterModifierType().GetParameterType();
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return AsNullableType().GetUnderlyingType();
 
                 default:
@@ -353,7 +353,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (this.GetTypeKind())
             {
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     {
                         AggregateSymbol sym = this.AsAggregateType().getAggregate();
 
@@ -373,17 +373,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return FUNDTYPE.FT_REF;  // Interfaces, classes, delegates are reference types.
                     }
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return FUNDTYPE.FT_VAR;
 
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_NullType:
+                case TypeKind.ArrayType:
+                case TypeKind.NullType:
                     return FUNDTYPE.FT_REF;
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     return FUNDTYPE.FT_PTR;
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return FUNDTYPE.FT_STRUCT;
 
                 default:
@@ -453,14 +453,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     default:
                         return type;
 
-                    case TypeKind.TK_NullableType:
+                    case TypeKind.NullableType:
                         if (!fStripNub)
                             return type;
                         type = type.GetBaseOrParameterOrElementType();
                         break;
-                    case TypeKind.TK_ArrayType:
-                    case TypeKind.TK_ParameterModifierType:
-                    case TypeKind.TK_PointerType:
+                    case TypeKind.ArrayType:
+                    case TypeKind.ParameterModifierType:
+                    case TypeKind.PointerType:
                         type = type.GetBaseOrParameterOrElementType();
                         break;
                 }
@@ -709,11 +709,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (this.GetTypeKind())
             {
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return this.AsTypeParameterType().IsValueType();
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     return this.AsAggregateType().getAggregate().IsValueType();
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return true;
                 default:
                     return false;
@@ -723,11 +723,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (this.GetTypeKind())
             {
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return this.AsTypeParameterType().IsNonNullableValueType();
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     return this.AsAggregateType().getAggregate().IsValueType();
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return false;
                 default:
                     return false;
@@ -737,12 +737,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (this.GetTypeKind())
             {
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_NullType:
+                case TypeKind.ArrayType:
+                case TypeKind.NullType:
                     return true;
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return this.AsTypeParameterType().IsReferenceType();
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     return this.AsAggregateType().getAggregate().IsRefType();
                 default:
                     return false;

@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 switch (_typeDest.GetTypeKind())
                 {
-                    case TypeKind.TK_ErrorType:
+                    case TypeKind.ErrorType:
                         Debug.Assert(_typeDest.AsErrorType().HasTypeParent() || _typeDest.AsErrorType().HasNSParent());
                         if (_typeSrc != _typeDest)
                         {
@@ -104,7 +104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             _exprDest = _exprSrc;
                         }
                         return true;
-                    case TypeKind.TK_NullType:
+                    case TypeKind.NullType:
                         // Can only convert to the null type if src is null.
                         if (!_typeSrc.IsNullType())
                         {
@@ -115,13 +115,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             _exprDest = _exprSrc;
                         }
                         return true;
-                    case TypeKind.TK_MethodGroupType:
+                    case TypeKind.MethodGroupType:
                         VSFAIL("Something is wrong with Type.IsNeverSameType()");
                         return false;
-                    case TypeKind.TK_NaturalIntegerType:
-                    case TypeKind.TK_ArgumentListType:
+                    case TypeKind.NaturalIntegerType:
+                    case TypeKind.ArgumentListType:
                         return _typeSrc == _typeDest;
-                    case TypeKind.TK_VoidType:
+                    case TypeKind.VoidType:
                         return false;
                     default:
                         break;
@@ -172,7 +172,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     default:
                         VSFAIL("Bad type symbol kind");
                         break;
-                    case TypeKind.TK_MethodGroupType:
+                    case TypeKind.MethodGroupType:
                         if (_exprSrc.isMEMGRP())
                         {
                             EXPRCALL outExpr;
@@ -181,40 +181,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return retVal;
                         }
                         return false;
-                    case TypeKind.TK_VoidType:
-                    case TypeKind.TK_ErrorType:
-                    case TypeKind.TK_ParameterModifierType:
-                    case TypeKind.TK_ArgumentListType:
+                    case TypeKind.VoidType:
+                    case TypeKind.ErrorType:
+                    case TypeKind.ParameterModifierType:
+                    case TypeKind.ArgumentListType:
                         return false;
-                    case TypeKind.TK_NullType:
+                    case TypeKind.NullType:
                         if (bindImplicitConversionFromNull())
                         {
                             return true;
                         }
                         // If not, try user defined implicit conversions.
                         break;
-                    case TypeKind.TK_ArrayType:
+                    case TypeKind.ArrayType:
                         if (bindImplicitConversionFromArray())
                         {
                             return true;
                         }
                         // If not, try user defined implicit conversions.
                         break;
-                    case TypeKind.TK_PointerType:
+                    case TypeKind.PointerType:
                         if (bindImplicitConversionFromPointer())
                         {
                             return true;
                         }
                         // If not, try user defined implicit conversions.
                         break;
-                    case TypeKind.TK_TypeParameterType:
+                    case TypeKind.TypeParameterType:
                         if (bindImplicitConversionFromTypeVar(_typeSrc.AsTypeParameterType()))
                         {
                             return true;
                         }
                         // If not, try user defined implicit conversions.
                         break;
-                    case TypeKind.TK_AggregateType:
+                    case TypeKind.AggregateType:
                         // TypeReference and ArgIterator can't be boxed (or converted to anything else)
                         if (_typeSrc.isSpecialByRefType())
                         {
