@@ -488,12 +488,10 @@ namespace System.Threading
                     isLastReader = true;
                     if ((knownState & LockStates.WaitingWritersMask) != 0)
                     {
-                        try
+                        writerEvent = TryGetOrCreateWriterEvent();
+                        if (writerEvent == null)
                         {
-                            writerEvent = GetOrCreateWriterEvent();
-                        }
-                        catch (SystemException)
-                        {
+                            // Similar to below, wait for some time and try again
                             Helpers.Sleep(100);
                             currentState = _state;
                             knownState = 0;
@@ -504,12 +502,21 @@ namespace System.Threading
                     }
                     else if ((knownState & LockStates.WaitingReadersMask) != 0)
                     {
-                        try
+                        readerEvent = TryGetOrCreateReaderEvent();
+                        if (readerEvent == null)
                         {
-                            readerEvent = GetOrCreateReaderEvent();
-                        }
-                        catch (OutOfMemoryException)
-                        {
+                            // Wait for some time and try again. Since a WaitingReaders bit is set, the event would usually
+                            // already be created (if the waiting reader that called AcquireReaderLock is already waiting on the
+                            // event, it would have created the event). However, AcquireReaderLock adds WaitingReader to the
+                            // state before trying to create the event.
+                            //
+                            // This is such a situation, where the event has not yet been created, and likely due to the system
+                            // being low on resources, this thread failed to create the event. We don't want to throw here,
+                            // because it could potentially leave waiters waiting and cause a deadlock.
+                            //
+                            // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
+                            // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
+                            // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
                             Helpers.Sleep(100);
                             currentState = _state;
                             knownState = 0;
@@ -590,12 +597,21 @@ namespace System.Threading
 
                 if ((knownState & LockStates.WaitingReadersMask) != 0)
                 {
-                    try
+                    readerEvent = TryGetOrCreateReaderEvent();
+                    if (readerEvent == null)
                     {
-                        readerEvent = GetOrCreateReaderEvent();
-                    }
-                    catch (OutOfMemoryException)
-                    {
+                        // Wait for some time and try again. Since a WaitingReaders bit is set, the event would usually
+                        // already be created (if the waiting reader that called AcquireReaderLock is already waiting on the
+                        // event, it would have created the event). However, AcquireReaderLock adds WaitingReader to the
+                        // state before trying to create the event.
+                        //
+                        // This is such a situation, where the event has not yet been created, and likely due to the system
+                        // being low on resources, this thread failed to create the event. We don't want to throw here,
+                        // because it could potentially leave waiters waiting and cause a deadlock.
+                        //
+                        // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
+                        // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
+                        // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
                         Helpers.Sleep(100);
                         currentState = _state;
                         knownState = 0;
@@ -606,12 +622,10 @@ namespace System.Threading
                 }
                 else if ((knownState & LockStates.WaitingWritersMask) != 0)
                 {
-                    try
+                    writerEvent = TryGetOrCreateWriterEvent();
+                    if (writerEvent == null)
                     {
-                        writerEvent = GetOrCreateWriterEvent();
-                    }
-                    catch (SystemException)
-                    {
+                        // Similar to above, wait for some time and try again
                         Helpers.Sleep(100);
                         currentState = _state;
                         knownState = 0;
@@ -774,12 +788,21 @@ namespace System.Threading
                     int modifyState = LockStates.Reader - LockStates.Writer;
                     if ((knownState & LockStates.WaitingReadersMask) != 0)
                     {
-                        try
+                        readerEvent = TryGetOrCreateReaderEvent();
+                        if (readerEvent == null)
                         {
-                            readerEvent = GetOrCreateReaderEvent();
-                        }
-                        catch (OutOfMemoryException)
-                        {
+                            // Wait for some time and try again. Since a WaitingReaders bit is set, the event would usually
+                            // already be created (if the waiting reader that called AcquireReaderLock is already waiting on the
+                            // event, it would have created the event). However, AcquireReaderLock adds WaitingReader to the
+                            // state before trying to create the event.
+                            //
+                            // This is such a situation, where the event has not yet been created, and likely due to the system
+                            // being low on resources, this thread failed to create the event. We don't want to throw here,
+                            // because it could potentially leave waiters waiting and cause a deadlock.
+                            //
+                            // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
+                            // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
+                            // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
                             Helpers.Sleep(100);
                             currentState = _state;
                             knownState = 0;
@@ -1032,6 +1055,37 @@ namespace System.Threading
 
             currentEvent.Dispose();
             return previousEvent;
+        }
+
+        private ManualResetEventSlim TryGetOrCreateReaderEvent()
+        {
+            // The intention is to catch all exceptions, so that the caller can try again. Typically, only OutOfMemoryException
+            // would be thrown, but the idea is that any exception that may be thrown will propagate to the user on a different
+            // path, through AcquireReaderLock.
+            try
+            {
+                return GetOrCreateReaderEvent();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private AutoResetEvent TryGetOrCreateWriterEvent()
+        {
+            // The intention is to catch all exceptions, so that the caller can try again. Typically, only OutOfMemoryException
+            // or any SystemException would be thrown. For instance, the EventWaitHandle constructor may throw IOException if
+            // the Windows CreateEvent function fails due to low system resources. The idea is that any exception that may be
+            // thrown will propagate to the user on a different path, through AcquireWriterLock.
+            try
+            {
+                return GetOrCreateWriterEvent();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void ReleaseEvents()
