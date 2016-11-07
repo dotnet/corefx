@@ -123,7 +123,7 @@ Existing PCL projects in VS2013 and VS2015 (excluding UWP targets), can only tar
 | Windows Phone 8.1 | wpa8.1 |
 | Universal Windows Platform 10 | uap10.0, netcore50 |
 | Silverlight 4, 5 | sl4, sl5 |
-| MonoAndroid | monoandroid |
+| MonoAndroid | monoandroid, monoandroid403 |
 | MonoTouch | monotouch |
 | MonoMac | monomac |
 | Xamarin iOS | xamarinios |
