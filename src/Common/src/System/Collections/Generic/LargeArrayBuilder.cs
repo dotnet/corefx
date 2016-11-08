@@ -164,7 +164,8 @@ namespace System.Collections.Generic
 
             Debug.Assert(_index == _current.Length, $"{nameof(AllocateBuffer)} was called, but there's more space.");
 
-            if (_count < ResizeLimit)
+            // If _count is int.MinValue, we want to go down the other path which will raise an exception.
+            if ((uint)_count < (uint)ResizeLimit)
             {
                 // We haven't passed ResizeLimit. Resize _first, copying over the previous items.
                 Debug.Assert(_current == _first && _count == _first.Length);
