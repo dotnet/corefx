@@ -25,13 +25,16 @@ namespace System.Collections.Generic
         /// Constructs a new builder.
         /// </summary>
         /// <param name="initialize">Pass <c>true</c>.</param>
-        public LargeArrayBuilder(bool initialize) : this()
+        public LargeArrayBuilder(bool initialize)
         {
             // This is a workaround for C# not having parameterless struct constructors yet.
             // Once it gets them, replace this with a parameterless constructor.
             Debug.Assert(initialize);
 
             _first = _current = Array.Empty<T>();
+            _buffers = default(ArrayBuilder<T[]>);
+            _index = 0;
+            _count = 0;
         }
 
         /// <summary>
