@@ -896,57 +896,94 @@ namespace System.Threading.Tests
 
             private void PerformLockAction(
                 int expectedFailureHResult,
+                bool isBlockingOperation,
                 Action rwlAction,
                 Action makeStateChangesOnSuccess)
             {
-                lock (_rwl)
+                // Blocking operations are inherently nondeterministic in the order in which they are performed, so record a
+                // pending change before performing the operation. Since the state changes following some blocking operations
+                // may occur in any order, state verification is only done once there are no pending state changes. Non-blocking
+                // operations appear atomic and the relevant state changes need to occur in the requested order, so take a
+                // single lock over the operation and state changes.
+                if (isBlockingOperation)
                 {
-                    ++_pendingStateChanges;
+                    lock (_rwl)
+                    {
+                        ++_pendingStateChanges;
+                    }
+                }
+                else
+                {
+                    Monitor.Enter(_rwl);
                 }
 
-                ApplicationException ex = null;
-                bool isHandledCase = false;
                 try
                 {
-                    rwlAction();
-                    isHandledCase = true;
-                }
-                catch (ApplicationException ex2)
-                {
-                    ex = ex2;
-                    isHandledCase = true;
-                }
-                finally
-                {
-                    if (!isHandledCase)
+                    ApplicationException ex = null;
+                    bool isHandledCase = false;
+                    try
                     {
-                        // Some exception other than ones handled above occurred. Decrement the pending state changes. For
-                        // handled cases, the decrement needs to occur in the same lock that also verifies the exception, makes
-                        // state changes, and verifies the state.
-                        lock (_rwl)
+                        rwlAction();
+                        isHandledCase = true;
+                    }
+                    catch (ApplicationException ex2)
+                    {
+                        ex = ex2;
+                        isHandledCase = true;
+                    }
+                    finally
+                    {
+                        if (!isHandledCase && isBlockingOperation)
                         {
+                            // Some exception other than ones handled above occurred. Decrement the pending state changes. For
+                            // handled cases, the decrement needs to occur in the same lock that also verifies the exception,
+                            // makes state changes, and verifies the state.
+                            lock (_rwl)
+                            {
+                                --_pendingStateChanges;
+                                // This exception will cause the test to fail, so don't verify state
+                            }
+                        }
+                    }
+
+                    if (isBlockingOperation)
+                    {
+                        Monitor.Enter(_rwl);
+                    }
+                    try
+                    {
+                        if (isBlockingOperation)
+                        {
+                            // Decrementing the pending state changes needs to occur in the same lock that makes state changes
+                            // and verifies state, in order to guarantee that when there are no pending state changes based on
+                            // the count, all state changes are reflected in the fields as well.
                             --_pendingStateChanges;
-                            // This exception will cause the test to fail, so don't verify state
+                        }
+
+                        Assert.Equal(expectedFailureHResult, ex == null ? 0 : ex.HResult);
+                        if (ex == null)
+                        {
+                            makeStateChangesOnSuccess();
+                        }
+
+                        if (_pendingStateChanges == 0)
+                        {
+                            VerifyState();
+                        }
+                    }
+                    finally
+                    {
+                        if (isBlockingOperation)
+                        {
+                            Monitor.Exit(_rwl);
                         }
                     }
                 }
-
-                lock (_rwl)
+                finally
                 {
-                    // Decrementing the pending state changes needs to occur in the same lock that makes state changes and
-                    // verifies state, in order to guarantee that when there are no pending state changes based on the count,
-                    // all state changes are reflected in the fields as well.
-                    --_pendingStateChanges;
-
-                    Assert.Equal(expectedFailureHResult, ex == null ? 0 : ex.HResult);
-                    if (ex == null)
+                    if (!isBlockingOperation)
                     {
-                        makeStateChangesOnSuccess();
-                    }
-
-                    if (_pendingStateChanges == 0)
-                    {
-                        VerifyState();
+                        Monitor.Exit(_rwl);
                     }
                 }
             }
@@ -955,6 +992,7 @@ namespace System.Threading.Tests
             {
                 PerformLockAction(
                     expectedFailureHResult,
+                    true /* isBlockingOperation */,
                     () => _rwl.AcquireReaderLock(GetTimeoutMilliseconds(expectedFailureHResult)),
                     () =>
                     {
@@ -975,11 +1013,13 @@ namespace System.Threading.Tests
             {
                 PerformLockAction(
                     expectedFailureHResult,
+                    true /* isBlockingOperation */,
                     () => _rwl.AcquireWriterLock(GetTimeoutMilliseconds(expectedFailureHResult)),
                     () =>
                     {
                         if (_writerLevel == 0)
                         {
+                            Assert.Equal(InvalidThreadID, _writerThreadID);
                             _writerThreadID = Environment.CurrentManagedThreadId;
                             ++_writerSeqNum;
                         }
@@ -995,6 +1035,7 @@ namespace System.Threading.Tests
             {
                 PerformLockAction(
                     expectedFailureHResult,
+                    false /* isBlockingOperation */,
                     () => _rwl.ReleaseReaderLock(),
                     () =>
                     {
@@ -1020,6 +1061,7 @@ namespace System.Threading.Tests
             {
                 PerformLockAction(
                     expectedFailureHResult,
+                    false /* isBlockingOperation */,
                     () => _rwl.ReleaseWriterLock(),
                     () =>
                     {
@@ -1039,6 +1081,7 @@ namespace System.Threading.Tests
                 LockCookie lockCookie = default(LockCookie);
                 PerformLockAction(
                     expectedFailureHResult,
+                    true /* isBlockingOperation */,
                     () => lockCookie = _rwl.UpgradeToWriterLock(GetTimeoutMilliseconds(expectedFailureHResult)),
                     () =>
                     {
@@ -1052,6 +1095,7 @@ namespace System.Threading.Tests
                         ThreadReaderLevel = 0;
                         if (_writerLevel == 0)
                         {
+                            Assert.Equal(InvalidThreadID, _writerThreadID);
                             _writerThreadID = Environment.CurrentManagedThreadId;
                             ++_writerSeqNum;
                         }
@@ -1070,6 +1114,7 @@ namespace System.Threading.Tests
 
                 PerformLockAction(
                     expectedFailureHResult,
+                    false /* isBlockingOperation */,
                     () => _rwl.DowngradeFromWriterLock(ref tlc._lockCookie),
                     () =>
                     {
@@ -1100,6 +1145,7 @@ namespace System.Threading.Tests
                 LockCookie lockCookie = default(LockCookie);
                 PerformLockAction(
                     0 /* expectedFailureHResult */,
+                    false /* isBlockingOperation */,
                     () => lockCookie = _rwl.ReleaseLock(),
                     () =>
                     {
@@ -1110,6 +1156,10 @@ namespace System.Threading.Tests
                             _writerLevel = _writerLevel
                         };
 
+                        if (_writerLevel != 0)
+                        {
+                            Assert.Equal(Environment.CurrentManagedThreadId, _writerThreadID);
+                        }
                         ThreadReaderLevel = 0;
                         _writerLevel = 0;
                         _writerThreadID = InvalidThreadID;
@@ -1124,6 +1174,7 @@ namespace System.Threading.Tests
 
                 PerformLockAction(
                     expectedFailureHResult,
+                    true /* isBlockingOperation */,
                     () => _rwl.RestoreLock(ref tlc._lockCookie),
                     () =>
                     {
@@ -1134,6 +1185,7 @@ namespace System.Threading.Tests
                         _writerLevel = tlc._writerLevel;
                         if (_writerLevel != 0)
                         {
+                            Assert.Equal(InvalidThreadID, _writerThreadID);
                             _writerThreadID = Environment.CurrentManagedThreadId;
                             ++_writerSeqNum;
                         }
