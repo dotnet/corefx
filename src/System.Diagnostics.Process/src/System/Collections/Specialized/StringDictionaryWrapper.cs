@@ -6,10 +6,8 @@ using System.Collections.Generic;
 
 namespace System.Collections.Specialized
 {
-    // This class is an internal class used by System.Diagnostics.Proccess on property EnvironmentVariables which returns an StringDictionary. Since we need an OrdinalIgnoreCase
-    // comparer for non casesensitive environments and Ordinal comparer for case sensitive environments, we need this workaround in order to use StringDictionary. We should 
-    // override StringDictionary's method and use our own Dictionary<string,string> with comparer since this class is internal and StringDictionary _contents Hashtable 
-    // is private and we don't want to make that field protected.
+    // This class is an internal class used by System.Diagnostics.Proccess on property EnvironmentVariables which returns an StringDictionary. Since we need
+    // EnvironmentVariables to return a StringDictionary, this is a wrapper to the Environment property in order to get the same comparer behavior on both properties.
 
     [Serializable]
     internal sealed class StringDictionaryWrapper : StringDictionary
