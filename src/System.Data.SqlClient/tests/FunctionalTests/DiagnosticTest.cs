@@ -206,13 +206,18 @@ namespace System.Data.SqlClient.Tests
             CollectStatisticsDiagnosticsAsync(async () =>
             {
                 using (SqlConnection conn = new SqlConnection(_connectionString))
-                using (SqlCommand cmd = new SqlCommand())
                 {
-                    cmd.Connection = conn;
-                    cmd.CommandText = "SELECT [name], [state] FROM [sys].[databases] WHERE [name] = db_name();";
-
                     conn.Open();
-                    var output = await cmd.ExecuteScalarAsync();
+                    using (SqlTransaction tx = conn.BeginTransaction())
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.Transaction = tx;
+                        cmd.CommandText = "SELECT [name], [state] FROM [sys].[databases] WHERE [name] = db_name();";
+
+                        var output = await cmd.ExecuteScalarAsync();
+                        tx.Commit();
+                    }
                 }
             });
         }
@@ -577,6 +582,97 @@ namespace System.Data.SqlClient.Tests
 
                         statsLogged = true;
                     }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitBefore"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                        statsLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitAfter"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                        statsLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitError"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                        Exception ex = GetPropertyValueFromType<Exception>(kvp.Value, "Exception");
+                        Assert.NotNull(ex);
+
+                        statsLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackBefore"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                        statsLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackAfter"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                        statsLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackError"))
+                    {
+                        Assert.NotNull(kvp.Value);
+
+                        SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                        Assert.NotNull(sqlConnection);
+
+                        string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                        Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                        GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+                        GetPropertyValueFromType<string>(kvp.Value, "TransactionName");
+
+                        Exception ex = GetPropertyValueFromType<Exception>(kvp.Value, "Exception");
+                        Assert.NotNull(ex);
+
+                        statsLogged = true;
+                    }
                 });
 
             diagnosticListenerObserver.Enable();
@@ -751,6 +847,97 @@ namespace System.Data.SqlClient.Tests
 
                     Guid connectionId = GetPropertyValueFromType<Guid>(kvp.Value, "ConnectionId");
                     Assert.NotEqual(connectionId, Guid.Empty);
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitBefore"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitAfter"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionCommitError"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                    Exception ex = GetPropertyValueFromType<Exception>(kvp.Value, "Exception");
+                    Assert.NotNull(ex);
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackBefore"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackAfter"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+
+                    statsLogged = true;
+                }
+                else if (kvp.Key.Equals("System.Data.SqlClient.WriteTransactionRollbackError"))
+                {
+                    Assert.NotNull(kvp.Value);
+
+                    SqlConnection sqlConnection = GetPropertyValueFromType<SqlConnection>(kvp.Value, "Connection");
+                    Assert.NotNull(sqlConnection);
+
+                    string operation = GetPropertyValueFromType<string>(kvp.Value, "Operation");
+                    Assert.False(string.IsNullOrWhiteSpace(operation));
+
+                    GetPropertyValueFromType<IsolationLevel>(kvp.Value, "IsolationLevel");
+                    GetPropertyValueFromType<string>(kvp.Value, "TransactionName");
+
+                    Exception ex = GetPropertyValueFromType<Exception>(kvp.Value, "Exception");
+                    Assert.NotNull(ex);
 
                     statsLogged = true;
                 }
