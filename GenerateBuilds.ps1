@@ -183,40 +183,32 @@ function GetConfigurations($projs, $srcDir, $projName)
   return $allConfigs | sort target, os;
 }
 
-$srcDirs = dir .\src\*\src
+$refDirs = dir .\src\*\ref
 
-foreach($srcDir in $srcDirs)
+foreach($refDir in $refDirs)
 {
-	#$srcDir.FullName
-	$projs = dir $srcDir -r -i *.*proj
-
-  if($projs.Count -eq 0) { Write-Host "Skipping $srcDir because it has no csproj files."; continue; }
-
-  $projName = $srcDir.Parent.Name;
-
-  $allSrcConfigs = GetConfigurations $projs $srcDir $projName
-  $defaultConfig = GetDefaultConfiguration $allSrcConfigs $projName
-
-  $testsDir = $srcDir.Parent.FullName + "\tests";
-  if (Test-Path $testsDir)
+  $projName = $refDir.Parent.Name
+  $pj = "$refDir\project.json"
+  $plj = "$refDir\project.lock.json"
+  $proj = "$refDir\$projName.csproj"
+  Write-Host "Looking at $pj"
+  if (Test-Path $pj)
   {
-    $testProjs = dir $testsDir -r -i *.csproj
-
-    if ($defaultConfig.os -eq "Windows_NT")
+    $deps = new-object System.Collections.ArrayList
+    $pjc = gc $pj;
+    foreach ($line in $pjc)
     {
-      #$testProjs | % { WriteDefaultConfiguration $defaultConfig $_ $(gc $_) }
+      if ($line -match "\`"`(?<dep>.*`)\`": \`"\d")
+      {
+        $deps.Add($matches["dep"]) | out-null
+      }
     }
-  }
-  #$testConfigs = GetConfigurations $testProjs $testsDir $projName
 
-  WriteBuilds $allSrcConfigs $srcDir $projName
+    $projc = gc $proj;
+    $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <ProjectReference Include=`"..\..\$_\ref\$_.csproj`" />" }) } else { $_ } }
+    $projc2 | sc $proj
 
-  $bfs = dir $srcDir -r -i *.builds
-
-  if ($bfs.Count -ne 1)
-  {
-    $projName + " contains " + $bfs.Count + " builds files!";
+    del $pj
+    #del $plj
   }
 }
-
-
