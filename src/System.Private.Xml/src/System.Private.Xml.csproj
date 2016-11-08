@@ -694,6 +694,7 @@
     <Compile Include="System\Xml\Xsl\XsltOld\XsltDebugger.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\XsltOutput.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\Compiler.cs" />
+    <Compile Include="System\Xml\Xsl\Xslt\CompilerError.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\CompilerScopeManager.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\Focus.cs" />
     <Compile Include="System\Xml\Xsl\Xslt\IErrorHelper.cs" />
@@ -719,11 +720,7 @@
     <Compile Include="System\Xml\Xsl\Xslt\XslVisitor.cs" />
     <Compile Include="$(CommonPath)\System\LocalAppContext.cs" />
     <Compile Include="System\Xml\Core\LocalAppContextSwitches.cs" />
-    <Compile Include="System\CodeDom\CodeDomProvider.cs" />
-    <Compile Include="System\CodeDom\CodeGenerator.cs" />
-    <Compile Include="System\CodeDom\CompilerError.cs" />
-    <Compile Include="System\CodeDom\CompilerResults.cs" />
-    <Compile Include="System\CodeDom\TempFileCollection.cs" />
+    <Compile Include="$(CommonPath)\System\CSharpHelpers.cs" />
     <Compile Include="Misc\ThisAssembly.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)'=='true'">
