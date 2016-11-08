@@ -1633,23 +1633,18 @@ namespace System.Collections.Generic
         /// <returns></returns>
         internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
         {
-            // handle null cases first
-            if (set1 == null)
+            if (set1 == set2)
             {
-                return (set2 == null);
+                return true;
             }
-            else if (set2 == null)
+
+            if (set1 == null | set2 == null || set1.Count != set2.Count)
             {
-                // set1 != null
                 return false;
             }
 
             if (comparer.Equals(set1._comparer))
             {
-                if (set1.Count != set2.Count)
-                {
-                    return false;
-                }
                 // suffices to check subset
                 foreach (T item in set2)
                 {
