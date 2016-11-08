@@ -1625,7 +1625,7 @@ namespace System.Collections.Generic
         /// to specified comparer.
         /// 
         /// Because items are hashed according to a specific equality comparer, we have to resort
-        /// to n^2 search if they're using different equality comparers.
+        /// to building a new set if neither use that equality comparer.
         /// </summary>
         /// <param name="set1"></param>
         /// <param name="set2"></param>
@@ -1652,26 +1652,12 @@ namespace System.Collections.Generic
             {
                 return set2.ContainsAllElements(set1);
             }
-            else
-            {  // n^2 search because items are hashed according to their respective ECs
-                foreach (T set2Item in set2)
-                {
-                    bool found = false;
-                    foreach (T set1Item in set1)
-                    {
-                        if (comparer.Equals(set2Item, set1Item))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
+            
+            // Creating a new set is O(n), but allows us to then do the
+            // equality comparison as an O(n) check rather than an O(n2)
+            // comparison of each element in the first set with each in
+            // the second.
+            return new HashSet<T>(set1, comparer).ContainsAllElements(set2);
         }
 
         /// <summary>
