@@ -1645,15 +1645,12 @@ namespace System.Collections.Generic
 
             if (comparer.Equals(set1._comparer))
             {
-                // suffices to check subset
-                foreach (T item in set2)
-                {
-                    if (!set1.Contains(item))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return set1.ContainsAllElements(set2);
+            }
+
+            if (comparer.Equals(set2._comparer))
+            {
+                return set2.ContainsAllElements(set1);
             }
             else
             {  // n^2 search because items are hashed according to their respective ECs
