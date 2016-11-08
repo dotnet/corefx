@@ -15,7 +15,7 @@ namespace System.Collections.Generic.Tests
 
     public static class GeneratorExtensions
     {
-        public static IEnumerable<T> GenerateSequence<T>(this IGenerator<T> generator, int count)
+        public static IEnumerable<T> GenerateEnumerable<T>(this IGenerator<T> generator, int count)
         {
             Debug.Assert(generator != null);
             Debug.Assert(count >= 0);
@@ -169,7 +169,7 @@ namespace System.Collections.Generic.Tests
 
                 // Test perf: Capture the items into a List here so we
                 // only enumerate the sequence once.
-                data.Add(s_generator.GenerateSequence(count).ToList());
+                data.Add(s_generator.GenerateEnumerable(count).ToList());
             }
 
             return data;

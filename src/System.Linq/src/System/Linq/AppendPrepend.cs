@@ -293,7 +293,7 @@ namespace System.Linq
 
             public IEnumerator<TSource> GetEnumerator()
             {
-                return ToArray().AsEnumerable().GetEnumerator();
+                return ((IEnumerable<TSource>)ToArray()).GetEnumerator();
             }
 
             public TSource[] ToArray()

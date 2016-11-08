@@ -92,7 +92,7 @@ namespace System.Collections.Generic.Tests
 
                 // Test perf: Capture the items into a List here so we
                 // only enumerate the sequence once.
-                data.Add(s_generator.GenerateSequence(count).ToList());
+                data.Add(s_generator.GenerateEnumerable(count).ToList());
             }
 
             return data;

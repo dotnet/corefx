@@ -17,7 +17,7 @@ namespace System.Collections.Generic
 
         private T[] _first;                 // The first buffer we store items in. Resized until ResizeLimit.
         private ArrayBuilder<T[]> _buffers; // After ResizeLimit * 2, we store previous buffers we've filled out here.
-        private T[] _current;               // Current buffer we're reading into. Is _first <= ResizeLimit.
+        private T[] _current;               // Current buffer we're reading into. If _count <= ResizeLimit, this is _first.
         private int _index;                 // Index into the current buffer.
         private int _count;                 // Count of all of the items in this builder.
 
@@ -82,7 +82,8 @@ namespace System.Collections.Generic
                         // No more space in this buffer. Resize.
                         _count += index - _index;
                         _index = index;
-                        destination = AllocateBuffer();
+                        AllocateBuffer();
+                        destination = _current;
                         index = _index; // May have been reset to 0
                     }
 
@@ -150,7 +151,7 @@ namespace System.Collections.Generic
             return array;
         }
         
-        private T[] AllocateBuffer()
+        private void AllocateBuffer()
         {
             // - On the first few adds, simply resize _first.
             // - When we pass ResizeLimit, allocate ResizeLimit elements for _current
@@ -189,8 +190,6 @@ namespace System.Collections.Generic
                 _current = new T[nextCapacity];
                 _index = 0;
             }
-            
-            return _current;
         }
     }
 }
