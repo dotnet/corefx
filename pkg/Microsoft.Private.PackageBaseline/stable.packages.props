@@ -1333,6 +1333,15 @@
     <StablePackage Include="System.IO.Compression">
       <Version>4.1.1</Version>
     </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.Platforms">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Http">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Http.WinHttpHandler">
+      <Version>4.0.1</Version>
+    </StablePackage>
     
   </ItemGroup>
 </Project>
