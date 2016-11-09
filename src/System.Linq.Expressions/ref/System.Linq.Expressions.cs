@@ -358,7 +358,7 @@ namespace System.Linq.Expressions
     public abstract partial class DynamicExpressionVisitor : System.Linq.Expressions.ExpressionVisitor
     {
         protected DynamicExpressionVisitor() { }
-        protected internal virtual new System.Linq.Expressions.Expression VisitDynamic(System.Linq.Expressions.DynamicExpression node) { throw null; }
+        protected internal override System.Linq.Expressions.Expression VisitDynamic(System.Linq.Expressions.DynamicExpression node) { throw null; }
     }
     public sealed partial class ElementInit : System.Linq.Expressions.IArgumentProvider
     {
