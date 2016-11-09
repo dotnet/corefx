@@ -123,7 +123,8 @@ foreach ($package in $packages)
 
 if (!$prereleaseVersion)
 {
-    throw "Could not find a Prerelease version in '$newPackages'"
+    # value here is no longer needed, use "stable" to indicate that prerelease is no longer valid and a human will have to do the update to stable.
+    $prereleaseVersion = "stable"
 }
 
 $versionFilePath = "$versionsRepoPath/Latest.txt"
