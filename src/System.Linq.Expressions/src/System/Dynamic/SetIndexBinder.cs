@@ -24,7 +24,7 @@ namespace System.Dynamic
         /// <summary>
         /// The result type of the operation.
         /// </summary>
-        public override sealed Type ReturnType => typeof(void);
+        public override sealed Type ReturnType => typeof(object);
 
         /// <summary>
         /// Gets the signature of the arguments at the call site.
