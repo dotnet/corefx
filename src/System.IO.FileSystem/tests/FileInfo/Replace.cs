@@ -8,11 +8,6 @@ namespace System.IO.Tests
 {
     public class FileInfo_Replace : FileSystemTest
     {
-        public FileInfo Replace(string source, string dest, string destBackup)
-        {
-            return new FileInfo(source).Replace(dest, destBackup);
-        }
-
         [Fact]
         public void Null_FileName()
         {
@@ -25,14 +20,18 @@ namespace System.IO.Tests
         {
             string srcFile = GetTestFilePath();
             string destFile = GetTestFilePath();
-            File.Create(srcFile).Dispose();
             File.Create(destFile).Dispose();
             FileInfo destInfo = new FileInfo(destFile);
+
+            var srcContents = new byte[] { 1, 3, 4, 8 };
+            File.WriteAllBytes(srcFile, srcContents);
+
             FileInfo newInfo = Replace(srcFile, destFile, null);
 
             Assert.False(File.Exists(srcFile));
             Assert.NotNull(newInfo);
             Assert.Equal(destInfo.FullName, newInfo.FullName);
+            Assert.Equal(srcContents, File.ReadAllBytes(newInfo.FullName));
         }
 
         [Fact]
@@ -53,6 +52,11 @@ namespace System.IO.Tests
             Assert.NotNull(newInfo);
             Assert.Equal(destInfo.FullName, newInfo.FullName);
             Assert.Equal(destContents, File.ReadAllBytes(destBackupPath));
+        }
+
+        private FileInfo Replace(string source, string dest, string destBackup)
+        {
+            return new FileInfo(source).Replace(dest, destBackup);
         }
     }
 }

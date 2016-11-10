@@ -160,14 +160,14 @@ namespace System.IO
         public void Decrypt() { }
         public void Encrypt() { }
         public void MoveTo(string destFileName) { }
-        public System.IO.FileInfo Replace(string destinationFileName, string destinationBackupFileName) { throw null; }
-        public System.IO.FileInfo Replace(string destinationFileName, string destinationBackupFileName, bool ignoreMetadataErrors) { throw null; }
         public System.IO.FileStream Open(System.IO.FileMode mode) { throw null; }
         public System.IO.FileStream Open(System.IO.FileMode mode, System.IO.FileAccess access) { throw null; }
         public System.IO.FileStream Open(System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share) { throw null; }
         public System.IO.FileStream OpenRead() { throw null; }
         public System.IO.StreamReader OpenText() { throw null; }
         public System.IO.FileStream OpenWrite() { throw null; }
+        public System.IO.FileInfo Replace(string destinationFileName, string destinationBackupFileName) { throw null; }
+        public System.IO.FileInfo Replace(string destinationFileName, string destinationBackupFileName, bool ignoreMetadataErrors) { throw null; }
         public override string ToString() { throw null; }
     }
 

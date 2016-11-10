@@ -298,7 +298,7 @@ namespace System.IO
 
         public FileInfo Replace(String destinationFileName, String destinationBackupFileName)
         {
-            return Replace(destinationFileName, destinationBackupFileName, false);
+            return Replace(destinationFileName, destinationBackupFileName, ignoreMetadataErrors: false);
         }
 
         public FileInfo Replace(String destinationFileName, String destinationBackupFileName, bool ignoreMetadataErrors)
