@@ -24,30 +24,34 @@ namespace System.IO.Tests
         public void FileInfo_IsSame_NoBackup()
         {
             string srcFile = GetTestFilePath();
-            File.Create(srcFile).Dispose();
             string destFile = GetTestFilePath();
+            File.Create(srcFile).Dispose();
+            File.Create(destFile).Dispose();
             FileInfo destInfo = new FileInfo(destFile);
             FileInfo newInfo = Replace(srcFile, destFile, null);
 
             Assert.False(File.Exists(srcFile));
             Assert.NotNull(newInfo);
-            Assert.Equal(destInfo, newInfo);
+            Assert.Equal(destInfo.FullName, newInfo.FullName);
         }
 
         [Fact]
         public void FileInfo_IsSame_Backup()
         {
             string srcFile = GetTestFilePath();
-            File.Create(srcFile).Dispose();
             string destFile = GetTestFilePath();
             string destBackupPath = GetTestFilePath();
+            File.Create(srcFile).Dispose();
+
+            var destContents = new byte[] { 1, 3, 4, 8 };
+            File.WriteAllBytes(destFile, destContents);
+
             FileInfo destInfo = new FileInfo(destFile);
             FileInfo newInfo = Replace(srcFile, destFile, destBackupPath);
-            var destContents = File.ReadAllBytes(destFile);
 
             Assert.False(File.Exists(srcFile));
             Assert.NotNull(newInfo);
-            Assert.Equal(destInfo, newInfo);
+            Assert.Equal(destInfo.FullName, newInfo.FullName);
             Assert.Equal(destContents, File.ReadAllBytes(destBackupPath));
         }
     }
