@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if !NETNATIVE
 extern alias System_Runtime_Extensions;
 extern alias System_Security_Principal;
+#endif
 
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -11,19 +13,111 @@ using System.Globalization;
 using System.Runtime.ConstrainedExecution;
 using Internal.Runtime.Augments;
 
+#if NETNATIVE // Temporary: these types are being added to System.Private.Corelib
 namespace System.Threading
 {
+    public delegate void ThreadStart();
+    public delegate void ParameterizedThreadStart(object obj);
+
+    public class ThreadInterruptedException : Exception
+    {
+        public ThreadInterruptedException() { }
+        public ThreadInterruptedException(string message) { }
+        public ThreadInterruptedException(string message, Exception innerException) { }
+    }
+
+    public sealed class ThreadStartException : Exception
+    {
+        internal ThreadStartException() { }
+    }
+
+    public class ThreadStateException : Exception
+    {
+        public ThreadStateException() { }
+        public ThreadStateException(string message) { }
+        public ThreadStateException(string message, Exception innerException) { }
+    }
+
+    public enum ThreadPriority
+    {
+        Lowest = 0,
+        BelowNormal = 1,
+        Normal = 2,
+        AboveNormal = 3,
+        Highest = 4
+    }
+
+    public enum ThreadState
+    {
+        Running = 0,
+        StopRequested = 1,
+        SuspendRequested = 2,
+        Background = 4,
+        Unstarted = 8,
+        Stopped = 16,
+        WaitSleepJoin = 32,
+        Suspended = 64,
+        AbortRequested = 128,
+        Aborted = 256
+    }
+
+    public enum ApartmentState
+    {
+        STA = 0,
+        MTA = 1,
+        Unknown = 2
+    }
+
+    public sealed class RuntimeThread
+    {
+        public static RuntimeThread Create(ThreadStart start) { throw null; }
+        public static RuntimeThread Create(ThreadStart start, int maxStackSize) { throw null; }
+        public static RuntimeThread Create(ParameterizedThreadStart start) { throw null; }
+        public static RuntimeThread Create(ParameterizedThreadStart start, int maxStackSize) { throw null; }
+        public static RuntimeThread CurrentThread { get { throw null; } }
+        public bool IsAlive { get { throw null; } }
+        public bool IsBackground { get { throw null; } set { throw null; } }
+        public bool IsThreadPoolThread { get { throw null; } }
+        public int ManagedThreadId { get { throw null; } }
+        public string Name { get { throw null; } set { throw null; } }
+        public ThreadPriority Priority { get { throw null; } set { throw null; } }
+        public ThreadState ThreadState { get { throw null; } }
+        public ApartmentState GetApartmentState() { throw null; }
+        public bool TrySetApartmentState(ApartmentState state) { throw null; }
+        public void DisableComObjectEagerCleanup() { throw null; }
+        public void Interrupt() { throw null; }
+        public void Join() { throw null; }
+        public bool Join(int millisecondsTimeout) { throw null; }
+        public static void Sleep(int millisecondsTimeout) { throw null; }
+        public static void SpinWait(int iterations) { throw null; }
+        public static bool Yield() { throw null; }
+        public void Start() { throw null; }
+        public void Start(object parameter) { throw null; }
+    }
+}
+#endif
+
+namespace System.Threading
+{
+#if !NETNATIVE
     using AppDomain = System_Runtime_Extensions::System.AppDomain;
     using IPrincipal = System_Security_Principal::System.Security.Principal.IPrincipal;
+#endif
 
+#if !NETNATIVE
     public sealed partial class Thread : CriticalFinalizerObject
+#else
+    public sealed partial class Thread
+#endif
     {
         [ThreadStatic]
         private static Thread t_currentThread;
 
         private readonly RuntimeThread _runtimeThread;
         private Delegate _start;
+#if !NETNATIVE
         private IPrincipal _principal;
+#endif
 
         private Thread(RuntimeThread runtimeThread)
         {
@@ -156,6 +250,7 @@ namespace System.Threading
             }
         }
 
+#if !NETNATIVE
         public static IPrincipal CurrentPrincipal
         {
             get
@@ -167,6 +262,7 @@ namespace System.Threading
                 CurrentThread._principal = value;
             }
         }
+#endif
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
         public bool IsAlive => _runtimeThread.IsAlive;
@@ -209,12 +305,14 @@ namespace System.Threading
         public static void BeginThreadAffinity() { }
         public static void EndThreadAffinity() { }
 
+#if !NETNATIVE
         public static LocalDataStoreSlot AllocateDataSlot() => LocalDataStore.AllocateSlot();
         public static LocalDataStoreSlot AllocateNamedDataSlot(string name) => LocalDataStore.AllocateNamedSlot(name);
         public static LocalDataStoreSlot GetNamedDataSlot(string name) => LocalDataStore.GetNamedSlot(name);
         public static void FreeNamedDataSlot(string name) => LocalDataStore.FreeNamedSlot(name);
         public static object GetData(LocalDataStoreSlot slot) => LocalDataStore.GetData(slot);
         public static void SetData(LocalDataStoreSlot slot, object data) => LocalDataStore.SetData(slot, data);
+#endif
 
         [Obsolete("The ApartmentState property has been deprecated.  Use GetApartmentState, SetApartmentState or TrySetApartmentState instead.", false)]
         public ApartmentState ApartmentState
@@ -263,8 +361,10 @@ namespace System.Threading
             return (int)timeoutMilliseconds;
         }
 
+#if !NETNATIVE
         public static AppDomain GetDomain() => AppDomain.CurrentDomain;
         public static int GetDomainID() => GetDomain().Id;
+#endif
         public override int GetHashCode() => ManagedThreadId;
         public void Interrupt() => _runtimeThread.Interrupt();
         public void Join() => _runtimeThread.Join();
@@ -315,6 +415,7 @@ namespace System.Threading
         [CLSCompliant(false)]
         public static void VolatileWrite(ref UIntPtr address, UIntPtr value) => Volatile.Write(ref address, value);
 
+#if !NETNATIVE
         /// <summary>
         /// Manages functionality required to support members of <see cref="Thread"/> dealing with thread-local data
         /// </summary>
@@ -395,5 +496,6 @@ namespace System.Threading
                 GetThreadLocal(slot).Value = value;
             }
         }
+#endif
     }
 }
