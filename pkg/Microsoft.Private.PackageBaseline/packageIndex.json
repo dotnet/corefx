@@ -1478,7 +1478,6 @@
     },
     "System.Memory": {
       "StableVersions": [
-        "4.0.0"
       ],
       "BaselineVersion": "4.4.0",
       "AssemblyVersionInPackageVersion": {
