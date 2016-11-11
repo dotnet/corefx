@@ -21,7 +21,7 @@ namespace System.Runtime.CompilerServices
         public static DebugInfoGenerator CreatePdbGenerator()
         {
             // Creating PDBs is not suported in .NET Core
-            throw new NotSupportedException();
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
