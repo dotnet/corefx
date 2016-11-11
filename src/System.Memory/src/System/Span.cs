@@ -28,9 +28,9 @@ namespace System
         public Span(T[] array)
         {
             if (array == null)
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                throw new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, typeof(T)));
+                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             _length = array.Length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -53,13 +53,13 @@ namespace System
         public Span(T[] array, int start)
         {
             if (array == null)
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                throw new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, typeof(T)));
+                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             int arrayLength = array.Length;
             if ((uint)start > (uint)arrayLength)
-                throw new ArgumentOutOfRangeException(nameof(start));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = arrayLength - start;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -83,11 +83,11 @@ namespace System
         public Span(T[] array, int start, int length)
         {
             if (array == null)
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                throw new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, typeof(T)));
+                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                throw new ArgumentOutOfRangeException(nameof(start));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -112,9 +112,9 @@ namespace System
         public unsafe Span(void* pointer, int length)
         {
             if (!SpanHelpers.IsReferenceFree<T>())
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
-                throw new ArgumentOutOfRangeException(nameof(length));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
             _pinnable = null;
@@ -139,9 +139,9 @@ namespace System
         public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
         {
             if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
             if (length < 0)
-                throw new ArgumentOutOfRangeException(nameof(length));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
             IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
@@ -183,7 +183,7 @@ namespace System
             get
             {
                 if ((uint)index >= ((uint)_length))
-                    throw new IndexOutOfRangeException();
+                    ThrowHelper.ThrowIndexOutOfRangeException();
 
                 IntPtr adjustedByteOffset = _byteOffset.Add<T>(index);
                 if (_pinnable == null)
@@ -206,7 +206,7 @@ namespace System
         public void CopyTo(Span<T> destination)
         {
             if (!TryCopyTo(destination))
-                throw new ArgumentException(SR.Argument_DestinationTooShort);
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
         }
 
 
@@ -322,7 +322,7 @@ namespace System
         public Span<T> Slice(int start)
         {
             if ((uint)start > (uint)_length)
-                throw new ArgumentOutOfRangeException(nameof(start));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             int length = _length - start;
@@ -341,7 +341,7 @@ namespace System
         public Span<T> Slice(int start, int length)
         {
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
-                throw new ArgumentOutOfRangeException(nameof(start));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             return new Span<T>(_pinnable, newOffset, length);

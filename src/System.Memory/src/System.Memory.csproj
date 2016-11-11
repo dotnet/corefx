@@ -17,6 +17,7 @@
     <Compile Include="System\Pinnable.cs" />
     <Compile Include="System\Span.cs" />
     <Compile Include="System\SpanHelpers.cs" />
+    <Compile Include="System\ThrowHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
