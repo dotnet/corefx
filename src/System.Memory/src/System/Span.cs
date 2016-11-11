@@ -127,12 +127,8 @@ namespace System
         /// "length" is not checked, nor is the fact that "rawPointer" actually lies within the object.
         /// </summary>
         /// <param name="obj">The managed object that contains the data to span over.</param>
-        /// <param name="rawPointer">A reference to data within that object.</param>
+        /// <param name="objectData">A reference to data within that object.</param>
         /// <param name="length">The number of <typeparamref name="T"/> elements the memory contains.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when the specified object is an array or string. Use the type-specific constructor
-        /// for these special cases.
-        /// </exception>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when the specified object is null.
         /// </exception>
@@ -140,23 +136,15 @@ namespace System
         /// Thrown when the specified <paramref name="length"/> is negative.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> DangerousCreate(object obj, ref T rawPointer, int length)
+        public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
             if (length < 0)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            // Disallow "special" objects that have their own object headers and would yield unexpected (and runtime-dependent) results.
-            // We already have constructors for arrays (and that enforce the passing of the properly typed single-dimensional array.)
-            // This constructor is not useful for strings (cannot express"ref s[i]").
-            if (obj is Array)
-                throw new ArgumentException(SR.Argument_CannotPassArrayToDangerousCreate);
-            if (obj is string)
-                throw new ArgumentException(SR.Argument_CannotPassStringToDangerousCreate);
-
             Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
-            IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref rawPointer);
+            IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
             return new Span<T>(pinnable, byteOffset, length);
         }
 

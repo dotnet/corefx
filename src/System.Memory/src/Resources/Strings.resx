@@ -129,12 +129,6 @@
   <data name="Argument_InvalidTypeWithPointersNotSupported" xml:space="preserve">
     <value>Cannot use type '{0}'. Only value types without pointers or references are supported.</value>
   </data>
-  <data name="Argument_CannotPassArrayToDangerousCreate" xml:space="preserve">
-    <value>Cannot pass arrays to this method. Use a constructor that takes an array argument.</value>
-  </data>
-  <data name="Argument_CannotPassStringToDangerousCreate" xml:space="preserve">
-    <value>Cannot pass strings to this method.</value>
-  </data>
   <data name="Argument_DestinationTooShort" xml:space="preserve">
     <value>Destination is too short.</value>
   </data>

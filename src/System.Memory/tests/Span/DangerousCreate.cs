@@ -22,29 +22,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void DangerousCreateNoArrays()
-        {
-            Assert.Throws<ArgumentException>(
-                delegate ()
-                {
-                    int[] a = new int[4];
-                    Span<int>.DangerousCreate(a, ref a[0], 0);
-                });
-        }
-
-        [Fact]
-        public static void DangerousCreateNoStrings()
-        {
-            Assert.Throws<ArgumentException>(
-                delegate ()
-                {
-                    char dummy = 'A';
-                    Span<char>.DangerousCreate("Hello", ref dummy, 0);
-                });
-        }
-
-
-        [Fact]
         public static void DangerousCreateBadLength()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
