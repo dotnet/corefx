@@ -9,39 +9,39 @@ namespace System
     internal static class ThrowHelper
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArgumentNullException(ExceptionArgument argument)
+        internal static Exception CreateThrowArgumentNullException(ExceptionArgument argument)
         {
-            throw new ArgumentNullException(argument.ToString());
+            return new ArgumentNullException(argument.ToString());
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type)
+        internal static Exception CreateThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type)
         {
-            throw new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, type));
+            return new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, type));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArgumentException_InvalidTypeWithPointersNotSupported(Type type)
+        internal static Exception CreateThrowArgumentException_InvalidTypeWithPointersNotSupported(Type type)
         {
-            throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, type));
+            return new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, type));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArgumentException_DestinationTooShort()
+        internal static Exception CreateThrowArgumentException_DestinationTooShort()
         {
-            throw new ArgumentException(SR.Argument_DestinationTooShort);
+            return new ArgumentException(SR.Argument_DestinationTooShort);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowIndexOutOfRangeException()
+        internal static Exception CreateThrowIndexOutOfRangeException()
         {
-            throw new IndexOutOfRangeException();
+            return new IndexOutOfRangeException();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument)
+        internal static Exception CreateThrowArgumentOutOfRangeException(ExceptionArgument argument)
         {
-            throw new ArgumentOutOfRangeException(argument.ToString());
+            return new ArgumentOutOfRangeException(argument.ToString());
         }
     }
 
