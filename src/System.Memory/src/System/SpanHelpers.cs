@@ -45,11 +45,6 @@ namespace System
         }
 
         /// <summary>
-        /// Returns a cached empty array (Array.Empty not available on S.R. 4.0.0.0)
-        /// </summary>
-        public static T[] EmptyArray<T>() => PerTypeLatches<T>.EmptyArray;
-
-        /// <summary>
         /// Determine if a type is eligible for storage in unmanaged memory. TODO: To be replaced by a ContainsReference() api.
         /// </summary>
         public static bool IsReferenceFree<T>()
@@ -80,7 +75,7 @@ namespace System
             if (typeof(T) == typeof(UIntPtr))
                 return true;
 
-            return PerTypeLatches<T>.IsReferenceFree;
+            return PerTypeValues<T>.IsReferenceFree;
         }
 
         private static bool IsReferenceFree(Type type)
@@ -109,7 +104,14 @@ namespace System
             return true;
         }
 
-        private static class PerTypeLatches<T>
+        // Array header sizes are a runtime implementation detail and aren't the same across all runtimes. (The CLR made a tweak after 4.5, and Mono has an extra Bounds pointer.)
+        private static IntPtr MeasureArrayAdjustment<T>()
+        {
+            T[] sampleArray = new T[1];
+            return Unsafe.ByteOffset<T>(ref Unsafe.As<Pinnable<T>>(sampleArray).Data, ref sampleArray[0]);
+        }
+
+        public static class PerTypeValues<T>
         {
             //
             // Latch to ensure that excruciatingly expensive validation check for constructing a Span around a raw pointer is done
@@ -121,6 +123,8 @@ namespace System
             public static readonly bool IsReferenceFree = IsReferenceFree(typeof(T));
 
             public static readonly T[] EmptyArray = new T[0];
+
+            public static readonly IntPtr ArrayAdjustment = MeasureArrayAdjustment<T>();
         }
     }
 }

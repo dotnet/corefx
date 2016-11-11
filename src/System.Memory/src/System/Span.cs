@@ -34,7 +34,7 @@ namespace System
 
             _length = array.Length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
-            unsafe { _byteOffset = (IntPtr)sizeof(ArrayHeader); }
+            _byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace System
 
             _length = arrayLength - start;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
-            unsafe { _byteOffset = ((IntPtr)sizeof(ArrayHeader)).Add<T>(start); }
+            _byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace System
 
             _length = length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
-            unsafe { _byteOffset = ((IntPtr)sizeof(ArrayHeader)).Add<T>(start); }
+            _byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start);
         }
 
         /// <summary>
@@ -355,7 +355,7 @@ namespace System
         public T[] ToArray()
         {
             if (_length == 0)
-                return SpanHelpers.EmptyArray<T>();
+                return SpanHelpers.PerTypeValues<T>.EmptyArray;
 
             T[] result = new T[_length];
             CopyTo(result);
