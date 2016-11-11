@@ -185,11 +185,10 @@ namespace System
                 if ((uint)index >= ((uint)_length))
                     ThrowHelper.ThrowIndexOutOfRangeException();
 
-                IntPtr adjustedByteOffset = _byteOffset.Add<T>(index);
                 if (_pinnable == null)
-                    unsafe { return ref Unsafe.AsRef<T>(adjustedByteOffset.ToPointer()); }
+                    unsafe { return ref Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index); }
                 else
-                    return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, adjustedByteOffset);
+                    return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
             }
         }
 
