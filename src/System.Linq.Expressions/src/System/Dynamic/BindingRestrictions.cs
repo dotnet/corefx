@@ -326,7 +326,7 @@ namespace System.Dynamic
 
                 ParameterExpression temp = Expression.Parameter(typeof(object), null);
                 return Expression.Block(
-                    new[] { temp },
+                    new TrueReadOnlyCollection<ParameterExpression>(new[] { temp }),
 #if ENABLEDYNAMICPROGRAMMING
                     Expression.Assign(
                         temp,

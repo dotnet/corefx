@@ -788,7 +788,7 @@ namespace System.Dynamic
 
                 result = new DynamicMetaObject(
                     Expression.Block(
-                        new[] { value },
+                        new TrueReadOnlyCollection<ParameterExpression>(new[] { value }),
                         Expression.Condition(
                             tryGetValue,
                             result.Expression,
