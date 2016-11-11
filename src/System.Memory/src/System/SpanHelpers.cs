@@ -52,7 +52,36 @@ namespace System
         /// <summary>
         /// Determine if a type is eligible for storage in unmanaged memory. TODO: To be replaced by a ContainsReference() api.
         /// </summary>
-        public static bool IsReferenceFree<T>() => PerTypeLatches<T>.IsReferenceFree;
+        public static bool IsReferenceFree<T>()
+        {
+            // Under the JIT, these become constant-folded.
+            if (typeof(T) == typeof(byte))
+                return true;
+            if (typeof(T) == typeof(sbyte))
+                return true;
+            if (typeof(T) == typeof(bool))
+                return true;
+            if (typeof(T) == typeof(char))
+                return true;
+            if (typeof(T) == typeof(short))
+                return true;
+            if (typeof(T) == typeof(ushort))
+                return true;
+            if (typeof(T) == typeof(int))
+                return true;
+            if (typeof(T) == typeof(uint))
+                return true;
+            if (typeof(T) == typeof(long))
+                return true;
+            if (typeof(T) == typeof(ulong))
+                return true;
+            if (typeof(T) == typeof(IntPtr))
+                return true;
+            if (typeof(T) == typeof(UIntPtr))
+                return true;
+
+            return PerTypeLatches<T>.IsReferenceFree;
+        }
 
         private static bool IsReferenceFree(Type type)
         {
