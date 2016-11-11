@@ -190,6 +190,8 @@ namespace System.Net
         public override System.Net.IWebProxy Proxy { get { throw null; } set { } }
         public static new System.Net.Cache.RequestCachePolicy DefaultCachePolicy { get { throw null; } set { } }
         public override bool PreAuthenticate { get { throw null; } set { } }
+        public override int Timeout { get { throw null; } set { } }
+        public override long ContentLength { get { throw null; } set { } }
     }
     public partial class HttpWebResponse : System.Net.WebResponse , System.Runtime.Serialization.ISerializable
     {

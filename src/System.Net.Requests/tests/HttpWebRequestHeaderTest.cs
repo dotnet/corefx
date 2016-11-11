@@ -107,7 +107,6 @@ namespace System.Net.Tests
         public void HttpWebRequest_Connection_Validate(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.UseDefaultCredentials = true;
             Assert.Throws<ArgumentException>(() => { request.Connection = "Close;keep-alive"; });
         }
 
@@ -123,11 +122,29 @@ namespace System.Net.Tests
         public void HttpWebRequest_Proxy_Validate(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.UseDefaultCredentials = true;
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
                 Assert.Throws<InvalidOperationException>(() => { request.Proxy = WebRequest.DefaultWebProxy; });
             }
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_TimeOut_Validate(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => { request.Timeout = -1; });
+            request.Timeout = 100;
+            Assert.Equal(100, request.Timeout);
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void HttpWebRequest_ContentLength_Validate(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.ContentLength = 100;
+            Assert.Equal(100, request.ContentLength);
         }
 
         [OuterLoop]

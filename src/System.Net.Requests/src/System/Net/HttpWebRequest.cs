@@ -49,6 +49,7 @@ namespace System.Net
         private int _maximumAllowedRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
         private int _maximumResponseHeaderLen = _defaultMaxResponseHeaderLength;
         private ServicePoint _servicePoint;
+        private int _timeout = WebRequest.DefaultTimeoutMilliseconds;
         private HttpContinueDelegate _continueDelegate;
 
         private RequestStream _requestStream;
@@ -59,7 +60,7 @@ namespace System.Net
         private int _abortCalled = 0;
         private CancellationTokenSource _sendRequestCts;
         private X509CertificateCollection _clientCertificates;
-        private Booleans _Booleans = Booleans.Default;        
+        private Booleans _Booleans = Booleans.Default;
         private bool _pipelined = true;
         private bool _preAuthenticate;
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
@@ -273,7 +274,48 @@ namespace System.Net
                 _continueTimeout = value;
             }
         }
-      
+
+        public override int Timeout
+        {
+            get
+            {
+                return _timeout;
+            }
+            set
+            {
+                if (value < 0 && value != System.Threading.Timeout.Infinite)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_io_timeout_use_ge_zero);
+                }
+                if (_timeout != value)
+                {
+                    _timeout = value;
+                }
+            }
+        }
+
+        public override long ContentLength
+        {
+            get
+            {
+                long value = 0;
+                long.TryParse(_webHeaderCollection[HttpKnownHeaderNames.ContentLength], out value);
+                return value;
+            }
+            set
+            {
+                if (RequestSubmitted)
+                {
+                    throw new InvalidOperationException(SR.net_writestarted);
+                }
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_io_timeout_use_ge_zero);
+                }
+                SetSpecialHeaders(HttpKnownHeaderNames.ContentLength, value.ToString());
+            }
+        }
+
         public Uri Address
         {
             get
@@ -1151,6 +1193,7 @@ namespace System.Net
                 handler.MaxAutomaticRedirections = MaximumAutomaticRedirections;
                 handler.MaxResponseHeadersLength = MaximumResponseHeadersLength;
                 handler.PreAuthenticate = PreAuthenticate;
+                client.Timeout = TimeSpan.FromMilliseconds(Timeout);
                 if (_cookieContainer != null)
                 {
                     handler.CookieContainer = _cookieContainer;
