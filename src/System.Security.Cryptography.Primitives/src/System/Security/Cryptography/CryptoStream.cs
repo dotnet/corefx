@@ -519,6 +519,10 @@ namespace System.Security.Cryptography
             }
             return;
         }
+        
+        public void Clear() {
+            Close();
+        }        
 
         protected override void Dispose(bool disposing)
         {
