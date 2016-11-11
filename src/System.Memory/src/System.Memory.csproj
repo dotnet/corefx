@@ -13,8 +13,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\PinnableReferenceHelpers.cs" />
-    <Compile Include="System\PinnableReferenceHelpers.Layouts.Microsoft.cs" />
+    <Compile Include="System\ArrayHeader.cs" />
+    <Compile Include="System\Pinnable.cs" />
     <Compile Include="System\Span.cs" />
     <Compile Include="System\SpanHelpers.cs" />
   </ItemGroup>

@@ -33,8 +33,8 @@ namespace System
                 throw new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, typeof(T)));
 
             _length = array.Length;
-            _object = array;
-            _byteOffset = IntPtr.Zero;
+            _pinnable = Unsafe.As<Pinnable<T>>(array);
+            unsafe { _byteOffset = (IntPtr)sizeof(ArrayHeader); }
         }
 
         /// <summary>
@@ -62,8 +62,8 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(start));
 
             _length = arrayLength - start;
-            _object = array;
-            _byteOffset = IntPtr.Zero.Add<T>(start);
+            _pinnable = Unsafe.As<Pinnable<T>>(array);
+            unsafe { _byteOffset = ((IntPtr)sizeof(ArrayHeader)).Add<T>(start); }
         }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(start));
 
             _length = length;
-            _object = array;
-            _byteOffset = IntPtr.Zero.Add<T>(start);
+            _pinnable = Unsafe.As<Pinnable<T>>(array);
+            unsafe { _byteOffset = ((IntPtr)sizeof(ArrayHeader)).Add<T>(start); }
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(length));
 
             _length = length;
-            _object = null;
+            _pinnable = null;
             _byteOffset = new IntPtr(pointer);
         }
 
@@ -155,19 +155,19 @@ namespace System
             if (obj is string)
                 throw new ArgumentException(SR.Argument_CannotPassStringToDangerousCreate);
 
-            ref T pinnableReference = ref Unsafe.As<byte, T>(ref obj.GetPinnableReferenceForPlainObject());
-            IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnableReference, ref rawPointer);
-            return new Span<T>(obj, byteOffset, length);
+            Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
+            IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref rawPointer);
+            return new Span<T>(pinnable, byteOffset, length);
         }
 
         // Constructor for internal use only.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Span(object o, IntPtr byteOffset, int length)
+        private Span(Pinnable<T> pinnable, IntPtr byteOffset, int length)
         {
             Debug.Assert(length >= 0);
 
             _length = length;
-            _object = o;
+            _pinnable = pinnable;
             _byteOffset = byteOffset;
         }
 
@@ -197,7 +197,11 @@ namespace System
                 if ((uint)index >= ((uint)_length))
                     throw new IndexOutOfRangeException();
 
-                return ref Unsafe.Add<T>(ref DangerousGetPinnableReference, index);
+                IntPtr adjustedByteOffset = _byteOffset.Add<T>(index);
+                if (_pinnable == null)
+                    unsafe { return ref Unsafe.AsRef<T>(adjustedByteOffset.ToPointer()); }
+                else
+                    return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, adjustedByteOffset);
             }
         }
 
@@ -334,7 +338,7 @@ namespace System
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             int length = _length - start;
-            return new Span<T>(_object, newOffset, length);
+            return new Span<T>(_pinnable, newOffset, length);
         }
 
         /// <summary>
@@ -352,7 +356,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(start));
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
-            return new Span<T>(_object, newOffset, length);
+            return new Span<T>(_pinnable, newOffset, length);
         }
 
         /// <summary>
@@ -381,43 +385,28 @@ namespace System
         /// </summary>
         public ref T DangerousGetPinnableReference
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                switch (_object)
-                {
-                    case null:
-                        unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
-                    case T[] array:
-                        return ref Unsafe.As<byte, T>(ref Unsafe.Add<byte>(ref array.GetPinnableReferenceForArray<T>(), _byteOffset));
-                    default:
-                        // Supporting multidim arrays is tricky as there isn't a 100% reliable way to distinguish SzArrays from MdArray (in particular, the rank 1 multidim array with zero bounds
-                        // which looks identical to all existing Reflection api but has a different object header than a true SzArray.) Right now, none of our constructors allow this so
-                        // we can simply assert this here.
-                        Debug.Assert(!(_object is Array), "Multidimensional array not expected.");
-                        Debug.Assert(!(_object is string), "Strings only supported by ReadOnlySpan");
-                        return ref Unsafe.As<byte, T>(ref Unsafe.Add<byte>(ref _object.GetPinnableReferenceForPlainObject(), _byteOffset));
-                }
+                if (_pinnable == null)
+                    unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
+                else
+                    return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
             }
         }
 
         //
-        // The interpretations of these fields depends on how the Span was constructed:
+        // If the Span was constructed from an object,
         //
-        //    - from a native pointer
-        //      _object == null, _byteOffset == the pointer value (think of it as the offset from NULL.)
+        //   _pinnable   = that object (unsafe-casted to a Pinnable<T>)
+        //   _byteOffset = offset in bytes from "ref _pinnable.Data" to "ref span[0]"
         //
-        //    - from a T[] (call it "a")
-        //      _object == the array, _byteOffset == offset from the address of a[0] (or in the case of an empty array, where a[0] would be.)
-        // 
-        //    - plain old object
-        //      _object == the object, _byteOffset = offset from the address of the first field laid out in memory.
+        // If the Span was constructed from a native pointer,
         //
-        // It would be simpler if the base address could always be the start of the object header, but it is not legal to represent that address as a "ref" as the object header
-        // is just runtime infrastructure that no official existence in the managed worldview.
+        //   _pinnable   = null
+        //   _byteOffset = the pointer
         //
-        // As the name suggests, the offset is measured in bytes, not T's.
-        //
-        private readonly object _object;
+        private readonly Pinnable<T> _pinnable; 
         private readonly IntPtr _byteOffset;
         private readonly int _length;
     }
