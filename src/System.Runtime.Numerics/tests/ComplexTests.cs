@@ -13,7 +13,7 @@ namespace System.Numerics.Tests
     public partial class ComplexTests
     {
         private static Random s_random = new Random(-55);
-        private static unsafe bool Is64Bit => sizeof(void*) == 8;
+        private static bool Is64Bit => IntPtr.Size == 8;
         
         public static readonly double[] s_validDoubleValues = new double[]
         {

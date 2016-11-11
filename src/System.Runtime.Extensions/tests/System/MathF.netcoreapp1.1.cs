@@ -26,7 +26,7 @@ namespace System.Tests
        // use CrossPlatformMachineEpsilon * 10.
         public const float CrossPlatformMachineEpsilon = 4.76837158e-07f;
 
-        private static unsafe bool Is64Bit => sizeof(void*) == 8;
+        private static bool Is64Bit => IntPtr.Size == 8;
 
         /// <summary>
         /// Verifies that two <see cref="float"/> values are equal, within the <paramref name="allowedVariance"/>.
