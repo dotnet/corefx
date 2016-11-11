@@ -230,7 +230,7 @@ namespace System.Linq.Expressions
                 Expression e4 = temp2;
 
                 return Expression.Block(
-                    new TrueReadOnlyCollection<ParameterExpression>(new[] { temp1, temp2 }),
+                    new TrueReadOnlyCollection<ParameterExpression>(temp1, temp2),
                     e1, e2, e3, e4
                 );
             }
@@ -421,7 +421,7 @@ namespace System.Linq.Expressions
             Debug.Assert(opTrueFalse != null);
 
             return Block(
-                new TrueReadOnlyCollection<ParameterExpression>(new[] { left }),
+                new TrueReadOnlyCollection<ParameterExpression>(left),
                 Assign(left, Left),
                 Condition(
                     Property(left, "HasValue"),
@@ -429,7 +429,7 @@ namespace System.Linq.Expressions
                         Call(opTrueFalse, Call(left, "GetValueOrDefault", null)),
                         left,
                         Block(
-                            new TrueReadOnlyCollection<ParameterExpression>(new[] { right }),
+                            new TrueReadOnlyCollection<ParameterExpression>(right),
                             Assign(right, Right),
                             Condition(
                                 Property(right, "HasValue"),

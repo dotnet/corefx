@@ -733,7 +733,7 @@ namespace System.Linq.Expressions.Compiler
             ParameterExpression switchValue = Expression.Variable(typeof(string), "switchValue");
             ParameterExpression switchIndex = Expression.Variable(typeof(int), "switchIndex");
             BlockExpression reduced = Expression.Block(
-                new TrueReadOnlyCollection<ParameterExpression>(new[] { switchIndex, switchValue }),
+                new TrueReadOnlyCollection<ParameterExpression>(switchIndex, switchValue),
                 Expression.Assign(switchValue, node.SwitchValue),
                 Expression.IfThenElse(
                     Expression.Equal(switchValue, Expression.Constant(null, typeof(string))),
