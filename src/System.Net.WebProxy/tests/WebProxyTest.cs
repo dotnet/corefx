@@ -145,7 +145,7 @@ namespace System.Net.Tests
             yield return new object[] { new Uri($"http://{Guid.NewGuid().ToString("N")}"), true };
             foreach (IPAddress address in Dns.GetHostEntryAsync(Dns.GetHostName()).GetAwaiter().GetResult().AddressList)
             {
-                if (address.AddressFamily == AddressFamily.InterNetwork)
+                if (address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(address))
                 {
                     Uri uri;
                     try { uri = new Uri($"http://{address}"); }
