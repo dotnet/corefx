@@ -154,5 +154,15 @@ namespace System.Linq.Expressions
         public  static MethodInfo   Math_Pow_Double_Double =>
                                   s_Math_Pow_Double_Double ??
                                  (s_Math_Pow_Double_Double = typeof(Math).GetMethod(nameof(Math.Pow), new[] { typeof(double), typeof(double) }));
+
+        private static MethodInfo s_String_Format_String_ObjectArray;
+        public  static MethodInfo   String_Format_String_ObjectArray =>
+                                  s_String_Format_String_ObjectArray ??
+                                 (s_String_Format_String_ObjectArray = typeof(string).GetMethod("Format", new Type[] { typeof(string), typeof(object[]) }));
+
+        private static ConstructorInfo s_InvalidCastException_Ctor_String;
+        public  static ConstructorInfo   InvalidCastException_Ctor_String =>
+                                       s_InvalidCastException_Ctor_String ??
+                                      (s_InvalidCastException_Ctor_String = typeof(InvalidCastException).GetConstructor(new Type[] { typeof(string) }));
     }
 }
