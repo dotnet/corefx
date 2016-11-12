@@ -7,6 +7,7 @@ using System.Dynamic.Utils;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using AstUtils = System.Linq.Expressions.Utils;
 using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Dynamic
@@ -15,7 +16,7 @@ namespace System.Dynamic
     /// Provides a simple class that can be inherited from to create an object with dynamic behavior
     /// at runtime.  Subclasses can override the various binder methods (GetMember, SetMember, Call, etc.)
     /// to provide custom behavior that will be invoked at runtime.
-    /// 
+    ///
     /// If a method is not overridden then the DynamicObject does not directly support that behavior and
     /// the call site will determine how the binding should be performed.
     /// </summary>
@@ -420,7 +421,7 @@ namespace System.Dynamic
                                 Expression.Convert(
                                     Expression.ArrayIndex(
                                         callArgs,
-                                        Expression.Constant(i)
+                                        AstUtils.Constant(i)
                                     ),
                                     args[i].Type
                                 )
@@ -432,7 +433,7 @@ namespace System.Dynamic
                 if (block != null)
                     return Expression.Block(block);
                 else
-                    return Expression.Empty();
+                    return AstUtils.Empty;
             }
 
             /// <summary>
@@ -494,7 +495,7 @@ namespace System.Dynamic
             /// <summary>
             /// Helper method for generating a MetaObject which calls a
             /// specific method on DynamicObject that returns a result.
-            /// 
+            ///
             /// args is either an array of arguments to be passed
             /// to the method as an object[] or NoArgs to signify that
             /// the target method takes no parameters.
@@ -546,7 +547,7 @@ namespace System.Dynamic
                     else
                     {
                         condition = Expression.OrElse(
-                                        Expression.Equal(resultMO.Expression, Expression.Constant(null)),
+                                        Expression.Equal(resultMO.Expression, AstUtils.Null),
                                         Expression.TypeIs(resultMO.Expression, binder.ReturnType));
                     }
 
@@ -560,7 +561,7 @@ namespace System.Dynamic
                                     Expression.Constant(convertFailed),
                                     Expression.NewArrayInit(typeof(object),
                                         Expression.Condition(
-                                            Expression.Equal(resultMO.Expression, Expression.Constant(null)),
+                                            Expression.Equal(resultMO.Expression, AstUtils.Null),
                                             Expression.Constant("null"),
                                             Expression.Call(
                                                 resultMO.Expression,
@@ -600,7 +601,7 @@ namespace System.Dynamic
                                 )
                             ),
                             Expression.Block(
-                                methodName != nameof(DynamicObject.TryBinaryOperation) ? ReferenceArgAssign(callArgs, args) : Expression.Empty(),
+                                methodName != nameof(DynamicObject.TryBinaryOperation) ? ReferenceArgAssign(callArgs, args) : AstUtils.Empty,
                                 resultMO.Expression
                             ),
                             fallbackResult.Expression,
@@ -616,7 +617,7 @@ namespace System.Dynamic
             /// Helper method for generating a MetaObject which calls a
             /// specific method on Dynamic, but uses one of the arguments for
             /// the result.
-            /// 
+            ///
             /// args is either an array of arguments to be passed
             /// to the method as an object[] or NoArgs to signify that
             /// the target method takes no parameters.
@@ -683,7 +684,7 @@ namespace System.Dynamic
             /// Helper method for generating a MetaObject which calls a
             /// specific method on Dynamic, but uses one of the arguments for
             /// the result.
-            /// 
+            ///
             /// args is either an array of arguments to be passed
             /// to the method as an object[] or NoArgs to signify that
             /// the target method takes no parameters.
@@ -720,7 +721,7 @@ namespace System.Dynamic
                             ),
                             Expression.Block(
                                 ReferenceArgAssign(callArgs, args),
-                                Expression.Empty()
+                                AstUtils.Empty
                             ),
                             fallbackResult.Expression,
                             typeof(void)
