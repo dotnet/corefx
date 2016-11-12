@@ -10,14 +10,15 @@ namespace System.IO.Tests
 {
     public class BufferedStreamFlushTests
     {
-        [Fact]
-        public async Task ShouldNotFlushUnderlyingStreamIfReadOnly()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ShouldNotFlushUnderlyingStreamIfReadOnly(bool underlyingCanSeek)
         {
             var underlying = new DelegateStream(
-                // These properties are necessary for the codepath in question to be hit.
                 canReadFunc: () => true,
                 canWriteFunc: () => false,
-                canSeekFunc: () => true,
+                canSeekFunc: () => underlyingCanSeek,
                 readFunc: (_, __, ___) => 123,
                 writeFunc: (_, __, ___) =>
                 {
@@ -25,8 +26,6 @@ namespace System.IO.Tests
                 },
                 seekFunc: (_, __) => 123L
             );
-            // These properties are necessary for the codepath in question to be hit.
-            Debug.Assert(underlying.CanRead && !underlying.CanWrite && underlying.CanSeek);
 
             var wrapper = new CallTrackingStream(underlying);
 
