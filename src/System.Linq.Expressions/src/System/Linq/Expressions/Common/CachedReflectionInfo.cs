@@ -164,5 +164,10 @@ namespace System.Linq.Expressions
         public  static ConstructorInfo   InvalidCastException_Ctor_String =>
                                        s_InvalidCastException_Ctor_String ??
                                       (s_InvalidCastException_Ctor_String = typeof(InvalidCastException).GetConstructor(new Type[] { typeof(string) }));
+
+        private static MethodInfo s_CallSiteOps_SetNotMatched;
+        public  static MethodInfo   CallSiteOps_SetNotMatched =>
+                                  s_CallSiteOps_SetNotMatched ??
+                                 (s_CallSiteOps_SetNotMatched = typeof(CallSiteOps).GetMethod(nameof(CallSiteOps.SetNotMatched)));
     }
 }
