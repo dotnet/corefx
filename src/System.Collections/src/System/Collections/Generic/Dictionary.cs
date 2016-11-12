@@ -330,7 +330,7 @@ namespace System.Collections.Generic
         {
             int size = HashHelpers.GetPrime(capacity);
             buckets = new int[size];
-            for (int i = 0; i < buckets.Length; i++) buckets[i] = -1;
+            for (int i = 0; i < size; i++) buckets[i] = -1;
             entries = new Entry[size];
             freeList = -1;
         }
@@ -345,20 +345,21 @@ namespace System.Collections.Generic
             if (buckets == null) Initialize(0);
             int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
             int targetBucket = hashCode % buckets.Length;
+            int index;
 
 #if FEATURE_RANDOMIZED_STRING_HASHING
             int collisionCount = 0;
 #endif
 
-            for (int i = buckets[targetBucket]; i >= 0; i = entries[i].next)
+            for (index = buckets[targetBucket]; index >= 0; index = entries[index].next)
             {
-                if (entries[i].hashCode == hashCode && comparer.Equals(entries[i].key, key))
+                if (entries[index].hashCode == hashCode && comparer.Equals(entries[index].key, key))
                 {
                     if (add)
                     {
                         throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
                     }
-                    entries[i].value = value;
+                    entries[index].value = value;
                     version++;
                     return;
                 }
@@ -366,8 +367,6 @@ namespace System.Collections.Generic
                 collisionCount++;
 #endif
             }
-
-            int index;
 
             if (freeCount > 0)
             {
@@ -458,7 +457,7 @@ namespace System.Collections.Generic
         {
             Debug.Assert(newSize >= entries.Length);
             int[] newBuckets = new int[newSize];
-            for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
+            for (int i = 0; i < newSize; i++) newBuckets[i] = -1;
 
             Entry[] newEntries = new Entry[newSize];
             Array.Copy(entries, 0, newEntries, 0, count);
