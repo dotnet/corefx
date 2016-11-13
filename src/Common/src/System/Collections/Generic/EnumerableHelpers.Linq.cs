@@ -38,6 +38,7 @@ namespace System.Collections.Generic
         /// <param name="enumerator">The enumerator to count.</param>
         /// <param name="disposable">The enumerator typed as an <see cref="IDisposable"/>.</param>
         /// <returns>The count of the enumerator.</returns>
+        /// <remarks>This method should be kept non-generic to avoid generated code bloat.</remarks>
         private static int CountAndDispose(IEnumerator enumerator, IDisposable disposable)
         {
             Debug.Assert(enumerator == disposable);
