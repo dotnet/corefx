@@ -31,7 +31,9 @@ namespace System.Linq
             TSource[] array = source as TSource[];
             if (array != null)
             {
-                return new WhereArrayIterator<TSource>(array, predicate);
+                return array.Length == 0 ?
+                    EmptyPartition<TSource>.Instance.AsEnumerable() :
+                    new WhereArrayIterator<TSource>(array, predicate);
             }
 
             List<TSource> list = source as List<TSource>;
@@ -75,7 +77,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class WhereEnumerableIterator<TSource> : Iterator<TSource>
+        internal sealed class WhereEnumerableIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -104,6 +106,8 @@ namespace System.Linq
 
                 base.Dispose();
             }
+
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
 
             public override bool MoveNext()
             {
@@ -136,17 +140,46 @@ namespace System.Linq
                 return new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, selector);
             }
 
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(initialize: true);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
                 return new WhereEnumerableIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
             }
         }
 
-        internal sealed class WhereArrayIterator<TSource> : Iterator<TSource>
+        internal sealed class WhereArrayIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
-            private int _index;
 
             public WhereArrayIterator(TSource[] source, Func<TSource, bool> predicate)
             {
@@ -161,24 +194,25 @@ namespace System.Linq
                 return new WhereArrayIterator<TSource>(_source, _predicate);
             }
 
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+
             public override bool MoveNext()
             {
-                if (_state == 1)
-                {
-                    while (_index < _source.Length)
-                    {
-                        TSource item = _source[_index];
-                        _index++;
-                        if (_predicate(item))
-                        {
-                            _current = item;
-                            return true;
-                        }
-                    }
+                int index = _state - 1;
+                TSource[] source = _source;
 
-                    Dispose();
+                while ((uint)index < (uint)source.Length)
+                {
+                    TSource item = source[index];
+                    index = ++_state - 1;
+                    if (_predicate(item))
+                    {
+                        _current = item;
+                        return true;
+                    }
                 }
 
+                Dispose();
                 return false;
             }
 
@@ -187,13 +221,47 @@ namespace System.Linq
                 return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, selector);
             }
 
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(initialize: true);
+
+                TSource[] source = _source;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                TSource[] source = _source;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
                 return new WhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
             }
         }
 
-        internal sealed class WhereListIterator<TSource> : Iterator<TSource>
+        internal sealed class WhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -211,6 +279,8 @@ namespace System.Linq
             {
                 return new WhereListIterator<TSource>(_source, _predicate);
             }
+
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
 
             public override bool MoveNext()
             {
@@ -243,18 +313,51 @@ namespace System.Linq
                 return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, selector);
             }
 
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(initialize: true);
+
+                List<TSource> source = _source;
+                for (int i = 0; i < source.Count; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                List<TSource> source = _source;
+                for (int i = 0; i < source.Count; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
                 return new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
             }
         }
 
-        internal sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
             private readonly Func<TSource, TResult> _selector;
-            private int _index;
 
             public WhereSelectArrayIterator(TSource[] source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
             {
@@ -271,24 +374,25 @@ namespace System.Linq
                 return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
             }
 
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+
             public override bool MoveNext()
             {
-                if (_state == 1)
-                {
-                    while (_index < _source.Length)
-                    {
-                        TSource item = _source[_index];
-                        _index++;
-                        if (_predicate(item))
-                        {
-                            _current = _selector(item);
-                            return true;
-                        }
-                    }
+                int index = _state - 1;
+                TSource[] source = _source;
 
-                    Dispose();
+                while ((uint)index < (uint)source.Length)
+                {
+                    TSource item = source[index];
+                    index = ++_state - 1;
+                    if (_predicate(item))
+                    {
+                        _current = _selector(item);
+                        return true;
+                    }
                 }
 
+                Dispose();
                 return false;
             }
 
@@ -296,9 +400,43 @@ namespace System.Linq
             {
                 return new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
             }
+
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+
+                TSource[] source = _source;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                TSource[] source = _source;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
         }
 
-        internal sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -319,6 +457,8 @@ namespace System.Linq
             {
                 return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
             }
+
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
 
             public override bool MoveNext()
             {
@@ -350,9 +490,43 @@ namespace System.Linq
             {
                 return new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
             }
+
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+
+                List<TSource> source = _source;
+                for (int i = 0; i < source.Count; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                List<TSource> source = _source;
+                for (int i = 0; i < source.Count; i++)
+                {
+                    TSource item = source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
         }
 
-        internal sealed class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -385,6 +559,8 @@ namespace System.Linq
                 base.Dispose();
             }
 
+            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+
             public override bool MoveNext()
             {
                 switch (_state)
@@ -414,6 +590,36 @@ namespace System.Linq
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
             {
                 return new WhereSelectEnumerableIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+            }
+
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
             }
         }
     }
