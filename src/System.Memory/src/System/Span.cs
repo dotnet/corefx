@@ -226,8 +226,8 @@ namespace System
             // TODO: This is a tide-over implementation as we plan to add a overlap-safe cpblk-based api to Unsafe. (https://github.com/dotnet/corefx/issues/13427)
             unsafe
             {
-                ref T src = ref DangerousGetPinnableReference;
-                ref T dst = ref destination.DangerousGetPinnableReference;
+                ref T src = ref DangerousGetPinnableReference();
+                ref T dst = ref destination.DangerousGetPinnableReference();
                 IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
                 int length = _length;
 
@@ -262,7 +262,7 @@ namespace System
             if (left._length != right._length)
                 return false;
 
-            if (!Unsafe.AreSame<T>(ref left.DangerousGetPinnableReference, ref right.DangerousGetPinnableReference))
+            if (!Unsafe.AreSame<T>(ref left.DangerousGetPinnableReference(), ref right.DangerousGetPinnableReference()))
                 return false;
 
             return true;
@@ -370,16 +370,13 @@ namespace System
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
         /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
         /// </summary>
-        public ref T DangerousGetPinnableReference
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T DangerousGetPinnableReference()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (_pinnable == null)
-                    unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
-                else
-                    return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
-            }
+            if (_pinnable == null)
+                unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
+            else
+                return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
         }
 
         //

@@ -33,7 +33,7 @@ namespace System.SpanTests
             {
                 Span<int> span = new Span<int>((void*)null, 0);
                 span.Validate<int>();
-                Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>((void*)null), ref span.DangerousGetPinnableReference));
+                Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>((void*)null), ref span.DangerousGetPinnableReference()));
             }
         }
 

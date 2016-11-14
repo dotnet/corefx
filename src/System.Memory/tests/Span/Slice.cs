@@ -24,7 +24,7 @@ namespace System.SpanTests
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 };
             Span<int> span = new Span<int>(a).Slice(a.Length);
             Assert.Equal(0, span.Length);
-            Assert.True(Unsafe.AreSame<int>(ref a[a.Length - 1], ref Unsafe.Subtract<int>(ref span.DangerousGetPinnableReference, 1)));
+            Assert.True(Unsafe.AreSame<int>(ref a[a.Length - 1], ref Unsafe.Subtract<int>(ref span.DangerousGetPinnableReference(), 1)));
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace System.SpanTests
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 };
             Span<int> span = new Span<int>(a).Slice(a.Length, 0);
             Assert.Equal(0, span.Length);
-            Assert.True(Unsafe.AreSame<int>(ref a[a.Length - 1], ref Unsafe.Subtract<int>(ref span.DangerousGetPinnableReference, 1)));
+            Assert.True(Unsafe.AreSame<int>(ref a[a.Length - 1], ref Unsafe.Subtract<int>(ref span.DangerousGetPinnableReference(), 1)));
         }
 
         [Fact]

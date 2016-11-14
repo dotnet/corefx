@@ -18,7 +18,7 @@ namespace System.SpanTests
             unsafe
             {
                 ref int expected = ref Unsafe.AsRef<int>(null);
-                ref int actual = ref empty.DangerousGetPinnableReference;
+                ref int actual = ref empty.DangerousGetPinnableReference();
                 Assert.True(Unsafe.AreSame<int>(ref expected, ref actual));
             }
         }
