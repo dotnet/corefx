@@ -9,17 +9,17 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-    internal static class SpanHelpers 
+    internal static class SpanHelpers
     {
         /// <summary>
         /// Computes "start + index * sizeof(T)", using the unsigned IntPtr-sized multiplication for 32 and 64 bits.
-        /// 
+        ///
         /// Assumptions:
         ///     Start and index are non-negative, and already pre-validated to be within the valid range of their containing Span.
-        ///     
+        ///
         ///     If the byte length (Span.Length * sizeof(T)) does an unsigned overflow (i.e. the buffer wraps or is too big to fit within the address space),
         ///     the behavior is undefined.
-        ///     
+        ///
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr Add<T>(this IntPtr start, int index)

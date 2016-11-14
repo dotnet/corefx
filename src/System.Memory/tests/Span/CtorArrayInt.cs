@@ -40,7 +40,7 @@ namespace System.SpanTests
             int[] a = new int[3];
             Assert.Throws<ArgumentOutOfRangeException>(() => new Span<int>(a, 4));
         }
-         
+
         [Fact]
         public static void CtorArrayIntStartEqualsLength()
         {
@@ -50,5 +50,5 @@ namespace System.SpanTests
             span.Validate<int>();
         }
     }
-} 
+}
 

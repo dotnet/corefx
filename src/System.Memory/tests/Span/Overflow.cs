@@ -52,7 +52,7 @@ namespace System.SpanTests
                 }
             }
         }
-        
+
         private const long ThreeGiB = 3L * 1024L * 1024L * 1024L;
         private const long TwoGiB = 2L * 1024L * 1024L * 1024L;
         private const long OneGiB = 1L * 1024L * 1024L * 1024L;

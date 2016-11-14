@@ -76,5 +76,5 @@ namespace System.SpanTests
             span.Validate<int>();
         }
     }
-} 
+}
 

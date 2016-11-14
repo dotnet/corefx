@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 
-#pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)' 
+#pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
 
 namespace System
 {
@@ -123,7 +123,7 @@ namespace System
 
         /// <summary>
         /// Create a new span over a portion of a regular managed object. This can be useful
-        /// if part of a managed object represents a "fixed array." This is dangerous because 
+        /// if part of a managed object represents a "fixed array." This is dangerous because
         /// "length" is not checked, nor is the fact that "rawPointer" actually lies within the object.
         /// </summary>
         /// <param name="obj">The managed object that contains the data to span over.</param>
@@ -165,7 +165,7 @@ namespace System
         public int Length => _length;
 
         /// <summary>
-        /// Returns true if Length is 0. 
+        /// Returns true if Length is 0.
         /// </summary>
         public bool IsEmpty => _length == 0;
 
@@ -194,9 +194,9 @@ namespace System
 
         /// <summary>
         /// Copies the contents of this span into destination span. If the source
-        /// and destinations overlap, this method behaves as if the original values in 
+        /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
-        /// 
+        ///
         /// <param name="destination">The span to copy items into.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when the destination Span is shorter than the source Span.
@@ -211,9 +211,9 @@ namespace System
 
         /// <summary>
         /// Copies the contents of this span into destination span. If the source
-        /// and destinations overlap, this method behaves as if the original values in 
+        /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
-        /// 
+        ///
         /// <returns>If the destination span is shorter than the source span, this method
         /// return false and no data is written to the destination.</returns>
         /// </summary>
@@ -384,7 +384,7 @@ namespace System
         //   _pinnable   = null
         //   _byteOffset = the pointer
         //
-        private readonly Pinnable<T> _pinnable; 
+        private readonly Pinnable<T> _pinnable;
         private readonly IntPtr _byteOffset;
         private readonly int _length;
     }
