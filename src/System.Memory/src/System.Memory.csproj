@@ -9,14 +9,18 @@
     <CLSCompliant>false</CLSCompliant>
     <NuGetTargetMoniker>.NETStandard,Version=v1.0</NuGetTargetMoniker>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <IsPartialFacadeAssembly>false</IsPartialFacadeAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\Pinnable.cs" />
     <Compile Include="System\Span.cs" />
     <Compile Include="System\SpanHelpers.cs" />
     <Compile Include="System\ThrowHelper.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+    <TargetingPackReference Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
