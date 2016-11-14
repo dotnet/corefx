@@ -151,6 +151,8 @@ namespace System.Diagnostics
         public System.Collections.Generic.IDictionary<string, string> Environment { get { throw null; } }
         public string FileName { get { throw null; } set { } }
         public bool LoadUserProfile { get { throw null; } set { } }
+        [System.CLSCompliant(false)]
+        public System.Security.SecureString Password { get { throw null; } set { } }
         public bool RedirectStandardError { get { throw null; } set { } }
         public bool RedirectStandardInput { get { throw null; } set { } }
         public bool RedirectStandardOutput { get { throw null; } set { } }

@@ -15,6 +15,7 @@ namespace System.Diagnostics
         private string _domain;
         private string _passwordInClearText;
         private bool _loadUserProfile;
+        private SecureString _password;
 
         private const bool CaseSensitiveEnvironmentVariables = false;
 
@@ -77,6 +78,13 @@ namespace System.Diagnostics
                     }
                 }
             }
+        }
+
+        [System.CLSCompliant(false)]
+        public SecureString Password
+        {
+            get { return _password; }
+            set { _password = value; }
         }
 
         // CoreCLR can't correctly support UseShellExecute=true for the following reasons
