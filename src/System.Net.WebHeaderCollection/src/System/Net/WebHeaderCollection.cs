@@ -44,10 +44,7 @@ namespace System.Net
             {
                 string headerName = serializationInfo.GetString(i.ToString(NumberFormatInfo.InvariantInfo));
                 string headerValue = serializationInfo.GetString((i + count).ToString(NumberFormatInfo.InvariantInfo));
-                if (GlobalLog.IsEnabled)
-                {
-                    GlobalLog.Print("WebHeaderCollection::.ctor(ISerializable) calling InnerCollection.Add() key:[" + headerName + "], value:[" + headerValue + "]");
-                }
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Add() key:[{headerName}], value:[{headerValue}]");
                 InnerCollection.Add(headerName, headerValue);
             }
         }
@@ -152,10 +149,7 @@ namespace System.Net
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
             ThrowOnRestrictedHeader(name);
             value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::Set() calling InnerCollection.Set() key:[" + name + "], value:[" + value + "]");
-            }
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Set() key:[{name}], value:[{value}]");
             if (_type == WebHeaderCollectionType.WebResponse)
             {
                 if (value != null && value.Length > ushort.MaxValue)
@@ -186,7 +180,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             this.Set(header.GetName(), value);
@@ -328,10 +322,7 @@ namespace System.Net
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
             ThrowOnRestrictedHeader(name);
             value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::Add(" + header + ") calling InnerCollection.Add() key:[" + name + "], value:[" + value + "]");
-            }
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Add({header}) calling InnerCollection.Add() key:[{name}], value:[{value}]");
             if (_type == WebHeaderCollectionType.WebResponse)
             {
                 if (value != null && value.Length > ushort.MaxValue)
@@ -348,10 +339,7 @@ namespace System.Net
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
             ThrowOnRestrictedHeader(name);
             value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::Add() calling InnerCollection.Add() key:[" + name + "], value:[" + value + "]");
-            }
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Add() key:[{name}], value:[{value}]");
             if (_type == WebHeaderCollectionType.WebResponse)
             {
                 if (value != null && value.Length > ushort.MaxValue)
@@ -363,23 +351,20 @@ namespace System.Net
             InnerCollection.Add(name, value);
         }
 
-        protected void AddWithoutValidate(string name, string value)
+        protected void AddWithoutValidate(string headerName, string headerValue)
         {
-            name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
-            value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::AddWithoutValidate() calling InnerCollection.Add() key:[" + name + "], value:[" + value + "]");
-            }
+            headerName = HttpValidationHelpers.CheckBadHeaderNameChars(headerName);
+            headerValue = HttpValidationHelpers.CheckBadHeaderValueChars(headerValue);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Add() key:[{headerName}], value:[{headerValue}]");
             if (_type == WebHeaderCollectionType.WebResponse)
             {
-                if (value != null && value.Length > ushort.MaxValue)
+                if (headerValue != null && headerValue.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(headerValue), headerValue, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
-            InnerCollection.Add(name, value);
+            InnerCollection.Add(headerName, headerValue);
         }
 
         internal void ThrowOnRestrictedHeader(string headerName)
@@ -421,10 +406,7 @@ namespace System.Net
             }
             ThrowOnRestrictedHeader(name);
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::Remove() calling InnerCollection.Remove() key:[" + name + "]");
-            }
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Remove() key:[{name}]");
             if (_innerCollection != null)
             {
                 InvalidateCachedArrays();
@@ -467,10 +449,7 @@ namespace System.Net
             }
 
             sb.Append("\r\n");
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Print("WebHeaderCollection::ToString: \r\n" + sb.ToString());
-            }
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"ToString: {sb}");
             return sb.ToString();
         }
 
@@ -489,6 +468,14 @@ namespace System.Net
             get
             {
                 return (_innerCollection == null ? 0 : _innerCollection.Count);
+            }
+        }
+
+        public override KeysCollection Keys
+        {
+            get
+            {
+                return InnerCollection.Keys;
             }
         }
 

@@ -216,7 +216,7 @@ namespace System.Linq.Expressions.Compiler
             Result left = RewriteExpression(node.Left, stack);
             // ... and so does the right one
             Result right = RewriteExpression(node.Right, stack);
-            //conversion is a lambda. stack state will be ignored. 
+            //conversion is a lambda. stack state will be ignored.
             Result conversion = RewriteExpression(node.Conversion, stack);
 
             RewriteAction action = left.Action | right.Action | conversion.Action;
@@ -479,7 +479,7 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                // In a case of NewArrayBounds we make no modifications to the stack 
+                // In a case of NewArrayBounds we make no modifications to the stack
                 // before emitting bounds expressions.
             }
 
@@ -1042,7 +1042,7 @@ namespace System.Linq.Expressions.Compiler
         /// <summary>
         /// If we are spilling, requires that there are no byref arguments to
         /// the method call.
-        /// 
+        ///
         /// Used for:
         ///   NewExpression,
         ///   MethodCallExpression,
@@ -1067,7 +1067,7 @@ namespace System.Linq.Expressions.Compiler
         /// <summary>
         /// Requires that the instance is not a value type (primitive types are
         /// okay because they're immutable).
-        /// 
+        ///
         /// Used for:
         ///  MethodCallExpression,
         ///  MemberExpression (for properties),
