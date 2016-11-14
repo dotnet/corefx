@@ -20,7 +20,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
             }
         }
 
-#if netcoreapp11 
+#if netstandard17 
         [Fact]
         public static void TestClearIsDispose()
         {

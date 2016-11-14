@@ -146,7 +146,7 @@ namespace System.Security.Cryptography.Hashing.Tests
             }
         }
 
-#if netcoreapp11 
+#if netstandard17 
         [Fact]
         public void ClearIsDispose()
         {
