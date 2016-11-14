@@ -49,7 +49,38 @@ namespace System
         /// </summary>
         public static bool IsReferenceFree<T>() => PerTypeValues<T>.IsReferenceFree;
 
-        private static bool IsReferenceFree(Type type)
+        private static bool IsReferenceFreeCore<T>()
+        {
+            // Under the JIT, these become constant-folded.
+            if (typeof(T) == typeof(byte))
+                return true;
+            if (typeof(T) == typeof(sbyte))
+                return true;
+            if (typeof(T) == typeof(bool))
+                return true;
+            if (typeof(T) == typeof(char))
+                return true;
+            if (typeof(T) == typeof(short))
+                return true;
+            if (typeof(T) == typeof(ushort))
+                return true;
+            if (typeof(T) == typeof(int))
+                return true;
+            if (typeof(T) == typeof(uint))
+                return true;
+            if (typeof(T) == typeof(long))
+                return true;
+            if (typeof(T) == typeof(ulong))
+                return true;
+            if (typeof(T) == typeof(IntPtr))
+                return true;
+            if (typeof(T) == typeof(UIntPtr))
+                return true;
+
+            return IsReferenceFreeCoreSlow(typeof(T));
+        }
+
+        private static bool IsReferenceFreeCoreSlow(Type type)
         {
             if (type.GetTypeInfo().IsPrimitive) // This is hopefully the common case. All types that return true for this are value types w/out embedded references.
                 return true;
@@ -69,17 +100,10 @@ namespace System
             {
                 if (field.IsStatic)
                     continue;
-                if (!IsReferenceFree(field.FieldType))
+                if (!IsReferenceFreeCoreSlow(field.FieldType))
                     return false;
             }
             return true;
-        }
-
-        // Array header sizes are a runtime implementation detail and aren't the same across all runtimes. (The CLR made a tweak after 4.5, and Mono has an extra Bounds pointer.)
-        private static IntPtr MeasureArrayAdjustment<T>()
-        {
-            T[] sampleArray = new T[1];
-            return Unsafe.ByteOffset<T>(ref Unsafe.As<Pinnable<T>>(sampleArray).Data, ref sampleArray[0]);
         }
 
         public static class PerTypeValues<T>
@@ -91,11 +115,18 @@ namespace System
             // false == not yet computed or found to be not reference free.
             // true == confirmed reference free
             //
-            public static readonly bool IsReferenceFree = IsReferenceFree(typeof(T));
+            public static readonly bool IsReferenceFree = IsReferenceFreeCore<T>();
 
             public static readonly T[] EmptyArray = new T[0];
 
-            public static readonly IntPtr ArrayAdjustment = MeasureArrayAdjustment<T>();
+            public static readonly IntPtr ArrayAdjustment = MeasureArrayAdjustment();
+
+            // Array header sizes are a runtime implementation detail and aren't the same across all runtimes. (The CLR made a tweak after 4.5, and Mono has an extra Bounds pointer.)
+            private static IntPtr MeasureArrayAdjustment()
+            {
+                T[] sampleArray = new T[1];
+                return Unsafe.ByteOffset<T>(ref Unsafe.As<Pinnable<T>>(sampleArray).Data, ref sampleArray[0]);
+            }
         }
     }
 }

@@ -835,7 +835,7 @@
   },
   {
     "Name": "System.Memory",
-    "Description": "Provides classes for efficient low-allocation access to memory.",
+    "Description": "Provides types for efficient low-allocation access to memory.",
     "CommonTypes": [
       "System.Span",
     ]
