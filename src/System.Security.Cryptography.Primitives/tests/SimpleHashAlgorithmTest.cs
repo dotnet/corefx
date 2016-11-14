@@ -146,10 +146,11 @@ namespace System.Security.Cryptography.Hashing.Tests
             }
         }
 
+#if netcoreapp11 
         [Fact]
         public void ClearIsDispose()
         {
-            using (var stream = new PositionValueStream(0))            
+            using (var stream = new PositionValueStream(0))
             using (HashAlgorithm hash = new Length32Hash())
             {
                 Assert.Throws<NullReferenceException>(() => hash.ComputeHash((Stream)null));
@@ -159,6 +160,7 @@ namespace System.Security.Cryptography.Hashing.Tests
                 Assert.Throws<ObjectDisposedException>(() => hash.ComputeHash(stream));
             }
         }
+#endif
 
         private void ArrayHash(byte[] array)
         {

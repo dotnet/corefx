@@ -158,6 +158,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
             }
         }
 
+#if netcoreapp11 
         [Fact]
         public static void Clear()
         {
@@ -169,6 +170,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Throws<NotSupportedException>(() => encryptStream.Write(new byte[] { 1, 2, 3, 4, 5 }, 0, 5));
             }
         }
+#endif
 
         [Fact]
         public static void MultipleDispose()

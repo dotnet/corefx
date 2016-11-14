@@ -519,8 +519,9 @@ namespace System.Security.Cryptography
             }
             return;
         }
-        
-        public void Clear() {
+
+        public void Clear()
+        {
             Close();
         }        
 

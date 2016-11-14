@@ -20,6 +20,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
             }
         }
 
+#if netcoreapp11 
         [Fact]
         public static void TestClearIsDispose()
         {
@@ -34,6 +35,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Symmetric
                 Assert.True(t.IsDisposed);
             }
         }
+#endif
 
         [Fact]
         public static void TestKey()
