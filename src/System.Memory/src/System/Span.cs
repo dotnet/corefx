@@ -259,13 +259,7 @@ namespace System
         /// </summary>
         public static bool operator ==(Span<T> left, Span<T> right)
         {
-            if (left._length != right._length)
-                return false;
-
-            if (!Unsafe.AreSame<T>(ref left.DangerousGetPinnableReference(), ref right.DangerousGetPinnableReference()))
-                return false;
-
-            return true;
+            return left._length == right._length && Unsafe.AreSame<T>(ref left.DangerousGetPinnableReference(), ref right.DangerousGetPinnableReference());
         }
 
         /// <summary>
