@@ -225,10 +225,8 @@ namespace System.Linq
             {
                 var builder = new LargeArrayBuilder<TSource>(initialize: true);
 
-                TSource[] source = _source;
-                for (int i = 0; i < source.Length; i++)
+                foreach (TSource item in _source)
                 {
-                    TSource item = source[i];
                     if (_predicate(item))
                     {
                         builder.Add(item);
@@ -242,10 +240,8 @@ namespace System.Linq
             {
                 var list = new List<TSource>();
 
-                TSource[] source = _source;
-                for (int i = 0; i < source.Length; i++)
+                foreach (TSource item in _source)
                 {
-                    TSource item = source[i];
                     if (_predicate(item))
                     {
                         list.Add(item);
@@ -405,10 +401,8 @@ namespace System.Linq
             {
                 var builder = new LargeArrayBuilder<TResult>(initialize: true);
 
-                TSource[] source = _source;
-                for (int i = 0; i < source.Length; i++)
+                foreach (TSource item in _source)
                 {
-                    TSource item = source[i];
                     if (_predicate(item))
                     {
                         builder.Add(_selector(item));
@@ -422,10 +416,8 @@ namespace System.Linq
             {
                 var list = new List<TResult>();
 
-                TSource[] source = _source;
-                for (int i = 0; i < source.Length; i++)
+                foreach (TSource item in _source)
                 {
-                    TSource item = source[i];
                     if (_predicate(item))
                     {
                         list.Add(_selector(item));
