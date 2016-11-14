@@ -16,7 +16,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int ConsumedStack => 2;
         public override int ProducedStack => 1;
         public override string InstructionName => "Equal";
-        
+
         private EqualInstruction() { }
 
         private sealed class EqualBoolean : EqualInstruction
@@ -532,7 +532,7 @@ namespace System.Linq.Expressions.Interpreter
         public static Instruction Create(Type type, bool liftedToNull)
         {
             // Boxed enums can be unboxed as their underlying types:
-            Type underlyingType = type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : TypeUtils.GetNonNullableType(type);
+            Type underlyingType = type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : type.GetNonNullableType();
 
             if (liftedToNull)
             {

@@ -19,7 +19,7 @@ namespace System.Linq.Expressions
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
     [DebuggerTypeProxy(typeof(LambdaExpressionProxy))]
-    public abstract class LambdaExpression : Expression, IParameterProvider
+    public abstract partial class LambdaExpression : Expression, IParameterProvider
     {
         private readonly Expression _body;
 
@@ -67,7 +67,7 @@ namespace System.Linq.Expressions
 
         /// <summary>
         /// Gets the value that indicates if the lambda expression will be compiled with
-        /// tail call optimization. 
+        /// tail call optimization.
         /// </summary>
         public bool TailCall => TailCallCore;
 
@@ -153,7 +153,7 @@ namespace System.Linq.Expressions
     /// <remarks>
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
-    public class Expression<TDelegate> : LambdaExpression
+    public partial class Expression<TDelegate> : LambdaExpression
     {
         internal Expression(Expression body)
             : base(body)
@@ -479,7 +479,7 @@ namespace System.Linq.Expressions
 #else
                 create = typeof(ExpressionCreator<>).MakeGenericType(delegateType).GetMethod("CreateExpressionFunc", BindingFlags.Static | BindingFlags.Public);
 #endif
-                if (TypeUtils.CanCache(delegateType))
+                if (delegateType.CanCache())
                 {
                     factories[delegateType] = fastPath = (Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>)create.CreateDelegate(typeof(Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>));
                 }
@@ -766,7 +766,7 @@ namespace System.Linq.Expressions
             if (!ldc.TryGetValue(delegateType, out mi))
             {
                 mi = delegateType.GetMethod("Invoke");
-                if (TypeUtils.CanCache(delegateType))
+                if (delegateType.CanCache())
                 {
                     ldc[delegateType] = mi;
                 }
@@ -903,7 +903,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="System.Type"/> object that represents a generic System.Action delegate type that has specific type arguments. 
+        /// Creates a <see cref="System.Type"/> object that represents a generic System.Action delegate type that has specific type arguments.
         /// </summary>
         /// <param name="typeArgs">An array of <see cref="System.Type"/> objects that specify the type arguments for the System.Action delegate type.</param>
         /// <returns>The type of a System.Action delegate that has the specified type arguments.</returns>

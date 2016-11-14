@@ -122,11 +122,6 @@ namespace System.Net.Security
                 throw new ArgumentNullException(nameof(serverCertificate));
             }
 
-            if ((int)enabledSslProtocols == 0)
-            {
-                throw new ArgumentException(SR.Format(SR.net_invalid_enum, "SslProtocolType"), "sslProtocolType");
-            }
-
             if (clientCertificates == null)
             {
                 clientCertificates = new X509CertificateCollection();
@@ -1441,7 +1436,7 @@ namespace System.Net.Security
                 {
                     if (e != null)
                     {
-                        asyncRequest.CompleteWithError(e);
+                        asyncRequest.CompleteUserWithError(e);
                     }
                     else
                     {
@@ -1725,7 +1720,7 @@ namespace System.Net.Security
             }
             catch (Exception e)
             {
-                request.CompleteWithError(e);
+                request.CompleteUserWithError(e);
             }
         }
 
