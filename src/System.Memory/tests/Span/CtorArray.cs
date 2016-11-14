@@ -83,9 +83,9 @@ namespace System.SpanTests
         [Fact]
         public static void CtorArrayNullArray()
         {
-            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null));
-            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null, 0));
-            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null).DontBox());
+            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null, 0).DontBox());
+            Assert.Throws<ArgumentNullException>(() => new Span<int>((int[])null, 0, 0).DontBox());
         }
 
         [Fact]
@@ -93,9 +93,9 @@ namespace System.SpanTests
         {
             // Cannot pass variant array, if array type is not a valuetype.
             string[] a = { "Hello" };
-            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a));
-            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a, 0));
-            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a, 0, a.Length));
+            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a).DontBox());
+            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a, 0).DontBox());
+            Assert.Throws<ArrayTypeMismatchException>(() => new Span<object>(a, 0, a.Length).DontBox());
         }
 
         [Fact]

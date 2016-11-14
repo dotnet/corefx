@@ -31,14 +31,14 @@ namespace System.SpanTests
         public static void CtorArrayIntNegativeStart()
         {
             int[] a = new int[3];
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Span<int>(a, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Span<int>(a, -1).DontBox());
         }
 
         [Fact]
         public static void CtorArrayIntStartTooLarge()
         {
             int[] a = new int[3];
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Span<int>(a, 4));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Span<int>(a, 4).DontBox());
         }
 
         [Fact]
