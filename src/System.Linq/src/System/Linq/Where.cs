@@ -32,7 +32,7 @@ namespace System.Linq
             if (array != null)
             {
                 return array.Length == 0 ?
-                    EmptyPartition<TSource>.Instance.AsEnumerable() :
+                    (IEnumerable<TSource>)EmptyPartition<TSource>.Instance :
                     new WhereArrayIterator<TSource>(array, predicate);
             }
 
