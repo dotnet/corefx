@@ -20,11 +20,11 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 
         protected override int BlockSize { get { return 128; } }
 
-#if netcoreapp11
+#if netstandard17
         [Fact]
         public void ProduceLegacyHmacValues()
         {
-            using (h = new HMACSHA512())
+            using (var h = new HMACSHA512())
             {
                 Assert.False(h.ProduceLegacyHmacValues);
                 h.ProduceLegacyHmacValues = false; // doesn't throw
