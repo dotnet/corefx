@@ -107,7 +107,28 @@ namespace System.Linq
                 base.Dispose();
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
@@ -183,7 +204,7 @@ namespace System.Linq
 
             public WhereArrayIterator(TSource[] source, Func<TSource, bool> predicate)
             {
-                Debug.Assert(source != null);
+                Debug.Assert(source != null && source.Length > 0);
                 Debug.Assert(predicate != null);
                 _source = source;
                 _predicate = predicate;
@@ -194,7 +215,28 @@ namespace System.Linq
                 return new WhereArrayIterator<TSource>(_source, _predicate);
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
@@ -276,7 +318,29 @@ namespace System.Linq
                 return new WhereListIterator<TSource>(_source, _predicate);
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = 0; i < _source.Count; i++)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
@@ -355,7 +419,7 @@ namespace System.Linq
 
             public WhereSelectArrayIterator(TSource[] source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
             {
-                Debug.Assert(source != null);
+                Debug.Assert(source != null && source.Length > 0);
                 Debug.Assert(predicate != null);
                 Debug.Assert(selector != null);
                 _source = source;
@@ -368,7 +432,28 @@ namespace System.Linq
                 return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
@@ -448,7 +533,29 @@ namespace System.Linq
                 return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = 0; i < _source.Count; i++)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
@@ -547,7 +654,28 @@ namespace System.Linq
                 base.Dispose();
             }
 
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : EnumerableHelpers.Count(this);
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
 
             public override bool MoveNext()
             {
