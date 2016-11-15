@@ -13,6 +13,8 @@ using System.Threading;
 using Windows.Foundation;
 using Windows.Storage.Streams;
 
+// Type aliases cannot match existing typenames. In this file our code is in System.IO, which would
+// create two MemoryStream definitions that are in scope if we defined as MemoryStream.
 using SREMemoryStream = System_Runtime_Extensions::System.IO.MemoryStream;
 
 namespace System.IO
