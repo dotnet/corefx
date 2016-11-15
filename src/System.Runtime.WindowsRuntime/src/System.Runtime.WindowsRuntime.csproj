@@ -67,7 +67,7 @@
       <TargetGroup>uap101aot</TargetGroup>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj">
-      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
+      <UndefineProperties>TargetGroup</UndefineProperties>
       <Aliases>System_Runtime_Extensions</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj">
