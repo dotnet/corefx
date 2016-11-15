@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -137,6 +138,75 @@ namespace System.Diagnostics.Tests
             }
 
             Assert.True(_process.WorkingSet > 0);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Process_StartInvalidNamesTest()
+        {
+            Assert.Throws<InvalidOperationException>(() => Process.Start(null, "userName", new SecureString(), "thisDomain"));
+            Assert.Throws<InvalidOperationException>(() => Process.Start(string.Empty, "userName", new SecureString(), "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start("exe", "userName", new SecureString(), "thisDomain"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Process_StartWithInvalidUserNamePassword()
+        {
+            SecureString password = AsSecureString("Value");
+
+            Assert.Throws<Win32Exception>(() => Process.Start("exe", "userName", password, "thisDomain"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Process_StartTest()
+        {
+            string currentProcessName = $"{Process.GetCurrentProcess().ProcessName}.exe";
+            string userName = string.Empty;
+            string domain = "thisDomain";
+            SecureString password = AsSecureString("Value");
+
+            Process p = Process.Start(currentProcessName, userName, password, domain);
+            Assert.NotNull(p);
+            Assert.Equal(currentProcessName, p.StartInfo.FileName);
+            Assert.Equal(userName, p.StartInfo.UserName);
+            Assert.Same(password, p.StartInfo.Password);
+            Assert.Equal(domain, p.StartInfo.Domain);
+            p.Kill();
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Process_StartWithArgumentsTest()
+        {
+            string currentProcessName = $"{Process.GetCurrentProcess().ProcessName}.exe";
+            string userName = string.Empty;
+            string domain = "thisDomain";
+            string arguments = "-xml testResults.xml";
+            SecureString password = AsSecureString("Value");
+
+            Process p = Process.Start(currentProcessName, arguments, userName, password, domain);
+            Assert.NotNull(p);
+            Assert.Equal(currentProcessName, p.StartInfo.FileName);
+            Assert.Equal(arguments, p.StartInfo.Arguments);
+            Assert.Equal(userName, p.StartInfo.UserName);
+            Assert.Same(password, p.StartInfo.Password);
+            Assert.Equal(domain, p.StartInfo.Domain);
+            p.Kill();
+        }
+
+        private SecureString AsSecureString(string str)
+        {
+            char [] charValues = str.ToCharArray();
+            SecureString secureString = new SecureString();
+
+            foreach (var ch in charValues)
+            {
+                secureString.AppendChar(ch);
+            }
+
+            return secureString;
         }
     }
 }

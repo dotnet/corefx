@@ -107,6 +107,10 @@ namespace System.Diagnostics
         public static System.Diagnostics.Process Start(System.Diagnostics.ProcessStartInfo startInfo) { throw null; }
         public static System.Diagnostics.Process Start(string fileName) { throw null; }
         public static System.Diagnostics.Process Start(string fileName, string arguments) { throw null; }
+        [System.CLSCompliant(false)]
+        public static System.Diagnostics.Process Start(string fileName, string userName, System.Security.SecureString password, string domain) { throw null; }
+        [System.CLSCompliant(false)]
+        public static System.Diagnostics.Process Start(string fileName, string arguments, string userName, System.Security.SecureString password, string domain) { throw null; }
         public void WaitForExit() { }
         public bool WaitForExit(int milliseconds) { throw null; }
     }

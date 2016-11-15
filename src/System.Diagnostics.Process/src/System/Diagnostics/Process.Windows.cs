@@ -45,6 +45,28 @@ namespace System.Diagnostics
             return list.ToArray();
         }
 
+        [System.CLSCompliant(false)]
+        public static Process Start(string fileName, string userName, SecureString password, string domain)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);            
+            startInfo.UserName = userName;
+            startInfo.Password = password;
+            startInfo.Domain = domain;
+            startInfo.UseShellExecute = false;
+            return Start(startInfo);
+        }
+
+        [System.CLSCompliant(false)]
+        public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);                        
+            startInfo.UserName = userName;
+            startInfo.Password = password;
+            startInfo.Domain = domain;
+            startInfo.UseShellExecute = false;            
+            return Start(startInfo);
+        }
+
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
         /// special mode by enabling the native property SeDebugPrivilege on the current thread.
