@@ -45,7 +45,7 @@ namespace System.Diagnostics
             return list.ToArray();
         }
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(fileName);            
@@ -56,7 +56,7 @@ namespace System.Diagnostics
             return Start(startInfo);
         }
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);                        

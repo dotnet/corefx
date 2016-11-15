@@ -37,13 +37,13 @@ namespace System.Diagnostics
             // Nop.
         }
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
             throw new PlatformNotSupportedException();
         }
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
         { 
             throw new PlatformNotSupportedException();

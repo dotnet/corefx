@@ -80,7 +80,7 @@ namespace System.Diagnostics
             }
         }
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public SecureString Password
         {
             get { return _password; }

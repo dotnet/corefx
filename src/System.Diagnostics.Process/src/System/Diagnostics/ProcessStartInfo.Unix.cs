@@ -39,7 +39,7 @@ namespace System.Diagnostics
 
         public string[] Verbs => Array.Empty<string>();
 
-        [System.CLSCompliant(false)]
+        [CLSCompliant(false)]
         public SecureString Password
         {
             get { throw new PlatformNotSupportedException(); }
