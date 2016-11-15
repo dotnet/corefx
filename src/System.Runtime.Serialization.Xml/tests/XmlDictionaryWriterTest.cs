@@ -325,9 +325,7 @@ public static class XmlDictionaryWriterTest
         writer2.Flush();
 
         byte[] doc1 = ms1.ToArray();
-        File.WriteAllBytes("doc1.txt", doc1);
         byte[] doc2 = ms2.ToArray();
-        File.WriteAllBytes("doc2.txt", doc2);
         CompareArrays(doc1, 0, doc2, 0, doc1.Length);
     }
     private static bool ReadTest(MemoryStream ms, Encoding encoding, ReaderWriterFactory.ReaderWriterType rwType, byte[] byteArray)
@@ -467,11 +465,7 @@ public static class XmlDictionaryWriterTest
     {
         for (int i = 0; i < count; i++)
         {
-            if (array1[i + offset1] != array2[i + offset2])
-            {
-                throw new Exception(String.Format("Error, arrays different at position {0} (array1[{1}]={2}, array2[{3}]={4})",
-                    i, i + offset1, array1[i + offset1], i + offset2, array2[i + offset2]));
-            }
+            Assert.Equal(array1[i + offset1], array2[i + offset2]);
         }
     }
 

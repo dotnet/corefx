@@ -4065,7 +4065,7 @@ public class AttributedURI
     [XmlText]
     public string Value;
 
-    public bool[] booleanValues = new bool[] { false, true, false, true, true };
+    public bool[] BooleanValues = new bool[] { false, true, false, true, true };
 }
 
 public class SerializeIm : XmlSerializerImplementation
@@ -4084,21 +4084,21 @@ public class AssemblyAttrTestClass
 
 public class MyXmlTextParser : IXmlTextParser
 {
-    XmlTextReader myreader;
+    private XmlTextReader _myreader;
     public MyXmlTextParser(XmlTextReader reader)
     {
-        myreader = reader;
+        _myreader = reader;
     }
     bool IXmlTextParser.Normalized
     {
         get
         {
-            return myreader.Normalization;
+            return _myreader.Normalization;
         }
 
         set
         {
-            myreader.Normalization = value;
+            _myreader.Normalization = value;
         }
     }
 
@@ -4106,12 +4106,12 @@ public class MyXmlTextParser : IXmlTextParser
     {
         get
         {
-            return myreader.WhitespaceHandling;
+            return _myreader.WhitespaceHandling;
         }
 
         set
         {
-            myreader.WhitespaceHandling = value;
+            _myreader.WhitespaceHandling = value;
         }
     }
 }
