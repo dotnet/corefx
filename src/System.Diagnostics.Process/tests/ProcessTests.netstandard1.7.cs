@@ -5,6 +5,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Principal;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -154,15 +155,15 @@ namespace System.Diagnostics.Tests
         public void Process_StartWithInvalidUserNamePassword()
         {
             SecureString password = AsSecureString("Value");
-
             Assert.Throws<Win32Exception>(() => Process.Start("exe", "userName", password, "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), WindowsIdentity.GetCurrent().Name, password, "thisDomain"));
         }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Process_StartTest()
         {
-            string currentProcessName = $"{Process.GetCurrentProcess().ProcessName}.exe";
+            string currentProcessName = GetCurrentProcessName();
             string userName = string.Empty;
             string domain = "thisDomain";
             SecureString password = AsSecureString("Value");
@@ -174,13 +175,14 @@ namespace System.Diagnostics.Tests
             Assert.Same(password, p.StartInfo.Password);
             Assert.Equal(domain, p.StartInfo.Domain);
             p.Kill();
+            password.Dispose();
         }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Process_StartWithArgumentsTest()
         {
-            string currentProcessName = $"{Process.GetCurrentProcess().ProcessName}.exe";
+            string currentProcessName = GetCurrentProcessName();
             string userName = string.Empty;
             string domain = "thisDomain";
             string arguments = "-xml testResults.xml";
@@ -194,14 +196,34 @@ namespace System.Diagnostics.Tests
             Assert.Same(password, p.StartInfo.Password);
             Assert.Equal(domain, p.StartInfo.Domain);
             p.Kill();
+            password.Dispose();
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Process_StartWithDuplicatePassword()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = "exe";
+            psi.UserName = "dummyUser";
+            psi.PasswordInClearText = "Value";
+            psi.Password = AsSecureString("Value");
+
+            Process p = new Process();
+            p.StartInfo = psi;
+            Assert.Throws<ArgumentException>(() => p.Start());
+        }
+
+        private string GetCurrentProcessName()
+        {
+            return $"{Process.GetCurrentProcess().ProcessName}.exe";
         }
 
         private SecureString AsSecureString(string str)
         {
-            char [] charValues = str.ToCharArray();
             SecureString secureString = new SecureString();
 
-            foreach (var ch in charValues)
+            foreach (var ch in str)
             {
                 secureString.AppendChar(ch);
             }

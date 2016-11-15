@@ -660,7 +660,7 @@ namespace System.Diagnostics
                     {
                         if(startInfo.Password != null && startInfo.PasswordInClearText != null)
                         {
-                            throw new ArgumentException("");
+                            throw new ArgumentException(SR.CantSetDuplicatePassword);
                         }
 
                         Interop.Advapi32.LogonFlags logonFlags = (Interop.Advapi32.LogonFlags)0;
