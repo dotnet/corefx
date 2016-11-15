@@ -44,7 +44,7 @@ namespace System.SpanTests
             Span<char> span = Span<char>.DangerousCreate(testClass, ref testClass.C1, 3);
             span.Validate<char>('b', 'c', 'd');
 
-            ref char pc1 = ref span[0];
+            ref char pc1 = ref span.DangerousGetPinnableReference();
             Assert.True(Unsafe.AreSame<char>(ref testClass.C1, ref pc1));
         }
     }

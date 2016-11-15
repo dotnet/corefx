@@ -21,7 +21,7 @@ namespace System.SpanTests
                 {
                     Span<int> span = new Span<int>(pa, 3);
                     span.Validate<int>(90, 91, 92);
-                    Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>(pa), ref span[0]));
+                    Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>(pa), ref span.DangerousGetPinnableReference()));
                 }
             }
         }
