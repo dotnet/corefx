@@ -658,12 +658,30 @@ namespace System.Diagnostics
 
                     if (startInfo.UserName.Length != 0)
                     {
+                        if(startInfo.Password != null && startInfo.PasswordInClearText != null)
+                        {
+                            throw new ArgumentException("");
+                        }
+
                         Interop.Advapi32.LogonFlags logonFlags = (Interop.Advapi32.LogonFlags)0;
                         if (startInfo.LoadUserProfile)
                         {
                             logonFlags = Interop.Advapi32.LogonFlags.LOGON_WITH_PROFILE;
                         }
 
+                        string password = string.Empty;
+                        IntPtr secureStringPtr = IntPtr.Zero;
+                        try
+                        {
+                            if(startInfo.Password != null)
+                            {
+                                secureStringPtr = Marshal.SecureStringToGlobalAllocUnicode(startInfo.Password);
+                                password = Marshal.PtrToStringUni(secureStringPtr);
+                            }
+                            else
+                            {
+                                password = startInfo.PasswordInClearText ?? string.Empty;
+                            }
 
                         try { }
                         finally
@@ -693,8 +711,17 @@ namespace System.Diagnostics
                             if (errorCode == Interop.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
                                 throw new Win32Exception(errorCode, SR.InvalidApplication);
 
-                            throw new Win32Exception(errorCode);
+                                throw new Win32Exception(errorCode);
+                            }
                         }
+                        finally
+                        {
+                            if(secureStringPtr != IntPtr.Zero)
+                            {
+                                Marshal.ZeroFreeGlobalAllocUnicode(secureStringPtr);
+                            }
+                        }
+                        
                     }
                     else
                     {

@@ -15,7 +15,6 @@ namespace System.Diagnostics
         private string _domain;
         private string _passwordInClearText;
         private bool _loadUserProfile;
-        private SecureString _password;
 
         private const bool CaseSensitiveEnvironmentVariables = false;
 
@@ -81,11 +80,7 @@ namespace System.Diagnostics
         }
 
         [CLSCompliant(false)]
-        public SecureString Password
-        {
-            get { return _password; }
-            set { _password = value; }
-        }
+        public SecureString Password { get; set; }
 
         // CoreCLR can't correctly support UseShellExecute=true for the following reasons
         // 1. ShellExecuteEx is not supported on onecore.
