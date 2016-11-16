@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Principal;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -156,8 +155,8 @@ namespace System.Diagnostics.Tests
         public void Process_StartWithInvalidUserNamePassword()
         {
             SecureString password = AsSecureString("Value");
-            Assert.Throws<Win32Exception>(() => Process.Start("exe", "userName", password, "thisDomain"));
-            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), WindowsIdentity.GetCurrent().Name, password, "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), "userName", password, "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), Environment.UserName, password, Environment.UserDomainName));
         }
 
         [Fact]
@@ -185,7 +184,7 @@ namespace System.Diagnostics.Tests
         {
             string currentProcessName = GetCurrentProcessName();
             string userName = string.Empty;
-            string domain = "thisDomain";
+            string domain = Environment.UserDomainName;
             string arguments = "-xml testResults.xml";
             SecureString password = AsSecureString("Value");
 

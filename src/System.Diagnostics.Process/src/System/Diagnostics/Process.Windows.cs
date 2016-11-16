@@ -669,18 +669,22 @@ namespace System.Diagnostics
                             logonFlags = Interop.Advapi32.LogonFlags.LOGON_WITH_PROFILE;
                         }
 
-                        string password = string.Empty;
-                        IntPtr secureStringPtr = IntPtr.Zero;
+                        IntPtr passwordPtr = IntPtr.Zero;
                         try
                         {
                             if(startInfo.Password != null)
                             {
-                                secureStringPtr = Marshal.SecureStringToGlobalAllocUnicode(startInfo.Password);
-                                password = Marshal.PtrToStringUni(secureStringPtr);
+                                passwordPtr = Marshal.SecureStringToGlobalAllocUnicode(startInfo.Password);
                             }
                             else
                             {
-                                password = startInfo.PasswordInClearText ?? string.Empty;
+                                unsafe
+                                {
+                                    fixed (char* p = startInfo.PasswordInClearText ?? string.Empty)
+                                    {
+                                        passwordPtr = (IntPtr)p;
+                                    }
+                                }
                             }
 
                         try { }
@@ -716,9 +720,9 @@ namespace System.Diagnostics
                         }
                         finally
                         {
-                            if(secureStringPtr != IntPtr.Zero)
+                            if (passwordPtr != IntPtr.Zero)
                             {
-                                Marshal.ZeroFreeGlobalAllocUnicode(secureStringPtr);
+                                Marshal.ZeroFreeGlobalAllocUnicode(passwordPtr);
                             }
                         }
                         
