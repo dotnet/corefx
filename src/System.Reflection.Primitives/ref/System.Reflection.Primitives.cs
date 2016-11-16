@@ -26,6 +26,7 @@ namespace System.Reflection.Emit
         Cond_Branch = 3,
         Meta = 4,
         Next = 5,
+        Phi = 6,
         Return = 7,
         Throw = 8,
     }
@@ -280,6 +281,7 @@ namespace System.Reflection.Emit
     }
     public enum OpCodeType
     {
+        Annotation = 0,
         Macro = 1,
         Nternal = 2,
         Objmodel = 3,
@@ -294,6 +296,7 @@ namespace System.Reflection.Emit
         InlineI8 = 3,
         InlineMethod = 4,
         InlineNone = 5,
+        InlinePhi = 6,
         InlineR = 7,
         InlineSig = 9,
         InlineString = 10,
