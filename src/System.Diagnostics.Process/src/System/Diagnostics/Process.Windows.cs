@@ -658,7 +658,7 @@ namespace System.Diagnostics
 
                     if (startInfo.UserName.Length != 0)
                     {
-                        if(startInfo.Password != null && startInfo.PasswordInClearText != null)
+                        if (startInfo.Password != null && startInfo.PasswordInClearText != null)
                         {
                             throw new ArgumentException(SR.CantSetDuplicatePassword);
                         }
@@ -672,7 +672,7 @@ namespace System.Diagnostics
                         IntPtr passwordPtr = IntPtr.Zero;
                         try
                         {
-                            if(startInfo.Password != null)
+                            if (startInfo.Password != null)
                             {
                                 passwordPtr = Marshal.SecureStringToGlobalAllocUnicode(startInfo.Password);
                             }
@@ -686,34 +686,35 @@ namespace System.Diagnostics
                                     }
                                 }
                             }
-
-                        try { }
-                        finally
-                        {
-                            retVal = Interop.Advapi32.CreateProcessWithLogonW(
-                                    startInfo.UserName,
-                                    startInfo.Domain,
-                                    startInfo.PasswordInClearText,
-                                    logonFlags,
-                                    null,            // we don't need this since all the info is in commandLine
-                                    commandLine,
-                                    creationFlags,
-                                    environmentPtr,
-                                    workingDirectory,
-                                    startupInfo,        // pointer to STARTUPINFO
-                                    processInfo         // pointer to PROCESS_INFORMATION
-                                );
+                            try { }
+                            finally
+                            {
+                                retVal = Interop.Advapi32.CreateProcessWithLogonW(
+                                        startInfo.UserName,
+                                        startInfo.Domain,
+                                        passwordPtr,
+                                        logonFlags,
+                                        null,            // we don't need this since all the info is in commandLine
+                                        commandLine,
+                                        creationFlags,
+                                        environmentPtr,
+                                        workingDirectory,
+                                        startupInfo,        // pointer to STARTUPINFO
+                                        processInfo         // pointer to PROCESS_INFORMATION
+                                    );
+                                if (!retVal)
+                                    errorCode = Marshal.GetLastWin32Error();
+                                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
+                                    procSH.InitialSetHandle(processInfo.hProcess);
+                                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
+                                    threadSH.InitialSetHandle(processInfo.hThread);
+                            }
                             if (!retVal)
-                                errorCode = Marshal.GetLastWin32Error();
-                            if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
-                                procSH.InitialSetHandle(processInfo.hProcess);
-                            if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
-                                threadSH.InitialSetHandle(processInfo.hThread);
-                        }
-                        if (!retVal)
-                        {
-                            if (errorCode == Interop.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
-                                throw new Win32Exception(errorCode, SR.InvalidApplication);
+                            {
+                                if (errorCode == Interop.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                                {
+                                    throw new Win32Exception(errorCode, SR.InvalidApplication);
+                                }
 
                                 throw new Win32Exception(errorCode);
                             }
@@ -725,7 +726,6 @@ namespace System.Diagnostics
                                 Marshal.ZeroFreeGlobalAllocUnicode(passwordPtr);
                             }
                         }
-                        
                     }
                     else
                     {
