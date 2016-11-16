@@ -2290,7 +2290,7 @@ public static partial class DataContractJsonSerializerTests
         p2.Name = "Elizabeth";
         p2.ID = 2006;
 
-        // Serializaze the PersonV2 object
+        // Serialize the PersonV2 object
         var ser = new DataContractJsonSerializer(typeof(PersonV2));
         var ms1 = new MemoryStream();
         ser.WriteObject(ms1, p2);
@@ -2320,7 +2320,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.True(p1.ExtensionData != null, $"{nameof(p1.ExtensionData)} was null.");
         Assert.Equal(p2.Name, p1.Name);
 
-        // Serializaze the Person instance
+        // Serialize the Person instance
         var ms2 = new MemoryStream();
         ser2.WriteObject(ms2, p1);
 
