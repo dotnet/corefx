@@ -2668,6 +2668,9 @@ public static partial class DataContractSerializerTests
         Assert.Equal(DateTimeOffset.MaxValue, ((DTOContainer)deserialized.Data).nDTO);
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13699)]
+#endif
     [Fact]
     public static void DCS_ExtensionDataObjectTest()
     {
