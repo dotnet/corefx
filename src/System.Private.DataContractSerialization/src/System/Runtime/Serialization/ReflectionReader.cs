@@ -36,6 +36,11 @@ namespace System.Runtime.Serialization
             ReflectionReadMembers(xmlReader, context, memberNames, memberNamespaces, classContract, ref obj);
             obj = ResolveAdapterObject(obj, classContract);
 
+            if (Globals.TypeOfIDeserializationCallback.IsAssignableFrom(classContract.UnderlyingType))
+            {
+                XmlFormatGeneratorStatics.OnDeserializationMethod.Invoke(obj, new object[] { null });
+            }
+
             InvokeOnDeserialized(context, classContract, obj);
 
             return obj;
