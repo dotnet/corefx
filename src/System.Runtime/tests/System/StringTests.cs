@@ -1625,6 +1625,7 @@ namespace System.Tests
             // Join does nothing if array[0] is null
             yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "" };
 #endif
+
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
         }
