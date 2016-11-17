@@ -117,7 +117,6 @@
     </Compile>
     <Compile Include="AesProvider.cs" />
     <Compile Include="AesTests.cs" />
-    <Compile Include="BlockSizeValueTests.cs" />
     <Compile Include="DefaultECDsaProvider.cs" />
     <Compile Include="DefaultRSAProvider.cs" />
     <Compile Include="HashAlgorithmTest.cs" />
@@ -148,6 +147,7 @@
   <ItemGroup Condition="'$(TargetGroup)'==''">
     <Compile Include="AesManagedTests.cs" />
     <Compile Include="AsymmetricSignatureFormatterTests.cs" />
+    <Compile Include="BlockSizeValueTests.cs" />
     <Compile Include="DefaultDSAProvider.cs" />
     <Compile Include="DESProvider.cs" />
     <Compile Include="DESTests.cs" />
