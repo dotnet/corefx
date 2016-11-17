@@ -20,8 +20,6 @@ namespace System.Security.Cryptography
         public HMACSHA384()
             : this(Helpers.GenerateRandom(BlockSize))
         {
-            // change the default value of BlockSizeValue to 128 instead of 64 
-            BlockSizeValue = BlockSize; 
         }
 
         public HMACSHA384(byte[] key)
