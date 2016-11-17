@@ -728,7 +728,6 @@ namespace System.Diagnostics
                             {
                                 throw new Win32Exception(errorCode, SR.InvalidApplication);
                             }
-
                             throw new Win32Exception(errorCode);
                         }
                     }
@@ -756,8 +755,9 @@ namespace System.Diagnostics
                         if (!retVal)
                         {
                             if (errorCode == Interop.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                            {
                                 throw new Win32Exception(errorCode, SR.InvalidApplication);
-
+                            }
                             throw new Win32Exception(errorCode);
                         }
                     }
