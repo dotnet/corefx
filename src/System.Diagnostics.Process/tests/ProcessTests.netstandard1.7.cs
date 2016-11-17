@@ -147,7 +147,7 @@ namespace System.Diagnostics.Tests
         {
             Assert.Throws<InvalidOperationException>(() => Process.Start(null, "userName", new SecureString(), "thisDomain"));
             Assert.Throws<InvalidOperationException>(() => Process.Start(string.Empty, "userName", new SecureString(), "thisDomain"));
-            Assert.Throws<Win32Exception>(() => Process.Start("exe", "userName", new SecureString(), "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start("exe", string.Empty, new SecureString(), "thisDomain"));
         }
 
         [Fact]
