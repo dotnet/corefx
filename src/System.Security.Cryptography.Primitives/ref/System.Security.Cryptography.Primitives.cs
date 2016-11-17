@@ -110,6 +110,7 @@ namespace System.Security.Cryptography
     public abstract partial class HMAC : System.Security.Cryptography.KeyedHashAlgorithm
     {
         protected HMAC() { }
+        protected int BlockSizeValue { get { return default(int); } set {} }
         public string HashName { get { throw null; } set { } }
         public override byte[] Key { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
