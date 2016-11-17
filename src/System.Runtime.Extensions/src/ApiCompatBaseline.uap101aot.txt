@@ -46,6 +46,8 @@ MembersMustExist : Member 'System.Convert.ToString(System.String, System.IFormat
 MembersMustExist : Member 'System.Convert.ToUInt16(System.DateTime)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Convert.ToUInt32(System.DateTime)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Convert.ToUInt64(System.DateTime)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.LoaderOptimization' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.LoaderOptimizationAttribute' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Math.BigMul(System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Math.Clamp(System.Byte, System.Byte, System.Byte)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Math.Clamp(System.Decimal, System.Decimal, System.Decimal)' does not exist in the implementation but it does exist in the contract.
