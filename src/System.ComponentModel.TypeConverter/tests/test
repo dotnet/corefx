@@ -1,0 +1,346 @@
+Microsoft (R) Build Engine версии 14.0.25420.1
+(C) Корпорация Майкрософт (Microsoft Corporation). Все права защищены.
+
+Сборка начата 18.11.2016 0:11:54.
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Целевой объект "AssignProjectConfiguration", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\dir.targets (20,34)", не существует в проекте и будет пропущен.
+Целевой объект "CoreCompile", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\ReferenceAssemblies.targets (41,120)", не существует в проекте и будет пропущен.
+Целевой объект "CoreCompile", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\codeAnalysis.targets (52,45)", не существует в проекте и будет пропущен.
+Целевой объект "CopyFilesToOutputDirectory", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\codeOptimization.targets (12,69)", не существует в проекте и будет пропущен.
+Целевой объект "AfterBuild", указанный в атрибуте AfterTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\codeOptimization.targets (12,43)", не существует в проекте и будет пропущен.
+Целевой объект "CoreCompile", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\codeOptimization.targets (51,49)", не существует в проекте и будет пропущен.
+Целевой объект "ResolveReferences", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\FrameworkTargeting.targets (47,7)", не существует в проекте и будет пропущен.
+Целевой объект "ResolveAssemblyReferences", указанный в атрибуте AfterTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\FrameworkTargeting.targets (93,54)", не существует в проекте и будет пропущен.
+Целевой объект "CoreCompile", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\FrameworkTargeting.targets (116,46)", не существует в проекте и будет пропущен.
+Целевой объект "AssignProjectConfiguration", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\FrameworkTargeting.targets (125,62)", не существует в проекте и будет пропущен.
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Целевой объект "AfterBuild", указанный в атрибуте AfterTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\sign.targets (38,28)", не существует в проекте и будет пропущен.
+Целевой объект "AfterBuild", указанный в атрибуте AfterTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\sign.targets (42,11)", не существует в проекте и будет пропущен.
+Целевой объект "AssignProjectConfiguration", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\PackageLibs.targets (13,49)", не существует в проекте и будет пропущен.
+Целевой объект "ResolveProjectReferences", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\src\dir.targets (18,30)", не существует в проекте и будет пропущен.
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj" в узле 1 (целевые объекты Test).
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj" (1) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\pkg\System.ComponentModel.TypeConverter.pkgproj" (2) в узле 1 (целевые объекты GetPackageAssets).
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\pkg\System.ComponentModel.TypeConverter.pkgproj" (2) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\ref\System.ComponentModel.TypeConverter.csproj" (3) в узле 1 (целевые объекты Build).
+GetLatestCommitHash:
+  git rev-parse HEAD 2>&1
+  Выход из команды "git rev-parse HEAD 2>&1" с кодом 9009.
+GenerateAssemblyInfo:
+Целевой объект "GenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CoreCompile:
+Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+OpenSourceSign:
+Целевой объект "OpenSourceSign" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CopyFilesToOutputDirectory:
+  System.ComponentModel.TypeConverter -> C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.dll
+GetPackagingOutputs:
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.BuiltProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.DebugSymbolsProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.pdb -> System.ComponentModel.TypeConverter.pdb
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter._GetProjectArchitecture : neutral -> 
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\ref\System.ComponentModel.TypeConverter.csproj" завершена (целевые объекты Build).
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\pkg\System.ComponentModel.TypeConverter.pkgproj" (2) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.builds" (4) в узле 1 (целевые объекты Build).
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.builds" (4) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.csproj" (5) в узле 1 (целевые объекты Build).
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.csproj" (5) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\ref\System.ComponentModel.TypeConverter.csproj" (3:2) в узле 1 (целевые объекты по умолчанию).
+GetLatestCommitHash:
+  git rev-parse HEAD 2>&1
+  Выход из команды "git rev-parse HEAD 2>&1" с кодом 9009.
+GenerateAssemblyInfo:
+Целевой объект "GenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CoreCompile:
+Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+OpenSourceSign:
+Целевой объект "OpenSourceSign" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CopyFilesToOutputDirectory:
+  System.ComponentModel.TypeConverter -> C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.dll
+GetPackagingOutputs:
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.BuiltProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.DebugSymbolsProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.pdb -> System.ComponentModel.TypeConverter.pdb
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter._GetProjectArchitecture : neutral -> 
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\ref\System.ComponentModel.TypeConverter.csproj" завершена (целевые объекты по умолчанию).
+CoreResGen:
+  Отсутствуют ресурсы, устаревшие по отношению к файлам своих источников. Пропуск формирования ресурсов.
+GenerateResourcesSource:
+Целевой объект "GenerateResourcesSource" пропускается, так как все выходные файлы актуальны по отношению к входным.
+GetLatestCommitHash:
+  git rev-parse HEAD 2>&1
+  Выход из команды "git rev-parse HEAD 2>&1" с кодом 9009.
+GenerateAssemblyInfo:
+Целевой объект "GenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CoreCompile:
+Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+OpenSourceSign:
+Целевой объект "OpenSourceSign" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CopyFilesToOutputDirectory:
+  System.ComponentModel.TypeConverter -> C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\System.ComponentModel.TypeConverter.dll
+GetPackagingOutputs:
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.BuiltProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.DebugSymbolsProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\System.ComponentModel.TypeConverter.pdb -> System.ComponentModel.TypeConverter.pdb
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter._GetProjectArchitecture : neutral -> 
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.csproj" завершена (целевые объекты Build).
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Проект "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.builds" (4) выполняет сборку "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.csproj" (5:2) в узле 1 (целевые объекты Build).
+CoreResGen:
+  Отсутствуют ресурсы, устаревшие по отношению к файлам своих источников. Пропуск формирования ресурсов.
+GenerateResourcesSource:
+Целевой объект "GenerateResourcesSource" пропускается, так как все выходные файлы актуальны по отношению к входным.
+GetLatestCommitHash:
+  git rev-parse HEAD 2>&1
+  Выход из команды "git rev-parse HEAD 2>&1" с кодом 9009.
+GenerateAssemblyInfo:
+Целевой объект "GenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CoreCompile:
+Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+OpenSourceSign:
+Целевой объект "OpenSourceSign" пропускается, так как все выходные файлы актуальны по отношению к входным.
+CopyFilesToOutputDirectory:
+  System.ComponentModel.TypeConverter -> C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\net463\System.ComponentModel.TypeConverter.dll
+GetPackagingOutputs:
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.BuiltProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\net463\System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter.DebugSymbolsProjectOutputGroup : C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\net463\System.ComponentModel.TypeConverter.pdb -> System.ComponentModel.TypeConverter.pdb
+  System.ComponentModel.TypeConverter : System.ComponentModel.TypeConverter._GetProjectArchitecture : neutral -> 
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.csproj" завершена (целевые объекты Build).
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System.ComponentModel.TypeConverter.builds" завершена (целевые объекты Build).
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+Целевой объект "BuildAllProjects", указанный в атрибуте BeforeTargets для "C:\Users\Alex\Documents\Home\corefx\Tools\versioning.targets (229,11)", не существует в проекте и будет пропущен.
+GetPkgProjPackageDependencies:
+Целевой объект "GetPkgProjPackageDependencies" пропускается из-за отсутствия входных данных.
+GetPkgProjPackageDependencies:
+Целевой объект "GetPkgProjPackageDependencies" пропускается из-за отсутствия входных данных.
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\pkg\System.ComponentModel.TypeConverter.pkgproj" завершена (целевые объекты GetPackageAssets).
+ResolvePkgProjReferences:
+  Resolved compile assets from .NETStandard,Version=v1.7: C:\Users\Alex\Documents\Home\corefx\bin\ref\System.ComponentModel.TypeConverter\4.2.0.0\System.ComponentModel.TypeConverter.dll
+  Resolved runtime assets from .NETCoreApp,Version=v1.1: C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\System.ComponentModel.TypeConverter.dll;C:\Users\Alex\Documents\Home\corefx\bin\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter\System.ComponentModel.TypeConverter.pdb
+ResolveNuGetPackages:
+  Excluding C:\Users\Alex\Documents\Home\corefx\packages/System.ComponentModel.TypeConverter\4.4.0-beta-24715-03\ref\netstandard1.7\System.ComponentModel.TypeConverter.dll; from package references since the same file is provided by a project reference.
+RunTestsForProject:
+  Generating C:\Users\Alex\Documents\Home\corefx\bin//TestDependencies/System.ComponentModel.TypeConverter.Tests-AnyOS.AnyCPU.Debug.default.netcoreapp1.1.dependencylist.txt
+  Test Command lines = call CoreRun.exe xunit.console.netcore.exe System.ComponentModel.TypeConverter.Tests.dll  -xml testResults.xml -notrait Benchmark=true -notrait category=nonnetcoreapp1.1tests  -notrait category=OuterLoop -notrait category=failing -notrait category=nonwindowstests
+  Wrote Windows-compatible test execution script to C:\Users\Alex\Documents\Home\corefx\bin/tests/AnyOS.AnyCPU.Debug/System.ComponentModel.TypeConverter.Tests/default.netcoreapp1.1//RunTests.cmd
+  C:\Users\Alex\Documents\Home\corefx\bin/tests/AnyOS.AnyCPU.Debug/System.ComponentModel.TypeConverter.Tests/default.netcoreapp1.1//RunTests.cmd C:\Users\Alex\Documents\Home\corefx\packages/
+  Using C:\Users\Alex\Documents\Home\corefx\packages\ as folder for resolving package dependencies.
+  Executing in C:\Users\Alex\Documents\Home\corefx\bin\tests\AnyOS.AnyCPU.Debug\System.ComponentModel.TypeConverter.Tests\default.netcoreapp1.1\ 
+  Hard linking dependent files... 
+  Finished linking needed files, moving to running tests.
+  Running tests... Start time:  0:11:59,49
+  Command(s):
+  call CoreRun.exe xunit.console.netcore.exe System.ComponentModel.TypeConverter.Tests.dll  -xml testResults.xml -notrait Benchmark=true -notrait category=nonnetcoreapp1.1tests  -notrait category=OuterLoop -notrait category=failing -notrait category=nonwindowstests
+  xUnit.net console test runner (64-bit .NET Core)
+  Copyright (C) 2014 Outercurve Foundation.
+  
+  Discovering: System.ComponentModel.TypeConverter.Tests
+  Discovered:  System.ComponentModel.TypeConverter.Tests
+  Starting:    System.ComponentModel.TypeConverter.Tests
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(width: 3,402823E+38, height: 3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(73,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertFromString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(101,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(width: -3,402823E+38, height: 3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(73,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertFromString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(101,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(width: 3,402823E+38, height: -3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(73,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertFromString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(101,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(width: -3,402823E+38, height: -3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(73,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertFromString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(101,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFrom(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(width: 3,402823E+38, height: 3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                   тЖУ (pos 1)
+        Expected: 3,40282347E+38, 3,40282347E+38
+        Actual:   3.40282347E+38, 3.40282347E+38
+                   тЖС (pos 1)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(252,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(width: -3,402823E+38, height: 3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                    тЖУ (pos 2)
+        Expected: -3,40282347E+38, 3,40282347E+38
+        Actual:   -3.40282347E+38, 3.40282347E+38
+                    тЖС (pos 2)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(252,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(width: 3,402823E+38, height: -3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                   тЖУ (pos 1)
+        Expected: 3,40282347E+38, -3,40282347E+38
+        Actual:   3.40282347E+38, -3.40282347E+38
+                   тЖС (pos 1)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(252,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(width: -3,402823E+38, height: -3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                    тЖУ (pos 2)
+        Expected: -3,40282347E+38, -3,40282347E+38
+        Actual:   -3.40282347E+38, -3.40282347E+38
+                    тЖС (pos 2)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(252,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertToInvariantString(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(width: 3,402823E+38, height: 3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(75,0): at System.ComponentModel.TypeConverter.ConvertFromInvariantString(String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(207,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(width: -3,402823E+38, height: 3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(75,0): at System.ComponentModel.TypeConverter.ConvertFromInvariantString(String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(207,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(width: 3,402823E+38, height: -3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(75,0): at System.ComponentModel.TypeConverter.ConvertFromInvariantString(String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(207,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(width: -3,402823E+38, height: -3,402823E+38) [FAIL]
+        System.Exception : 40282347E+38 is not a valid value for Single.
+        ---- System.OverflowException : Value was either too large or too small for a Single.
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(104,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\Drawing\SizeFConverter.cs(61,0): at System.Drawing.SizeFConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(107,0): at System.ComponentModel.TypeConverter.ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\TypeConverter.cs(75,0): at System.ComponentModel.TypeConverter.ConvertFromInvariantString(String text)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(207,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertFromInvariantString(Single width, Single height)
+           ----- Inner Stack Trace -----
+              at System.Number.ParseSingle(String value, NumberStyles options, NumberFormatInfo numfmt)
+              at System.Single.Parse(String s, NumberStyles style, IFormatProvider provider)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\SingleConverter.cs(51,0): at System.ComponentModel.SingleConverter.FromString(String value, NumberFormatInfo formatInfo)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\src\System\ComponentModel\BaseNumberConverter.cs(99,0): at System.ComponentModel.BaseNumberConverter.ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(width: 3,402823E+38, height: 3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                   тЖУ (pos 1)
+        Expected: 3,40282347E+38, 3,40282347E+38
+        Actual:   3.40282347E+38, 3.40282347E+38
+                   тЖС (pos 1)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(78,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertToString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(139,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(width: -3,402823E+38, height: 3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                    тЖУ (pos 2)
+        Expected: -3,40282347E+38, 3,40282347E+38
+        Actual:   -3.40282347E+38, 3.40282347E+38
+                    тЖС (pos 2)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(78,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertToString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(139,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(width: 3,402823E+38, height: -3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                   тЖУ (pos 1)
+        Expected: 3,40282347E+38, -3,40282347E+38
+        Actual:   3.40282347E+38, -3.40282347E+38
+                   тЖС (pos 1)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(78,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertToString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(139,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(Single width, Single height)
+     System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(width: -3,402823E+38, height: -3,402823E+38) [FAIL]
+        Assert.Equal() Failure
+                    тЖУ (pos 2)
+        Expected: -3,40282347E+38, -3,40282347E+38
+        Actual:   -3.40282347E+38, -3.40282347E+38
+                    тЖС (pos 2)
+        Stack Trace:
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\StringTypeConverterTestBase.cs(78,0): at System.ComponentModel.TypeConverterTests.StringTypeConverterTestBase`1.TestConvertToString(T value, String str)
+           C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\Drawing\SizeFConverterTests.cs(139,0): at System.ComponentModel.TypeConverterTests.SizeFConverterTests.ConvertTo(Single width, Single height)
+  Finished:    System.ComponentModel.TypeConverter.Tests
+  
+  === TEST EXECUTION SUMMARY ===
+C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(243,5): warning :    System.ComponentModel.TypeConverter.Tests  Total: 5781, Errors: 0, Failed: 16, Skipped: 0, Time: 0,820s [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+  Предыдущая ошибка преобразована в предупреждение, так как задача вызывалась с атрибутом ContinueOnError=true.
+  Finished running tests.  End time= 0:12:01,24, Exit code = 1
+C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(243,5): warning MSB3073: выход из команды "C:\Users\Alex\Documents\Home\corefx\bin/tests/AnyOS.AnyCPU.Debug/System.ComponentModel.TypeConverter.Tests/default.netcoreapp1.1//RunTests.cmd C:\Users\Alex\Documents\Home\corefx\packages/" с кодом 1. [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+  Предыдущая ошибка преобразована в предупреждение, так как задача вызывалась с атрибутом ContinueOnError=true.
+  Сборка продолжается, так как выражение "ContinueOnError" для задачи "Exec" равно "true".
+C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(254,5): error : One or more tests failed while running tests from 'System.ComponentModel.TypeConverter.Tests' please check log for details! [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+Сборка проекта "C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj" завершена (целевые объекты Test) с ошибкой.
+
+Ошибка сборки.
+
+"C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj" (целевой объект Test ) (1) ->
+(Целевой объект RunTestsForProject) -> 
+  C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(243,5): warning :    System.ComponentModel.TypeConverter.Tests  Total: 5781, Errors: 0, Failed: 16, Skipped: 0, Time: 0,820s [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+  C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(243,5): warning MSB3073: выход из команды "C:\Users\Alex\Documents\Home\corefx\bin/tests/AnyOS.AnyCPU.Debug/System.ComponentModel.TypeConverter.Tests/default.netcoreapp1.1//RunTests.cmd C:\Users\Alex\Documents\Home\corefx\packages/" с кодом 1. [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+
+
+"C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj" (целевой объект Test ) (1) ->
+(Целевой объект RunTestsForProject) -> 
+  C:\Users\Alex\Documents\Home\corefx\Tools\tests.targets(254,5): error : One or more tests failed while running tests from 'System.ComponentModel.TypeConverter.Tests' please check log for details! [C:\Users\Alex\Documents\Home\corefx\src\System.ComponentModel.TypeConverter\tests\System.ComponentModel.TypeConverter.Tests.csproj]
+
+    Предупреждений: 2
+    Ошибок: 1
+
+Затраченное время: 00:00:06.50
