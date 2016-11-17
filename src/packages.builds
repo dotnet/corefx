@@ -24,15 +24,6 @@
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
