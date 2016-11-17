@@ -34,8 +34,7 @@ namespace System.Threading.Tests
             Assert.Equal(0, tsc.Wait(handles, true, 0));
         }
 
-        // TODO: Enable this test after CoreCLR package is updated again
-        //[Fact]
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // desktop framework does not check for null and crashes
         public static void WaitTest_ChangedInDotNetCore()
         {
