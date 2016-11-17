@@ -5,9 +5,10 @@
   <PropertyGroup>
     <PackageReportDir Condition="'$(PackageReportDir)' == ''">$(BinDir)pkg/reports/</PackageReportDir>
     <BuildAllOSGroups Condition="'$(FilterToOSGroup)' != ''">false</BuildAllOSGroups>
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'" >
     <Project Include="Native\pkg\**\*.builds" Condition="'$(SkipNativePackageBuild)' != 'true'">
       <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
       <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
@@ -18,6 +19,10 @@
     <Project Include="..\pkg\*\*.builds" Condition="'$(SkipManagedPackageBuild)' != 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
+    <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
