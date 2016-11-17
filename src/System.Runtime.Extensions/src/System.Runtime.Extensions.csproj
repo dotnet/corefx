@@ -56,6 +56,8 @@
     <Compile Include="System\Environment.SpecialFolder.cs" />
     <Compile Include="System\Environment.SpecialFolderOption.cs" />
     <Compile Include="System\EnvironmentVariableTarget.cs" />
+    <Compile Include="System\LoaderOptimization.cs" />
+    <Compile Include="System\LoaderOptimizationAttribute.cs" />
     <Compile Include="System\OperatingSystem.cs" />
     <Compile Include="System\PlatformID.cs" />
     <Compile Include="System\CodeDom\Compiler\IndentedTextWriter.cs" />
@@ -427,7 +429,7 @@
     <Compile Include="$(CommonPath)\System\SystemException.cs" />
     <Compile Include="System\Net\Configuration\UnicodeDecodingConformance.cs" />
     <Compile Include="System\Net\Configuration\UnicodeEncodingConformance.cs" />
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLastError.cs" Condition="'$(TargetsWindows)'=='true'" />
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLastError.cs" />
     <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Uap.cs">
       <Link>Common\System\IO\DriveInfoInternal.Uap.cs</Link>
     </Compile>
