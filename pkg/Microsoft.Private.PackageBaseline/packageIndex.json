@@ -16,6 +16,7 @@
       "StableVersions": [
         "1.0.0",
         "1.0.1",
+        "1.0.2",
         "1.1.0"
       ],
       "BaselineVersion": "1.1.0"
@@ -1362,6 +1363,7 @@
       "StableVersions": [
         "4.0.0",
         "4.1.0",
+        "4.1.1",
         "4.3.0"
       ],
       "BaselineVersion": "4.3.0",
@@ -1386,6 +1388,7 @@
     "System.Net.Http.WinHttpHandler": {
       "StableVersions": [
         "4.0.0",
+        "4.0.1",
         "4.3.0"
       ],
       "BaselineVersion": "4.3.0",
