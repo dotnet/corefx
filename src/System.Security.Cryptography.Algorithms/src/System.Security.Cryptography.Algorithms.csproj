@@ -426,6 +426,9 @@
     <Compile Include="System\Security\Cryptography\IncrementalHash.net46.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\pkg\System.Security.Cryptography.Primitives.pkgproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

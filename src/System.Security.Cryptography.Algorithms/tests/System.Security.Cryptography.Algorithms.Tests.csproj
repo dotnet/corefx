@@ -117,6 +117,7 @@
     </Compile>
     <Compile Include="AesProvider.cs" />
     <Compile Include="AesTests.cs" />
+    <Compile Include="BlockSizeValueTests.cs" />
     <Compile Include="DefaultECDsaProvider.cs" />
     <Compile Include="DefaultRSAProvider.cs" />
     <Compile Include="HashAlgorithmTest.cs" />
@@ -209,6 +210,9 @@
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\RSA\RSASignatureFormatter.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\RSA\RSASignatureFormatter.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\pkg\System.Security.Cryptography.Primitives.pkgproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\Interop\Unix\" />
