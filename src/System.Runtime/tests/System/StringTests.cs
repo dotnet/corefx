@@ -1618,9 +1618,13 @@ namespace System.Tests
             yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
             yield return new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" };
 
+#if netstandard17
             // Join is fixed if array[0] is null
             yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" };
-
+#else
+            // Join does nothing if array[0] is null
+            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "" };
+#endif
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
         }
@@ -1630,9 +1634,14 @@ namespace System.Tests
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
             Assert.Equal(expected, string.Join(separator, values));
+#if netstandard17
             // Join is fixed if array[0] is null
-            //if (!(values.Length > 0 && values[0] == null))
+            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+#else
+            // Join does nothing if array[0] is null
+            if (!(values.Length > 0 && values[0] == null))
                 Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+#endif
         }
 
         [Fact]
