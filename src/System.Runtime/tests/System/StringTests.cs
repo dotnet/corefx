@@ -1630,7 +1630,7 @@ namespace System.Tests
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
             Assert.Equal(expected, string.Join(separator, values));
-            // Join is  fixed if array[0] is null
+            // Join is fixed if array[0] is null
             //if (!(values.Length > 0 && values[0] == null))
                 Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
         }
