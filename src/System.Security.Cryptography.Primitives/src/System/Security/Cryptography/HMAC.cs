@@ -10,9 +10,6 @@ namespace System.Security.Cryptography
 {
     public abstract class HMAC : KeyedHashAlgorithm
     {
-        // an HMAC uses a hash function where data is hashed by iterating a basic compression
-        // function on blocks of data. BlockSizeValue is the byte size of such a block
-
         private int _blockSizeValue = 64;
 
         protected int BlockSizeValue
