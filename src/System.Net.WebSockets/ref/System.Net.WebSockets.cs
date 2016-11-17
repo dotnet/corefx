@@ -11,25 +11,25 @@ namespace System.Net.WebSockets
     public abstract partial class WebSocket : System.IDisposable
     {
         protected WebSocket() { }
-        public static System.TimeSpan DefaultKeepAliveInterval { get { throw null; } }
         public abstract System.Nullable<System.Net.WebSockets.WebSocketCloseStatus> CloseStatus { get; }
         public abstract string CloseStatusDescription { get; }
+        public static System.TimeSpan DefaultKeepAliveInterval { get { throw null; } }
         public abstract System.Net.WebSockets.WebSocketState State { get; }
         public abstract string SubProtocol { get; }
         public abstract void Abort();
         public abstract System.Threading.Tasks.Task CloseAsync(System.Net.WebSockets.WebSocketCloseStatus closeStatus, string statusDescription, System.Threading.CancellationToken cancellationToken);
         public abstract System.Threading.Tasks.Task CloseOutputAsync(System.Net.WebSockets.WebSocketCloseStatus closeStatus, string statusDescription, System.Threading.CancellationToken cancellationToken);
         public static System.ArraySegment<byte> CreateClientBuffer(int receiveBufferSize, int sendBufferSize) { throw null; }
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static System.Net.WebSockets.WebSocket CreateClientWebSocket(System.IO.Stream innerStream, string subProtocol, int receiveBufferSize, int sendBufferSize, System.TimeSpan keepAliveInterval, bool useZeroMaskingKey, System.ArraySegment<byte> internalBuffer) { throw null; }
         public static System.ArraySegment<byte> CreateServerBuffer(int receiveBufferSize) { throw null; }
         public abstract void Dispose();
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [System.Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.")]
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.")]
         public static bool IsApplicationTargeting45() { throw null; }
         protected static bool IsStateTerminal(System.Net.WebSockets.WebSocketState state) { throw null; }
         public abstract System.Threading.Tasks.Task<System.Net.WebSockets.WebSocketReceiveResult> ReceiveAsync(System.ArraySegment<byte> buffer, System.Threading.CancellationToken cancellationToken);
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void RegisterPrefixes() { }
         public abstract System.Threading.Tasks.Task SendAsync(System.ArraySegment<byte> buffer, System.Net.WebSockets.WebSocketMessageType messageType, bool endOfMessage, System.Threading.CancellationToken cancellationToken);
         protected static void ThrowOnInvalidState(System.Net.WebSockets.WebSocketState state, params System.Net.WebSockets.WebSocketState[] validStates) { }
@@ -47,19 +47,20 @@ namespace System.Net.WebSockets
         PolicyViolation = 1008,
         ProtocolError = 1002,
     }
-    public abstract class WebSocketContext
+    public abstract partial class WebSocketContext
     {
-        public abstract System.Uri RequestUri { get; }
-        public abstract System.Collections.Specialized.NameValueCollection Headers { get; }
-        public abstract string Origin { get; }
-        public abstract System.Collections.Generic.IEnumerable<string> SecWebSocketProtocols { get; }
-        public abstract string SecWebSocketVersion { get; }
-        public abstract string SecWebSocketKey { get; }
+        protected WebSocketContext() { }
         public abstract System.Net.CookieCollection CookieCollection { get; }
-        public abstract System.Security.Principal.IPrincipal User { get; }
+        public abstract System.Collections.Specialized.NameValueCollection Headers { get; }
         public abstract bool IsAuthenticated { get; }
         public abstract bool IsLocal { get; }
         public abstract bool IsSecureConnection { get; }
+        public abstract string Origin { get; }
+        public abstract System.Uri RequestUri { get; }
+        public abstract string SecWebSocketKey { get; }
+        public abstract System.Collections.Generic.IEnumerable<string> SecWebSocketProtocols { get; }
+        public abstract string SecWebSocketVersion { get; }
+        public abstract System.Security.Principal.IPrincipal User { get; }
         public abstract System.Net.WebSockets.WebSocket WebSocket { get; }
     }
     public enum WebSocketError
@@ -91,9 +92,9 @@ namespace System.Net.WebSockets
         public WebSocketException(System.Net.WebSockets.WebSocketError error, string message, System.Exception innerException) { }
         public WebSocketException(string message) { }
         public WebSocketException(string message, System.Exception innerException) { }
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public System.Net.WebSockets.WebSocketError WebSocketErrorCode { get { throw null; } }
         public override int ErrorCode { get { throw null; } }
+        public System.Net.WebSockets.WebSocketError WebSocketErrorCode { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public enum WebSocketMessageType
     {

@@ -13,11 +13,15 @@ namespace System.Net
         public HttpListener() { }
         public System.Net.AuthenticationSchemes AuthenticationSchemes { get { throw null; } set { } }
         public System.Net.AuthenticationSchemeSelector AuthenticationSchemeSelectorDelegate { get { throw null; } set { } }
+        public System.Security.Authentication.ExtendedProtection.ServiceNameCollection DefaultServiceNames { get { throw null; } }
+        public System.Security.Authentication.ExtendedProtection.ExtendedProtectionPolicy ExtendedProtectionPolicy { get { throw null; } set { } }
+        public System.Net.HttpListener.ExtendedProtectionSelector ExtendedProtectionSelectorDelegate { get { throw null; } set { } }
         public bool IgnoreWriteExceptions { get { throw null; } set { } }
         public bool IsListening { get { throw null; } }
         public static bool IsSupported { get { throw null; } }
         public System.Net.HttpListenerPrefixCollection Prefixes { get { throw null; } }
         public string Realm { get { throw null; } set { } }
+        public System.Net.HttpListenerTimeoutManager TimeoutManager { get { throw null; } }
         public bool UnsafeConnectionNtlmAuthentication { get { throw null; } set { } }
         public void Abort() { }
         public System.IAsyncResult BeginGetContext(System.AsyncCallback callback, object state) { throw null; }
@@ -28,10 +32,11 @@ namespace System.Net
         public void Start() { }
         public void Stop() { }
         void System.IDisposable.Dispose() { }
+        public delegate System.Security.Authentication.ExtendedProtection.ExtendedProtectionPolicy ExtendedProtectionSelector(System.Net.HttpListenerRequest request);
     }
     public partial class HttpListenerBasicIdentity : System.Security.Principal.GenericIdentity
     {
-        public HttpListenerBasicIdentity(string username, string password) : base(default(string)) { }
+        public HttpListenerBasicIdentity(string username, string password) : base (default(string)) { }
         public virtual string Password { get { throw null; } }
     }
     public sealed partial class HttpListenerContext
@@ -42,13 +47,17 @@ namespace System.Net
         public System.Security.Principal.IPrincipal User { get { throw null; } }
         public System.Threading.Tasks.Task<System.Net.WebSockets.HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol) { throw null; }
         public System.Threading.Tasks.Task<System.Net.WebSockets.HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, System.TimeSpan keepAliveInterval) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public System.Threading.Tasks.Task<System.Net.WebSockets.HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, System.TimeSpan keepAliveInterval, System.ArraySegment<byte> internalBuffer) { throw null; }
+        public System.Threading.Tasks.Task<System.Net.WebSockets.HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, System.TimeSpan keepAliveInterval) { throw null; }
     }
     public partial class HttpListenerException : System.ComponentModel.Win32Exception
     {
         public HttpListenerException() { }
         public HttpListenerException(int errorCode) { }
         public HttpListenerException(int errorCode, string message) { }
+        protected HttpListenerException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
+        public override int ErrorCode { get { throw null; } }
     }
     public partial class HttpListenerPrefixCollection : System.Collections.Generic.ICollection<string>, System.Collections.Generic.IEnumerable<string>, System.Collections.IEnumerable
     {
@@ -128,12 +137,22 @@ namespace System.Net
         public void SetCookie(System.Net.Cookie cookie) { }
         void System.IDisposable.Dispose() { }
     }
+    public partial class HttpListenerTimeoutManager
+    {
+        internal HttpListenerTimeoutManager() { }
+        public System.TimeSpan DrainEntityBody { get { throw null; } set { } }
+        public System.TimeSpan EntityBody { get { throw null; } set { } }
+        public System.TimeSpan HeaderWait { get { throw null; } set { } }
+        public System.TimeSpan IdleConnection { get { throw null; } set { } }
+        public long MinSendBytesPerSecond { get { throw null; } set { } }
+        public System.TimeSpan RequestQueue { get { throw null; } set { } }
+    }
 }
 namespace System.Net.WebSockets
 {
     public partial class HttpListenerWebSocketContext : System.Net.WebSockets.WebSocketContext
     {
-        private HttpListenerWebSocketContext() { }
+        internal HttpListenerWebSocketContext() { }
         public override System.Net.CookieCollection CookieCollection { get { throw null; } }
         public override System.Collections.Specialized.NameValueCollection Headers { get { throw null; } }
         public override bool IsAuthenticated { get { throw null; } }

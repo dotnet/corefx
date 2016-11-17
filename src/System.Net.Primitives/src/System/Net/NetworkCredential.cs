@@ -52,6 +52,20 @@ namespace System.Net
             Domain = domain;
         }
 
+        [System.CLSCompliantAttribute(false)]
+        public NetworkCredential(string userName, SecureString password) 
+        { 
+            // TODO: #12134
+            throw new PlatformNotSupportedException();
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        public NetworkCredential(string userName, SecureString password, string domain) 
+        { 
+            // TODO: #12134
+            throw new PlatformNotSupportedException();
+        }
+
         /// <devdoc>
         ///    <para>
         ///       The user name associated with this credential.
@@ -104,6 +118,20 @@ namespace System.Net
             }
         }
 
+        [System.CLSCompliantAttribute(false)]
+        public System.Security.SecureString SecurePassword 
+        { 
+            get 
+            { 
+                // TODO: #12134
+                throw new PlatformNotSupportedException();
+            } 
+            set 
+            { 
+                // TODO: #12134
+                throw new PlatformNotSupportedException();
+            } 
+        }
         internal string InternalGetUserName()
         {
             return _userName;
