@@ -20,9 +20,6 @@ namespace System.Security.Cryptography
         public HMACSHA256()
             : this(Helpers.GenerateRandom(BlockSize))
         {
-            // this not really needed as it'll initialize BlockSizeValue with same value it has which is 64.
-            // we just want to be explicit in all HMAC extended classes   
-            BlockSizeValue = BlockSize; 
         }
 
         public HMACSHA256(byte[] key)
