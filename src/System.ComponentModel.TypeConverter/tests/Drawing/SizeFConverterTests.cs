@@ -153,7 +153,7 @@ namespace System.ComponentModel.TypeConverterTests
         [Fact]
         public void ConvertTo_NullCulture()
         {
-            var listSep = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
+            string listSep = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
             Assert.Equal($"1{listSep} 1", Converter.ConvertTo(null, null, new SizeF(1, 1), typeof(string)));
         }
 
