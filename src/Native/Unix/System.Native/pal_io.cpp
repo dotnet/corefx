@@ -1172,7 +1172,7 @@ extern "C" char* SystemNative_RealPath(const char* path)
     return realpath(path, nullptr);
 }
 
-extern "C" int32_t SystemNative_LockFileRegion(int fd, int64_t offset, int64_t length, int16_t lockType)
+extern "C" int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType)
 {
     if (offset < 0 || length < 0) 
     {
