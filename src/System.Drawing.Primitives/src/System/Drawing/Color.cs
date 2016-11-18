@@ -391,12 +391,9 @@ namespace System.Drawing
                 {
                     // first try the table so we can avoid the (slow!) .ToString()
                     string tablename = KnownColorTable.KnownColorToName((KnownColor)knownColor);
-                    if (tablename != null)
-                        return tablename;
+                    Debug.Assert(tablename != null, $"Could not find known color '{(KnownColor)knownColor}' in the KnownColorTable");
 
-                    Debug.Assert(false, "Could not find known color '" + ((KnownColor)knownColor) + "' in the KnownColorTable");
-
-                    return ((KnownColor)knownColor).ToString();
+                    return tablename;
                 }
 
                 // if we reached here, just encode the value
