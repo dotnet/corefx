@@ -15,7 +15,7 @@ namespace System.Security.Authentication.ExtendedProtection
     {
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(InstanceDescriptor) ? true : base.CanConvertTo(context, destinationType);
+            return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
