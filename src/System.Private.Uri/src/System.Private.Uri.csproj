@@ -161,6 +161,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLastError.cs" Condition="'$(TargetsWindows)'=='true'">
       <Link>Common\Interop\Windows\kernel32\Interop.GetLastError.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" Condition="'$(TargetsUnix)'=='true'">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <TargetingPackReference Include="System.Private.CoreLib" />

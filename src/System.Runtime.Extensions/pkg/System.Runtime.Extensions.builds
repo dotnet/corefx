@@ -9,6 +9,9 @@
     <Project Include="unix\System.Runtime.Extensions.pkgproj">
       <OSGroup>Unix</OSGroup>
     </Project>
+    <Project Include="aot\System.Runtime.Extensions.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
