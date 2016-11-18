@@ -306,11 +306,11 @@ namespace System.Drawing
         // NOTE : The "zero" pattern (all members being 0) must represent
         //      : "not set". This allows "Color c;" to be correct.
 
-        private static short s_stateKnownColorValid = 0x0001;
-        private static short s_stateARGBValueValid = 0x0002;
-        private static short s_stateValueMask = (short)(s_stateARGBValueValid);
-        private static short s_stateNameValid = 0x0008;
-        private static long s_notDefinedValue = 0;
+        private static readonly short s_stateKnownColorValid = 0x0001;
+        private static readonly short s_stateARGBValueValid = 0x0002;
+        private static readonly short s_stateValueMask = s_stateARGBValueValid;
+        private static readonly short s_stateNameValid = 0x0008;
+        private static readonly long s_notDefinedValue = 0;
 
         /**
          * Shift count and bit mask for A, R, G, B components in ARGB mode!
