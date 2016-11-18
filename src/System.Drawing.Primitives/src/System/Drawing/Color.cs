@@ -545,10 +545,10 @@ namespace System.Drawing
             float g = G / 255.0f;
             float b = B / 255.0f;
 
-            float max, min;
-            float l, s = 0;
+            float s = 0;
 
-            max = r; min = r;
+            float max = r;
+            float min = r;
 
             if (g > max) max = g;
             if (b > max) max = b;
@@ -561,7 +561,7 @@ namespace System.Drawing
             //
             if (max != min)
             {
-                l = (max + min) / 2;
+                float l = (max + min) / 2;
 
                 if (l <= .5)
                 {
