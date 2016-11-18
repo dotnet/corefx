@@ -11,11 +11,6 @@
     <ProjectReference Include="..\..\src\System.Runtime.Extensions.csproj">
       <OSGroup>Unix</OSGroup>
     </ProjectReference>
-    <!-- AOT implementation comes from AOT package -->
-    <File Include="$(PlaceholderFile)">
-      <TargetPath>runtimes/aot/lib/uap10.1</TargetPath>
-      <TargetFramework>aot</TargetFramework>
-    </File>
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
