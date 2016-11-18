@@ -301,7 +301,7 @@ namespace System.Drawing
         /// </summary>
         public void Intersect(Rectangle rect)
         {
-            Rectangle result = Rectangle.Intersect(rect, this);
+            Rectangle result = Intersect(rect, this);
 
             X = result.X;
             Y = result.Y;

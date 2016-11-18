@@ -288,7 +288,7 @@ namespace System.Drawing
         /// </summary>
         public void Intersect(RectangleF rect)
         {
-            RectangleF result = RectangleF.Intersect(rect, this);
+            RectangleF result = Intersect(rect, this);
 
             X = result.X;
             Y = result.Y;

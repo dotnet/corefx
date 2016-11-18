@@ -457,7 +457,7 @@ namespace System.Drawing
             var value = (int)color;
             if (value < (int)KnownColor.ActiveBorder || value > (int)KnownColor.MenuHighlight)
             {
-                return Color.FromName(color.ToString());
+                return FromName(color.ToString());
             }
 
             return new Color(color);
