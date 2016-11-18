@@ -9,18 +9,6 @@ namespace System.Drawing
         private static int[] s_colorTable;
         private static string[] s_colorNameTable;
 
-        /**
-         * Shift count and bit mask for A, R, G, B components
-         */
-        private const int AlphaShift = 24;
-        private const int RedShift = 16;
-        private const int GreenShift = 8;
-        private const int BlueShift = 0;
-
-        private const int Win32RedShift = 0;
-        private const int Win32GreenShift = 8;
-        private const int Win32BlueShift = 16;
-
         private static void EnsureColorTable()
         {
             // no need to lock... worse case is a double create of the table...
