@@ -83,8 +83,10 @@ namespace System
         public static string BaseDirectory { get { throw null; } }
         public static void SetSwitch(string switchName, bool isEnabled) { }
         public static bool TryGetSwitch(string switchName, out bool isEnabled) { throw null; }
+#if netcoreapp11
         public static string TargetFrameworkName { get { throw null; } }
         public static object GetData(string name) { throw null; }
+#endif
     }
     
     public partial class EntryPointNotFoundException : System.TypeLoadException
@@ -4334,6 +4336,20 @@ namespace System.Globalization
         public static System.Globalization.CultureInfo ReadOnly(System.Globalization.CultureInfo ci) { throw null; }
         public override string ToString() { throw null; }
     }
+    public sealed partial class IdnMapping
+    {
+        public IdnMapping() { }
+        public bool AllowUnassigned { get { throw null; } set { } }
+        public bool UseStd3AsciiRules { get { throw null; } set { } }
+        public override bool Equals(object obj) { throw null; }
+        public string GetAscii(string unicode) { throw null; }
+        public string GetAscii(string unicode, int index) { throw null; }
+        public string GetAscii(string unicode, int index, int count) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public string GetUnicode(string ascii) { throw null; }
+        public string GetUnicode(string ascii, int index) { throw null; }
+        public string GetUnicode(string ascii, int index, int count) { throw null; }
+    }    
     public partial class CultureNotFoundException : System.ArgumentException, System.Runtime.Serialization.ISerializable
     {
         public CultureNotFoundException() { }
@@ -4622,6 +4638,14 @@ namespace System.IO
     }
     public partial class FileStream : System.IO.Stream
     {
+        [Obsolete("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public FileStream(IntPtr handle, FileAccess access) { }
+        [Obsolete("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public FileStream(IntPtr handle, FileAccess access, bool ownsHandle) { }
+        [Obsolete("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access, int bufferSize) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public FileStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize) { }
+        [Obsolete("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access, int bufferSize, bool isAsync) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public FileStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize, bool isAsync) { }
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access) { }
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access, int bufferSize) { }
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access, int bufferSize, bool isAsync) { }
@@ -5784,6 +5808,7 @@ namespace System.Reflection
     public partial class StrongNameKeyPair : System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
     {
         public StrongNameKeyPair(byte[] keyPairArray) { }
+        public StrongNameKeyPair(System.IO.FileStream keyPairFile) { }
         protected StrongNameKeyPair(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public StrongNameKeyPair(string keyPairContainer) { }
         public byte[] PublicKey { [System.Security.SecuritySafeCriticalAttribute]get { throw null; } }
