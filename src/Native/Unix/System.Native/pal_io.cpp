@@ -1172,7 +1172,7 @@ extern "C" char* SystemNative_RealPath(const char* path)
     return realpath(path, nullptr);
 }
 
-static int32_t LockUnlock(intptr_t fd, off_t offset, off_t length, bool lock)
+extern "C" int32_t SystemNative_LockFileRegion(int fd, int64_t offset, int64_t length, short lockType)
 {
     if (offset < 0 || length < 0) 
     {
@@ -1181,34 +1181,12 @@ static int32_t LockUnlock(intptr_t fd, off_t offset, off_t length, bool lock)
     }
     
     struct flock lockArgs;
-    int32_t ret;
-    if (lock)
-    {
-        lockArgs.l_type = F_WRLCK;
-    }
-    else
-    {
-        lockArgs.l_type = F_UNLCK;
-    }
+    lockArgs.l_type = lockType;
     lockArgs.l_whence = SEEK_SET;
     lockArgs.l_start = offset;
     lockArgs.l_len = length;
     
-    do 
-    {
-        ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs);
-    } while (ret == -1 && errno == EINTR);
-
+    int32_t ret;
+    while (CheckInterrupted(ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)));
     return ret;
 }
-
-extern "C" int32_t SystemNative_LockFileRegion(int fd, off_t offset, off_t length)
-{
-    return LockUnlock(fd, offset, length, true);
-}
-
-extern "C" int32_t SystemNative_UnlockFileRegion(int fd, off_t offset, off_t length)
-{
-    return LockUnlock(fd, offset, length, false);
-}
-
