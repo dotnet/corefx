@@ -157,6 +157,38 @@ namespace Internal.Cryptography
             // See PadBlock for a description of the padding modes.
             switch (PaddingMode)
             {
+                case PaddingMode.ANSIX923:
+                    padBytes = block[offset + count - 1];
+
+                    // Verify the amount of padding is reasonable
+                    if (padBytes <= 0 || padBytes > InputBlockSize)
+                    {
+                        throw new CryptographicException(SR.Cryptography_InvalidPadding);
+                    }
+
+                    // Verify that all the padding bytes are 0s
+                    for (int i = offset + count - padBytes; i < offset + count - 1; i++)
+                    {
+                        if (block[i] != 0)
+                        {
+                            throw new CryptographicException(SR.Cryptography_InvalidPadding);
+                        }
+                    }
+
+                    break;
+
+                case PaddingMode.ISO10126:
+                    padBytes = block[offset + count - 1];
+
+                    // Verify the amount of padding is reasonable
+                    if (padBytes <= 0 || padBytes > InputBlockSize)
+                    {
+                        throw new CryptographicException(SR.Cryptography_InvalidPadding);
+                    }
+
+                    // Since the padding consists of random bytes, we cannot verify the actual pad bytes themselves
+                    break;
+
                 case PaddingMode.PKCS7:
                     padBytes = block[offset + count - 1];
 
