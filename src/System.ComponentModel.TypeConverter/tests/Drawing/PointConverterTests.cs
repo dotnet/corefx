@@ -204,7 +204,7 @@ namespace System.ComponentModel.TypeConverterTests
         [MemberData(nameof(PointData))]
         public void ConvertFromInvariantString(int x, int y)
         {
-                point = (Point)Converter.ConvertFromInvariantString($"{x}, {y}");
+            var point = (Point)Converter.ConvertFromInvariantString($"{x}, {y}");
             Assert.Equal(x, point.X);
             Assert.Equal(y, point.Y);
         }
