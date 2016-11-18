@@ -3195,7 +3195,6 @@ namespace System.Runtime.InteropServices
         public bool IsClosed { get { throw null; } }
         public abstract bool IsInvalid { get; }
         public void Close() { }
-        public void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~CriticalHandle() { }
