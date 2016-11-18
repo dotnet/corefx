@@ -15,10 +15,13 @@ namespace System.Runtime.Serialization
     {
         private static PropertyInfo s_collectionItemNameProperty;
 
+<<<<<<< HEAD
         private static ConstructorInfo s_extensionDataObjectCtor;
 
         private static PropertyInfo s_extensionDataProperty;
 
+=======
+>>>>>>> 704fb06759d77b70997efd6ea2e5300503fff21d
         private static MethodInfo s_getItemContractMethod;
 
         private static MethodInfo s_getJsonDataContractMethod;

@@ -477,12 +477,15 @@ namespace System.Runtime.Serialization
             }
         }
 
+<<<<<<< HEAD
         private static Type s_typeOfIExtensibleDataObject;
         internal static Type TypeOfIExtensibleDataObject => s_typeOfIExtensibleDataObject ?? (s_typeOfIExtensibleDataObject = typeof (IExtensibleDataObject));
 
         private static Type s_typeOfExtensionDataObject;
         internal static Type TypeOfExtensionDataObject => s_typeOfExtensionDataObject ?? (s_typeOfExtensionDataObject = typeof (ExtensionDataObject));
 
+=======
+>>>>>>> 704fb06759d77b70997efd6ea2e5300503fff21d
         private static Type s_typeOfISerializableDataNode;
         internal static Type TypeOfISerializableDataNode
         {
