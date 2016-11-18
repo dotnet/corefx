@@ -204,6 +204,12 @@ namespace System.Security.Authentication.ExtendedProtection
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
+    public partial class ExtendedProtectionPolicyTypeConverter : System.ComponentModel.TypeConverter
+    {
+        public ExtendedProtectionPolicyTypeConverter() { }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Type destinationType) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, System.Type destinationType) { throw null; }
+    }
     public enum PolicyEnforcement
     {
         Always = 2,
