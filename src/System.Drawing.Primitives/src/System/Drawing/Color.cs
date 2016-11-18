@@ -306,11 +306,11 @@ namespace System.Drawing
         // NOTE : The "zero" pattern (all members being 0) must represent
         //      : "not set". This allows "Color c;" to be correct.
 
-        private static readonly short s_stateKnownColorValid = 0x0001;
-        private static readonly short s_stateARGBValueValid = 0x0002;
-        private static readonly short s_stateValueMask = s_stateARGBValueValid;
-        private static readonly short s_stateNameValid = 0x0008;
-        private static readonly long s_notDefinedValue = 0;
+        private const short StateKnownColorValid = 0x0001;
+        private const short StateARGBValueValid = 0x0002;
+        private const short StateValueMask = StateARGBValueValid;
+        private const short StateNameValid = 0x0008;
+        private const long NotDefinedValue = 0;
 
         /**
          * Shift count and bit mask for A, R, G, B components in ARGB mode!
@@ -342,7 +342,7 @@ namespace System.Drawing
         internal Color(KnownColor knownColor)
         {
             value = 0;
-            state = s_stateKnownColorValid;
+            state = StateKnownColorValid;
             name = null;
             this.knownColor = unchecked((short)knownColor);
         }
@@ -363,11 +363,11 @@ namespace System.Drawing
 
         public byte A => (byte)((Value >> ARGBAlphaShift) & 0xFF);
 
-        public bool IsKnownColor => ((state & s_stateKnownColorValid) != 0);
+        public bool IsKnownColor => ((state & StateKnownColorValid) != 0);
 
         public bool IsEmpty => state == 0;
 
-        public bool IsNamedColor => ((state & s_stateNameValid) != 0) || IsKnownColor;
+        public bool IsNamedColor => ((state & StateNameValid) != 0) || IsKnownColor;
 
         public bool IsSystemColor => IsKnownColor && ((((KnownColor)knownColor) <= KnownColor.WindowText) || (((KnownColor)knownColor) > KnownColor.YellowGreen));
 
@@ -382,14 +382,13 @@ namespace System.Drawing
         {
             get
             {
-                if ((state & s_stateNameValid) != 0)
+                if ((state & StateNameValid) != 0)
                 {
                     return name;
                 }
 
                 if (IsKnownColor)
                 {
-                    // first try the table so we can avoid the (slow!) .ToString()
                     string tablename = KnownColorTable.KnownColorToName((KnownColor)knownColor);
                     Debug.Assert(tablename != null, $"Could not find known color '{(KnownColor)knownColor}' in the KnownColorTable");
 
@@ -406,7 +405,7 @@ namespace System.Drawing
         {
             get
             {
-                if ((state & s_stateValueMask) != 0)
+                if ((state & StateValueMask) != 0)
                 {
                     return value;
                 }
@@ -416,7 +415,7 @@ namespace System.Drawing
                     return KnownColorTable.KnownColorToArgb((KnownColor)knownColor);
                 }
 
-                return s_notDefinedValue;
+                return NotDefinedValue;
             }
         }
 
@@ -432,7 +431,7 @@ namespace System.Drawing
                 blue << ARGBBlueShift |
                 alpha << ARGBAlphaShift)) & 0xffffffff;
 
-        public static Color FromArgb(int argb) => new Color(argb & 0xffffffff, s_stateARGBValueValid, null, 0);
+        public static Color FromArgb(int argb) => new Color(argb & 0xffffffff, StateARGBValueValid, null, 0);
 
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
@@ -440,14 +439,14 @@ namespace System.Drawing
             CheckByte(red, nameof(red));
             CheckByte(green, nameof(green));
             CheckByte(blue, nameof(blue));
-            return new Color(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue), s_stateARGBValueValid, null, (KnownColor)0);
+            return new Color(MakeArgb((byte)alpha, (byte)red, (byte)green, (byte)blue), StateARGBValueValid, null, (KnownColor)0);
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
         {
             CheckByte(alpha, nameof(alpha));
             // unchecked - because we already checked that alpha is a byte in CheckByte above
-            return new Color(MakeArgb(unchecked((byte)alpha), baseColor.R, baseColor.G, baseColor.B), s_stateARGBValueValid, null, (KnownColor)0);
+            return new Color(MakeArgb(unchecked((byte)alpha), baseColor.R, baseColor.G, baseColor.B), StateARGBValueValid, null, (KnownColor)0);
         }
 
         public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
@@ -472,7 +471,7 @@ namespace System.Drawing
                 return color;
             }
             // otherwise treat it as a named color
-            return new Color(s_notDefinedValue, s_stateNameValid, name, (KnownColor)0);
+            return new Color(NotDefinedValue, StateNameValid, name, (KnownColor)0);
         }
 
         public float GetBrightness()
@@ -581,11 +580,11 @@ namespace System.Drawing
 
         public override string ToString()
         {
-            if ((state & s_stateNameValid) != 0 || (state & s_stateKnownColorValid) != 0)
+            if ((state & StateNameValid) != 0 || (state & StateKnownColorValid) != 0)
             {
                 return nameof(Color) + " [" + Name + "]";
             }
-            else if ((state & s_stateValueMask) != 0)
+            else if ((state & StateValueMask) != 0)
             {
                 return nameof(Color) + " [A=" + A.ToString() + ", R=" + R.ToString() + ", G=" + G.ToString() + ", B=" + B.ToString() + "]";
             }

@@ -194,7 +194,7 @@ namespace System.Drawing
         /// <summary>
         ///    Translates this <see cref='System.Drawing.Point'/> by the specified amount.
         /// </summary>
-        public void Offset(Point p) =>Offset(p.X, p.Y);
+        public void Offset(Point p) => Offset(p.X, p.Y);
 
         /// <summary>
         ///    <para>
