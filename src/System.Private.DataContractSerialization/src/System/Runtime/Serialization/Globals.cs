@@ -483,7 +483,6 @@ namespace System.Runtime.Serialization
         private static Type s_typeOfExtensionDataObject;
         internal static Type TypeOfExtensionDataObject => s_typeOfExtensionDataObject ?? (s_typeOfExtensionDataObject = typeof (ExtensionDataObject));
 
-        [SecurityCritical]
         private static Type s_typeOfISerializableDataNode;
         internal static Type TypeOfISerializableDataNode
         {
