@@ -410,6 +410,7 @@ namespace System.Drawing
                 {
                     return value;
                 }
+
                 if (IsKnownColor)
                 {
                     return KnownColorTable.KnownColorToArgb((KnownColor)knownColor);
@@ -425,18 +426,13 @@ namespace System.Drawing
                 throw new ArgumentException(SR.Format(SR.InvalidEx2BoundArgument, name, value, 0, 255));
         }
 
-        private static long MakeArgb(byte alpha, byte red, byte green, byte blue)
-        {
-            return (long)(unchecked((uint)(red << ARGBRedShift |
-                         green << ARGBGreenShift |
-                         blue << ARGBBlueShift |
-                         alpha << ARGBAlphaShift))) & 0xffffffff;
-        }
+        private static long MakeArgb(byte alpha, byte red, byte green, byte blue) =>
+            (long)unchecked((uint)(red << ARGBRedShift |
+                green << ARGBGreenShift |
+                blue << ARGBBlueShift |
+                alpha << ARGBAlphaShift)) & 0xffffffff;
 
-        public static Color FromArgb(int argb)
-        {
-            return new Color((long)argb & 0xffffffff, s_stateARGBValueValid, null, (KnownColor)0);
-        }
+        public static Color FromArgb(int argb) => new Color(argb & 0xffffffff, s_stateARGBValueValid, null, 0);
 
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
@@ -454,10 +450,7 @@ namespace System.Drawing
             return new Color(MakeArgb(unchecked((byte)alpha), baseColor.R, baseColor.G, baseColor.B), s_stateARGBValueValid, null, (KnownColor)0);
         }
 
-        public static Color FromArgb(int red, int green, int blue)
-        {
-            return FromArgb(255, red, green, blue);
-        }
+        public static Color FromArgb(int red, int green, int blue) => FromArgb(255, red, green, blue);
 
         public static Color FromKnownColor(KnownColor color)
         {
@@ -466,6 +459,7 @@ namespace System.Drawing
             {
                 return Color.FromName(color.ToString());
             }
+
             return new Color(color);
         }
 
@@ -581,15 +575,9 @@ namespace System.Drawing
             return s;
         }
 
-        public int ToArgb()
-        {
-            return unchecked((int)Value);
-        }
+        public int ToArgb() => unchecked((int)Value);
 
-        public KnownColor ToKnownColor()
-        {
-            return (KnownColor)knownColor;
-        }
+        public KnownColor ToKnownColor() => (KnownColor)knownColor;
 
         public override string ToString()
         {
@@ -607,21 +595,15 @@ namespace System.Drawing
             }
         }
 
-        public static bool operator ==(Color left, Color right)
-            => left.value == right.value
+        public static bool operator ==(Color left, Color right) =>
+            left.value == right.value
                 && left.state == right.state
                 && left.knownColor == right.knownColor
                 && left.name == right.name;
 
-        public static bool operator !=(Color left, Color right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(Color left, Color right) => !(left == right);
 
-        public override bool Equals(object obj)
-        {
-            return obj is Color && this == (Color)obj;
-        }
+        public override bool Equals(object obj) => obj is Color && this == (Color)obj;
 
         public override int GetHashCode()
         {
