@@ -477,9 +477,9 @@ namespace System.Drawing
 
         public float GetBrightness()
         {
-            float r = (float)R / 255.0f;
-            float g = (float)G / 255.0f;
-            float b = (float)B / 255.0f;
+            float r = R / 255.0f;
+            float g = G / 255.0f;
+            float b = B / 255.0f;
 
             float max, min;
 
@@ -500,9 +500,9 @@ namespace System.Drawing
             if (R == G && G == B)
                 return 0; // 0 makes as good an UNDEFINED value as any
 
-            float r = (float)R / 255.0f;
-            float g = (float)G / 255.0f;
-            float b = (float)B / 255.0f;
+            float r = R / 255.0f;
+            float g = G / 255.0f;
+            float b = B / 255.0f;
 
             float max, min;
             float delta;
@@ -541,9 +541,9 @@ namespace System.Drawing
 
         public float GetSaturation()
         {
-            float r = (float)R / 255.0f;
-            float g = (float)G / 255.0f;
-            float b = (float)B / 255.0f;
+            float r = R / 255.0f;
+            float g = G / 255.0f;
+            float b = B / 255.0f;
 
             float max, min;
             float l, s = 0;
