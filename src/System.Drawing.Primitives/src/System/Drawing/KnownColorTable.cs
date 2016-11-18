@@ -21,7 +21,7 @@ namespace System.Drawing
 
         private static void InitColorTable()
         {
-            int[] values = new int[(unchecked((int)KnownColor.MenuHighlight)) + 1];
+            int[] values = new int[(int)KnownColor.MenuHighlight + 1];
 
             // system
             //
@@ -36,7 +36,7 @@ namespace System.Drawing
             values[(int)KnownColor.Aquamarine] = unchecked((int)0xFF7FFFD4);
             values[(int)KnownColor.Azure] = unchecked((int)0xFFF0FFFF);
             values[(int)KnownColor.Beige] = unchecked((int)0xFFF5F5DC);
-            values[(int)KnownColor.Bisque] = unchecked(unchecked((int)0xFFFFE4C4));
+            values[(int)KnownColor.Bisque] = unchecked((int)0xFFFFE4C4);
             values[(int)KnownColor.Black] = unchecked((int)0xFF000000);
             values[(int)KnownColor.BlanchedAlmond] = unchecked((int)0xFFFFEBCD);
             values[(int)KnownColor.Blue] = unchecked((int)0xFF0000FF);
@@ -372,7 +372,7 @@ namespace System.Drawing
             EnsureColorTable();
             if (color <= KnownColor.MenuHighlight)
             {
-                return s_colorTable[unchecked((int)color)];
+                return s_colorTable[(int)color];
             }
             else
             {
@@ -385,7 +385,7 @@ namespace System.Drawing
             EnsureColorNameTable();
             if (color <= KnownColor.MenuHighlight)
             {
-                return s_colorNameTable[unchecked((int)color)];
+                return s_colorNameTable[(int)color];
             }
             else
             {

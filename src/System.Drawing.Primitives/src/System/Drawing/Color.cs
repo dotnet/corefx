@@ -412,7 +412,7 @@ namespace System.Drawing
                 }
                 if (IsKnownColor)
                 {
-                    return unchecked((int)KnownColorTable.KnownColorToArgb((KnownColor)knownColor));
+                    return KnownColorTable.KnownColorToArgb((KnownColor)knownColor);
                 }
 
                 return s_notDefinedValue;
