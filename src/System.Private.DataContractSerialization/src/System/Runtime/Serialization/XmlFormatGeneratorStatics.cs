@@ -844,10 +844,7 @@ namespace System.Runtime.Serialization
         private static MethodInfo s_extensionDataSetExplicitMethodInfo;
         internal static MethodInfo ExtensionDataSetExplicitMethodInfo => s_extensionDataSetExplicitMethodInfo ?? 
                                                                          (s_extensionDataSetExplicitMethodInfo = typeof(IExtensibleDataObject).GetMethod(Globals.ExtensionDataSetMethod));
-<<<<<<< 9e7841fb59a12e9fbaf1f6370ef48130c9c1548c
-=======
 
->>>>>>> Remove [SecureSafeCritical] and [SecurityCritical] in System.Private.DataContractSerialization.
         private static PropertyInfo s_childElementNamespacesProperty;
         internal static PropertyInfo ChildElementNamespacesProperty
         {
