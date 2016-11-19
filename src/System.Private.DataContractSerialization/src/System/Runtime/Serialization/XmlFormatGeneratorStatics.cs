@@ -844,6 +844,7 @@ namespace System.Runtime.Serialization
         private static MethodInfo s_extensionDataSetExplicitMethodInfo;
         internal static MethodInfo ExtensionDataSetExplicitMethodInfo => s_extensionDataSetExplicitMethodInfo ?? 
                                                                          (s_extensionDataSetExplicitMethodInfo = typeof(IExtensibleDataObject).GetMethod(Globals.ExtensionDataSetMethod));
+
         private static PropertyInfo s_childElementNamespacesProperty;
         internal static PropertyInfo ChildElementNamespacesProperty
         {
