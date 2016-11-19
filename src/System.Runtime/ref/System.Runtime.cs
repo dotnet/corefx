@@ -3188,7 +3188,6 @@ namespace System.Runtime.ConstrainedExecution
 
 namespace System.Runtime.InteropServices
 {
-    [System.Security.SecurityCriticalAttribute]
     public abstract partial class CriticalHandle : System.Runtime.ConstrainedExecution.CriticalFinalizerObject, System.IDisposable
     {
         protected System.IntPtr handle;
@@ -3196,9 +3195,7 @@ namespace System.Runtime.InteropServices
         public bool IsClosed { get { throw null; } }
         public abstract bool IsInvalid { get; }
         public void Close() { }
-        [System.Security.SecuritySafeCriticalAttribute]
         public void Dispose() { }
-        [System.Security.SecurityCriticalAttribute]
         protected virtual void Dispose(bool disposing) { }
         ~CriticalHandle() { }
         protected abstract bool ReleaseHandle();
@@ -4711,6 +4708,7 @@ namespace System.Reflection
         protected Assembly() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
+        public virtual string EscapedCodeBase { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Type> ExportedTypes { get { throw null; } }
         public virtual MethodInfo EntryPoint { get { throw null; } }
         public virtual string FullName { get { throw null; } }
@@ -4728,6 +4726,9 @@ namespace System.Reflection
         public static bool operator !=(System.Reflection.Assembly left, System.Reflection.Assembly right) { throw null; }
         public static System.Reflection.Assembly GetAssembly(System.Type type) { throw null; }
         public static System.Reflection.Assembly GetCallingAssembly() { throw null; }
+        public virtual System.IO.FileStream GetFile(string name) { throw null; }
+        public virtual System.IO.FileStream[] GetFiles() { throw null; }
+        public virtual System.IO.FileStream[] GetFiles(bool getResourceModules) { throw null; }
         public override int GetHashCode() { throw null; }
         public virtual System.Reflection.ManifestResourceInfo GetManifestResourceInfo(string resourceName) { throw null; }
         public virtual string[] GetManifestResourceNames() { throw null; }
@@ -4749,7 +4750,7 @@ namespace System.Reflection
         public static System.Reflection.Assembly LoadFrom(String assemblyFile) { throw null; }
         public static Assembly LoadFrom(string assemblyFile, byte[] hashValue, System.Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm) { throw null; }
         public System.Reflection.Module LoadModule(String moduleName, byte[] rawModule) { throw null; }
-        public System.Reflection.Module LoadModule(String moduleName, byte[] rawModule, byte[] rawSymbolStore) { throw null; }
+        public virtual System.Reflection.Module LoadModule(String moduleName, byte[] rawModule, byte[] rawSymbolStore) { throw null; }
         [ObsoleteAttribute("This method has been deprecated. Please use Assembly.Load() instead.")]
         public static Assembly LoadWithPartialName(string partialName) { throw null; }
         public static System.Reflection.Assembly GetEntryAssembly() { throw null; }
@@ -4885,6 +4886,7 @@ namespace System.Reflection
         public System.Reflection.AssemblyContentType ContentType { get { throw null; } set { } }
         public System.Globalization.CultureInfo CultureInfo { get { throw null; } set { } }
         public string CultureName { get { throw null; } set { } }
+        public string EscapedCodeBase { get { throw null; } }
         public System.Reflection.AssemblyNameFlags Flags { get { throw null; } set { } }
         public string FullName { get { throw null; } }
         public System.Configuration.Assemblies.AssemblyHashAlgorithm HashAlgorithm { get { throw null; } set { } }
@@ -5369,6 +5371,7 @@ namespace System.Reflection
         public bool IsStatic { get { throw null; } }
         public bool IsVirtual { get { throw null; } }
         public virtual bool IsSecurityCritical { get { throw null; } }
+        public virtual bool IsSecuritySafeCritical { get { throw null; } }
         public virtual bool IsSecurityTransparent { get { throw null; } }
         public abstract System.RuntimeMethodHandle MethodHandle { get; }
         public virtual System.Reflection.MethodImplAttributes MethodImplementationFlags { get { throw null; } }

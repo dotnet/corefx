@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
-using System.Security;
 using System.Xml;
 using System.Diagnostics;
 
@@ -14,102 +13,76 @@ namespace System.Runtime.Serialization
 {
     public static class JsonFormatGeneratorStatics
     {
-        [SecurityCritical]
         private static PropertyInfo s_collectionItemNameProperty;
 
-        [SecurityCritical]
+        private static ConstructorInfo s_extensionDataObjectCtor;
+
+        private static PropertyInfo s_extensionDataProperty;
+
         private static MethodInfo s_getItemContractMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_getJsonDataContractMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_getJsonMemberIndexMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_getRevisedItemContractMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_getUninitializedObjectMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_ienumeratorGetCurrentMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_ienumeratorMoveNextMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_isStartElementMethod0;
 
-        [SecurityCritical]
         private static MethodInfo s_isStartElementMethod2;
 
-        [SecurityCritical]
         private static PropertyInfo s_localNameProperty;
 
-        [SecurityCritical]
         private static PropertyInfo s_namespaceProperty;
 
-        [SecurityCritical]
         private static MethodInfo s_moveToContentMethod;
 
-        [SecurityCritical]
         private static PropertyInfo s_nodeTypeProperty;
 
         private static MethodInfo s_onDeserializationMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_readJsonValueMethod;
 
-        [SecurityCritical]
         private static ConstructorInfo s_serializationExceptionCtor;
 
         private static Type[] s_serInfoCtorArgs;
 
-        [SecurityCritical]
         private static MethodInfo s_throwDuplicateMemberExceptionMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_throwMissingRequiredMembersMethod;
 
-        [SecurityCritical]
         private static PropertyInfo s_typeHandleProperty;
 
-        [SecurityCritical]
         private static PropertyInfo s_useSimpleDictionaryFormatReadProperty;
 
-        [SecurityCritical]
         private static PropertyInfo s_useSimpleDictionaryFormatWriteProperty;
 
-        [SecurityCritical]
         private static MethodInfo s_writeAttributeStringMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_writeEndElementMethod;
 
         private static MethodInfo s_writeJsonISerializableMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_writeJsonNameWithMappingMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_writeJsonValueMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_writeStartElementMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_writeStartElementStringMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_parseEnumMethod;
 
-        [SecurityCritical]
         private static MethodInfo s_getJsonMemberNameMethod;
 
         public static PropertyInfo CollectionItemNameProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_collectionItemNameProperty == null)
@@ -121,9 +94,16 @@ namespace System.Runtime.Serialization
                 return s_collectionItemNameProperty;
             }
         }
+
+        public static ConstructorInfo ExtensionDataObjectCtor => s_extensionDataObjectCtor ??
+                                                                 (s_extensionDataObjectCtor =
+                                                                     typeof (ExtensionDataObject).GetConstructor(Globals.ScanAllMembers, null, new Type[] {}, null));
+
+        public static PropertyInfo ExtensionDataProperty => s_extensionDataProperty ??
+                                                            (s_extensionDataProperty = typeof (IExtensibleDataObject).GetProperty("ExtensionData"));
+
         public static MethodInfo GetCurrentMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_ienumeratorGetCurrentMethod == null)
@@ -136,7 +116,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo GetItemContractMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getItemContractMethod == null)
@@ -149,7 +128,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo GetJsonDataContractMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getJsonDataContractMethod == null)
@@ -162,7 +140,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo GetJsonMemberIndexMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getJsonMemberIndexMethod == null)
@@ -175,7 +152,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo GetRevisedItemContractMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getRevisedItemContractMethod == null)
@@ -188,7 +164,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo GetUninitializedObjectMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getUninitializedObjectMethod == null)
@@ -202,7 +177,6 @@ namespace System.Runtime.Serialization
 
         public static MethodInfo IsStartElementMethod0
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_isStartElementMethod0 == null)
@@ -215,7 +189,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo IsStartElementMethod2
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_isStartElementMethod2 == null)
@@ -228,7 +201,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo LocalNameProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_localNameProperty == null)
@@ -241,7 +213,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo NamespaceProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_namespaceProperty == null)
@@ -254,7 +225,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo MoveNextMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_ienumeratorMoveNextMethod == null)
@@ -267,7 +237,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo MoveToContentMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_moveToContentMethod == null)
@@ -280,7 +249,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo NodeTypeProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_nodeTypeProperty == null)
@@ -293,7 +261,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo OnDeserializationMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_onDeserializationMethod == null)
@@ -305,7 +272,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo ReadJsonValueMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_readJsonValueMethod == null)
@@ -318,7 +284,6 @@ namespace System.Runtime.Serialization
         }
         public static ConstructorInfo SerializationExceptionCtor
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_serializationExceptionCtor == null)
@@ -330,7 +295,6 @@ namespace System.Runtime.Serialization
         }
         public static Type[] SerInfoCtorArgs
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_serInfoCtorArgs == null)
@@ -342,7 +306,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo ThrowDuplicateMemberExceptionMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_throwDuplicateMemberExceptionMethod == null)
@@ -355,7 +318,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo ThrowMissingRequiredMembersMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_throwMissingRequiredMembersMethod == null)
@@ -368,7 +330,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo TypeHandleProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_typeHandleProperty == null)
@@ -381,7 +342,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo UseSimpleDictionaryFormatReadProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_useSimpleDictionaryFormatReadProperty == null)
@@ -394,7 +354,6 @@ namespace System.Runtime.Serialization
         }
         public static PropertyInfo UseSimpleDictionaryFormatWriteProperty
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_useSimpleDictionaryFormatWriteProperty == null)
@@ -407,7 +366,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteAttributeStringMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeAttributeStringMethod == null)
@@ -420,7 +378,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteEndElementMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeEndElementMethod == null)
@@ -433,7 +390,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteJsonISerializableMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeJsonISerializableMethod == null)
@@ -445,7 +401,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteJsonNameWithMappingMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeJsonNameWithMappingMethod == null)
@@ -458,7 +413,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteJsonValueMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeJsonValueMethod == null)
@@ -471,7 +425,6 @@ namespace System.Runtime.Serialization
         }
         public static MethodInfo WriteStartElementMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeStartElementMethod == null)
@@ -485,7 +438,6 @@ namespace System.Runtime.Serialization
 
         public static MethodInfo WriteStartElementStringMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_writeStartElementStringMethod == null)
@@ -499,7 +451,6 @@ namespace System.Runtime.Serialization
 
         public static MethodInfo ParseEnumMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_parseEnumMethod == null)
@@ -512,7 +463,6 @@ namespace System.Runtime.Serialization
 
         public static MethodInfo GetJsonMemberNameMethod
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_getJsonMemberNameMethod == null)

@@ -510,6 +510,7 @@ namespace System.Runtime.InteropServices
         public static bool AreComObjectsAvailableForCleanup() { throw null; }
         public static object BindToMoniker(string monikerName) { throw null; }
         public static void ChangeWrapperHandleStrength(object otp, bool fIsWeak) { }        
+        public static void CleanupUnusedObjectsInCurrentContext() { }
         public static void Copy(byte[] source, int startIndex, System.IntPtr destination, int length) { }
         public static void Copy(char[] source, int startIndex, System.IntPtr destination, int length) { }
         public static void Copy(double[] source, int startIndex, System.IntPtr destination, int length) { }
@@ -594,7 +595,8 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr OffsetOf<T>(string fieldName) { throw null; }
         public static void Prelink(System.Reflection.MethodInfo m) { }
         public static void PrelinkAll(Type c) { }
-        public static string PtrToStringAuto(System.IntPtr ptr) { throw null; }        
+        public static string PtrToStringAuto(System.IntPtr ptr) { throw null; }
+        public static string PtrToStringAuto(System.IntPtr ptr, int length) { throw null; }        
         public static string PtrToStringAnsi(System.IntPtr ptr) { throw null; }
         public static string PtrToStringAnsi(System.IntPtr ptr, int len) { throw null; }
         public static string PtrToStringBSTR(System.IntPtr ptr) { throw null; }
