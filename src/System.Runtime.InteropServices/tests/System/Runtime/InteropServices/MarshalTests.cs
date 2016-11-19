@@ -32,6 +32,7 @@ namespace System.Runtime.InteropServices
 
         [Theory]
         [MemberData(nameof(StringData))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void SecureStringToBSTR(string data)
         {
             using (var str = ToSecureString(data))
