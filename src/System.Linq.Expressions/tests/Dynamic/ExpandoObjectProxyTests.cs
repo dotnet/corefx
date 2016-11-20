@@ -66,6 +66,9 @@ namespace System.Dynamic.Tests
         private static IEnumerable<object[]> ValueCollections()
             => TestExpandos().Select(dict => new object[] {dict.Values});
 
+        private static IEnumerable<object[]> OneOfEachCollection() =>
+            KeyCollections().Take(1).Concat(ValueCollections().Take(1));
+
         private static void AssertSameCollectionIgnoreOrder<T>(ICollection<T> expected, ICollection<T> actual)
         {
             Assert.Equal(actual.Count, expected.Count);
@@ -99,6 +102,16 @@ namespace System.Dynamic.Tests
             var itemsProp = view.GetType().GetProperty("Items");
             object[] items = (object[])itemsProp.GetValue(view);
             AssertSameCollectionIgnoreOrder(keys, items);
+        }
+
+        [Theory, MemberData(nameof(OneOfEachCollection))]
+        public void ViewTypeThrowsOnNull(object collection)
+        {
+            Type debugViewType = GetDebugViewType(collection.GetType());
+            ConstructorInfo constructor = debugViewType.GetConstructors().Single();
+            var tie = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] {null}));
+            var ane = (ArgumentNullException)tie.InnerException;
+            Assert.Equal("collection", ane.ParamName);
         }
     }
 }
