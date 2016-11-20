@@ -285,7 +285,8 @@ namespace System.IO
                 if (_stream.CanWrite)
                     _stream.Flush();
 
-                Debug.Assert(_writePos == 0 && _readPos == 0 && _readLen == 0);
+                // If the Stream was seekable, then we should have called FlushRead which resets _readPos & _readLen.
+                Debug.Assert(_writePos == 0 && (!_stream.CanSeek || (_readPos == 0 && _readLen == 0)));
                 return;
             }
 
@@ -337,7 +338,8 @@ namespace System.IO
                     if (_stream.CanWrite)
                         await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-                    Debug.Assert(_writePos == 0 && _readPos == 0 && _readLen == 0);
+                    // If the Stream was seekable, then we should have called FlushRead which resets _readPos & _readLen.
+                    Debug.Assert(_writePos == 0 && (!_stream.CanSeek || (_readPos == 0 && _readLen == 0)));
                     return;
                 }
 
