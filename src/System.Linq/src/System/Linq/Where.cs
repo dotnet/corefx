@@ -246,7 +246,7 @@ namespace System.Linq
                 while ((uint)index < (uint)source.Length)
                 {
                     TSource item = source[index];
-                    index = ++_state - 1;
+                    index = _state++;
                     if (_predicate(item))
                     {
                         _current = item;
@@ -463,7 +463,7 @@ namespace System.Linq
                 while ((uint)index < (uint)source.Length)
                 {
                     TSource item = source[index];
-                    index = ++_state - 1;
+                    index = _state++;
                     if (_predicate(item))
                     {
                         _current = _selector(item);
