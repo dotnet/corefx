@@ -99,6 +99,7 @@
     <Compile Include="Dynamic\BindingRestrictionsTests.cs" />
     <Compile Include="Dynamic\CallInfoTests.cs" />
     <Compile Include="Dynamic\DynamicObjectDefaultBehaviorTests.cs" />
+    <Compile Include="Dynamic\ExpandoObjectProxyTests.cs" />
     <Compile Include="Dynamic\UnaryOperationTests.cs .cs" />
     <Compile Include="ExceptionHandling\ExceptionHandlingExpressions.cs" />
     <Compile Include="ExpressionTests.cs" />
