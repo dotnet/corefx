@@ -10,22 +10,32 @@ namespace System
     {
         public static bool IsNormalized(this string strInput)
         {
-            return strInput.IsNormalized(NormalizationForm.FormC);
+            return IsNormalized(strInput, NormalizationForm.FormC);
         }
 
         public static bool IsNormalized(this string strInput, NormalizationForm normalizationForm)
         {
+            if (strInput == null)
+            {
+                throw new ArgumentNullException(nameof(strInput));
+            }
+
             return strInput.IsNormalized(normalizationForm);
         }
 
         public static string Normalize(this string strInput)
         {
             // Default to Form C
-            return strInput.Normalize(NormalizationForm.FormC);
+            return Normalize(strInput, NormalizationForm.FormC);
         }
 
         public static string Normalize(this string strInput, NormalizationForm normalizationForm)
         {
+            if (strInput == null)
+            {
+                throw new ArgumentNullException(nameof(strInput));
+            }
+
             return strInput.Normalize(normalizationForm);
         }
     }
