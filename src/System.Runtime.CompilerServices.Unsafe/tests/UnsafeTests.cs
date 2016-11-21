@@ -314,6 +314,50 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(CopyBlockData))]
+        public static unsafe void CopyBlockRef(int numBytes)
+        {
+            byte* source = stackalloc byte[numBytes];
+            byte* destination = stackalloc byte[numBytes];
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                byte value = (byte)(i % 255);
+                source[i] = value;
+            }
+
+            Unsafe.CopyBlock(ref destination[0], ref source[0], numBytes);
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                byte value = (byte)(i % 255);
+                Assert.Equal(value, destination[i]);
+                Assert.Equal(source[i], destination[i]);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CopyBlockData))]
+        public static unsafe void CopyBlockRefIntData(int numBytes)
+        {
+            var source = stackalloc int[numBytes];
+            var destination = stackalloc int[numBytes];
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                source[i] = i;
+            }
+
+            Unsafe.CopyBlock(ref destination[0], ref source[0], numBytes);
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                Assert.Equal(i, destination[i]);
+                Assert.Equal(source[i], destination[i]);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CopyBlockData))]
         public static unsafe void CopyBlockUnaligned(int numBytes)
         {
             byte* source = stackalloc byte[numBytes + 1];
@@ -359,6 +403,54 @@ namespace System.Runtime.CompilerServices
             {
                 byte value = (byte)(i % 255);
                 Assert.Equal(value, destination[i]);
+                Assert.Equal(source[i], destination[i]);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CopyBlockData))]
+        public static unsafe void CopyBlockUnalignedRef(int numBytes)
+        {
+            byte* source = stackalloc byte[numBytes + 1];
+            byte* destination = stackalloc byte[numBytes + 1];
+            source += 1;      // +1 = make unaligned
+            destination += 1; // +1 = make unaligned
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                byte value = (byte)(i % 255);
+                source[i] = value;
+            }
+
+            Unsafe.CopyBlockUnaligned(ref destination[0], ref source[0], numBytes);
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                byte value = (byte)(i % 255);
+                Assert.Equal(value, destination[i]);
+                Assert.Equal(source[i], destination[i]);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CopyBlockData))]
+        public static unsafe void CopyBlockUnalignedRefIntData(int numBytes)
+        {
+            int* source = stackalloc int[numBytes + 1];
+            int* destination = stackalloc int[numBytes + 1];
+            source += 1;      // +1 = make unaligned (only on 64-bit)
+            destination += 1; // +1 = make unaligned (only on 64-bit)
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                source[i] = i;
+            }
+
+            Unsafe.CopyBlockUnaligned(ref destination[0], ref source[0], numBytes);
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                Assert.Equal(i, destination[i]);
                 Assert.Equal(source[i], destination[i]);
             }
         }

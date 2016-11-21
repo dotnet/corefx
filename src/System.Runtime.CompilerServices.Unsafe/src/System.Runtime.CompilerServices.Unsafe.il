@@ -141,6 +141,20 @@
         ret
   } // end of method Unsafe::CopyBlock
 
+  .method public hidebysig static void CopyBlock<T>(!!T& destination, !!T& source, int32 elementCount) cil managed aggressiveinlining
+  {
+        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+        .maxstack 4
+        ldarg.0
+        ldarg.1
+        ldarg.2
+        sizeof !!T
+        conv.i
+        mul
+        cpblk
+        ret
+  } // end of method Unsafe::CopyBlock
+
   .method public hidebysig static void CopyBlockUnaligned(void* destination, void* source, uint32 byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
@@ -164,6 +178,21 @@
         cpblk
         ret
   } // end of method Unsafe::CopyBlockUnaligned
+
+  .method public hidebysig static void CopyBlockUnaligned<T>(!!T& destination, !!T& source, int32 elementCount) cil managed aggressiveinlining
+  {
+        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+        .maxstack 4
+        ldarg.0
+        ldarg.1
+        ldarg.2
+        sizeof !!T
+        conv.i
+        mul
+        unaligned. 0x1
+        cpblk
+        ret
+  } // end of method Unsafe::CopyBlock
 
   .method public hidebysig static void InitBlock(void* startAddress, uint8 'value', uint32 byteCount) cil managed aggressiveinlining
   {
