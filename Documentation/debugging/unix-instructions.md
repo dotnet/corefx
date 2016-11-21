@@ -1,7 +1,7 @@
-Debugging CoreFX on Linux
+Debugging CoreFX on Unix
 ==========================
 
-CoreFX can be debugged on linux using both lldb and visual studio code
+CoreFX can be debugged on unix using both lldb and visual studio code
 
 ## Using lldb and SOS
 
