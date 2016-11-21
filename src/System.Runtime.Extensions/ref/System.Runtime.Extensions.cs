@@ -948,7 +948,6 @@ namespace System
     {
         public ContextStaticAttribute() { }
     }
-
     public static class StringNormalizationExtensions
     {
         public static bool IsNormalized(this string value) { throw null; }
