@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.TargetingPack.Private.WinRT": "1.0.2"
+    "Microsoft.TargetingPack.Private.WinRT": "1.0.3"
   },
   "frameworks": {
     "netstandard1.0": {}

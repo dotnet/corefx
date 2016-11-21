@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <BinPlaceStuffDependsOn Condition="'$(IsReferenceAssembly)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceReferenceAssembly</BinPlaceStuffDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BinPlaceStuff" DependsOnTargets="$(BinPlaceStuffDependsOn)" AfterTargets="CopyFilesToOutputDirectory">
+  </Target>
+
+  <Target Name="BinPlaceReferenceAssembly" DependsOnTargets="GetTargetingPackDir">
+    <Copy Condition="'$(TargetingPackDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(TargetingPackDir)" />
+  </Target>
+
+  <Target Name="GetTargetingPackDir">
+    <PropertyGroup>
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))">$(BinDir)netcoreapp\TargetingPack</TargetingPackDir>
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))">$(BinDir)netcoreapp\TargetingPack</TargetingPackDir>
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETFramework'))">$(BinDir)net\TargetingPack</TargetingPackDir>
+    </PropertyGroup>
+    <Error Condition="'$(TargetingPackDir)' == ''" Message="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
+    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
+  </Target>
+</Project>
