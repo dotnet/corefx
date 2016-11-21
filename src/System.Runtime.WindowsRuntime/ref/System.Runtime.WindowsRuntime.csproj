@@ -13,8 +13,6 @@
                        match the output assembly name 'System.Runtime.WindowsRuntime, Version=4.0.10.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.
      -->
     <NoWarn>1698</NoWarn>
-    <OutputType>Library</OutputType>
-    <NuGetTargetMoniker>.NETStandard,Version=v1.2</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Runtime.WindowsRuntime.cs" />
