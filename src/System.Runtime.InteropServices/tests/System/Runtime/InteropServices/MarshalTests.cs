@@ -10,19 +10,18 @@ namespace System.Runtime.InteropServices
 {
     public static class MarshalTests
     {
-        public static IEnumerable<object[]> StringData =>
-            new []
-            {
-                new object[] { "pizza" },
-                new object[] { "pepperoni" },
-                new object[] { "password" },
-                new object[] { "P4ssw0rdAa1!" },
-            };
+        public static readonly object[][] StringData =
+        {
+            new object[] { "pizza" },
+            new object[] { "pepperoni" },
+            new object[] { "password" },
+            new object[] { "P4ssw0rdAa1!" },
+        };
 
         private static SecureString ToSecureString(string data)
         {
             var str = new SecureString();
-            foreach (var c in data)
+            foreach (char c in data)
             {
                 str.AppendChar(c);
             }
@@ -35,7 +34,7 @@ namespace System.Runtime.InteropServices
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void SecureStringToBSTR(string data)
         {
-            using (var str = ToSecureString(data))
+            using (SecureString str = ToSecureString(data))
             {
                 IntPtr bstr = Marshal.SecureStringToBSTR(str);
                 try
