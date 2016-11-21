@@ -16,9 +16,8 @@
     <PropertyGroup>
       <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))">$(BinDir)netcoreapp\TargetingPack</TargetingPackDir>
       <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))">$(BinDir)netstandard\TargetingPack</TargetingPackDir>
-      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETFramework'))">$(BinDir)net\TargetingPack</TargetingPackDir>
     </PropertyGroup>
-    <Error Condition="'$(TargetingPackDir)' == ''" Message="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
+    <Error Condition="'$(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
     <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
   </Target>
 </Project>
