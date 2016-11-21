@@ -43,6 +43,13 @@ set(NATIVECRYPTO_SOURCES
     pal_x509ext.cpp
 )
 
+if (FEATURE_DISTRO_AGNOSTIC_SSL)
+    list(APPEND NATIVECRYPTO_SOURCES
+        opensslshim.cpp
+    )
+    add_definitions(-DFEATURE_DISTRO_AGNOSTIC_SSL)
+endif()
+
 add_library(objlib OBJECT ${NATIVECRYPTO_SOURCES} ${VERSION_FILE_PATH})
 
 add_library(System.Security.Cryptography.Native
@@ -59,36 +66,46 @@ add_library(System.Security.Cryptography.Native.OpenSsl
 set_target_properties(System.Security.Cryptography.Native PROPERTIES PREFIX "")
 set_target_properties(System.Security.Cryptography.Native.OpenSsl PROPERTIES PREFIX "")
 
-target_link_libraries(System.Security.Cryptography.Native
-  ${OPENSSL_CRYPTO_LIBRARY}
-  ${OPENSSL_SSL_LIBRARY}
-)
+if (NOT FEATURE_DISTRO_AGNOSTIC_SSL)
+  target_link_libraries(System.Security.Cryptography.Native
+    ${OPENSSL_CRYPTO_LIBRARY}
+    ${OPENSSL_SSL_LIBRARY}
+  )
 
-target_link_libraries(System.Security.Cryptography.Native.OpenSsl
-  ${OPENSSL_CRYPTO_LIBRARY}
-  ${OPENSSL_SSL_LIBRARY}
-)
+  target_link_libraries(System.Security.Cryptography.Native.OpenSsl
+    ${OPENSSL_CRYPTO_LIBRARY}
+    ${OPENSSL_SSL_LIBRARY}
+  )
 
-# On OS X every library emits the manner in which it should be referenced.
-# All of our libraries are referenced via @rpath, which is similar to how Linux and Windows
-# libraries are loaded. The homebrew installation of OpenSSL (libcrypto, libssl) uses the
-# full path to the library installation. This means that this library is not flexible to
-# users installing newer libcrypto in the working directory, or to systems which do not
-# install to the same path as homebrew does.
-#
-# So, after compiling, rewrite the references to libcrypto to be more flexible.
-if (APPLE)
-    add_custom_command(TARGET System.Security.Cryptography.Native POST_BUILD
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native>
-        )
+  # On OS X every library emits the manner in which it should be referenced.
+  # All of our libraries are referenced via @rpath, which is similar to how Linux and Windows
+  # libraries are loaded. The homebrew installation of OpenSSL (libcrypto, libssl) uses the
+  # full path to the library installation. This means that this library is not flexible to
+  # users installing newer libcrypto in the working directory, or to systems which do not
+  # install to the same path as homebrew does.
+  #
+  # So, after compiling, rewrite the references to libcrypto to be more flexible.
+  if (APPLE)
+      add_custom_command(TARGET System.Security.Cryptography.Native POST_BUILD
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native>
+          )
+  
+      add_custom_command(TARGET System.Security.Cryptography.Native.OpenSsl POST_BUILD
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
+          )
+  endif()
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL FreeBSD AND NOT CMAKE_SYSTEM_NAME STREQUAL NetBSD)
+  target_link_libraries(System.Security.Cryptography.Native
+    dl
+  )
 
-    add_custom_command(TARGET System.Security.Cryptography.Native.OpenSsl POST_BUILD
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
-        )
+  target_link_libraries(System.Security.Cryptography.Native.OpenSsl
+    dl
+  )
 endif()
 
 include(configure.cmake)
