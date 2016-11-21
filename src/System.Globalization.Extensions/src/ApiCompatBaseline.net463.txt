@@ -1,0 +1,2 @@
+TypesMustExist : Type 'System.StringNormalizationExtensions' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Globalization.GlobalizationExtensions' does not exist in the implementation but it does exist in the contract.
