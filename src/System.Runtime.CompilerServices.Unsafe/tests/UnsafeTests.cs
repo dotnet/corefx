@@ -337,21 +337,22 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(CopyBlockData))]
-        public static unsafe void CopyBlockRefIntData(int numBytes)
+        public static unsafe void CopyBlockRefShortData(int numBytes)
         {
-            var source = stackalloc int[numBytes];
-            var destination = stackalloc int[numBytes];
+            short* source = stackalloc short[numBytes];
+            short* destination = stackalloc short[numBytes];
 
             for (int i = 0; i < numBytes; i++)
             {
-                source[i] = i;
+                source[i] = (short)i;
             }
 
             Unsafe.CopyBlock(ref destination[0], ref source[0], numBytes);
 
             for (int i = 0; i < numBytes; i++)
             {
-                Assert.Equal(i, destination[i]);
+                var value = (short)i;
+                Assert.Equal(value, destination[i]);
                 Assert.Equal(source[i], destination[i]);
             }
         }
@@ -434,23 +435,24 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(CopyBlockData))]
-        public static unsafe void CopyBlockUnalignedRefIntData(int numBytes)
+        public static unsafe void CopyBlockUnalignedRefShortData(int numBytes)
         {
-            int* source = stackalloc int[numBytes + 1];
-            int* destination = stackalloc int[numBytes + 1];
-            source += 1;      // +1 = make unaligned (only on 64-bit)
-            destination += 1; // +1 = make unaligned (only on 64-bit)
+            short* source = stackalloc short[numBytes + 1];
+            short* destination = stackalloc short[numBytes + 1];
+            source += 1;      // +1 = make unaligned
+            destination += 1; // +1 = make unaligned
 
             for (int i = 0; i < numBytes; i++)
             {
-                source[i] = i;
+                source[i] = (short)i;
             }
 
             Unsafe.CopyBlockUnaligned(ref destination[0], ref source[0], numBytes);
 
             for (int i = 0; i < numBytes; i++)
             {
-                Assert.Equal(i, destination[i]);
+                var value = (short)i;
+                Assert.Equal(value, destination[i]);
                 Assert.Equal(source[i], destination[i]);
             }
         }
