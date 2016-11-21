@@ -47,8 +47,21 @@ namespace System.IO.Tests
             byte[] data = new byte[c_DefaultBufferSize];
             new Random(1).NextBytes(data);
 
-            using (FileStream fs = CreateFileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read, c_DefaultBufferSize, option))
+            FileStream fs = null;
+            try
             {
+                try
+                {
+                    fs = CreateFileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read, c_DefaultBufferSize, option);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    if ((option & FileOptions.Encrypted) == FileOptions.Encrypted)
+                        fs = CreateFileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read, c_DefaultBufferSize, option & ~FileOptions.Encrypted);
+                    else
+                        throw;
+                }
+
                 // make sure we can write, seek, and read data with this option set
                 fs.Write(data, 0, data.Length);
                 fs.Position = 0;
@@ -63,6 +76,10 @@ namespace System.IO.Tests
                         break;
                     totalRead += numRead;
                 }
+            }
+            finally
+            {
+                fs?.Dispose();
             }
         }
 
