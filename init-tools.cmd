@@ -77,7 +77,7 @@ if %UPDATE_CLI_ERRORLEVEL% GTR 1 (
   exit /b %UPDATE_CLI_ERRORLEVEL%
 )
 
-echo Copying supplemental overrides from "%~dp0/Tools-Override."
+echo Copying supplemental overrides from Tools-Override.
 cp %~dp0Tools-Override/* %~dp0Tools
 
 :: Create sempahore file

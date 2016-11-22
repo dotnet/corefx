@@ -7,9 +7,7 @@
     <AssemblyVersion Condition="'$(TargetGroup)'=='net462' OR '$(TargetGroup)'=='netstandard1.5'">4.1.1.0</AssemblyVersion>
     <ContractProject Condition="'$(AssemblyVersion)'=='4.1.1.0'">../ref/4.1.0/System.Runtime.depproj</ContractProject>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <PackageTargetFramework Condition="'$(TargetGroup)'==''">netstandard1.7;uap10.1</PackageTargetFramework>
     <GenFacadesArgs Condition="'$(TargetGroup)' == 'uap101aot'">$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
@@ -72,6 +70,7 @@
     <TargetingPackReference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Private.CoreLib" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

@@ -2,14 +2,21 @@
 <Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <IsRuntimeAssembly Condition="'$(IsRuntimeAssembly)'=='' AND '$(IsReferenceAssembly)' != 'true'">true</IsRuntimeAssembly>
     <BinPlaceStuffDependsOn Condition="'$(IsReferenceAssembly)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceReferenceAssembly</BinPlaceStuffDependsOn>
+    <BinPlaceStuffDependsOn Condition="'$(IsRuntimeAssembly)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceRuntimeAssembly</BinPlaceStuffDependsOn>
   </PropertyGroup>
 
   <Target Name="BinPlaceStuff" DependsOnTargets="$(BinPlaceStuffDependsOn)" AfterTargets="CopyFilesToOutputDirectory">
+    <Message Importance="high" Text="IsRuntimeAssembly: $(IsRuntimeAssembly)" />
   </Target>
 
   <Target Name="BinPlaceReferenceAssembly" DependsOnTargets="GetTargetingPackDir">
     <Copy Condition="'$(TargetingPackDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(TargetingPackDir)" />
+  </Target>
+
+  <Target Name="BinPlaceRuntimeAssembly" DependsOnTargets="GetRuntimeDir">
+    <Copy Condition="'$(RuntimeDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(RuntimeDir)" />
   </Target>
 
   <Target Name="GetTargetingPackDir">
@@ -19,5 +26,14 @@
     </PropertyGroup>
     <Error Condition="'$(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
     <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
+  </Target>
+
+    <Target Name="GetRuntimeDir">
+    <PropertyGroup>
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))">$(BinDir)netcoreapp\Runtime</RuntimeDir>
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))">$(BinDir)netstandard\Runtime</RuntimeDir>
+    </PropertyGroup>
+    <Error Condition="'$(RuntimeDir)' == ''" Text="No Runtime directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
+    <Message Text="Got RuntimeDir:$(RuntimeDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
   </Target>
 </Project>
