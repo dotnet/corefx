@@ -2,12 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
-    <Project Include="System.Runtime.Extensions.csproj">
-      <OSGroup>Unix</OSGroup>
-    </Project>
-    <Project Include="System.Runtime.Extensions.csproj">
-      <OSGroup>Windows_NT</OSGroup>
-    </Project>
+    <Project Include="System.Runtime.Extensions.csproj" />
     <Project Include="System.Runtime.Extensions.csproj">
       <TargetGroup>net462</TargetGroup>
     </Project>
