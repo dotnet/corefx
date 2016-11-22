@@ -433,8 +433,6 @@
     <!-- TODO: Remove this after a package update -->
     <ProjectReference Include="../../System.Security.Cryptography.Primitives/src/System.Security.Cryptography.Primitives.csproj" />
   </ItemGroup>
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
