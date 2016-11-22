@@ -287,7 +287,7 @@ namespace System.Linq.Expressions
 
         internal override ParameterExpression GetParameter(int index)
         {
-            throw new ArgumentOutOfRangeException(nameof(index));
+            throw Error.ArgumentOutOfRange(nameof(index));
         }
 
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => EmptyReadOnlyCollection<ParameterExpression>.Instance;
@@ -318,7 +318,7 @@ namespace System.Linq.Expressions
             switch (index)
             {
                 case 0: return ReturnObject<ParameterExpression>(_par0);
-                default: throw new ArgumentOutOfRangeException(nameof(index));
+                default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
 
@@ -358,7 +358,7 @@ namespace System.Linq.Expressions
             {
                 case 0: return ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
+                default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
 
@@ -401,7 +401,7 @@ namespace System.Linq.Expressions
                 case 0: return ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
                 case 2: return _par2;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
+                default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
 
