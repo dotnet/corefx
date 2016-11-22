@@ -34,7 +34,7 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => TypeCore;
 
-        protected abstract Type TypeCore { get; }
+        internal abstract Type TypeCore { get; }
 
         /// <summary>
         /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
@@ -53,7 +53,7 @@ namespace System.Linq.Expressions
         /// <remarks>Used for debugging purposes.</remarks>
         public string Name => NameCore;
 
-        protected virtual string NameCore => null;
+        internal virtual string NameCore => null;
 
         /// <summary>
         /// Gets the body of the lambda expression.
@@ -71,7 +71,7 @@ namespace System.Linq.Expressions
         /// </summary>
         public bool TailCall => TailCallCore;
 
-        protected virtual bool TailCallCore => false;
+        internal virtual bool TailCallCore => false;
 
         [ExcludeFromCodeCoverage] // Unreachable
         internal virtual ReadOnlyCollection<ParameterExpression> GetOrMakeParameters()
@@ -83,7 +83,7 @@ namespace System.Linq.Expressions
         ParameterExpression IParameterProvider.GetParameter(int index) => GetParameter(index);
 
         [ExcludeFromCodeCoverage] // Unreachable
-        protected internal virtual ParameterExpression GetParameter(int index)
+        internal virtual ParameterExpression GetParameter(int index)
         {
             throw ContractUtils.Unreachable;
         }
@@ -92,7 +92,7 @@ namespace System.Linq.Expressions
         int IParameterProvider.ParameterCount => ParameterCount;
 
         [ExcludeFromCodeCoverage] // Unreachable
-        protected internal virtual int ParameterCount
+        internal virtual int ParameterCount
         {
             get
             {
@@ -166,7 +166,7 @@ namespace System.Linq.Expressions
         {
         }
 
-        protected sealed override Type TypeCore => typeof(TDelegate);
+        internal sealed override Type TypeCore => typeof(TDelegate);
 
         /// <summary>
         /// Produces a delegate that represents the lambda expression.
@@ -283,11 +283,11 @@ namespace System.Linq.Expressions
         {
         }
 
-        protected internal override int ParameterCount => 0;
+        internal override int ParameterCount => 0;
 
-        protected internal override ParameterExpression GetParameter(int index)
+        internal override ParameterExpression GetParameter(int index)
         {
-            throw new InvalidOperationException();
+            throw new ArgumentOutOfRangeException(nameof(index));
         }
 
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => EmptyReadOnlyCollection<ParameterExpression>.Instance;
@@ -311,14 +311,14 @@ namespace System.Linq.Expressions
             _par0 = par0;
         }
 
-        protected internal override int ParameterCount => 1;
+        internal override int ParameterCount => 1;
 
-        protected internal override ParameterExpression GetParameter(int index)
+        internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
                 case 0: return ReturnObject<ParameterExpression>(_par0);
-                default: throw new InvalidOperationException();
+                default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
@@ -350,15 +350,15 @@ namespace System.Linq.Expressions
             _par1 = par1;
         }
 
-        protected internal override int ParameterCount => 2;
+        internal override int ParameterCount => 2;
 
-        protected internal override ParameterExpression GetParameter(int index)
+        internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
                 case 0: return ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
-                default: throw new InvalidOperationException();
+                default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
@@ -392,16 +392,16 @@ namespace System.Linq.Expressions
             _par2 = par2;
         }
 
-        protected internal override int ParameterCount => 3;
+        internal override int ParameterCount => 3;
 
-        protected internal override ParameterExpression GetParameter(int index)
+        internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
                 case 0: return ReturnObject<ParameterExpression>(_par0);
                 case 1: return _par1;
                 case 2: return _par2;
-                default: throw new InvalidOperationException();
+                default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
@@ -431,9 +431,9 @@ namespace System.Linq.Expressions
             _parameters = parameters;
         }
 
-        protected internal override int ParameterCount => _parameters.Count;
+        internal override int ParameterCount => _parameters.Count;
 
-        protected internal override ParameterExpression GetParameter(int index) => _parameters[index];
+        internal override ParameterExpression GetParameter(int index) => _parameters[index];
 
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(ref _parameters);
 
@@ -455,8 +455,8 @@ namespace System.Linq.Expressions
             TailCallCore = tailCall;
         }
 
-        protected override string NameCore { get; }
-        protected override bool TailCallCore { get; }
+        internal override string NameCore { get; }
+        internal override bool TailCallCore { get; }
     }
 
     public partial class Expression
