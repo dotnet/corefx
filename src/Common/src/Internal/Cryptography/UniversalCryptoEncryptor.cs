@@ -19,6 +19,7 @@ namespace Internal.Cryptography
     internal sealed class UniversalCryptoEncryptor : UniversalCryptoTransform
     {
         private static readonly RandomNumberGenerator s_randomNumberGenerator = RandomNumberGenerator.Create();
+
         public UniversalCryptoEncryptor(PaddingMode paddingMode, BasicSymmetricCipher basicSymmetricCipher)
             : base(paddingMode, basicSymmetricCipher)
         {
