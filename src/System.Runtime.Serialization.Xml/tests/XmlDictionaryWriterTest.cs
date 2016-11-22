@@ -281,9 +281,9 @@ public static class XmlDictionaryWriterTest
     [Fact]
     public static void IXmlTextReaderInitializerTest()
     {
-        SampleTextWriter writer = new SampleTextWriter();
-        MemoryStream ms = new MemoryStream();
-        Encoding encoding = Encoding.UTF8;
+        var writer = new SampleTextWriter();
+        var ms = new MemoryStream();
+        var encoding = Encoding.UTF8;
         writer.SetOutput(ms, encoding, true);
     }
 

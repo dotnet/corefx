@@ -4147,6 +4147,7 @@ public class SampleTextWriter : IXmlTextWriterInitializer
     public Stream Stream;
     public SampleTextWriter()
     {
+
     }
     public void SetOutput(Stream stream, Encoding encoding, bool ownsStream)
     {
