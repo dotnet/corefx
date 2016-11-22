@@ -30,10 +30,11 @@ namespace System.Security.Cryptography.Rsa.Tests
                 {
                     bool hasSupport = true;
 
-                    // For Windows 7 (Microsoft Windows 6.1) this is false for RSACng.
+                    // For Windows 7 (Microsoft Windows 6.1) and Windows 8 (Microsoft Windows 6.2) this is false for RSACng.
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        hasSupport = !RuntimeInformation.OSDescription.Contains("Windows 6.1");
+                        if (RuntimeInformation.OSDescription.Contains("Windows 6.1") || RuntimeInformation.OSDescription.Contains("Windows 6.2"))
+                            hasSupport = false;
                     }
 
                     _supports384PrivateKey = hasSupport;
