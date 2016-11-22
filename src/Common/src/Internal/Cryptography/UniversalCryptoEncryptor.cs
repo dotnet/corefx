@@ -57,8 +57,10 @@ namespace Internal.Cryptography
                 // x 00 00 00 00 00 00 07
                 case PaddingMode.ANSIX923:
                     result = new byte[count + padBytes];
-                    Buffer.BlockCopy(block, 0, result, 0, count);
+
+                    Buffer.BlockCopy(block, offset, result, 0, count);
                     result[result.Length - 1] = (byte)padBytes;
+
                     break;
 
                 // ISO padding fills the blocks up with random bytes and adds the total number of padding
@@ -68,9 +70,10 @@ namespace Internal.Cryptography
                 case PaddingMode.ISO10126:
                     result = new byte[count + padBytes];
                     
-                    s_randomNumberGenerator.GetBytes(result, 0, result.Length - count - 1);
-                    Buffer.BlockCopy(block, 0, result, 0, count);
+                    Buffer.BlockCopy(block, offset, result, 0, count);
+                    s_randomNumberGenerator.GetBytes(result, count + 1, padBytes - 1);
                     result[result.Length - 1] = (byte)padBytes;
+
                     break;
 
                 // PKCS padding fills the blocks up with bytes containing the total number of padding bytes

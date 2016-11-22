@@ -136,10 +136,19 @@ namespace Internal.Cryptography
         {
             get
             {
-                // Aes automatically strips padding after decryption when PKCS7 padding is in effect.
-                // It does not do so when PaddingMode.Zeroes in effect as that padding mode is not sufficiently
-                // self-describing to do the operation safely.
-                return PaddingMode == PaddingMode.PKCS7;
+                // Some padding modes encode sufficient information to allow for automatic depadding to happen.
+                switch (PaddingMode)
+                {
+                    case PaddingMode.PKCS7:
+                    case PaddingMode.ANSIX923:
+                    case PaddingMode.ISO10126:
+                        return true;
+                    case PaddingMode.Zeros:
+                    case PaddingMode.None:
+                        return false;
+                    default:
+                        throw new CryptographicException(SR.Cryptography_InvalidPadding);
+                }
             }
         }
 
