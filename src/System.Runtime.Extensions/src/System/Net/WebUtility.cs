@@ -52,7 +52,6 @@ namespace System.Net
 
         public static void HtmlEncode(string value, TextWriter output)
         {
-            // Since we already have a private method that decodes the value using a StringBuilder we don't want to have duplicate code in order to have a better mantainance.
             output.Write(HtmlEncode(value));
         }
 
@@ -162,7 +161,6 @@ namespace System.Net
 
         public static void HtmlDecode(string value, TextWriter output)
         {
-            // Since we already have a private method that decodes the value using a StringBuilder we don't want to have duplicate code in order to have a better mantainance.
             output.Write(HtmlDecode(value));
         }
 

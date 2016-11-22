@@ -10,12 +10,12 @@ namespace System.Net.Tests
 {
     public partial class WebUtilityTests
     {
-    	[Theory]
+        [Theory]
         [MemberData(nameof(HtmlDecode_TestData))]
         public static void HtmlDecode_TextWriterOutput(string value, string expected)
         {
             if(value == null)
-            	expected = string.Empty;
+                expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlDecode(value, output);
             Assert.Equal(expected, output.ToString());
@@ -25,8 +25,8 @@ namespace System.Net.Tests
         [MemberData(nameof(HtmlEncode_TestData))]
         public static void HtmlEncode_TextWriterOutput(string value, string expected)
         {
-        	if(value == null)
-            	expected = string.Empty;
+            if(value == null)
+                expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlEncode(value, output);
             Assert.Equal(expected, output.ToString());
