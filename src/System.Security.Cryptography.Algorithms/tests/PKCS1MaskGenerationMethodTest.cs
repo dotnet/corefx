@@ -32,42 +32,45 @@ namespace System.Security.Cryptography.Algorithms.Tests
 	public class PKCS1MaskGenerationMethodTest 
 	{
 		[Fact]
-		public void PropertyTest() 
+		public static void PropertyTest()
 		{
+			PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 			Assert.Equal("SHA1", pkcs1.HashName);
 
-			pkcs1.HashName = "MD5";
-			Assert.Equal("MD5", pkcs1.HashName);
+			Assert.Throws<PlatformNotSupportedException>(() => pkcs1.HashName = "MD5");
 
 			pkcs1.HashName = null;
 			Assert.Equal("SHA1", pkcs1.HashName);
 		}
 
 		[Fact]
-		public void EmptyMaskTest() 
+		public static void EmptyMaskTest()
 		{
+			PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 			byte[] random = { 0x01 };
 			byte[] mask = pkcs1.GenerateMask(random, 0);
 			Assert.Equal(0, mask.Length);
 		}
 
 		[Fact]
-		public void NullSeedTest() 
+		public static void NullSeedTest()
 		{
+			PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 			Assert.Throws<NullReferenceException>(() => pkcs1.GenerateMask(null, 10));
 		}
 
 		[Fact]
-		public void NegativeReturnParameterTest() 
+		public static void NegativeReturnParameterTest()
 		{
+			PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 			byte[] random = { 0x01 };
 			Assert.Throws<OverflowException>(() => pkcs1.GenerateMask(random, -1));
 		}
 
 		[Fact]
-		public void GenerateMaskTest()
+		public static void GenerateMaskTest()
 		{
-			pkcs1.HashName = "SHA1";
+			PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 			
 			byte[] seed = { 0xaa, 0xfd, 0x12, 0xf6, 0x59, 0xca, 0xe6, 0x34, 0x89, 0xb4, 0x79, 0xe5, 0x07, 0x6d, 0xde, 0xc2, 0xf0, 0x6c, 0xb5, 0x8f };
 			int LengthDB = 107;
@@ -101,7 +104,5 @@ namespace System.Security.Cryptography.Algorithms.Tests
 
 			Assert.Equal(expectedSeedMask, seedMask);
 		}
-
-		private PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
 	}
 }

@@ -18,12 +18,21 @@ namespace System.Security.Cryptography
         public string HashName
         {
             get { return _hashNameValue; }
-            set { _hashNameValue = value ?? "SHA1"; }
+            set 
+            { 
+                if (value != null && value != "SHA1")
+                {
+                    throw new PlatformNotSupportedException();
+                }
+
+                _hashNameValue = "SHA1";
+            }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "CryptoConfig.CreateFromName is not supported on Unix platforms, should create SHA1 directly")]
         public override byte[] GenerateMask(byte[] rgbSeed, int cbReturn)
         {
-            HashAlgorithm hash = (HashAlgorithm)CryptoConfig.CreateFromName(_hashNameValue);
+            HashAlgorithm hash = SHA1.Create();
             byte[] rgbCounter = new byte[4];
             byte[] rgbT = new byte[cbReturn];
 
