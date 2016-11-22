@@ -90,16 +90,6 @@ build_native()
         echo "Failed to build corefx native components."
         exit 1
     fi
-    
-    if [ "$__BuildOS" != "OSX" ]; then
-        echo "Verifying System.Security.Cryptography.Native.OpenSsl.so dependencies"
-
-        ldd -r $__BinDir/System.Security.Cryptography.Native.OpenSsl.so | awk 'BEGIN {count=0} /undefined symbol:/ { if (count==0) {print "Undefined symbol(s) found:"} print " " $3; count++ } END {if (count>0) exit(1)}'
-        if [ $? != 0 ]; then
-            echo "Failed. System.Security.Cryptography.Native.OpenSsl.so has undefined dependencies. These are likely OpenSSL APIs that need to be added to opensslshim.h"
-            exit 1
-        fi    
-    fi
 }
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)

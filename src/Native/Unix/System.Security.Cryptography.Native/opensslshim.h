@@ -7,8 +7,7 @@
 // different versioned so files naming and different configuration options
 // on various Linux distributions.
 
-#ifndef __OPENSSLSHIM_H__
-#define __OPENSSLSHIM_H__
+#pragma once
 
 // All the openssl includes need to be here to ensure that the APIs we use
 // are overriden to be called through our function pointers.
@@ -565,7 +564,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_EXTENSION_get_data X509_EXTENSION_get_data_ptr
 #define X509_EXTENSION_get_object X509_EXTENSION_get_object_ptr
 #define X509_free X509_free_ptr
-#define X509_free X509_free_ptr
 #define X509_get_default_cert_dir X509_get_default_cert_dir_ptr
 #define X509_get_default_cert_dir_env X509_get_default_cert_dir_env_ptr
 #define X509_get_default_cert_file X509_get_default_cert_file_ptr
@@ -581,7 +579,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_NAME_entry_count X509_NAME_entry_count_ptr
 #define X509_NAME_ENTRY_get_data X509_NAME_ENTRY_get_data_ptr
 #define X509_NAME_ENTRY_get_object X509_NAME_ENTRY_get_object_ptr
-#define X509_NAME_free X509_NAME_free_ptr
 #define X509_NAME_free X509_NAME_free_ptr
 #define X509_NAME_get_entry X509_NAME_get_entry_ptr
 #define X509_NAME_get_index_by_NID X509_NAME_get_index_by_NID_ptr
@@ -609,5 +606,3 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define API_EXISTS(fn) true
 
 #endif // FEATURE_DISTRO_AGNOSTIC_SSL
-
-#endif // __OPENSSLSHIM_H__
