@@ -33,7 +33,7 @@ namespace System.Net
 
         public static string HtmlEncode(string value)
         {
-            if (String.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
                 return value;
             }
