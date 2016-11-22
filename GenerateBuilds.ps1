@@ -12,6 +12,7 @@ $footer = @"
   <Import Project="`$([MSBuild]::GetDirectoryNameOfFileAbove(`$(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
 
+
 "@
 
 function WriteBuilds($allConfigs, $srcDir, $projName)
@@ -183,14 +184,14 @@ function GetConfigurations($projs, $srcDir, $projName)
   return $allConfigs | sort target, os;
 }
 
-$refDirs = dir .\src\*\ref
+$srcDirs = dir .\src\*\src
 
-foreach($refDir in $refDirs)
+foreach($srcDir in $srcDirs)
 {
-  $projName = $refDir.Parent.Name
-  $pj = "$refDir\project.json"
-  $plj = "$refDir\project.lock.json"
-  $proj = "$refDir\$projName.csproj"
+  $projName = $srcDir.Parent.Name
+  $pj = "$srcDir\project.json"
+  $plj = "$srcDir\project.lock.json"
+  $proj = "$srcDir\$projName.csproj"
   Write-Host "Looking at $pj"
   if (Test-Path $pj)
   {
@@ -205,7 +206,7 @@ foreach($refDir in $refDirs)
     }
 
     $projc = gc $proj;
-    $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <ProjectReference Include=`"..\..\$_\ref\$_.csproj`" />" }) } else { $_ } }
+    $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <Reference Include=`"$_`" />" }) } else { $_ } }
     $projc2 | sc $proj
 
     del $pj
