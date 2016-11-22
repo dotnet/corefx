@@ -119,30 +119,14 @@ namespace Internal.Cryptography
             return oddParityKey;
         }
 
-        public static void ConvertIntToByteArray(uint dwInput, ref byte[] counter)
+        internal static void ConvertIntToByteArray(uint value, byte[] dest)
         {
-            Debug.Assert(counter != null, "Counter is null");
-            Debug.Assert(counter.Length >= 4, "Counter invalid length");
-
-            uint t1 = dwInput;  // t1 is remaining value to account for
-            uint t2;  // t2 is t1 % 256
-            int i = 0;
-
-            // clear the array first
-            Array.Clear(counter, 0, counter.Length);
-            if (dwInput == 0)
-            {
-                return;
-            }
-            
-            while (t1 > 0)
-            {
-                Debug.Assert(i < 4, "Int too big!");
-                t2 = t1 % 256;
-                counter[3 - i] = (byte)t2;
-                t1 = (t1 - t2)/256;
-                i++;
-            }
+            Debug.Assert(dest != null);
+            Debug.Assert(dest.Length == 4);
+            dest[0] = (byte)((value & 0xFF000000) >> 24);
+            dest[1] = (byte)((value & 0xFF0000) >> 16);
+            dest[2] = (byte)((value & 0xFF00) >> 8);
+            dest[3] = (byte)(value & 0xFF);
         }
     }
 }

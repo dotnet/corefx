@@ -32,6 +32,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
     public class PKCS1MaskGenerationMethodTest 
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public static void PropertyTest()
         {
             PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();

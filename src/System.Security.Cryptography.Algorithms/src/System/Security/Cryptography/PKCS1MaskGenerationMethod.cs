@@ -8,7 +8,7 @@ namespace System.Security.Cryptography
 {
     public class PKCS1MaskGenerationMethod : MaskGenerationMethod
     {
-        private string _hashNameValue;
+        private readonly string _hashNameValue;
         
         public PKCS1MaskGenerationMethod()
         {
@@ -19,44 +19,37 @@ namespace System.Security.Cryptography
         {
             get { return _hashNameValue; }
             set 
-            { 
+            {
                 if (value != null && value != "SHA1")
                 {
                     throw new PlatformNotSupportedException();
                 }
-
-                _hashNameValue = "SHA1";
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "CryptoConfig.CreateFromName is not supported on Unix platforms, should create SHA1 directly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "CryptoConfig.CreateFromName may return platform-dependent objects, so this implementation is limited to SHA-1 for now")]
         public override byte[] GenerateMask(byte[] rgbSeed, int cbReturn)
         {
-            HashAlgorithm hash = SHA1.Create();
-            byte[] rgbCounter = new byte[4];
-            byte[] rgbT = new byte[cbReturn];
-
-            uint counter = 0;
-            for (int ib = 0; ib < rgbT.Length;)
+            using (HashAlgorithm hasher = SHA1.Create())
             {
-                //  Increment counter -- up to 2^32 * sizeof(Hash)
-                Helpers.ConvertIntToByteArray(counter++, ref rgbCounter);
-                hash.TransformBlock(rgbSeed, 0, rgbSeed.Length, rgbSeed, 0);
-                hash.TransformFinalBlock(rgbCounter, 0, 4);
-                byte[] _hash = hash.Hash;
-                hash.Initialize();
-                if (rgbT.Length - ib > _hash.Length)
-                {
-                    Buffer.BlockCopy(_hash, 0, rgbT, ib, _hash.Length);
-                } 
-                else
-                {
-                    Buffer.BlockCopy(_hash, 0, rgbT, ib, rgbT.Length - ib);
-                }
+                byte[] rgbCounter = new byte[4];
+                byte[] rgbT = new byte[cbReturn];
 
-                ib += hash.Hash.Length;
+                uint counter = 0;
+                for (int ib = 0; ib < rgbT.Length;)
+                {
+                    //  Increment counter -- up to 2^32 * sizeof(Hash)
+                    Helpers.ConvertIntToByteArray(counter++, rgbCounter);
+                    hasher.TransformBlock(rgbSeed, 0, rgbSeed.Length, rgbSeed, 0);
+                    hasher.TransformFinalBlock(rgbCounter, 0, 4);
+                    byte[] hash = hasher.Hash;
+                    hasher.Initialize();
+                    Buffer.BlockCopy(hash, 0, rgbT, ib, Math.Min(rgbT.Length - ib, hash.Length));
+
+                    ib += hasher.Hash.Length;
+                }
+                return rgbT;
             }
-            return rgbT;
         }
     }
 }
