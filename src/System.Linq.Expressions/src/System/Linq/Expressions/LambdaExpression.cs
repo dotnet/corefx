@@ -80,13 +80,19 @@ namespace System.Linq.Expressions
         }
 
         [ExcludeFromCodeCoverage] // Unreachable
-        public virtual ParameterExpression GetParameter(int index)
+        ParameterExpression IParameterProvider.GetParameter(int index) => GetParameter(index);
+
+        [ExcludeFromCodeCoverage] // Unreachable
+        protected internal virtual ParameterExpression GetParameter(int index)
         {
             throw ContractUtils.Unreachable;
         }
 
         [ExcludeFromCodeCoverage] // Unreachable
-        public virtual int ParameterCount
+        int IParameterProvider.ParameterCount => ParameterCount;
+
+        [ExcludeFromCodeCoverage] // Unreachable
+        protected internal virtual int ParameterCount
         {
             get
             {
@@ -277,9 +283,9 @@ namespace System.Linq.Expressions
         {
         }
 
-        public override int ParameterCount => 0;
+        protected internal override int ParameterCount => 0;
 
-        public override ParameterExpression GetParameter(int index)
+        protected internal override ParameterExpression GetParameter(int index)
         {
             throw new InvalidOperationException();
         }
@@ -305,9 +311,9 @@ namespace System.Linq.Expressions
             _par0 = par0;
         }
 
-        public override int ParameterCount => 1;
+        protected internal override int ParameterCount => 1;
 
-        public override ParameterExpression GetParameter(int index)
+        protected internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
@@ -344,9 +350,9 @@ namespace System.Linq.Expressions
             _par1 = par1;
         }
 
-        public override int ParameterCount => 2;
+        protected internal override int ParameterCount => 2;
 
-        public override ParameterExpression GetParameter(int index)
+        protected internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
@@ -386,9 +392,9 @@ namespace System.Linq.Expressions
             _par2 = par2;
         }
 
-        public override int ParameterCount => 3;
+        protected internal override int ParameterCount => 3;
 
-        public override ParameterExpression GetParameter(int index)
+        protected internal override ParameterExpression GetParameter(int index)
         {
             switch (index)
             {
@@ -425,9 +431,9 @@ namespace System.Linq.Expressions
             _parameters = parameters;
         }
 
-        public override int ParameterCount => _parameters.Count;
+        protected internal override int ParameterCount => _parameters.Count;
 
-        public override ParameterExpression GetParameter(int index) => _parameters[index];
+        protected internal override ParameterExpression GetParameter(int index) => _parameters[index];
 
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeParameters() => ReturnReadOnly(ref _parameters);
 
