@@ -4140,3 +4140,17 @@ public class SquareWithDeserializationCallback : IDeserializationCallback
         _area = Edge * Edge;
     }
 }
+
+public class SampleTextWriter : IXmlTextWriterInitializer
+{
+    public Encoding Encoding;
+    public Stream Stream;
+    public SampleTextWriter()
+    {
+    }
+    public void SetOutput(Stream stream, Encoding encoding, bool ownsStream)
+    {
+        Encoding = encoding;
+        Stream = stream;
+    }
+}

@@ -278,26 +278,13 @@ public static class XmlDictionaryWriterTest
         binaryReader.Close();
     }
 
-    [ActiveIssue(12902)]
     [Fact]
     public static void IXmlTextReaderInitializerTest()
     {
-        DataContractSerializer serializer = new DataContractSerializer(typeof(TestData));
+        SampleTextWriter writer = new SampleTextWriter();
         MemoryStream ms = new MemoryStream();
-        TestData td = new TestData();
         Encoding encoding = Encoding.UTF8;
-        XmlDictionaryWriter textWriter = XmlDictionaryWriter.CreateTextWriter(ms, encoding, false);
-        IXmlTextWriterInitializer writerInitializer = (IXmlTextWriterInitializer)textWriter;
-        writerInitializer.SetOutput(ms, encoding, false);
-        serializer.WriteObject(ms, td);
-        textWriter.Flush();
-        byte[] xmlDoc = ms.ToArray();
-        textWriter.Close();
-        XmlDictionaryReader textReader = XmlDictionaryReader.CreateTextReader(xmlDoc, 0, xmlDoc.Length, encoding, XmlDictionaryReaderQuotas.Max, new OnXmlDictionaryReaderClose((XmlDictionaryReader reader) => { }));
-        IXmlTextReaderInitializer readerInitializer = (IXmlTextReaderInitializer)textReader;
-        readerInitializer.SetInput(xmlDoc, 0, xmlDoc.Length, encoding, XmlDictionaryReaderQuotas.Max, new OnXmlDictionaryReaderClose((XmlDictionaryReader reader) => { }));
-        textReader.ReadContentAsObject();
-        textReader.Close();
+        writer.SetOutput(ms, encoding, true);
     }
 
     [ActiveIssue(13375)]
