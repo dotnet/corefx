@@ -246,6 +246,7 @@
     <Compile Include="System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

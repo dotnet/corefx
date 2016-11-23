@@ -46,8 +46,15 @@
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
     <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.IO\src\System.IO.csproj" />
+    <ProjectReference Include="..\..\System.IO.FileSystem\src\System.IO.FileSystem.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj">
+      <OSGroup>$(InputOSGroup)</OSGroup>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='uap101aot'">
     <Compile Include="System\Diagnostics\StackFrameExtensions.CoreCLR.cs" />
