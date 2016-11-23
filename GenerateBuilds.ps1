@@ -185,11 +185,13 @@ function GetConfigurations($projs, $srcDir, $projName)
 }
 
 $srcDirs = dir .\src\*\src
+$layoutDir = "D:\corefx-packages-backup\packages\Debug\layout\runtimes\win7-x64\lib\netcoreapp1.1"
 
 foreach($srcDir in $srcDirs)
 {
   $projName = $srcDir.Parent.Name
-  $pj = "$srcDir\project.json"
+  $pjOrig = "$srcDir\project.json"
+  $pj = "$layoutDir\$projName.deps"
   $plj = "$srcDir\project.lock.json"
   $proj = "$srcDir\$projName.csproj"
   Write-Host "Looking at $pj"
@@ -232,7 +234,7 @@ foreach($srcDir in $srcDirs)
     $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <Reference Include=`"$_`" />" }) } else { $_ } }
     $projc2 | sc $proj
 
-    del $pj
+    del $pjOrig
     #del $plj
   }
 }
