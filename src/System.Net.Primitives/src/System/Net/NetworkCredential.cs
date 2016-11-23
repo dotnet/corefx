@@ -22,6 +22,7 @@ namespace System.Net
         private string _domain;
         private string _userName;
         private string _password;
+        private SecureString _securePassword;
 
         public NetworkCredential()
             : this(string.Empty, string.Empty, string.Empty)
@@ -42,13 +43,27 @@ namespace System.Net
         /// <devdoc>
         ///    <para>
         ///       Initializes a new instance of the <see cref='System.Net.NetworkCredential'/>
-        ///       class with name and password set as specified.
+        ///       class with name, password and domain set as specified.
         ///    </para>
         /// </devdoc>
         public NetworkCredential(string userName, string password, string domain)
         {
             UserName = userName;
             Password = password;
+            Domain = domain;
+        }
+
+        [CLSCompliant(false)]
+        public NetworkCredential(string userName, SecureString password)
+        : this(userName, password, string.Empty)
+        {
+        }
+
+        [CLSCompliant(false)]
+        public NetworkCredential(string userName, SecureString password, string domain)
+        {
+            UserName = userName;
+            SecurePassword = password;
             Domain = domain;
         }
 
@@ -59,14 +74,8 @@ namespace System.Net
         /// </devdoc>
         public string UserName
         {
-            get
-            {
-                return InternalGetUserName();
-            }
-            set
-            {
-                _userName = value ?? string.Empty;
-            }
+            get { return _userName; }
+            set { _userName = value ?? string.Empty; }
         }
 
         /// <devdoc>
@@ -76,14 +85,15 @@ namespace System.Net
         /// </devdoc>
         public string Password
         {
-            get
-            {
-                return InternalGetPassword();
-            }
-            set
-            {
-                _password = value;
-            }
+            get { return _password; }
+            set { _password = value ?? string.Empty; }
+        }
+
+        [CLSCompliant(false)]
+        public SecureString SecurePassword
+        {
+            get { return _securePassword.Copy(); } 
+            set { _securePassword = value != null ? value.Copy() : new SecureString(); }
         }
 
         /// <devdoc>
@@ -94,36 +104,13 @@ namespace System.Net
         /// </devdoc>
         public string Domain
         {
-            get
-            {
-                return InternalGetDomain();
-            }
-            set
-            {
-                _domain = value ?? string.Empty;
-            }
-        }
-
-        internal string InternalGetUserName()
-        {
-            return _userName;
-        }
-
-        internal string InternalGetPassword()
-        {
-            return _password;
-        }
-
-        internal string InternalGetDomain()
-        {
-            return _domain;
+            get { return _domain; }
+            set { _domain = value ?? string.Empty; }
         }
 
         internal string InternalGetDomainUserName()
         {
-            string domain = InternalGetDomain();
-            string userName = InternalGetUserName();
-            return domain != "" ? domain + "\\" + userName : userName;
+            return _domain != "" ? _domain + "\\" + _userName : _userName;
         }
 
         /// <devdoc>
@@ -162,9 +149,9 @@ namespace System.Net
                 return false;
             }
 
-            return (InternalGetUserName() == compCred.InternalGetUserName() &&
-                    InternalGetDomain() == compCred.InternalGetDomain() &&
-                    string.Equals(_password, compCred._password, StringComparison.Ordinal));
+            return (_userName == compCred.UserName &&
+                    _domain == compCred.Domain &&
+                    string.Equals(_password, compCred.Password, StringComparison.Ordinal));
         }
 #endif
     }
