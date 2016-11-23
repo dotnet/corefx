@@ -34,13 +34,13 @@ namespace System.Net.Security.Tests
                 // Anonymous (with domain name).
                 yield return new object[] { new NetworkCredential(
                     Configuration.Security.ActiveDirectoryUserName,
-                    null,
+                    (string)null,
                     Configuration.Security.ActiveDirectoryName) };
                 
                 // Anonymous (without domain).
                 yield return new object[] { new NetworkCredential(
                     Configuration.Security.ActiveDirectoryUserName,
-                    null,
+                    (string)null,
                     null) };
             }
         }
@@ -49,11 +49,11 @@ namespace System.Net.Security.Tests
         {
             get
             {
-                yield return new object[] { new NetworkCredential(null, null, Configuration.Security.ActiveDirectoryName) };
-                yield return new object[] { new NetworkCredential(null, null, null) };
+                yield return new object[] { new NetworkCredential(null, (string)null, Configuration.Security.ActiveDirectoryName) };
+                yield return new object[] { new NetworkCredential(null, (string)null, null) };
                 yield return new object[] { new NetworkCredential(
                     "baduser", 
-                    null, 
+                    (string)null, 
                     Configuration.Security.ActiveDirectoryName) };
                 yield return new object[] { new NetworkCredential(
                     "baduser", 
