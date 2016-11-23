@@ -445,6 +445,7 @@ namespace System.Linq
                 {
                     if (_predicate(item))
                     {
+                        _selector(item);
                         checked
                         {
                             count++;
@@ -547,6 +548,7 @@ namespace System.Linq
                     TSource item = _source[i];
                     if (_predicate(item))
                     {
+                        _selector(item);
                         checked
                         {
                             count++;
@@ -667,6 +669,7 @@ namespace System.Linq
                 {
                     if (_predicate(item))
                     {
+                        _selector(item);
                         checked
                         {
                             count++;
