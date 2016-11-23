@@ -248,7 +248,7 @@ foreach($srcDir in $srcDirs)
     }
 
     $projc = gc $proj;
-    $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <Reference Include=`"$_`" />" }) } else { $_ } }
+    $projc2 = $projc | % { if ($_ -match "None Include=`"project.json`"") { $($deps | % { "    <Reference Include=`"$_`" />" }) } else { $_ } }
     $projc2 | sc $proj
 
     del $pjOrig
