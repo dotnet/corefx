@@ -18,7 +18,7 @@ namespace System.Xml.Xsl.Runtime
 
             if (UpperFirst)
             {
-                // TODO: Support uppder case first on Linux
+                // TODO: Support upper case first on Linux
                 // Issues #13926, #13236
                 throw new PlatformNotSupportedException(SR.Xslt_UpperCaseFirstNotSupported);
             }
