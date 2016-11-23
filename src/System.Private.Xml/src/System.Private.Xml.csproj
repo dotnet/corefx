@@ -509,6 +509,7 @@
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\System.Threading.Tasks.Extensions\src\System.Threading.Tasks.Extensions.csproj" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>

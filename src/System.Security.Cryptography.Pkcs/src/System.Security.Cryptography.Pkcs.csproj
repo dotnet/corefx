@@ -184,7 +184,7 @@
     <TargetingPackReference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(ProjectJson)" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
