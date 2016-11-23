@@ -230,6 +230,23 @@ foreach($srcDir in $srcDirs)
       }
     }
 
+    $pjOrigC = gc $pjOrig;
+    foreach ($line in $pjOrigC)
+    {
+      if ($line -match "\`"`(?<dep>.*`)\`": \`"\d")
+      {
+        $item = $matches["dep"];
+        if ($item -eq "System.Diagnostics.Contracts")
+        {
+          $deps.Add($item) | out-null
+        }
+        elseif ($item -eq "System.Diagnostics.Tools")
+        {
+          $deps.Add($item) | out-null
+        }
+      }
+    }
+
     $projc = gc $proj;
     $projc2 = $projc | % { if ($_ -match "project.json") { $($deps | % { "    <Reference Include=`"$_`" />" }) } else { $_ } }
     $projc2 | sc $proj
