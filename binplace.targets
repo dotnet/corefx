@@ -9,10 +9,12 @@
 
   <Target Name="BinPlaceStuff" DependsOnTargets="$(BinPlaceStuffDependsOn)" AfterTargets="CopyFilesToOutputDirectory">
     <Message Importance="high" Text="IsRuntimeAssembly: $(IsRuntimeAssembly)" />
+    <Message Importance="high" Text="IsReferenceAssembly: $(IsReferenceAssembly)" />
   </Target>
 
   <Target Name="BinPlaceReferenceAssembly" DependsOnTargets="GetTargetingPackDir">
-    <Copy Condition="'$(TargetingPackDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(TargetingPackDir)" />
+    <Message Importance="high" Text="TargetingPackDir: @(TargetingPackDir)" />
+    <Copy Condition="'@(TargetingPackDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="%(TargetingPackDir.Identity)" />
   </Target>
 
   <Target Name="BinPlaceRuntimeAssembly" DependsOnTargets="GetRuntimeDir">
@@ -20,12 +22,13 @@
   </Target>
 
   <Target Name="GetTargetingPackDir">
-    <PropertyGroup>
-      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))">$(BinDir)netcoreapp\TargetingPack</TargetingPackDir>
-      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))">$(BinDir)netstandard\TargetingPack</TargetingPackDir>
-    </PropertyGroup>
-    <Error Condition="'$(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
-    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
+    <ItemGroup>
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))" Include="$(BinDir)netcoreapp\TargetingPack" />
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netstandard\TargetingPack" />
+      <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netcoreapp\TargetingPack" />
+    </ItemGroup>
+    <Error Condition="'@(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
+    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="High" />
   </Target>
 
     <Target Name="GetRuntimeDir">
