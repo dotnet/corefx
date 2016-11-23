@@ -28,5 +28,8 @@
     <Compile Include="System\Windows\Media\Animation\RepeatBehavior.cs" />
     <Compile Include="System\Windows\Media\Media3D\Matrix3D.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
