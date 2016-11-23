@@ -201,7 +201,30 @@ foreach($srcDir in $srcDirs)
     {
       if ($line -match "\`"`(?<dep>.*`)\`": \`"\d")
       {
-        $deps.Add($matches["dep"]) | out-null
+        $item = $matches["dep"];
+        if ($item -eq "Microsoft.TargetingPack.Private.CoreCLR")
+        {
+          $deps.Add("System.Private.CoreLib") | out-null
+        }
+        elseif ($item -eq "Microsoft.TargetingPack.NETFramework.v4.6")
+        {
+        }
+        elseif ($item -eq "Microsoft.TargetingPack.NETFramework.v4.6.1")
+        {
+        }
+        elseif ($item -eq "Microsoft.TargetingPack.NETFramework.v4.6.2")
+        {
+        }
+        elseif ($item -eq "Microsoft.TargetingPack.Private.NETNative")
+        {
+        }
+        elseif ($item -eq "Microsoft.NETCore.Platforms")
+        {
+        }
+        else
+        {
+          $deps.Add($item) | out-null
+        }
       }
     }
 
