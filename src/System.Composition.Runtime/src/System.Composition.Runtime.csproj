@@ -30,5 +30,8 @@
     <Compile Include="System\Composition\Hosting\Core\CompositionContract.cs" />
     <Compile Include="System\Composition\Runtime\Util\Formatters.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -25,5 +25,8 @@
     <Compile Include="System\Composition\SharedAttribute.cs" />
     <Compile Include="System\Composition\SharingBoundaryAttribute.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
