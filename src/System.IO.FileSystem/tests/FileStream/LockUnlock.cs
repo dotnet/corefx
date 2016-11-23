@@ -87,7 +87,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unix locks are on a per-process basis, so overlapping locks from the same process are allowed.
         [InlineData(10, 0, 10, 1, 2)]
         [InlineData(10, 3, 5, 3, 5)]
         [InlineData(10, 3, 5, 3, 4)]
@@ -95,7 +95,7 @@ namespace System.IO.Tests
         [InlineData(10, 3, 5, 2, 6)]
         [InlineData(10, 3, 5, 2, 4)]
         [InlineData(10, 3, 5, 4, 6)]
-        public void OverlappingRegionsFromSameProcess_ThrowsException(long fileLength, long firstPosition, long firstLength, long secondPosition, long secondLength)
+        public void OverlappingRegionsFromSameProcess_ThrowsExceptionOnWindows(long fileLength, long firstPosition, long firstLength, long secondPosition, long secondLength)
         {
             string path = GetTestFilePath();
             File.WriteAllBytes(path, new byte[fileLength]);
@@ -108,6 +108,30 @@ namespace System.IO.Tests
                 fs1.Unlock(firstPosition, firstLength);
 
                 fs2.Lock(secondPosition, secondLength);
+                fs2.Unlock(secondPosition, secondLength);
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix locks are on a per-process basis, so overlapping locks from the same process are allowed.
+        [InlineData(10, 0, 10, 1, 2)]
+        [InlineData(10, 3, 5, 3, 5)]
+        [InlineData(10, 3, 5, 3, 4)]
+        [InlineData(10, 3, 5, 4, 5)]
+        [InlineData(10, 3, 5, 2, 6)]
+        [InlineData(10, 3, 5, 2, 4)]
+        [InlineData(10, 3, 5, 4, 6)]
+        public void OverlappingRegionsFromSameProcess_AllowedOnUnix(long fileLength, long firstPosition, long firstLength, long secondPosition, long secondLength)
+        {
+            string path = GetTestFilePath();
+            File.WriteAllBytes(path, new byte[fileLength]);
+
+            using (FileStream fs1 = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (FileStream fs2 = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                fs1.Lock(firstPosition, firstLength);
+                fs2.Lock(secondPosition, secondLength);
+                fs1.Unlock(firstPosition, firstLength);
                 fs2.Unlock(secondPosition, secondLength);
             }
         }
