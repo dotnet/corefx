@@ -14,14 +14,6 @@
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net463'">true</IsPartialFacadeAssembly>
     <NuGetTargetMoniker Condition="'$(TargetGroup)'==''">.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(ProjectJson)' == '' ">
-    <ProjectJson>win/project.json</ProjectJson>
-    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' and '$(ProjectJson)' == '' ">
-    <ProjectJson>unix/project.json</ProjectJson>
-    <ProjectLockJson>unix/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
@@ -307,6 +299,9 @@
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
