@@ -21,8 +21,7 @@ namespace System.Net
     {
         private string _domain;
         private string _userName;
-        private string _password;
-        private SecureString _securePassword;
+        private object _password;
 
         public NetworkCredential()
             : this(string.Empty, string.Empty, string.Empty)
@@ -85,15 +84,36 @@ namespace System.Net
         /// </devdoc>
         public string Password
         {
-            get { return _password; }
-            set { _password = value ?? string.Empty; }
+            get
+            {
+                SecureString sstr = _password as SecureString;
+                if (sstr != null) return MarshalToString(sstr); 
+                return (string)_password ?? string.Empty;
+            }
+            set
+            {
+                SecureString old = _password as SecureString;
+                _password = value ?? string.Empty;
+                old?.Dispose();
+            }
         }
 
         [CLSCompliant(false)]
         public SecureString SecurePassword
         {
-            get { return _securePassword.Copy(); } 
-            set { _securePassword = value != null ? value.Copy() : new SecureString(); }
+            get
+            {
+                string str = _password as string;
+                if (str != null) return MarshalToSecureString(str);
+                SecureString sstr = _password as SecureString;
+                return sstr != null ? sstr.Copy() : new SecureString();
+            } 
+            set
+            { 
+                SecureString old = _password as SecureString;
+                _password = value?.Copy();
+                old?.Dispose();
+            }
         }
 
         /// <devdoc>
@@ -129,30 +149,37 @@ namespace System.Net
             return this;
         }
 
-#if DEBUG
-        // This method is only called as part of an assert
-        internal bool IsEqualTo(object compObject)
+        private string MarshalToString(SecureString sstr)
         {
-            if ((object)compObject == null)
-            {
-                return false;
-            }
+            if (sstr == null || sstr.Length == 0)
+                return string.Empty;
 
-            if ((object)this == (object)compObject)
+            IntPtr ptr = IntPtr.Zero;
+            string result = string.Empty;
+            try
             {
-                return true;
+                ptr = Marshal.SecureStringToGlobalAllocUnicode(sstr);
+                result = Marshal.PtrToStringUni(ptr);
             }
-
-            NetworkCredential compCred = compObject as NetworkCredential;
-            if ((object)compCred == null)
+            finally
             {
-                return false;
+                if (ptr != IntPtr.Zero)
+                {
+                    Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+                }
             }
-
-            return (_userName == compCred.UserName &&
-                    _domain == compCred.Domain &&
-                    string.Equals(_password, compCred.Password, StringComparison.Ordinal));
+            return result;
         }
-#endif
+
+        private unsafe SecureString MarshalToSecureString(string str)
+        {
+            if (str == null || str.Length == 0)
+                return new SecureString();
+
+            fixed (char* ptr = str)
+            {
+                return new SecureString(ptr, str.Length);
+            }
+        }
     }
 }

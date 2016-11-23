@@ -19,6 +19,14 @@ namespace System.Net.Primitives.Functional.Tests
             yield return new object[] { null, AsSecureString(null) };
         }
 
+        public static IEnumerable<object[]> Password_RoundTestData()
+        {
+            yield return new object[] { "password", "planPassword" };
+            yield return new object[] { "SecurePassword", "justOnePassword" };
+            yield return new object[] { "", "OneMoreTest" };
+            yield return new object[] { null, null };
+        }
+
         [Fact]
         public static void Ctor_SecureString_Test()
         {
@@ -59,34 +67,46 @@ namespace System.Net.Primitives.Functional.Tests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(Password_RoundTestData))]
+        public static void SecurePassword_Password_RoundData_Test(string expectedSecurePassword, string expectedPassword)
+        {
+            NetworkCredential nc = new NetworkCredential();
+            using (SecureString securePassword = AsSecureString(expectedSecurePassword))
+            {
+                nc.SecurePassword = securePassword;
+                Assert.Equal(expectedSecurePassword ?? string.Empty, nc.Password);
+
+                nc.Password = expectedPassword;
+                Assert.True(AsSecureString(expectedPassword).CompareSecureString(nc.SecurePassword));
+            }
+        }
+
         private static bool CompareSecureString(this SecureString s1, SecureString s2)
         {
-            if(s1 == null || s2 == null)
-                return false;
+            return s1 != null && s2 != null && AsString(s1) == AsString(s2);
+        }
 
-            IntPtr ptr1 = IntPtr.Zero;
-            IntPtr ptr2 = IntPtr.Zero;
-            string str1 = string.Empty;
-            string str2 = string.Empty;
+        private static string AsString(SecureString sstr)
+        {
+            if (sstr.Length == 0)
+                return string.Empty;
+
+            IntPtr ptr = IntPtr.Zero;
+            string result = string.Empty;
             try
             {
-                ptr1 = Marshal.SecureStringToGlobalAllocUnicode(s1);
-                ptr2 = Marshal.SecureStringToGlobalAllocUnicode(s2);
-                str1 = Marshal.PtrToStringUni(ptr1);
-                str2 = Marshal.PtrToStringUni(ptr2);
+                ptr = Marshal.SecureStringToGlobalAllocUnicode(sstr);
+                result = Marshal.PtrToStringUni(ptr);
             }
             finally
             {
-                if(ptr1 != IntPtr.Zero)
+                if (ptr != IntPtr.Zero)
                 {
-                    Marshal.ZeroFreeGlobalAllocUnicode(ptr1);
-                }
-                if(ptr2 != IntPtr.Zero)
-                {
-                    Marshal.ZeroFreeGlobalAllocUnicode(ptr2);
+                    Marshal.ZeroFreeGlobalAllocUnicode(ptr);
                 }
             }
-            return str1 == str2;
+            return result;
         }
 
         private static SecureString AsSecureString(string str)
@@ -96,7 +116,7 @@ namespace System.Net.Primitives.Functional.Tests
             if(str == null)
                 return secureString;
 
-            foreach (var ch in str)
+            foreach (char ch in str)
             {
                 secureString.AppendChar(ch);
             }
