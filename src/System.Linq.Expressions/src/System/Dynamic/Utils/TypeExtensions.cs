@@ -102,16 +102,5 @@ namespace System.Dynamic.Utils
             else
                 return TypeCode.Object;
         }
-
-        public static IEnumerable<MethodInfo> GetStaticMethods(this Type type)
-        {
-            foreach (MethodInfo method in type.GetRuntimeMethods())
-            {
-                if (method.IsStatic)
-                {
-                    yield return method;
-                }
-            }
-        }
     }
 }
