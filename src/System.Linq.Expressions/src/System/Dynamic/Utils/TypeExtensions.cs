@@ -16,9 +16,9 @@ namespace System.Dynamic.Utils
         /// </summary>
         public static MethodInfo GetAnyStaticMethodValidated(this Type type, string name, Type[] types)
         {
-            foreach (MethodInfo method in type.GetTypeInfo().DeclaredMethods)
+            foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly))
             {
-                if (method.IsStatic && method.Name == name && method.MatchesArgumentTypes(types))
+                if (method.Name == name && method.MatchesArgumentTypes(types))
                 {
                     return method;
                 }
@@ -101,17 +101,6 @@ namespace System.Dynamic.Utils
                 return Enum.GetUnderlyingType(type).GetTypeCode();
             else
                 return TypeCode.Object;
-        }
-
-        public static IEnumerable<MethodInfo> GetStaticMethods(this Type type)
-        {
-            foreach (MethodInfo method in type.GetRuntimeMethods())
-            {
-                if (method.IsStatic)
-                {
-                    yield return method;
-                }
-            }
         }
     }
 }
