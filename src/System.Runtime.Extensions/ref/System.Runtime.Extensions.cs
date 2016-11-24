@@ -1577,7 +1577,7 @@ namespace System.Security
         public static bool IsValidText(string text) { throw null; }
         public System.Security.SecurityElement SearchForChildByTag(string tag) { throw null; }
         public string SearchForTextOfTag(string tag) { throw null; }
-        public override string ToString() => base.ToString();
+        public override string ToString() { throw null; }
     }
 }
 namespace System.Security.Permissions
