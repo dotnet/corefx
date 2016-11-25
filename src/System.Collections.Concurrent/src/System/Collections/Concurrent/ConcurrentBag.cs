@@ -575,22 +575,12 @@ namespace System.Collections.Concurrent
             if (_headList == null)
                 return;
 
-            bool lockTaken = false;
-            try
+            // Acquire the global lock to update the pointers
+            lock (GlobalListsLock)
             {
-                FreezeBag(ref lockTaken);
-
-                // Acquire the lock to update the pointers
-                lock (GlobalListsLock)
-                {
-                    _locals = new ThreadLocal<ThreadLocalList>();
-                    _headList = null;
-                    _tailList = null;
-                }
-            }
-            finally
-            {
-                UnfreezeBag(lockTaken);
+                _locals = new ThreadLocal<ThreadLocalList>();
+                _headList = null;
+                _tailList = null;
             }
         }
 
