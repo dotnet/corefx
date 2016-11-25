@@ -2376,6 +2376,8 @@ namespace System.Linq.Expressions.Tests
             yield return typeof(UInt64Enum);
             yield return NonCSharpTypes.CharEnumType;
             yield return NonCSharpTypes.BoolEnumType;
+            yield return NonCSharpTypes.IntPtrEnumType;
+            yield return NonCSharpTypes.UIntPtrEnumType;
         }
 
         public static IEnumerable<object[]> EnumerableTypeArgs() => EnumerableTypes().Select(t => new object[] {t});

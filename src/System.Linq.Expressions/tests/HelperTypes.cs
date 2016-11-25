@@ -338,19 +338,23 @@ namespace System.Linq.Expressions.Tests
         }
     }
 
-    public enum ByteEnum : byte { A = Byte.MaxValue }
-    public enum SByteEnum : sbyte { A = SByte.MaxValue }
-    public enum Int16Enum : short { A = Int16.MaxValue }
-    public enum UInt16Enum : ushort { A = UInt16.MaxValue }
-    public enum Int32Enum : int { A = Int32.MaxValue }
-    public enum UInt32Enum : uint { A = UInt32.MaxValue }
-    public enum Int64Enum : long { A = Int64.MaxValue }
-    public enum UInt64Enum : ulong { A = UInt64.MaxValue }
+    public enum ByteEnum : byte { A = byte.MaxValue }
+    public enum SByteEnum : sbyte { A = sbyte.MaxValue }
+    public enum Int16Enum : short { A = short.MaxValue }
+    public enum UInt16Enum : ushort { A = ushort.MaxValue }
+    public enum Int32Enum : int { A = int.MaxValue }
+    public enum UInt32Enum : uint { A = uint.MaxValue }
+    public enum Int64Enum : long { A = long.MaxValue }
+    public enum UInt64Enum : ulong { A = ulong.MaxValue }
 
     public static class NonCSharpTypes
     {
         private static Type _charEnumType;
         private static Type _boolEnumType;
+        private static Type _floatEnumType;
+        private static Type _doubleEnumType;
+        private static Type _intPtrEnumType;
+        private static Type _uintPtrEnumType;
 
         private static ModuleBuilder GetModuleBuilder()
         {
@@ -389,6 +393,68 @@ namespace System.Linq.Expressions.Tests
                 }
 
                 return _boolEnumType;
+            }
+        }
+        
+        public static Type FloatEnumType
+        {
+            get
+            {
+                if (_floatEnumType == null)
+                {
+                    EnumBuilder eb = GetModuleBuilder().DefineEnum("FloatEnumType", TypeAttributes.Public, typeof(float));
+                    eb.DefineLiteral("A", 1.0f);
+                    eb.DefineLiteral("B", 2.0f);
+                    eb.DefineLiteral("C", 3.0f);
+                    _floatEnumType = eb.CreateTypeInfo().AsType();
+                }
+
+                return _floatEnumType;
+            }
+        }
+
+        public static Type DoubleEnumType
+        {
+            get
+            {
+                if (_doubleEnumType == null)
+                {
+                    EnumBuilder eb = GetModuleBuilder().DefineEnum("DoubleEnumType", TypeAttributes.Public, typeof(double));
+                    eb.DefineLiteral("A", 1.0);
+                    eb.DefineLiteral("B", 2.0);
+                    eb.DefineLiteral("C", 3.0);
+                    _doubleEnumType = eb.CreateTypeInfo().AsType();
+                }
+
+                return _doubleEnumType;
+            }
+        }
+
+        public static Type IntPtrEnumType
+        {
+            get
+            {
+                if (_intPtrEnumType == null)
+                {
+                    EnumBuilder eb = GetModuleBuilder().DefineEnum("IntPtrEnumType", TypeAttributes.Public, typeof(IntPtr));
+                    _intPtrEnumType = eb.CreateTypeInfo().AsType();
+                }
+
+                return _intPtrEnumType;
+            }
+        }
+
+        public static Type UIntPtrEnumType
+        {
+            get
+            {
+                if (_uintPtrEnumType == null)
+                {
+                    EnumBuilder eb = GetModuleBuilder().DefineEnum("UIntPtrEnumType", TypeAttributes.Public, typeof(UIntPtr));
+                    _uintPtrEnumType = eb.CreateTypeInfo().AsType();
+                }
+
+                return _uintPtrEnumType;
             }
         }
     }

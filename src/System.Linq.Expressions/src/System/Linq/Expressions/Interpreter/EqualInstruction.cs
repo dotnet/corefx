@@ -10,8 +10,8 @@ namespace System.Linq.Expressions.Interpreter
     internal abstract class EqualInstruction : Instruction
     {
         // Perf: EqualityComparer<T> but is 3/2 to 2 times slower.
-        private static Instruction s_reference, s_boolean, s_SByte, s_int16, s_char, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_single, s_double;
-        private static Instruction s_referenceLiftedToNull, s_booleanLiftedToNull, s_SByteLiftedToNull, s_int16LiftedToNull, s_charLiftedToNull, s_int32LiftedToNull, s_int64LiftedToNull, s_byteLiftedToNull, s_UInt16LiftedToNull, s_UInt32LiftedToNull, s_UInt64LiftedToNull, s_singleLiftedToNull, s_doubleLiftedToNull;
+        private static Instruction s_reference, s_boolean, s_SByte, s_int16, s_char, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_single, s_double, s_intPtr, s_uintPtr;
+        private static Instruction s_referenceLiftedToNull, s_booleanLiftedToNull, s_SByteLiftedToNull, s_int16LiftedToNull, s_charLiftedToNull, s_int32LiftedToNull, s_int64LiftedToNull, s_byteLiftedToNull, s_UInt16LiftedToNull, s_UInt32LiftedToNull, s_UInt64LiftedToNull, s_singleLiftedToNull, s_doubleLiftedToNull, s_intPtrLiftedToNull, s_uintPtrLiftedToNull;
 
         public override int ConsumedStack => 2;
         public override int ProducedStack => 1;
@@ -283,6 +283,50 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
+        private sealed class EqualIntPtr : EqualInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object right = frame.Pop();
+                object left = frame.Pop();
+                if (left == null)
+                {
+                    frame.Push(right == null);
+                }
+                else if (right == null)
+                {
+                    frame.Push(false);
+                }
+                else
+                {
+                    frame.Push((IntPtr)left == (IntPtr)right);
+                }
+                return +1;
+            }
+        }
+
+        private sealed class EqualUIntPtr : EqualInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object right = frame.Pop();
+                object left = frame.Pop();
+                if (left == null)
+                {
+                    frame.Push(right == null);
+                }
+                else if (right == null)
+                {
+                    frame.Push(false);
+                }
+                else
+                {
+                    frame.Push((UIntPtr)left == (UIntPtr)right);
+                }
+                return +1;
+            }
+        }
+
         private sealed class EqualReference : EqualInstruction
         {
             public override int Run(InterpretedFrame frame)
@@ -508,6 +552,41 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
+        private sealed class EqualIntPtrLiftedToNull : EqualInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object right = frame.Pop();
+                object left = frame.Pop();
+                if (left == null || right == null)
+                {
+                    frame.Push(null);
+                }
+                else
+                {
+                    frame.Push((IntPtr)left == (IntPtr)right);
+                }
+                return +1;
+            }
+        }
+
+        private sealed class EqualUIntPtrLiftedToNull : EqualInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object right = frame.Pop();
+                object left = frame.Pop();
+                if (left == null || right == null)
+                {
+                    frame.Push(null);
+                }
+                else
+                {
+                    frame.Push((UIntPtr)left == (UIntPtr)right);
+                }
+                return +1;
+            }
+        }
 
         private sealed class EqualReferenceLiftedToNull : EqualInstruction
         {
@@ -559,6 +638,15 @@ namespace System.Linq.Expressions.Interpreter
                         {
                             return s_referenceLiftedToNull ?? (s_referenceLiftedToNull = new EqualReferenceLiftedToNull());
                         }
+                        else if (underlyingType == typeof(IntPtr))
+                        {
+                            return s_intPtrLiftedToNull ?? (s_intPtrLiftedToNull = new EqualIntPtrLiftedToNull());
+                        }
+                        else if (underlyingType == typeof(UIntPtr))
+                        {
+                            return s_uintPtrLiftedToNull ?? (s_uintPtrLiftedToNull = new EqualUIntPtrLiftedToNull());
+                        }
+
                         // TODO: Nullable<T>
                         throw Error.ExpressionNotSupportedForNullableType("Equal", type);
 
@@ -591,6 +679,15 @@ namespace System.Linq.Expressions.Interpreter
                         {
                             return s_reference ?? (s_reference = new EqualReference());
                         }
+                        else if (underlyingType == typeof(IntPtr))
+                        {
+                            return s_intPtr ?? (s_intPtr = new EqualIntPtr());
+                        }
+                        else if(underlyingType == typeof(UIntPtr))
+                        {
+                            return s_uintPtr ?? (s_uintPtr = new EqualUIntPtr());
+                        }
+
                         // TODO: Nullable<T>
                         throw Error.ExpressionNotSupportedForNullableType("Equal", type);
 

@@ -493,12 +493,22 @@ namespace System.Linq.Expressions.Interpreter
                 // Disallowed in C#, but allowed in CIL
                 frame.Push(Enum.ToObject(_t, (char)from));
             }
+            else if (underlying == typeof(bool))
+            {
+                // Disallowed in C#, but allowed in CIL
+                frame.Push(Enum.ToObject(_t, (bool)from));
+            }
+            else if (underlying == typeof(IntPtr))
+            {
+                // Disallowed in C#, but allowed in CIL
+                frame.Push(Enum.ToObject(_t, ((IntPtr)from).ToInt64()));
+            }
             else
             {
                 // Only remaining possible type.
                 // Disallowed in C#, but allowed in CIL
-                Debug.Assert(underlying == typeof(bool));
-                frame.Push(Enum.ToObject(_t, (bool)from));
+                Debug.Assert(underlying == typeof(UIntPtr));
+                frame.Push(Enum.ToObject(_t, ((UIntPtr)from).ToUInt64()));
             }
 
             return 1;

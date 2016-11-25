@@ -403,7 +403,7 @@ namespace System.Dynamic.Utils
                 case TypeCode.Char:
                     return true;
                 default:
-                    return false;
+                    return type == typeof(IntPtr) || type == typeof(UIntPtr);
             }
         }
 
