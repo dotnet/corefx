@@ -10,10 +10,10 @@ using static System.Linq.Expressions.Expression;
 
 namespace System.Linq.Expressions.Tests
 {
-    public static class UnaryQuoteTests
+    public class UnaryQuoteTests
     {
         [Theory, ClassData(typeof(CompilationTypes))]
-        public static void QuotePreservesTypingOfBlock(bool useInterpreter)
+        public void QuotePreservesTypingOfBlock(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -49,13 +49,12 @@ namespace System.Linq.Expressions.Tests
         public static Type Quote1(Expression<Action> e) => e.Body.Type;
         public static Type Quote2(Expression<Func<object>> e) => e.Body.Type;
 
-#if FEATURE_COMPILE
-        [Fact]
-        public static void Quote_Lambda_Action()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_Action(bool useInterpreter)
         {
             Expression<Func<LambdaExpression>> f = () => GetQuote<Action>(() => Nop());
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
             Assert.Equal(0, quote.Parameters.Count);
             Assert.Equal(ExpressionType.Call, quote.Body.NodeType);
@@ -64,46 +63,46 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(typeof(UnaryQuoteTests).GetMethod(nameof(Nop)), call.Method);
         }
 
-        [Fact]
-        public static void Quote_Lambda_IdentityFunc()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_IdentityFunc(bool useInterpreter)
         {
             Expression<Func<LambdaExpression>> f = () => GetQuote<Func<int, int>>(x => x);
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
             Assert.Equal(1, quote.Parameters.Count);
             Assert.Same(quote.Body, quote.Parameters[0]);
         }
 
-        [Fact]
-        public static void Quote_Lambda_Closure1()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_Closure1(bool useInterpreter)
         {
             Expression<Func<int, LambdaExpression>> f = x => GetQuote<Func<int>>(() => x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
-            AssertIsBox(quote.Body, 42);
+            AssertIsBox(quote.Body, 42, useInterpreter);
         }
 
-        [Fact]
-        public static void Quote_Lambda_Closure2()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_Closure2(bool useInterpreter)
         {
             Expression<Func<int, Func<int, LambdaExpression>>> f = x => y => GetQuote<Func<int>>(() => x + y);
 
-            var quote = f.Compile()(1)(2);
+            var quote = f.Compile(useInterpreter)(1)(2);
 
             Assert.Equal(0, quote.Parameters.Count);
 
             Assert.Equal(ExpressionType.Add, quote.Body.NodeType);
 
             var add = (BinaryExpression)quote.Body;
-            AssertIsBox(add.Left, 1);
-            AssertIsBox(add.Right, 2);
+            AssertIsBox(add.Left, 1, useInterpreter);
+            AssertIsBox(add.Right, 2, useInterpreter);
         }
 
-        [Fact]
-        public static void Quote_Block_Action()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Block_Action(bool useInterpreter)
         {
             var expr =
                 Block(
@@ -112,14 +111,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<LambdaExpression>, Action>(expr);
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
             Assert.Equal(0, quote.Parameters.Count);
             Assert.Same(expr, quote.Body);
         }
 
-        [Fact]
-        public static void Quote_Block_Local()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Block_Local(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -132,14 +131,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<LambdaExpression>, Func<int>>(expr);
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
             Assert.Equal(0, quote.Parameters.Count);
             Assert.Same(expr, quote.Body);
         }
 
-        [Fact]
-        public static void Quote_Block_Local_Shadow()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Block_Local_Shadow(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -152,14 +151,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(43);
+            var quote = f.Compile(useInterpreter)(43);
 
             Assert.Equal(0, quote.Parameters.Count);
             Assert.Same(expr, quote.Body);
         }
 
-        [Fact]
-        public static void Quote_Block_Closure()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Block_Closure(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -170,7 +169,7 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
 
@@ -179,11 +178,11 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(0, block.Variables.Count);
             Assert.Equal(1, block.Expressions.Count);
 
-            AssertIsBox(block.Expressions[0], 42);
+            AssertIsBox(block.Expressions[0], 42, useInterpreter);
         }
 
-        [Fact]
-        public static void Quote_Block_LocalAndClosure()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Block_LocalAndClosure(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
             var y = Parameter(typeof(int));
@@ -200,7 +199,7 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(1);
+            var quote = f.Compile(useInterpreter)(1);
 
             Assert.Equal(0, quote.Parameters.Count);
 
@@ -218,12 +217,12 @@ namespace System.Linq.Expressions.Tests
 
             var add = (BinaryExpression)expr1;
 
-            AssertIsBox(add.Left, 1);
+            AssertIsBox(add.Left, 1, useInterpreter);
             Assert.Same(y, add.Right);
         }
 
-        [Fact]
-        public static void Quote_CatchBlock_Local()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_CatchBlock_Local(bool useInterpreter)
         {
             var ex = Parameter(typeof(Exception));
 
@@ -238,14 +237,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<LambdaExpression>, Action>(expr);
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
             Assert.Equal(0, quote.Parameters.Count);
             Assert.Same(expr, quote.Body);
         }
 
-        [Fact]
-        public static void Quote_CatchBlock_Variable_Closure1()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_CatchBlock_Variable_Closure1(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
             var ex = Parameter(typeof(Exception));
@@ -261,14 +260,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
 
-            AssertIsBox(@try.Body, 42);
+            AssertIsBox(@try.Body, 42, useInterpreter);
             Assert.Null(@try.Fault);
             Assert.Null(@try.Finally);
 
@@ -279,8 +278,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Same(expr.Handlers[0], handler);
         }
 
-        [Fact]
-        public static void Quote_CatchBlock_Variable_Closure2()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_CatchBlock_Variable_Closure2(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
             var ex = Parameter(typeof(Exception));
@@ -296,7 +295,7 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
 
@@ -313,11 +312,11 @@ namespace System.Linq.Expressions.Tests
             var handler = @try.Handlers[0];
             Assert.Null(handler.Filter);
             Assert.Same(ex, handler.Variable);
-            AssertIsBox(@handler.Body, 42);
+            AssertIsBox(@handler.Body, 42, useInterpreter);
         }
 
-        [Fact]
-        public static void Quote_CatchBlock_NoVariable_Closure1()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_CatchBlock_NoVariable_Closure1(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -332,14 +331,14 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
 
-            AssertIsBox(@try.Body, 42);
+            AssertIsBox(@try.Body, 42, useInterpreter);
             Assert.Null(@try.Fault);
             Assert.Null(@try.Finally);
 
@@ -350,8 +349,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Same(expr.Handlers[0], handler);
         }
 
-        [Fact]
-        public static void Quote_CatchBlock_NoVariable_Closure2()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_CatchBlock_NoVariable_Closure2(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -366,7 +365,7 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, LambdaExpression>, Func<int>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
             Assert.Equal(0, quote.Parameters.Count);
 
@@ -383,11 +382,11 @@ namespace System.Linq.Expressions.Tests
             var handler = @try.Handlers[0];
             Assert.Null(handler.Filter);
             Assert.Null(handler.Variable);
-            AssertIsBox(@handler.Body, 42);
+            AssertIsBox(@handler.Body, 42, useInterpreter);
         }
 
-        [Fact]
-        public static void Quote_RuntimeVariables_Closure()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_RuntimeVariables_Closure(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -398,9 +397,9 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, Expression<Func<IRuntimeVariables>>>, Func<IRuntimeVariables>>(expr, x);
 
-            var quote = f.Compile()(42);
+            var quote = f.Compile(useInterpreter)(42);
 
-            var vars = quote.Compile()();
+            var vars = quote.Compile(useInterpreter)();
             Assert.Equal(1, vars.Count);
             Assert.Equal(42, vars[0]);
 
@@ -408,8 +407,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(43, vars[0]);
         }
 
-        [Fact]
-        public static void Quote_RuntimeVariables_Local()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_RuntimeVariables_Local(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
 
@@ -424,9 +423,9 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<Expression<Func<IRuntimeVariables>>>, Func<IRuntimeVariables>>(expr);
 
-            var quote = f.Compile()();
+            var quote = f.Compile(useInterpreter)();
 
-            var vars = quote.Compile()();
+            var vars = quote.Compile(useInterpreter)();
             Assert.Equal(1, vars.Count);
             Assert.Equal(42, vars[0]);
 
@@ -434,8 +433,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(43, vars[0]);
         }
 
-        [Fact]
-        public static void Quote_RuntimeVariables_ClosureAndLocal()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_RuntimeVariables_ClosureAndLocal(bool useInterpreter)
         {
             var x = Parameter(typeof(int));
             var y = Parameter(typeof(int));
@@ -452,9 +451,9 @@ namespace System.Linq.Expressions.Tests
 
             var f = BuildQuote<Func<int, Expression<Func<IRuntimeVariables>>>, Func<IRuntimeVariables>>(expr, x);
 
-            var quote = f.Compile()(1);
+            var quote = f.Compile(useInterpreter)(1);
 
-            var vars = quote.Compile()();
+            var vars = quote.Compile(useInterpreter)();
             Assert.Equal(2, vars.Count);
             Assert.Equal(1, vars[0]);
             Assert.Equal(2, vars[1]);
@@ -465,16 +464,35 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(4, vars[1]);
         }
 
-        private static void AssertIsBox<T>(Expression e, T value)
+        private void AssertIsBox<T>(Expression expression, T value, bool isInterpreted)
         {
-            Assert.Equal(ExpressionType.MemberAccess, e.NodeType);
+            if (isInterpreted)
+            {
+                // See https://github.com/dotnet/corefx/issues/11097 for the difference between
+                // runtime expression quoting in the compiler and the interpreter.
 
-            var member = (MemberExpression)e;
+                Assert.Equal(ExpressionType.Convert, expression.NodeType);
+
+                var convert = (UnaryExpression)expression;
+                Assert.Equal(typeof(T), convert.Type);
+
+                AssertBox<object>(convert.Operand, value);
+            }
+            else
+            {
+                AssertBox(expression, value);
+            }
+        }
+
+        private void AssertBox<T>(Expression expression, T value)
+        {
+            Assert.Equal(ExpressionType.MemberAccess, expression.NodeType);
+
+            var member = (MemberExpression)expression;
 
             var field = member.Member as FieldInfo;
             Assert.NotNull(field);
-            Assert.Equal(typeof(T), field.FieldType);
-            Assert.Equal(typeof(StrongBox<T>), field.DeclaringType);
+            Assert.Equal(typeof(StrongBox<T>).GetField(nameof(StrongBox<T>.Value)), field);
 
             var constant = member.Expression as ConstantExpression;
             Assert.NotNull(constant);
@@ -502,7 +520,6 @@ namespace System.Linq.Expressions.Tests
 
         public static Expression<T> GetQuote<T>(Expression<T> e) => e;
 
-        public static void Nop() { }
-#endif
+        public void Nop() { }
     }
 }
