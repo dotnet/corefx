@@ -126,6 +126,7 @@ namespace System.Collections.Concurrent
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
+            _globalLock = new object();
             _locals = new ThreadLocal<ThreadLocalList>();
 
             ThreadLocalList list = GetThreadList(true);
