@@ -567,6 +567,34 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
+        /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        public void Clear()
+        {
+            // Short path if the bag is empty
+            if (_headList == null)
+                return;
+
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+
+                // Acquire the lock to update the pointers
+                lock (GlobalListsLock)
+                {
+                    _locals = new ThreadLocal<ThreadLocalList>();
+                    _headList = null;
+                    _tailList = null;
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
         /// Returns an enumerator that iterates through the <see
         /// cref="ConcurrentBag{T}"/>.
         /// </summary>
