@@ -351,8 +351,6 @@ namespace System.Linq.Expressions.Tests
     {
         private static Type _charEnumType;
         private static Type _boolEnumType;
-        private static Type _floatEnumType;
-        private static Type _doubleEnumType;
         private static Type _intPtrEnumType;
         private static Type _uintPtrEnumType;
 
@@ -396,40 +394,6 @@ namespace System.Linq.Expressions.Tests
             }
         }
         
-        public static Type FloatEnumType
-        {
-            get
-            {
-                if (_floatEnumType == null)
-                {
-                    EnumBuilder eb = GetModuleBuilder().DefineEnum("FloatEnumType", TypeAttributes.Public, typeof(float));
-                    eb.DefineLiteral("A", 1.0f);
-                    eb.DefineLiteral("B", 2.0f);
-                    eb.DefineLiteral("C", 3.0f);
-                    _floatEnumType = eb.CreateTypeInfo().AsType();
-                }
-
-                return _floatEnumType;
-            }
-        }
-
-        public static Type DoubleEnumType
-        {
-            get
-            {
-                if (_doubleEnumType == null)
-                {
-                    EnumBuilder eb = GetModuleBuilder().DefineEnum("DoubleEnumType", TypeAttributes.Public, typeof(double));
-                    eb.DefineLiteral("A", 1.0);
-                    eb.DefineLiteral("B", 2.0);
-                    eb.DefineLiteral("C", 3.0);
-                    _doubleEnumType = eb.CreateTypeInfo().AsType();
-                }
-
-                return _doubleEnumType;
-            }
-        }
-
         public static Type IntPtrEnumType
         {
             get
