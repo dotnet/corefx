@@ -627,6 +627,18 @@ namespace System.Collections.Concurrent
             return false;
         }
 
+        /// <summary>
+        /// Removes all objects from the <see cref="ConcurrentQueue{T}"/>.
+        /// </summary>
+        public void Clear()
+        {
+            while (!IsEmpty)
+            {
+                Segment head = _head;
+                head.Clear();
+            }
+        }
+
 
         /// <summary>
         /// private class for ConcurrentQueue. 
@@ -867,6 +879,59 @@ namespace System.Collections.Concurrent
                 result = default(T);
                 return false;
             }
+
+            /// <summary>
+            /// Clear elements of current segment
+            /// </summary>
+            internal void Clear()
+            {
+                SpinWait spin = new SpinWait();
+                int lowLocal = Low, highLocal = High;
+                while (lowLocal <= highLocal)
+                {
+                    //try to update _low
+                    if (Interlocked.CompareExchange(ref _low, highLocal - 1, lowLocal) == lowLocal)
+                    {
+                        // If there is no other thread taking snapshot (GetEnumerator(), ToList(), etc), reset the deleted entry to null.
+                        // It is ok if after this conditional check _numSnapshotTakers becomes > 0, because new snapshots won't include 
+                        // the deleted entry at _array[lowLocal]. 
+                        if (_source._numSnapshotTakers <= 0)
+                        {
+                            while (lowLocal <= highLocal)
+                                _array[lowLocal++] = default(T); //release the reference to the object.
+                        }
+                        lowLocal = highLocal + 1;
+
+                        //if the current thread sets _low to SEGMENT_SIZE, which means the current segment becomes
+                        //disposable, then this thread is responsible to dispose this segment, and reset _head 
+                        if (lowLocal >= SEGMENT_SIZE)
+                        {
+                            //  Invariant: we only dispose the current _head, not any other segment
+                            //  In usual situation, disposing a segment is simply setting _head to _head._next
+                            //  But there is one special case, where _head and _tail points to the same and ONLY
+                            //segment of the queue: Another thread A is doing Enqueue and finds that it needs to grow,
+                            //while the *current* thread is doing *this* Dequeue operation, and finds that it needs to 
+                            //dispose the current (and ONLY) segment. Then we need to wait till thread A finishes its 
+                            //Grow operation, this is the reason of having the following while loop
+                            var spinLocal = new SpinWait();
+                            while (_next == null)
+                            {
+                                spinLocal.SpinOnce();
+                            }
+                            Debug.Assert(_source._head == this);
+                            _source._head = _next;
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        //CAS failed due to contention: spin briefly and retry
+                        spin.SpinOnce();
+                        lowLocal = Low; highLocal = High;
+                    }
+                }//end of while
+            }
+
 #pragma warning restore 0420
             /// <summary>
             /// try to peek the current segment
