@@ -45,7 +45,7 @@ namespace System.Collections.Concurrent
         [NonSerialized]
         private ThreadLocal<ThreadLocalList> _locals;
 
-        // seperated GlobalLock object. We cannot use _locals because it recreated in Clear method.
+        // Separated GlobalLock object. We cannot use _locals because it recreated in Clear method.
         [NonSerialized]
         private object _globalLock = new object();
 
