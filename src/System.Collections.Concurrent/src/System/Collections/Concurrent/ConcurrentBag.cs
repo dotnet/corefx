@@ -45,6 +45,10 @@ namespace System.Collections.Concurrent
         [NonSerialized]
         private ThreadLocal<ThreadLocalList> _locals;
 
+        // seperated GlobalLock object. We cannot use _locals because it recreated in Clear method.
+        [NonSerialized]
+        private object _globalLock = new object();
+
         // This head and tail pointers points to the first and last local lists, to allow enumeration on the thread locals objects
         [NonSerialized]
         private volatile ThreadLocalList _headList, _tailList;
@@ -578,9 +582,9 @@ namespace System.Collections.Concurrent
             // Acquire the global lock to update the pointers
             lock (GlobalListsLock)
             {
-                _locals = new ThreadLocal<ThreadLocalList>();
                 _headList = null;
                 _tailList = null;
+                _locals = new ThreadLocal<ThreadLocalList>();
             }
         }
 
@@ -729,8 +733,8 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                Debug.Assert(_locals != null);
-                return _locals;
+                Debug.Assert(_globalLock != null);
+                return _globalLock;
             }
         }
 
