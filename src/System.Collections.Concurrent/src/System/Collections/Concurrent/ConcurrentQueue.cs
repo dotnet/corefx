@@ -890,7 +890,7 @@ namespace System.Collections.Concurrent
                 while (lowLocal <= highLocal)
                 {
                     //try to update _low
-                    if (Interlocked.CompareExchange(ref _low, highLocal - 1, lowLocal) == lowLocal)
+                    if (Interlocked.CompareExchange(ref _low, highLocal + 1, lowLocal) == lowLocal)
                     {
                         // If there is no other thread taking snapshot (GetEnumerator(), ToList(), etc), reset the deleted entry to null.
                         // It is ok if after this conditional check _numSnapshotTakers becomes > 0, because new snapshots won't include 
