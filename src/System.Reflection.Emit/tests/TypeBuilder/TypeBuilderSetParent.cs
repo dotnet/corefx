@@ -19,9 +19,11 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SetParent_TestData))]
         public void SetParent(TypeAttributes attributes, Type parent, Type expected)
         {
             TypeBuilder type = Helpers.DynamicType(attributes);
+
             type.SetParent(parent);
             Assert.Equal(expected, type.BaseType);
 
@@ -61,7 +63,7 @@ namespace System.Reflection.Emit.Tests
         [InlineData(TypeAttributes.Interface | TypeAttributes.Abstract)]
         public void SetParent_InterfaceType_ThrowsArgumentException(TypeAttributes attributes)
         {
-            TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
+            TypeBuilder type = Helpers.DynamicType(attributes);
             Assert.Throws<ArgumentException>(null, () => type.SetParent(typeof(EmptyNonGenericInterface1)));
         }
 
