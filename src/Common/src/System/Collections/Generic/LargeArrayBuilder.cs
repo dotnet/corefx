@@ -60,7 +60,7 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item, int limit)
         {
-            Debug.Assert(limit > _count);
+            Debug.Assert((uint)limit > (uint)_count);
 
             if (_index == _current.Length)
             {
@@ -174,7 +174,7 @@ namespace System.Collections.Generic
             //   above step, except with _current.Length * 2.
             // - Make sure we never pass the provided limit in all of the above steps.
 
-            Debug.Assert(limit > _count);
+            Debug.Assert((uint)limit > (uint)_count);
             Debug.Assert(_index == _current.Length, $"{nameof(AllocateBuffer)} was called, but there's more space.");
 
             // If _count is int.MinValue, we want to go down the other path which will raise an exception.
