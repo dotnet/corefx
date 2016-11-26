@@ -48,22 +48,15 @@ namespace System.Collections.Generic.Tests
         [MemberData(nameof(EnumerableWithLimitData))]
         public void AddWithLimit(IEnumerable<T> seed, int limit)
         {
-            var builder1 = new LargeArrayBuilder<T>(initialize: true);
-            var builder2 = new LargeArrayBuilder<T>(initialize: true);
+            var builder = new LargeArrayBuilder<T>(initialize: true);
 
             for (int i = 0; i < limit; i++)
             {
+                builder.Add(seed.ElementAt(i), limit);
+
                 int count = i + 1;
-                T item = seed.ElementAt(i);
-
-                builder1.Add(item, limit);
-                builder2.SlowAdd(item, limit);
-
-                Assert.Equal(count, builder1.Count);
-                Assert.Equal(count, builder2.Count);
-
-                Assert.Equal(seed.Take(count), builder1.ToArray());
-                Assert.Equal(seed.Take(count), builder2.ToArray());
+                Assert.Equal(count, builder.Count);
+                Assert.Equal(seed.Take(count), builder.ToArray());
             }
         }
 
