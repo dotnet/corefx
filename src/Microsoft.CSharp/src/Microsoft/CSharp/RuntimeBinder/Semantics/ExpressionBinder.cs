@@ -459,11 +459,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal EXPR BindArrayIndexCore(BindingFlag bindFlags, EXPR pOp1, EXPR pOp2)
         {
             EXPR pExpr;
-            bool bIsError = false;
-            if (!pOp1.isOK() || !pOp2.isOK())
-            {
-                bIsError = true;
-            }
+            bool bIsError = !pOp1.isOK() || !pOp2.isOK();
 
             CType pIntType = GetReqPDT(PredefinedType.PT_INT);
 
@@ -823,25 +819,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             EXPRFIELD pResult;
             {
-                bool isLValue = false;
-                if ((pOptionalObject != null && pOptionalObject.type.IsPointerType()) || objectIsLvalue(pOptionalObject))
-                {
-                    isLValue = true;
-                }
+                bool isLValue = pOptionalObject != null && pOptionalObject.type.IsPointerType() || objectIsLvalue(pOptionalObject);
+
                 // Exception: a readonly field is not an lvalue unless we're in the constructor/static constructor appropriate
                 // for the field.
-                if (RespectReadonly() && fwt.Field().isReadOnly)
-                {
-                    if (ContainingAgg() == null ||
-                        !InMethod() || !InConstructor() ||
-                        fwt.Field().getClass() != ContainingAgg() ||
-                        InStaticMethod() != fwt.Field().isStatic ||
-                        (pOptionalObject != null && !isThisPointer(pOptionalObject)) ||
-                        InAnonymousMethod())
-                    {
-                        isLValue = false;
-                    }
-                }
+                if (RespectReadonly() && fwt.Field().isReadOnly
+                    && (ContainingAgg() == null || !InMethod() || !InConstructor()
+                        || fwt.Field().getClass() != ContainingAgg() || InStaticMethod() != fwt.Field().isStatic
+                        || (pOptionalObject != null && !isThisPointer(pOptionalObject)) || InAnonymousMethod()))
+                    isLValue = false;
 
                 pResult = GetExprFactory().CreateField(isLValue ? EXPRFLAG.EXF_LVALUE : 0, pFieldType, pOptionalObject, 0, fwt, pOptionalLHS);
                 if (!bIsMatchingStatic)

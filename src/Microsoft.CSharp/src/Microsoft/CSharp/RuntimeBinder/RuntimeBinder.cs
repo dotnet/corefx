@@ -737,11 +737,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // Make sure we're not setting ref for the receiver of a call - the argument
                 // will be marked as ref if we're calling off a struct, but we don't want 
                 // to persist that in our system.
-                bool isFirstParamOfCallOrInvoke = false;
-                if (i == 0 && IsBinderThatCanHaveRefReceiver(payload))
-                {
-                    isFirstParamOfCallOrInvoke = true;
-                }
+                bool isFirstParamOfCallOrInvoke = i == 0 && IsBinderThatCanHaveRefReceiver(payload);
 
                 // If we have a ref or out, get the parameter modifier type.
                 if ((parameter is ParameterExpression && (parameter as ParameterExpression).IsByRef) &&
