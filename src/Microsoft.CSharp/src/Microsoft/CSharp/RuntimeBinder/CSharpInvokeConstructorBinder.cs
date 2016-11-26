@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private Type _callingContext;
 
         public IList<CSharpArgumentInfo> ArgumentInfo { get { return _argumentInfo.AsReadOnly(); } }
-        private List<CSharpArgumentInfo> _argumentInfo;
+        private readonly List<CSharpArgumentInfo> _argumentInfo;
 
         public bool StaticCall { get { return true; } }
         public IList<Type> TypeArguments { get { return Array.Empty<Type>(); } }
@@ -26,7 +26,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         bool ICSharpInvokeOrInvokeMemberBinder.ResultDiscarded { get { return false; } }
 
-        private RuntimeBinder _binder;
+        private readonly RuntimeBinder _binder;
 
         public CSharpInvokeConstructorBinder(
             CSharpCallFlags flags,

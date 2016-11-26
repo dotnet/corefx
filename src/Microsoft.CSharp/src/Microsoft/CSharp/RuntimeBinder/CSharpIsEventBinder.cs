@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal Type CallingContext { get { return _callingContext; } }
         private Type _callingContext;
 
-        private RuntimeBinder _binder;
+        private readonly RuntimeBinder _binder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSharpIsEventBinder"/> class.
