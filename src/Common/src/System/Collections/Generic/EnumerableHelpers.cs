@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace System.Collections.Generic
 {
     /// <summary>Internal helper functions for working with enumerables.</summary>
-    internal static partial class EnumerableHelpers
+    internal static class EnumerableHelpers
     {
         /// <summary>Converts an enumerable to an array.</summary>
         /// <param name="source">The enumerable to convert.</param>
