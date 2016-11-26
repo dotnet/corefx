@@ -247,6 +247,10 @@
       <Project>{aef718e9-d4fc-418f-a7ae-ed6b2c7b3787}</Project>
       <Name>System.Linq.Expressions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.CSharp\src\Microsoft.CSharp.csproj">
+      <Project>{96AA2060-C846-4E56-9509-E8CB9C114C8F}</Project>
+      <Name>Microsoft.CSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
