@@ -13,6 +13,8 @@
     <Compile Include="CSharpBinaryOperationTests.cs" />
     <Compile Include="CSharpConvertBinderTests.cs" />
     <Compile Include="CSharpArgumentInfoTests.cs" />
+    <Compile Include="CSharpGetIndexBinderTests.cs" />
+    <Compile Include="CSharpGetMemberBinderTests.cs" />
     <Compile Include="CSharpInvokeMemberBinderTests.cs" />
     <Compile Include="UnaryOperationTests.cs .cs" />
   </ItemGroup>
