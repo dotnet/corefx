@@ -45,9 +45,11 @@ namespace System.Collections.Concurrent
         [NonSerialized]
         private ThreadLocal<ThreadLocalList> _locals;
 
+#if netcoreapp11
         // Separated GlobalLock object. We cannot use _locals because it recreated in Clear method.
         [NonSerialized]
         private object _globalLock = new object();
+#endif
 
         // This head and tail pointers points to the first and last local lists, to allow enumeration on the thread locals objects
         [NonSerialized]
@@ -126,8 +128,10 @@ namespace System.Collections.Concurrent
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            _globalLock = new object();
             _locals = new ThreadLocal<ThreadLocalList>();
+#if netcoreapp11
+            _globalLock = new object();
+#endif
 
             ThreadLocalList list = GetThreadList(true);
             foreach (T item in _serializationArray)
@@ -571,6 +575,7 @@ namespace System.Collections.Concurrent
             }
         }
 
+#if netcoreapp11
         /// <summary>
         /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
@@ -588,6 +593,7 @@ namespace System.Collections.Concurrent
                 _locals = new ThreadLocal<ThreadLocalList>();
             }
         }
+#endif
 
         /// <summary>
         /// Returns an enumerator that iterates through the <see
@@ -734,13 +740,18 @@ namespace System.Collections.Concurrent
         {
             get
             {
+#if netcoreapp11
                 Debug.Assert(_globalLock != null);
                 return _globalLock;
+#else
+                Debug.Assert(_locals != null);
+                return _locals;
+#endif
             }
         }
 
 
-        #region Freeze bag helper methods
+#region Freeze bag helper methods
         /// <summary>
         /// Local helper method to freeze all bag operations, it
         /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new thread can be added
@@ -893,10 +904,10 @@ namespace System.Collections.Concurrent
             return list;
         }
 
-        #endregion
+#endregion
 
 
-        #region Inner Classes
+#region Inner Classes
 
         /// <summary>
         /// A class that represents a node in the lock thread list
@@ -1060,7 +1071,7 @@ namespace System.Collections.Concurrent
                 }
             }
         }
-        #endregion
+#endregion
     }
 
     /// <summary>

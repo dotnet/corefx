@@ -16,6 +16,10 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netcoreapp1.1_Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netcoreapp1.1_Release|AnyCPU' ">
+  </PropertyGroup>
   <ItemGroup>
     <!-- Common Collections tests -->
     <Compile Include="$(CommonTestPath)\System\Collections\CollectionAsserts.cs">
@@ -84,6 +88,9 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
+    <Compile Include="ConcurrentBagTests.netcoreapp1.1.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!=''">
     <Compile Include="$(CommonPath)\System\SerializableAttribute.cs">
