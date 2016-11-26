@@ -224,11 +224,15 @@ namespace System.Collections.Generic
                     // doing min(256 * 2, 500) - 256. This represents the total we've allocated after
                     // this operation, minus the amount we've already allocated.
 
-                    Debug.Assert(_count >= ResizeLimit * 2);
+                    // Note: In case _count overflows (last buffer is 0x40000000) or _count * 2
+                    // overflows (last buffer is 0x20000000), we must cast to uint for correctness
+                    // during comparisons.
+
+                    Debug.Assert((uint)_count >= (uint)ResizeLimit * 2);
                     Debug.Assert(_count == _current.Length * 2);
 
                     _buffers.Add(_current);
-                    nextCapacity = Math.Min(_count * 2, limit) - _count;
+                    nextCapacity = (int)Math.Min((uint)_count * 2, (uint)limit) - _count;
                 }
 
                 _current = new T[nextCapacity];
