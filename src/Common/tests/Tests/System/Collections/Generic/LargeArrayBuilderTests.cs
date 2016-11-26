@@ -45,12 +45,12 @@ namespace System.Collections.Generic.Tests
         }
 
         [Theory]
-        [MemberData(nameof(EnumerableWithLimitData))]
-        public void AddWithLimit(IEnumerable<T> seed, int limit)
+        [MemberData(nameof(MaxCapacityData))]
+        public void MaxCapacity(IEnumerable<T> seed, int maxCapacity)
         {
-            var builder = new LargeArrayBuilder<T>(limit);
+            var builder = new LargeArrayBuilder<T>(maxCapacity);
 
-            for (int i = 0; i < limit; i++)
+            for (int i = 0; i < maxCapacity; i++)
             {
                 builder.Add(seed.ElementAt(i));
 
@@ -112,7 +112,7 @@ namespace System.Collections.Generic.Tests
             return data;
         }
 
-        public static TheoryData<IEnumerable<T>, int> EnumerableWithLimitData()
+        public static TheoryData<IEnumerable<T>, int> MaxCapacityData()
         {
             var data = new TheoryData<IEnumerable<T>, int>();
 
