@@ -26,16 +26,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Direct = 0x11,
             Indirect = 0x12
         }
-        private SymbolLoader _symbolLoader;
-        private ExpressionBinder _binder;
-        private TypeArray _pMethodTypeParameters;
-        private TypeArray _pClassTypeArguments;
-        private TypeArray _pMethodFormalParameterTypes;
-        private ArgInfos _pMethodArguments;
-        private List<CType>[] _pExactBounds;
-        private List<CType>[] _pUpperBounds;
-        private List<CType>[] _pLowerBounds;
-        private CType[] _pFixedResults;
+        private readonly SymbolLoader _symbolLoader;
+        private readonly ExpressionBinder _binder;
+        private readonly TypeArray _pMethodTypeParameters;
+        private readonly TypeArray _pClassTypeArguments;
+        private readonly TypeArray _pMethodFormalParameterTypes;
+        private readonly ArgInfos _pMethodArguments;
+        private readonly List<CType>[] _pExactBounds;
+        private readonly List<CType>[] _pUpperBounds;
+        private readonly List<CType>[] _pLowerBounds;
+        private readonly CType[] _pFixedResults;
         private Dependency[][] _ppDependencies;
         private bool _dependenciesDirty;
 
@@ -531,8 +531,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   then each such Xi is fixed. If any fixing operation fails then
             // SPEC:   CType inference fails.
 
-            NewInferenceResult res;
-            res = FixNondependentParameters();
+            NewInferenceResult res = FixNondependentParameters();
             if (res != NewInferenceResult.NoProgress)
             {
                 return res;

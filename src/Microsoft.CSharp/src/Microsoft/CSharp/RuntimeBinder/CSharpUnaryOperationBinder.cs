@@ -17,16 +17,14 @@ namespace Microsoft.CSharp.RuntimeBinder
     /// </summary>
     internal sealed class CSharpUnaryOperationBinder : UnaryOperationBinder
     {
-        internal bool IsChecked { get { return _isChecked; } }
-        private bool _isChecked;
+        internal bool IsChecked { get; }
 
-        internal Type CallingContext { get { return _callingContext; } }
-        private Type _callingContext;
+        internal Type CallingContext { get; }
 
         internal IList<CSharpArgumentInfo> ArgumentInfo { get { return _argumentInfo.AsReadOnly(); } }
-        private List<CSharpArgumentInfo> _argumentInfo;
+        private readonly List<CSharpArgumentInfo> _argumentInfo;
 
-        private RuntimeBinder _binder;
+        private readonly RuntimeBinder _binder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSharpUnaryOperationBinder"/> class.
@@ -41,8 +39,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             IEnumerable<CSharpArgumentInfo> argumentInfo) :
             base(operation)
         {
-            _isChecked = isChecked;
-            _callingContext = callingContext;
+            IsChecked = isChecked;
+            CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToList(argumentInfo);
             Debug.Assert(_argumentInfo.Count == 1);
             _binder = RuntimeBinder.GetInstance();

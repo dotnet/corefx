@@ -25,15 +25,15 @@ namespace Microsoft.CSharp.RuntimeBinder
         private HashSet<NameHashKey> _namesLoadedForEachType;
 
         // Members from the managed binder.
-        private SYMTBL _symbolTable;
-        private SymFactory _symFactory;
-        private NameManager _nameManager;
-        private TypeManager _typeManager;
-        private BSYMMGR _bsymmgr;
-        private CSemanticChecker _semanticChecker;
+        private readonly SYMTBL _symbolTable;
+        private readonly SymFactory _symFactory;
+        private readonly NameManager _nameManager;
+        private readonly TypeManager _typeManager;
+        private readonly BSYMMGR _bsymmgr;
+        private readonly CSemanticChecker _semanticChecker;
 
         private NamespaceSymbol _rootNamespace;
-        private InputFile _infile;
+        private readonly InputFile _infile;
 
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -670,13 +670,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             NamespaceOrAggregateSymbol current = _rootNamespace;
-            NamespaceOrAggregateSymbol next = null;
 
             // Go through the declaration chain and add namespaces and types for 
             // each element in the chain.
             for (int i = 0; i < declarationChain.Count; i++)
             {
                 object o = declarationChain[i];
+                NamespaceOrAggregateSymbol next;
                 if (o is Type)
                 {
                     Type t = o as Type;
@@ -1162,13 +1162,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void SetInterfacesOnAggregate(AggregateSymbol aggregate, Type type)
         {
-            Type[] interfaces;
-
             if (type.GetTypeInfo().IsGenericType)
             {
                 type = type.GetTypeInfo().GetGenericTypeDefinition();
             }
-            interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
+            Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
             // We wont be able to find the difference between Ifaces and 
             // IfacesAll anymore - at runtime, the class implements all of its
