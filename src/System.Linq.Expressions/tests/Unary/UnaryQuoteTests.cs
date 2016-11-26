@@ -520,6 +520,6 @@ namespace System.Linq.Expressions.Tests
 
         public static Expression<T> GetQuote<T>(Expression<T> e) => e;
 
-        public void Nop() { }
+        public static void Nop() { }
     }
 }
