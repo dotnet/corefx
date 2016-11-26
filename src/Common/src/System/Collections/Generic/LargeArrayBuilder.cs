@@ -38,6 +38,9 @@ namespace System.Collections.Generic
         /// Constructs a new builder with the specified maximum capacity.
         /// </summary>
         /// <param name="maxCapacity">The maximum capacity this builder can have.</param>
+        /// <remarks>
+        /// Do not add more than <paramref name="maxCapacity"/> items to this builder.
+        /// </remarks>
         public LargeArrayBuilder(int maxCapacity)
         {
             Debug.Assert(maxCapacity >= 0);
@@ -80,6 +83,10 @@ namespace System.Collections.Generic
         /// Adds a range of items to this builder.
         /// </summary>
         /// <param name="items">The sequence to add.</param>
+        /// <remarks>
+        /// It is the caller's responsibility to ensure that adding <paramref name="items"/>
+        /// does not cause the builder to exceed its maximum capacity.
+        /// </remarks>
         public void AddRange(IEnumerable<T> items)
         {
             Debug.Assert(items != null);
