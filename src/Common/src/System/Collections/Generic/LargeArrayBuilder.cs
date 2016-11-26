@@ -57,10 +57,6 @@ namespace System.Collections.Generic
         /// </summary>
         /// <param name="item">The item to add.</param>
         /// <param name="limit">The maximum capacity to allocate.</param>
-        /// <remarks>
-        /// Use <see cref="Add"/> if adding to the builder is a bottleneck for your use case.
-        /// Otherwise, use <see cref="SlowAdd"/>.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item, int limit)
         {
@@ -150,18 +146,6 @@ namespace System.Collections.Generic
         /// </remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void SlowAdd(T item) => Add(item);
-
-        /// <summary>
-        /// Adds an item to this builder with the specified limit.
-        /// </summary>
-        /// <param name="item">The item to add.</param>
-        /// <param name="limit">The maximum capacity to allocate.</param>
-        /// <remarks>
-        /// Use <see cref="Add"/> if adding to the builder is a bottleneck for your use case.
-        /// Otherwise, use <see cref="SlowAdd"/>.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public void SlowAdd(T item, int limit) => Add(item, limit);
 
         /// <summary>
         /// Returns an array representation of this builder.
