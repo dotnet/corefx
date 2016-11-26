@@ -1091,8 +1091,7 @@ namespace System.Linq.Tests
         {
             IEnumerable<int> seq = GenerateRandomSequnce(seed: 0xdeadbeef, count: 10);
 
-            var transforms = IdentityTransforms<int>();
-            foreach (var seq2 in transforms.Select(t => t(seq)))
+            foreach (IEnumerable<int> seq2 in IdentityTransforms<int>().Select(t => t(seq)))
             {
                 yield return new object[] { seq2 };
             }
