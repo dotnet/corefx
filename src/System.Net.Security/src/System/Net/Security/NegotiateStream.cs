@@ -507,7 +507,7 @@ namespace System.Net.Security
         {
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User | ThreadKinds.Async))
             {
-                await InnerStream.FlushAsync(cancellationToken);
+                await InnerStream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 #else
