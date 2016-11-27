@@ -11,7 +11,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 
@@ -44,12 +43,6 @@ namespace System.Collections.Concurrent
         // ThreadLocalList object that contains the data per thread
         [NonSerialized]
         private ThreadLocal<ThreadLocalList> _locals;
-
-#if netcoreapp11
-        // Separated GlobalLock object. We cannot use _locals because it recreated in Clear method.
-        [NonSerialized]
-        private object _globalLock = new object();
-#endif
 
         // This head and tail pointers points to the first and last local lists, to allow enumeration on the thread locals objects
         [NonSerialized]
@@ -129,9 +122,6 @@ namespace System.Collections.Concurrent
         private void OnDeserialized(StreamingContext context)
         {
             _locals = new ThreadLocal<ThreadLocalList>();
-#if netcoreapp11
-            _globalLock = new object();
-#endif
 
             ThreadLocalList list = GetThreadList(true);
             foreach (T item in _serializationArray)
@@ -393,7 +383,6 @@ namespace System.Collections.Concurrent
                 versionsList.Clear(); //clear the list from the previous iteration
                 loop = false;
 
-
                 ThreadLocalList currentList = _headList;
                 while (currentList != null)
                 {
@@ -575,7 +564,6 @@ namespace System.Collections.Concurrent
             }
         }
 
-#if netcoreapp11
         /// <summary>
         /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
@@ -585,15 +573,23 @@ namespace System.Collections.Concurrent
             if (_headList == null)
                 return;
 
-            // Acquire the global lock to update the pointers
-            lock (GlobalListsLock)
+            bool lockTaken = false;
+            try
             {
-                _headList = null;
-                _tailList = null;
-                _locals = new ThreadLocal<ThreadLocalList>();
+                FreezeBag(ref lockTaken);
+
+                var currentList = _headList;
+                while (currentList != null)
+                {
+                    currentList.Clear();
+                    currentList = currentList._nextList;
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
             }
         }
-#endif
 
         /// <summary>
         /// Returns an enumerator that iterates through the <see
@@ -740,13 +736,8 @@ namespace System.Collections.Concurrent
         {
             get
             {
-#if netcoreapp11
-                Debug.Assert(_globalLock != null);
-                return _globalLock;
-#else
                 Debug.Assert(_locals != null);
                 return _locals;
-#endif
             }
         }
 
@@ -1031,6 +1022,19 @@ namespace System.Collections.Concurrent
                 }
                 result = default(T);
                 return false;
+            }
+
+            /// <summary>
+            /// Remove all items from the list
+            /// </summary>
+            /// <param name="result">the peeked item</param>
+            /// <returns>True if succeeded, false otherwise</returns>
+            internal void Clear()
+            {
+                _head = null;
+                _tail = null;
+                _count = 0;
+                _stealCount = 0;
             }
 
             /// <summary>
