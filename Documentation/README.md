@@ -47,7 +47,6 @@ Coding Guidelines
 - [Project Guidelines](coding-guidelines/project-guidelines.md)
 - [Adding APIs Guidelines](coding-guidelines/adding-api-guidelines.md)
 
-
 Building from Source
 ====================
 
