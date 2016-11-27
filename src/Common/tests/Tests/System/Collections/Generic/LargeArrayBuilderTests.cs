@@ -122,9 +122,6 @@ namespace System.Collections.Generic.Tests
             {
                 int count = enumerable.Count();
                 data.Add(enumerable, count);
-
-                data.Add(enumerable, count / 2);
-                data.Add(enumerable, count / 4);
             }
 
             return data;
