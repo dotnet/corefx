@@ -15,12 +15,12 @@ namespace System.Collections.Generic
         private const int StartingCapacity = 4;
         private const int ResizeLimit = 32;
 
+        private readonly int _maxCapacity;  // The maximum capacity this builder can have.
         private T[] _first;                 // The first buffer we store items in. Resized until ResizeLimit.
         private ArrayBuilder<T[]> _buffers; // After ResizeLimit * 2, we store previous buffers we've filled out here.
         private T[] _current;               // Current buffer we're reading into. If _count <= ResizeLimit, this is _first.
         private int _index;                 // Index into the current buffer.
         private int _count;                 // Count of all of the items in this builder.
-        private int _maxCapacity;           // The maximum capacity this builder can have.
 
         /// <summary>
         /// Constructs a new builder.
@@ -68,7 +68,7 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item)
         {
-            Debug.Assert((uint)_maxCapacity > (uint)_count);
+            Debug.Assert(_maxCapacity > _count);
 
             if (_index == _current.Length)
             {
@@ -128,10 +128,9 @@ namespace System.Collections.Generic
         /// <param name="count">The number of items to copy.</param>
         public void CopyTo(T[] array, int arrayIndex, int count)
         {
-            Debug.Assert(array != null);
             Debug.Assert(arrayIndex >= 0);
             Debug.Assert(count >= 0 && count <= Count);
-            Debug.Assert(array.Length - arrayIndex >= count);
+            Debug.Assert(array?.Length - arrayIndex >= count);
 
             for (int i = -1; count > 0; i++)
             {
@@ -215,18 +214,14 @@ namespace System.Collections.Generic
                     // Then our buffers look like this: | 32 | 32 | 64 | 128 |
                     // As you can see, our count will be just double the last buffer.
                     // Now, say _maxCapacity is 500. We will find the right amount to allocate by
-                    // doing min(256 * 2, 500) - 256. This represents the total we've allocated after
-                    // this operation, minus the amount we've already allocated.
+                    // doing min(256, 500 - 256). The lhs represents double the last buffer,
+                    // the rhs the limit minus the amount we've already allocated.
 
-                    // Note: In case _count overflows (last buffer is 0x40000000) or _count * 2
-                    // overflows (last buffer is 0x20000000), we must cast to uint for correctness
-                    // during comparisons.
-
-                    Debug.Assert((uint)_count >= (uint)ResizeLimit * 2);
+                    Debug.Assert(_count >= ResizeLimit * 2);
                     Debug.Assert(_count == _current.Length * 2);
 
                     _buffers.Add(_current);
-                    nextCapacity = (int)Math.Min((uint)_count * 2, (uint)_maxCapacity) - _count;
+                    nextCapacity = Math.Min(_count, _maxCapacity - _count);
                 }
 
                 _current = new T[nextCapacity];
