@@ -503,7 +503,7 @@ namespace System.Runtime.CompilerServices
         }
 
         [Serializable]
-        private class Enumerator : IEnumerator<T>, System.Collections.IEnumerator
+        private class Enumerator : IEnumerator<T>, IEnumerator
         {
             private readonly ReadOnlyCollectionBuilder<T> _builder;
             private readonly int _version;
@@ -536,7 +536,7 @@ namespace System.Runtime.CompilerServices
 
             #region IEnumerator Members
 
-            object System.Collections.IEnumerator.Current
+            object IEnumerator.Current
             {
                 get
                 {
@@ -574,7 +574,7 @@ namespace System.Runtime.CompilerServices
 
             #region IEnumerator Members
 
-            void System.Collections.IEnumerator.Reset()
+            void IEnumerator.Reset()
             {
                 if (_version != _builder._version)
                 {
