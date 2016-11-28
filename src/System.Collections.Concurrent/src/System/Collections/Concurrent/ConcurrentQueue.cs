@@ -881,7 +881,7 @@ namespace System.Collections.Concurrent
             }
 
             /// <summary>
-            /// Clear elements of current segment
+            /// Remove all elements of current segment by one operation, not one by one as TryRemove does
             /// </summary>
             internal void Clear()
             {
@@ -889,7 +889,7 @@ namespace System.Collections.Concurrent
                 int lowLocal = Low, highLocal = High;
                 while (lowLocal <= highLocal)
                 {
-                    //try to update _low
+                    //try to update _low to the last element + 1 to remove all elements by one operation
                     if (Interlocked.CompareExchange(ref _low, highLocal + 1, lowLocal) == lowLocal)
                     {
                         // If there is no other thread taking snapshot (GetEnumerator(), ToList(), etc), reset the deleted entry to null.

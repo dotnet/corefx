@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Collections.Concurrent.Tests
 {
-    public class ConcurrentQueueTests : IEnumerable_Generic_Tests<int>
+    public partial class ConcurrentQueueTests : IEnumerable_Generic_Tests<int>
     {
         protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
         protected override IEnumerable<int> GenericIEnumerableFactory(int count) => new ConcurrentQueue<int>(Enumerable.Range(0, count));

@@ -4,6 +4,6 @@
     "System.Threading.Tasks": "4.3.0"
   },
   "frameworks": {
-    "netstandard1.3": {}
+    "netstandard1.7": {}
   }
 }
