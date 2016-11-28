@@ -32,6 +32,8 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
+#include "pal_crypto_config.h"
+
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
 
 #define API_EXISTS(fn) (fn != nullptr)
@@ -39,7 +41,7 @@
 // List of all functions from the libssl that are used in the System.Security.Cryptography.Native.
 // Forgetting to add a function here results in build failure with message reporting the function
 // that needs to be added.
-#define FOR_ALL_OPENSSL_FUNCTIONS \
+#define FOR_ALL_UNCONDITIONAL_OPENSSL_FUNCTIONS \
     PER_FUNCTION_BLOCK(ASN1_BIT_STRING_free, true) \
     PER_FUNCTION_BLOCK(ASN1_INTEGER_get, true) \
     PER_FUNCTION_BLOCK(ASN1_OBJECT_free, true) \
@@ -92,7 +94,6 @@
     PER_FUNCTION_BLOCK(ECDSA_sign, true) \
     PER_FUNCTION_BLOCK(ECDSA_size, true) \
     PER_FUNCTION_BLOCK(ECDSA_verify, true) \
-    PER_FUNCTION_BLOCK(EC_GF2m_simple_method, false) \
     PER_FUNCTION_BLOCK(EC_GFp_mont_method, true) \
     PER_FUNCTION_BLOCK(EC_GFp_simple_method, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_check, true) \
@@ -100,7 +101,6 @@
     PER_FUNCTION_BLOCK(EC_GROUP_get0_generator, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_get0_seed, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_get_cofactor, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GFp, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_get_curve_name, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_get_degree, true) \
@@ -108,7 +108,6 @@
     PER_FUNCTION_BLOCK(EC_GROUP_get_seed_len, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_method_of, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_new, true) \
-    PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GFp, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_set_generator, true) \
     PER_FUNCTION_BLOCK(EC_GROUP_set_seed, true) \
@@ -126,10 +125,8 @@
     PER_FUNCTION_BLOCK(EC_KEY_up_ref, true) \
     PER_FUNCTION_BLOCK(EC_METHOD_get_field_type, true) \
     PER_FUNCTION_BLOCK(EC_POINT_free, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GFp, true) \
     PER_FUNCTION_BLOCK(EC_POINT_new, true) \
-    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false) \
     PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GFp, true) \
     PER_FUNCTION_BLOCK(ERR_clear_error, true) \
     PER_FUNCTION_BLOCK(ERR_error_string_n, true) \
@@ -317,6 +314,21 @@
     PER_FUNCTION_BLOCK(X509_verify_cert_error_string, true) \
     PER_FUNCTION_BLOCK(X509_VERIFY_PARAM_set_time, true) \
 
+#if HAVE_OPENSSL_EC2M
+#define FOR_ALL_OPENSSL_FUNCTIONS \
+    FOR_ALL_UNCONDITIONAL_OPENSSL_FUNCTIONS \
+    PER_FUNCTION_BLOCK(EC_GF2m_simple_method, false) \
+    PER_FUNCTION_BLOCK(EC_GROUP_get_curve_GF2m, false) \
+    PER_FUNCTION_BLOCK(EC_GROUP_set_curve_GF2m, false) \
+    PER_FUNCTION_BLOCK(EC_POINT_get_affine_coordinates_GF2m, false) \
+    PER_FUNCTION_BLOCK(EC_POINT_set_affine_coordinates_GF2m, false) \
+    
+#else // HAVE_OPENSSL_EC2M
+#define FOR_ALL_OPENSSL_FUNCTIONS \
+    FOR_ALL_UNCONDITIONAL_OPENSSL_FUNCTIONS
+
+#endif // HAVE_OPENSSL_EC2M
+
 // Declare pointers to all the used OpenSSL functions
 #define PER_FUNCTION_BLOCK(fn, isRequired) extern decltype(fn)* fn##_ptr;
 FOR_ALL_OPENSSL_FUNCTIONS
@@ -376,7 +388,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define ECDSA_sign ECDSA_sign_ptr
 #define ECDSA_size ECDSA_size_ptr
 #define ECDSA_verify ECDSA_verify_ptr
-#define EC_GF2m_simple_method EC_GF2m_simple_method_ptr
 #define EC_GFp_mont_method EC_GFp_mont_method_ptr
 #define EC_GFp_simple_method EC_GFp_simple_method_ptr
 #define EC_GROUP_check EC_GROUP_check_ptr
@@ -384,7 +395,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EC_GROUP_get0_generator EC_GROUP_get0_generator_ptr
 #define EC_GROUP_get0_seed EC_GROUP_get0_seed_ptr
 #define EC_GROUP_get_cofactor EC_GROUP_get_cofactor_ptr
-#define EC_GROUP_get_curve_GF2m EC_GROUP_get_curve_GF2m_ptr
 #define EC_GROUP_get_curve_GFp EC_GROUP_get_curve_GFp_ptr
 #define EC_GROUP_get_curve_name EC_GROUP_get_curve_name_ptr
 #define EC_GROUP_get_degree EC_GROUP_get_degree_ptr
@@ -392,7 +402,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EC_GROUP_get_seed_len EC_GROUP_get_seed_len_ptr
 #define EC_GROUP_method_of EC_GROUP_method_of_ptr
 #define EC_GROUP_new EC_GROUP_new_ptr
-#define EC_GROUP_set_curve_GF2m EC_GROUP_set_curve_GF2m_ptr
 #define EC_GROUP_set_curve_GFp EC_GROUP_set_curve_GFp_ptr
 #define EC_GROUP_set_generator EC_GROUP_set_generator_ptr
 #define EC_GROUP_set_seed EC_GROUP_set_seed_ptr
@@ -410,10 +419,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define EC_KEY_up_ref EC_KEY_up_ref_ptr
 #define EC_METHOD_get_field_type EC_METHOD_get_field_type_ptr
 #define EC_POINT_free EC_POINT_free_ptr
-#define EC_POINT_get_affine_coordinates_GF2m EC_POINT_get_affine_coordinates_GF2m_ptr
 #define EC_POINT_get_affine_coordinates_GFp EC_POINT_get_affine_coordinates_GFp_ptr
 #define EC_POINT_new EC_POINT_new_ptr
-#define EC_POINT_set_affine_coordinates_GF2m EC_POINT_set_affine_coordinates_GF2m_ptr
 #define EC_POINT_set_affine_coordinates_GFp EC_POINT_set_affine_coordinates_GFp_ptr
 #define ERR_clear_error ERR_clear_error_ptr
 #define ERR_error_string_n ERR_error_string_n_ptr
@@ -600,6 +607,14 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_verify_cert X509_verify_cert_ptr
 #define X509_verify_cert_error_string X509_verify_cert_error_string_ptr
 #define X509_VERIFY_PARAM_set_time X509_VERIFY_PARAM_set_time_ptr
+
+#if HAVE_OPENSSL_EC2M
+#define EC_GF2m_simple_method EC_GF2m_simple_method_ptr
+#define EC_GROUP_get_curve_GF2m EC_GROUP_get_curve_GF2m_ptr
+#define EC_GROUP_set_curve_GF2m EC_GROUP_set_curve_GF2m_ptr
+#define EC_POINT_get_affine_coordinates_GF2m EC_POINT_get_affine_coordinates_GF2m_ptr
+#define EC_POINT_set_affine_coordinates_GF2m EC_POINT_set_affine_coordinates_GF2m_ptr
+#endif // HAVE_OPENSSL_EC2M
 
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 

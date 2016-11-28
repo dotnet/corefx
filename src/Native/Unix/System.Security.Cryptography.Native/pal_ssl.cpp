@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_ssl.h"
-#include "pal_crypto_config.h"
 
 #include <assert.h>
 #include <string.h>
