@@ -87,7 +87,10 @@ namespace System.Net
             get
             {
                 SecureString sstr = _password as SecureString;
-                if (sstr != null) return MarshalToString(sstr); 
+                if (sstr != null)
+                {
+                    return MarshalToString(sstr);
+                }
                 return (string)_password ?? string.Empty;
             }
             set
@@ -104,7 +107,10 @@ namespace System.Net
             get
             {
                 string str = _password as string;
-                if (str != null) return MarshalToSecureString(str);
+                if (str != null)
+                {
+                    return MarshalToSecureString(str);
+                }
                 SecureString sstr = _password as SecureString;
                 return sstr != null ? sstr.Copy() : new SecureString();
             } 
@@ -152,7 +158,9 @@ namespace System.Net
         private string MarshalToString(SecureString sstr)
         {
             if (sstr == null || sstr.Length == 0)
+            {
                 return string.Empty;
+            }
 
             IntPtr ptr = IntPtr.Zero;
             string result = string.Empty;
@@ -174,7 +182,9 @@ namespace System.Net
         private unsafe SecureString MarshalToSecureString(string str)
         {
             if (str == null || str.Length == 0)
+            {
                 return new SecureString();
+            }
 
             fixed (char* ptr = str)
             {

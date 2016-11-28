@@ -90,7 +90,9 @@ namespace System.Net.Primitives.Functional.Tests
         private static string AsString(SecureString sstr)
         {
             if (sstr.Length == 0)
+            {
                 return string.Empty;
+            }
 
             IntPtr ptr = IntPtr.Zero;
             string result = string.Empty;
@@ -113,8 +115,10 @@ namespace System.Net.Primitives.Functional.Tests
         {
             SecureString secureString = new SecureString();
 
-            if(str == null)
+            if (str == null)
+            {
                 return secureString;
+            }
 
             foreach (char ch in str)
             {
