@@ -863,6 +863,21 @@ namespace System.Linq.Expressions.Compiler
                                 il.Emit(OpCodes.Conv_Ovf_U8_Un);
                                 break;
                             default:
+                                if (typeTo.IsEnum)
+                                {
+                                    Type underlyingType = Enum.GetUnderlyingType(typeTo);
+                                    if (underlyingType == typeof(IntPtr))
+                                    {
+                                        il.Emit(OpCodes.Conv_Ovf_I_Un);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Debug.Assert(underlyingType == typeof(UIntPtr));
+                                        il.Emit(OpCodes.Conv_Ovf_U_Un);
+                                        break;
+                                    }
+                                }
                                 throw Error.UnhandledConvert(typeTo);
                         }
                     }
@@ -896,6 +911,21 @@ namespace System.Linq.Expressions.Compiler
                                 il.Emit(OpCodes.Conv_Ovf_U8);
                                 break;
                             default:
+                                if (typeTo.IsEnum)
+                                {
+                                    Type underlyingType = Enum.GetUnderlyingType(typeTo);
+                                    if (underlyingType == typeof(IntPtr))
+                                    {
+                                        il.Emit(OpCodes.Conv_Ovf_I);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Debug.Assert(underlyingType == typeof(UIntPtr));
+                                        il.Emit(OpCodes.Conv_Ovf_U);
+                                        break;
+                                    }
+                                }
                                 throw Error.UnhandledConvert(typeTo);
                         }
                     }
@@ -948,6 +978,21 @@ namespace System.Linq.Expressions.Compiler
                             il.Emit(OpCodes.Cgt_Un);
                             break;
                         default:
+                            if (typeTo.IsEnum)
+                            {
+                                Type underlyingType = Enum.GetUnderlyingType(typeTo);
+                                if (underlyingType == typeof(IntPtr))
+                                {
+                                    il.Emit(OpCodes.Conv_I);
+                                    break;
+                                }
+                                else
+                                {
+                                    Debug.Assert(underlyingType == typeof(UIntPtr));
+                                    il.Emit(OpCodes.Conv_U);
+                                    break;
+                                }
+                            }
                             throw Error.UnhandledConvert(typeTo);
                     }
                 }
@@ -1191,9 +1236,23 @@ namespace System.Linq.Expressions.Compiler
                 case TypeCode.DateTime:
                     if (type.GetTypeInfo().IsValueType)
                     {
-                        // Type.GetTypeCode on an enum returns the underlying
-                        // integer TypeCode, so we won't get here.
-                        Debug.Assert(!type.GetTypeInfo().IsEnum);
+                        if (type.GetTypeInfo().IsEnum)
+                        {
+                            Type underlyingType = Enum.GetUnderlyingType(type);
+                            if (underlyingType == typeof(IntPtr))
+                            {
+                                il.Emit(OpCodes.Ldc_I4_0);
+                                il.Emit(OpCodes.Conv_I);
+                                break;
+                            }
+                            else
+                            {
+                                Debug.Assert(underlyingType == typeof(UIntPtr));
+                                il.Emit(OpCodes.Ldc_I4_0);
+                                il.Emit(OpCodes.Conv_U);
+                                break;
+                            }
+                        }
 
                         // This is the IL for default(T) if T is a generic type
                         // parameter, so it should work for any type. It's also
