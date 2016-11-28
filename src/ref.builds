@@ -4,6 +4,7 @@
   <ItemGroup>
     <Project Include="*\ref\*.*proj">
       <UndefineProperties>OSGroup;TargetGroup</UndefineProperties>
+      <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />

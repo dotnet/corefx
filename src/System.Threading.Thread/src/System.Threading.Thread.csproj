@@ -39,15 +39,19 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'net463' and '$(TargetGroup)' != 'uap101aot'">
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
       <Aliases>System_Runtime</Aliases>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj">
-      <OSGroup>$(InputOSGroup)</OSGroup>
       <Aliases>System_Runtime_Extensions</Aliases>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
       <Aliases>System_Security_Principal</Aliases>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
     <TargetingPackReference Include="System.Private.CoreLib" />

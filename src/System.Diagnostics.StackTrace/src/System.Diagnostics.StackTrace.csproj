@@ -51,7 +51,6 @@
     <ProjectReference Include="..\..\System.IO.FileSystem\src\System.IO.FileSystem.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj">
-      <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
     <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />

@@ -433,14 +433,17 @@
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
       <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
       <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
       <Aliases>System_Security_Principal</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
+      <UndefineProperties>%(ProjectReference.UndefineProperties);OSGroup</UndefineProperties>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net462' Or '$(TargetGroup)' == 'net463'">

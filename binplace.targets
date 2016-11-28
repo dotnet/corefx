@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <Target Name="BinPlaceStuff" DependsOnTargets="$(BinPlaceStuffDependsOn)" AfterTargets="CopyFilesToOutputDirectory">
-    <Message Importance="high" Text="IsRuntimeAssembly: $(IsRuntimeAssembly)" />
-    <Message Importance="high" Text="IsReferenceAssembly: $(IsReferenceAssembly)" />
+    <Message Importance="low" Text="IsRuntimeAssembly: $(IsRuntimeAssembly)" />
+    <Message Importance="low" Text="IsReferenceAssembly: $(IsReferenceAssembly)" />
   </Target>
 
   <Target Name="BinPlaceReferenceAssembly" DependsOnTargets="GetTargetingPackDir">
-    <Message Importance="high" Text="TargetingPackDir: @(TargetingPackDir)" />
+    <Message Importance="low" Text="TargetingPackDir: @(TargetingPackDir)" />
     <Copy Condition="'@(TargetingPackDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="%(TargetingPackDir.Identity)" />
   </Target>
 

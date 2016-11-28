@@ -31,7 +31,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
       <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
-      <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap101aot'">
