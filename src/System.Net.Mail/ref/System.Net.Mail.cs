@@ -177,6 +177,7 @@ namespace System.Net.Mail
         public string Host { get { throw null; } set { } }
         public string PickupDirectoryLocation { get { throw null; } set { } }
         public int Port { get { throw null; } set { } }
+        public System.Net.ServicePoint ServicePoint { get { throw null; } }
         public string TargetName { get { throw null; } set { } }
         public int Timeout { get { throw null; } set { } }
         public bool UseDefaultCredentials { get { throw null; } set { } }
@@ -189,7 +190,6 @@ namespace System.Net.Mail
         public void SendAsync(System.Net.Mail.MailMessage message, object userToken) { }
         public void SendAsync(string from, string recipients, string subject, string body, object userToken) { }
         public void SendAsyncCancel() { }
-        public System.Net.ServicePoint ServicePoint { get { throw null; } }
         public System.Threading.Tasks.Task SendMailAsync(System.Net.Mail.MailMessage message) { throw null; }
         public System.Threading.Tasks.Task SendMailAsync(string from, string recipients, string subject, string body) { throw null; }
     }

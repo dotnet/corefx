@@ -210,6 +210,21 @@ namespace System.Net.Sockets
             }
         }
 
+        public System.Net.Sockets.TransmitFileOptions SendPacketsFlags 
+        { 
+            get 
+            { 
+                // TODO: #12460
+                throw new PlatformNotSupportedException();
+            } 
+
+            set 
+            { 
+                // TODO: #12460
+                throw new PlatformNotSupportedException();
+            } 
+        }
+        
         public int SendPacketsSendSize
         {
             get { return _sendPacketsSendSize; }

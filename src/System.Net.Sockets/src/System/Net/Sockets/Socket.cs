@@ -2852,6 +2852,36 @@ namespace System.Net.Sockets
             return bytesTransferred;
         }
 
+        public void SendFile(string fileName) 
+        {
+            // TODO: #12460
+            throw new PlatformNotSupportedException();
+        }
+
+        public void SendFile(string fileName, byte[] preBuffer, byte[] postBuffer, TransmitFileOptions flags) 
+        { 
+            // TODO: #12460
+            throw new PlatformNotSupportedException();
+        }
+
+        public IAsyncResult BeginSendFile(string fileName, AsyncCallback callback, object state) 
+        { 
+            // TODO: #12460
+            throw new PlatformNotSupportedException();
+        }
+
+        public IAsyncResult BeginSendFile(string fileName, byte[] preBuffer, byte[] postBuffer, TransmitFileOptions flags, AsyncCallback callback, object state) 
+        { 
+            // TODO: #12460
+            throw new PlatformNotSupportedException();
+        }
+
+        public void EndSendFile(IAsyncResult asyncResult) 
+        { 
+            // TODO: #12460
+            throw new PlatformNotSupportedException();
+        }
+
         // Routine Description:
         // 
         //    BeginSendTo - Async implementation of SendTo,
@@ -3915,7 +3945,7 @@ namespace System.Net.Sockets
             return EndAccept(out buffer, out bytesTransferred, asyncResult);
         }
 
-        internal Socket EndAccept(out byte[] buffer, IAsyncResult asyncResult)
+        public Socket EndAccept(out byte[] buffer, IAsyncResult asyncResult)
         {
             int bytesTransferred;
             byte[] innerBuffer;
@@ -3926,7 +3956,7 @@ namespace System.Net.Sockets
             return socket;
         }
 
-        internal Socket EndAccept(out byte[] buffer, out int bytesTransferred, IAsyncResult asyncResult)
+        public Socket EndAccept(out byte[] buffer, out int bytesTransferred, IAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, asyncResult);
             if (CleanedUp)
