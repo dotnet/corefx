@@ -28,7 +28,7 @@
       <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netcoreapp\TargetingPack" />
     </ItemGroup>
     <Error Condition="'@(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
-    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="High" />
+    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
   </Target>
 
     <Target Name="GetRuntimeDir">
