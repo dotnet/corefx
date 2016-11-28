@@ -58,9 +58,6 @@
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\ContractUtils.cs">
       <Link>Common\System\Dynamic\Utils\ContractUtils.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\EmptyReadOnlyCollection.cs">
-      <Link>Common\System\Dynamic\Utils\EmptyReadOnlyCollection.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\Error.cs">
       <Link>Common\System\Dynamic\Utils\Error.cs</Link>
     </Compile>
@@ -172,6 +169,7 @@
     <Compile Include="System\Runtime\CompilerServices\DebugInfoGenerator.cs" />
     <Compile Include="System\Dynamic\Utils\CachedReflectionInfo.cs" />
     <Compile Include="System\Dynamic\Utils\CollectionExtensions.cs" />
+    <Compile Include="System\Dynamic\Utils\EmptyReadOnlyCollection.cs" />
     <Compile Include="System\Dynamic\UpdateDelegates.Generated.cs" />
     <Compile Include="System\Dynamic\DynamicMetaObjectBinder.cs" />
     <Compile Include="System\Dynamic\DynamicMetaObject.cs" />
