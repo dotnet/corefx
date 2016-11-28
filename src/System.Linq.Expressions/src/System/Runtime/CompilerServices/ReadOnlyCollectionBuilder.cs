@@ -499,7 +499,7 @@ namespace System.Runtime.CompilerServices
 
         private static Exception InvalidTypeException(object value, string argument)
         {
-            throw new ArgumentException(Strings.InvalidObjectType(value != null ? value.GetType() : (object)"null", typeof(T)), argument);
+            return new ArgumentException(Strings.InvalidObjectType(value != null ? value.GetType() : (object)"null", typeof(T)), argument);
         }
 
         [Serializable]
