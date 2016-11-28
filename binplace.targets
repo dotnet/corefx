@@ -18,7 +18,7 @@
   </Target>
 
   <Target Name="BinPlaceRuntimeAssembly" DependsOnTargets="GetRuntimeDir">
-    <Copy Condition="'$(RuntimeDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(RuntimeDir)" />
+    <Copy Condition="'@(RuntimeDir)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="%(RuntimeDir.Identity)" />
   </Target>
 
   <Target Name="GetTargetingPackDir">
@@ -28,15 +28,16 @@
       <TargetingPackDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netcoreapp\TargetingPack" />
     </ItemGroup>
     <Error Condition="'@(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
-    <Message Text="Got TargetingPackDir:$(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
+    <Message Text="Got TargetingPackDir:@(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
   </Target>
 
     <Target Name="GetRuntimeDir">
-    <PropertyGroup>
-      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))">$(BinDir)netcoreapp\Runtime</RuntimeDir>
-      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))">$(BinDir)netstandard\Runtime</RuntimeDir>
-    </PropertyGroup>
-    <Error Condition="'$(RuntimeDir)' == ''" Text="No Runtime directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
-    <Message Text="Got RuntimeDir:$(RuntimeDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
+    <ItemGroup>
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))" Include="$(BinDir)netcoreapp\Runtime" />
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netstandard\Runtime" />
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netcoreapp\Runtime" />
+    </ItemGroup>
+    <Error Condition="'@(RuntimeDir)' == ''" Text="No Runtime directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
+    <Message Text="Got RuntimeDir:@(RuntimeDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
   </Target>
 </Project>
