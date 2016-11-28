@@ -116,7 +116,7 @@ namespace System.Collections.Generic.Tests
         {
             var data = new TheoryData<IEnumerable<T>, int>();
 
-            var enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
+            IEnumerable<IEnumerable<T>> enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
 
             foreach (IEnumerable<T> enumerable in enumerables)
             {
@@ -131,7 +131,7 @@ namespace System.Collections.Generic.Tests
         {
             var data = new TheoryData<IEnumerable<T>, int, int>();
 
-            var enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
+            IEnumerable<IEnumerable<T>> enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
 
             foreach (IEnumerable<T> enumerable in enumerables)
             {
