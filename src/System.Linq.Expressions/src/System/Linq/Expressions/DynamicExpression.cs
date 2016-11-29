@@ -448,7 +448,10 @@ namespace System.Linq.Expressions
 
         Expression IDynamicExpression.Rewrite(Expression[] args) => Rewrite(args);
 
-        object IDynamicExpression.CreateCallSite() => CallSite.Create(this.DelegateType, this.Binder);
+        object IDynamicExpression.CreateCallSite()
+        {
+            return CallSite.Create(this.DelegateType, this.Binder);
+        }
     }
 
     #region Specialized Subclasses
@@ -467,7 +470,10 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => _arguments.Count;
 
-        internal override ReadOnlyCollection<Expression> GetOrMakeArguments() => ExpressionUtils.ReturnReadOnly(ref _arguments);
+        internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
+        {
+            return ReturnReadOnly(ref _arguments);
+        }
 
         internal override DynamicExpression Rewrite(Expression[] args)
         {
@@ -510,7 +516,10 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => 1;
 
-        internal override ReadOnlyCollection<Expression> GetOrMakeArguments() => ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
+        {
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        }
 
         internal override DynamicExpression Rewrite(Expression[] args)
         {
@@ -555,7 +564,10 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => 2;
 
-        internal override ReadOnlyCollection<Expression> GetOrMakeArguments() => ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
+        {
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        }
 
         internal override DynamicExpression Rewrite(Expression[] args)
         {
@@ -602,7 +614,10 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => 3;
 
-        internal override ReadOnlyCollection<Expression> GetOrMakeArguments() => ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
+        {
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        }
 
         internal override DynamicExpression Rewrite(Expression[] args)
         {
@@ -651,7 +666,10 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => 4;
 
-        internal override ReadOnlyCollection<Expression> GetOrMakeArguments() => ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
+        {
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        }
 
         internal override DynamicExpression Rewrite(Expression[] args)
         {
@@ -1072,7 +1090,7 @@ namespace System.Linq.Expressions
             ContractUtils.RequiresNotNull(returnType, nameof(returnType));
 
             var args = arguments.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(args, nameof(args));
+            ContractUtils.RequiresNotEmpty(args, nameof(arguments));
             return MakeDynamic(binder, returnType, args);
         }
 
