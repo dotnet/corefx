@@ -4,6 +4,10 @@
   <ItemGroup>
     <Project Include="System.Collections.Concurrent.Tests.csproj" />
     <Project Include="System.Collections.Concurrent.Tests.csproj">
+      <TargetGroup>netstandard1.7</TargetGroup>
+      <TestTFMs>netcoreapp1.1</TestTFMs>
+    </Project>
+    <Project Include="System.Collections.Concurrent.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
       <TestTFMs>netcoreapp1.0</TestTFMs>
     </Project>
