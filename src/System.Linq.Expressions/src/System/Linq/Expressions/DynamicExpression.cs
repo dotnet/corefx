@@ -1098,7 +1098,9 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(binder, nameof(binder));
 
-            for (int i = 0; i < arguments.Count; i++)
+            int n = arguments.Count;
+
+            for (int i = 0; i < n; i++)
             {
                 Expression arg = arguments[i];
 
@@ -1110,7 +1112,7 @@ namespace System.Linq.Expressions
             // Since we made a delegate with argument types that exactly match,
             // we can skip delegate and argument validation
 
-            switch (arguments.Count)
+            switch (n)
             {
                 case 1: return DynamicExpression.Make(returnType, delegateType, binder, arguments[0]);
                 case 2: return DynamicExpression.Make(returnType, delegateType, binder, arguments[0], arguments[1]);
