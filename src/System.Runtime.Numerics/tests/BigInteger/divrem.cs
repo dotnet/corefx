@@ -192,8 +192,8 @@ namespace System.Numerics.Tests
             }
             catch(Exception e) when (!(e is DivideByZeroException))
             {
-                Console.WriteLine($"VerifyDivRemString failed: {opstring} {e.ToString()}");
-                throw;
+                // Log the original parameters, so we can reproduce any failure given the log
+                throw new Exception($"VerifyDivRemString failed: {opstring} {e.ToString()}", e);
             }
         }
 
