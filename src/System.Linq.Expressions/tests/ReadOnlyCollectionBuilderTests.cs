@@ -193,19 +193,19 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(1, rocb.IndexOf(2));
             Assert.Equal(3, rocb.IndexOf(3));
 
-            Assert.True(rocb.IndexOf(0) < 0);
-            Assert.True(rocb.IndexOf(4) < 0);
+            Assert.InRange(rocb.IndexOf(0), int.MinValue, -1);
+            Assert.InRange(rocb.IndexOf(4), int.MinValue, -1);
 
             rocb.Capacity = 5;
 
             Assert.Equal(4, rocb.Count);
-            Assert.True(rocb.IndexOf(0) < 0); // No default values leak in through underlying array
+            Assert.InRange(rocb.IndexOf(0), int.MinValue, -1); // No default values leak in through underlying array
 
             Assert.True(rocb.Remove(3));
 
             Assert.Equal(3, rocb.Count);
-            Assert.True(rocb.IndexOf(0) < 0); // No default values leak in through underlying array
-            Assert.True(rocb.IndexOf(3) < 0);
+            Assert.InRange(rocb.IndexOf(0), int.MinValue, -1); // No default values leak in through underlying array
+            Assert.InRange(rocb.IndexOf(3), int.MinValue, -1);
         }
 
         [Fact]
@@ -220,22 +220,22 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(1, list.IndexOf(2));
             Assert.Equal(3, list.IndexOf(3));
 
-            Assert.True(list.IndexOf(0) < 0);
-            Assert.True(list.IndexOf(4) < 0);
+            Assert.InRange(list.IndexOf(0), int.MinValue, -1);
+            Assert.InRange(list.IndexOf(4), int.MinValue, -1);
 
             rocb.Capacity = 5;
 
             Assert.Equal(4, list.Count);
-            Assert.True(list.IndexOf(0) < 0); // No default values leak in through underlying array
+            Assert.InRange(list.IndexOf(0), int.MinValue, -1); // No default values leak in through underlying array
 
             list.Remove(3);
 
             Assert.Equal(3, list.Count);
-            Assert.True(list.IndexOf(0) < 0); // No default values leak in through underlying array
-            Assert.True(list.IndexOf(3) < 0);
+            Assert.InRange(list.IndexOf(0), int.MinValue, -1); // No default values leak in through underlying array
+            Assert.InRange(list.IndexOf(3), int.MinValue, -1);
 
-            Assert.True(list.IndexOf("bar") < 0);
-            Assert.True(list.IndexOf(null) < 0);
+            Assert.InRange(list.IndexOf("bar"), int.MinValue, -1);
+            Assert.InRange(list.IndexOf(null), int.MinValue, -1);
         }
 
         [Fact]
@@ -863,7 +863,7 @@ namespace System.Linq.Expressions.Tests
 
             Assert.False(rocb.Contains(default(T)));
             Assert.False(rocb.Remove(default(T)));
-            Assert.True(rocb.IndexOf(default(T)) < 0);
+            Assert.InRange(rocb.IndexOf(default(T)), int.MinValue, -1);
 
             IEnumerator<T> e = rocb.GetEnumerator();
             Assert.False(e.MoveNext());
