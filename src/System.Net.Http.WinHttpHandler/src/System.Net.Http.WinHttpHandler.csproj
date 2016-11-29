@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />

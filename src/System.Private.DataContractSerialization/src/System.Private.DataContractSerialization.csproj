@@ -182,6 +182,7 @@
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Xml.XDocument" />
+    <Reference Include="System.Xml.XmlSerializer" />
     <Reference Include="System.Runtime.Serialization.Formatters" />
     <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>

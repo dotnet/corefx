@@ -193,6 +193,7 @@
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Text.Encoding" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Diagnostics.Contracts" />

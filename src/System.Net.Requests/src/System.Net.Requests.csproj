@@ -127,6 +127,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.WebHeaderCollection" />
     <Reference Include="System.Threading" />

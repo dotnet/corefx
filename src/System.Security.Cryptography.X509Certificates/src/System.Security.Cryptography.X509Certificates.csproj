@@ -311,6 +311,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Runtime.Numerics" />
     <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Threading" />
