@@ -1627,13 +1627,21 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.NetcoreUwp | TargetFrameworkMonikers.Netcoreapp1_0)]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
+            Assert.Equal(expected, string.Join(separator, values));
+            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+        }
+
+        [Theory]
+        [MemberData(nameof(Join_ObjectArray_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp1_1)]
+        public static void Join_ObjectArray_WithNullIssue(string separator, object[] values, string expected)
+        {
             string enumerableExpected = expected;
-#if !netstandard17
             if (values.Length > 0 && values[0] == null) // Join return nothing when first value is null
                 expected = "";
-#endif
             Assert.Equal(expected, string.Join(separator, values));
             Assert.Equal(enumerableExpected, string.Join(separator, (IEnumerable<object>)values));
         }
