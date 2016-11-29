@@ -212,7 +212,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_StableIfReset()
+        public static void GetBytes_NotIdempotent()
         {
             byte[] first;
             byte[] second;
@@ -227,7 +227,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_IdempotentIfReset()
+        public static void GetBytes_StableIfReset()
         {
             byte[] first;
             byte[] second;
@@ -243,12 +243,47 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_StreamLike()
+        public static void GetBytes_StreamLike_ExtraBytes()
         {
             byte[] first;
 
             using (var deriveBytes = new PasswordDeriveBytes(TestPassword, s_testSalt))
             {
+                // SHA1 default
+                Assert.Equal("SHA1", deriveBytes.HashName);
+
+                // Request double of SHA1 hash size
+                first = deriveBytes.GetBytes(40);
+            }
+
+            byte[] second = new byte[first.Length];
+
+            // Reset
+            using (var deriveBytes = new PasswordDeriveBytes(TestPassword, s_testSalt))
+            {
+                // Make two passes over the hash
+                byte[] secondFirstHalf = deriveBytes.GetBytes(first.Length / 2);
+                byte[] secondSecondHalf = deriveBytes.GetBytes(first.Length - secondFirstHalf.Length);
+
+                Buffer.BlockCopy(secondFirstHalf, 0, second, 0, secondFirstHalf.Length);
+                Buffer.BlockCopy(secondSecondHalf, 0, second, secondFirstHalf.Length, secondSecondHalf.Length);
+            }
+
+            // Since we requested >= 20 bytes in secondFirstHalf there no 'extra' bytes and we don't encounter the
+            // "_extraCount" bug in GetBytes() that is tested in GetBytes_StreamLike_Bug_Compat.
+            Assert.Equal(first, second);
+        }
+
+        [Fact]
+        public static void GetBytes_StreamLike_Bug_Compat()
+        {
+            byte[] first;
+
+            using (var deriveBytes = new PasswordDeriveBytes(TestPassword, s_testSalt))
+            {
+                Assert.Equal("SHA1", deriveBytes.HashName);
+
+                // Request 20 bytes (SHA1 hash size) plus 12 extra bytes
                 first = deriveBytes.GetBytes(32);
             }
 
@@ -257,22 +292,28 @@ namespace System.Security.Cryptography.DeriveBytesTests
             // Reset
             using (var deriveBytes = new PasswordDeriveBytes(TestPassword, s_testSalt))
             {
-                byte[] secondFirstHalf = deriveBytes.GetBytes(first.Length / 2);
-                byte[] secondSecondHalf = deriveBytes.GetBytes(first.Length - secondFirstHalf.Length);
+                // Ask for half now (16 bytes), half later (16 bytes)
+                byte[] firstHalf = deriveBytes.GetBytes(first.Length / 2);
+                byte[] lastHalf = deriveBytes.GetBytes(first.Length - firstHalf.Length);
 
-                Buffer.BlockCopy(secondFirstHalf, 0, second, 0, secondFirstHalf.Length);
-                Buffer.BlockCopy(secondSecondHalf, 0, second, secondFirstHalf.Length, secondSecondHalf.Length);
+                // lastHalf should contain the last 4 bytes from the SHA1 hash plus 12 extra bytes
+                // but due to the _extraCount bug it doesn't
+
+                // Merge the two buffers into the second array
+                Buffer.BlockCopy(firstHalf, 0, second, 0, firstHalf.Length);
+                Buffer.BlockCopy(lastHalf, 0, second, firstHalf.Length, lastHalf.Length);
             }
 
-            // Due to "_extraCount" bug in GetBytes() these won't be equal. The bug is fixed in Rfc2898DeriveBytes.
+            // Fails due to _extraCount bug (the bug is fixed in Rfc2898DeriveBytes)
             Assert.NotEqual(first, second);
 
-            // However, the first portion will be equal (the _extraCount bug does not affect the first portion)
-            byte[] firstHalf1 = new byte[first.Length / 2];
-            byte[] firstHalf2 = new byte[second.Length / 2];
-            Buffer.BlockCopy(first, 0, firstHalf1, 0, firstHalf1.Length);
-            Buffer.BlockCopy(second, 0, firstHalf2, 0, firstHalf2.Length);
-            Assert.Equal(firstHalf1, firstHalf2);
+            // However, the first 16 bytes will be equal because the _extraCount bug does
+            // not affect the first call, only the subsequent GetBytes() call.
+            byte[] first_firstHalf = new byte[first.Length / 2];
+            byte[] second_firstHalf = new byte[first.Length / 2];
+            Buffer.BlockCopy(first, 0, first_firstHalf, 0, first_firstHalf.Length);
+            Buffer.BlockCopy(second, 0, second_firstHalf, 0, second_firstHalf.Length);
+            Assert.Equal(first_firstHalf, second_firstHalf);
         }
 
         [Fact]
@@ -289,9 +330,32 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_KnownValues_1()
+        public static void GetBytes_KnownValues_MD5_32()
         {
             TestKnownValue_GetBytes(
+                HashAlgorithmName.MD5,
+                TestPassword,
+                s_testSalt,
+                DefaultIterationCount,
+                ByteUtils.HexToByteArray("F8D88E9DAFC828DA2400F5144271C2F630A1C061C654FC9DE2E7900E121461B9"));
+        }
+
+        [Fact]
+        public static void GetBytes_KnownValues_SHA256_40()
+        {
+            TestKnownValue_GetBytes(
+                HashAlgorithmName.SHA256,
+                TestPassword,
+                s_testSalt,
+                DefaultIterationCount,
+                ByteUtils.HexToByteArray("3774A17468276057717A90C25B72915921D8F8C046F7868868DBB99BB4C4031CADE9E26BE77BEA39"));
+        }
+
+        [Fact]
+        public static void GetBytes_KnownValues_SHA1_40()
+        {
+            TestKnownValue_GetBytes(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 s_testSalt,
                 DefaultIterationCount,
@@ -299,9 +363,10 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_KnownValues_2()
+        public static void GetBytes_KnownValues_SHA1_40_2()
         {
             TestKnownValue_GetBytes(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 s_testSalt,
                 DefaultIterationCount + 1,
@@ -309,9 +374,10 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_KnownValues_3()
+        public static void GetBytes_KnownValues_SHA1_40_3()
         {
             TestKnownValue_GetBytes(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 s_testSaltB,
                 DefaultIterationCount,
@@ -319,9 +385,10 @@ namespace System.Security.Cryptography.DeriveBytesTests
         }
 
         [Fact]
-        public static void GetBytes_KnownValues_4()
+        public static void GetBytes_KnownValues_SHA1_40_4()
         {
             TestKnownValue_GetBytes(
+                HashAlgorithmName.SHA1,
                 TestPasswordB,
                 s_testSalt,
                 DefaultIterationCount,
@@ -332,9 +399,9 @@ namespace System.Security.Cryptography.DeriveBytesTests
         public static void CryptDeriveKey_KnownValues_TripleDes()
         {
             byte[] key = TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 "TripleDES",
-                "SHA1",
                 192,
                 s_testSalt,
                 ByteUtils.HexToByteArray("97628A641949D99DCED35DB0ABCE20F21FF4DA9B46E00BCE"));
@@ -362,25 +429,25 @@ namespace System.Security.Cryptography.DeriveBytesTests
         public static void CryptDeriveKey_KnownValues_RC2()
         {
             TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 "RC2",
-                "SHA1",
                 128,
                 s_testSalt,
                 ByteUtils.HexToByteArray("B0695D8D98F5844B9650A9F68EFF105B"));
 
             TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.SHA256,
                 TestPassword,
                 "RC2",
-                "SHA256",
                 128,
                 s_testSalt,
                 ByteUtils.HexToByteArray("CF4A1CA60093E71D6B740DBB962B3C66"));
 
             TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.MD5,
                 TestPassword,
                 "RC2",
-                "MD5",
                 128,
                 s_testSalt,
                 ByteUtils.HexToByteArray("84F4B6854CDF896A86FB493B852B6E1F"));
@@ -390,9 +457,9 @@ namespace System.Security.Cryptography.DeriveBytesTests
         public static void CryptDeriveKey_KnownValues_RC2_NoSalt()
         {
             TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 "RC2",
-                "SHA1",
                 128,
                 null, // Salt is not used here so we should get same key value
                 ByteUtils.HexToByteArray("B0695D8D98F5844B9650A9F68EFF105B"));
@@ -402,9 +469,9 @@ namespace System.Security.Cryptography.DeriveBytesTests
         public static void CryptDeriveKey_KnownValues_DES()
         {
             TestKnownValue_CryptDeriveKey(
+                HashAlgorithmName.SHA1,
                 TestPassword,
                 "DES",
-                "SHA1",
                 64,
                 s_testSalt,
                 ByteUtils.HexToByteArray("B0685D8C98F4854A"));
@@ -448,14 +515,14 @@ namespace System.Security.Cryptography.DeriveBytesTests
             }
         }
 
-        private static byte[] TestKnownValue_CryptDeriveKey(string password, string alg, string hashAlg, int keySize, byte[] salt, byte[] expected)
+        private static byte[] TestKnownValue_CryptDeriveKey(HashAlgorithmName hashName, string password, string alg, int keySize, byte[] salt, byte[] expected)
         {
             byte[] output;
             byte[] iv = new byte[8];
 
             using (var deriveBytes = new PasswordDeriveBytes(password, salt))
             {
-                output = deriveBytes.CryptDeriveKey(alg, hashAlg, keySize, iv);
+                output = deriveBytes.CryptDeriveKey(alg, hashName.Name, keySize, iv);
             }
 
             Assert.Equal(expected, output);
@@ -466,11 +533,11 @@ namespace System.Security.Cryptography.DeriveBytesTests
             return output;
         }
 
-        private static void TestKnownValue_GetBytes(string password, byte[] salt, int iterationCount, byte[] expected)
+        private static void TestKnownValue_GetBytes(HashAlgorithmName hashName, string password, byte[] salt, int iterationCount, byte[] expected)
         {
             byte[] output;
 
-            using (var deriveBytes = new PasswordDeriveBytes(password, salt, "SHA1", iterationCount))
+            using (var deriveBytes = new PasswordDeriveBytes(password, salt, hashName.Name, iterationCount))
             {
                 output = deriveBytes.GetBytes(expected.Length);
             }
