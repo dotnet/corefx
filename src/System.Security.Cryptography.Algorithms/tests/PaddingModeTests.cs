@@ -15,25 +15,23 @@ namespace System.Security.Cryptography.Tests
     {
         [Theory]
         [InlineData(PaddingMode.Zeros, 0, "", "")] // no block is added in this case!
-        [InlineData(PaddingMode.Zeros, 1,    "46785bde46622b92ff7c8ebb91508a", "1be8aa365a15d11fc7826b3a10602d09" )]
-        [InlineData(PaddingMode.Zeros, 13, "e505a2", "0a2e62938b03e5822ee251117a4ce066")]
-        [InlineData(PaddingMode.PKCS7, 1,    "46785bde46622b92ff7c8ebb91508a", "db5b7829cce732bfe609140cf45a8843")]
-        [InlineData(PaddingMode.PKCS7, 13, "e505a2", "46785bde46622b92ff7c8ebb91508a4d")]
-        [InlineData(PaddingMode.PKCS7, 16, "", "d5450767bcc31793fe5065251b96b715")]
-        [InlineData(PaddingMode.ANSIX923, 1, "46785bde46622b92ff7c8ebb91508a", "db5b7829cce732bfe609140cf45a8843" )]
-        [InlineData(PaddingMode.ANSIX923, 13, "e505a2", "43b27d41a9fde73ca5db22c0fda76cb1")]
-        [InlineData(PaddingMode.ANSIX923, 16, "", "a3d32a3a9dca71b6f961f5a8ed7e414f")]
-        [InlineData(PaddingMode.ISO10126, 1, "46785bde46622b92ff7c8ebb91508a", null)]
-        [InlineData(PaddingMode.ISO10126, 13, "e505a2", null)]
-        [InlineData(PaddingMode.ISO10126, 16, "", null)]
-        private static void ValidatePaddingMode(PaddingMode paddingMode, int expectedPaddingSize, string plainTextStr, string expectedCipherStr)
+        [InlineData(PaddingMode.Zeros, 1,    "46785BDE46622B92FF7C8EBB91508A", "1BE8AA365A15D11FC7826B3A10602D09" )]
+        [InlineData(PaddingMode.Zeros, 13, "E505A2", "0A2E62938B03E5822EE251117A4CE066")]
+        [InlineData(PaddingMode.PKCS7, 1,    "46785BDE46622B92FF7C8EBB91508A", "DB5B7829CCE732BFE609140CF45A8843")]
+        [InlineData(PaddingMode.PKCS7, 13, "E505A2", "46785BDE46622B92FF7C8EBB91508A4D")]
+        [InlineData(PaddingMode.PKCS7, 16, "", "D5450767BCC31793FE5065251B96B715")]
+        [InlineData(PaddingMode.ANSIX923, 1, "46785BDE46622B92FF7C8EBB91508A", "DB5B7829CCE732BFE609140CF45A8843" )]
+        [InlineData(PaddingMode.ANSIX923, 13, "E505A2", "43B27D41A9FDE73CA5DB22C0FDA76CB1")]
+        [InlineData(PaddingMode.ANSIX923, 16, "", "A3D32A3A9DCA71B6F961F5A8ED7E414F")]
+        private static void ValidatePaddingMode_NonISO10126(PaddingMode paddingMode, int expectedPaddingSize, string plainTextStr, string expectedCipherStr)
         {
+            Assert.True(paddingMode != PaddingMode.ISO10126, "This tests only non-ISO10126 padding");
 
             byte[] key = "1ed2f625c187b993256a8b3ccf9dcbfa5b44b4795c731012f70e4e64732efd5d".HexToByteArray();
             byte[] iv = "47d1e060ba3c8643f9f8b65feeda4b30".HexToByteArray();
 
             byte[] plainText = plainTextStr.HexToByteArray();
-            byte[] expectedCipher = expectedCipherStr == null? Array.Empty<byte>() : expectedCipherStr.HexToByteArray();
+            byte[] expectedCipher = expectedCipherStr == null ? Array.Empty<byte>() : expectedCipherStr.HexToByteArray();
 
             using (Aes a = Aes.Create())
             {
@@ -44,11 +42,7 @@ namespace System.Security.Cryptography.Tests
 
                 byte[] cipher = a.Encrypt(plainText);
 
-                // we cannot validate the cipher in this padding mode as it consists of random data
-                if (paddingMode != PaddingMode.ISO10126)
-                {
-                    Assert.Equal<byte>(expectedCipher, cipher);
-                }
+                Assert.Equal(expectedCipherStr, cipher.ByteArrayToHex());
 
                 // decrypt it with PaddingMode.None so that we can inspect the padding manually
                 a.Padding = PaddingMode.None;
@@ -56,6 +50,44 @@ namespace System.Security.Cryptography.Tests
                 ValidatePadding(decrypted, paddingMode, expectedPaddingSize);
             }
         }
+
+        [Theory]
+        [InlineData(1, "46785BDE46622B92FF7C8EBB91508A")]
+        [InlineData(13, "E505A2")]
+        [InlineData(16, "")]
+        private static void ValidatePaddingMode_ISO10126(int expectedPaddingSize, string plainTextStr)
+        {
+            byte[] key = "1ed2f625c187b993256a8b3ccf9dcbfa5b44b4795c731012f70e4e64732efd5d".HexToByteArray();
+            byte[] iv = "47d1e060ba3c8643f9f8b65feeda4b30".HexToByteArray();
+
+            byte[] plainText = plainTextStr.HexToByteArray();
+
+            using (Aes a = Aes.Create())
+            {
+                a.Key = key;
+                a.IV = iv;
+                a.Mode = CipherMode.CBC;
+                a.Padding = PaddingMode.ISO10126;
+
+                // for ISO10126 we are going to encrypt it twice and assert that the ciphers produced are going to be different
+                byte[] cipher = a.Encrypt(plainText);
+                byte[] secondCipher = a.Encrypt(plainText);
+
+                // decrypt it with PaddingMode.None so that we can inspect the padding manually
+                a.Padding = PaddingMode.None;
+                byte[] decrypted = a.Decrypt(cipher);
+
+                if (expectedPaddingSize >= 5)
+                {
+                    byte[] secondDecrypted = a.Decrypt(secondCipher);
+
+                    // after we decrypted, the two ciphers are going to be different
+                    Assert.NotEqual(decrypted.ByteArrayToHex(), secondDecrypted.ByteArrayToHex());
+                }
+
+                ValidatePadding(decrypted, PaddingMode.ISO10126, expectedPaddingSize);
+            }
+        }        
 
         private static void ValidatePadding(byte[] buffer, PaddingMode paddingMode, int expectedPaddingSize)
         {
