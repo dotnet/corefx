@@ -1618,7 +1618,7 @@ namespace System.Tests
             yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
             yield return new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" };
 
-            // Join does nothing if array[0] is null
+            // Test join when first value is null
             yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" };
 
             // Join should ignore objects that have a null ToString() value
@@ -1629,15 +1629,13 @@ namespace System.Tests
         [MemberData(nameof(Join_ObjectArray_TestData))]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
-            var exp = expected;
-            if (values.Length > 0 && values[0] == null) // Join return empty string if array[0] is null
-                exp = "";
-#if netstandard17
-            // In netstandard17 Join issue was fixed
-            exp = expected;
+            var enumerableExpected = expected;
+#if !netstandard17
+            if (values.Length > 0 && values[0] == null) // Join return nothing when first value is null
+                expected = "";
 #endif
-            Assert.Equal(exp, string.Join(separator, values));
-            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+            Assert.Equal(expected, string.Join(separator, values));
+            Assert.Equal(enumerableExpected, string.Join(separator, (IEnumerable<object>)values));
         }
 
         [Fact]
