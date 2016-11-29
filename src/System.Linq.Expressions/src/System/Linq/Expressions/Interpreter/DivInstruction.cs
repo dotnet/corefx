@@ -23,14 +23,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l / (int)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l / (int)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -42,14 +45,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (short)((short)l / (short)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (short)((short)l / (short)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -61,14 +67,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (long)((long)l / (long)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (long)((long)l / (long)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -80,14 +89,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l / (ushort)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l / (ushort)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -99,14 +111,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (uint)((uint)l / (uint)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (uint)((uint)l / (uint)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -118,14 +133,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l / (ulong)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l / (ulong)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -137,14 +155,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (float)((float)l / (float)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (float)((float)l / (float)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -156,14 +177,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (double)l / (double)r;
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (double)l / (double)r;
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -205,14 +229,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l % (int)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l % (int)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -224,14 +251,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (short)((short)l % (short)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (short)((short)l % (short)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -243,14 +273,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (long)((long)l % (long)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (long)((long)l % (long)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -262,14 +295,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l % (ushort)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l % (ushort)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -281,14 +317,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (uint)((uint)l % (uint)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (uint)((uint)l % (uint)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -300,14 +339,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l % (ulong)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l % (ulong)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -319,14 +361,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (float)((float)l % (float)r);
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (float)((float)l % (float)r);
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
@@ -338,14 +383,17 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                if (l != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
-                }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (double)l % (double)r;
+                    object r = frame.Data[frame.StackIndex - 1];
+                    if (r == null)
+                    {
+                        frame.Data[frame.StackIndex - 2] = null;
+                    }
+                    else
+                    {
+                        frame.Data[frame.StackIndex - 2] = (double)l % (double)r;
+                    }
                 }
                 frame.StackIndex--;
                 return 1;
