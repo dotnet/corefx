@@ -30,7 +30,6 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Reflection" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Diagnostics.Debug" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

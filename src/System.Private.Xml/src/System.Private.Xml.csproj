@@ -523,7 +523,6 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Text.Encoding.Extensions" />
-    <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Reflection.Emit" />
     <Reference Include="System.Reflection.Emit.ILGeneration" />
     <Reference Include="System.Collections.NonGeneric" />

@@ -19,7 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Private.DataContractSerialization" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

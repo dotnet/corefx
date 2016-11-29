@@ -83,7 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Composition.Runtime" />
     <Reference Include="System.Reflection" />
     <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.Collections" />

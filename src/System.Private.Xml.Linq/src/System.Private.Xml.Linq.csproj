@@ -76,7 +76,6 @@
   <ItemGroup>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Private.Xml" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Runtime.Extensions" />

@@ -249,7 +249,6 @@
     <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Collections.Immutable" />
     <Reference Include="System.Reflection.Primitives" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Collections" />
