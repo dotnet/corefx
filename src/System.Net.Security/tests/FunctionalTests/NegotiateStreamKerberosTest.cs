@@ -174,7 +174,7 @@ namespace System.Net.Security.Tests
         {
             SecureString secureString = new SecureString();
 
-            if (str == null)
+            if (string.IsNullOrEmpty(str))
             {
                 return secureString;
             }

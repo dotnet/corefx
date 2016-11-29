@@ -96,7 +96,7 @@ namespace System.Net
             set
             {
                 SecureString old = _password as SecureString;
-                _password = value ?? string.Empty;
+                _password = value;
                 old?.Dispose();
             }
         }
@@ -181,7 +181,7 @@ namespace System.Net
 
         private unsafe SecureString MarshalToSecureString(string str)
         {
-            if (str == null || str.Length == 0)
+            if (string.IsNullOrEmpty(str))
             {
                 return new SecureString();
             }
