@@ -11,19 +11,27 @@ namespace System.Dynamic.Utils
 {
     internal static partial class CollectionExtensions
     {
-        public static T[] AddFirst<T>(this IList<T> list, T item)
+        public static TrueReadOnlyCollection<T> AddFirst<T>(this ReadOnlyCollection<T> list, T item)
         {
             T[] res = new T[list.Count + 1];
             res[0] = item;
             list.CopyTo(res, 1);
+            return new TrueReadOnlyCollection<T>(res);
+        }
+
+        public static T[] AddFirst<T>(this T[] array, T item)
+        {
+            T[] res = new T[array.Length + 1];
+            res[0] = item;
+            array.CopyTo(res, 1);
             return res;
         }
 
-        public static T[] AddLast<T>(this IList<T> list, T item)
+        public static T[] AddLast<T>(this T[] array, T item)
         {
-            T[] res = new T[list.Count + 1];
-            list.CopyTo(res, 0);
-            res[list.Count] = item;
+            T[] res = new T[array.Length + 1];
+            array.CopyTo(res, 0);
+            res[array.Length] = item;
             return res;
         }
 
@@ -41,21 +49,6 @@ namespace System.Dynamic.Utils
             return result;
         }
 
-        // Name needs to be different so it doesn't conflict with Enumerable.Select
-        public static U[] Map<T, U>(this T[] array, Func<T, U> select)
-        {
-            int count = array.Length;
-
-            U[] result = new U[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                result[i] = select(array[i]);
-            }
-
-            return result;
-        }
-
         /// <summary>
         /// Wraps the provided enumerable into a ReadOnlyCollection{T}
         ///
@@ -63,7 +56,6 @@ namespace System.Dynamic.Utils
         /// changed after creation. The exception is if the enumerable is
         /// already a ReadOnlyCollection{T}, in which case we just return it.
         /// </summary>
-        [Pure]
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> enumerable)
         {
             if (enumerable == null)
@@ -101,7 +93,6 @@ namespace System.Dynamic.Utils
             return h;
         }
 
-        [Pure]
         public static bool ListEquals<T>(this ReadOnlyCollection<T> first, ReadOnlyCollection<T> second)
         {
             if (first == second)
