@@ -50,12 +50,21 @@ namespace System.Collections.Generic
         /// Use <see cref="Add"/> if adding to the builder is a bottleneck for your use case.
         /// Otherwise, use <see cref="SlowAdd"/>.
         /// </remarks>
+        public void Add(T item) => Add(item, limit: int.MaxValue);
+
+        /// <summary>
+        /// Adds an item to this builder with the specified limit.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
+        /// <param name="limit">The maximum capacity to allocate.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(T item)
+        public void Add(T item, int limit)
         {
+            Debug.Assert((uint)limit > (uint)_count);
+
             if (_index == _current.Length)
             {
-                AllocateBuffer();
+                AllocateBuffer(limit);
             }
 
             _current[_index++] = item;
@@ -154,14 +163,18 @@ namespace System.Collections.Generic
             return array;
         }
 
-        private void AllocateBuffer()
+        private void AllocateBuffer() => AllocateBuffer(limit: int.MaxValue);
+
+        private void AllocateBuffer(int limit)
         {
             // - On the first few adds, simply resize _first.
             // - When we pass ResizeLimit, allocate ResizeLimit elements for _current
             //   and start reading into _current. Set _index to 0.
             // - When _current runs out of space, add it to _buffers and repeat the
             //   above step, except with _current.Length * 2.
+            // - Make sure we never pass the provided limit in all of the above steps.
 
+            Debug.Assert((uint)limit > (uint)_count);
             Debug.Assert(_index == _current.Length, $"{nameof(AllocateBuffer)} was called, but there's more space.");
 
             // If _count is int.MinValue, we want to go down the other path which will raise an exception.
@@ -170,7 +183,7 @@ namespace System.Collections.Generic
                 // We haven't passed ResizeLimit. Resize _first, copying over the previous items.
                 Debug.Assert(_current == _first && _count == _first.Length);
 
-                int nextCapacity = _count == 0 ? StartingCapacity : _count * 2;
+                int nextCapacity = Math.Min(_count == 0 ? StartingCapacity : _count * 2, limit);
 
                 _current = new T[nextCapacity];
                 Array.Copy(_first, 0, _current, 0, _count);
@@ -178,6 +191,7 @@ namespace System.Collections.Generic
             }
             else
             {
+                Debug.Assert(limit > ResizeLimit);
                 Debug.Assert(_count == ResizeLimit ^ _current != _first);
 
                 int nextCapacity;
@@ -187,8 +201,22 @@ namespace System.Collections.Generic
                 }
                 else
                 {
+                    // Example scenario: Let's say _count == 256.
+                    // Then our buffers look like this: | 32 | 32 | 64 | 128 |
+                    // As you can see, our count will be just double the last buffer.
+                    // Now, say the provided limit is 500. We will find the right amount to allocate by
+                    // doing min(256 * 2, 500) - 256. This represents the total we've allocated after
+                    // this operation, minus the amount we've already allocated.
+
+                    // Note: In case _count overflows (last buffer is 0x40000000) or _count * 2
+                    // overflows (last buffer is 0x20000000), we must cast to uint for correctness
+                    // during comparisons.
+
+                    Debug.Assert((uint)_count >= (uint)ResizeLimit * 2);
+                    Debug.Assert(_count == _current.Length * 2);
+
                     _buffers.Add(_current);
-                    nextCapacity = _current.Length * 2;
+                    nextCapacity = (int)Math.Min((uint)_count * 2, (uint)limit) - _count;
                 }
 
                 _current = new T[nextCapacity];

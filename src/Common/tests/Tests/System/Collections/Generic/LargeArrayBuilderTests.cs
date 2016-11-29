@@ -23,10 +23,8 @@ namespace System.Collections.Generic.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableData))]
-        public void TypicalUsages(IEnumerable<T> seed)
+        public void AddCountAndToArray(IEnumerable<T> seed)
         {
-            // Verifies Count, Add, SlowAdd, and ToArray.
-
             var builder1 = new LargeArrayBuilder<T>(initialize: true);
             var builder2 = new LargeArrayBuilder<T>(initialize: true);
 
@@ -43,6 +41,22 @@ namespace System.Collections.Generic.Tests
 
                 Assert.Equal(seed.Take(count), builder1.ToArray());
                 Assert.Equal(seed.Take(count), builder2.ToArray());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnumerableWithLimitData))]
+        public void AddWithLimit(IEnumerable<T> seed, int limit)
+        {
+            var builder = new LargeArrayBuilder<T>(initialize: true);
+
+            for (int i = 0; i < limit; i++)
+            {
+                builder.Add(seed.ElementAt(i), limit);
+
+                int count = i + 1;
+                Assert.Equal(count, builder.Count);
+                Assert.Equal(seed.Take(count), builder.ToArray());
             }
         }
 
@@ -93,6 +107,24 @@ namespace System.Collections.Generic.Tests
                 // Test perf: Capture the items into a List here so we
                 // only enumerate the sequence once.
                 data.Add(s_generator.GenerateEnumerable(count).ToList());
+            }
+
+            return data;
+        }
+
+        public static TheoryData<IEnumerable<T>, int> EnumerableWithLimitData()
+        {
+            var data = new TheoryData<IEnumerable<T>, int>();
+
+            var enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
+
+            foreach (IEnumerable<T> enumerable in enumerables)
+            {
+                int count = enumerable.Count();
+                data.Add(enumerable, count);
+
+                data.Add(enumerable, count / 2);
+                data.Add(enumerable, count / 4);
             }
 
             return data;
