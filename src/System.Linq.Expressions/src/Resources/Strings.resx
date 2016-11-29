@@ -366,9 +366,6 @@
   <data name="ExpressionNotSupportedForType" xml:space="preserve">
     <value>The expression '{0}' is not supported for type '{1}'</value>
   </data>
-  <data name="ExpressionNotSupportedForNullableType" xml:space="preserve">
-    <value>The expression '{0}' is not supported for nullable type '{1}'</value>
-  </data>
   <data name="UnsupportedExpressionType" xml:space="preserve">
     <value>The expression type '{0}' is not supported</value>
   </data>
@@ -509,9 +506,6 @@
   </data>
   <data name="UnknownLiftType" xml:space="preserve">
     <value>unknown lift type: '{0}'.</value>
-  </data>
-  <data name="IllegalNewGenericParams" xml:space="preserve">
-    <value>Cannot create instance of {0} because it contains generic parameters</value>
   </data>
   <data name="UndefinedVariable" xml:space="preserve">
     <value>variable '{0}' of type '{1}' referenced from scope '{2}', but it is not defined</value>

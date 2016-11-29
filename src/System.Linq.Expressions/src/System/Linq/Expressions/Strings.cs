@@ -510,11 +510,6 @@ namespace System.Linq.Expressions
         internal static string ExpressionNotSupportedForType(object p0, object p1) => SR.Format(SR.ExpressionNotSupportedForType, p0, p1);
 
         /// <summary>
-        /// A string like "The expression '{0}' is not supported for nullable type '{1}'"
-        /// </summary>
-        internal static string ExpressionNotSupportedForNullableType(object p0, object p1) => SR.Format(SR.ExpressionNotSupportedForNullableType, p0, p1);
-
-        /// <summary>
         /// A string like "ParameterExpression of type '{0}' cannot be used for delegate parameter of type '{1}'"
         /// </summary>
         internal static string ParameterExpressionNotValidAsDelegate(object p0, object p1) => SR.Format(SR.ParameterExpressionNotValidAsDelegate, p0, p1);
@@ -740,11 +735,6 @@ namespace System.Linq.Expressions
         /// A string like "unknown lift type: '{0}'."
         /// </summary>
         internal static string UnknownLiftType(object p0) => SR.Format(SR.UnknownLiftType, p0);
-
-        /// <summary>
-        /// A string like "Cannot create instance of {0} because it contains generic parameters"
-        /// </summary>
-        internal static string IllegalNewGenericParams(object p0) => SR.Format(SR.IllegalNewGenericParams, p0);
 
         /// <summary>
         /// A string like "variable '{0}' of type '{1}' referenced from scope '{2}', but it is not defined"

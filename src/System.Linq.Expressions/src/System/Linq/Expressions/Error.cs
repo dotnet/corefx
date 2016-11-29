@@ -832,13 +832,7 @@ namespace System.Linq.Expressions
         {
             return new PlatformNotSupportedException(Strings.ExpressionNotSupportedForType(p0, p1));
         }
-        /// <summary>
-        /// PlatformNotSupportedException with message like "The instruction '{0}' is not supported for nullable type '{1}'"
-        /// </summary>
-        internal static Exception ExpressionNotSupportedForNullableType(object p0, object p1)
-        {
-            return new PlatformNotSupportedException(Strings.ExpressionNotSupportedForNullableType(p0, p1));
-        }
+
         /// <summary>
         /// ArgumentException with message like "ParameterExpression of type '{0}' cannot be used for delegate parameter of type '{1}'"
         /// </summary>
@@ -1158,13 +1152,7 @@ namespace System.Linq.Expressions
         {
             return new InvalidOperationException(Strings.UnknownLiftType(p0));
         }
-        /// <summary>
-        /// ArgumentException with message like "Cannot create instance of {0} because it contains generic parameters"
-        /// </summary>
-        internal static Exception IllegalNewGenericParams(object p0, string paramName)
-        {
-            return new ArgumentException(Strings.IllegalNewGenericParams(p0), paramName);
-        }
+
         /// <summary>
         /// InvalidOperationException with message like "variable '{0}' of type '{1}' referenced from scope '{2}', but it is not defined"
         /// </summary>
