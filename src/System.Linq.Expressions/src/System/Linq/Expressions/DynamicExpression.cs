@@ -472,7 +472,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(ref _arguments);
+            return ExpressionUtils.ReturnReadOnly(ref _arguments);
         }
 
         internal override DynamicExpression Rewrite(Expression[] args)
