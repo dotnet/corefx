@@ -271,6 +271,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
 
             // Since we requested 20 bytes in secondFirstHalf there are no 'extra' bytes left over to cause the
             // the "_extraCount" bug in GetBytes(); that issue is tested in GetBytes_StreamLike_Bug_Compat.
+
             Assert.Equal(first, second);
         }
 
@@ -297,7 +298,11 @@ namespace System.Security.Cryptography.DeriveBytesTests
                 byte[] lastHalf = deriveBytes.GetBytes(first.Length - firstHalf.Length);
 
                 // lastHalf should contain the last 4 bytes from the SHA1 hash plus 12 extra bytes
+<<<<<<< HEAD
                 // but due to the _extraCount bug it doesn't.
+=======
+                // but due to the _extraCount bug it doesn't
+>>>>>>> 282ea92168a249e1ad4c81fb32612fb1f294e554
 
                 // Merge the two buffers into the second array
                 Buffer.BlockCopy(firstHalf, 0, second, 0, firstHalf.Length);
