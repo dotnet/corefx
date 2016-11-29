@@ -578,7 +578,7 @@ namespace System.Collections.Concurrent
             {
                 FreezeBag(ref lockTaken);
 
-                var currentList = _headList;
+                ThreadLocalList currentList = _headList;
                 while (currentList != null)
                 {
                     currentList.Clear();
