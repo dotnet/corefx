@@ -1619,22 +1619,25 @@ namespace System.Tests
             yield return new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" };
 
             // Join does nothing if array[0] is null
-            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "" };
+            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" };
 
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
         }
 
-        [ActiveIssue(13747)]
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
-            Assert.Equal(expected, string.Join(separator, values));
-            if (!(values.Length > 0 && values[0] == null))
-            {
-                Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
-            }
+            var exp = expected;
+            if (values.Length > 0 && values[0] == null) // Join return empty string if array[0] is null
+                exp = "";
+#if netstandard17
+            // In netstandard17 Join issue was fixed
+            exp = expected;
+#endif
+            Assert.Equal(exp, string.Join(separator, values));
+            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
         }
 
         [Fact]
