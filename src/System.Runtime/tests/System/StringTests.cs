@@ -1629,7 +1629,7 @@ namespace System.Tests
         [MemberData(nameof(Join_ObjectArray_TestData))]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
-            var enumerableExpected = expected;
+            string enumerableExpected = expected;
 #if !netstandard17
             if (values.Length > 0 && values[0] == null) // Join return nothing when first value is null
                 expected = "";
