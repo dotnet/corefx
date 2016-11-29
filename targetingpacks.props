@@ -8,7 +8,7 @@
   <PropertyGroup>
     <ContractOutputPath>$(BinDir)netcoreapp/TargetingPack</ContractOutputPath>
     <FrameworkPathOverride>$(ContractOutputPath)</FrameworkPathOverride>
-    <AssemblySearchPaths>$(AssemblySearchPaths);$(ContractOutputPath)</AssemblySearchPaths>
+    <AssemblySearchPaths>$(AssemblySearchPaths);$(ContractOutputPath);{RawFileName}</AssemblySearchPaths>
   </PropertyGroup>
 
 </Project>
