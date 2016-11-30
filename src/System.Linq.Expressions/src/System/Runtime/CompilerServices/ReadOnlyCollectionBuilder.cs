@@ -67,12 +67,9 @@ namespace System.Runtime.CompilerServices
                 _size = 0;
                 _items = new T[DefaultCapacity];
 
-                using (IEnumerator<T> en = collection.GetEnumerator())
+                foreach (T item in collection)
                 {
-                    while (en.MoveNext())
-                    {
-                        Add(en.Current);
-                    }
+                    Add(item);
                 }
             }
         }
@@ -131,7 +128,7 @@ namespace System.Runtime.CompilerServices
         /// <param name="item">The object to insert into the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Insert(int index, T item)
         {
-            if (index > _size)
+            if (index < 0 || index > _size)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             if (_size == _items.Length)
@@ -174,14 +171,14 @@ namespace System.Runtime.CompilerServices
         {
             get
             {
-                if (index >= _size)
+                if (index < 0 || index >= _size)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 return _items[index];
             }
             set
             {
-                if (index >= _size)
+                if (index < 0 || index >= _size)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 _items[index] = value;
@@ -225,32 +222,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         /// <param name="item">the object to locate in the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         /// <returns>true if item is found in the <see cref="ReadOnlyCollectionBuilder{T}"/>; otherwise, false.</returns>
-        public bool Contains(T item)
-        {
-            if ((object)item == null)
-            {
-                for (int i = 0; i < _size; i++)
-                {
-                    if ((object)_items[i] == null)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else
-            {
-                EqualityComparer<T> c = EqualityComparer<T>.Default;
-                for (int i = 0; i < _size; i++)
-                {
-                    if (c.Equals(_items[i], item))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
+        public bool Contains(T item) => IndexOf(item) >= 0;
 
         /// <summary>
         /// Copies the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/> to an <see cref="Array"/>,
@@ -317,7 +289,7 @@ namespace System.Runtime.CompilerServices
             {
                 throw InvalidTypeException(value, nameof(value));
             }
-            return Count - 1;
+            return _size - 1;
         }
 
         bool IList.Contains(object value)
@@ -407,7 +379,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         public void Reverse()
         {
-            Reverse(0, Count);
+            Reverse(0, _size);
         }
 
         /// <summary>
@@ -421,6 +393,8 @@ namespace System.Runtime.CompilerServices
                 throw new ArgumentOutOfRangeException(nameof(index));
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
+            if (_size - index < count)
+                throw new ArgumentException();
 
             Array.Reverse(_items, index, count);
             _version++;
@@ -466,11 +440,7 @@ namespace System.Runtime.CompilerServices
         {
             if (_items.Length < min)
             {
-                int newCapacity = DefaultCapacity;
-                if (_items.Length > 0)
-                {
-                    newCapacity = _items.Length * 2;
-                }
+                int newCapacity = _items.Length > 0 ? _items.Length * 2 : DefaultCapacity;
                 if (newCapacity < min)
                 {
                     newCapacity = min;
@@ -534,7 +504,7 @@ namespace System.Runtime.CompilerServices
             {
                 get
                 {
-                    if (_index == 0 || _index > _builder._size)
+                    if (_index == 0 || _index == int.MaxValue)
                     {
                         throw Error.EnumerationIsDone();
                     }
@@ -553,7 +523,7 @@ namespace System.Runtime.CompilerServices
                     }
                     else
                     {
-                        _index = _builder._size + 1;
+                        _index = int.MaxValue;
                         _current = default(T);
                         return false;
                     }
