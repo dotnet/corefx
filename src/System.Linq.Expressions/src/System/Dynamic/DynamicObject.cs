@@ -764,8 +764,8 @@ namespace System.Dynamic
 
                             if (baseMethod != null)
                             {
-                                ParameterInfo[] baseParams = baseMethod.GetParameters();
-                                ParameterInfo[] miParams = mi.GetParameters();
+                                ParameterInfo[] baseParams = baseMethod.GetParametersCached();
+                                ParameterInfo[] miParams = mi.GetParametersCached();
 
                                 if (baseParams.Length == miParams.Length)
                                 {
