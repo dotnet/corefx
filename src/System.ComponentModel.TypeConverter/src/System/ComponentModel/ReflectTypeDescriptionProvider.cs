@@ -80,7 +80,7 @@ namespace System.ComponentModel
         internal static Guid ExtenderProviderKey { get; } = Guid.NewGuid();
 
 
-        private static object s_internalSyncObject = new object();
+        private static readonly object s_internalSyncObject = new object();
         /// <summary>
         ///     Creates a new ReflectTypeDescriptionProvider.  The type is the
         ///     type we will obtain type information for.

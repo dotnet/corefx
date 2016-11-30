@@ -25,7 +25,7 @@ namespace System.ComponentModel
         private ContainerFilterService _filter;
         private bool _checkedFilter;
 
-        private object _syncObj = new Object();
+        private readonly object _syncObj = new Object();
 
         ~Container()
         {
