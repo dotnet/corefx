@@ -105,17 +105,16 @@ namespace System.ComponentModel
                     //
                     if (retVal == null)
                     {
-                        ICollection values = GetStandardValues(context);
-                        IEnumerator e = values.GetEnumerator();
-                        while (e.MoveNext())
+                        foreach (var val in GetStandardValues(context))
                         {
-                            CultureInfo info = (CultureInfo)e.Current;
+                            CultureInfo info = (CultureInfo)val;
                             if (info != null && string.Compare(GetCultureName(info), text, StringComparison.Ordinal) == 0)
                             {
                                 retVal = info;
                                 break;
                             }
                         }
+                       
                     }
 
                     // Now try to create a new culture info from this value
@@ -134,16 +133,16 @@ namespace System.ComponentModel
                     if (retVal == null)
                     {
                         text = text.ToLower(CultureInfo.CurrentCulture);
-                        IEnumerator e = _values.GetEnumerator();
-                        while (e.MoveNext())
+                        foreach (var val in _values)
                         {
-                            CultureInfo info = (CultureInfo)e.Current;
+                            CultureInfo info = (CultureInfo)val;
                             if (info != null && GetCultureName(info).ToLower(CultureInfo.CurrentCulture).StartsWith(text))
                             {
                                 retVal = info;
                                 break;
                             }
                         }
+                        
                     }
                 }
 

@@ -691,10 +691,9 @@ namespace System.ComponentModel
                     }
                     else if (extenderCount > 0)
                     {
-                        IEnumerator componentEnum = components.GetEnumerator();
-                        while (componentEnum.MoveNext())
+                        foreach (var component in components)
                         {
-                            IExtenderProvider p = componentEnum.Current as IExtenderProvider;
+                            IExtenderProvider p = component as IExtenderProvider;
 
                             if (p != null && ((curIdx < maxCanExtendResults && (canExtend & ((UInt64)1 << curIdx)) != 0) ||
                                                 (curIdx >= maxCanExtendResults && p.CanExtend(instance))))
