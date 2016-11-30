@@ -489,6 +489,8 @@ namespace System.Linq.Tests
         {
             var partition = NumberRangeGuaranteedNotCollectionType(1, 100).Skip(skip).Take(take);
             Assert.Equal(expected, partition.Count());
+            Assert.Equal(expected, partition.Select(i => i).Count());
+            Assert.Equal(expected, partition.Select(i => i).ToArray().Length);
         }
 
         [Theory]

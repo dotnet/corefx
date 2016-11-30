@@ -505,6 +505,11 @@ namespace System.Linq
                 return false;
             }
 
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
+            {
+                return new SelectIPartitionIterator<TSource, TResult>(this, selector);
+            }
+
             public IPartition<TSource> Skip(int count)
             {
                 int minIndex = _minIndexInclusive + count;
