@@ -178,11 +178,7 @@ namespace System.ComponentModel
         /// </summary>
         private static LicenseProvider GetCachedProvider(Type type)
         {
-            if (s_providers != null)
-            {
-                return (LicenseProvider)s_providers[type];
-            }
-            return null;
+            return (LicenseProvider) s_providers?[type];
         }
 
 
@@ -193,11 +189,7 @@ namespace System.ComponentModel
         private static LicenseProvider GetCachedProviderInstance(Type providerType)
         {
             Debug.Assert(providerType != null, "Type cannot ever be null");
-            if (s_providerInstances != null)
-            {
-                return (LicenseProvider)s_providerInstances[providerType];
-            }
-            return null;
+            return (LicenseProvider) s_providerInstances?[providerType];
         }
 
         /// <summary>
@@ -308,12 +300,8 @@ namespace System.ComponentModel
                 if (attr != null)
                 {
                     Type providerType = attr.LicenseProvider;
-                    provider = GetCachedProviderInstance(providerType);
-
-                    if (provider == null)
-                    {
-                        provider = (LicenseProvider)SecurityUtils.SecureCreateInstance(providerType);
-                    }
+                    provider = GetCachedProviderInstance(providerType) ??
+                               (LicenseProvider)SecurityUtils.SecureCreateInstance(providerType);
                 }
 
                 CacheProvider(type, provider);

@@ -211,14 +211,7 @@ namespace System.ComponentModel
         {
             string valueTypeName;
 
-            if (value == null)
-            {
-                valueTypeName = SR.Null;
-            }
-            else
-            {
-                valueTypeName = value.GetType().FullName;
-            }
+            valueTypeName = value == null ? SR.Null : value.GetType().FullName;
 
             throw new NotSupportedException(SR.Format(SR.ConvertFromException, GetType().Name, valueTypeName));
         }
@@ -231,14 +224,7 @@ namespace System.ComponentModel
         {
             string valueTypeName;
 
-            if (value == null)
-            {
-                valueTypeName = SR.Null;
-            }
-            else
-            {
-                valueTypeName = value.GetType().FullName;
-            }
+            valueTypeName = value == null ? SR.Null : value.GetType().FullName;
 
             throw new NotSupportedException(SR.Format(SR.ConvertToException, GetType().Name, valueTypeName, destinationType.FullName));
         }

@@ -199,10 +199,7 @@ namespace System.ComponentModel
 
                 // Now notify the change service that the change was successful.
                 //
-                if (changeService != null)
-                {
-                    changeService.OnComponentChanged(component, this, null, value);
-                }
+                changeService?.OnComponentChanged(component, this, null, value);
             }
         }
 
@@ -488,10 +485,7 @@ namespace System.ComponentModel
 
                 // Now notify the change service that the change was successful.
                 //
-                if (changeService != null)
-                {
-                    changeService.OnComponentChanged(component, this, null, value);
-                }
+                changeService?.OnComponentChanged(component, this, null, value);
             }
         }
     }

@@ -221,12 +221,7 @@ namespace System.ComponentModel
                 obj = objectType.GetTypeInfo().GetConstructor(argTypes)?.Invoke(args);
             }
 
-            if (obj == null)
-            {
-                obj = Activator.CreateInstance(objectType, args);
-            }
-
-            return obj;
+            return obj ?? (obj = Activator.CreateInstance(objectType, args));
         }
 
 
@@ -758,13 +753,10 @@ namespace System.ComponentModel
         public override string GetFullComponentName(object component)
         {
             IComponent comp = component as IComponent;
-            if (comp != null)
+            INestedSite ns = comp?.Site as INestedSite;
+            if (ns != null)
             {
-                INestedSite ns = comp.Site as INestedSite;
-                if (ns != null)
-                {
-                    return ns.FullName;
-                }
+                return ns.FullName;
             }
 
             return TypeDescriptor.GetComponentName(component);
@@ -1289,10 +1281,7 @@ namespace System.ComponentModel
         internal void Refresh(Type type)
         {
             ReflectedTypeData td = GetTypeData(type, false);
-            if (td != null)
-            {
-                td.Refresh();
-            }
+            td?.Refresh();
         }
 
         /// <summary> 

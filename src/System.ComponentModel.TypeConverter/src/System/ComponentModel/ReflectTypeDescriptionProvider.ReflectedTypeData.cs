@@ -167,20 +167,17 @@ namespace System.ComponentModel
             internal string GetComponentName(object instance)
             {
                 IComponent comp = instance as IComponent;
-                if (comp != null)
+                ISite site = comp?.Site;
+                if (site != null)
                 {
-                    ISite site = comp.Site;
-                    if (site != null)
+                    INestedSite nestedSite = site as INestedSite;
+                    if (nestedSite != null)
                     {
-                        INestedSite nestedSite = site as INestedSite;
-                        if (nestedSite != null)
-                        {
-                            return nestedSite.FullName;
-                        }
-                        else
-                        {
-                            return site.Name;
-                        }
+                        return nestedSite.FullName;
+                    }
+                    else
+                    {
+                        return site.Name;
                     }
                 }
 

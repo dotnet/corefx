@@ -136,10 +136,7 @@ namespace System.ComponentModel
         /// </summary>
         protected virtual void OnAddingNew(AddingNewEventArgs e)
         {
-            if (_onAddingNew != null)
-            {
-                _onAddingNew(this, e);
-            }
+            _onAddingNew?.Invoke(this, e);
         }
 
         // Private helper method
@@ -174,10 +171,7 @@ namespace System.ComponentModel
         /// </summary>
         protected virtual void OnListChanged(ListChangedEventArgs e)
         {
-            if (_onListChanged != null)
-            {
-                _onListChanged(this, e);
-            }
+            _onListChanged?.Invoke(this, e);
         }
 
         public bool RaiseListChangedEvents

@@ -87,17 +87,7 @@ namespace System.ComponentModel
         ///     The unique identifier for this attribute.  All ToolboxItemFilterAttributes with the same filter string
         ///     are considered the same, so they return the same TypeId.
         /// </summary>
-        public override object TypeId
-        {
-            get
-            {
-                if (_typeId == null)
-                {
-                    _typeId = GetType().FullName + FilterString;
-                }
-                return _typeId;
-            }
-        }
+        public override object TypeId => _typeId ?? (_typeId = GetType().FullName + FilterString);
 
         public override bool Equals(object obj)
         {

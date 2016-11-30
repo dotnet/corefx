@@ -137,20 +137,7 @@ namespace System.ComponentModel
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
-        protected string[] TabClassNames
-        {
-            get
-            {
-                if (_tabClassNames != null)
-                {
-                    return (string[])_tabClassNames.Clone();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        protected string[] TabClassNames => (string[]) _tabClassNames?.Clone();
 
         /// <summary>
         /// <para>Gets the scopes of tabs for this System.ComponentModel.Design.PropertyTabAttribute, from System.ComponentModel.Design.PropertyTabScope.</para>

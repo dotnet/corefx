@@ -180,12 +180,7 @@ namespace System.ComponentModel
 
             public override bool Equals(object o)
             {
-                if (o == null)
-                {
-                    return false;
-                }
-
-                if (o.GetHashCode() != _hashCode)
+                if (o?.GetHashCode() != _hashCode)
                 {
                     return false;
                 }

@@ -436,9 +436,9 @@ namespace System.ComponentModel
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2109:ReviewVisibleEventHandlers")]
         protected virtual void OnValueChanged(object component, EventArgs e)
         {
-            if (component != null && _valueChangedHandlers != null)
+            if (component != null)
             {
-                ((EventHandler)_valueChangedHandlers[component])?.Invoke(component, e);
+                ((EventHandler) _valueChangedHandlers?[component])?.Invoke(component, e);
             }
         }
 

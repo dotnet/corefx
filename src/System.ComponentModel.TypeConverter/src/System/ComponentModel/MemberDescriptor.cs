@@ -177,17 +177,7 @@ namespace System.ComponentModel
         ///       in the <see cref='System.ComponentModel.CategoryAttribute'/>.
         ///    </para>
         /// </summary>
-        public virtual string Category
-        {
-            get
-            {
-                if (_category == null)
-                {
-                    _category = ((CategoryAttribute)Attributes[typeof(CategoryAttribute)]).Category;
-                }
-                return _category;
-            }
-        }
+        public virtual string Category => _category ?? (_category = ((CategoryAttribute) Attributes[typeof(CategoryAttribute)]).Category);
 
         /// <summary>
         ///    <para>
@@ -195,17 +185,8 @@ namespace System.ComponentModel
         ///       the member as specified in the <see cref='System.ComponentModel.DescriptionAttribute'/>.
         ///    </para>
         /// </summary>
-        public virtual string Description
-        {
-            get
-            {
-                if (_description == null)
-                {
-                    _description = ((DescriptionAttribute)Attributes[typeof(DescriptionAttribute)]).Description;
-                }
-                return _description;
-            }
-        }
+        public virtual string Description => _description ??
+                                             (_description = ((DescriptionAttribute) Attributes[typeof(DescriptionAttribute)]).Description);
 
         /// <summary>
         ///    <para>
@@ -221,17 +202,7 @@ namespace System.ComponentModel
         ///       name of the member.
         ///    </para>
         /// </summary>
-        public virtual string Name
-        {
-            get
-            {
-                if (_name == null)
-                {
-                    return "";
-                }
-                return _name;
-            }
-        }
+        public virtual string Name => _name ?? "";
 
         /// <summary>
         ///    <para>
@@ -507,12 +478,7 @@ namespace System.ComponentModel
         /// </summary>
         protected static ISite GetSite(object component)
         {
-            if (!(component is IComponent))
-            {
-                return null;
-            }
-
-            return ((IComponent)component).Site;
+            return (component as IComponent)?.Site;
         }
 
         [Obsolete("This method has been deprecated. Use GetInvocationTarget instead.  http://go.microsoft.com/fwlink/?linkid=14202")]

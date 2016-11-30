@@ -234,11 +234,7 @@ namespace System.ComponentModel
                 // out fields marked Browsable(false). Note that if multiple fields have the same value,
                 // the behavior is undefined, since what we return are just enum values, not names.
 
-                Type reflectType = TypeDescriptor.GetReflectionType(_type);
-                if (reflectType == null)
-                {
-                    reflectType = _type;
-                }
+                Type reflectType = TypeDescriptor.GetReflectionType(_type) ?? _type;
 
                 FieldInfo[] fields = reflectType.GetFields(BindingFlags.Public | BindingFlags.Static);
                 ArrayList objValues = null;

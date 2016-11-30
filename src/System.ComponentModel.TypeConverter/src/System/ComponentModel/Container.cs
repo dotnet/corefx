@@ -86,10 +86,7 @@ namespace System.ComponentModel
                     }
                 }
 
-                if (site != null)
-                {
-                    site.Container.Remove(component);
-                }
+                site?.Container.Remove(component);
 
                 ISite newSite = CreateSite(component, name);
                 _sites[_siteCount++] = newSite;
@@ -232,9 +229,7 @@ namespace System.ComponentModel
         {
             lock (_syncObj)
             {
-                if (component == null)
-                    return;
-                ISite site = component.Site;
+                ISite site = component?.Site;
                 if (site == null || site.Container != this)
                     return;
                 if (!preserveSite)
@@ -276,9 +271,7 @@ namespace System.ComponentModel
                 {
                     ISite s = _sites[i];
 
-                    if (s != null && s.Name != null
-                            && string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase)
-                            && s.Component != component)
+                    if (s?.Name != null && string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase) && s.Component != component)
                     {
                         InheritanceAttribute inheritanceAttribute = (InheritanceAttribute)TypeDescriptor.GetAttributes(s.Component)[typeof(InheritanceAttribute)];
                         if (inheritanceAttribute.InheritanceLevel != InheritanceLevel.InheritedReadOnly)

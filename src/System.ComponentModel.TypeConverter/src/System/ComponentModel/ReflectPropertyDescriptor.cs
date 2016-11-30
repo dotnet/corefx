@@ -504,10 +504,7 @@ namespace System.ComponentModel
                 if (GetValueChangedHandler(component) == null)
                 {
                     EventDescriptor iPropChangedEvent = IPropChangedEventValue;
-                    if (iPropChangedEvent != null)
-                    {
-                        iPropChangedEvent.AddEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
-                    }
+                    iPropChangedEvent?.AddEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
                 }
 
                 base.AddValueChanged(component, handler);
@@ -663,10 +660,7 @@ namespace System.ComponentModel
 
                     // Now notify the change service that the change was successful.
                     //
-                    if (changeService != null)
-                    {
-                        changeService.OnComponentChanged(component, notifyDesc, oldValue, value);
-                    }
+                    changeService?.OnComponentChanged(component, notifyDesc, oldValue, value);
                 }
             }
         }
@@ -945,13 +939,10 @@ namespace System.ComponentModel
                 {
                     string name = null;
                     IComponent comp = component as IComponent;
-                    if (comp != null)
+                    ISite site = comp?.Site;
+                    if (site?.Name != null)
                     {
-                        ISite site = comp.Site;
-                        if (site != null && site.Name != null)
-                        {
-                            name = site.Name;
-                        }
+                        name = site.Name;
                     }
 
                     if (name == null)
@@ -964,11 +955,7 @@ namespace System.ComponentModel
                         t = t.InnerException;
                     }
 
-                    string message = t.Message;
-                    if (message == null)
-                    {
-                        message = t.GetType().Name;
-                    }
+                    string message = t.Message ?? t.GetType().Name;
 
                     throw new TargetInvocationException(string.Format(SR.ErrorPropertyAccessorException, Name, name, message), t);
                 }
@@ -1030,10 +1017,7 @@ namespace System.ComponentModel
                 if (GetValueChangedHandler(component) == null)
                 {
                     EventDescriptor iPropChangedEvent = IPropChangedEventValue;
-                    if (iPropChangedEvent != null)
-                    {
-                        iPropChangedEvent.RemoveEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
-                    }
+                    iPropChangedEvent?.RemoveEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
                 }
             }
         }
@@ -1192,10 +1176,7 @@ namespace System.ComponentModel
                     {
                         // Now notify the change service that the change was successful.
                         //
-                        if (changeService != null)
-                        {
-                            changeService.OnComponentChanged(component, this, oldValue, value);
-                        }
+                        changeService?.OnComponentChanged(component, this, oldValue, value);
                     }
                 }
             }

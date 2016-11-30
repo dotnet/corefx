@@ -104,16 +104,13 @@ namespace System.ComponentModel
                 {
                     // Try the reference service first.
                     //
-                    if (context != null)
+                    IReferenceService refSvc = (IReferenceService) context?.GetService(typeof(IReferenceService));
+                    if (refSvc != null)
                     {
-                        IReferenceService refSvc = (IReferenceService)context.GetService(typeof(IReferenceService));
-                        if (refSvc != null)
+                        string name = refSvc.GetName(value);
+                        if (name != null)
                         {
-                            string name = refSvc.GetName(value);
-                            if (name != null)
-                            {
-                                return name;
-                            }
+                            return name;
                         }
                     }
 
@@ -123,13 +120,10 @@ namespace System.ComponentModel
                     {
                         IComponent comp = (IComponent)value;
                         ISite site = comp.Site;
-                        if (site != null)
+                        string name = site?.Name;
+                        if (name != null)
                         {
-                            string name = site.Name;
-                            if (name != null)
-                            {
-                                return name;
-                            }
+                            return name;
                         }
                     }
 

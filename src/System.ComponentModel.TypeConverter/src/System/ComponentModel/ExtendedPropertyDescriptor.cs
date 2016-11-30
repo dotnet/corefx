@@ -99,13 +99,10 @@ namespace System.ComponentModel
                 if (displayNameAttr == null || displayNameAttr.IsDefaultAttribute())
                 {
                     ISite site = GetSite(_provider);
-                    if (site != null)
+                    string providerName = site?.Name;
+                    if (providerName != null && providerName.Length > 0)
                     {
-                        string providerName = site.Name;
-                        if (providerName != null && providerName.Length > 0)
-                        {
-                            name = string.Format(SR.MetaExtenderName, name, providerName);
-                        }
+                        name = string.Format(SR.MetaExtenderName, name, providerName);
                     }
                 }
                 return name;

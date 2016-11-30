@@ -119,20 +119,7 @@ namespace System.ComponentModel.Design
 
         /// <summary>
         /// </summary>
-        public virtual IDictionary Properties
-        {
-            get
-            {
-                if (_properties == null)
-                {
-                    _properties = new HybridDictionary();
-                }
-
-                return _properties;
-            }
-        }
-
-
+        public virtual IDictionary Properties => _properties ?? (_properties = new HybridDictionary());
 
 
         /// <summary>
@@ -237,10 +224,7 @@ namespace System.ComponentModel.Design
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2109:ReviewVisibleEventHandlers")] // Safe: FullTrust LinkDemand to instantiate an object of this class.
         protected virtual void OnCommandChanged(EventArgs e)
         {
-            if (_statusHandler != null)
-            {
-                _statusHandler(this, e);
-            }
+            _statusHandler?.Invoke(this, e);
         }
 
         /// <summary>

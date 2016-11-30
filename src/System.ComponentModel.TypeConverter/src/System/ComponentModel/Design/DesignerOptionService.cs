@@ -25,14 +25,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public DesignerOptionCollection Options
         {
-            get
-            {
-                if (_options == null)
-                {
-                    _options = new DesignerOptionCollection(this, null, string.Empty, null);
-                }
-                return _options;
-            }
+            get { return _options ?? (_options = new DesignerOptionCollection(this, null, string.Empty, null)); }
         }
 
         /// <summary>
@@ -119,11 +112,7 @@ namespace System.ComponentModel.Design
         object IDesignerOptionService.GetOptionValue(string pageName, string valueName)
         {
             PropertyDescriptor optionProp = GetOptionProperty(pageName, valueName);
-            if (optionProp != null)
-            {
-                return optionProp.GetValue(null);
-            }
-            return null;
+            return optionProp?.GetValue(null);
         }
 
         /// <internalonly/>
@@ -133,10 +122,7 @@ namespace System.ComponentModel.Design
         void IDesignerOptionService.SetOptionValue(string pageName, string valueName, object value)
         {
             PropertyDescriptor optionProp = GetOptionProperty(pageName, valueName);
-            if (optionProp != null)
-            {
-                optionProp.SetValue(null, value);
-            }
+            optionProp?.SetValue(null, value);
         }
 
         /// <summary>
