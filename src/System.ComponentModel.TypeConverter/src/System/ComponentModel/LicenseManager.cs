@@ -118,7 +118,7 @@ namespace System.ComponentModel
         /// </summary>
         public static object CreateWithContext(Type type, LicenseContext creationContext)
         {
-            return CreateWithContext(type, creationContext, new object[0]);
+            return CreateWithContext(type, creationContext, Array.Empty<object>());
         }
 
 

@@ -28,8 +28,8 @@ namespace System.ComponentModel
         /// </summary>
         public PropertyTabAttribute()
         {
-            TabScopes = new PropertyTabScope[0];
-            _tabClassNames = new string[0];
+            TabScopes = Array.Empty<PropertyTabScope>();
+            _tabClassNames = Array.Empty<string>();
         }
 
         /// <summary>

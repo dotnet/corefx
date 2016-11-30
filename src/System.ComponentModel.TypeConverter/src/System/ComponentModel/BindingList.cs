@@ -93,7 +93,7 @@ namespace System.ComponentModel
                     return true;
                 }
 
-                if (itemType.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance, null, new Type[0], null) != null)
+                if (itemType.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.CreateInstance, null, Array.Empty<Type>(), null) != null)
                 {
                     return true;
                 }

@@ -416,7 +416,7 @@ namespace System.ComponentModel
             ///       Initializes a new instance of the <see cref='System.ComponentModel.TypeConverter.SimplePropertyDescriptor'/> class.
             ///    </para>
             /// </summary>
-            protected SimplePropertyDescriptor(Type componentType, string name, Type propertyType) : this(componentType, name, propertyType, new Attribute[0])
+            protected SimplePropertyDescriptor(Type componentType, string name, Type propertyType) : this(componentType, name, propertyType, Array.Empty<Attribute>())
             {
             }
 
@@ -499,7 +499,7 @@ namespace System.ComponentModel
             {
                 if (values == null)
                 {
-                    values = new object[0];
+                    values = Array.Empty<object>();
                 }
 
                 Array a = values as Array;
