@@ -66,7 +66,7 @@ namespace System.ComponentModel
         private MethodInfo _addMethod;     // the method to use when adding an event
         private MethodInfo _removeMethod;  // the method to use when removing an event
         private EventInfo _realEvent;      // actual event info... may be null
-        private bool _filledMethods = false;   // did we already call FillMethods() once?
+        private bool _filledMethods;   // did we already call FillMethods() once?
 
         /// <summary>
         ///     This is the main constructor for an ReflectEventDescriptor.

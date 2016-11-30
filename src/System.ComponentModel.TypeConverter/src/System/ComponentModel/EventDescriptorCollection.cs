@@ -20,8 +20,8 @@ namespace System.ComponentModel
         private string[] _namedSort;
         private readonly IComparer _comparer;
         private bool _eventsOwned;
-        private bool _needSort = false;
-        private readonly bool _readOnly = false;
+        private bool _needSort;
+        private readonly bool _readOnly;
 
         /// <summary>
         /// An empty AttributeCollection that can used instead of creating a new one with no items.

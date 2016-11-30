@@ -41,7 +41,7 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly BindableAttribute Default = No;
 
-        private bool _isDefault = false;
+        private bool _isDefault;
 
         /// <summary>
         ///    <para>
@@ -90,7 +90,7 @@ namespace System.ComponentModel
         ///       whether a property is appropriate to bind data to.
         ///    </para>
         /// </summary>
-        public bool Bindable { get; } = false;
+        public bool Bindable { get; }
 
         /// <summary>
         /// <para>

@@ -24,8 +24,8 @@ namespace System.ComponentModel
         private AttributeCollection _attributeCollection;
         private Attribute[] _attributes;
         private Attribute[] _originalAttributes;
-        private bool _attributesFiltered = false;
-        private bool _attributesFilled = false;
+        private bool _attributesFiltered;
+        private bool _attributesFilled;
         private int _metadataVersion;
         private string _category;
         private string _description;

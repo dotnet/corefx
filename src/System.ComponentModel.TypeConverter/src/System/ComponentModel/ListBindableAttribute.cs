@@ -30,7 +30,7 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly ListBindableAttribute Default = Yes;
 
-        private bool _isDefault = false;
+        private bool _isDefault;
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
@@ -52,7 +52,7 @@ namespace System.ComponentModel
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
-        public bool ListBindable { get; } = false;
+        public bool ListBindable { get; }
 
         /// <summary>
         ///    <para>[To be supplied.]</para>

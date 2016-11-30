@@ -34,7 +34,7 @@ namespace System.ComponentModel
 
         private AttributeEntry[] _foundAttributeTypes;
 
-        private int _index = 0;
+        private int _index;
 
         /// <summary>
         ///     Creates a new AttributeCollection.

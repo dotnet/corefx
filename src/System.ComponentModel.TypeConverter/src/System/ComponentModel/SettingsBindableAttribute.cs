@@ -33,7 +33,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Gets a value indicating whether a property is appropriate to bind settings to.
         /// </summary>
-        public bool Bindable { get; } = false;
+        public bool Bindable { get; }
 
         public override bool Equals(object obj)
         {

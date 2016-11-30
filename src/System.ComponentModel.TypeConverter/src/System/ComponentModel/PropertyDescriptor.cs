@@ -12,7 +12,7 @@ namespace System.ComponentModel
     /// </summary>
     public abstract class PropertyDescriptor : MemberDescriptor
     {
-        private TypeConverter _converter = null;
+        private TypeConverter _converter;
         private Hashtable _valueChangedHandlers;
         private object[] _editors;
         private Type[] _editorTypes;

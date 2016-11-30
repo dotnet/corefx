@@ -31,7 +31,7 @@ namespace System.ComponentModel
         ///    <para>Gets a value indicating whether the property this
         ///       attribute is bound to can be used as an application setting.</para>
         /// </summary>
-        public bool RecommendedAsConfigurable { get; } = false;
+        public bool RecommendedAsConfigurable { get; }
 
         /// <summary>
         ///    <para>

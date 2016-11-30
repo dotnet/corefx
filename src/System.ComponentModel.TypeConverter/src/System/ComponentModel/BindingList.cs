@@ -23,13 +23,13 @@ namespace System.ComponentModel
     {
         private int _addNewPos = -1;
         private bool _raiseListChangedEvents = true;
-        private bool _raiseItemChangedEvents = false;
+        private bool _raiseItemChangedEvents;
 
         [NonSerialized]
-        private PropertyDescriptorCollection _itemTypeProperties = null;
+        private PropertyDescriptorCollection _itemTypeProperties;
 
         [NonSerialized]
-        private PropertyChangedEventHandler _propertyChangedEventHandler = null;
+        private PropertyChangedEventHandler _propertyChangedEventHandler;
 
         [NonSerialized]
         private AddingNewEventHandler _onAddingNew;
@@ -43,7 +43,7 @@ namespace System.ComponentModel
         private bool _allowNew = true;
         private bool _allowEdit = true;
         private bool _allowRemove = true;
-        private bool _userSetAllowNew = false;
+        private bool _userSetAllowNew;
 
         #region Constructors
 

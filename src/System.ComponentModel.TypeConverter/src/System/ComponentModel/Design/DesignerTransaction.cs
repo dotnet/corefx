@@ -14,7 +14,7 @@ namespace System.ComponentModel.Design
     /// </summary>
     public abstract class DesignerTransaction : IDisposable
     {
-        private bool _suppressedFinalization = false;
+        private bool _suppressedFinalization;
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
@@ -36,12 +36,12 @@ namespace System.ComponentModel.Design
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
-        public bool Canceled { get; private set; } = false;
+        public bool Canceled { get; private set; }
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
-        public bool Committed { get; private set; } = false;
+        public bool Committed { get; private set; }
 
         /// <summary>
         ///    <para>[To be supplied.]</para>

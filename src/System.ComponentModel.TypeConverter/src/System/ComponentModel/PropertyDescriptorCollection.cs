@@ -31,8 +31,8 @@ namespace System.ComponentModel
         private readonly string[] _namedSort;
         private readonly IComparer _comparer;
         private bool _propsOwned;
-        private bool _needSort = false;
-        private bool _readOnly = false;
+        private bool _needSort;
+        private bool _readOnly;
 
         private readonly object _internalSyncObject = new object();
 
@@ -87,7 +87,7 @@ namespace System.ComponentModel
         ///       collection.
         ///    </para>
         /// </summary>
-        public int Count { get; private set; } = 0;
+        public int Count { get; private set; }
 
         /// <summary>
         ///    <para>Gets the property with the specified index

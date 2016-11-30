@@ -36,6 +36,6 @@ namespace System.ComponentModel
         /// <summary>
         ///     Gets or sets the new object that will be added to the list.
         /// </summary>
-        public object NewObject { get; set; } = null;
+        public object NewObject { get; set; }
     }
 }

@@ -22,8 +22,8 @@ namespace System.ComponentModel
     {
         private static readonly object s_selfLock = new object();
 
-        private static volatile LicenseContext s_context = null;
-        private static object s_contextLockHolder = null;
+        private static volatile LicenseContext s_context;
+        private static object s_contextLockHolder;
         private static volatile Hashtable s_providers;
         private static volatile Hashtable s_providerInstances;
         private static object s_internalSyncObject = new object();
