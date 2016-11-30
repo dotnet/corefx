@@ -48,13 +48,7 @@ namespace System.ComponentModel
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
-        protected Type EnumType
-        {
-            get
-            {
-                return _type;
-            }
-        }
+        protected Type EnumType => _type;
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
@@ -105,13 +99,7 @@ namespace System.ComponentModel
         ///         be used to sort the values of the enumerator.
         ///     </para>
         /// </summary>
-        protected virtual IComparer Comparer
-        {
-            get
-            {
-                return InvariantComparer.Default;
-            }
-        }
+        protected virtual IComparer Comparer => InvariantComparer.Default;
 
         /// <internalonly/>
         /// <summary>

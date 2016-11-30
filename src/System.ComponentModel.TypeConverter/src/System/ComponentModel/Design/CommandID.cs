@@ -40,13 +40,7 @@ namespace System.ComponentModel.Design
         ///       Gets or sets the numeric command ID.
         ///    </para>
         /// </summary>
-        public virtual int ID
-        {
-            get
-            {
-                return _commandID;
-            }
-        }
+        public virtual int ID => _commandID;
 
         /// <summary>
         ///    <para>
@@ -79,13 +73,7 @@ namespace System.ComponentModel.Design
         ///       represents belongs to.
         ///    </para>
         /// </summary>
-        public virtual Guid Guid
-        {
-            get
-            {
-                return _menuGroup;
-            }
-        }
+        public virtual Guid Guid => _menuGroup;
 
         /// <summary>
         ///    <para>

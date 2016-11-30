@@ -132,13 +132,7 @@ namespace System.ComponentModel
             public IComponent Component { get; }
 
             // The container in which the component is sited.
-            public IContainer Container
-            {
-                get
-                {
-                    return _container;
-                }
-            }
+            public IContainer Container => _container;
 
             public Object GetService(Type service)
             {

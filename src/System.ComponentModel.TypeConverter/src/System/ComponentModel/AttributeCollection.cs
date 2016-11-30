@@ -125,35 +125,17 @@ namespace System.ComponentModel
         ///     Gets the attributes collection.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Matches constructor input type")]
-        protected virtual Attribute[] Attributes
-        {
-            get
-            {
-                return _attributes;
-            }
-        }
+        protected virtual Attribute[] Attributes => _attributes;
 
         /// <summary>
         ///     Gets the number of attributes.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return Attributes.Length;
-            }
-        }
+        public int Count => Attributes.Length;
 
         /// <summary>
         ///     Gets the attribute with the specified index number.
         /// </summary>
-        public virtual Attribute this[int index]
-        {
-            get
-            {
-                return Attributes[index];
-            }
-        }
+        public virtual Attribute this[int index] => Attributes[index];
 
         /// <summary>
         ///    Gets the attribute with the specified type.
@@ -361,30 +343,12 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return null;
-            }
-        }
+        object ICollection.SyncRoot => null;
 
-        int ICollection.Count 
-        { 
-            get
-            {
-                return Count;
-            }
-        }
+        int ICollection.Count => Count;
 
         IEnumerator IEnumerable.GetEnumerator()
         {

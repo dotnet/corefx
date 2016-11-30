@@ -100,13 +100,7 @@ namespace System.ComponentModel
         ///       Gets the event with the specified name.
         ///    </para>
         /// </summary>
-        public virtual EventDescriptor this[string name]
-        {
-            get
-            {
-                return Find(name, false);
-            }
-        }
+        public virtual EventDescriptor this[string name] => Find(name, false);
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
@@ -430,30 +424,12 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return null;
-            }
-        }
+        object ICollection.SyncRoot => null;
 
-        int ICollection.Count 
-        {
-            get
-            {
-                return Count;
-            }
-        }
+        int ICollection.Count => Count;
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -524,22 +500,10 @@ namespace System.ComponentModel
         }        
 
         /// <internalonly/>
-        bool IList.IsReadOnly
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsReadOnly => _readOnly;
 
         /// <internalonly/>
-        bool IList.IsFixedSize
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsFixedSize => _readOnly;
 
         private class ArraySubsetEnumerator : IEnumerator
         {

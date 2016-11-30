@@ -109,13 +109,7 @@ namespace System.ComponentModel
         /// <summary>
         ///    <para>Gets the property with the specified name.</para>
         /// </summary>
-        public virtual PropertyDescriptor this[string name]
-        {
-            get
-            {
-                return Find(name, false);
-            }
-        }
+        public virtual PropertyDescriptor this[string name] => Find(name, false);
 
         /// <summary>
         ///    <para>[To be supplied.]</para>
@@ -465,30 +459,12 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return null;
-            }
-        }
+        object ICollection.SyncRoot => null;
 
-        int ICollection.Count
-        {
-            get
-            {
-                return Count;
-            }
-        }
+        int ICollection.Count => Count;
 
         void IList.Clear()
         {
@@ -539,22 +515,10 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        bool IDictionary.IsFixedSize
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IDictionary.IsFixedSize => _readOnly;
 
         /// <internalonly/>
-        bool IDictionary.IsReadOnly
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IDictionary.IsReadOnly => _readOnly;
 
         /// <internalonly/>
         object IDictionary.this[object key]
@@ -695,22 +659,10 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        bool IList.IsReadOnly
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsReadOnly => _readOnly;
 
         /// <internalonly/>
-        bool IList.IsFixedSize
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsFixedSize => _readOnly;
 
         /// <internalonly/>
         void IList.Remove(object value)
@@ -758,13 +710,7 @@ namespace System.ComponentModel
                 _owner = owner;
             }
 
-            public object Current
-            {
-                get
-                {
-                    return Entry;
-                }
-            }
+            public object Current => Entry;
 
             public DictionaryEntry Entry
             {
@@ -775,21 +721,9 @@ namespace System.ComponentModel
                 }
             }
 
-            public object Key
-            {
-                get
-                {
-                    return _owner[_index].Name;
-                }
-            }
+            public object Key => _owner[_index].Name;
 
-            public object Value
-            {
-                get
-                {
-                    return _owner[_index].Name;
-                }
-            }
+            public object Value => _owner[_index].Name;
 
             public bool MoveNext()
             {

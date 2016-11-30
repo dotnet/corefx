@@ -33,13 +33,7 @@ namespace System.ComponentModel
         ///       the component this attribute is bound to.
         ///    </para>
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
+        public string Name => _name;
 
         /// <summary>
         ///    <para>

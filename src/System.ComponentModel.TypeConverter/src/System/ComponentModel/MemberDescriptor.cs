@@ -213,13 +213,7 @@ namespace System.ComponentModel
         ///    <see cref='System.ComponentModel.BrowsableAttribute'/>. 
         ///    </para>
         /// </summary>
-        public virtual bool IsBrowsable
-        {
-            get
-            {
-                return ((BrowsableAttribute)Attributes[typeof(BrowsableAttribute)]).Browsable;
-            }
-        }
+        public virtual bool IsBrowsable => ((BrowsableAttribute)Attributes[typeof(BrowsableAttribute)]).Browsable;
 
         /// <summary>
         ///    <para>
@@ -245,13 +239,7 @@ namespace System.ComponentModel
         ///       code for the name of the member as specified in <see cref='System.String.GetHashCode'/>.
         ///    </para>
         /// </summary>
-        protected virtual int NameHashCode
-        {
-            get
-            {
-                return _nameHash;
-            }
-        }
+        protected virtual int NameHashCode => _nameHash;
 
         /// <summary>
         ///    <para>
@@ -259,13 +247,7 @@ namespace System.ComponentModel
         ///       design time as specified in the <see cref='System.ComponentModel.DesignOnlyAttribute'/>.
         ///    </para>
         /// </summary>
-        public virtual bool DesignTimeOnly
-        {
-            get
-            {
-                return (DesignOnlyAttribute.Yes.Equals(Attributes[typeof(DesignOnlyAttribute)]));
-            }
-        }
+        public virtual bool DesignTimeOnly => (DesignOnlyAttribute.Yes.Equals(Attributes[typeof(DesignOnlyAttribute)]));
 
         /// <summary>
         ///    <para>

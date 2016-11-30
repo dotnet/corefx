@@ -228,13 +228,7 @@ namespace System.ComponentModel.Design
         ///       Gets the OLE command status code for this menu item.
         ///    </para>
         /// </summary>
-        public virtual int OleStatus
-        {
-            get
-            {
-                return _status;
-            }
-        }
+        public virtual int OleStatus => _status;
 
         /// <summary>
         ///    <para>Provides notification and is called in response to 

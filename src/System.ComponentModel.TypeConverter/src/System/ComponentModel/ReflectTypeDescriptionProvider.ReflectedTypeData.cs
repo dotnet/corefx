@@ -36,13 +36,7 @@ namespace System.ComponentModel
             ///     This method returns true if the data cache in this reflection 
             ///     type descriptor has data in it.
             /// </summary>
-            internal bool IsPopulated
-            {
-                get
-                {
-                    return (_attributes != null) | (_events != null) | (_properties != null);
-                }
-            }
+            internal bool IsPopulated => (_attributes != null) | (_events != null) | (_properties != null);
 
             /// <summary>
             ///     Retrieves custom attributes.

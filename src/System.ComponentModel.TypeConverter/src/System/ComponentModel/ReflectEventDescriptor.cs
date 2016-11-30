@@ -120,13 +120,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Retrieves the type of the component this EventDescriptor is bound to.
         /// </summary>
-        public override Type ComponentType
-        {
-            get
-            {
-                return _componentClass;
-            }
-        }
+        public override Type ComponentType => _componentClass;
 
         /// <summary>
         ///     Retrieves the type of the delegate for this event.
@@ -143,13 +137,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Indicates whether the delegate type for this event is a multicast delegate.
         /// </summary>
-        public override bool IsMulticast
-        {
-            get
-            {
-                return (typeof(MulticastDelegate)).IsAssignableFrom(EventType);
-            }
-        }
+        public override bool IsMulticast => (typeof(MulticastDelegate)).IsAssignableFrom(EventType);
 
         /// <summary>
         ///     This adds the delegate value as a listener to when this event is fired

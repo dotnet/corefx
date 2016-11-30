@@ -84,24 +84,12 @@ namespace System.ComponentModel
         ///     AddProvider methods to define a type description provider for interface types.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static Type InterfaceType
-        {
-            get
-            {
-                return typeof(TypeDescriptorInterface);
-            }
-        }
+        public static Type InterfaceType => typeof(TypeDescriptorInterface);
 
         /// <summary>
         ///     This value increments each time someone refreshes or changes metadata.
         /// </summary>
-        internal static int MetadataVersion
-        {
-            get
-            {
-                return s_metadataVersion;
-            }
-        }
+        internal static int MetadataVersion => s_metadataVersion;
 
         /// <summary>
         ///    Occurs when Refreshed is raised for a component.
@@ -2436,13 +2424,7 @@ namespace System.ComponentModel
         }
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static Type ComObjectType
-        {
-            get
-            {
-                return typeof(TypeDescriptor.TypeDescriptorComObject);
-            }
-        }
+        public static Type ComObjectType => typeof(TypeDescriptor.TypeDescriptorComObject);
 
         public static IDesigner CreateDesigner(IComponent component, Type designerBaseType)
         {

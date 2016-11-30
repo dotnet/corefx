@@ -103,13 +103,7 @@ namespace System.ComponentModel
         ///       specified in the <see cref='System.ComponentModel.LocalizableAttribute'/>.
         ///    </para>
         /// </summary>
-        public virtual bool IsLocalizable
-        {
-            get
-            {
-                return (LocalizableAttribute.Yes.Equals(Attributes[typeof(LocalizableAttribute)]));
-            }
-        }
+        public virtual bool IsLocalizable => (LocalizableAttribute.Yes.Equals(Attributes[typeof(LocalizableAttribute)]));
 
         /// <summary>
         ///    <para>
@@ -517,12 +511,6 @@ namespace System.ComponentModel
         ///     from direct calls made to PropertyDescriptor.SetValue (value=false). For example, the component may
         ///     implement the INotifyPropertyChanged interface, or may have an explicit '{name}Changed' event for this property.
         /// </summary>
-        public virtual bool SupportsChangeEvents
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool SupportsChangeEvents => false;
     }
 }

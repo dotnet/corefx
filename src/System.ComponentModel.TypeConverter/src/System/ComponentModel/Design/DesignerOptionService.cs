@@ -363,49 +363,25 @@ namespace System.ComponentModel.Design
             /// <summary>
             /// Private ICollection implementation.
             /// </summary>
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            bool ICollection.IsSynchronized => false;
 
             /// <internalonly/>
             /// <summary>
             /// Private ICollection implementation.
             /// </summary>
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            object ICollection.SyncRoot => this;
 
             /// <internalonly/>
             /// <summary>
             /// Private IList implementation.
             /// </summary>
-            bool IList.IsFixedSize
-            {
-                get
-                {
-                    return true;
-                }
-            }
+            bool IList.IsFixedSize => true;
 
             /// <internalonly/>
             /// <summary>
             /// Private IList implementation.
             /// </summary>
-            bool IList.IsReadOnly
-            {
-                get
-                {
-                    return true;
-                }
-            }
+            bool IList.IsReadOnly => true;
 
             /// <internalonly/>
             /// <summary>
@@ -504,37 +480,13 @@ namespace System.ComponentModel.Design
                     _target = target;
                 }
 
-                public override AttributeCollection Attributes
-                {
-                    get
-                    {
-                        return _property.Attributes;
-                    }
-                }
+                public override AttributeCollection Attributes => _property.Attributes;
 
-                public override Type ComponentType
-                {
-                    get
-                    {
-                        return _property.ComponentType;
-                    }
-                }
+                public override Type ComponentType => _property.ComponentType;
 
-                public override bool IsReadOnly
-                {
-                    get
-                    {
-                        return _property.IsReadOnly;
-                    }
-                }
+                public override bool IsReadOnly => _property.IsReadOnly;
 
-                public override Type PropertyType
-                {
-                    get
-                    {
-                        return _property.PropertyType;
-                    }
-                }
+                public override Type PropertyType => _property.PropertyType;
 
                 public override bool CanResetValue(object component)
                 {
@@ -612,29 +564,11 @@ namespace System.ComponentModel.Design
                     _option = option;
                 }
 
-                public override Type ComponentType
-                {
-                    get
-                    {
-                        return _option.GetType();
-                    }
-                }
+                public override Type ComponentType => _option.GetType();
 
-                public override bool IsReadOnly
-                {
-                    get
-                    {
-                        return true;
-                    }
-                }
+                public override bool IsReadOnly => true;
 
-                public override Type PropertyType
-                {
-                    get
-                    {
-                        return _option.GetType();
-                    }
-                }
+                public override Type PropertyType => _option.GetType();
 
                 public override bool CanResetValue(object component)
                 {

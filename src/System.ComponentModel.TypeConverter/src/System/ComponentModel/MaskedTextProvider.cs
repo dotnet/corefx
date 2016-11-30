@@ -452,13 +452,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Specifies whether the prompt character should be treated as a valid input character or not.
         /// </summary>
-        public bool AllowPromptAsInput
-        {
-            get
-            {
-                return _flagState[s_ALLOW_PROMPT_AS_INPUT];
-            }
-        }
+        public bool AllowPromptAsInput => _flagState[s_ALLOW_PROMPT_AS_INPUT];
 
         /// <summary>
         ///     Retreives the number of editable characters that have been set.
@@ -468,13 +462,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Retreives the number of editable characters that have been set.
         /// </summary>
-        public int AvailableEditPositionCount
-        {
-            get
-            {
-                return EditPositionCount - AssignedEditPositionCount;
-            }
-        }
+        public int AvailableEditPositionCount => EditPositionCount - AssignedEditPositionCount;
 
         /// <summary>
         ///     Creates a 'clean' (no text assigned) MaskedTextProvider instance with the same property values as the 
@@ -544,26 +532,12 @@ namespace System.ComponentModel
         /// <summary>
         ///       The system password char.
         /// </summary>
-        public static char DefaultPasswordChar
-        {
-            get
-            {
-                // ComCtl32.dll V6 (WindowsXP) provides a nice black circle but we don't want to attempt to simulate it 
-                // here to avoid hard coding values.  MaskedTextBox picks up the right value at run time from comctl32.
-                return '*';
-            }
-        }
+        public static char DefaultPasswordChar => '*';
 
         /// <summary>
         ///       The number of editable positions in the test string.
         /// </summary>
-        public int EditPositionCount
-        {
-            get
-            {
-                return _optionalEditChars + _requiredEditChars;
-            }
-        }
+        public int EditPositionCount => _optionalEditChars + _requiredEditChars;
 
         /// <summary>
         ///       Returns a new IEnumerator object containing the editable positions in the test string.
@@ -623,13 +597,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Specifies whether only ASCII characters are accepted as valid input.
         /// </summary>
-        public bool AsciiOnly
-        {
-            get
-            {
-                return _flagState[s_ASCII_ONLY];
-            }
-        }
+        public bool AsciiOnly => _flagState[s_ASCII_ONLY];
 
         /// <summary>
         ///     Specifies whether the user text is to be rendered as password characters.
@@ -653,36 +621,18 @@ namespace System.ComponentModel
         /// <summary>
         ///     A negative value representing an index outside the test string.
         /// </summary>
-        public static int InvalidIndex
-        {
-            get
-            {
-                return invalidIndex;
-            }
-        }
+        public static int InvalidIndex => invalidIndex;
 
         /// <summary>
         ///     The last edit position (relative to the origin not to time) in the test string where 
         ///     an input character has been placed.  If no position has been assigned, InvalidIndex is returned.
         /// </summary>
-        public int LastAssignedPosition
-        {
-            get
-            {
-                return FindAssignedEditPositionFrom(_testString.Length - 1, backward);
-            }
-        }
+        public int LastAssignedPosition => FindAssignedEditPositionFrom(_testString.Length - 1, backward);
 
         /// <summary>
         ///     Specifies the length of the test string.
         /// </summary>
-        public int Length
-        {
-            get
-            {
-                return _testString.Length;
-            }
-        }
+        public int Length => _testString.Length;
 
         /// <summary>
         ///     The mask to be applied to the test string.

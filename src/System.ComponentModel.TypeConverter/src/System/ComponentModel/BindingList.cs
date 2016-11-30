@@ -348,13 +348,7 @@ namespace System.ComponentModel
             return newItem;
         }
 
-        private bool AddingNewHandled
-        {
-            get
-            {
-                return _onAddingNew != null && _onAddingNew.GetInvocationList().Length > 0;
-            }
-        }
+        private bool AddingNewHandled => _onAddingNew != null && _onAddingNew.GetInvocationList().Length > 0;
 
         /// <summary>
         ///     Creates a new item and adds it to the list.
@@ -415,13 +409,7 @@ namespace System.ComponentModel
         }
 
         /* private */
-        bool IBindingList.AllowNew
-        {
-            get
-            {
-                return AllowNew;
-            }
-        }
+        bool IBindingList.AllowNew => AllowNew;
 
         /// <summary>
         /// </summary>
@@ -442,13 +430,7 @@ namespace System.ComponentModel
         }
 
         /* private */
-        bool IBindingList.AllowEdit
-        {
-            get
-            {
-                return AllowEdit;
-            }
-        }
+        bool IBindingList.AllowEdit => AllowEdit;
 
         /// <summary>
         /// </summary>
@@ -469,109 +451,31 @@ namespace System.ComponentModel
         }
 
         /* private */
-        bool IBindingList.AllowRemove
-        {
-            get
-            {
-                return AllowRemove;
-            }
-        }
+        bool IBindingList.AllowRemove => AllowRemove;
 
-        bool IBindingList.SupportsChangeNotification
-        {
-            get
-            {
-                return SupportsChangeNotificationCore;
-            }
-        }
+        bool IBindingList.SupportsChangeNotification => SupportsChangeNotificationCore;
 
-        protected virtual bool SupportsChangeNotificationCore
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected virtual bool SupportsChangeNotificationCore => true;
 
-        bool IBindingList.SupportsSearching
-        {
-            get
-            {
-                return SupportsSearchingCore;
-            }
-        }
+        bool IBindingList.SupportsSearching => SupportsSearchingCore;
 
-        protected virtual bool SupportsSearchingCore
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected virtual bool SupportsSearchingCore => false;
 
-        bool IBindingList.SupportsSorting
-        {
-            get
-            {
-                return SupportsSortingCore;
-            }
-        }
+        bool IBindingList.SupportsSorting => SupportsSortingCore;
 
-        protected virtual bool SupportsSortingCore
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected virtual bool SupportsSortingCore => false;
 
-        bool IBindingList.IsSorted
-        {
-            get
-            {
-                return IsSortedCore;
-            }
-        }
+        bool IBindingList.IsSorted => IsSortedCore;
 
-        protected virtual bool IsSortedCore
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected virtual bool IsSortedCore => false;
 
-        PropertyDescriptor IBindingList.SortProperty
-        {
-            get
-            {
-                return SortPropertyCore;
-            }
-        }
+        PropertyDescriptor IBindingList.SortProperty => SortPropertyCore;
 
-        protected virtual PropertyDescriptor SortPropertyCore
-        {
-            get
-            {
-                return null;
-            }
-        }
+        protected virtual PropertyDescriptor SortPropertyCore => null;
 
-        ListSortDirection IBindingList.SortDirection
-        {
-            get
-            {
-                return SortDirectionCore;
-            }
-        }
+        ListSortDirection IBindingList.SortDirection => SortDirectionCore;
 
-        protected virtual ListSortDirection SortDirectionCore
-        {
-            get
-            {
-                return ListSortDirection.Ascending;
-            }
-        }
+        protected virtual ListSortDirection SortDirectionCore => ListSortDirection.Ascending;
 
         void IBindingList.ApplySort(PropertyDescriptor prop, ListSortDirection direction)
         {
@@ -718,13 +622,7 @@ namespace System.ComponentModel
         ///     of type ItemChanged as a result of property changes on individual list items
         ///     unless those items support INotifyPropertyChanged
         /// </summary>
-        bool IRaiseItemChangedEvents.RaisesItemChangedEvents
-        {
-            get
-            {
-                return _raiseItemChangedEvents;
-            }
-        }
+        bool IRaiseItemChangedEvents.RaisesItemChangedEvents => _raiseItemChangedEvents;
 
         #endregion
     }

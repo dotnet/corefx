@@ -199,13 +199,7 @@ namespace System.ComponentModel.Design.Serialization
         /// <summary>
         ///    Returns true if this relationship is empty.
         /// </summary>
-        public bool IsEmpty
-        {
-            get
-            {
-                return Owner == null;
-            }
-        }
+        public bool IsEmpty => Owner == null;
 
         /// <summary>
         ///    The member in this relationship.

@@ -453,13 +453,7 @@ namespace System.ComponentModel
             /// <summary>
             ///    <para>Gets a value indicating whether this property is read-only.</para>
             /// </summary>
-            public override bool IsReadOnly
-            {
-                get
-                {
-                    return Attributes.Contains(ReadOnlyAttribute.Yes);
-                }
-            }
+            public override bool IsReadOnly => Attributes.Contains(ReadOnlyAttribute.Yes);
 
             /// <summary>
             ///    <para>Gets the type of the property.</para>
@@ -600,26 +594,14 @@ namespace System.ComponentModel
             /// Determines if this collection is synchronized. The ValidatorCollection is not synchronized for
             /// speed.  Also, since it is read-only, there is no need to synchronize it.
             /// </summary>
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            bool ICollection.IsSynchronized => false;
 
             /// <internalonly/>
             /// <summary>
             /// Retrieves the synchronization root for this collection.  Because we are not synchronized,
             /// this returns null.
             /// </summary>
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return null;
-                }
-            }
+            object ICollection.SyncRoot => null;
         }
     }
 }

@@ -59,13 +59,7 @@ namespace System.ComponentModel.Design
         ///     types.  You may override this proeprty and return your own types, modifying the default behavior
         ///     of GetService.
         /// </summary>
-        protected virtual Type[] DefaultServices
-        {
-            get
-            {
-                return s_defaultServices;
-            }
-        }
+        protected virtual Type[] DefaultServices => s_defaultServices;
 
         /// <summary>
         ///     Our collection of services.  The service collection is demand

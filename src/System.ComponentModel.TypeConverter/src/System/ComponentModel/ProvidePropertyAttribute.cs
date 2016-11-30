@@ -60,13 +60,7 @@ namespace System.ComponentModel
             return PropertyName.GetHashCode() ^ ReceiverTypeName.GetHashCode();
         }
 
-        public override object TypeId
-        {
-            get
-            {
-                return base.GetType().FullName + PropertyName;
-            }
-        }
+        public override object TypeId => base.GetType().FullName + PropertyName;
     }
 }
 

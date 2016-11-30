@@ -42,13 +42,7 @@ namespace System.ComponentModel.Design
         ///       sets the document that is losing activation.
         ///    </para>
         /// </summary>
-        public IDesignerHost OldDesigner
-        {
-            get
-            {
-                return _oldDesigner;
-            }
-        }
+        public IDesignerHost OldDesigner => _oldDesigner;
 
         /// <summary>
         ///    <para>
@@ -56,12 +50,6 @@ namespace System.ComponentModel.Design
         ///       sets the document that is gaining activation.
         ///    </para>
         /// </summary>
-        public IDesignerHost NewDesigner
-        {
-            get
-            {
-                return _newDesigner;
-            }
-        }
+        public IDesignerHost NewDesigner => _newDesigner;
     }
 }

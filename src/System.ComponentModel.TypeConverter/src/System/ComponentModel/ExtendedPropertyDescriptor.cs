@@ -72,35 +72,17 @@ namespace System.ComponentModel
         /// <summary>
         ///     Retrieves the type of the component this PropertyDescriptor is bound to.
         /// </summary>
-        public override Type ComponentType
-        {
-            get
-            {
-                return _extenderInfo.ComponentType;
-            }
-        }
+        public override Type ComponentType => _extenderInfo.ComponentType;
 
         /// <summary>
         ///     Determines if the property can be written to.
         /// </summary>
-        public override bool IsReadOnly
-        {
-            get
-            {
-                return Attributes[typeof(ReadOnlyAttribute)].Equals(ReadOnlyAttribute.Yes);
-            }
-        }
+        public override bool IsReadOnly => Attributes[typeof(ReadOnlyAttribute)].Equals(ReadOnlyAttribute.Yes);
 
         /// <summary>
         ///     Retrieves the data type of the property.
         /// </summary>
-        public override Type PropertyType
-        {
-            get
-            {
-                return _extenderInfo.ExtenderGetType(_provider);
-            }
-        }
+        public override Type PropertyType => _extenderInfo.ExtenderGetType(_provider);
 
         /// <summary>
         ///     Retrieves the display name of the property.  This is the name that will

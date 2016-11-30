@@ -25,13 +25,7 @@ namespace System.ComponentModel
         /// <summary>
         ///      Retrieves the "default" name for our culture.
         /// </summary>
-        private string DefaultCultureString
-        {
-            get
-            {
-                return SR.CultureInfoConverterDefaultCultureString;
-            }
-        }
+        private string DefaultCultureString => SR.CultureInfoConverterDefaultCultureString;
 
         /// <summary>
         ///      Retrieves the Name for a input CultureInfo.

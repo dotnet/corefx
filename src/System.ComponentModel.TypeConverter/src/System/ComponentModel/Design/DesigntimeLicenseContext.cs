@@ -30,13 +30,8 @@ namespace System.ComponentModel.Design
         ///       Gets or sets the license usage mode.
         ///    </para>
         /// </summary>
-        public override LicenseUsageMode UsageMode
-        {
-            get
-            {
-                return LicenseUsageMode.Designtime;
-            }
-        }
+        public override LicenseUsageMode UsageMode => LicenseUsageMode.Designtime;
+
         /// <summary>
         ///    <para>
         ///       Gets a saved license key.
