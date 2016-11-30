@@ -127,18 +127,6 @@ namespace System.IO.Tests
             Assert.True(Directory.Exists(Path.Combine(testDirDest, testDirSubDirectory)));
         }
 
-        [Fact]
-        public void Path_Longer_Than_MaxLongPath_Throws_Exception()
-        {
-            string testDir = GetTestFilePath();
-            Directory.CreateDirectory(testDir);
-            Assert.All((IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath())), (path) =>
-            {
-                Assert.Throws<PathTooLongException>(() => Move(testDir, path));
-                Assert.Throws<PathTooLongException>(() => Move(path, testDir));
-            });
-        }
-
         #endregion
 
         #region PlatformSpecific

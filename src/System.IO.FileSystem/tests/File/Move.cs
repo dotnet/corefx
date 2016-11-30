@@ -176,22 +176,6 @@ namespace System.IO.Tests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void LongPath()
-        {
-            //Create a destination path longer than the traditional Windows limit of 256 characters
-            string testFileSource = Path.Combine(TestDirectory, GetTestFileName());
-            File.Create(testFileSource).Dispose();
-
-            Assert.All(IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath()), (path) =>
-            {
-                Assert.Throws<PathTooLongException>(() => Move(testFileSource, path));
-                File.Delete(testFileSource);
-                Assert.Throws<PathTooLongException>(() => Move(path, testFileSource));
-            });
-        }
-
         #endregion
 
         #region PlatformSpecific

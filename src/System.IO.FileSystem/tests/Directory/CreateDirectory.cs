@@ -206,19 +206,6 @@ namespace System.IO.Tests
             Assert.True(Directory.Exists(result.FullName));
         }
 
-        [Fact]
-        public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsPathTooLongException()
-        {
-            // While paths themselves can be up to 260 characters including trailing null, file systems
-            // limit each components of the path to a total of 255 characters.
-            var paths = IOInputs.GetPathsWithComponentLongerThanMaxComponent();
-
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-            });
-        }
-
         #endregion
 
         #region PlatformSpecific
@@ -245,30 +232,6 @@ namespace System.IO.Tests
                 Assert.True(Directory.Exists(result.FullName));
             });
         }
-
-        [Fact]
-        [ActiveIssue(11687)]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void DirectoryLongerThanMaxLongPath_ThrowsPathTooLongException()
-        {
-            var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath());
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-            });
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
-        {
-            var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
-            Assert.All(paths, (path) =>
-            {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-            });
-        }
-
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]

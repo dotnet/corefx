@@ -125,9 +125,6 @@ namespace System.IO
 
         private async Task<StorageFolder> CreateDirectoryAsync(string fullPath, bool failIfExists)
         {
-            if (fullPath.Length >= Interop.Kernel32.MAX_DIRECTORY_PATH)
-                throw new PathTooLongException(SR.IO_PathTooLong);
-
             Stack<string> stackDir = new Stack<string>();
             StorageFolder workingFolder = null;
             string workingPath = fullPath;
