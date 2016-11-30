@@ -249,7 +249,7 @@ namespace System
             // Forward to helper class in Common for this
             // We keep the actual hashing logic there, so
             // other classes can use it for hashing
-            return HashHelpers.Combine(h1, h2);
+            return HashHelpers.Combine(HashHelpers.Combine(h1, h2), HashHelpers.RandomSeed);
         }
 
         internal static int CombineHashCodes(int h1, int h2, int h3)
