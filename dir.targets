@@ -93,4 +93,76 @@
     </ItemGroup>
   </Target>
 
+  <!-- Support for CoreRT Targeting Packs
+       CoreRT Targeting requires differentiating the targetting pack according to the platforms.
+       i.e.: the targetting pack for linux is different than that of windows. In order to support this
+       requirement (with a reasonable cost) we need a mapping between an identity package to multiple 
+       contract packages, and have NuGet restore figure out the right targetting pack according to the specified 
+       target platform. NuGet doesn't support that notion. But it supports something that's close by;
+       mapping a contract package to multiple runtime packages. CoreRT targeting pack packages are created 
+       as if they are of this latter type.
+
+       The main difference between a runtime package and a contract package (as their names indicates) is that 
+       the assets in contract packages are used at compiling, wheres the runtime package assets are copied into 
+       project output directory to be consumed at runtime. However what we need for CoreRT targeting pack packages
+       is that the assets in so-named runtime packages to be used at compile time, as if they were contract packages. 
+
+       In order to support this,
+       - we need to pick the runtime assets from so-named runtime packages
+          - this can be done by setting a TargetRuntimeIdentifier when invoking PreresolveNugetPackageAssets
+       - convert them to compile time assets. See FixupReferencesForCoreRTTargetingPack target.
+  -->
+  <Choose>
+    <When Condition="'$(OSGroup)' == 'Windows_NT'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>win-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Unix'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>linux-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Linux'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>linux-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='OSX'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>osx-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='FreeBSD'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>linux-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='NetBSD'">
+      <PropertyGroup>
+        <_NuGetRuntimeIdentifier>linux-corert</_NuGetRuntimeIdentifier>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ConfigurationErrorMsg Condition="'$(TargetGroup)' == 'netcoreapp1.2corert'">$(ConfigurationErrorMsg);$(TargetGroup) TargetGroup requires OSGroup to be specified to one of 'Windows_NT, Unix, Linux, OSX, FreeBSD, NetBSD' but it is set to '$(OSGroup)'</ConfigurationErrorMsg>
+      </PropertyGroup>
+    </Otherwise>    
+  </Choose>
+  
+  <PropertyGroup>
+    <NuGetRuntimeIdentifier Condition="'$(TargetGroup)' == 'netcoreapp1.2corert'">$(_NuGetRuntimeIdentifier)</NuGetRuntimeIdentifier>
+  </PropertyGroup>
+       
+  <Target Name="FixupReferencesForCoreRTTargetingPack"
+    AfterTargets="ResolveNuGetPackages"
+    Condition="'$(NuGetTargetMoniker)' == '.NETCoreApp,Version=v1.2' AND '$(NuGetRuntimeIdentifier)'=='win-corert'">
+    <ItemGroup>
+      <ReferenceCopyLocalPathsForCoreRTTargetingPack Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'runtime.win-corert.netcoreapp1.2.Microsoft.TargetingPack.Private.CoreRT'" />
+      <Reference Include="@(ReferenceCopyLocalPathsForCoreRTTargetingPack)"/>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPathsForCoreRTTargetingPack)" />
+    </ItemGroup>
+    <Message Text="Moved the following items from ReferenceCopyLocalPaths to Reference:" Importance="Low"/>
+    <Message Text="%(ReferenceCopyLocalPathsForCoreRTTargetingPack.Identity)" Importance="Low"/>
+  </Target>
 </Project>
