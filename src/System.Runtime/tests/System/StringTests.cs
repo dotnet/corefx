@@ -1618,8 +1618,7 @@ namespace System.Tests
             yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
             yield return new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" };
 
-            // Join does nothing if array[0] is null
-            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "" };
+            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" };
 
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
@@ -1630,11 +1629,15 @@ namespace System.Tests
         [MemberData(nameof(Join_ObjectArray_TestData))]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
+#if netstandard17
             Assert.Equal(expected, string.Join(separator, values));
-            if (!(values.Length > 0 && values[0] == null))
-            {
-                Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
-            }
+#else
+            if (values.Length > 0 && values[0] == null) // Join return empty string if array[0] is null
+                Assert.Equal("", string.Join(separator, values));
+            else
+                Assert.Equal(expected, string.Join(separator, values));
+#endif
+            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
         }
 
         [Fact]
