@@ -35,9 +35,6 @@ namespace System.ComponentModel
         private AddingNewEventHandler _onAddingNew;
 
         [NonSerialized]
-        private ListChangedEventHandler _onListChanged;
-
-        [NonSerialized]
         private int _lastChangeIndex = -1;
 
         private bool _allowNew = true;
@@ -154,24 +151,15 @@ namespace System.ComponentModel
         /// <summary>
         ///     Event that reports changes to the list or to items in the list.
         /// </summary>
-        public event ListChangedEventHandler ListChanged
-        {
-            add
-            {
-                _onListChanged += value;
-            }
-            remove
-            {
-                _onListChanged -= value;
-            }
-        }
+        public event ListChangedEventHandler ListChanged; 
+        
 
         /// <summary>
         ///     Raises the ListChanged event.
         /// </summary>
         protected virtual void OnListChanged(ListChangedEventArgs e)
         {
-            _onListChanged?.Invoke(this, e);
+            ListChanged?.Invoke(this, e);
         }
 
         public bool RaiseListChangedEvents

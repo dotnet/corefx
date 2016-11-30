@@ -23,7 +23,6 @@ namespace System.ComponentModel.Design
         // Events that we suface or call on
         //
         private EventHandler _execHandler;
-        private EventHandler _statusHandler;
 
         private int _status;
         private IDictionary _properties;
@@ -159,17 +158,8 @@ namespace System.ComponentModel.Design
         ///       Occurs when the menu command changes.
         ///    </para>
         /// </summary>
-        public event EventHandler CommandChanged
-        {
-            add
-            {
-                _statusHandler += value;
-            }
-            remove
-            {
-                _statusHandler -= value;
-            }
-        }
+        public event EventHandler CommandChanged;
+        
 
         /// <summary>
         /// <para>Gets the <see cref='System.ComponentModel.Design.CommandID'/> associated with this menu command.</para>
@@ -224,7 +214,7 @@ namespace System.ComponentModel.Design
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2109:ReviewVisibleEventHandlers")] // Safe: FullTrust LinkDemand to instantiate an object of this class.
         protected virtual void OnCommandChanged(EventArgs e)
         {
-            _statusHandler?.Invoke(this, e);
+            CommandChanged?.Invoke(this, e);
         }
 
         /// <summary>
