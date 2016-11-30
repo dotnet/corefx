@@ -16,6 +16,7 @@ namespace System.ComponentModel
     /// </summary>
     public class EnumConverter : TypeConverter
     {
+        private static readonly char[] c_comma = {','};
         /// <summary>
         ///    <para>
         ///       Provides a <see cref='System.ComponentModel.TypeConverter.StandardValuesCollection'/> that specifies the
@@ -115,7 +116,7 @@ namespace System.ComponentModel
                     if (strValue.IndexOf(',') != -1)
                     {
                         long convertedValue = 0;
-                        string[] values = strValue.Split(new char[] { ',' });
+                        string[] values = strValue.Split(c_comma);
                         foreach (string v in values)
                         {
                             convertedValue |= Convert.ToInt64((Enum)Enum.Parse(_type, v, true), culture);
