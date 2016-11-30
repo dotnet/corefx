@@ -22,7 +22,7 @@ namespace System.ComponentModel
         ///     Initializes a new instance of the <see cref='System.ComponentModel.AddingNewEventArgs'/> class,
         ///     with no new object defined.
         /// </summary>
-        public AddingNewEventArgs() : base()
+        public AddingNewEventArgs()
         {
         }
 
@@ -30,7 +30,7 @@ namespace System.ComponentModel
         ///     Initializes a new instance of the <see cref='System.ComponentModel.AddingNewEventArgs'/> class,
         ///     with the specified object defined as the default new object.
         /// </summary>
-        public AddingNewEventArgs(object newObject) : base()
+        public AddingNewEventArgs(object newObject)
         {
             _newObject = newObject;
         }

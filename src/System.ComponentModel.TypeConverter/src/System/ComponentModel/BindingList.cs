@@ -50,7 +50,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Default constructor.
         /// </summary>
-        public BindingList() : base()
+        public BindingList()
         {
             Initialize();
         }
