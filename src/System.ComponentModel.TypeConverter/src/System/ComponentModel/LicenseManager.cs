@@ -600,23 +600,16 @@ namespace System.ComponentModel
             // of a single Type.
             internal class CLRLicenseContext : LicenseContext
             {
-                private LicenseUsageMode _usageMode;
                 private Type _type;
                 private string _key;
 
                 public CLRLicenseContext(LicenseUsageMode usageMode, Type type)
                 {
-                    _usageMode = usageMode;
+                    UsageMode = usageMode;
                     _type = type;
                 }
 
-                public override LicenseUsageMode UsageMode
-                {
-                    get
-                    {
-                        return _usageMode;
-                    }
-                }
+                public override LicenseUsageMode UsageMode { get; }
 
 
                 public override string GetSavedLicenseKey(Type type, Assembly resourceAssembly)

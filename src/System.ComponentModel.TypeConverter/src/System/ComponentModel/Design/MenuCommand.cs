@@ -25,7 +25,6 @@ namespace System.ComponentModel.Design
         private EventHandler _execHandler;
         private EventHandler _statusHandler;
 
-        private CommandID _commandID;
         private int _status;
         private IDictionary _properties;
 
@@ -61,7 +60,7 @@ namespace System.ComponentModel.Design
         public MenuCommand(EventHandler handler, CommandID command)
         {
             _execHandler = handler;
-            _commandID = command;
+            CommandID = command;
             _status = SUPPORTED | ENABLED;
         }
 
@@ -188,13 +187,7 @@ namespace System.ComponentModel.Design
         /// <summary>
         /// <para>Gets the <see cref='System.ComponentModel.Design.CommandID'/> associated with this menu command.</para>
         /// </summary>
-        public virtual CommandID CommandID
-        {
-            get
-            {
-                return _commandID;
-            }
-        }
+        public virtual CommandID CommandID { get; }
 
         /// <summary>
         ///    <para>

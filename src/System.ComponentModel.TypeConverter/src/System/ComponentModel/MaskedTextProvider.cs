@@ -133,13 +133,11 @@ namespace System.ComponentModel
         private BitVector32 _flagState;
 
         // Used to obtained localized placeholder chars (date separator for instance).
-        private CultureInfo _culture;
 
         // the formatted string.
         private StringBuilder _testString;
 
         // the number of assigned edit chars.
-        private int _assignedCharCount;
 
         // the number of assigned required edit chars.
         private int _requiredCharCount;
@@ -151,7 +149,6 @@ namespace System.ComponentModel
         private int _optionalEditChars;
 
         // Properties backend fields (see corresponding property for info).
-        private string _mask;
         private char _passwordChar;
         private char _promptChar;
 
@@ -253,7 +250,7 @@ namespace System.ComponentModel
 
             // read only property-backend fields.
 
-            _mask = mask;
+            Mask = mask;
             _promptChar = promptChar;
             _passwordChar = passwordChar;
 
@@ -265,25 +262,25 @@ namespace System.ComponentModel
                 {
                     if (culture.Equals(tempCulture.Parent))
                     {
-                        _culture = tempCulture;
+                        Culture = tempCulture;
                         break;
                     }
                 }
 
                 // Last resort use invariant culture.
-                if (_culture == null)
+                if (Culture == null)
                 {
-                    _culture = CultureInfo.InvariantCulture;
+                    Culture = CultureInfo.InvariantCulture;
                 }
             }
             else
             {
-                _culture = culture;
+                Culture = culture;
             }
 
-            if (!_culture.IsReadOnly)
+            if (!Culture.IsReadOnly)
             {
-                _culture = CultureInfo.ReadOnly(_culture);
+                Culture = CultureInfo.ReadOnly(Culture);
             }
 
             _flagState[s_ALLOW_PROMPT_AS_INPUT] = allowPromptAsInput;
@@ -322,9 +319,9 @@ namespace System.ComponentModel
             // Traverse the mask to generate the test string and the string descriptor table so we don't have
             // to traverse those strings anymore.
             //
-            for (int maskPos = 0; maskPos < _mask.Length; maskPos++)
+            for (int maskPos = 0; maskPos < Mask.Length; maskPos++)
             {
-                ch = _mask[maskPos];
+                ch = Mask[maskPos];
                 if (!escapedChar)   // if false treat the char as literal.
                 {
                     switch (ch)
@@ -334,27 +331,27 @@ namespace System.ComponentModel
                         // set the corresponding localized char to be added to the test string.
                         //
                         case '.':   // decimal separator.
-                            locSymbol = _culture.NumberFormat.NumberDecimalSeparator;
+                            locSymbol = Culture.NumberFormat.NumberDecimalSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case ',':   // thousands separator.
-                            locSymbol = _culture.NumberFormat.NumberGroupSeparator;
+                            locSymbol = Culture.NumberFormat.NumberGroupSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case ':':   // time separator.
-                            locSymbol = _culture.DateTimeFormat.TimeSeparator;
+                            locSymbol = Culture.DateTimeFormat.TimeSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case '/':   // date separator.
-                            locSymbol = _culture.DateTimeFormat.DateSeparator;
+                            locSymbol = Culture.DateTimeFormat.DateSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case '$':   // currency symbol.
-                            locSymbol = _culture.NumberFormat.CurrencySymbol;
+                            locSymbol = Culture.NumberFormat.CurrencySymbol;
                             charType = CharType.Separator;
                             break;
 
@@ -466,13 +463,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     Retreives the number of editable characters that have been set.
         /// </summary>
-        public int AssignedEditPositionCount
-        {
-            get
-            {
-                return _assignedCharCount;
-            }
-        }
+        public int AssignedEditPositionCount { get; private set; }
 
         /// <summary>
         ///     Retreives the number of editable characters that have been set.
@@ -481,7 +472,7 @@ namespace System.ComponentModel
         {
             get
             {
-                return EditPositionCount - _assignedCharCount;
+                return EditPositionCount - AssignedEditPositionCount;
             }
         }
 
@@ -548,13 +539,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     The culture that determines the value of the localizable mask language separators and placeholders.
         /// </summary>
-        public CultureInfo Culture
-        {
-            get
-            {
-                return _culture;
-            }
-        }
+        public CultureInfo Culture { get; }
 
         /// <summary>
         ///       The system password char.
@@ -702,13 +687,7 @@ namespace System.ComponentModel
         /// <summary>
         ///     The mask to be applied to the test string.
         /// </summary>
-        public string Mask
-        {
-            get
-            {
-                return _mask;
-            }
-        }
+        public string Mask { get; }
 
         /// <summary>
         ///     Specifies whether all required inputs have been provided into the mask successfully.
@@ -717,7 +696,7 @@ namespace System.ComponentModel
         {
             get
             {
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
                 return _requiredCharCount == _requiredEditChars;
             }
         }
@@ -729,8 +708,8 @@ namespace System.ComponentModel
         {
             get
             {
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
-                return _assignedCharCount == EditPositionCount;
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
+                return AssignedEditPositionCount == EditPositionCount;
             }
         }
 
@@ -989,7 +968,7 @@ namespace System.ComponentModel
         /// </summary>
         public void Clear(out MaskedTextResultHint resultHint)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
                 resultHint = MaskedTextResultHint.NoEffect;
                 return;
@@ -1010,7 +989,7 @@ namespace System.ComponentModel
         /// </summary>
         public int FindAssignedEditPositionFrom(int position, bool direction)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
                 return invalidIndex;
             }
@@ -1039,7 +1018,7 @@ namespace System.ComponentModel
         /// </summary>
         public int FindAssignedEditPositionInRange(int startPosition, int endPosition, bool direction)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
                 return invalidIndex;
             }
@@ -1985,7 +1964,7 @@ namespace System.ComponentModel
                 return false;
             }
 
-            if (_assignedCharCount > 0)
+            if (AssignedEditPositionCount > 0)
             {
                 // cache out params to preserve the ones from the primary operation (in case of success).
                 int tempPos;
@@ -2077,14 +2056,14 @@ namespace System.ComponentModel
             {
                 chDex.IsAssigned = false;
                 _testString[testPosition] = _promptChar;
-                _assignedCharCount--;
+                AssignedEditPositionCount--;
 
                 if (chDex.CharType == CharType.EditRequired)
                 {
                     _requiredCharCount--;
                 }
 
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
             }
         }
 
@@ -2204,14 +2183,14 @@ namespace System.ComponentModel
                 {
                     if (charDescriptor.CaseConversion == CaseConversion.ToLower)
                     {
-                        input = _culture.TextInfo.ToLower(input);
+                        input = Culture.TextInfo.ToLower(input);
                     }
                 }
                 else // Char.IsLower( input )
                 {
                     if (charDescriptor.CaseConversion == CaseConversion.ToUpper)
                     {
-                        input = _culture.TextInfo.ToUpper(input);
+                        input = Culture.TextInfo.ToUpper(input);
                     }
                 }
             }
@@ -2221,7 +2200,7 @@ namespace System.ComponentModel
             if (!charDescriptor.IsAssigned) // if position not counted for already (replace case) we do it (add case).
             {
                 charDescriptor.IsAssigned = true;
-                _assignedCharCount++;
+                AssignedEditPositionCount++;
 
                 if (charDescriptor.CharType == CharType.EditRequired)
                 {
@@ -2229,7 +2208,7 @@ namespace System.ComponentModel
                 }
             }
 
-            Debug.Assert(_assignedCharCount <= EditPositionCount, "Invalid count of assigned chars.");
+            Debug.Assert(AssignedEditPositionCount <= EditPositionCount, "Invalid count of assigned chars.");
         }
 
         /// <summary>
@@ -2374,7 +2353,7 @@ namespace System.ComponentModel
 
             // Test the character against the mask constraints.  The switch tests false conditions.
             // Space char succeeds the test if the char type is optional.
-            switch (_mask[charDex.MaskPosition])
+            switch (Mask[charDex.MaskPosition])
             {
                 case '#':   // digit or plus/minus sign optional.
                     if (!Char.IsDigit(input) && (input != '-') && (input != '+') && input != spaceChar)
@@ -2628,7 +2607,7 @@ namespace System.ComponentModel
         /// </summary>
         public string ToDisplayString()
         {
-            if (!IsPassword || _assignedCharCount == 0) // just return the testString since it contains the formatted text.
+            if (!IsPassword || AssignedEditPositionCount == 0) // just return the testString since it contains the formatted text.
             {
                 return _testString.ToString();
             }

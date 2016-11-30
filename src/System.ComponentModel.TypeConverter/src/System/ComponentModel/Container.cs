@@ -292,25 +292,18 @@ namespace System.ComponentModel
 
         private class Site : ISite
         {
-            private IComponent _component;
             private Container _container;
             private String _name;
 
             internal Site(IComponent component, Container container, String name)
             {
-                _component = component;
+                Component = component;
                 _container = container;
                 _name = name;
             }
 
             // The component sited by this component site.
-            public IComponent Component
-            {
-                get
-                {
-                    return _component;
-                }
-            }
+            public IComponent Component { get; }
 
             // The container in which the component is sited.
             public IContainer Container
@@ -346,7 +339,7 @@ namespace System.ComponentModel
                     if (value == null || _name == null || !value.Equals(_name))
                     {
                         // UNDONE : This is a breaking change.  
-                        _container.ValidateName(_component, value);
+                        _container.ValidateName(Component, value);
                         _name = value;
                     }
                 }

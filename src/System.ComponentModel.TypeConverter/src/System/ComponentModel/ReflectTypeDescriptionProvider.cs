@@ -62,7 +62,6 @@ namespace System.ComponentModel
         // These are keys we stuff into our object cache.  We use this
         // cache data to store extender provider info for an object.
         //
-        private static readonly Guid s_extenderProviderKey = Guid.NewGuid();
         private static readonly Guid s_extenderPropertiesKey = Guid.NewGuid();
         private static readonly Guid s_extenderProviderPropertiesKey = Guid.NewGuid();
 
@@ -78,13 +77,7 @@ namespace System.ComponentModel
         };
 
 
-        internal static Guid ExtenderProviderKey
-        {
-            get
-            {
-                return s_extenderProviderKey;
-            }
-        }
+        internal static Guid ExtenderProviderKey { get; } = Guid.NewGuid();
 
 
         private static object s_internalSyncObject = new object();
@@ -628,7 +621,7 @@ namespace System.ComponentModel
 
             if (cache != null)
             {
-                existingExtenders = cache[s_extenderProviderKey] as IExtenderProvider[];
+                existingExtenders = cache[ExtenderProviderKey] as IExtenderProvider[];
             }
 
             if (existingExtenders == null)
@@ -723,7 +716,7 @@ namespace System.ComponentModel
 
                 if (cache != null)
                 {
-                    cache[s_extenderProviderKey] = currentExtenders;
+                    cache[ExtenderProviderKey] = currentExtenders;
                     cache.Remove(s_extenderPropertiesKey);
                 }
             }

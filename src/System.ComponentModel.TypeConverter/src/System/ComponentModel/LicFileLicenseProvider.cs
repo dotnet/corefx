@@ -108,20 +108,14 @@ namespace System.ComponentModel
         private class LicFileLicense : License
         {
             private LicFileLicenseProvider _owner;
-            private string _key;
 
             public LicFileLicense(LicFileLicenseProvider owner, string key)
             {
                 _owner = owner;
-                _key = key;
+                LicenseKey = key;
             }
-            public override string LicenseKey
-            {
-                get
-                {
-                    return _key;
-                }
-            }
+            public override string LicenseKey { get; }
+
             public override void Dispose()
             {
                 GC.SuppressFinalize(this);

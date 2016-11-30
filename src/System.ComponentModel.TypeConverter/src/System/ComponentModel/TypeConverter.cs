@@ -425,9 +425,6 @@ namespace System.ComponentModel
         /// </summary>
         protected abstract class SimplePropertyDescriptor : PropertyDescriptor
         {
-            private Type _componentType;
-            private Type _propertyType;
-
             /// <summary>
             ///    <para>
             ///       Initializes a new instance of the <see cref='System.ComponentModel.TypeConverter.SimplePropertyDescriptor'/> class.
@@ -444,20 +441,14 @@ namespace System.ComponentModel
             /// </summary>
             protected SimplePropertyDescriptor(Type componentType, string name, Type propertyType, Attribute[] attributes) : base(name, attributes)
             {
-                _componentType = componentType;
-                _propertyType = propertyType;
+                ComponentType = componentType;
+                PropertyType = propertyType;
             }
 
             /// <summary>
             ///    <para>Gets the type of the component this property description is bound to.</para>
             /// </summary>
-            public override Type ComponentType
-            {
-                get
-                {
-                    return _componentType;
-                }
-            }
+            public override Type ComponentType { get; }
 
             /// <summary>
             ///    <para>Gets a value indicating whether this property is read-only.</para>
@@ -473,13 +464,7 @@ namespace System.ComponentModel
             /// <summary>
             ///    <para>Gets the type of the property.</para>
             /// </summary>
-            public override Type PropertyType
-            {
-                get
-                {
-                    return _propertyType;
-                }
-            }
+            public override Type PropertyType { get; }
 
             /// <summary>
             ///    <para>

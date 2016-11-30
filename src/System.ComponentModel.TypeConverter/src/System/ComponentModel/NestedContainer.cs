@@ -19,8 +19,6 @@ namespace System.ComponentModel
     /// </summary>
     public class NestedContainer : Container, INestedContainer
     {
-        private IComponent _owner;
-
         /// <summary>
         ///     Creates a new NestedContainer.
         /// </summary>
@@ -30,20 +28,14 @@ namespace System.ComponentModel
             {
                 throw new ArgumentNullException(nameof(owner));
             }
-            _owner = owner;
-            _owner.Disposed += new EventHandler(OnOwnerDisposed);
+            Owner = owner;
+            Owner.Disposed += new EventHandler(OnOwnerDisposed);
         }
 
         /// <summary>
         ///     The component that owns this nested container.
         /// </summary>
-        public IComponent Owner
-        {
-            get
-            {
-                return _owner;
-            }
-        }
+        public IComponent Owner { get; }
 
         /// <summary>
         ///     Retrieves the name of the owning component.  This may be overridden to
@@ -56,16 +48,16 @@ namespace System.ComponentModel
             get
             {
                 string ownerName = null;
-                if (_owner != null && _owner.Site != null)
+                if (Owner != null && Owner.Site != null)
                 {
-                    INestedSite nestedOwnerSite = _owner.Site as INestedSite;
+                    INestedSite nestedOwnerSite = Owner.Site as INestedSite;
                     if (nestedOwnerSite != null)
                     {
                         ownerName = nestedOwnerSite.FullName;
                     }
                     else
                     {
-                        ownerName = _owner.Site.Name;
+                        ownerName = Owner.Site.Name;
                     }
                 }
 
@@ -92,7 +84,7 @@ namespace System.ComponentModel
         {
             if (disposing)
             {
-                _owner.Disposed -= new EventHandler(OnOwnerDisposed);
+                Owner.Disposed -= new EventHandler(OnOwnerDisposed);
             }
             base.Dispose(disposing);
         }
@@ -126,25 +118,18 @@ namespace System.ComponentModel
         /// </summary>
         private class Site : INestedSite
         {
-            private IComponent _component;
             private NestedContainer _container;
             private string _name;
 
             internal Site(IComponent component, NestedContainer container, string name)
             {
-                _component = component;
+                Component = component;
                 _container = container;
                 _name = name;
             }
 
             // The component sited by this component site.
-            public IComponent Component
-            {
-                get
-                {
-                    return _component;
-                }
-            }
+            public IComponent Component { get; }
 
             // The container in which the component is sited.
             public IContainer Container
@@ -206,7 +191,7 @@ namespace System.ComponentModel
                 {
                     if (value == null || _name == null || !value.Equals(_name))
                     {
-                        _container.ValidateName(_component, value);
+                        _container.ValidateName(Component, value);
                         _name = value;
                     }
                 }

@@ -15,9 +15,6 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ComplexBindingPropertiesAttribute : Attribute
     {
-        private readonly string _dataSource;
-        private readonly string _dataMember;
-
         /// <summary>
         ///    <para>
         ///       Initializes a new instance of
@@ -26,8 +23,8 @@ namespace System.ComponentModel
         /// </summary>
         public ComplexBindingPropertiesAttribute()
         {
-            _dataSource = null;
-            _dataMember = null;
+            DataSource = null;
+            DataMember = null;
         }
 
         /// <summary>
@@ -38,8 +35,8 @@ namespace System.ComponentModel
         /// </summary>
         public ComplexBindingPropertiesAttribute(string dataSource)
         {
-            _dataSource = dataSource;
-            _dataMember = null;
+            DataSource = dataSource;
+            DataMember = null;
         }
 
         /// <summary>
@@ -50,8 +47,8 @@ namespace System.ComponentModel
         /// </summary>
         public ComplexBindingPropertiesAttribute(string dataSource, string dataMember)
         {
-            _dataSource = dataSource;
-            _dataMember = dataMember;
+            DataSource = dataSource;
+            DataMember = dataMember;
         }
 
         /// <summary>
@@ -60,13 +57,7 @@ namespace System.ComponentModel
         ///       bound to.
         ///    </para>
         /// </summary>
-        public string DataSource
-        {
-            get
-            {
-                return _dataSource;
-            }
-        }
+        public string DataSource { get; }
 
         /// <summary>
         ///    <para>
@@ -74,13 +65,7 @@ namespace System.ComponentModel
         ///       bound to.
         ///    </para>
         /// </summary>
-        public string DataMember
-        {
-            get
-            {
-                return _dataMember;
-            }
-        }
+        public string DataMember { get; }
 
         /// <summary>
         ///    <para>
@@ -94,8 +79,8 @@ namespace System.ComponentModel
         {
             ComplexBindingPropertiesAttribute other = obj as ComplexBindingPropertiesAttribute;
             return other != null &&
-                   other.DataSource == _dataSource &&
-                   other.DataMember == _dataMember;
+                   other.DataSource == DataSource &&
+                   other.DataMember == DataMember;
         }
 
         public override int GetHashCode()

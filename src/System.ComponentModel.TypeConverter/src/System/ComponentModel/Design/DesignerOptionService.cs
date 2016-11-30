@@ -150,8 +150,6 @@ namespace System.ComponentModel.Design
         public sealed class DesignerOptionCollection : IList
         {
             private DesignerOptionService _service;
-            private DesignerOptionCollection _parent;
-            private string _name;
             private object _value;
             private ArrayList _children;
             private PropertyDescriptorCollection _properties;
@@ -162,17 +160,17 @@ namespace System.ComponentModel.Design
             internal DesignerOptionCollection(DesignerOptionService service, DesignerOptionCollection parent, string name, object value)
             {
                 _service = service;
-                _parent = parent;
-                _name = name;
+                Parent = parent;
+                Name = name;
                 _value = value;
 
-                if (_parent != null)
+                if (Parent != null)
                 {
-                    if (_parent._children == null)
+                    if (Parent._children == null)
                     {
-                        _parent._children = new ArrayList(1);
+                        Parent._children = new ArrayList(1);
                     }
-                    _parent._children.Add(this);
+                    Parent._children.Add(this);
                 }
             }
 
@@ -192,24 +190,12 @@ namespace System.ComponentModel.Design
             ///     The name of this collection.  Names are programmatic names and are not 
             ///     localized.  A name search is case insensitive.
             /// </summary>
-            public string Name
-            {
-                get
-                {
-                    return _name;
-                }
-            }
+            public string Name { get; }
 
             /// <summary>
             ///     Returns the parent collection object, or null if there is no parent.
             /// </summary>
-            public DesignerOptionCollection Parent
-            {
-                get
-                {
-                    return _parent;
-                }
-            }
+            public DesignerOptionCollection Parent { get; }
 
             /// <summary>
             ///     The collection of properties that this OptionCollection, along with all of 

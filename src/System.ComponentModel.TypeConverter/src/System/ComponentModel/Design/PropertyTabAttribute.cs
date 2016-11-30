@@ -17,7 +17,6 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.All)]
     public class PropertyTabAttribute : Attribute
     {
-        private PropertyTabScope[] _tabScopes;
         private Type[] _tabClasses;
         private string[] _tabClassNames;
 
@@ -29,7 +28,7 @@ namespace System.ComponentModel
         /// </summary>
         public PropertyTabAttribute()
         {
-            _tabScopes = new PropertyTabScope[0];
+            TabScopes = new PropertyTabScope[0];
             _tabClassNames = new string[0];
         }
 
@@ -66,7 +65,7 @@ namespace System.ComponentModel
             {
                 throw new ArgumentException(SR.Format(SR.PropertyTabAttributeBadPropertyTabScope), nameof(tabScope));
             }
-            _tabScopes = new PropertyTabScope[] { tabScope };
+            TabScopes = new PropertyTabScope[] { tabScope };
         }
 
 
@@ -83,7 +82,7 @@ namespace System.ComponentModel
             {
                 throw new ArgumentException(SR.Format(SR.PropertyTabAttributeBadPropertyTabScope), nameof(tabScope));
             }
-            _tabScopes = new PropertyTabScope[] { tabScope };
+            TabScopes = new PropertyTabScope[] { tabScope };
         }
 
         /// <summary>
@@ -156,13 +155,8 @@ namespace System.ComponentModel
         /// <summary>
         /// <para>Gets the scopes of tabs for this System.ComponentModel.Design.PropertyTabAttribute, from System.ComponentModel.Design.PropertyTabScope.</para>
         /// </summary>
-        public PropertyTabScope[] TabScopes
-        {
-            get
-            {
-                return _tabScopes;
-            }
-        }
+        public PropertyTabScope[] TabScopes { get; private set; }
+
         /// <internalonly/>
         public override bool Equals(object other)
         {
@@ -262,15 +256,15 @@ namespace System.ComponentModel
                         throw new ArgumentException(SR.PropertyTabAttributeBadPropertyTabScope);
                     }
                 }
-                _tabScopes = (PropertyTabScope[])tabScopes.Clone();
+                TabScopes = (PropertyTabScope[])tabScopes.Clone();
             }
             else
             {
-                _tabScopes = new PropertyTabScope[tabClasses.Length];
+                TabScopes = new PropertyTabScope[tabClasses.Length];
 
                 for (int i = 0; i < TabScopes.Length; i++)
                 {
-                    _tabScopes[i] = PropertyTabScope.Component;
+                    TabScopes[i] = PropertyTabScope.Component;
                 }
             }
         }

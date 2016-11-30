@@ -21,7 +21,6 @@ namespace System.ComponentModel
         private readonly IComparer _comparer;
         private bool _eventsOwned;
         private bool _needSort = false;
-        private int _eventCount;
         private readonly bool _readOnly = false;
 
         /// <summary>
@@ -39,12 +38,12 @@ namespace System.ComponentModel
             if (events == null)
             {
                 _events = Array.Empty<EventDescriptor>();
-                _eventCount = 0;
+                Count = 0;
             }
             else
             {
                 _events = events;
-                _eventCount = events.Length;
+                Count = events.Length;
             }
             _eventsOwned = true;
         }
@@ -67,7 +66,7 @@ namespace System.ComponentModel
             }
             _comparer = comparer;
             _events = events;
-            _eventCount = eventCount;
+            Count = eventCount;
             _needSort = true;
         }
 
@@ -77,13 +76,7 @@ namespace System.ComponentModel
         ///       of event descriptors in the collection.
         ///    </para>
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return _eventCount;
-            }
-        }
+        public int Count { get; private set; }
 
         /// <summary>
         ///    <para>Gets the event with the specified index 
@@ -93,7 +86,7 @@ namespace System.ComponentModel
         {
             get
             {
-                if (index >= _eventCount)
+                if (index >= Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -125,9 +118,9 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            EnsureSize(_eventCount + 1);
-            _events[_eventCount++] = value;
-            return _eventCount - 1;
+            EnsureSize(Count + 1);
+            _events[Count++] = value;
+            return Count - 1;
         }
 
         /// <summary>
@@ -140,7 +133,7 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            _eventCount = 0;
+            Count = 0;
         }
 
         /// <summary>
@@ -187,7 +180,7 @@ namespace System.ComponentModel
 
             if (_events.Length == 0)
             {
-                _eventCount = 0;
+                Count = 0;
                 _events = new EventDescriptor[sizeNeeded];
                 return;
             }
@@ -196,7 +189,7 @@ namespace System.ComponentModel
 
             int newSize = Math.Max(sizeNeeded, _events.Length * 2);
             EventDescriptor[] newEvents = new EventDescriptor[newSize];
-            Array.Copy(_events, 0, newEvents, 0, _eventCount);
+            Array.Copy(_events, 0, newEvents, 0, Count);
             _events = newEvents;
         }
 
@@ -242,7 +235,7 @@ namespace System.ComponentModel
         /// </summary>
         public int IndexOf(EventDescriptor value)
         {
-            return Array.IndexOf(_events, value, 0, _eventCount);
+            return Array.IndexOf(_events, value, 0, Count);
         }
 
         /// <summary>
@@ -255,13 +248,13 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            EnsureSize(_eventCount + 1);
-            if (index < _eventCount)
+            EnsureSize(Count + 1);
+            if (index < Count)
             {
-                Array.Copy(_events, index, _events, index + 1, _eventCount - index);
+                Array.Copy(_events, index, _events, index + 1, Count - index);
             }
             _events[index] = value;
-            _eventCount++;
+            Count++;
         }
 
         /// <summary>
@@ -292,12 +285,12 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            if (index < _eventCount - 1)
+            if (index < Count - 1)
             {
-                Array.Copy(_events, index + 1, _events, index, _eventCount - index - 1);
+                Array.Copy(_events, index + 1, _events, index, Count - index - 1);
             }
-            _events[_eventCount - 1] = null;
-            _eventCount--;
+            _events[Count - 1] = null;
+            Count--;
         }
 
         /// <summary>
@@ -308,13 +301,13 @@ namespace System.ComponentModel
         public IEnumerator GetEnumerator()
         {
             // we can only return an enumerator on the events we actually have...
-            if (_events.Length == _eventCount)
+            if (_events.Length == Count)
             {
                 return _events.GetEnumerator();
             }
             else
             {
-                return new ArraySubsetEnumerator(_events, _eventCount);
+                return new ArraySubsetEnumerator(_events, Count);
             }
         }
 
@@ -326,7 +319,7 @@ namespace System.ComponentModel
         /// </summary>
         public virtual EventDescriptorCollection Sort()
         {
-            return new EventDescriptorCollection(_events, _eventCount, _namedSort, _comparer);
+            return new EventDescriptorCollection(_events, Count, _namedSort, _comparer);
         }
 
 
@@ -338,7 +331,7 @@ namespace System.ComponentModel
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names)
         {
-            return new EventDescriptorCollection(_events, _eventCount, names, _comparer);
+            return new EventDescriptorCollection(_events, Count, names, _comparer);
         }
 
         /// <summary>
@@ -349,7 +342,7 @@ namespace System.ComponentModel
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names, IComparer comparer)
         {
-            return new EventDescriptorCollection(_events, _eventCount, names, comparer);
+            return new EventDescriptorCollection(_events, Count, names, comparer);
         }
 
         /// <summary>
@@ -360,7 +353,7 @@ namespace System.ComponentModel
         /// </summary>
         public virtual EventDescriptorCollection Sort(IComparer comparer)
         {
-            return new EventDescriptorCollection(_events, _eventCount, _namedSort, comparer);
+            return new EventDescriptorCollection(_events, Count, _namedSort, comparer);
         }
 
         /// <summary>
@@ -481,7 +474,7 @@ namespace System.ComponentModel
                     throw new NotSupportedException();
                 }
 
-                if (index >= _eventCount)
+                if (index >= Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
