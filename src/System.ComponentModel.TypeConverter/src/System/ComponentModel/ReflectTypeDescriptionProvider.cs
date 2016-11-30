@@ -519,7 +519,7 @@ namespace System.ComponentModel
                     PropertyDescriptor prop = propertyArray[propIdx];
                     ExtenderProvidedPropertyAttribute eppa = prop.Attributes[typeof(ExtenderProvidedPropertyAttribute)] as ExtenderProvidedPropertyAttribute;
 
-                    Debug.Assert(eppa != null, "Extender property " + prop.Name + " has no provider attribute.  We will skip it.");
+                    Debug.Assert(eppa != null, $"Extender property {prop.Name} has no provider attribute.  We will skip it.");
                     if (eppa != null)
                     {
                         Type receiverType = eppa.ReceiverType;
@@ -1139,11 +1139,11 @@ namespace System.ComponentModel
 
                                 if (receiverType != null)
                                 {
-                                    MethodInfo getMethod = providerType.GetTypeInfo().GetMethod("Get" + provideAttr.PropertyName, new Type[] { receiverType });
+                                    MethodInfo getMethod = providerType.GetTypeInfo().GetMethod($"Get{provideAttr.PropertyName}", new Type[] { receiverType });
 
                                     if (getMethod != null && !getMethod.IsStatic && getMethod.IsPublic)
                                     {
-                                        MethodInfo setMethod = providerType.GetTypeInfo().GetMethod("Set" + provideAttr.PropertyName, new Type[] { receiverType, getMethod.ReturnType });
+                                        MethodInfo setMethod = providerType.GetTypeInfo().GetMethod($"Set{provideAttr.PropertyName}", new Type[] { receiverType, getMethod.ReturnType });
 
                                         if (setMethod != null && (setMethod.IsStatic || !setMethod.IsPublic))
                                         {
@@ -1264,7 +1264,7 @@ namespace System.ComponentModel
                         properties = newProperties;
                     }
 
-                    Debug.Assert(!properties.Any(dbgProp => dbgProp == null), "Holes in property array for type " + type);
+                    Debug.Assert(!properties.Any(dbgProp => dbgProp == null), $"Holes in property array for type {type}");
 
                     s_propertyCache[type] = properties;
                 }

@@ -82,7 +82,7 @@ namespace System.ComponentModel
             {
                 throw new ArgumentException(SR.Format(SR.ErrorInvalidEventType, name));
             }
-            Debug.Assert(type.GetTypeInfo().IsSubclassOf(typeof(Delegate)), "Not a valid ReflectEvent: " + componentClass.FullName + "." + name + " " + type.FullName);
+            Debug.Assert(type.GetTypeInfo().IsSubclassOf(typeof(Delegate)), $"Not a valid ReflectEvent: {componentClass.FullName}. {name} {type.FullName}");
             _componentClass = componentClass;
             _type = type;
         }
@@ -234,10 +234,10 @@ namespace System.ComponentModel
             }
             else
             {
-                Debug.Assert(_removeMethod != null, "Null remove method for " + Name);
+                Debug.Assert(_removeMethod != null, $"Null remove method for {Name}");
                 FillSingleMethodAttribute(_removeMethod, attributes);
 
-                Debug.Assert(_addMethod != null, "Null remove method for " + Name);
+                Debug.Assert(_addMethod != null, $"Null remove method for {Name}");
                 FillSingleMethodAttribute(_addMethod, attributes);
             }
 
@@ -360,11 +360,11 @@ namespace System.ComponentModel
                 }
 
                 Type[] argsType = new Type[] { _type };
-                _addMethod = FindMethod(_componentClass, "AddOn" + Name, argsType, typeof(void));
-                _removeMethod = FindMethod(_componentClass, "RemoveOn" + Name, argsType, typeof(void));
+                _addMethod = FindMethod(_componentClass, $"AddOn{Name}", argsType, typeof(void));
+                _removeMethod = FindMethod(_componentClass, $"RemoveOn{Name}", argsType, typeof(void));
                 if (_addMethod == null || _removeMethod == null)
                 {
-                    Debug.Fail("Missing event accessors for " + _componentClass.FullName + "." + Name);
+                    Debug.Fail($"Missing event accessors for {_componentClass.FullName}. {Name}");
                     throw new ArgumentException(SR.Format(SR.ErrorMissingEventAccessors, Name));
                 }
             }

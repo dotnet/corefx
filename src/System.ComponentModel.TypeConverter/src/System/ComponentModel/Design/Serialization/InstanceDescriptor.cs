@@ -152,7 +152,7 @@ namespace System.ComponentModel.Design.Serialization
             }
             else
             {
-                Debug.Fail("Unrecognized reflection type in instance descriptor: " + MemberInfo.GetType().Name);
+                Debug.Fail($"Unrecognized reflection type in instance descriptor: {MemberInfo.GetType().Name}");
             }
 
             return null;

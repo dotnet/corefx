@@ -190,7 +190,7 @@ namespace System.ComponentModel
             ISite s = _site;
 
             if (s != null)
-                return s.Name + " [" + GetType().FullName + "]";
+                return s.Name + $" [{GetType().FullName}]";
             else
                 return GetType().FullName;
         }

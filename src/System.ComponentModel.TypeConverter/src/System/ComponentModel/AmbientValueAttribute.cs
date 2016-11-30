@@ -36,7 +36,7 @@ namespace System.ComponentModel
             }
             catch
             {
-                Debug.Fail("Ambient value attribute of type " + type.FullName + " threw converting from the string '" + value + "'.");
+                Debug.Fail($"Ambient value attribute of type {type.FullName} threw converting from the string '{value}'.");
             }
         }
 

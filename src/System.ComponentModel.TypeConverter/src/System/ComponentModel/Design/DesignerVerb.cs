@@ -85,7 +85,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public override string ToString()
         {
-            return Text + " : " + base.ToString();
+            return $"{Text} : {base.ToString()}";
         }
     }
 }

@@ -378,7 +378,7 @@ namespace System.ComponentModel
                     //
                     if (editor != null && !editorBaseType.GetTypeInfo().IsInstanceOfType(editor))
                     {
-                        Debug.Fail("Editor " + editor.GetType().FullName + " is not an instance of " + editorBaseType.FullName + " but it is in that base types table.");
+                        Debug.Fail($"Editor {editor.GetType().FullName} is not an instance of {editorBaseType.FullName} but it is in that base types table.");
                         editor = null;
                     }
                 }

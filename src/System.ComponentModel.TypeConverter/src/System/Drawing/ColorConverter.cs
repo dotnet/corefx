@@ -174,7 +174,7 @@ namespace System.Drawing
                         }
                         else if (c.IsNamedColor)
                         {
-                            return "'" + c.Name + "'";
+                            return $"'{c.Name}'";
                         }
                         else
                         {

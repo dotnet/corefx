@@ -170,8 +170,8 @@ namespace System.ComponentModel.Design
 
                 if (licenseFile != null)
                 {
-                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, "licenseFile: " + licenseFile.ToString());
-                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, "opening licenses file over URI " + licenseFile.ToString());
+                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"licenseFile: {licenseFile.ToString()}");
+                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"opening licenses file over URI {licenseFile.ToString()}");
                     Stream s = OpenRead(licenseFile);
                     if (s != null)
                     {
@@ -182,7 +182,7 @@ namespace System.ComponentModel.Design
                     }
                 }
             }
-            Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, "returning : " + (string)savedLicenseKeys[type.AssemblyQualifiedName]);
+            Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"returning : {(string)savedLicenseKeys[type.AssemblyQualifiedName]}");
             return (string)savedLicenseKeys[type.AssemblyQualifiedName];
         }
 

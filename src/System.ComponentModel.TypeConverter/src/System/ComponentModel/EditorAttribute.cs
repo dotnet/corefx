@@ -33,7 +33,7 @@ namespace System.ComponentModel
         public EditorAttribute(string typeName, string baseTypeName)
         {
             string temp = typeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, "Came across: " + typeName + " . Please remove the .dll extension");
+            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {typeName} . Please remove the .dll extension");
             EditorTypeName = typeName;
             EditorBaseTypeName = baseTypeName;
         }
@@ -44,7 +44,7 @@ namespace System.ComponentModel
         public EditorAttribute(string typeName, Type baseType)
         {
             string temp = typeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, "Came across: " + typeName + " . Please remove the .dll extension");
+            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {typeName} . Please remove the .dll extension");
             EditorTypeName = typeName;
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }

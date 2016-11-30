@@ -28,7 +28,7 @@ namespace System.ComponentModel
         public DesignerAttribute(string designerTypeName)
         {
             string temp = designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, "Came across: " + designerTypeName + " . Please remove the .dll extension");
+            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {designerTypeName}. Please remove the .dll extension");
             DesignerTypeName = designerTypeName;
             DesignerBaseTypeName = typeof(IDesigner).FullName;
         }
@@ -54,7 +54,7 @@ namespace System.ComponentModel
         public DesignerAttribute(string designerTypeName, string designerBaseTypeName)
         {
             string temp = designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, "Came across: " + designerTypeName + " . Please remove the .dll extension");
+            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {designerTypeName}. Please remove the .dll extension");
             DesignerTypeName = designerTypeName;
             DesignerBaseTypeName = designerBaseTypeName;
         }
@@ -68,7 +68,7 @@ namespace System.ComponentModel
         public DesignerAttribute(string designerTypeName, Type designerBaseType)
         {
             string temp = designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, "Came across: " + designerTypeName + " . Please remove the .dll extension");
+            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {designerTypeName}. Please remove the .dll extension");
             DesignerTypeName = designerTypeName;
             DesignerBaseTypeName = designerBaseType.AssemblyQualifiedName;
         }

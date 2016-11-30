@@ -126,7 +126,7 @@ namespace System.ComponentModel
 
         public override string ToString()
         {
-            return FilterString + "," + Enum.GetName(typeof(ToolboxItemFilterType), FilterType);
+            return $"{FilterString}, {Enum.GetName(typeof(ToolboxItemFilterType), FilterType)}";
         }
     }
 }

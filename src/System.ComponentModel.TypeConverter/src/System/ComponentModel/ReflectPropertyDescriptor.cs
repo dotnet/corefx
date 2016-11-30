@@ -90,12 +90,12 @@ namespace System.ComponentModel
             {
                 if (type == null)
                 {
-                    Debug.WriteLine("type == null, name == " + name);
+                    Debug.WriteLine($"type == null, name == {name}");
                     throw new ArgumentException(string.Format(SR.ErrorInvalidPropertyType, name));
                 }
                 if (componentClass == null)
                 {
-                    Debug.WriteLine("componentClass == null, name == " + name);
+                    Debug.WriteLine($"componentClass == null, name == {name}");
                     throw new ArgumentException(string.Format(SR.InvalidNullArgument, nameof(componentClass)));
                 }
                 _type = type;
@@ -103,7 +103,7 @@ namespace System.ComponentModel
             }
             catch (Exception t)
             {
-                Debug.Fail("Property '" + name + "' on component " + componentClass.FullName + " failed to init.");
+                Debug.Fail($"Property '{name}' on component {componentClass.FullName} failed to init.");
                 Debug.Fail(t.ToString());
                 throw;
             }
@@ -330,12 +330,12 @@ namespace System.ComponentModel
                         }
                         if (_getMethod == null)
                         {
-                            throw new InvalidOperationException(string.Format(SR.ErrorMissingPropertyAccessors, _componentClass.FullName + "." + Name));
+                            throw new InvalidOperationException(string.Format(SR.ErrorMissingPropertyAccessors, $"{_componentClass.FullName}.{Name}"));
                         }
                     }
                     else
                     {
-                        _getMethod = FindMethod(_componentClass, "Get" + Name, new Type[] { _receiverType }, _type);
+                        _getMethod = FindMethod(_componentClass, $"Get {Name}", new Type[] { _receiverType }, _type);
                         if (_getMethod == null)
                         {
                             throw new ArgumentException(string.Format(SR.ErrorMissingPropertyAccessors, Name));
@@ -383,7 +383,7 @@ namespace System.ComponentModel
                         args = new Type[] { _receiverType };
                     }
 
-                    _resetMethod = FindMethod(_componentClass, "Reset" + Name, args, typeof(void), /* publicOnly= */ false);
+                    _resetMethod = FindMethod(_componentClass, $"Reset {Name}", args, typeof(void), /* publicOnly= */ false);
 
                     _state[s_bitResetQueried] = true;
                 }
@@ -444,7 +444,7 @@ namespace System.ComponentModel
                     }
                     else
                     {
-                        _setMethod = FindMethod(_componentClass, "Set" + Name,
+                        _setMethod = FindMethod(_componentClass, "Set {Name}",
                                                new Type[] { _receiverType, _type }, typeof(void));
                     }
 
@@ -474,7 +474,7 @@ namespace System.ComponentModel
                         args = new Type[] { _receiverType };
                     }
 
-                    _shouldSerializeMethod = FindMethod(_componentClass, "ShouldSerialize" + Name, args, typeof(Boolean), /* publicOnly= */ false);
+                    _shouldSerializeMethod = FindMethod(_componentClass, $"ShouldSerialize {Name}", args, typeof(Boolean), /* publicOnly= */ false);
                     _state[s_bitShouldSerializeQueried] = true;
                 }
                 return _shouldSerializeMethod;
@@ -820,7 +820,7 @@ namespace System.ComponentModel
                     if (IsExtender)
                     {
                         //receiverType is used to avoid ambitiousness when there are overloads for the get method.
-                        memberInfo = currentReflectType.GetTypeInfo().GetMethod("Get" + Name, new Type[] { _receiverType }, null);
+                        memberInfo = currentReflectType.GetTypeInfo().GetMethod($"Get{Name}", new Type[] { _receiverType }, null);
                     }
                     else
                     {
@@ -920,7 +920,7 @@ namespace System.ComponentModel
 
             if (IsExtender)
             {
-                Debug.WriteLine("[" + Name + "]:   ---> returning: null");
+                Debug.WriteLine($"[{Name}]:   ---> returning: null");
                 return null;
             }
 
