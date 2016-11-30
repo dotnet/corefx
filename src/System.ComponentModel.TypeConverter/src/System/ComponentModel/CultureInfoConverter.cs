@@ -4,6 +4,7 @@
 
 using Microsoft.Win32;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Globalization;
@@ -332,26 +333,12 @@ namespace System.ComponentModel
         {
             ///  Dictionary of CultureInfo.DisplayName, CultureInfo.Name for cultures that have changed DisplayName over releases.
             ///  This is to workaround an issue with CultureInfoConverter that serializes DisplayName (fixing it would introduce breaking changes).
-            private static volatile System.Collections.Generic.Dictionary<string, string> s_cultureInfoNameMap;
+            private static readonly Dictionary<string, string> s_cultureInfoNameMap = CreateMap();
 
-            public static string GetCultureInfoName(string cultureInfoDisplayName)
+            private static Dictionary<string,string> CreateMap()
             {
-                if (s_cultureInfoNameMap == null)
-                {
-                    InitializeCultureInfoMap();
-                }
-
-                if (s_cultureInfoNameMap.ContainsKey(cultureInfoDisplayName))
-                {
-                    return s_cultureInfoNameMap[cultureInfoDisplayName];
-                }
-
-                return cultureInfoDisplayName;
-            }
-
-            private static void InitializeCultureInfoMap()
-            {
-                s_cultureInfoNameMap = new System.Collections.Generic.Dictionary<string, string>() {
+                const int Count = 274;
+                var result = new Dictionary<string, string>(Count) {
                     {"Afrikaans", "af"},
                     {"Afrikaans (South Africa)", "af-ZA"},
                     {"Albanian", "sq"},
@@ -627,7 +614,19 @@ namespace System.ComponentModel
                     {"Yi (PRC)", "ii-CN"},
                     {"Yoruba (Nigeria)", "yo-NG"}
                 };
+
+                Debug.Assert(result.Count == Count);
+                return result;
             }
+
+            public static string GetCultureInfoName(string cultureInfoDisplayName)
+            {
+                string name;
+                return s_cultureInfoNameMap.TryGetValue(cultureInfoDisplayName, out name) ?
+                    name :
+                    cultureInfoDisplayName;
+            }
+
         }
     }
 }
