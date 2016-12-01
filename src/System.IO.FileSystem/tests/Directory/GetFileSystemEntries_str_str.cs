@@ -209,6 +209,17 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WindowsSearchPatternLongSegment()
+        {
+            // Create a path segment longer than the normal max of 255
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            string longName = new string('k', 257);
+
+            Assert.Throws<IOException>(() => GetEntries(testDir.FullName, longName));
+        }
+
+        [Fact]
         public void SearchPatternLongPath()
         {
             // Create a destination path longer than the traditional Windows limit of 256 characters

@@ -176,11 +176,27 @@ namespace System.IO.Tests
             });
         }
 
-        #endregion
-
-        #region PlatformSpecific
-
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void LongPath()
+        {
+            //Create a destination path longer than the traditional Windows limit of 256 characters
+            string testFileSource = Path.Combine(TestDirectory, GetTestFileName());
+            File.Create(testFileSource).Dispose();
+
+            Assert.All(IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath()), (path) =>
+            {
+                Assert.Throws<IOException>(() => Move(testFileSource, path));
+                File.Delete(testFileSource);
+                Assert.Throws<IOException>(() => Move(path, testFileSource));
+            });
+        }
+
+#endregion
+
+#region PlatformSpecific
+
+[Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsPathWithIllegalColons()
         {

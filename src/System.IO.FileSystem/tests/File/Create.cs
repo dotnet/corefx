@@ -149,11 +149,18 @@ namespace System.IO.Tests
             Assert.True(File.Exists(testFile));
         }
 
-        #endregion
-
-        #region PlatformSpecific
-
         [Fact]
+        public void LongPath()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            Assert.Throws<PathTooLongException>(() => Create(Path.Combine(testDir.FullName, new string('a', 300))));
+        }
+
+    #endregion
+
+    #region PlatformSpecific
+
+    [Fact]
         [PlatformSpecific(CaseSensitivePlatforms)]
         public void CaseSensitive()
         {
