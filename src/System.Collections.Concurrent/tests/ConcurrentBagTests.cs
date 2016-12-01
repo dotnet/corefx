@@ -13,7 +13,7 @@ using Xunit;
 namespace System.Collections.Concurrent.Tests
 {
     /// <summary>The class that contains the unit tests of the LazyInit.</summary>
-    public class ConcurrentBagTests : IEnumerable_Generic_Tests<int>
+    public partial class ConcurrentBagTests : IEnumerable_Generic_Tests<int>
     {
         protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
         protected override IEnumerable<int> GenericIEnumerableFactory(int count) => new ConcurrentBag<int>(Enumerable.Range(0, count));

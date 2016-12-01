@@ -11,7 +11,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 
@@ -384,7 +383,6 @@ namespace System.Collections.Concurrent
                 versionsList.Clear(); //clear the list from the previous iteration
                 loop = false;
 
-
                 ThreadLocalList currentList = _headList;
                 while (currentList != null)
                 {
@@ -567,6 +565,33 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
+        /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        public void Clear()
+        {
+            // Short path if the bag is empty
+            if (_headList == null)
+                return;
+
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+
+                ThreadLocalList currentList = _headList;
+                while (currentList != null)
+                {
+                    currentList.Clear();
+                    currentList = currentList._nextList;
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
         /// Returns an enumerator that iterates through the <see
         /// cref="ConcurrentBag{T}"/>.
         /// </summary>
@@ -717,7 +742,7 @@ namespace System.Collections.Concurrent
         }
 
 
-        #region Freeze bag helper methods
+#region Freeze bag helper methods
         /// <summary>
         /// Local helper method to freeze all bag operations, it
         /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new thread can be added
@@ -870,10 +895,10 @@ namespace System.Collections.Concurrent
             return list;
         }
 
-        #endregion
+#endregion
 
 
-        #region Inner Classes
+#region Inner Classes
 
         /// <summary>
         /// A class that represents a node in the lock thread list
@@ -1000,6 +1025,19 @@ namespace System.Collections.Concurrent
             }
 
             /// <summary>
+            /// Remove all items from the list
+            /// </summary>
+            /// <param name="result">the peeked item</param>
+            /// <returns>True if succeeded, false otherwise</returns>
+            internal void Clear()
+            {
+                _head = null;
+                _tail = null;
+                _count = 0;
+                _stealCount = 0;
+            }
+
+            /// <summary>
             /// Steal an item from the tail of the list
             /// </summary>
             /// <param name="result">the removed item</param>
@@ -1037,7 +1075,7 @@ namespace System.Collections.Concurrent
                 }
             }
         }
-        #endregion
+#endregion
     }
 
     /// <summary>
