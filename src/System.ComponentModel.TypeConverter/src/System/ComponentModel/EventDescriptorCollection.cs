@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.EventDescriptorCollection")]
@@ -367,7 +368,7 @@ namespace System.ComponentModel
 
             if (names != null && names.Length > 0)
             {
-                ArrayList eventArrayList = new ArrayList(_events);
+                List<EventDescriptor> eventArrayList = new List<EventDescriptor>(_events);
                 int foundCount = 0;
                 int eventCount = _events.Length;
 
@@ -375,7 +376,7 @@ namespace System.ComponentModel
                 {
                     for (int j = 0; j < eventCount; j++)
                     {
-                        EventDescriptor currentEvent = (EventDescriptor)eventArrayList[j];
+                        EventDescriptor currentEvent = eventArrayList[j];
 
                         // Found a matching event.  Here, we add it to our array.  We also
                         // mark it as null in our array list so we don't add it twice later.
@@ -398,7 +399,7 @@ namespace System.ComponentModel
                 {
                     if (eventArrayList[i] != null)
                     {
-                        _events[foundCount++] = (EventDescriptor)eventArrayList[i];
+                        _events[foundCount++] = eventArrayList[i];
                     }
                 }
 

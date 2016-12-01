@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.ComponentModel
@@ -29,7 +30,7 @@ namespace System.ComponentModel
             Debug.Assert(extenderInfo != null, "ExtendedPropertyDescriptor must have extenderInfo");
             Debug.Assert(provider != null, "ExtendedPropertyDescriptor must have provider");
 
-            ArrayList attrList = new ArrayList(AttributeArray);
+            List<Attribute> attrList = new List<Attribute>(AttributeArray);
             attrList.Add(ExtenderProvidedPropertyAttribute.Create(extenderInfo, receiverType, provider));
             if (extenderInfo.IsReadOnly)
             {

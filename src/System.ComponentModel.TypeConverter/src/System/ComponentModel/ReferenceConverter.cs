@@ -4,6 +4,7 @@
 
 using Microsoft.Win32;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
@@ -146,7 +147,7 @@ namespace System.ComponentModel
 
             if (context != null)
             {
-                ArrayList list = new ArrayList();
+                List<object> list = new List<object>();
                 list.Add(null);
 
                 // Try the reference service first.

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters", Scope = "member", Target = "System.ComponentModel.PropertyDescriptorCollection.System.Collections.IDictionary.Add(System.Object,System.Object):System.Void")]
@@ -384,7 +385,7 @@ namespace System.ComponentModel
 
             if (names != null && names.Length > 0)
             {
-                ArrayList propArrayList = new ArrayList(_properties);
+                List<PropertyDescriptor> propArrayList = new List<PropertyDescriptor>(_properties);
                 int foundCount = 0;
                 int propCount = _properties.Length;
 
@@ -392,7 +393,7 @@ namespace System.ComponentModel
                 {
                     for (int j = 0; j < propCount; j++)
                     {
-                        PropertyDescriptor currentProp = (PropertyDescriptor)propArrayList[j];
+                        PropertyDescriptor currentProp = propArrayList[j];
 
                         // Found a matching property.  Here, we add it to our array.  We also
                         // mark it as null in our array list so we don't add it twice later.
@@ -415,7 +416,7 @@ namespace System.ComponentModel
                 {
                     if (propArrayList[i] != null)
                     {
-                        _properties[foundCount++] = (PropertyDescriptor)propArrayList[i];
+                        _properties[foundCount++] = propArrayList[i];
                     }
                 }
 

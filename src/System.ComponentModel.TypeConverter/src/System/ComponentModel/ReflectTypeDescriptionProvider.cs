@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
@@ -503,7 +504,7 @@ namespace System.ComponentModel
             // Unlike normal properties, it is fine for there to be properties with
             // duplicate names here.  
             //
-            ArrayList propertyList = null;
+            List<PropertyDescriptor> propertyList = null;
 
             for (int idx = 0; idx < extenders.Length; idx++)
             {
@@ -511,7 +512,7 @@ namespace System.ComponentModel
 
                 if (propertyList == null)
                 {
-                    propertyList = new ArrayList(propertyArray.Length * extenders.Length);
+                    propertyList = new List<PropertyDescriptor>(propertyArray.Length * extenders.Length);
                 }
 
                 for (int propIdx = 0; propIdx < propertyArray.Length; propIdx++)
@@ -767,7 +768,7 @@ namespace System.ComponentModel
         /// </summary>
         internal Type[] GetPopulatedTypes(Module module)
         {
-            ArrayList typeList = new ArrayList(); ;
+            List<Type> typeList = new List<Type>(); 
 
             // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
             IDictionaryEnumerator e = _typeData.GetEnumerator();
@@ -783,7 +784,7 @@ namespace System.ComponentModel
                 }
             }
 
-            return (Type[])typeList.ToArray(typeof(Type));
+            return typeList.ToArray();
         }
 
         /// <summary>
@@ -1126,7 +1127,7 @@ namespace System.ComponentModel
                     if (extendedProperties == null)
                     {
                         AttributeCollection attributes = TypeDescriptor.GetAttributes(providerType);
-                        ArrayList extendedList = new ArrayList(attributes.Count);
+                        List<ReflectPropertyDescriptor> extendedList = new List<ReflectPropertyDescriptor>(attributes.Count);
 
                         foreach (Attribute attr in attributes)
                         {

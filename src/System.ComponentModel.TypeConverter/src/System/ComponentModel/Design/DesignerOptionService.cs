@@ -4,11 +4,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Permissions;
+using Enumerable = System.Linq.Enumerable;
 
 namespace System.ComponentModel.Design
 {
@@ -198,12 +200,12 @@ namespace System.ComponentModel.Design
                 {
                     if (_properties == null)
                     {
-                        ArrayList propList;
+                        List<PropertyDescriptor> propList;
 
                         if (_value != null)
                         {
                             PropertyDescriptorCollection props = TypeDescriptor.GetProperties(_value);
-                            propList = new ArrayList(props.Count);
+                            propList = new List<PropertyDescriptor>(props.Count);
                             foreach (PropertyDescriptor prop in props)
                             {
                                 propList.Add(new WrappedPropertyDescriptor(prop, _value));
@@ -211,16 +213,16 @@ namespace System.ComponentModel.Design
                         }
                         else
                         {
-                            propList = new ArrayList(1);
+                            propList = new List<PropertyDescriptor>(1);
                         }
 
                         EnsurePopulated();
                         foreach (DesignerOptionCollection child in _children)
                         {
-                            propList.AddRange(child.Properties);
+                            propList.AddRange(Enumerable.Cast<PropertyDescriptor>(child.Properties));
                         }
 
-                        PropertyDescriptor[] propArray = (PropertyDescriptor[])propList.ToArray(typeof(PropertyDescriptor));
+                        PropertyDescriptor[] propArray = propList.ToArray();
                         _properties = new PropertyDescriptorCollection(propArray, true);
                     }
 

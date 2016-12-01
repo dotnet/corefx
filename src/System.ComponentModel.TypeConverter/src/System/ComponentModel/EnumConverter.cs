@@ -238,11 +238,11 @@ namespace System.ComponentModel
                 Type reflectType = TypeDescriptor.GetReflectionType(_type) ?? _type;
 
                 FieldInfo[] fields = reflectType.GetFields(BindingFlags.Public | BindingFlags.Static);
-                ArrayList objValues = null;
+                List<object> objValues = null;
 
                 if (fields != null && fields.Length > 0)
                 {
-                    objValues = new ArrayList(fields.Length);
+                    objValues = new List<object>(fields.Length);
                 }
 
                 if (objValues != null)
@@ -281,11 +281,11 @@ namespace System.ComponentModel
                     IComparer comparer = Comparer;
                     if (comparer != null)
                     {
-                        objValues.Sort(comparer);
+                        objValues.Sort((IComparer<object>) comparer);
                     }
                 }
 
-                Array arr = (objValues != null) ? objValues.ToArray() : null;
+                Array arr = objValues?.ToArray();
                 _values = new StandardValuesCollection(arr);
             }
             return _values;

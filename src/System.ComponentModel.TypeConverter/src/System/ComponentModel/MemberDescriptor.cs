@@ -97,11 +97,11 @@ namespace System.ComponentModel
             _displayName = oldMemberDescriptor.DisplayName;
             _nameHash = _name.GetHashCode();
 
-            ArrayList newArray = new ArrayList();
+            List<Attribute> newArray  = new List<Attribute>();
 
             if (oldMemberDescriptor.Attributes.Count != 0)
             {
-                foreach (object o in oldMemberDescriptor.Attributes)
+                foreach (Attribute o in oldMemberDescriptor.Attributes)
                 {
                     newArray.Add(o);
                 }
@@ -109,7 +109,7 @@ namespace System.ComponentModel
 
             if (newAttributes != null)
             {
-                foreach (object o in newAttributes)
+                foreach (Attribute o in newAttributes)
                 {
                     newArray.Add(o);
                 }
