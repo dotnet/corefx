@@ -884,7 +884,7 @@ namespace System.Collections.Concurrent
             {
                 _value = value;
             }
-            public readonly T _value;
+            public T _value;
             public Node _next;
             public Node _prev;
         }
@@ -894,6 +894,10 @@ namespace System.Collections.Concurrent
         /// </summary>
         internal class ThreadLocalList
         {
+            private const int _maxPooledNodesPerThread = 32;
+
+            private Queue<Node> _nodePool;
+
             // Head node in the list, null means the list is empty
             internal volatile Node _head;
 
@@ -928,6 +932,7 @@ namespace System.Collections.Concurrent
             internal ThreadLocalList(int ownerThreadId)
             {
                 _ownerThreadId = ownerThreadId;
+                _nodePool = new Queue<Node>(_maxPooledNodesPerThread);
             }
             /// <summary>
             /// Add new item to head of the list
@@ -940,7 +945,7 @@ namespace System.Collections.Concurrent
                 {
                     _count++;
                 }
-                Node node = new Node(item);
+                Node node = RentNodeForItem(item); // Get pooled Node
                 if (_head == null)
                 {
                     Debug.Assert(_tail == null);
@@ -980,6 +985,8 @@ namespace System.Collections.Concurrent
                 }
                 _count--;
                 result = head._value;
+
+                ReturnNode(head); // Pool the Node
             }
 
             /// <summary>
@@ -1008,6 +1015,8 @@ namespace System.Collections.Concurrent
             {
                 Node tail = _tail;
                 Debug.Assert(tail != null);
+                result = tail._value;
+
                 if (remove) // Take operation
                 {
                     _tail = _tail._prev;
@@ -1021,10 +1030,10 @@ namespace System.Collections.Concurrent
                     }
                     // Increment the steal count
                     _stealCount++;
-                }
-                result = tail._value;
-            }
 
+                    ReturnNode(tail); // Pool the Node
+                }
+            }
 
             /// <summary>
             /// Gets the total list count, it's not thread safe, may provide incorrect count if it is called concurrently
@@ -1034,6 +1043,30 @@ namespace System.Collections.Concurrent
                 get
                 {
                     return _count - _stealCount;
+                }
+            }
+
+            private Node RentNodeForItem(T item)
+            {
+                if (_nodePool.Count > 0)
+                {
+                    var node = _nodePool.Dequeue();
+                    node._value = item;
+                    return node;
+                }
+                return new Node(item);
+            }
+
+            private void ReturnNode(Node node)
+            {
+                if (_nodePool.Count < _maxPooledNodesPerThread)
+                {
+                    // Clear node before pooling
+                    node._value = default(T);
+                    node._next = null;
+                    node._prev = null;
+
+                    _nodePool.Enqueue(node);
                 }
             }
         }
