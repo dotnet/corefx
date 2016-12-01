@@ -17,6 +17,8 @@
   <Target Name="GenerateTestProjectJson" />
   <Target Name="GenerateAllTestProjectJsons" />
 
+  <Import Condition="'$(_BuildVertical)' == 'true'" Project="buildvertical.targets" />
+
   <Target Name="UndefineTestTFM" BeforeTargets="AssignProjectConfiguration">
     <ItemGroup>
       <ProjectReference>

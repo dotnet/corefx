@@ -1,0 +1,1 @@
+ProjectReference to pkgproj breaks vertical build

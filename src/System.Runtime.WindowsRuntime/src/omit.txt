@@ -1,0 +1,1 @@
+ProjectReference to System.Runtime.InteropServices.WindowsRuntime is inheriting TargetGroup netstandard1.7 instead of netstandard1.3

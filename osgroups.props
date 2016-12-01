@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <OSGroups Include="Windows_NT">
+        <Imports>AnyOS</Imports>
+    </OSGroups>
+    <OSGroups Include="Unix">
+        <Imports>AnyOS</Imports>
+    </OSGroups>
+    <OSGroups Include="Linux">
+        <Imports>Unix</Imports>
+    </OSGroups>
+    <OSGroups Include="OSX">
+        <Imports>Unix</Imports>
+    </OSGroups>
+    <OSGroups Include="AnyOS" />
+  </ItemGroup>
+
+ <!-- Todo: get rid of this -->
+  <!-- Setup properties per OSGroup -->
+  <Choose>
+    <When Condition="'$(OSGroup)'=='AnyOS'">
+      <PropertyGroup>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Windows_NT'">
+      <PropertyGroup>
+        <TargetsWindows>true</TargetsWindows>
+        <PackageTargetRuntime>win</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Unix'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <PackageTargetRuntime>unix</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Linux'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsLinux>true</TargetsLinux>
+        <PackageTargetRuntime>linux</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='OSX'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsOSX>true</TargetsOSX>
+        <PackageTargetRuntime>osx</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='FreeBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsFreeBSD>true</TargetsFreeBSD>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='NetBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsNetBSD>true</TargetsNetBSD>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ConfigurationErrorMsg>$(ConfigurationErrorMsg);Unknown OSGroup [$(OSGroup)] specificed in your project.</ConfigurationErrorMsg>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <TargetsUnknownUnix Condition="'$(TargetsUnix)' == 'true' AND '$(OSGroup)' != 'Unix' AND '$(OSGroup)' != 'FreeBSD' AND '$(OSGroup)' != 'Linux' AND '$(OSGroup)' != 'NetBSD' AND '$(OSGroup)' != 'OSX'">true</TargetsUnknownUnix>
+  </PropertyGroup>
+</Project>

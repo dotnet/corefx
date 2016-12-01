@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+<!-- Temporarily added to assist with auto-generating configurations.props files -->
+  <Target Name="GetProjects"
+          Returns="@(Project)" />
+
   <Target Name="FilterProjects">
     <PropertyGroup>
       <FilterToOSGroup Condition="'$(FilterToOSGroup)'=='' and '$(OSGroup)'!='' and '$(OSGroup)'!='AnyOS'">$(OSGroup)</FilterToOSGroup>
@@ -112,11 +117,16 @@
     <Message Text="%(PackageIds.Identity)" Importance="High" />
   </Target>
 
+
+
+
   <Target Name="BuildAllProjects" DependsOnTargets="FilterProjects">
+    <Error Condition="'$(VerticalGroup)' != ''" Text="This project should be overridden with the BuildAllProjects target from buildvertical.targets if VerticalGroup is specified." />
     <PropertyGroup>
       <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
     </PropertyGroup>
 
+<Message Text="Building: %(Project.Identity)" Importance="High" />
     <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
          however since the project names are unique it will essentially force each to run in its own batch -->
     <MSBuild Targets="$(DefaultBuildAllTarget)"
@@ -330,5 +340,7 @@
 
   <!-- Target will be overridden if buildagainstpackages.targets is imported. -->
   <Target Name="GenerateTestProjectJson" />
+
   <Import Condition="'$(_BuildAgainstPackages)' == 'true'" Project="$(ToolsDir)/buildagainstpackages.targets" />
+  <Import Condition="'$(_BuildVertical)' == 'true'" Project="buildvertical.traversal.targets" />
 </Project>

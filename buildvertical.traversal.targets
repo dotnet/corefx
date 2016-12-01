@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!-- Override buildallprojects from dir.traversal.targets -->
+  <Target Name="BuildAllProjects">
+    <PropertyGroup>
+      <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
+    </PropertyGroup>
+
+    <Message Importance="Low" Text="Building: %(Project.Identity) for %(Project.TargetGroup), %(Project.OSGroup)" />
+    <MSBuild Targets="$(DefaultBuildAllTarget)"
+             Projects="@(Project)"
+             Condition="'%(Identity)' != ''"
+             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;TargetGroup=%(Project.TargetGroup);OSGroup=%(Project.OSGroup)" 
+             ContinueOnError="ErrorAndContinue" />
+    <!-- Given we ErrorAndContinue we need to propagate the error if the overall task failed -->
+    <Error Condition="'$(MSBuildLastTaskResult)'=='false'" />
+  </Target>
+</Project>

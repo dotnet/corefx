@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BuildConfigurations>
+      $(DefaultTargetGroup)|rhel.7;
+      $(DefaultTargetGroup)|debian.8;
+      $(DefaultTargetGroup)|fedora.23;
+      $(DefaultTargetGroup)|fedora.24;
+      $(DefaultTargetGroup)|ubuntu.14.04;
+      $(DefaultTargetGroup)|ubuntu.16.04;
+      $(DefaultTargetGroup)|ubuntu.16.10;
+      $(DefaultTargetGroup)|osx.10;
+      $(DefaultTargetGroup)|opensuse.13.2;
+      $(DefaultTargetGroup)|opensuse.42.1;
+      $(DefaultTargetGroup)|alpine.3.4.3;
+      $(DefaultTargetGroup)|Windows_NT;
+      $(DefaultTargetGroup)|AnyOS;
+    </BuildConfigurations>
+  </PropertyGroup>
+</Project>
