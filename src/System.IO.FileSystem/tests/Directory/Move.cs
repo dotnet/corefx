@@ -139,11 +139,11 @@ namespace System.IO.Tests
             });
         }
 
-#endregion
+        #endregion
 
-#region PlatformSpecific
+        #region PlatformSpecific
 
-[Fact]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Path_With_Longer_Than_MaxDirectory_Succeeds()
         {
