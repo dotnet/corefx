@@ -1050,23 +1050,23 @@ namespace System.Collections.Tests
 
         #endregion
 
-        #region Enumerator Current After End After Add
+        #region Enumerator.Current
 
         // Enumerator.Current should fail at end after new elements was added
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.NetcoreUwp | TargetFrameworkMonikers.Netcoreapp1_0)]
         public void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly && !ExpectedFixedSize)
+            if (!IsReadOnly && !ExpectedFixedSize && Enumerator_Current_UndefinedOperation_Throws)
             {
                 IList collection = NonGenericIListFactory(count);
                 IEnumerator enu = collection.GetEnumerator();
                 while (enu.MoveNext()) ; // Go to end of enumerator
                 Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail
+
                 int seed = 523561;
-                for (int i = 0; i < Math.Max(1, count); i++)
-                    collection.Add(CreateT(seed++));
+                collection.Add(CreateT(seed++));
+
                 Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail again
             }
         }

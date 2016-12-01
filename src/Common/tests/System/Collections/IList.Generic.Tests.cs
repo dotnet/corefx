@@ -614,20 +614,40 @@ namespace System.Collections.Tests
         // Enumerator.Current should fail at end after new elements was added
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.NetcoreUwp | TargetFrameworkMonikers.Netcoreapp1_0)]
         public void IList_Generic_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && (Enumerator_Current_UndefinedOperation_Throws || EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws))
             {
                 IList<T> collection = GenericIListFactory(count);
-                using (IEnumerator<T> enu = collection.GetEnumerator())
+
+                if (collection is List<T> && !Enumerator_Current_UndefinedOperation_Throws)
+                    return; // Skip this test for List<T> 
+
+                using (IEnumerator<T> enumerator = collection.GetEnumerator())
                 {
-                    while (enu.MoveNext()) ; // Go to end of enumerator
-                    Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail
+                    while (enumerator.MoveNext()) ; // Go to end of enumerator
+
+                    if (Enumerator_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+
+                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // Enumerator.Current should fail
+
                     int seed = 3538963;
-                    for (int i = 0; i < Math.Max(1, count); i++)
-                        collection.Add(CreateT(seed++));
-                    Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail again
+                    collection.Add(CreateT(seed++));
+
+                    if (Enumerator_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+
+                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    {
+                        if (collection is List<T>)
+                            // List.Enumerator.Current have breaking issue
+                            Assert.Equal(default(T), (enumerator as IEnumerator).Current);
+                        else
+                            Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // Enumerator.Current should fail
+
+                    }
                 }
             }
         }

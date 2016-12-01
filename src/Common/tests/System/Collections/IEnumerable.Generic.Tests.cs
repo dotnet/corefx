@@ -60,16 +60,22 @@ namespace System.Collections.Tests
         protected virtual bool Enumerator_Current_UndefinedOperation_Throws => false;
 
         /// <summary>
+        /// When calling Current of the enumerator before the first MoveNext, after the end of the collection,
+        /// or after modification of the enumeration, the resulting behavior is undefined. Tests are included
+        /// to cover two behavioral scenarios:
+        ///   - Throwing an InvalidOperationException
+        ///   - Returning an undefined value.
+        /// 
+        /// If this property is set to true, the tests ensure that the exception is thrown. The default value is
+        /// false.
+        /// </summary>
+        protected virtual bool EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws => true;
+
+        /// <summary>
         /// The behavior of MoveNext at the end of the enumerable after modification is undefined for the generic
         /// IEnumerable. It may either throw an InvalidOperationException or do nothing.
         /// </summary>
         protected bool MoveNextAtEndThrowsOnModifiedCollection => true;
-
-        /// <summary>
-        /// Used in IEnumerable_Generic_Enumerator_Current.
-        /// Some enumerators do not throw accessing Current if enumeration has not yet started (e.g. ConcurrentDictionary)
-        /// </summary>
-        protected virtual bool IEnumerable_Generic_Enumerator_Current_EnumerationNotStarted_ThrowsInvalidOperationException => true;
 
         /// <summary>
         /// Specifies whether this IEnumerable follows some sort of ordering pattern.
@@ -90,12 +96,12 @@ namespace System.Collections.Tests
         #region Validation
 
         private void RepeatTest(
-            Action<IEnumerator, T[], int> testCode,
+            Action<IEnumerator<T>, T[], int> testCode,
             int iters = 3)
         {
             IEnumerable<T> enumerable = GenericIEnumerableFactory(32);
             T[] items = enumerable.ToArray();
-            IEnumerator enumerator = enumerable.GetEnumerator();
+            IEnumerator<T> enumerator = enumerable.GetEnumerator();
             for (var i = 0; i < iters; i++)
             {
                 testCode(enumerator, items, i);
@@ -111,14 +117,14 @@ namespace System.Collections.Tests
         }
 
         private void RepeatTest(
-            Action<IEnumerator, T[]> testCode,
+            Action<IEnumerator<T>, T[]> testCode,
             int iters = 3)
         {
             RepeatTest((e, i, it) => testCode(e, i), iters);
         }
 
         private void VerifyModifiedEnumerator(
-            IEnumerator enumerator,
+            IEnumerator<T> enumerator,
             object expectedCurrent,
             bool expectCurrentThrow,
             bool atEnd)
@@ -156,7 +162,7 @@ namespace System.Collections.Tests
         }
 
         private void VerifyEnumerator(
-            IEnumerator enumerator,
+            IEnumerator<T> enumerator,
             T[] expectedItems)
         {
             VerifyEnumerator(
@@ -169,26 +175,34 @@ namespace System.Collections.Tests
         }
 
         private void VerifyEnumerator(
-            IEnumerator enumerator,
+            IEnumerator<T> enumerator,
             T[] expectedItems,
             int startIndex,
             int count,
             bool validateStart,
             bool validateEnd)
         {
-            bool needToMatchAllExpectedItems = count - startIndex
-                                               == expectedItems.Length;
+            bool needToMatchAllExpectedItems = count - startIndex == expectedItems.Length;
             if (validateStart)
             {
                 for (var i = 0; i < 3; i++)
                 {
-                    if (IEnumerable_Generic_Enumerator_Current_EnumerationNotStarted_ThrowsInvalidOperationException)
+                    if (Enumerator_Current_UndefinedOperation_Throws)
                     {
                         Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                     }
                     else
                     {
                         var cur = enumerator.Current;
+                    }
+
+                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    {
+                        Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
+                    }
+                    else
+                    {
+                        var cur = (enumerator as IEnumerator).Current;
                     }
                 }
             }
@@ -283,16 +297,23 @@ namespace System.Collections.Tests
                         "enumerator.MoveNext() returned true past the expected end.");
                 }
 
-                if (!Enumerator_Current_UndefinedOperation_Throws)
+                if (Enumerator_Current_UndefinedOperation_Throws)
                 {
-                    return;
+                    Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 }
-                // apparently it is okay if enumerator.Current doesn't throw when the collection is generic.
-                for (var i = 0; i < 3; i++)
+                else
                 {
+                    var cur = enumerator.Current;
                 }
-                Assert.Throws<InvalidOperationException>(
-                    () => enumerator.Current);
+
+                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                {
+                    Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
+                }
+                else
+                {
+                    var cur = (enumerator as IEnumerator).Current;
+                }
             }
         }
 
@@ -450,23 +471,6 @@ namespace System.Collections.Tests
         #region Enumerator.Current
 
         [Fact]
-        public void IEnumerable_Generic_Enumerator_CurrentThrowsAfterEndOfCollection()
-        {
-            if (Enumerator_Current_UndefinedOperation_Throws)
-            {
-                RepeatTest(
-                    (enumerator, items) =>
-                    {
-                        while (enumerator.MoveNext())
-                        {
-                        }
-                        Assert.Throws<InvalidOperationException>(
-                            () => enumerator.Current);
-                    });
-            }
-        }
-
-        [Fact]
         public void IEnumerable_Generic_Enumerator_Current()
         {
             // Verify that current returns proper result.
@@ -536,6 +540,13 @@ namespace System.Collections.Tests
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 else
                     current = enumerator.Current;
+
+                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
+                else
+                {
+                    var obj = (enumerator as IEnumerator).Current;
+                }
             }
         }
 
@@ -552,6 +563,13 @@ namespace System.Collections.Tests
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 else
                     current = enumerator.Current;
+
+                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
+                else
+                {
+                    var obj = (enumerator as IEnumerator).Current;
+                }
             }
         }
 
@@ -571,6 +589,13 @@ namespace System.Collections.Tests
                             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                         else
                             current = enumerator.Current;
+
+                        if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                            Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
+                        else
+                        {
+                            var obj = (enumerator as IEnumerator).Current;
+                        }
                     }
                 }
             });
