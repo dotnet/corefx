@@ -29,14 +29,12 @@ namespace System.IO.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(FileOptions.None)]
         [InlineData(FileOptions.DeleteOnClose)]
-        //[InlineData(FileOptions.Encrypted)] may not be allowed for some users
         [InlineData(FileOptions.RandomAccess)]
         [InlineData(FileOptions.SequentialScan)]
         [InlineData(FileOptions.WriteThrough)]
         [InlineData((FileOptions)0x20000000)] // FILE_FLAG_NO_BUFFERING on Windows
         [InlineData(FileOptions.Asynchronous)]
         [InlineData(FileOptions.Asynchronous | FileOptions.DeleteOnClose)]
-        //[InlineData(FileOptions.Asynchronous | FileOptions.Encrypted)] may not be allowed for some users
         [InlineData(FileOptions.Asynchronous | FileOptions.RandomAccess)]
         [InlineData(FileOptions.Asynchronous | FileOptions.SequentialScan)]
         [InlineData(FileOptions.Asynchronous | FileOptions.WriteThrough)]
