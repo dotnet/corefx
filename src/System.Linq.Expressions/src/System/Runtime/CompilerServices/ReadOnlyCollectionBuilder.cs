@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
 using System.Dynamic.Utils;
 
 namespace System.Runtime.CompilerServices
@@ -100,7 +99,6 @@ namespace System.Runtime.CompilerServices
         public int Capacity
         {
             get {
-                Contract.Ensures(Contract.Result<int>() >= 0);
                 return _items.Length;
             }
             set
@@ -143,8 +141,6 @@ namespace System.Runtime.CompilerServices
         /// <returns>The index of the first occurrence of an item.</returns>
         public int IndexOf(T item)
         {
-            Contract.Ensures(Contract.Result<int>() >= -1);
-            Contract.Ensures(Contract.Result<int>() < Count);
             return Array.IndexOf(_items, item, 0, Count);
         }
 
@@ -460,9 +456,6 @@ namespace System.Runtime.CompilerServices
         /// <returns>An array containing copies of the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/>.</returns>
         public T[] ToArray()
         {
-            Contract.Ensures(Contract.Result<T[]>() != null);
-            Contract.Ensures(Contract.Result<T[]>().Length == Count);
-
             if (Count == 0)
             {
                 return Array.Empty<T>();
