@@ -107,7 +107,7 @@ namespace System.ComponentModel
             // Now, if we collapsed some attributes, create a new array.
             //
 
-            Attribute[] attributes = Array.Empty<Attribute>();
+            Attribute[] attributes;
             if (actualCount < newArray.Length)
             {
                 attributes = new Attribute[actualCount];

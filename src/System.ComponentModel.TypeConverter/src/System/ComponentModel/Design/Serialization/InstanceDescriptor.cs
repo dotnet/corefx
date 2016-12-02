@@ -34,7 +34,7 @@ namespace System.ComponentModel.Design.Serialization
 
             if (arguments == null)
             {
-                Arguments = new object[0];
+                Arguments = Array.Empty<object>();
             }
             else
             {

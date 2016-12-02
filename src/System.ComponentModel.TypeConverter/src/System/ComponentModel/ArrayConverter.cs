@@ -73,7 +73,7 @@ namespace System.ComponentModel
             private readonly int _index;
 
             public ArrayPropertyDescriptor(Type arrayType, Type elementType, int index)
-                : base(arrayType, $"[{index}]", elementType, null)
+                : base(arrayType, "[" + index + "]", elementType, null)
             {
                 _index = index;
             }

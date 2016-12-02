@@ -82,7 +82,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public override string ToString()
         {
-            return $"{_menuGroup.ToString()} : {_commandID.ToString(CultureInfo.CurrentCulture)}";
+            return _menuGroup.ToString() + " : " + _commandID.ToString(CultureInfo.CurrentCulture);
         }
     }
 }

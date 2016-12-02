@@ -23,8 +23,6 @@ namespace System.ComponentModel
         /// </summary>
         public ComplexBindingPropertiesAttribute()
         {
-            DataSource = null;
-            DataMember = null;
         }
 
         /// <summary>
@@ -36,7 +34,6 @@ namespace System.ComponentModel
         public ComplexBindingPropertiesAttribute(string dataSource)
         {
             DataSource = dataSource;
-            DataMember = null;
         }
 
         /// <summary>

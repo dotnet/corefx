@@ -20,7 +20,7 @@ namespace System.ComponentModel.Design
     public abstract class DesignerOptionService : IDesignerOptionService
     {
         private DesignerOptionCollection _options;
-        private static readonly char[] c_slash = {'\\'};
+        private static readonly char[] s_slash = {'\\'};
         /// <summary>
         ///     Returns the options collection for this service.  There is 
         ///     always a global options collection that contains child collections.
@@ -75,7 +75,7 @@ namespace System.ComponentModel.Design
                 throw new ArgumentNullException(nameof(valueName));
             }
 
-            string[] optionNames = pageName.Split(c_slash);
+            string[] optionNames = pageName.Split(s_slash);
 
             DesignerOptionCollection options = Options;
             foreach (string optionName in optionNames)
@@ -200,12 +200,12 @@ namespace System.ComponentModel.Design
                 {
                     if (_properties == null)
                     {
-                        List<PropertyDescriptor> propList;
+                        ArrayList propList;
 
                         if (_value != null)
                         {
                             PropertyDescriptorCollection props = TypeDescriptor.GetProperties(_value);
-                            propList = new List<PropertyDescriptor>(props.Count);
+                            propList = new ArrayList(props.Count);
                             foreach (PropertyDescriptor prop in props)
                             {
                                 propList.Add(new WrappedPropertyDescriptor(prop, _value));
@@ -213,16 +213,16 @@ namespace System.ComponentModel.Design
                         }
                         else
                         {
-                            propList = new List<PropertyDescriptor>(1);
+                            propList = new ArrayList(1);
                         }
 
                         EnsurePopulated();
                         foreach (DesignerOptionCollection child in _children)
                         {
-                            propList.AddRange(Enumerable.Cast<PropertyDescriptor>(child.Properties));
+                            propList.AddRange(child.Properties);
                         }
 
-                        PropertyDescriptor[] propArray = propList.ToArray();
+                        PropertyDescriptor[] propArray = (PropertyDescriptor[])propList.ToArray(typeof(PropertyDescriptor));
                         _properties = new PropertyDescriptorCollection(propArray, true);
                     }
 

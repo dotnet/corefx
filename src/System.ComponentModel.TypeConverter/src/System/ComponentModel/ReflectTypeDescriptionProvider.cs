@@ -222,7 +222,7 @@ namespace System.ComponentModel
                 obj = objectType.GetTypeInfo().GetConstructor(argTypes)?.Invoke(args);
             }
 
-            return obj ?? (obj = Activator.CreateInstance(objectType, args));
+            return obj ?? Activator.CreateInstance(objectType, args);
         }
 
 
@@ -1139,11 +1139,11 @@ namespace System.ComponentModel
 
                                 if (receiverType != null)
                                 {
-                                    MethodInfo getMethod = providerType.GetTypeInfo().GetMethod($"Get{provideAttr.PropertyName}", new Type[] { receiverType });
+                                    MethodInfo getMethod = providerType.GetTypeInfo().GetMethod("Get" + provideAttr.PropertyName, new Type[] { receiverType });
 
                                     if (getMethod != null && !getMethod.IsStatic && getMethod.IsPublic)
                                     {
-                                        MethodInfo setMethod = providerType.GetTypeInfo().GetMethod($"Set{provideAttr.PropertyName}", new Type[] { receiverType, getMethod.ReturnType });
+                                        MethodInfo setMethod = providerType.GetTypeInfo().GetMethod("Set" + provideAttr.PropertyName, new Type[] { receiverType, getMethod.ReturnType });
 
                                         if (setMethod != null && (setMethod.IsStatic || !setMethod.IsPublic))
                                         {

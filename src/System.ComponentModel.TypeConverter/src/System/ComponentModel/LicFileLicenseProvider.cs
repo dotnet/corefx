@@ -81,7 +81,7 @@ namespace System.ComponentModel
                     }
 
                     string moduleDir = Path.GetDirectoryName(modulePath);
-                    string licenseFile = $"{moduleDir}\\{type.FullName}.lic";
+                    string licenseFile = moduleDir + "\\" + type.FullName + ".lic";
 
                     Debug.WriteLine($"Looking for license in: {licenseFile}");
                     if (File.Exists(licenseFile))

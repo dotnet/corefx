@@ -106,9 +106,8 @@ namespace System.ComponentModel
                     //
                     if (retVal == null)
                     {
-                        foreach (var val in GetStandardValues(context))
+                        foreach (CultureInfo info in GetStandardValues(context))
                         {
-                            CultureInfo info = (CultureInfo)val;
                             if (info != null && string.Compare(GetCultureName(info), text, StringComparison.Ordinal) == 0)
                             {
                                 retVal = info;
@@ -134,9 +133,8 @@ namespace System.ComponentModel
                     if (retVal == null)
                     {
                         text = text.ToLower(CultureInfo.CurrentCulture);
-                        foreach (var val in _values)
+                        foreach (CultureInfo info in _values)
                         {
-                            CultureInfo info = (CultureInfo)val;
                             if (info != null && GetCultureName(info).ToLower(CultureInfo.CurrentCulture).StartsWith(text))
                             {
                                 retVal = info;

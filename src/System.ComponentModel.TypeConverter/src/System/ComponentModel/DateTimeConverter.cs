@@ -124,7 +124,7 @@ namespace System.ComponentModel
                 }
                 else
                 {
-                    format = $"{formatInfo.ShortDatePattern} {formatInfo.ShortTimePattern}";
+                    format = formatInfo.ShortDatePattern + formatInfo.ShortTimePattern;
                 }
 
                 return dt.ToString(format, CultureInfo.CurrentCulture);

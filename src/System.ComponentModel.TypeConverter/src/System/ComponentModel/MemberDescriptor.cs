@@ -97,7 +97,7 @@ namespace System.ComponentModel
             _displayName = oldMemberDescriptor.DisplayName;
             _nameHash = _name.GetHashCode();
 
-            List<Attribute> newArray  = new List<Attribute>();
+            List<Attribute> newArray = new List<Attribute>();
 
             if (oldMemberDescriptor.Attributes.Count != 0)
             {

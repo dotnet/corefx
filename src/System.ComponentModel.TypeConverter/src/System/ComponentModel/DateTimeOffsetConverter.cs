@@ -138,7 +138,7 @@ namespace System.ComponentModel
                 {
                     // pattern just like DateTimeConverter when DateTime.TimeOfDay.TotalSeconds!=0
                     // but with ' zzz' offset pattern added.
-                    format = $"{formatInfo.ShortDatePattern} {formatInfo.ShortTimePattern} zzz";
+                    format = formatInfo.ShortDatePattern + formatInfo.ShortTimePattern + "zzz";
                 }
 
                 return dto.ToString(format, CultureInfo.CurrentCulture);

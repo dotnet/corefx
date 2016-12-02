@@ -492,7 +492,7 @@ namespace System.ComponentModel
                 instance = p.CreateInstance(provider, objectType, argTypes, args);
             }
 
-            return instance ?? (instance = NodeFor(objectType).CreateInstance(provider, objectType, argTypes, args));
+            return instance ?? NodeFor(objectType).CreateInstance(provider, objectType, argTypes, args);
         }
         /// <summary>
         ///     This dynamically binds a PropertyDescriptor to a type.

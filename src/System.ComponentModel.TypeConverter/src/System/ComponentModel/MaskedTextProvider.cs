@@ -532,6 +532,10 @@ namespace System.ComponentModel
         /// <summary>
         ///       The system password char.
         /// </summary>
+        /// <remarks> 
+        /// ComCtl32.dll V6 (WindowsXP) provides a nice black circle but we don't want to attempt to simulate it 
+        ///  here to avoid hard coding values.  MaskedTextBox picks up the right value at run time from comctl32.
+        /// </remarks>
         public static char DefaultPasswordChar => '*';
 
         /// <summary>

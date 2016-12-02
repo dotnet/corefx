@@ -360,8 +360,8 @@ namespace System.ComponentModel
                 }
 
                 Type[] argsType = new Type[] { _type };
-                _addMethod = FindMethod(_componentClass, $"AddOn{Name}", argsType, typeof(void));
-                _removeMethod = FindMethod(_componentClass, $"RemoveOn{Name}", argsType, typeof(void));
+                _addMethod = FindMethod(_componentClass, "AddOn" + Name, argsType, typeof(void));
+                _removeMethod = FindMethod(_componentClass, "RemoveOn" + Name, argsType, typeof(void));
                 if (_addMethod == null || _removeMethod == null)
                 {
                     Debug.Fail($"Missing event accessors for {_componentClass.FullName}. {Name}");
