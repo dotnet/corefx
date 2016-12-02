@@ -15,7 +15,6 @@ namespace System.Runtime.CompilerServices
     /// </summary>
     /// <typeparam name="T">The type of the collection element.</typeparam>
     [Serializable]
-    [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
     {
@@ -44,12 +43,15 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             }
-            //Contract.EndContractBlock();
 
             if (capacity == 0)
+            {
                 _items = Array.Empty<T>();
+            }
             else
+            {
                 _items = new T[capacity];
+            }
         }
 
         /// <summary>
@@ -62,7 +64,6 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentNullException(nameof(collection));
             }
-            //Contract.EndContractBlock();
 
             ICollection<T> c = collection as ICollection<T>;
             if (c != null)
@@ -108,7 +109,6 @@ namespace System.Runtime.CompilerServices
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                //Contract.EndContractBlock();
 
                 if (value != _items.Length)
                 {
@@ -160,7 +160,6 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            //Contract.EndContractBlock();
 
             if (Count == _items.Length)
             {
@@ -186,7 +185,6 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            //Contract.EndContractBlock();
 
             Count--;
             if (index < Count)
@@ -211,7 +209,6 @@ namespace System.Runtime.CompilerServices
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                //Contract.EndContractBlock();
 
                 return _items[index];
             }
@@ -222,7 +219,6 @@ namespace System.Runtime.CompilerServices
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                //Contract.EndContractBlock();
 
                 _items[index] = value;
                 _version++;
@@ -408,7 +404,6 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentException(); // Arg_RankMultiDimNotSupported
             }
-            //Contract.EndContractBlock();
 
             try
             {
@@ -454,7 +449,6 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentException(); // Argument_InvalidOffLen
             }
-            //Contract.EndContractBlock();
 
             Array.Reverse(_items, index, count);
             _version++;
