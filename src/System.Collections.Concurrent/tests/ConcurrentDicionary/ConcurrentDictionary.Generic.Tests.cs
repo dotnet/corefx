@@ -59,7 +59,7 @@ namespace System.Collections.Concurrent.Tests
 
         protected override bool IDictionary_Generic_Keys_Values_Enumeration_ThrowsInvalidOperation_WhenParentModified => false;
         
-        protected override bool IEnumerable_Generic_Enumerator_Current_EnumerationNotStarted_ThrowsInvalidOperationException => false;
+        protected override bool Enumerator_NonGeneric_Current_UndefinedOperation_Throws => false;
 
         protected override bool IDictionary_Generic_Keys_Values_ModifyingTheDictionaryUpdatesTheCollection => false;
 

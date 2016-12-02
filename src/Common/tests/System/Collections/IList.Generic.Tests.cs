@@ -616,36 +616,33 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly && (Enumerator_Current_UndefinedOperation_Throws || EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws))
+            if (!IsReadOnly && (Enumerator_Generic_Current_UndefinedOperation_Throws || Enumerator_NonGeneric_Current_UndefinedOperation_Throws))
             {
                 IList<T> collection = GenericIListFactory(count);
-
-                if (collection is List<T> && !Enumerator_Current_UndefinedOperation_Throws)
-                    return; // Skip this test for List<T> 
 
                 using (IEnumerator<T> enumerator = collection.GetEnumerator())
                 {
                     while (enumerator.MoveNext()) ; // Go to end of enumerator
 
-                    if (Enumerator_Current_UndefinedOperation_Throws)
-                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                    if (Enumerator_Generic_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // enumerator.Current should fail
 
-                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
-                        Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // Enumerator.Current should fail
+                    if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // (enumerator as IEnumerator).Current should fail
 
                     int seed = 3538963;
                     collection.Add(CreateT(seed++));
 
-                    if (Enumerator_Current_UndefinedOperation_Throws)
-                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                    if (Enumerator_Generic_Current_UndefinedOperation_Throws)
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // enumerator.Current should fail
 
-                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                     {
-                        if (collection is List<T>)
-                            // List.Enumerator.Current have breaking issue
+                        // (List<T>.Enumerator as IEnumerator).Current have breaking issue here
+                        if (enumerator is List<T>.Enumerator)
                             Assert.Equal(default(T), (enumerator as IEnumerator).Current);
                         else
-                            Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // Enumerator.Current should fail
+                            Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // (enumerator as IEnumerator).Current should fail
 
                     }
                 }

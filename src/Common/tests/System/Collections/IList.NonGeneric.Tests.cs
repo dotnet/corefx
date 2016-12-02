@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -1060,14 +1061,26 @@ namespace System.Collections.Tests
             if (!IsReadOnly && !ExpectedFixedSize && Enumerator_Current_UndefinedOperation_Throws)
             {
                 IList collection = NonGenericIListFactory(count);
-                IEnumerator enu = collection.GetEnumerator();
-                while (enu.MoveNext()) ; // Go to end of enumerator
-                Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail
+                IEnumerator enumerator = collection.GetEnumerator();
+                while (enumerator.MoveNext()) ; // Go to end of enumerator
+                Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
 
                 int seed = 523561;
                 collection.Add(CreateT(seed++));
 
-                Assert.Throws<InvalidOperationException>(() => enu.Current); // Enumerator.Current should fail again
+                // (List<T>.Enumerator as IEnumerator).Current have breaking issue here
+                bool isGenericList = false;
+                {
+                    var typeInfo = enumerator.GetType().GetTypeInfo();
+                    isGenericList = typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(List<>.Enumerator);
+                }
+
+                if (isGenericList)
+                {
+                    var current = enumerator.Current;
+                }
+                else
+                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail again
             }
         }
 

@@ -57,7 +57,7 @@ namespace System.Collections.Tests
         /// If this property is set to true, the tests ensure that the exception is thrown. The default value is
         /// false.
         /// </summary>
-        protected virtual bool Enumerator_Current_UndefinedOperation_Throws => false;
+        protected virtual bool Enumerator_Generic_Current_UndefinedOperation_Throws => false;
 
         /// <summary>
         /// When calling Current of the enumerator before the first MoveNext, after the end of the collection,
@@ -69,7 +69,7 @@ namespace System.Collections.Tests
         /// If this property is set to true, the tests ensure that the exception is thrown. The default value is
         /// false.
         /// </summary>
-        protected virtual bool EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws => true;
+        protected virtual bool Enumerator_NonGeneric_Current_UndefinedOperation_Throws => true;
 
         /// <summary>
         /// The behavior of MoveNext at the end of the enumerable after modification is undefined for the generic
@@ -187,7 +187,7 @@ namespace System.Collections.Tests
             {
                 for (var i = 0; i < 3; i++)
                 {
-                    if (Enumerator_Current_UndefinedOperation_Throws)
+                    if (Enumerator_Generic_Current_UndefinedOperation_Throws)
                     {
                         Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                     }
@@ -196,7 +196,7 @@ namespace System.Collections.Tests
                         var cur = enumerator.Current;
                     }
 
-                    if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                    if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                     {
                         Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
                     }
@@ -297,7 +297,7 @@ namespace System.Collections.Tests
                         "enumerator.MoveNext() returned true past the expected end.");
                 }
 
-                if (Enumerator_Current_UndefinedOperation_Throws)
+                if (Enumerator_Generic_Current_UndefinedOperation_Throws)
                 {
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 }
@@ -306,7 +306,7 @@ namespace System.Collections.Tests
                     var cur = enumerator.Current;
                 }
 
-                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                 {
                     Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
                 }
@@ -536,12 +536,12 @@ namespace System.Collections.Tests
             IEnumerable<T> enumerable = GenericIEnumerableFactory(count);
             using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
             {
-                if (Enumerator_Current_UndefinedOperation_Throws)
+                if (Enumerator_Generic_Current_UndefinedOperation_Throws)
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 else
                     current = enumerator.Current;
 
-                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                     Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
                 else
                 {
@@ -559,12 +559,12 @@ namespace System.Collections.Tests
             using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
             {
                 while (enumerator.MoveNext()) ;
-                if (Enumerator_Current_UndefinedOperation_Throws)
+                if (Enumerator_Generic_Current_UndefinedOperation_Throws)
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 else
                     current = enumerator.Current;
 
-                if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                     Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
                 else
                 {
@@ -585,12 +585,12 @@ namespace System.Collections.Tests
                 {
                     if (ModifyEnumerable(enumerable))
                     {
-                        if (Enumerator_Current_UndefinedOperation_Throws)
+                        if (Enumerator_Generic_Current_UndefinedOperation_Throws)
                             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                         else
                             current = enumerator.Current;
 
-                        if (EnumeratorAsNonGeneric_Current_UndefinedOperation_Throws)
+                        if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
                             Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current);
                         else
                         {

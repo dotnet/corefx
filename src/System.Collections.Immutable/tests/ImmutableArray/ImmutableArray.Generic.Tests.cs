@@ -21,7 +21,7 @@ namespace System.Collections.Immutable.Tests
         protected override bool IsReadOnly => true;
         protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
         protected override Type IList_Generic_Item_InvalidIndex_ThrowType => typeof(IndexOutOfRangeException);
-        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
+        protected override bool Enumerator_Generic_Current_UndefinedOperation_Throws => true;
 
         protected override IList<T> GenericIListFactory() => GenericIListFactory(0);
         protected override IList<T> GenericIListFactory(int count)
