@@ -315,7 +315,7 @@ namespace System.Runtime.CompilerServices
 
         #region IEnumerable Members
 
-        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #endregion
 
