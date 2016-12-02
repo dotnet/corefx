@@ -29,8 +29,6 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string Name { get; set; }
 
-        public bool UseCompileFramework { get; set; }
-
         public bool AllowCompatibleFramework { get; set; }
 
         [Output]
@@ -56,12 +54,12 @@ namespace Microsoft.DotNet.Build.Tasks
                 Dictionary<string, ITaskItem> searchTargetGroups = TargetGroups.ToDictionary(f => f.ItemSpec, f => f);
 
                 // Depth search for a valid framework ie. netcoreapp1.1 => netcoreapp1.0
-                targetGroup = FindCompatibleTargetGroup(targetGroup, supportedTargetGroups, searchTargetGroups, UseCompileFramework);
+                targetGroup = FindCompatibleTargetGroup(targetGroup, supportedTargetGroups, searchTargetGroups);
 
                 if(string.IsNullOrWhiteSpace(targetGroup) && AllowCompatibleFramework == true)
                 {
                     // Depth search of compatible framework hierarchy, ie. netcoreapp1.1 => netstandard1.7 (compatible) => netstandard1.6 => ...
-                    targetGroup = searchTargetGroups[originalTargetGroup].GetMetadata("CompatibleGroup");
+                    targetGroup = searchTargetGroups[originalTargetGroup].GetMetadata("CompatibleWith");
                     targetGroup = FindCompatibleTargetGroup(targetGroup, supportedTargetGroups, searchTargetGroups);
                 }
 
@@ -92,19 +90,11 @@ namespace Microsoft.DotNet.Build.Tasks
             return FindCompatibleOSGroup(searchOSGroups[osGroup].GetMetadata("Imports"), supportedOsGroups, searchOSGroups);
         }
 
-        private string FindCompatibleTargetGroup(string targetGroup, string [] supportedTargetGroups, Dictionary<string, ITaskItem> searchTargetGroups, bool UseCompileFramework = false)
+        private string FindCompatibleTargetGroup(string targetGroup, string [] supportedTargetGroups, Dictionary<string, ITaskItem> searchTargetGroups)
         {
             if(string.IsNullOrWhiteSpace(targetGroup))
             {
                 return targetGroup;
-            }
-
-            if (UseCompileFramework && searchTargetGroups.ContainsKey(targetGroup))
-            {
-                if (searchTargetGroups[targetGroup].GetMetadata("CompatibleGroup") != string.Empty)
-                {
-                    targetGroup = searchTargetGroups[targetGroup].GetMetadata("CompatibleGroup");
-                }
             }
 
             if (supportedTargetGroups.Contains(targetGroup))

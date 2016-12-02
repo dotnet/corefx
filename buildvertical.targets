@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="FindBestConfiguration" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
+  <UsingTask TaskName="FindBestConfiguration" AssemblyFile="$(CoreFxToolsTaskDir)CoreFx.Tools.dll" />
+  <Import Project="$(MSBuildThisFileDirectory)src/Tools/GenerateProps/targetgroups.props" />
+  <Import Project="$(MSBuildThisFileDirectory)src/Tools/GenerateProps/osgroups.props" />
   <PropertyGroup>
     <BinDir>$(BinDir)$(VerticalGroup)/</BinDir>
     <_ImportedBuildVerticalTargets>true</_ImportedBuildVerticalTargets>
@@ -10,7 +12,9 @@
   <Target Name="GatherProjectsForVerticalBuild"
           BeforeTargets="DetermineBuildVerticalProjects">
     <ItemGroup>
+    <!-->
       <VerticalProject Include="$(ProjectDir)**/src/*.vbproj" />
+    -->
       <VerticalProject Include="$(ProjectDir)**/src/*.csproj" />
     </ItemGroup>
     <Message Text="Projects: @(VerticalProject)" Importance="Low" />
@@ -164,7 +168,6 @@
                      OSGroups="@(OSGroups)"
                      TargetGroups="@(TargetGroups)"
                      ProjectConfigurations="$(BuildConfigurations)"
-                     UseCompileFramework="false"
                      AllowCompatibleFramework="true"
                      Condition="'$(BuildConfigurations)' != ''">
       <Output TaskParameter="OutputItem" ItemName="VerticalTargets" />                          

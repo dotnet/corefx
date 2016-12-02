@@ -36,6 +36,7 @@
       <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp'))" Include="$(BinDir)netcoreapp\Runtime" />
       <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netstandard\Runtime" />
       <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETStandard'))" Include="$(BinDir)netcoreapp\Runtime" />
+      <RuntimeDir Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETFramework'))" Include="$(BinDir)netframework\Runtime" />
     </ItemGroup>
     <Error Condition="'@(RuntimeDir)' == ''" Text="No Runtime directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
     <Message Text="Got RuntimeDir:@(RuntimeDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
