@@ -15,14 +15,13 @@ namespace System.Runtime.CompilerServices
     /// </summary>
     /// <typeparam name="T">The type of the collection element.</typeparam>
     [Serializable]
+    [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
-    public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList, IReadOnlyList<T>
+    public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
     {
         private const int DefaultCapacity = 4;
 
         private T[] _items;
-        [ContractPublicPropertyName("Count")]
-        private int _size;
         private int _version;
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
             if (capacity == 0)
                 _items = Array.Empty<T>();
@@ -63,7 +62,7 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentNullException(nameof(collection));
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
             ICollection<T> c = collection as ICollection<T>;
             if (c != null)
@@ -77,12 +76,12 @@ namespace System.Runtime.CompilerServices
                 {
                     _items = new T[count];
                     c.CopyTo(_items, 0);
-                    _size = count;
+                    Count = count;
                 }
             }
             else
             {
-                _size = 0;
+                Count = 0;
                 _items = Array.Empty<T>();
                 // This enumerable could be empty.  Let Add allocate a new array, if needed.
                 // Note it will also go to _defaultCapacity first, not 1, then 2, etc.
@@ -105,20 +104,20 @@ namespace System.Runtime.CompilerServices
             }
             set
             {
-                if (value < _size)
+                if (value < Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                Contract.EndContractBlock();
+                //Contract.EndContractBlock();
 
                 if (value != _items.Length)
                 {
                     if (value > 0)
                     {
                         T[] newItems = new T[value];
-                        if (_size > 0)
+                        if (Count > 0)
                         {
-                            Array.Copy(_items, 0, newItems, 0, _size);
+                            Array.Copy(_items, 0, newItems, 0, Count);
                         }
                         _items = newItems;
                     }
@@ -133,14 +132,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>
         /// Returns number of elements in the <see cref="ReadOnlyCollectionBuilder{T}"/>.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<int>() >= 0);
-                return _size;
-            }
-        }
+        public int Count { get; private set; }
 
         #region IList<T> Members
 
@@ -153,7 +145,7 @@ namespace System.Runtime.CompilerServices
         {
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < Count);
-            return Array.IndexOf(_items, item, 0, _size);
+            return Array.IndexOf(_items, item, 0, Count);
         }
 
         /// <summary>
@@ -165,22 +157,22 @@ namespace System.Runtime.CompilerServices
         {
             // Note that insertions at the end are legal.
             // Following trick can reduce the range check by one
-            if ((uint)index > (uint)_size)
+            if ((uint)index > (uint)Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
-            if (_size == _items.Length)
+            if (Count == _items.Length)
             {
-                EnsureCapacity(_size + 1);
+                EnsureCapacity(Count + 1);
             }
-            if (index < _size)
+            if (index < Count)
             {
-                Array.Copy(_items, index, _items, index + 1, _size - index);
+                Array.Copy(_items, index, _items, index + 1, Count - index);
             }
             _items[index] = item;
-            _size++;
+            Count++;
             _version++;
         }
 
@@ -191,18 +183,18 @@ namespace System.Runtime.CompilerServices
         public void RemoveAt(int index)
         {
             // Following trick can reduce the range check by one
-            if ((uint)index >= (uint)_size)
+            if ((uint)index >= (uint)Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
-            _size--;
-            if (index < _size)
+            Count--;
+            if (index < Count)
             {
-                Array.Copy(_items, index + 1, _items, index, _size - index);
+                Array.Copy(_items, index + 1, _items, index, Count - index);
             }
-            _items[_size] = default(T);
+            _items[Count] = default(T);
             _version++;
         }
 
@@ -216,22 +208,22 @@ namespace System.Runtime.CompilerServices
             get
             {
                 // Following trick can reduce the range check by one
-                if ((uint)index >= (uint)_size)
+                if ((uint)index >= (uint)Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                Contract.EndContractBlock();
+                //Contract.EndContractBlock();
 
                 return _items[index];
             }
             set
             {
                 // Following trick can reduce the range check by one
-                if ((uint)index >= (uint)_size)
+                if ((uint)index >= (uint)Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                Contract.EndContractBlock();
+                //Contract.EndContractBlock();
 
                 _items[index] = value;
                 _version++;
@@ -248,11 +240,11 @@ namespace System.Runtime.CompilerServices
         /// <param name="item">The object to add to the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Add(T item)
         {
-            if (_size == _items.Length)
+            if (Count == _items.Length)
             {
-                EnsureCapacity(_size + 1);
+                EnsureCapacity(Count + 1);
             }
-            _items[_size++] = item;
+            _items[Count++] = item;
             _version++;
         }
 
@@ -261,10 +253,10 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         public void Clear()
         {
-            if (_size > 0)
+            if (Count > 0)
             {
-                Array.Clear(_items, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
-                _size = 0;
+                Array.Clear(_items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+                Count = 0;
             }
             _version++;
         }
@@ -274,7 +266,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         /// <param name="item">the object to locate in the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         /// <returns>true if item is found in the <see cref="ReadOnlyCollectionBuilder{T}"/>; otherwise, false.</returns>
-        public bool Contains(T item) => _size != 0 && IndexOf(item) != -1;
+        public bool Contains(T item) => Count != 0 && IndexOf(item) != -1;
 
         /// <summary>
         /// Copies the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/> to an <see cref="Array"/>,
@@ -284,21 +276,8 @@ namespace System.Runtime.CompilerServices
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if ((array != null) && (array.Rank != 1))
-            {
-                throw new ArgumentException();
-            }
-            Contract.EndContractBlock();
-
-            try
-            {
-                // Array.Copy will check for NULL.
-                Array.Copy(_items, 0, array, arrayIndex, _size);
-            }
-            catch (ArrayTypeMismatchException)
-            {
-                throw new ArgumentException();
-            }
+            // Delegate rest of error checking to Array.Copy.
+            Array.Copy(_items, 0, array, arrayIndex, Count);
         }
 
         bool ICollection<T>.IsReadOnly => false;
@@ -355,7 +334,7 @@ namespace System.Runtime.CompilerServices
             {
                 throw InvalidTypeException(value, nameof(value));
             }
-            return _size - 1;
+            return Count - 1;
         }
 
         bool IList.Contains(object value)
@@ -428,18 +407,18 @@ namespace System.Runtime.CompilerServices
         {
             if ((array != null) && (array.Rank != 1))
             {
-                throw new ArgumentNullException(nameof(array));
+                throw new ArgumentException(); // Arg_RankMultiDimNotSupported
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
             try
             {
-                // Array.Copy will check for NULL.
-                Array.Copy(_items, 0, array, index, _size);
+                // Array.Copy will check for null.
+                Array.Copy(_items, 0, array, index, Count);
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentException(); // Argument_InvalidArrayType
             }
         }
 
@@ -454,7 +433,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         public void Reverse()
         {
-            Reverse(0, _size);
+            Reverse(0, Count);
         }
 
         /// <summary>
@@ -472,11 +451,11 @@ namespace System.Runtime.CompilerServices
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if (_size - index < count)
+            if (Count - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException(); // Argument_InvalidOffLen
             }
-            Contract.EndContractBlock();
+            //Contract.EndContractBlock();
 
             Array.Reverse(_items, index, count);
             _version++;
@@ -491,13 +470,13 @@ namespace System.Runtime.CompilerServices
             Contract.Ensures(Contract.Result<T[]>() != null);
             Contract.Ensures(Contract.Result<T[]>().Length == Count);
 
-            if (_size == 0)
+            if (Count == 0)
             {
                 return Array.Empty<T>();
             }
 
-            T[] array = new T[_size];
-            Array.Copy(_items, 0, array, 0, _size);
+            T[] array = new T[Count];
+            Array.Copy(_items, 0, array, 0, Count);
             return array;
         }
 
@@ -511,7 +490,7 @@ namespace System.Runtime.CompilerServices
         {
             // Can we use the stored array?
             T[] items;
-            if (_size == _items.Length)
+            if (Count == _items.Length)
             {
                 items = _items;
             }
@@ -520,7 +499,7 @@ namespace System.Runtime.CompilerServices
                 items = ToArray();
             }
             _items = Array.Empty<T>();
-            _size = 0;
+            Count = 0;
             _version++;
 
             return new TrueReadOnlyCollection<T>(items);
@@ -537,7 +516,7 @@ namespace System.Runtime.CompilerServices
                 int newCapacity = _items.Length > 0 ? _items.Length * 2 : DefaultCapacity;
                 // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
                 // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-                if ((uint)newCapacity > int.MaxValue) newCapacity = int.MaxValue;
+                newCapacity = (int)Math.Min((uint)newCapacity, (uint)0X7FEFFFFF);
                 if (newCapacity < min)
                 {
                     newCapacity = min;
@@ -565,7 +544,7 @@ namespace System.Runtime.CompilerServices
         }
 
         [Serializable]
-        private struct Enumerator : IEnumerator<T>, IEnumerator
+        private class Enumerator : IEnumerator<T>, IEnumerator
         {
             private readonly ReadOnlyCollectionBuilder<T> _builder;
             private readonly int _version;
@@ -614,7 +593,7 @@ namespace System.Runtime.CompilerServices
                 ReadOnlyCollectionBuilder<T> localBuilder = _builder;
 
                 // Following trick can reduce the range check by one
-                if (_version == localBuilder._version && ((uint)_index < (uint)localBuilder._size))
+                if (_version == localBuilder._version && ((uint)_index < (uint)localBuilder.Count))
                 {
                     _current = localBuilder._items[_index++];
                     return true;
