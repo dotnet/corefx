@@ -41,28 +41,37 @@ namespace System.IO.Tests
         [InlineData(FileOptions.Asynchronous | FileOptions.SequentialScan)]
         [InlineData(FileOptions.Asynchronous | FileOptions.WriteThrough)]
         [InlineData(FileOptions.Asynchronous | (FileOptions)0x20000000)]
+        [InlineData(FileOptions.Asynchronous | FileOptions.DeleteOnClose | FileOptions.RandomAccess | FileOptions.SequentialScan | FileOptions.WriteThrough)]
         [InlineData(FileOptions.Asynchronous | FileOptions.DeleteOnClose | FileOptions.Encrypted | FileOptions.RandomAccess | FileOptions.SequentialScan | FileOptions.WriteThrough)]
         public void ValidFileOptions(FileOptions option)
         {
             byte[] data = new byte[c_DefaultBufferSize];
             new Random(1).NextBytes(data);
 
-            using (FileStream fs = CreateFileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read, c_DefaultBufferSize, option))
+            try
             {
-                // make sure we can write, seek, and read data with this option set
-                fs.Write(data, 0, data.Length);
-                fs.Position = 0;
-
-                byte[] tmp = new byte[data.Length];
-                int totalRead = 0;
-                while (true)
+                using (var fs = CreateFileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read, c_DefaultBufferSize, option))
                 {
-                    int numRead = fs.Read(tmp, totalRead, tmp.Length - totalRead);
-                    Assert.InRange(numRead, 0, tmp.Length);
-                    if (numRead == 0)
-                        break;
-                    totalRead += numRead;
+                    // make sure we can write, seek, and read data with this option set
+                    fs.Write(data, 0, data.Length);
+                    fs.Position = 0;
+
+                    byte[] tmp = new byte[data.Length];
+                    int totalRead = 0;
+                    while (true)
+                    {
+                        int numRead = fs.Read(tmp, totalRead, tmp.Length - totalRead);
+                        Assert.InRange(numRead, 0, tmp.Length);
+                        if (numRead == 0)
+                            break;
+                        totalRead += numRead;
+                    }
                 }
+            }
+            catch (UnauthorizedAccessException) // Not enough rights
+            {
+                if ((option & FileOptions.Encrypted) == 0)
+                    throw;
             }
         }
 
