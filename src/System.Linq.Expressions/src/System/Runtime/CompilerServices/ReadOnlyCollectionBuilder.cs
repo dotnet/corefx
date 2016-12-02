@@ -156,7 +156,6 @@ namespace System.Runtime.CompilerServices
         public void Insert(int index, T item)
         {
             // Note that insertions at the end are legal.
-            // Following trick can reduce the range check by one
             if ((uint)index > (uint)Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -182,7 +181,7 @@ namespace System.Runtime.CompilerServices
         /// <param name="index">The zero-based index of the item to remove.</param>
         public void RemoveAt(int index)
         {
-            // Following trick can reduce the range check by one
+            // Following trick can reduce the range check by one comparison
             if ((uint)index >= (uint)Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -207,7 +206,7 @@ namespace System.Runtime.CompilerServices
         {
             get
             {
-                // Following trick can reduce the range check by one
+                // Following trick can reduce the range check by one comparison
                 if ((uint)index >= (uint)Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -218,7 +217,7 @@ namespace System.Runtime.CompilerServices
             }
             set
             {
-                // Following trick can reduce the range check by one
+                // Following trick can reduce the range check by one comparison
                 if ((uint)index >= (uint)Count)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -592,7 +591,7 @@ namespace System.Runtime.CompilerServices
             {
                 ReadOnlyCollectionBuilder<T> localBuilder = _builder;
 
-                // Following trick can reduce the range check by one
+                // Following trick can reduce the range check by one comparison
                 if (_version == localBuilder._version && ((uint)_index < (uint)localBuilder.Count))
                 {
                     _current = localBuilder._items[_index++];
