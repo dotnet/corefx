@@ -291,7 +291,16 @@
     <Compile Include="System\Linq\Expressions\Interpreter\InterpretedFrame.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Interpreter.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\LabelInfo.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\LeftShiftInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\LeftShiftInstruction.cs">
+      <DependentUpon>LeftShiftInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\LeftShiftInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LeftShiftInstruction.cs</LastGenOutput>
+    </Content>
+
     <Compile Include="System\Linq\Expressions\Interpreter\LessThanInstruction.cs">
       <DependentUpon>LessThanInstruction.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -342,7 +351,15 @@
     <Compile Include="System\Linq\Expressions\Interpreter\NullCheckInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.cs">
+      <DependentUpon>RightShiftInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>RightShiftInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\RuntimeVariables.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\StackOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\SubInstruction.cs">
@@ -359,6 +376,7 @@
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryArithmeticInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryComparisonInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryShiftInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
