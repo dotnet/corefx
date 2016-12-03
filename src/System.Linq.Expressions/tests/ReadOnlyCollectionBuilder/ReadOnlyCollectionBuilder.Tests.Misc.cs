@@ -159,7 +159,7 @@ namespace System.Linq.Expressions.Tests
                 for (int i = 0; i < times + 1; i++)
                 {
                     Assert.True(list.Contains(items[items.Length / 2])); //"Should contain item."
-                    list.Remove(items[items.Length / 2]);
+                    Assert.True(list.Remove(items[items.Length / 2]));
                 }
                 Assert.False(list.Contains(items[items.Length / 2])); //"Should not contain item"
             }
