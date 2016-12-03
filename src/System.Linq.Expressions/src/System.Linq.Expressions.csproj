@@ -244,6 +244,7 @@
       <DependentUpon>AddInstruction.tt</DependentUpon>
     </Compile>
     <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.Boolean.cs" />
     <Content Include="System\Linq\Expressions\Interpreter\AddInstruction.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AddInstruction.cs</LastGenOutput>
@@ -266,6 +267,7 @@
     </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.Boolean.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\FieldOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanOrEqualInstruction.cs">
       <DependentUpon>GreaterThanOrEqualInstruction.tt</DependentUpon>
@@ -349,6 +351,7 @@
     <Compile Include="System\Linq\Expressions\Interpreter\NumericConvertInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NullCheckInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.Boolean.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.cs">
       <DependentUpon>RightShiftInstruction.tt</DependentUpon>
@@ -384,11 +387,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.Boolean.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.Boolean.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.Boolean.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
