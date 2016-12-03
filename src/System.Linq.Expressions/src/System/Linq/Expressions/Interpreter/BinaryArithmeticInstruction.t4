@@ -118,7 +118,12 @@ foreach (var type in operandsWithOverflow)
     var typeName = toBcl(type);
     var typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")((" + typeAlias + ")l " + infix + " (" + typeAlias + ")r)";
+    var op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
+
+    if (getBinaryResultType(infix, type, type) != type)
+    {
+        op = "(" + typeAlias + ")(" + op + ")";
+    }
 
     if (hasOverflow && !hasNoOvfInstructions.Contains(type))
     {

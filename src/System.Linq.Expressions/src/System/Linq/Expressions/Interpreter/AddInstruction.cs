@@ -231,7 +231,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject(checked((int)((int)l + (int)r)));
+                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject(checked((int)l + (int)r));
                 }
                 frame.StackIndex--;
                 return 1;
@@ -250,7 +250,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = checked((long)((long)l + (long)r));
+                    frame.Data[frame.StackIndex - 2] = checked((long)l + (long)r);
                 }
                 frame.StackIndex--;
                 return 1;
@@ -288,7 +288,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = checked((uint)((uint)l + (uint)r));
+                    frame.Data[frame.StackIndex - 2] = checked((uint)l + (uint)r);
                 }
                 frame.StackIndex--;
                 return 1;
@@ -307,7 +307,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = checked((ulong)((ulong)l + (ulong)r));
+                    frame.Data[frame.StackIndex - 2] = checked((ulong)l + (ulong)r);
                 }
                 frame.StackIndex--;
                 return 1;
