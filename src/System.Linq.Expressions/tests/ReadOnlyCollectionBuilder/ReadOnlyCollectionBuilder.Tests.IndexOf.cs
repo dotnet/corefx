@@ -26,7 +26,7 @@ namespace System.Linq.Expressions.Tests
         {
             switch (methodType)
             {
-                case (IndexOfMethod.IndexOf_T):
+                case IndexOfMethod.IndexOf_T:
                     return ((ReadOnlyCollectionBuilder<T> list, T value) => { return list.IndexOf(value); });
                 default:
                     throw new Exception("Invalid IndexOfMethod");
