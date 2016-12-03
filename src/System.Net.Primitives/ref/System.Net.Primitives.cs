@@ -191,7 +191,7 @@ namespace System.Net
         public static readonly System.Net.IPAddress Loopback;
         public static readonly System.Net.IPAddress None;
         public IPAddress(byte[] address) { }
-        public IPAddress(byte[] address, long scopeid) { }
+        public IPAddress(byte[] address, long scopeId) { }
         public IPAddress(long newAddress) { }
         public System.Net.Sockets.AddressFamily AddressFamily { get { throw null; } }
         public bool IsIPv4MappedToIPv6 { get { throw null; } }

@@ -123,7 +123,7 @@ namespace System.Net
         ///     Constructor for an IPv6 Address with a specified Scope.
         ///   </para>
         /// </devdoc>
-        public IPAddress(byte[] address, long scopeid)
+        public IPAddress(byte[] address, long scopeId)
         {
             if (address == null)
             {
@@ -144,20 +144,20 @@ namespace System.Net
 
             // Consider: Since scope is only valid for link-local and site-local
             //           addresses we could implement some more robust checking here
-            if (scopeid < 0 || scopeid > 0x00000000FFFFFFFF)
+            if (scopeId < 0 || scopeId > 0x00000000FFFFFFFF)
             {
-                throw new ArgumentOutOfRangeException(nameof(scopeid));
+                throw new ArgumentOutOfRangeException(nameof(scopeId));
             }
 
-            PrivateScopeId = (uint)scopeid;
+            PrivateScopeId = (uint)scopeId;
         }
 
-        private IPAddress(ushort[] numbers, uint scopeid)
+        private IPAddress(ushort[] numbers, uint scopeId)
         {
             Debug.Assert(numbers != null);
 
             _numbers = numbers;
-            PrivateScopeId = scopeid;
+            PrivateScopeId = scopeId;
         }
 
         /// <devdoc>
@@ -562,6 +562,7 @@ namespace System.Net
             labels[5] = 0xFFFF;
             labels[6] = (ushort)(((address & 0x0000FF00) >> 8) | ((address & 0x000000FF) << 8));
             labels[7] = (ushort)(((address & 0xFF000000) >> 24) | ((address & 0x00FF0000) >> 8));
+            
             return new IPAddress(labels, 0);
         }
 
