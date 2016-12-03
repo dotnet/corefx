@@ -39,7 +39,7 @@ foreach (var type in operands)
 
     var op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
 
-    // TODO: redundant cast analysis
+    if (getBinaryResultType(infix, type, type) != type)
     {
         op = "(" + typeAlias + ")(" + op + ")";
     }

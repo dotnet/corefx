@@ -38,4 +38,45 @@ toCSharp = type =>
 };
 
 Func<Type, string> toBcl = type => type.Name;
+
+Dictionary<Tuple<Type, Type>, Type> arithmeticOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(uint)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(long)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(ulong)), typeof(ulong) },
+    { Tuple.Create(typeof(float), typeof(float)), typeof(float) },
+    { Tuple.Create(typeof(double), typeof(double)), typeof(double) },
+};
+
+Dictionary<Tuple<Type, Type>, Type> shiftOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(int)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(int)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
+};
+
+Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> ops = new Dictionary<string, Dictionary<Tuple<Type, Type>, Type>>
+{
+    { "+", arithmeticOperations },
+    { "-", arithmeticOperations },
+    { "*", arithmeticOperations },
+    { "/", arithmeticOperations },
+    { "%", arithmeticOperations },
+    { "<<", shiftOperations },
+    { ">>", shiftOperations },
+};
+
+Func<string, Type, Type, Type> getBinaryResultType = (op, l, r) =>
+{
+    Dictionary<Tuple<Type, Type>, Type> table;
+    Type res;
+    if (ops.TryGetValue(op, out table) && table.TryGetValue(Tuple.Create(l, r), out res))
+    {
+        return res;
+    }
+
+    return null;
+};
 #>

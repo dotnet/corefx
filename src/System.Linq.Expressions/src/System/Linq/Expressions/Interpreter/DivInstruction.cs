@@ -50,7 +50,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)((int)l / (int)r));
+                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l / (int)r);
                 }
                 frame.StackIndex--;
                 return 1;
@@ -69,7 +69,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (long)((long)l / (long)r);
+                    frame.Data[frame.StackIndex - 2] = (long)l / (long)r;
                 }
                 frame.StackIndex--;
                 return 1;
@@ -107,7 +107,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (uint)((uint)l / (uint)r);
+                    frame.Data[frame.StackIndex - 2] = (uint)l / (uint)r;
                 }
                 frame.StackIndex--;
                 return 1;
@@ -126,7 +126,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l / (ulong)r);
+                    frame.Data[frame.StackIndex - 2] = (ulong)l / (ulong)r;
                 }
                 frame.StackIndex--;
                 return 1;
@@ -145,7 +145,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (float)((float)l / (float)r);
+                    frame.Data[frame.StackIndex - 2] = (float)l / (float)r;
                 }
                 frame.StackIndex--;
                 return 1;
@@ -164,7 +164,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Data[frame.StackIndex - 2] = (double)((double)l / (double)r);
+                    frame.Data[frame.StackIndex - 2] = (double)l / (double)r;
                 }
                 frame.StackIndex--;
                 return 1;
