@@ -18,6 +18,7 @@ namespace System.Runtime.CompilerServices
     public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
     {
         private const int DefaultCapacity = 4;
+        private const int MaxCoreClrArrayLength = 0x7fefffff;
 
         private T[] _items;
         private int _version;
@@ -98,9 +99,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         public int Capacity
         {
-            get {
-                return _items.Length;
-            }
+            get { return _items.Length; }
             set
             {
                 if (value < Count)
@@ -492,7 +491,7 @@ namespace System.Runtime.CompilerServices
         }
 
         // Ensures that the capacity of this list is at least the given minimum
-        // value. If the currect capacity of the list is less than min, the
+        // value. If the current capacity of the list is less than min, the
         // capacity is increased to twice the current capacity or to min,
         // whichever is larger.
         private void EnsureCapacity(int min)
@@ -502,7 +501,7 @@ namespace System.Runtime.CompilerServices
                 int newCapacity = _items.Length > 0 ? _items.Length * 2 : DefaultCapacity;
                 // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
                 // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-                newCapacity = (int)Math.Min((uint)newCapacity, (uint)0X7FEFFFFF);
+                newCapacity = (int)Math.Min((uint)newCapacity, (uint)MaxCoreClrArrayLength);
                 if (newCapacity < min)
                 {
                     newCapacity = min;
