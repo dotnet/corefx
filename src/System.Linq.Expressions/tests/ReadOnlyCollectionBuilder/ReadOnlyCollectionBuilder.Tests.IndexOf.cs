@@ -45,10 +45,6 @@ namespace System.Linq.Expressions.Tests
             {
                 int count = (int)sizes[0];
                 yield return new object[] { IndexOfMethod.IndexOf_T, count, true };
-
-                if (count > 0) // 0 is an invalid index for IndexOf when the count is 0.
-                {
-                }
             }
         }
 
