@@ -55,9 +55,8 @@ namespace System.Collections.Tests
         /// </summary>
         public static IEnumerable<object[]> IndexOfTestData()
         {
-            foreach (object[] sizes in ValidCollectionSizes())
+            foreach (int count in ValidCollectionSizes().Select(array => array[0]).Cast<int>())
             {
-                int count = (int)sizes[0];
                 yield return new object[] { IndexOfMethod.IndexOf_T, count, true };
                 yield return new object[] { IndexOfMethod.LastIndexOf_T, count, false };
 
