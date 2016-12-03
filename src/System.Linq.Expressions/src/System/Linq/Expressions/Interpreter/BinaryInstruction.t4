@@ -1,51 +1,13 @@
 ﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
-<#@ import namespace="System.Collections.Generic" #>
+<#@ include file="Helpers.t4" #>
 <#
-HashSet<Type> hasBoxCache = new HashSet<Type> { typeof(int) };
 HashSet<Type> hasNoOvfInstructions = new HashSet<Type> { typeof(float), typeof(double) };
 
-Func<Type, string> toCSharp = null;
-toCSharp = type =>
-{
-    if (type == typeof(int)) return "int";
-    else if (type == typeof(uint)) return "uint";
-    else if (type == typeof(short)) return "short";
-    else if (type == typeof(ushort)) return "ushort";
-    else if (type == typeof(byte)) return "byte";
-    else if (type == typeof(sbyte)) return "sbyte";
-    else if (type == typeof(long)) return "long";
-    else if (type == typeof(ulong)) return "ulong";
-    else if (type == typeof(float)) return "float";
-    else if (type == typeof(double)) return "double";
-    else if (type == typeof(decimal)) return "decimal";
-    else if (type == typeof(bool)) return "bool";
-    else if (type == typeof(char)) return "char";
-    else if (type == typeof(string)) return "string";
-    else if (type == typeof(object)) return "object";
-
-    if (type.IsArray)
-    {
-        return toCSharp(type.GetElementType()) + "[]";
-    }
-
-    if (type.IsGenericType)
-    {
-        if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
-        {
-            return toCSharp(type.GetGenericArguments()[0]) + "[]";
-        }
-    }
-
-    return type.Name;
-};
-
-Func<Type, string> toBcl = type => type.Name;
-
 string cachedInstructions = string.Join(", ", operands.Select(o => "s_" + toBcl(o)));
-
 #>
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.

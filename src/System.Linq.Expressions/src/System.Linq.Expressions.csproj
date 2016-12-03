@@ -244,6 +244,10 @@
       <DependentUpon>AddInstruction.tt</DependentUpon>
     </Compile>
     <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.cs" />
+    <Content Include="System\Linq\Expressions\Interpreter\AddInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AddInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\ArrayOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\BranchLabel.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\CallInstruction.cs" />
@@ -256,6 +260,10 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\DivInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DivInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\FieldOperations.cs" />
@@ -279,11 +287,19 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\ModuloInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ModuloInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\MulInstruction.cs">
       <DependentUpon>MulInstruction.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\MulInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MulInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\NegateInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NewInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.cs" />
@@ -300,36 +316,21 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\SubInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SubInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\TypeOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Utilities.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="System\Linq\Expressions\Interpreter\BinaryInstruction.t4" />
-    <Content Include="System\Linq\Expressions\Interpreter\AddInstruction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AddInstruction.cs</LastGenOutput>
-    </Content>
-    <Content Include="System\Linq\Expressions\Interpreter\DivInstruction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DivInstruction.cs</LastGenOutput>
-    </Content>
-    <Content Include="System\Linq\Expressions\Interpreter\ModuloInstruction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModuloInstruction.cs</LastGenOutput>
-    </Content>
-    <Content Include="System\Linq\Expressions\Interpreter\MulInstruction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>MulInstruction.cs</LastGenOutput>
-    </Content>
-    <Content Include="System\Linq\Expressions\Interpreter\SubInstruction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>SubInstruction.cs</LastGenOutput>
-    </Content>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
