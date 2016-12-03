@@ -48,7 +48,9 @@ namespace System.Text.Encodings.Web
     internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
-        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
+
+        //fix the issue: https://github.com/dotnet/corefx/issues/11844
+        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.All));
 
         public DefaultHtmlEncoder(TextEncoderSettings filter)
         {
