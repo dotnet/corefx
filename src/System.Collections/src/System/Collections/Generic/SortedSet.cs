@@ -120,8 +120,8 @@ namespace System.Collections.Generic
                 }
 
                 //pre order way to replicate nodes
-                Stack<Node> theirStack = new Stack<SortedSet<T>.Node>(2 * log2(baseSortedSet.Count) + 2);
-                Stack<Node> myStack = new Stack<SortedSet<T>.Node>(2 * log2(baseSortedSet.Count) + 2);
+                Stack<Node> theirStack = new Stack<SortedSet<T>.Node>(2 * Log2(baseSortedSet.Count) + 2);
+                Stack<Node> myStack = new Stack<SortedSet<T>.Node>(2 * Log2(baseSortedSet.Count) + 2);
                 Node theirCurrent = baseSortedSet._root;
                 Node myCurrent = (theirCurrent != null ? new SortedSet<T>.Node(theirCurrent.Item, theirCurrent.IsRed) : null);
                 _root = myCurrent;
@@ -242,7 +242,7 @@ namespace System.Collections.Generic
             // See page 264 of "Introduction to algorithms" by Thomas H. Cormen
             // note: this should be logbase2, but since the stack grows itself, we 
             // don't want the extra cost
-            Stack<Node> stack = new Stack<Node>(2 * (int)(SortedSet<T>.log2(Count + 1)));
+            Stack<Node> stack = new Stack<Node>(2 * (int)(SortedSet<T>.Log2(Count + 1)));
             Node current = _root;
             while (current != null)
             {
@@ -2050,7 +2050,7 @@ namespace System.Collections.Generic
 
                 // The maximum height of a red-black tree is 2*lg(n+1).
                 // See page 264 of "Introduction to algorithms" by Thomas H. Cormen
-                Stack<Node> stack = new Stack<Node>(2 * (int)SortedSet<T>.log2(_count + 1)); //this is not exactly right if count is out of date, but the stack can grow
+                Stack<Node> stack = new Stack<Node>(2 * (int)SortedSet<T>.Log2(_count + 1)); //this is not exactly right if count is out of date, but the stack can grow
                 Node current = _root;
                 while (current != null)
                 {
@@ -2396,7 +2396,7 @@ namespace System.Collections.Generic
                 _version = _tree._version;
 
                 // 2lg(n + 1) is the maximum height
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.log2(set.Count + 1));
+                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(set.Count + 1));
                 _current = null;
                 _reverse = false;
 
@@ -2412,7 +2412,7 @@ namespace System.Collections.Generic
                 _version = _tree._version;
 
                 // 2lg(n + 1) is the maximum height
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.log2(set.Count + 1));
+                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(set.Count + 1));
                 _current = null;
                 _reverse = reverse;
 
@@ -2466,7 +2466,7 @@ namespace System.Collections.Generic
                 _version = _siInfo.GetInt32(EnumVersionName);
                 _reverse = _siInfo.GetBoolean(ReverseName);
                 bool EnumStarted = _siInfo.GetBoolean(EnumStartName);
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.log2(_tree.Count + 1));
+                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(_tree.Count + 1));
                 _current = null;
                 if (EnumStarted)
                 {
@@ -2610,15 +2610,15 @@ namespace System.Collections.Generic
 
         #region misc
         // used for set checking operations (using enumerables) that rely on counting
-        private static int log2(int value)
+        private static int Log2(int value)
         {
-            int c = 0;
+            int result = 0;
             while (value > 0)
             {
-                c++;
-                value >>= 1;
+                result++;
+                value &= value - 1; // clear last bit set
             }
-            return c;
+            return result;
         }
         #endregion
     }
