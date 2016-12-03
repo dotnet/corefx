@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
-    internal abstract class OrInstruction : Instruction
+    internal abstract partial class OrInstruction : Instruction
     {
         private static Instruction s_SByte, s_int16, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_bool;
 
@@ -145,36 +145,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        private sealed class OrBool : OrInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null)
-                {
-                    if (right == null)
-                    {
-                        frame.Push(null);
-                    }
-                    else
-                    {
-                        frame.Push((bool)right ? Utils.BoxedTrue : null);
-                    }
-                    return +1;
-                }
-
-                if (right == null)
-                {
-                    frame.Push((bool)left ? Utils.BoxedTrue : null);
-                    return +1;
-                }
-
-                frame.Push((bool)left | (bool)right);
-                return +1;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static Instruction Create(Type type)
         {
@@ -192,7 +162,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new OrUInt16());
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new OrUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new OrUInt64());
-                case TypeCode.Boolean: return s_bool ?? (s_bool = new OrBool());
+                case TypeCode.Boolean: return s_bool ?? (s_bool = new OrBoolean());
 
                 default:
                     throw Error.ExpressionNotSupportedForType("Or", type);

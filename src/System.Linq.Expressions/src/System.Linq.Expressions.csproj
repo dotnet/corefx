@@ -300,7 +300,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>LeftShiftInstruction.cs</LastGenOutput>
     </Content>
-
     <Compile Include="System\Linq\Expressions\Interpreter\LessThanInstruction.cs">
       <DependentUpon>LessThanInstruction.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -385,6 +384,11 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.Boolean.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.Boolean.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.Boolean.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

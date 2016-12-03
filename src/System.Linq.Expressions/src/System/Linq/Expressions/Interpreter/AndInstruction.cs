@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
-    internal abstract class AndInstruction : Instruction
+    internal abstract partial class AndInstruction : Instruction
     {
         private static Instruction s_SByte, s_int16, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_bool;
 
@@ -145,34 +145,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        private sealed class AndBool : AndInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null)
-                {
-                    if (right == null)
-                    {
-                        frame.Push(null);
-                    }
-                    else
-                    {
-                        frame.Push((bool)right ? null : Utils.BoxedFalse);
-                    }
-                    return +1;
-                }
-                else if (right == null)
-                {
-                    frame.Push((bool)left ? null : Utils.BoxedFalse);
-                    return +1;
-                }
-                frame.Push(((bool)left) & ((bool)right));
-                return +1;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static Instruction Create(Type type)
         {
@@ -189,7 +161,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new AndUInt16());
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new AndUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new AndUInt64());
-                case TypeCode.Boolean: return s_bool ?? (s_bool = new AndBool());
+                case TypeCode.Boolean: return s_bool ?? (s_bool = new AndBoolean());
 
                 default:
                     throw Error.ExpressionNotSupportedForType("And", type);

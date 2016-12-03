@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
-    internal abstract class ExclusiveOrInstruction : Instruction
+    internal abstract partial class ExclusiveOrInstruction : Instruction
     {
         private static Instruction s_SByte, s_int16, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_bool;
 
@@ -145,22 +145,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        private sealed class ExclusiveOrBool : ExclusiveOrInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object left = frame.Pop();
-                object right = frame.Pop();
-                if (left == null || right == null)
-                {
-                    frame.Push(null);
-                    return +1;
-                }
-                frame.Push(((bool)left) ^ ((bool)right));
-                return +1;
-            }
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static Instruction Create(Type type)
         {
@@ -178,7 +162,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new ExclusiveOrUInt16());
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new ExclusiveOrUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new ExclusiveOrUInt64());
-                case TypeCode.Boolean: return s_bool ?? (s_bool = new ExclusiveOrBool());
+                case TypeCode.Boolean: return s_bool ?? (s_bool = new ExclusiveOrBoolean());
 
                 default:
                     throw Error.ExpressionNotSupportedForType("ExclusiveOr", type);
