@@ -763,7 +763,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void InsertTests_negative()
+        public static void InsertTests_Negative()
         {
             Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
