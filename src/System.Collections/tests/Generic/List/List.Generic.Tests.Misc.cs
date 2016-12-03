@@ -709,7 +709,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void InsertTests()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
@@ -718,21 +718,21 @@ namespace System.Collections.Tests
             for (int i = 0; i < 100; i++)
                 intArr2[i] = i + 100;
 
-            IntDriver.BasicInsert(new int[0], 1, 0, 3);
-            IntDriver.BasicInsert(intArr1, 101, 50, 4);
-            IntDriver.BasicInsert(intArr1, 100, 100, 5);
-            IntDriver.BasicInsert(intArr1, 100, 99, 6);
-            IntDriver.BasicInsert(intArr1, 50, 0, 7);
-            IntDriver.BasicInsert(intArr1, 50, 1, 8);
-            IntDriver.BasicInsert(intArr1, 100, 50, 50);
+            intDriver.BasicInsert(new int[0], 1, 0, 3);
+            intDriver.BasicInsert(intArr1, 101, 50, 4);
+            intDriver.BasicInsert(intArr1, 100, 100, 5);
+            intDriver.BasicInsert(intArr1, 100, 99, 6);
+            intDriver.BasicInsert(intArr1, 50, 0, 7);
+            intDriver.BasicInsert(intArr1, 50, 1, 8);
+            intDriver.BasicInsert(intArr1, 100, 50, 50);
 
-            IntDriver.NonGenericIListBasicInsert(new int[0], 1, 0, 3);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 101, 50, 4);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 100, 100, 5);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 100, 99, 6);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 50, 0, 7);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 50, 1, 8);
-            IntDriver.NonGenericIListBasicInsert(intArr1, 100, 50, 50);
+            intDriver.NonGenericIListBasicInsert(new int[0], 1, 0, 3);
+            intDriver.NonGenericIListBasicInsert(intArr1, 101, 50, 4);
+            intDriver.NonGenericIListBasicInsert(intArr1, 100, 100, 5);
+            intDriver.NonGenericIListBasicInsert(intArr1, 100, 99, 6);
+            intDriver.NonGenericIListBasicInsert(intArr1, 50, 0, 7);
+            intDriver.NonGenericIListBasicInsert(intArr1, 50, 1, 8);
+            intDriver.NonGenericIListBasicInsert(intArr1, 100, 50, 50);
 
             Driver<string> StringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
@@ -765,12 +765,12 @@ namespace System.Collections.Tests
         [Fact]
         public static void InsertTests_negative()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
-            IntDriver.InsertValidations(intArr1);
-            IntDriver.NonGenericIListInsertValidations(intArr1);
+            intDriver.InsertValidations(intArr1);
+            intDriver.NonGenericIListInsertValidations(intArr1);
 
             Driver<string> StringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
@@ -783,7 +783,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void InsertRangeTests()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
@@ -794,13 +794,13 @@ namespace System.Collections.Tests
                 intArr2[i] = i + 100;
             }
 
-            IntDriver.InsertRangeICollection(new int[0], intArr1, 0, 1, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeICollection(intArr1, intArr2, 0, 1, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeICollection(intArr1, intArr2, 1, 1, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeICollection(intArr1, intArr2, 99, 1, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeICollection(intArr1, intArr2, 100, 1, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeICollection(intArr1, intArr2, 50, 50, IntDriver.ConstructTestCollection);
-            IntDriver.InsertRangeList(intArr1, intArr2, 0, 1, IntDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(new int[0], intArr1, 0, 1, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(intArr1, intArr2, 0, 1, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(intArr1, intArr2, 1, 1, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(intArr1, intArr2, 99, 1, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(intArr1, intArr2, 100, 1, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeICollection(intArr1, intArr2, 50, 50, intDriver.ConstructTestCollection);
+            intDriver.InsertRangeList(intArr1, intArr2, 0, 1, intDriver.ConstructTestCollection);
 
             Driver<string> StringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
@@ -826,7 +826,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void InsertRangeTests_Negative()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
@@ -835,29 +835,29 @@ namespace System.Collections.Tests
             for (int i = 0; i < 100; i++)
                 stringArr1[i] = "SomeTestString" + i.ToString();
 
-            IntDriver.InsertRangeValidations(intArr1, IntDriver.ConstructTestCollection);
+            intDriver.InsertRangeValidations(intArr1, intDriver.ConstructTestCollection);
             StringDriver.InsertRangeValidations(stringArr1, StringDriver.ConstructTestCollection);
         }
 
         [Fact]
         public static void GetRangeTests()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
 
-            IntDriver.BasicGetRange(intArr1, 50, 50);
-            IntDriver.BasicGetRange(intArr1, 0, 50);
-            IntDriver.BasicGetRange(intArr1, 50, 25);
-            IntDriver.BasicGetRange(intArr1, 0, 25);
-            IntDriver.BasicGetRange(intArr1, 75, 25);
-            IntDriver.BasicGetRange(intArr1, 0, 100);
-            IntDriver.BasicGetRange(intArr1, 0, 99);
-            IntDriver.BasicGetRange(intArr1, 1, 1);
-            IntDriver.BasicGetRange(intArr1, 99, 1);
-            IntDriver.EnsureRangeIsReference(intArr1, 101, 0, 10);
-            IntDriver.EnsureThrowsAfterModification(intArr1, 10, 10, 10);
+            intDriver.BasicGetRange(intArr1, 50, 50);
+            intDriver.BasicGetRange(intArr1, 0, 50);
+            intDriver.BasicGetRange(intArr1, 50, 25);
+            intDriver.BasicGetRange(intArr1, 0, 25);
+            intDriver.BasicGetRange(intArr1, 75, 25);
+            intDriver.BasicGetRange(intArr1, 0, 100);
+            intDriver.BasicGetRange(intArr1, 0, 99);
+            intDriver.BasicGetRange(intArr1, 1, 1);
+            intDriver.BasicGetRange(intArr1, 99, 1);
+            intDriver.EnsureRangeIsReference(intArr1, 101, 0, 10);
+            intDriver.EnsureThrowsAfterModification(intArr1, 10, 10, 10);
 
             Driver<string> StringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
@@ -880,7 +880,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void GetRangeTests_Negative()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[100];
             for (int i = 0; i < 100; i++)
                 intArr1[i] = i;
@@ -891,7 +891,7 @@ namespace System.Collections.Tests
                 stringArr1[i] = "SomeTestString" + i.ToString();
 
             StringDriver.GetRangeValidations(stringArr1);
-            IntDriver.GetRangeValidations(intArr1);
+            intDriver.GetRangeValidations(intArr1);
         }
 
         [Fact]
@@ -946,7 +946,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void ContainsTests()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr1 = new int[10];
             for (int i = 0; i < 10; i++)
             {
@@ -959,21 +959,21 @@ namespace System.Collections.Tests
                 intArr2[i] = i + 10;
             }
 
-            IntDriver.BasicContains(intArr1);
-            IntDriver.NonExistingValues(intArr1, intArr2);
-            IntDriver.RemovedValues(intArr1);
-            IntDriver.AddRemoveValues(intArr1);
-            IntDriver.MultipleValues(intArr1, 3);
-            IntDriver.MultipleValues(intArr1, 5);
-            IntDriver.MultipleValues(intArr1, 17);
-            IntDriver.NonGenericIListBasicContains(intArr1);
-            IntDriver.NonGenericIListNonExistingValues(intArr1, intArr2);
-            IntDriver.NonGenericIListRemovedValues(intArr1);
-            IntDriver.NonGenericIListAddRemoveValues(intArr1);
-            IntDriver.NonGenericIListMultipleValues(intArr1, 3);
-            IntDriver.NonGenericIListMultipleValues(intArr1, 5);
-            IntDriver.NonGenericIListMultipleValues(intArr1, 17);
-            IntDriver.NonGenericIListContainsTestParams();
+            intDriver.BasicContains(intArr1);
+            intDriver.NonExistingValues(intArr1, intArr2);
+            intDriver.RemovedValues(intArr1);
+            intDriver.AddRemoveValues(intArr1);
+            intDriver.MultipleValues(intArr1, 3);
+            intDriver.MultipleValues(intArr1, 5);
+            intDriver.MultipleValues(intArr1, 17);
+            intDriver.NonGenericIListBasicContains(intArr1);
+            intDriver.NonGenericIListNonExistingValues(intArr1, intArr2);
+            intDriver.NonGenericIListRemovedValues(intArr1);
+            intDriver.NonGenericIListAddRemoveValues(intArr1);
+            intDriver.NonGenericIListMultipleValues(intArr1, 3);
+            intDriver.NonGenericIListMultipleValues(intArr1, 5);
+            intDriver.NonGenericIListMultipleValues(intArr1, 17);
+            intDriver.NonGenericIListContainsTestParams();
 
 
             Driver<string> StringDriver = new Driver<string>();
@@ -1010,29 +1010,29 @@ namespace System.Collections.Tests
         [Fact]
         public static void ClearTests()
         {
-            Driver<int> IntDriver = new Driver<int>();
+            Driver<int> intDriver = new Driver<int>();
             int[] intArr = new int[10];
             for (int i = 0; i < 10; i++)
             {
                 intArr[i] = i;
             }
 
-            IntDriver.ClearEmptyList();
-            IntDriver.ClearMultipleTimesEmptyList(1);
-            IntDriver.ClearMultipleTimesEmptyList(10);
-            IntDriver.ClearMultipleTimesEmptyList(100);
-            IntDriver.ClearNonEmptyList(intArr);
-            IntDriver.ClearMultipleTimesNonEmptyList(intArr, 2);
-            IntDriver.ClearMultipleTimesNonEmptyList(intArr, 7);
-            IntDriver.ClearMultipleTimesNonEmptyList(intArr, 31);
-            IntDriver.NonGenericIListClearEmptyList();
-            IntDriver.NonGenericIListClearMultipleTimesEmptyList(1);
-            IntDriver.NonGenericIListClearMultipleTimesEmptyList(10);
-            IntDriver.NonGenericIListClearMultipleTimesEmptyList(100);
-            IntDriver.NonGenericIListClearNonEmptyList(intArr);
-            IntDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 2);
-            IntDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 7);
-            IntDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 31);
+            intDriver.ClearEmptyList();
+            intDriver.ClearMultipleTimesEmptyList(1);
+            intDriver.ClearMultipleTimesEmptyList(10);
+            intDriver.ClearMultipleTimesEmptyList(100);
+            intDriver.ClearNonEmptyList(intArr);
+            intDriver.ClearMultipleTimesNonEmptyList(intArr, 2);
+            intDriver.ClearMultipleTimesNonEmptyList(intArr, 7);
+            intDriver.ClearMultipleTimesNonEmptyList(intArr, 31);
+            intDriver.NonGenericIListClearEmptyList();
+            intDriver.NonGenericIListClearMultipleTimesEmptyList(1);
+            intDriver.NonGenericIListClearMultipleTimesEmptyList(10);
+            intDriver.NonGenericIListClearMultipleTimesEmptyList(100);
+            intDriver.NonGenericIListClearNonEmptyList(intArr);
+            intDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 2);
+            intDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 7);
+            intDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 31);
 
             Driver<string> StringDriver = new Driver<string>();
             string[] stringArr = new string[10];
