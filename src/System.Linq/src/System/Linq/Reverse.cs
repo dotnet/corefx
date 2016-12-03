@@ -122,38 +122,21 @@ namespace System.Linq
 
             public TSource TryGetElementAt(int index, out bool found)
             {
-                if ((uint)index < (uint)_source.Length)
+                var buffer = new Buffer<TSource>(_source);
+
+                if ((uint)index < (uint)buffer._count)
                 {
                     found = true;
-                    return _selector(_source[index]);
+                    return buffer._items[buffer._count - index - 1];
                 }
 
                 found = false;
                 return default(TSource);
             }
 
-            public TSource TryGetFirst(out bool found)
-            {
-                Debug.Assert(_source.Length > 0); // See assert in constructor
+            public TSource TryGetFirst(out bool found) => _source.TryGetLast(out found);
 
-                found = true;
-                return _selector(_source[0]);
-            }
-
-            public TSource TryGetLast(out bool found)
-            {
-                using (IEnumerator<TSource> en = _source.GetEnumerator())
-                {
-                    if (en.MoveNext())
-                    {
-                        found = true;
-                        return en.Current;
-                    }
-                }
-
-                found = false;
-                return default(TSource);
-            }
+            public TSource TryGetLast(out bool found) => _source.TryGetFirst(out found);
         }
     }
 }
