@@ -394,7 +394,7 @@ namespace System.Linq.Expressions.Tests
             intDriver.NonGenericIListBasicInsert(intArr1, 50, 1, 8);
             intDriver.NonGenericIListBasicInsert(intArr1, 100, 50, 50);
 
-            Driver<string> StringDriver = new Driver<string>();
+            Driver<string> stringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
             for (int i = 0; i < 100; i++)
                 stringArr1[i] = "SomeTestString" + i.ToString();
@@ -402,24 +402,24 @@ namespace System.Linq.Expressions.Tests
             for (int i = 0; i < 100; i++)
                 stringArr2[i] = "SomeTestString" + (i + 100).ToString();
 
-            StringDriver.BasicInsert(stringArr1, "strobia", 99, 2);
-            StringDriver.BasicInsert(stringArr1, "strobia", 100, 3);
-            StringDriver.BasicInsert(stringArr1, "strobia", 0, 4);
-            StringDriver.BasicInsert(stringArr1, "strobia", 1, 5);
-            StringDriver.BasicInsert(stringArr1, "strobia", 50, 51);
-            StringDriver.BasicInsert(stringArr1, "strobia", 0, 100);
-            StringDriver.BasicInsert(new string[] { null, null, null, "strobia", null }, null, 2, 3);
-            StringDriver.BasicInsert(new string[] { null, null, null, null, null }, "strobia", 0, 5);
-            StringDriver.BasicInsert(new string[] { null, null, null, null, null }, "strobia", 5, 1);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 99, 2);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 100, 3);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 0, 4);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 1, 5);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 50, 51);
-            StringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 0, 100);
-            StringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, "strobia", null }, null, 2, 3);
-            StringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, null, null }, "strobia", 0, 5);
-            StringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, null, null }, "strobia", 5, 1);
+            stringDriver.BasicInsert(stringArr1, "strobia", 99, 2);
+            stringDriver.BasicInsert(stringArr1, "strobia", 100, 3);
+            stringDriver.BasicInsert(stringArr1, "strobia", 0, 4);
+            stringDriver.BasicInsert(stringArr1, "strobia", 1, 5);
+            stringDriver.BasicInsert(stringArr1, "strobia", 50, 51);
+            stringDriver.BasicInsert(stringArr1, "strobia", 0, 100);
+            stringDriver.BasicInsert(new string[] { null, null, null, "strobia", null }, null, 2, 3);
+            stringDriver.BasicInsert(new string[] { null, null, null, null, null }, "strobia", 0, 5);
+            stringDriver.BasicInsert(new string[] { null, null, null, null, null }, "strobia", 5, 1);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 99, 2);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 100, 3);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 0, 4);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 1, 5);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 50, 51);
+            stringDriver.NonGenericIListBasicInsert(stringArr1, "strobia", 0, 100);
+            stringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, "strobia", null }, null, 2, 3);
+            stringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, null, null }, "strobia", 0, 5);
+            stringDriver.NonGenericIListBasicInsert(new string[] { null, null, null, null, null }, "strobia", 5, 1);
         }
 
         [Fact]
@@ -432,12 +432,12 @@ namespace System.Linq.Expressions.Tests
             intDriver.InsertValidations(intArr1);
             intDriver.NonGenericIListInsertValidations(intArr1);
 
-            Driver<string> StringDriver = new Driver<string>();
+            Driver<string> stringDriver = new Driver<string>();
             string[] stringArr1 = new string[100];
             for (int i = 0; i < 100; i++)
                 stringArr1[i] = "SomeTestString" + i.ToString();
-            StringDriver.InsertValidations(stringArr1);
-            StringDriver.NonGenericIListInsertValidations(stringArr1);
+            stringDriver.InsertValidations(stringArr1);
+            stringDriver.NonGenericIListInsertValidations(stringArr1);
         }
 
         [Fact]
@@ -473,7 +473,7 @@ namespace System.Linq.Expressions.Tests
             intDriver.NonGenericIListContainsTestParams();
 
 
-            Driver<string> StringDriver = new Driver<string>();
+            Driver<string> stringDriver = new Driver<string>();
             string[] stringArr1 = new string[10];
             for (int i = 0; i < 10; i++)
             {
@@ -485,23 +485,23 @@ namespace System.Linq.Expressions.Tests
                 stringArr2[i] = "SomeTestString" + (i + 10).ToString();
             }
 
-            StringDriver.BasicContains(stringArr1);
-            StringDriver.NonExistingValues(stringArr1, stringArr2);
-            StringDriver.RemovedValues(stringArr1);
-            StringDriver.AddRemoveValues(stringArr1);
-            StringDriver.MultipleValues(stringArr1, 3);
-            StringDriver.MultipleValues(stringArr1, 5);
-            StringDriver.MultipleValues(stringArr1, 17);
-            StringDriver.ContainsNullWhenReference(stringArr1, null);
-            StringDriver.NonGenericIListBasicContains(stringArr1);
-            StringDriver.NonGenericIListNonExistingValues(stringArr1, stringArr2);
-            StringDriver.NonGenericIListRemovedValues(stringArr1);
-            StringDriver.NonGenericIListAddRemoveValues(stringArr1);
-            StringDriver.NonGenericIListMultipleValues(stringArr1, 3);
-            StringDriver.NonGenericIListMultipleValues(stringArr1, 5);
-            StringDriver.NonGenericIListMultipleValues(stringArr1, 17);
-            StringDriver.NonGenericIListContainsNullWhenReference(stringArr1, null);
-            StringDriver.NonGenericIListContainsTestParams();
+            stringDriver.BasicContains(stringArr1);
+            stringDriver.NonExistingValues(stringArr1, stringArr2);
+            stringDriver.RemovedValues(stringArr1);
+            stringDriver.AddRemoveValues(stringArr1);
+            stringDriver.MultipleValues(stringArr1, 3);
+            stringDriver.MultipleValues(stringArr1, 5);
+            stringDriver.MultipleValues(stringArr1, 17);
+            stringDriver.ContainsNullWhenReference(stringArr1, null);
+            stringDriver.NonGenericIListBasicContains(stringArr1);
+            stringDriver.NonGenericIListNonExistingValues(stringArr1, stringArr2);
+            stringDriver.NonGenericIListRemovedValues(stringArr1);
+            stringDriver.NonGenericIListAddRemoveValues(stringArr1);
+            stringDriver.NonGenericIListMultipleValues(stringArr1, 3);
+            stringDriver.NonGenericIListMultipleValues(stringArr1, 5);
+            stringDriver.NonGenericIListMultipleValues(stringArr1, 17);
+            stringDriver.NonGenericIListContainsNullWhenReference(stringArr1, null);
+            stringDriver.NonGenericIListContainsTestParams();
         }
 
         [Fact]
@@ -531,29 +531,29 @@ namespace System.Linq.Expressions.Tests
             intDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 7);
             intDriver.NonGenericIListClearMultipleTimesNonEmptyList(intArr, 31);
 
-            Driver<string> StringDriver = new Driver<string>();
+            Driver<string> stringDriver = new Driver<string>();
             string[] stringArr = new string[10];
             for (int i = 0; i < 10; i++)
             {
                 stringArr[i] = "SomeTestString" + i.ToString();
             }
 
-            StringDriver.ClearEmptyList();
-            StringDriver.ClearMultipleTimesEmptyList(1);
-            StringDriver.ClearMultipleTimesEmptyList(10);
-            StringDriver.ClearMultipleTimesEmptyList(100);
-            StringDriver.ClearNonEmptyList(stringArr);
-            StringDriver.ClearMultipleTimesNonEmptyList(stringArr, 2);
-            StringDriver.ClearMultipleTimesNonEmptyList(stringArr, 7);
-            StringDriver.ClearMultipleTimesNonEmptyList(stringArr, 31);
-            StringDriver.NonGenericIListClearEmptyList();
-            StringDriver.NonGenericIListClearMultipleTimesEmptyList(1);
-            StringDriver.NonGenericIListClearMultipleTimesEmptyList(10);
-            StringDriver.NonGenericIListClearMultipleTimesEmptyList(100);
-            StringDriver.NonGenericIListClearNonEmptyList(stringArr);
-            StringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 2);
-            StringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 7);
-            StringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 31);
+            stringDriver.ClearEmptyList();
+            stringDriver.ClearMultipleTimesEmptyList(1);
+            stringDriver.ClearMultipleTimesEmptyList(10);
+            stringDriver.ClearMultipleTimesEmptyList(100);
+            stringDriver.ClearNonEmptyList(stringArr);
+            stringDriver.ClearMultipleTimesNonEmptyList(stringArr, 2);
+            stringDriver.ClearMultipleTimesNonEmptyList(stringArr, 7);
+            stringDriver.ClearMultipleTimesNonEmptyList(stringArr, 31);
+            stringDriver.NonGenericIListClearEmptyList();
+            stringDriver.NonGenericIListClearMultipleTimesEmptyList(1);
+            stringDriver.NonGenericIListClearMultipleTimesEmptyList(10);
+            stringDriver.NonGenericIListClearMultipleTimesEmptyList(100);
+            stringDriver.NonGenericIListClearNonEmptyList(stringArr);
+            stringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 2);
+            stringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 7);
+            stringDriver.NonGenericIListClearMultipleTimesNonEmptyList(stringArr, 31);
         }
     }
 }
