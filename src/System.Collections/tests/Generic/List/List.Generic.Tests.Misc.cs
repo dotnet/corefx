@@ -59,11 +59,11 @@ namespace System.Collections.Tests
             public void NonGenericIListBasicInsert(T[] items, T item, int index, int repeat)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
 
                 for (int i = 0; i < repeat; i++)
                 {
-                    _ilist.Insert(index, item);
+                    iList.Insert(index, item);
                 }
 
                 Assert.True(list.Contains(item));
@@ -89,14 +89,14 @@ namespace System.Collections.Tests
             public void NonGenericIListInsertValidations(T[] items)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
                 int[] bad = new int[] { items.Length + 1, items.Length + 2, int.MaxValue, -1, -2, int.MinValue };
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentOutOfRangeException>(() => _ilist.Insert(bad[i], items[0]));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => iList.Insert(bad[i], items[0]));
                 }
 
-                Assert.Throws<ArgumentException>(() => _ilist.Insert(0, new LinkedListNode<string>("blargh")));
+                Assert.Throws<ArgumentException>(() => iList.Insert(0, new LinkedListNode<string>("blargh")));
             }
 
             #endregion
@@ -477,53 +477,53 @@ namespace System.Collections.Tests
             public void NonGenericIListBasicContains(T[] items)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
 
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Assert.True(_ilist.Contains(items[i]));
+                    Assert.True(iList.Contains(items[i]));
                 }
             }
 
             public void NonGenericIListNonExistingValues(T[] itemsX, T[] itemsY)
             {
                 List<T> list = new List<T>(itemsX);
-                IList _ilist = list;
+                IList iList = list;
 
                 for (int i = 0; i < itemsY.Length; i++)
                 {
-                    Assert.False(_ilist.Contains(itemsY[i]));
+                    Assert.False(iList.Contains(itemsY[i]));
                 }
             }
 
             public void NonGenericIListRemovedValues(T[] items)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
                 for (int i = 0; i < items.Length; i++)
                 {
                     list.Remove(items[i]);
-                    Assert.False(_ilist.Contains(items[i]));
+                    Assert.False(iList.Contains(items[i]));
                 }
             }
 
             public void NonGenericIListAddRemoveValues(T[] items)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
                 for (int i = 0; i < items.Length; i++)
                 {
                     list.Add(items[i]);
                     list.Remove(items[i]);
                     list.Add(items[i]);
-                    Assert.True(_ilist.Contains(items[i]));
+                    Assert.True(iList.Contains(items[i]));
                 }
             }
 
             public void NonGenericIListMultipleValues(T[] items, int times)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
 
                 for (int i = 0; i < times; i++)
                 {
@@ -532,10 +532,10 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < times + 1; i++)
                 {
-                    Assert.True(_ilist.Contains(items[items.Length / 2]));
+                    Assert.True(iList.Contains(items[items.Length / 2]));
                     list.Remove(items[items.Length / 2]);
                 }
-                Assert.False(_ilist.Contains(items[items.Length / 2]));
+                Assert.False(iList.Contains(items[items.Length / 2]));
             }
 
             public void NonGenericIListContainsNullWhenReference(T[] items, T value)
@@ -546,18 +546,17 @@ namespace System.Collections.Tests
                 }
 
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
                 list.Add(value);
-                Assert.True(_ilist.Contains(value));
+                Assert.True(iList.Contains(value));
             }
 
             public void NonGenericIListContainsTestParams()
             {
                 List<T> list = new List<T>();
-                IList _ilist = list;
+                IList iList = list;
 
-                Assert.False(_ilist.Contains(new LinkedListNode<string>("rah")),
-                    "Err_68850ahiuedpz Expected Contains to return false with invalid type");
+                Assert.False(iList.Contains(new LinkedListNode<string>("rah"))); //"Err_68850ahiuedpz Expected Contains to return false with invalid type");
             }
 
             #endregion
@@ -601,37 +600,37 @@ namespace System.Collections.Tests
             public void NonGenericIListClearEmptyList()
             {
                 List<T> list = new List<T>();
-                IList _ilist = list;
+                IList iList = list;
                 Assert.Equal(list.Count, 0);
-                _ilist.Clear();
+                iList.Clear();
                 Assert.Equal(list.Count, 0);
             }
             public void NonGenericIListClearMultipleTimesEmptyList(int times)
             {
                 List<T> list = new List<T>();
-                IList _ilist = list;
+                IList iList = list;
                 Assert.Equal(list.Count, 0);
                 for (int i = 0; i < times; i++)
                 {
-                    _ilist.Clear();
+                    iList.Clear();
                     Assert.Equal(list.Count, 0);
                 }
             }
             public void NonGenericIListClearNonEmptyList(T[] items)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
-                _ilist.Clear();
+                IList iList = list;
+                iList.Clear();
                 Assert.Equal(list.Count, 0);
             }
 
             public void NonGenericIListClearMultipleTimesNonEmptyList(T[] items, int times)
             {
                 List<T> list = new List<T>(items);
-                IList _ilist = list;
+                IList iList = list;
                 for (int i = 0; i < times; i++)
                 {
-                    _ilist.Clear();
+                    iList.Clear();
                     Assert.Equal(list.Count, 0);
                 }
             }
