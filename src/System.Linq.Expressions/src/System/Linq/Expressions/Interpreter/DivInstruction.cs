@@ -34,7 +34,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (short)((short)l / (short)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -53,7 +53,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)((int)l / (int)r));
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -72,7 +72,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (long)((long)l / (long)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -91,7 +91,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l / (ushort)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -110,7 +110,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (uint)((uint)l / (uint)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -129,7 +129,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (ulong)((ulong)l / (ulong)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -148,7 +148,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (float)((float)l / (float)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -167,7 +167,7 @@ namespace System.Linq.Expressions.Interpreter
                     frame.Data[frame.StackIndex - 2] = (double)((double)l / (double)r);
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 

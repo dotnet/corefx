@@ -69,7 +69,7 @@ foreach (var type in operands)
                     frame.Data[frame.StackIndex - 2] = <#=op#>;
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
@@ -145,7 +145,7 @@ foreach (var type in operandsWithOverflow)
                     frame.Data[frame.StackIndex - 2] = <#=op#>;
                 }
                 frame.StackIndex--;
-                return +1;
+                return 1;
             }
         }
 
