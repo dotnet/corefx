@@ -2,6 +2,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Linq.Expressions" #>
 <#@ import namespace="System.Text" #>
 <#@ include file="Helpers.t4" #>
 <#
@@ -36,7 +37,12 @@ foreach (var type in operands)
     var typeName = toBcl(type);
     var typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")((" + typeAlias + ")l " + infix + " (" + typeAlias + ")r)";
+    var op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
+
+    // TODO: redundant cast analysis
+    {
+        op = "(" + typeAlias + ")(" + op + ")";
+    }
 
     if (hasOverflow && !hasNoOvfInstructions.Contains(type))
     {
