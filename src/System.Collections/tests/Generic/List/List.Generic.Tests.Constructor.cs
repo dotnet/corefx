@@ -3,21 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections.Tests;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using Xunit;
 
-namespace System.Linq.Expressions.Tests
+namespace System.Collections.Tests
 {
     /// <summary>
     /// Contains tests that ensure the correctness of the List class.
     /// </summary>
-    public abstract partial class ReadOnlyCollectionBuilder_Generic_Tests<T> : IList_Generic_Tests<T>
+    public abstract partial class List_Generic_Tests<T> : IList_Generic_Tests<T>
     {
         [Fact]
         public void Constructor_Default()
         {
-            ReadOnlyCollectionBuilder<T> list = new ReadOnlyCollectionBuilder<T>();
+            List<T> list = new List<T>();
             Assert.Equal(0, list.Capacity); //"Expected capacity of list to be the same as given."
             Assert.Equal(0, list.Count); //"Do not expect anything to be in the list."
             Assert.False(((IList<T>)list).IsReadOnly); //"List should not be readonly"
