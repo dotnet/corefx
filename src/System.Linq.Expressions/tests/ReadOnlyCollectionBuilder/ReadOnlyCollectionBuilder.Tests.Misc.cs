@@ -27,24 +27,24 @@ namespace System.Linq.Expressions.Tests
                     list.Insert(index, item);
                 }
 
-                Assert.True(list.Contains(item)); //"Expect it to contain the item."
-                Assert.Equal(list.Count, items.Length + repeat); //"Expect to be the same."
+                Assert.True(list.Contains(item));
+                Assert.Equal(list.Count, items.Length + repeat);
 
 
                 for (int i = 0; i < index; i++)
                 {
-                    Assert.Equal(list[i], items[i]); //"Expect to be the same."
+                    Assert.Equal(list[i], items[i]);
                 }
 
                 for (int i = index; i < index + repeat; i++)
                 {
-                    Assert.Equal(list[i], item); //"Expect to be the same."
+                    Assert.Equal(list[i], item);
                 }
 
 
                 for (int i = index + repeat; i < list.Count; i++)
                 {
-                    Assert.Equal(list[i], items[i - repeat]); //"Expect to be the same."
+                    Assert.Equal(list[i], items[i - repeat]);
                 }
             }
 
