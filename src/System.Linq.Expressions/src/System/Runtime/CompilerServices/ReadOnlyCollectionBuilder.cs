@@ -395,14 +395,17 @@ namespace System.Runtime.CompilerServices
 
         void ICollection.CopyTo(Array array, int index)
         {
-            if ((array != null) && (array.Rank != 1))
+            if (array == null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (array.Rank != 1)
             {
                 throw new ArgumentException(); // Arg_RankMultiDimNotSupported
             }
 
             try
             {
-                // Array.Copy will check for null.
                 Array.Copy(_items, 0, array, index, Count);
             }
             catch (ArrayTypeMismatchException)
