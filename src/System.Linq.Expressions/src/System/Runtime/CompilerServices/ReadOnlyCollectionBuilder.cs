@@ -401,7 +401,7 @@ namespace System.Runtime.CompilerServices
             }
             if (array.Rank != 1)
             {
-                throw new ArgumentException(); // Arg_RankMultiDimNotSupported
+                throw new ArgumentException(SR.ArgumentMustBeSingleDimensionalArrayType, nameof(array));
             }
 
             try
@@ -410,7 +410,7 @@ namespace System.Runtime.CompilerServices
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentException(); // Argument_InvalidArrayType
+                throw new ArgumentException(SR.ArgumentInvalidArrayType, nameof(array));
             }
         }
 
@@ -445,7 +445,7 @@ namespace System.Runtime.CompilerServices
             }
             if (Count - index < count)
             {
-                throw new ArgumentException(); // Argument_InvalidOffLen
+                throw new ArgumentException(SR.ArgumentInvalidOffLen);
             }
 
             Array.Reverse(_items, index, count);
