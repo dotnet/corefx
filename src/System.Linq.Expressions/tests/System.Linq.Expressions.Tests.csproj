@@ -30,11 +30,26 @@
     <Compile Include="..\..\Common\tests\System\Collections\ICollection.Generic.Tests.cs">
       <Link>Common\System\Collections\ICollection.Generic.Tests.cs</Link>
     </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\ICollection.NonGeneric.Tests.cs">
+      <Link>Common\System\Collections\ICollection.NonGeneric.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IEnumerable.Generic.Serialization.Tests.cs">
+      <Link>Common\System\Collections\IEnumerable.Generic.Serialization.Tests.cs</Link>
+    </Compile>
     <Compile Include="..\..\Common\tests\System\Collections\IEnumerable.Generic.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.Generic.Tests.cs</Link>
     </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IEnumerable.NonGeneric.Serialization.Tests.cs">
+      <Link>Common\System\Collections\IEnumerable.NonGeneric.Serialization.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IEnumerable.NonGeneric.Tests.cs">
+      <Link>Common\System\Collections\IEnumerable.NonGeneric.Tests.cs</Link>
+    </Compile>
     <Compile Include="..\..\Common\tests\System\Collections\IList.Generic.Tests.cs">
       <Link>Common\System\Collections\IList.Generic.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IList.NonGeneric.Tests.cs">
+      <Link>Common\System\Collections\IList.NonGeneric.Tests.cs</Link>
     </Compile>
     <Compile Include="..\..\Common\tests\System\Collections\TestBase.Generic.cs">
       <Link>Common\System\Collections\TestBase.Generic.cs</Link>
@@ -198,7 +213,11 @@
     <Compile Include="New\NewWithParameterTests.cs" />
     <Compile Include="New\NewWithTwoParametersTests.cs" />
     <Compile Include="New\TypeExtensions.cs" />
-    <Compile Include="ReadOnlyCollectionBuilderTests.cs" />
+    <Compile Include="ReadOnlyCollectionBuilder\ReadOnlyCollectionBuilder.Tests.Misc.cs" />
+    <Compile Include="ReadOnlyCollectionBuilder\ReadOnlyCollectionBuilder.Tests.Reverse.cs" />
+    <Compile Include="ReadOnlyCollectionBuilder\ReadOnlyCollectionBuilder.Tests.IndexOf.cs" />
+    <Compile Include="ReadOnlyCollectionBuilder\ReadOnlyCollectionBuilder.Tests.Constructor.cs" />
+    <Compile Include="ReadOnlyCollectionBuilder\ReadOnlyCollectionBuilder.Tests.cs" />
     <Compile Include="SequenceTests\SequenceTests.cs" />
     <Compile Include="StackSpillerTests.cs" />
     <Compile Include="Switch\SwitchTests.cs" />

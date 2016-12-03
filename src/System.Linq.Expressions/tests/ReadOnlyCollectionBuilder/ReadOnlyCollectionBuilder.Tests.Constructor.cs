@@ -1,13 +1,13 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections.Tests;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-namespace System.Linq.Expressions.Tests
+namespace System.Collections.Tests
 {
     /// <summary>
     /// Contains tests that ensure the correctness of the List class.
@@ -32,7 +32,7 @@ namespace System.Linq.Expressions.Tests
         [InlineData(100)]
         public void Constructor_Capacity(int capacity)
         {
-            List<T> list = new List<T>(capacity);
+            ReadOnlyCollectionBuilder<T> list = new ReadOnlyCollectionBuilder<T>(capacity);
             Assert.Equal(capacity, list.Capacity); //"Expected capacity of list to be the same as given."
             Assert.Equal(0, list.Count); //"Do not expect anything to be in the list."
             Assert.False(((IList<T>)list).IsReadOnly); //"List should not be readonly"
@@ -43,7 +43,7 @@ namespace System.Linq.Expressions.Tests
         [InlineData(int.MinValue)]
         public void Constructor_NegativeCapacity_ThrowsArgumentOutOfRangeException(int capacity)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new List<T>(capacity));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlyCollectionBuilder<T>(capacity));
         }
 
         [Theory]
@@ -51,7 +51,7 @@ namespace System.Linq.Expressions.Tests
         public void Constructor_IEnumerable(EnumerableType enumerableType, int listLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, numberOfDuplicateElements);
-            List<T> list = new List<T>(enumerable);
+            ReadOnlyCollectionBuilder<T> list = new ReadOnlyCollectionBuilder<T>(enumerable);
             List<T> expected = enumerable.ToList();
 
             Assert.Equal(enumerableLength, list.Count); //"Number of items in list do not match the number of items given."
@@ -65,7 +65,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void Constructo_NullIEnumerable_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => { List<T> _list = new List<T>(null); }); //"Expected ArgumentnUllException for null items"
+            Assert.Throws<ArgumentNullException>(() => { ReadOnlyCollectionBuilder<T> _list = new ReadOnlyCollectionBuilder<T>(null); }); //"Expected ArgumentnUllException for null items"
         }
     }
 }
