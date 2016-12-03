@@ -52,7 +52,7 @@ namespace System.Collections.Tests
                 int[] bad = new int[] { items.Length + 1, items.Length + 2, int.MaxValue, -1, -2, int.MinValue };
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentOutOfRangeException>(() => list.Insert(bad[i], items[0])); //"ArgumentOutOfRangeException expected."
+                    Assert.Throws<ArgumentOutOfRangeException>(() => list.Insert(bad[i], items[0]));
                 }
             }
 
@@ -66,23 +66,23 @@ namespace System.Collections.Tests
                     _ilist.Insert(index, item);
                 }
 
-                Assert.True(list.Contains(item)); //"Expected it to be true."
-                Assert.Equal(list.Count, items.Length + repeat); //"Expected them to be equal."
+                Assert.True(list.Contains(item));
+                Assert.Equal(list.Count, items.Length + repeat);
 
                 for (int i = 0; i < index; i++)
                 {
-                    Assert.Equal(list[i], items[i]); //"Expected them to be equal."
+                    Assert.Equal(list[i], items[i]);
                 }
 
                 for (int i = index; i < index + repeat; i++)
                 {
-                    Assert.Equal((object)list[i], item); //"Expected them to be equal."
+                    Assert.Equal((object)list[i], item);
                 }
 
 
                 for (int i = index + repeat; i < list.Count; i++)
                 {
-                    Assert.Equal(list[i], items[i - repeat]); //"Expected them to be equal."
+                    Assert.Equal(list[i], items[i - repeat]);
                 }
             }
 
@@ -93,10 +93,10 @@ namespace System.Collections.Tests
                 int[] bad = new int[] { items.Length + 1, items.Length + 2, int.MaxValue, -1, -2, int.MinValue };
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentOutOfRangeException>(() => _ilist.Insert(bad[i], items[0])); //"ArgumentOutOfRangeException expected."
+                    Assert.Throws<ArgumentOutOfRangeException>(() => _ilist.Insert(bad[i], items[0]));
                 }
 
-                Assert.Throws<ArgumentException>(() => _ilist.Insert(0, new LinkedListNode<string>("blargh"))); //"ArgumentException expected."
+                Assert.Throws<ArgumentException>(() => _ilist.Insert(0, new LinkedListNode<string>("blargh")));
             }
 
             #endregion
@@ -114,23 +114,23 @@ namespace System.Collections.Tests
 
                 foreach (T item in itemsY)
                 {
-                    Assert.True(list.Contains(item)); //"Should contain the item."
+                    Assert.True(list.Contains(item));
                 }
-                Assert.Equal(list.Count, itemsX.Length + (itemsY.Length * repeat)); //"Should have the same result."
+                Assert.Equal(list.Count, itemsX.Length + (itemsY.Length * repeat));
 
                 for (int i = 0; i < index; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i]);
                 }
 
                 for (int i = index; i < index + (itemsY.Length * repeat); i++)
                 {
-                    Assert.Equal(list[i], itemsY[(i - index) % itemsY.Length]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsY[(i - index) % itemsY.Length]);
                 }
 
                 for (int i = index + (itemsY.Length * repeat); i < list.Count; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i - (itemsY.Length * repeat)]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i - (itemsY.Length * repeat)]);
                 }
 
                 //InsertRange into itself
@@ -139,23 +139,23 @@ namespace System.Collections.Tests
 
                 foreach (T item in itemsX)
                 {
-                    Assert.True(list.Contains(item)); //"Should contain the item."
+                    Assert.True(list.Contains(item));
                 }
-                Assert.Equal(list.Count, itemsX.Length + (itemsX.Length)); //"Should have the same result."
+                Assert.Equal(list.Count, itemsX.Length + (itemsX.Length));
 
                 for (int i = 0; i < index; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i]);
                 }
 
                 for (int i = index; i < index + (itemsX.Length); i++)
                 {
-                    Assert.Equal(list[i], itemsX[(i - index) % itemsX.Length]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[(i - index) % itemsX.Length]);
                 }
 
                 for (int i = index + (itemsX.Length); i < list.Count; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i - (itemsX.Length)]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i - (itemsX.Length)]);
                 }
             }
 
@@ -170,23 +170,23 @@ namespace System.Collections.Tests
 
                 foreach (T item in itemsY)
                 {
-                    Assert.True(list.Contains(item)); //"Should contain the item."
+                    Assert.True(list.Contains(item));
                 }
-                Assert.Equal(list.Count, itemsX.Length + (itemsY.Length * repeat)); //"Should have the same result."
+                Assert.Equal(list.Count, itemsX.Length + (itemsY.Length * repeat));
 
                 for (int i = 0; i < index; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i]);
                 }
 
                 for (int i = index; i < index + (itemsY.Length * repeat); i++)
                 {
-                    Assert.Equal(list[i], itemsY[(i - index) % itemsY.Length]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsY[(i - index) % itemsY.Length]);
                 }
 
                 for (int i = index + (itemsY.Length * repeat); i < list.Count; i++)
                 {
-                    Assert.Equal(list[i], itemsX[i - (itemsY.Length * repeat)]); //"Should have the same result."
+                    Assert.Equal(list[i], itemsX[i - (itemsY.Length * repeat)]);
                 }
             }
 
@@ -196,10 +196,10 @@ namespace System.Collections.Tests
                 int[] bad = new int[] { items.Length + 1, items.Length + 2, int.MaxValue, -1, -2, int.MinValue };
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentOutOfRangeException>(() => list.InsertRange(bad[i], constructIEnumerable(items))); //"ArgumentOutOfRangeException expected"
+                    Assert.Throws<ArgumentOutOfRangeException>(() => list.InsertRange(bad[i], constructIEnumerable(items)));
                 }
 
-                Assert.Throws<ArgumentNullException>(() => list.InsertRange(0, null)); //"ArgumentNullException expected."
+                Assert.Throws<ArgumentNullException>(() => list.InsertRange(0, null));
             }
 
             public IEnumerable<T> ConstructTestCollection(T[] items)
@@ -285,7 +285,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentException>(() => list.GetRange(bad[i], bad[++i])); //"ArgumentException expected."
+                    Assert.Throws<ArgumentException>(() => list.GetRange(bad[i], bad[++i]));
                 }
 
                 bad = new int[] {
@@ -307,7 +307,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < bad.Length; i++)
                 {
-                    Assert.Throws<ArgumentOutOfRangeException>(() => list.GetRange(bad[i], bad[++i])); //"ArgumentOutOfRangeException expected."
+                    Assert.Throws<ArgumentOutOfRangeException>(() => list.GetRange(bad[i], bad[++i]));
                 }
             }
 
@@ -330,7 +330,7 @@ namespace System.Collections.Tests
                     list.Add(items[i]);
 
                 //[] Verify Null match
-                Assert.Throws<ArgumentNullException>(() => list.Exists(null)); //"Err_858ahia Expected null match to throw ArgumentNullException"
+                Assert.Throws<ArgumentNullException>(() => list.Exists(null));
             }
 
             private void Exists_VerifyVanilla(T[] items)
@@ -410,7 +410,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Assert.True(list.Contains(items[i])); //"Should contain item."
+                    Assert.True(list.Contains(items[i]));
                 }
             }
 
@@ -420,7 +420,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < itemsY.Length; i++)
                 {
-                    Assert.False(list.Contains(itemsY[i])); //"Should not contain item"
+                    Assert.False(list.Contains(itemsY[i]));
                 }
             }
 
@@ -430,7 +430,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < items.Length; i++)
                 {
                     list.Remove(items[i]);
-                    Assert.False(list.Contains(items[i])); //"Should not contain item"
+                    Assert.False(list.Contains(items[i]));
                 }
             }
 
@@ -442,7 +442,7 @@ namespace System.Collections.Tests
                     list.Add(items[i]);
                     list.Remove(items[i]);
                     list.Add(items[i]);
-                    Assert.True(list.Contains(items[i])); //"Should contain item."
+                    Assert.True(list.Contains(items[i]));
                 }
             }
 
@@ -457,10 +457,10 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < times + 1; i++)
                 {
-                    Assert.True(list.Contains(items[items.Length / 2])); //"Should contain item."
+                    Assert.True(list.Contains(items[items.Length / 2]));
                     list.Remove(items[items.Length / 2]);
                 }
-                Assert.False(list.Contains(items[items.Length / 2])); //"Should not contain item"
+                Assert.False(list.Contains(items[items.Length / 2]));
             }
             public void ContainsNullWhenReference(T[] items, T value)
             {
@@ -471,7 +471,7 @@ namespace System.Collections.Tests
 
                 List<T> list = new List<T>(items);
                 list.Add(value);
-                Assert.True(list.Contains(value)); //"Should contain item."
+                Assert.True(list.Contains(value));
             }
 
             public void NonGenericIListBasicContains(T[] items)
@@ -481,7 +481,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Assert.True(_ilist.Contains(items[i])); //"Should contain item."
+                    Assert.True(_ilist.Contains(items[i]));
                 }
             }
 
@@ -492,7 +492,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < itemsY.Length; i++)
                 {
-                    Assert.False(_ilist.Contains(itemsY[i])); //"Should not contain item"
+                    Assert.False(_ilist.Contains(itemsY[i]));
                 }
             }
 
@@ -503,7 +503,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < items.Length; i++)
                 {
                     list.Remove(items[i]);
-                    Assert.False(_ilist.Contains(items[i])); //"Should not contain item"
+                    Assert.False(_ilist.Contains(items[i]));
                 }
             }
 
@@ -516,7 +516,7 @@ namespace System.Collections.Tests
                     list.Add(items[i]);
                     list.Remove(items[i]);
                     list.Add(items[i]);
-                    Assert.True(_ilist.Contains(items[i])); //"Should contain item."
+                    Assert.True(_ilist.Contains(items[i]));
                 }
             }
 
@@ -532,10 +532,10 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < times + 1; i++)
                 {
-                    Assert.True(_ilist.Contains(items[items.Length / 2])); //"Should contain item."
+                    Assert.True(_ilist.Contains(items[items.Length / 2]));
                     list.Remove(items[items.Length / 2]);
                 }
-                Assert.False(_ilist.Contains(items[items.Length / 2])); //"Should not contain item"
+                Assert.False(_ilist.Contains(items[items.Length / 2]));
             }
 
             public void NonGenericIListContainsNullWhenReference(T[] items, T value)
@@ -548,7 +548,7 @@ namespace System.Collections.Tests
                 List<T> list = new List<T>(items);
                 IList _ilist = list;
                 list.Add(value);
-                Assert.True(_ilist.Contains(value)); //"Should contain item."
+                Assert.True(_ilist.Contains(value));
             }
 
             public void NonGenericIListContainsTestParams()
@@ -567,25 +567,25 @@ namespace System.Collections.Tests
             public void ClearEmptyList()
             {
                 List<T> list = new List<T>();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0"
+                Assert.Equal(list.Count, 0);
                 list.Clear();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
             }
             public void ClearMultipleTimesEmptyList(int times)
             {
                 List<T> list = new List<T>();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
                 for (int i = 0; i < times; i++)
                 {
                     list.Clear();
-                    Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                    Assert.Equal(list.Count, 0);
                 }
             }
             public void ClearNonEmptyList(T[] items)
             {
                 List<T> list = new List<T>(items);
                 list.Clear();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
             }
 
             public void ClearMultipleTimesNonEmptyList(T[] items, int times)
@@ -594,7 +594,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < times; i++)
                 {
                     list.Clear();
-                    Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                    Assert.Equal(list.Count, 0);
                 }
             }
 
@@ -602,19 +602,19 @@ namespace System.Collections.Tests
             {
                 List<T> list = new List<T>();
                 IList _ilist = list;
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
                 _ilist.Clear();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
             }
             public void NonGenericIListClearMultipleTimesEmptyList(int times)
             {
                 List<T> list = new List<T>();
                 IList _ilist = list;
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
                 for (int i = 0; i < times; i++)
                 {
                     _ilist.Clear();
-                    Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                    Assert.Equal(list.Count, 0);
                 }
             }
             public void NonGenericIListClearNonEmptyList(T[] items)
@@ -622,7 +622,7 @@ namespace System.Collections.Tests
                 List<T> list = new List<T>(items);
                 IList _ilist = list;
                 _ilist.Clear();
-                Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                Assert.Equal(list.Count, 0);
             }
 
             public void NonGenericIListClearMultipleTimesNonEmptyList(T[] items, int times)
@@ -632,7 +632,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < times; i++)
                 {
                     _ilist.Clear();
-                    Assert.Equal(list.Count, 0); //"Should be equal to 0."
+                    Assert.Equal(list.Count, 0);
                 }
             }
 
@@ -689,7 +689,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Assert.Equal(((object)arr[i]), items[i]); //"Should be equal."
+                    Assert.Equal(((object)arr[i]), items[i]);
                 }
             }
 
@@ -699,9 +699,9 @@ namespace System.Collections.Tests
                 T[] arr = list.ToArray();
                 list[0] = item;
                 if (((object)arr[0]) == null)
-                    Assert.NotNull(list[0]); //"Should NOT be null"
+                    Assert.NotNull(list[0]);
                 else
-                    Assert.NotEqual(((object)arr[0]), list[0]); //"Should NOT be equal."
+                    Assert.NotEqual(((object)arr[0]), list[0]);
             }
 
             #endregion
