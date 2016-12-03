@@ -35,7 +35,7 @@ foreach (var type in operands)
     var typeName = toBcl(type);
     var typeAlias = toCSharp(type);
 
-    var op = "((" + typeAlias + ")value) " + infix + " ((int)shift)";
+    var op = "(" + typeAlias + ")value " + infix + " (int)shift";
 
     if (getBinaryResultType(infix, type, typeof(int)) != type)
     {
