@@ -495,7 +495,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         /// <param name = "min">The minimum value to have allocated.</param>
         /// <remarks>
-        /// If the current capacity of the list is less than <paramref name = "min" />,
+        /// If the current capacity of the list is less than <paramref name = "min"/>,
         /// the capacity is increased to the larger value of twice the current capacity
         /// and <paramref name="min"/>.
         /// </remarks>
