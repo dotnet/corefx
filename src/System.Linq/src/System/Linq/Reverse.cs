@@ -20,7 +20,7 @@ namespace System.Linq
             return new ReverseIterator<TSource>(source);
         }
 
-        private sealed class ReverseIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        private sealed class ReverseIterator<TSource> : Iterator<TSource>, IPartition<TSource>
         {
             private readonly IEnumerable<TSource> _source;
             private TSource[] _buffer;
@@ -108,6 +108,51 @@ namespace System.Linq
                 }
 
                 return _source.Count();
+            }
+
+            public IPartition<TSource> Skip(int count)
+            {
+                return new EnumerablePartition<TSource>(this, count, -1);
+            }
+
+            public IPartition<TSource> Take(int count)
+            {
+                return new EnumerablePartition<TSource>(this, 0, count - 1);
+            }
+
+            public TSource TryGetElementAt(int index, out bool found)
+            {
+                if ((uint)index < (uint)_source.Length)
+                {
+                    found = true;
+                    return _selector(_source[index]);
+                }
+
+                found = false;
+                return default(TSource);
+            }
+
+            public TSource TryGetFirst(out bool found)
+            {
+                Debug.Assert(_source.Length > 0); // See assert in constructor
+
+                found = true;
+                return _selector(_source[0]);
+            }
+
+            public TSource TryGetLast(out bool found)
+            {
+                using (IEnumerator<TSource> en = _source.GetEnumerator())
+                {
+                    if (en.MoveNext())
+                    {
+                        found = true;
+                        return en.Current;
+                    }
+                }
+
+                found = false;
+                return default(TSource);
             }
         }
     }
