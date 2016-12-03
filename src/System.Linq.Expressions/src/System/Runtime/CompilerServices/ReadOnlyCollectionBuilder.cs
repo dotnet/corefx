@@ -490,10 +490,15 @@ namespace System.Runtime.CompilerServices
             return new TrueReadOnlyCollection<T>(items);
         }
 
-        // Ensures that the capacity of this list is at least the given minimum
-        // value. If the current capacity of the list is less than min, the
-        // capacity is increased to twice the current capacity or to min,
-        // whichever is larger.
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the given minimum value.
+        /// </summary>
+        /// <param name = "min">The minimum value to have allocated.</param>
+        /// <remarks>
+        /// If the current capacity of the list is less than <paramref name = "min" />,
+        /// the capacity is increased to the larger value of twice the current capacity
+        /// and <paramref name="min"/>.
+        /// </remarks>
         private void EnsureCapacity(int min)
         {
             if (_items.Length < min)
