@@ -1,0 +1,9 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "Add";
+string infix = "+";
+bool hasOverflow = true;
+Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
+#>
+<#@ include file="BinaryInstruction.t4" #>

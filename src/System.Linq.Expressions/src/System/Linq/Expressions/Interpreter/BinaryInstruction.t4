@@ -1,0 +1,206 @@
+﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+HashSet<Type> hasBoxCache = new HashSet<Type> { typeof(int) };
+HashSet<Type> hasNoOvfInstructions = new HashSet<Type> { typeof(float), typeof(double) };
+
+Func<Type, string> toCSharp = null;
+toCSharp = type =>
+{
+    if (type == typeof(int)) return "int";
+    else if (type == typeof(uint)) return "uint";
+    else if (type == typeof(short)) return "short";
+    else if (type == typeof(ushort)) return "ushort";
+    else if (type == typeof(byte)) return "byte";
+    else if (type == typeof(sbyte)) return "sbyte";
+    else if (type == typeof(long)) return "long";
+    else if (type == typeof(ulong)) return "ulong";
+    else if (type == typeof(float)) return "float";
+    else if (type == typeof(double)) return "double";
+    else if (type == typeof(decimal)) return "decimal";
+    else if (type == typeof(bool)) return "bool";
+    else if (type == typeof(char)) return "char";
+    else if (type == typeof(string)) return "string";
+    else if (type == typeof(object)) return "object";
+
+    if (type.IsArray)
+    {
+        return toCSharp(type.GetElementType()) + "[]";
+    }
+
+    if (type.IsGenericType)
+    {
+        if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            return toCSharp(type.GetGenericArguments()[0]) + "[]";
+        }
+    }
+
+    return type.Name;
+};
+
+Func<Type, string> toBcl = type => type.Name;
+
+string cachedInstructions = string.Join(", ", operands.Select(o => "s_" + toBcl(o)));
+
+#>
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
+using System.Dynamic.Utils;
+
+namespace System.Linq.Expressions.Interpreter
+{
+    internal abstract class <#=instruction#>Instruction : Instruction
+    {
+        private static Instruction <#=cachedInstructions#>;
+
+        public override int ConsumedStack => 2;
+        public override int ProducedStack => 1;
+        public override string InstructionName => "<#=instruction#>";
+
+        private <#=instruction#>Instruction() { }
+
+<#
+foreach (var type in operands)
+{
+    var typeName = toBcl(type);
+    var typeAlias = toCSharp(type);
+
+    var op = "(" + typeAlias + ")((" + typeAlias + ")l " + infix + " (" + typeAlias + ")r)";
+
+    if (hasOverflow && !hasNoOvfInstructions.Contains(type))
+    {
+        op = "unchecked(" + op + ")";
+    }
+
+    if (hasBoxCache.Contains(type))
+    {
+        op = "ScriptingRuntimeHelpers." + typeName + "ToObject(" + op + ")";
+    }
+#>
+        private sealed class <#=instruction#><#=typeName#> : <#=instruction#>Instruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object l = frame.Data[frame.StackIndex - 2];
+                object r = frame.Data[frame.StackIndex - 1];
+                if (l == null || r == null)
+                {
+                    frame.Data[frame.StackIndex - 2] = null;
+                }
+                else
+                {
+                    frame.Data[frame.StackIndex - 2] = <#=op#>;
+                }
+                frame.StackIndex--;
+                return +1;
+            }
+        }
+
+<#
+}
+#>
+        public static Instruction Create(Type type)
+        {
+            Debug.Assert(type.IsArithmetic());
+            switch (type.GetNonNullableType().GetTypeCode())
+            {
+<#
+foreach (var type in operands)
+{
+    var typeName = toBcl(type);
+#>
+                case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#><#=typeName#>());
+<#
+}
+#>
+                default:
+                    throw ContractUtils.Unreachable;
+            }
+        }
+    }
+<#
+if (hasOverflow)
+{
+    var operandsWithOverflow = operands.Except(new[] { typeof(float), typeof(double) });
+    string cachedInstructionsWithOverflow = string.Join(", ", operandsWithOverflow.Select(o => "s_" + toBcl(o)));
+#>
+
+    internal abstract class <#=instruction#>OvfInstruction : Instruction
+    {
+        private static Instruction <#=cachedInstructionsWithOverflow#>;
+
+        public override int ConsumedStack => 2;
+        public override int ProducedStack => 1;
+        public override string InstructionName => "<#=instruction#>Ovf";
+
+        private <#=instruction#>OvfInstruction() { }
+
+<#
+foreach (var type in operandsWithOverflow)
+{
+    var typeName = toBcl(type);
+    var typeAlias = toCSharp(type);
+
+    var op = "(" + typeAlias + ")((" + typeAlias + ")l " + infix + " (" + typeAlias + ")r)";
+
+    if (hasOverflow && !hasNoOvfInstructions.Contains(type))
+    {
+        op = "checked(" + op + ")";
+    }
+
+    if (hasBoxCache.Contains(type))
+    {
+        op = "ScriptingRuntimeHelpers." + typeName + "ToObject(" + op + ")";
+    }
+#>
+        private sealed class <#=instruction#>Ovf<#=typeName#> : <#=instruction#>OvfInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object l = frame.Data[frame.StackIndex - 2];
+                object r = frame.Data[frame.StackIndex - 1];
+                if (l == null || r == null)
+                {
+                    frame.Data[frame.StackIndex - 2] = null;
+                }
+                else
+                {
+                    frame.Data[frame.StackIndex - 2] = <#=op#>;
+                }
+                frame.StackIndex--;
+                return +1;
+            }
+        }
+
+<#
+}
+#>
+        public static Instruction Create(Type type)
+        {
+            Debug.Assert(type.IsArithmetic());
+            switch (type.GetNonNullableType().GetTypeCode())
+            {
+<#
+foreach (var type in operandsWithOverflow)
+{
+    var typeName = toBcl(type);
+#>
+                case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#>Ovf<#=typeName#>());
+<#
+}
+#>
+                default:
+                    return <#=instruction#>Instruction.Create(type);
+            }
+        }
+    }
+<#
+}
+#>
+}
