@@ -243,8 +243,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AddInstruction.tt</DependentUpon>
     </Compile>
-    <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.Boolean.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.cs">
+      <DependentUpon>AndInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\AndInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AndInstruction.cs</LastGenOutput>
+    </Content>
     <Content Include="System\Linq\Expressions\Interpreter\AddInstruction.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AddInstruction.cs</LastGenOutput>
@@ -266,8 +274,16 @@
       <LastGenOutput>DivInstruction.cs</LastGenOutput>
     </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.Boolean.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs">
+      <DependentUpon>ExclusiveOrInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ExclusiveOrInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\FieldOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanOrEqualInstruction.cs">
       <DependentUpon>GreaterThanOrEqualInstruction.tt</DependentUpon>
@@ -350,8 +366,16 @@
     <Compile Include="System\Linq\Expressions\Interpreter\NotInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NumericConvertInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NullCheckInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.Boolean.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.cs">
+      <DependentUpon>OrInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\OrInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OrInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.cs">
       <DependentUpon>RightShiftInstruction.tt</DependentUpon>
@@ -377,6 +401,7 @@
     <Compile Include="System\Linq\Expressions\Interpreter\Utilities.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryArithmeticInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryBitwiseInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryComparisonInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryShiftInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />

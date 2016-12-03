@@ -57,6 +57,14 @@ Dictionary<Tuple<Type, Type>, Type> shiftOperations = new Dictionary<Tuple<Type,
     { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
 };
 
+Dictionary<Tuple<Type, Type>, Type> bitwiseOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(int)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(int)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
+};
+
 Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> ops = new Dictionary<string, Dictionary<Tuple<Type, Type>, Type>>
 {
     { "+", arithmeticOperations },
@@ -66,6 +74,9 @@ Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> ops = new Dictionary<str
     { "%", arithmeticOperations },
     { "<<", shiftOperations },
     { ">>", shiftOperations },
+    { "&", bitwiseOperations },
+    { "|", bitwiseOperations },
+    { "^", bitwiseOperations },
 };
 
 Func<string, Type, Type, Type> getBinaryResultType = (op, l, r) =>
