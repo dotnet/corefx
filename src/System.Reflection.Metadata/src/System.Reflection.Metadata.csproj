@@ -20,7 +20,6 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
