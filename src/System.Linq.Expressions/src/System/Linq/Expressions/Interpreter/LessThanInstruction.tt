@@ -1,0 +1,8 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "LessThan";
+string infix = "<";
+Type[] operands = new[] { typeof(sbyte), typeof(short), typeof(char), typeof(int), typeof(long), typeof(byte), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
+#>
+<#@ include file="BinaryComparisonInstruction.t4" #>

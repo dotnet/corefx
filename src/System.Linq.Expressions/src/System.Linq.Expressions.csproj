@@ -267,8 +267,24 @@
     <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\FieldOperations.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanOrEqualInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanOrEqualInstruction.cs">
+      <DependentUpon>GreaterThanOrEqualInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\GreaterThanOrEqualInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GreaterThanOrEqualInstruction.cs</LastGenOutput>
+    </Content>
+    <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanInstruction.cs">
+      <DependentUpon>GreaterThanInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\GreaterThanInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GreaterThanInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\IncrementInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Instruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\InstructionList.cs" />
@@ -276,8 +292,24 @@
     <Compile Include="System\Linq\Expressions\Interpreter\Interpreter.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\LabelInfo.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\LeftShiftInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\LessThanInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\LessThanOrEqualInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\LessThanInstruction.cs">
+      <DependentUpon>LessThanInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\LessThanInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LessThanInstruction.cs</LastGenOutput>
+    </Content>
+    <Compile Include="System\Linq\Expressions\Interpreter\LessThanOrEqualInstruction.cs">
+      <DependentUpon>LessThanOrEqualInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\LessThanOrEqualInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LessThanOrEqualInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\LightCompiler.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\LightDelegateCreator.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\LightLambda.cs" />
@@ -326,6 +358,7 @@
     <Compile Include="System\Linq\Expressions\Interpreter\Utilities.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryArithmeticInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryComparisonInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
