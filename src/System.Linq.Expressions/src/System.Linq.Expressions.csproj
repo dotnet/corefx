@@ -323,7 +323,7 @@
     <Compile Include="System\Linq\Expressions\Interpreter\TypeOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Utilities.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
-    <None Include="System\Linq\Expressions\Interpreter\BinaryInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryArithmeticInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">

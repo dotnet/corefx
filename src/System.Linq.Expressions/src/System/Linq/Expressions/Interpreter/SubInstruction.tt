@@ -6,4 +6,4 @@ string infix = "-";
 bool hasOverflow = true;
 Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
 #>
-<#@ include file="BinaryInstruction.t4" #>
+<#@ include file="BinaryArithmeticInstruction.t4" #>
