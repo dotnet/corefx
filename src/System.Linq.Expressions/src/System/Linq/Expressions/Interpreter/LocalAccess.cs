@@ -46,7 +46,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[frame.StackIndex++] = frame.Data[_index];
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -69,7 +69,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             frame.Data[frame.StackIndex++] = box.Value;
-            return +1;
+            return 1;
         }
     }
 
@@ -87,7 +87,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box.Value;
-            return +1;
+            return 1;
         }
     }
 
@@ -105,7 +105,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box;
-            return +1;
+            return 1;
         }
     }
 
@@ -127,7 +127,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[_index] = frame.Peek();
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -149,7 +149,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[_index] = frame.Pop();
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -173,7 +173,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             box.Value = frame.Peek();
-            return +1;
+            return 1;
         }
     }
 
@@ -192,7 +192,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             box.Value = frame.Data[--frame.StackIndex];
-            return +1;
+            return 1;
         }
     }
 
@@ -211,7 +211,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             IStrongBox box = frame.Closure[_index];
             box.Value = frame.Peek();
-            return +1;
+            return 1;
         }
     }
 
@@ -229,7 +229,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             object o = frame.Pop();
             frame.Push(o == null ? o : RuntimeHelpers.GetObjectValue(o));
-            return +1;
+            return 1;
         }
     }
 
@@ -461,7 +461,7 @@ namespace System.Linq.Expressions.Interpreter
                 ret[i] = (IStrongBox)frame.Pop();
             }
             frame.Push(RuntimeVariables.Create(ret));
-            return +1;
+            return 1;
         }
 
         public override string ToString() => "GetRuntimeVariables()";
