@@ -5,11 +5,77 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Tests;
 using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
 {
+    public abstract class ReadOnlyCollectionBuilderTests<T> : IList_Generic_Tests<T>
+    {
+        #region IList<T> Helper Methods
+
+        protected override IList<T> GenericIListFactory()
+        {
+            return GenericListFactory();
+        }
+
+        protected override IList<T> GenericIListFactory(int count)
+        {
+            return GenericListFactory(count);
+        }
+
+        #endregion
+
+        #region ReadOnlyCollectionBuilder<T> Helper Methods
+
+        protected virtual ReadOnlyCollectionBuilder<T> GenericListFactory()
+        {
+            return new ReadOnlyCollectionBuilder<T>();
+        }
+
+        protected virtual ReadOnlyCollectionBuilder<T> GenericListFactory(int count)
+        {
+            IEnumerable<T> toCreateFrom = CreateEnumerable(EnumerableType.List, null, count, 0, 0);
+            return new ReadOnlyCollectionBuilder<T>(toCreateFrom);
+        }
+
+        protected void VerifyList(List<T> list, List<T> expectedItems)
+        {
+            Assert.Equal(expectedItems.Count, list.Count);
+
+            //Only verify the indexer. List should be in a good enough state that we
+            //do not have to verify consistency with any other method.
+            for (int i = 0; i < list.Count; ++i)
+            {
+                Assert.True(list[i] == null ? expectedItems[i] == null : list[i].Equals(expectedItems[i]));
+            }
+        }
+
+        #endregion
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void CopyTo_ArgumentValidity(int count)
+        {
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(count);
+            Assert.Throws<ArgumentException>(() => list.CopyTo(new T[0], count + 1));
+            Assert.Throws<ArgumentException>(() => list.CopyTo(new T[0], 1));
+        }
+    }
+
+    public class ReadOnlyCollectionBuilderTests_string : ReadOnlyCollectionBuilderTests<string>
+    {
+        protected override string CreateT(int seed)
+        {
+            int stringLength = seed % 10 + 5;
+            Random rand = new Random(seed);
+            byte[] bytes = new byte[stringLength];
+            rand.NextBytes(bytes);
+            return Convert.ToBase64String(bytes);
+        }
+    }
+
     public class ReadOnlyCollectionBuilderTests
     {
         [Fact]

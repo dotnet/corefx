@@ -24,6 +24,24 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\tests\System\Collections\CollectionAsserts.cs">
+      <Link>Common\System\Collections\CollectionAsserts.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\ICollection.Generic.Tests.cs">
+      <Link>Common\System\Collections\ICollection.Generic.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IEnumerable.Generic.Tests.cs">
+      <Link>Common\System\Collections\IEnumerable.Generic.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\IList.Generic.Tests.cs">
+      <Link>Common\System\Collections\IList.Generic.Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\TestBase.Generic.cs">
+      <Link>Common\System\Collections\TestBase.Generic.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\tests\System\Collections\TestBase.NonGeneric.cs">
+      <Link>Common\System\Collections\TestBase.NonGeneric.cs</Link>
+    </Compile>
     <Compile Include="CompilerTests.cs" />
     <Compile Include="DebugViewTests.cs" />
     <Compile Include="Array\ArrayAccessTests.cs" />
