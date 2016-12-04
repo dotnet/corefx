@@ -63,9 +63,7 @@ namespace System.Linq.Tests
             return integers
                 .Select(collection => new object[] { collection, 0 })
                 .Concat(
-                    integers
-                        .Select(collection => collection.Select(i => i.ToString()))
-                        .Select(collection => new object[] { collection, string.Empty })
+                    integers.Select(c => new object[] { c.Select(i => i.ToString()), string.Empty })
                 );
         }
 
