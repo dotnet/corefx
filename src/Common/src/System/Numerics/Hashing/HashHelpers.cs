@@ -6,7 +6,7 @@ namespace System.Numerics.Hashing
 {
     internal static class HashHelpers
     {
-        public static int RandomSeed { get; } = Guid.NewGuid().GetHashCode();
+        public static readonly int RandomSeed = Guid.NewGuid().GetHashCode();
 
         public static int Combine(int h1, int h2)
         {
