@@ -28,7 +28,7 @@ namespace System.Linq
 
             if (!found)
             {
-                throw Error.NoElements();
+                throw Error.NoMatch();
             }
 
             return last;
