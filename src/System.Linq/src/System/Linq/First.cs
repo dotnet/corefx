@@ -23,31 +23,15 @@ namespace System.Linq
 
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
+            bool found;
+            TSource first = source.TryGetFirst(predicate, out found);
+
+            if (!found)
             {
-                throw Error.ArgumentNull(nameof(source));
+                throw Error.NoMatch();
             }
 
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
-
-            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
-            if (ordered != null)
-            {
-                return ordered.First(predicate);
-            }
-
-            foreach (TSource element in source)
-            {
-                if (predicate(element))
-                {
-                    return element;
-                }
-            }
-
-            throw Error.NoMatch();
+            return first;
         }
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
@@ -58,31 +42,8 @@ namespace System.Linq
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
-
-            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
-            if (ordered != null)
-            {
-                return ordered.FirstOrDefault(predicate);
-            }
-
-            foreach (TSource element in source)
-            {
-                if (predicate(element))
-                {
-                    return element;
-                }
-            }
-
-            return default(TSource);
+            bool found;
+            return source.TryGetFirst(predicate, out found);
         }
 
         internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
@@ -116,6 +77,37 @@ namespace System.Linq
                         found = true;
                         return e.Current;
                     }
+                }
+            }
+
+            found = false;
+            return default(TSource);
+        }
+
+        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        {
+            if (source == null)
+            {
+                throw Error.ArgumentNull(nameof(source));
+            }
+
+            if (predicate == null)
+            {
+                throw Error.ArgumentNull(nameof(predicate));
+            }
+
+            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
+            if (ordered != null)
+            {
+                return ordered.TryGetFirst(predicate, out found);
+            }
+
+            foreach (TSource element in source)
+            {
+                if (predicate(element))
+                {
+                    found = true;
+                    return element;
                 }
             }
 
