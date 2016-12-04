@@ -273,7 +273,16 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DivInstruction.cs</LastGenOutput>
     </Content>
-    <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs">
+      <DependentUpon>EqualInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\EqualInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>EqualInstruction.cs</LastGenOutput>
+    </Content>
+    <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.Reference.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.Boolean.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ExclusiveOrInstruction.cs">
       <DependentUpon>ExclusiveOrInstruction.tt</DependentUpon>
@@ -362,7 +371,16 @@
     </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\NegateInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NewInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.cs">
+      <DependentUpon>NotEqualInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>NotEqualInstruction.cs</LastGenOutput>
+    </Content>
+    <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.Reference.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NotInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NumericConvertInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NullCheckInstruction.cs" />
@@ -403,6 +421,7 @@
     <None Include="System\Linq\Expressions\Interpreter\BinaryArithmeticInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryBitwiseInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryComparisonInstruction.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\BinaryEqualityInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryShiftInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
   </ItemGroup>
