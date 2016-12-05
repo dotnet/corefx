@@ -30,12 +30,12 @@ namespace System.Linq.Expressions.Interpreter
         private <#=instruction#>Instruction() { }
 
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")value " + infix + " (int)shift";
+    string op = "(" + typeAlias + ")value " + infix + " (int)shift";
 
     if (getBinaryResultType(infix, type, typeof(int)) != type)
     {
@@ -72,9 +72,9 @@ foreach (var type in operands)
             switch (underlyingType.GetTypeCode())
             {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                 case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#><#=typeName#>());
 <#

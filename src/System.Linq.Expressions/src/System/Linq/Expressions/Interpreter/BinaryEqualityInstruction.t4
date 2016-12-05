@@ -36,12 +36,12 @@ namespace System.Linq.Expressions.Interpreter
         private <#=instruction#>Instruction() { }
 
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")left " + infix + " (" + typeAlias + ")right";
+    string op = "(" + typeAlias + ")left " + infix + " (" + typeAlias + ")right";
 #>
         private sealed class <#=instruction#><#=typeName#> : <#=instruction#>Instruction
         {
@@ -68,12 +68,12 @@ foreach (var type in operands)
 <#
 }
 
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")left " + infix + " (" + typeAlias + ")right";
+    string op = "(" + typeAlias + ")left " + infix + " (" + typeAlias + ")right";
 #>
         private sealed class <#=instruction#><#=typeName#>LiftedToNull : <#=instruction#>Instruction
         {
@@ -107,9 +107,9 @@ foreach (var type in operands)
                 switch (underlyingType.GetTypeCode())
                 {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                     case TypeCode.<#=typeName#>: return s_<#=typeName#>LiftedToNull ?? (s_<#=typeName#>LiftedToNull = new <#=instruction#><#=typeName#>LiftedToNull());
 <#
@@ -124,9 +124,9 @@ foreach (var type in operands)
                 switch (underlyingType.GetTypeCode())
                 {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                     case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#><#=typeName#>());
 <#

@@ -32,12 +32,12 @@ namespace System.Linq.Expressions.Interpreter
         private <#=instruction#>Instruction() { }
 
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
+    string op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
 
     if (getBinaryResultType(infix, type, type) != type)
     {
@@ -82,9 +82,9 @@ foreach (var type in operands)
             switch (type.GetNonNullableType().GetTypeCode())
             {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                 case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#><#=typeName#>());
 <#
@@ -98,7 +98,7 @@ foreach (var type in operands)
 <#
 if (hasOverflow)
 {
-    var operandsWithOverflow = operands.Except(new[] { typeof(float), typeof(double) });
+    IEnumerable<Type> operandsWithOverflow = operands.Except(new[] { typeof(float), typeof(double) });
     string cachedInstructionsWithOverflow = string.Join(", ", operandsWithOverflow.Select(o => "s_" + toBcl(o)));
 #>
 
@@ -113,12 +113,12 @@ if (hasOverflow)
         private <#=instruction#>OvfInstruction() { }
 
 <#
-foreach (var type in operandsWithOverflow)
+foreach (Type type in operandsWithOverflow)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
+    string op = "(" + typeAlias + ")l " + infix + " (" + typeAlias + ")r";
 
     if (getBinaryResultType(infix, type, type) != type)
     {
@@ -163,9 +163,9 @@ foreach (var type in operandsWithOverflow)
             switch (type.GetNonNullableType().GetTypeCode())
             {
 <#
-foreach (var type in operandsWithOverflow)
+foreach (Type type in operandsWithOverflow)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                 case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#>Ovf<#=typeName#>());
 <#

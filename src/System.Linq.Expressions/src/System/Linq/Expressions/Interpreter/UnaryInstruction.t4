@@ -31,14 +31,14 @@ namespace System.Linq.Expressions.Interpreter
         private <#=instruction#>Instruction() { }
 
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")obj";
+    string op = "(" + typeAlias + ")obj";
 
-    var formatLocal = format;
+    string formatLocal = format;
 
     if (type == typeof(bool) && instruction == "Not")
     {
@@ -83,9 +83,9 @@ foreach (var type in operands)
             switch (type.GetNonNullableType().GetTypeCode())
             {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                 case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#><#=typeName#>());
 <#
@@ -112,12 +112,12 @@ if (hasChecked)
         private <#=instruction#>CheckedInstruction() { }
 
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
-    var typeAlias = toCSharp(type);
+    string typeName = toBcl(type);
+    string typeAlias = toCSharp(type);
 
-    var op = "(" + typeAlias + ")obj";
+    string op = "(" + typeAlias + ")obj";
 
     op = string.Format(format, op);
 
@@ -157,9 +157,9 @@ foreach (var type in operands)
             switch (type.GetNonNullableType().GetTypeCode())
             {
 <#
-foreach (var type in operands)
+foreach (Type type in operands)
 {
-    var typeName = toBcl(type);
+    string typeName = toBcl(type);
 #>
                 case TypeCode.<#=typeName#>: return s_<#=typeName#> ?? (s_<#=typeName#> = new <#=instruction#>Checked<#=typeName#>());
 <#
