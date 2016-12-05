@@ -262,7 +262,15 @@
     <Compile Include="System\Linq\Expressions\Interpreter\CallInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\CallInstruction.Generated.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ControlFlowInstructions.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\DecrementInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\DecrementInstruction.cs">
+      <DependentUpon>DecrementInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\DecrementInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DecrementInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\DefaultValueInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\DivInstruction.cs">
       <DependentUpon>DivInstruction.tt</DependentUpon>
@@ -312,7 +320,15 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>GreaterThanInstruction.cs</LastGenOutput>
     </Content>
-    <Compile Include="System\Linq\Expressions\Interpreter\IncrementInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\IncrementInstruction.cs">
+      <DependentUpon>IncrementInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\IncrementInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>IncrementInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\Instruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\InstructionList.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\InterpretedFrame.cs" />
@@ -369,7 +385,15 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MulInstruction.cs</LastGenOutput>
     </Content>
-    <Compile Include="System\Linq\Expressions\Interpreter\NegateInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\NegateInstruction.cs">
+      <DependentUpon>NegateInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\NegateInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>NegateInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\NewInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.cs">
       <DependentUpon>NotEqualInstruction.tt</DependentUpon>
@@ -381,9 +405,26 @@
       <LastGenOutput>NotEqualInstruction.cs</LastGenOutput>
     </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\NotEqualInstruction.Reference.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\NotInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\NotInstruction.cs">
+      <DependentUpon>NotInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\NotInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>NotInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\NumericConvertInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\NullCheckInstruction.cs" />
+    <Compile Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.cs">
+      <DependentUpon>OnesComplementInstruction.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OnesComplementInstruction.cs</LastGenOutput>
+    </Content>
     <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.Boolean.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\OrInstruction.cs">
       <DependentUpon>OrInstruction.tt</DependentUpon>
@@ -394,7 +435,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OrInstruction.cs</LastGenOutput>
     </Content>
-    <Compile Include="System\Linq\Expressions\Interpreter\OnesComplementInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\RightShiftInstruction.cs">
       <DependentUpon>RightShiftInstruction.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -424,6 +464,7 @@
     <None Include="System\Linq\Expressions\Interpreter\BinaryEqualityInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\BinaryShiftInstruction.t4" />
     <None Include="System\Linq\Expressions\Interpreter\Helpers.t4" />
+    <None Include="System\Linq\Expressions\Interpreter\UnaryInstruction.t4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />

@@ -1,0 +1,9 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "OnesComplement";
+string format = "~{0}";
+bool hasChecked = false;
+Type[] operands = new[] { typeof(sbyte), typeof(short), typeof(int), typeof(long), typeof(byte), typeof(ushort), typeof(uint), typeof(ulong) };
+#>
+<#@ include file="UnaryInstruction.t4" #>

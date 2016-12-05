@@ -1,0 +1,9 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "Increment";
+string format = "{0} + 1";
+bool hasChecked = false;
+Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
+#>
+<#@ include file="UnaryInstruction.t4" #>

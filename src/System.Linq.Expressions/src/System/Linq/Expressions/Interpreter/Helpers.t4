@@ -65,7 +65,18 @@ Dictionary<Tuple<Type, Type>, Type> bitwiseOperations = new Dictionary<Tuple<Typ
     { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
 };
 
-Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> ops = new Dictionary<string, Dictionary<Tuple<Type, Type>, Type>>
+Dictionary<Type, Type> unaryOpTypes = new Dictionary<Type, Type>
+{
+    { typeof(bool), typeof(bool) }, // used by Not
+    { typeof(int), typeof(int) },
+    { typeof(long), typeof(long) },
+    { typeof(uint), typeof(uint) },
+    { typeof(ulong), typeof(ulong) },
+    { typeof(float), typeof(float) },
+    { typeof(double), typeof(double) },
+};
+
+Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> binOps = new Dictionary<string, Dictionary<Tuple<Type, Type>, Type>>
 {
     { "+", arithmeticOperations },
     { "-", arithmeticOperations },
@@ -79,11 +90,32 @@ Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> ops = new Dictionary<str
     { "^", bitwiseOperations },
 };
 
+Dictionary<string, Dictionary<Type, Type>> unOps = new Dictionary<string, Dictionary<Type, Type>>
+{
+    { "Negate", unaryOpTypes },
+    { "Not", unaryOpTypes },
+    { "OnesComplement", unaryOpTypes },
+    { "Increment", unaryOpTypes },
+    { "Decrement", unaryOpTypes },
+};
+
+Func<string, Type, Type> getUnaryResultType = (op, o) =>
+{
+    Dictionary<Type, Type> table;
+    Type res;
+    if (unOps.TryGetValue(op, out table) && table.TryGetValue(o, out res))
+    {
+        return res;
+    }
+
+    return null;
+};
+
 Func<string, Type, Type, Type> getBinaryResultType = (op, l, r) =>
 {
     Dictionary<Tuple<Type, Type>, Type> table;
     Type res;
-    if (ops.TryGetValue(op, out table) && table.TryGetValue(Tuple.Create(l, r), out res))
+    if (binOps.TryGetValue(op, out table) && table.TryGetValue(Tuple.Create(l, r), out res))
     {
         return res;
     }

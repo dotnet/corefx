@@ -1,0 +1,9 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "Negate";
+string format = "-{0}";
+bool hasChecked = true;
+Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(float), typeof(double) };
+#>
+<#@ include file="UnaryInstruction.t4" #>
