@@ -5,9 +5,8 @@
       netcore50aot|Windows_NT;
       uap101aot|Windows_NT;
       netstandard1.3|AnyOS;
-      net46|AnyOS;
       net463|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.7|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

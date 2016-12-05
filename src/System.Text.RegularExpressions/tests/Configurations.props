@@ -5,7 +5,7 @@
       netstandard1.6|Windows_NT;
       netstandard1.6|AnyOS;
       netcoreapp1.1|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.7|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

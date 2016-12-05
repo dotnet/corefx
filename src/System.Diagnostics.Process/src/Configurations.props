@@ -2,9 +2,9 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildConfigurations>
-      $(DefaultTargetGroup)|Linux;
-      $(DefaultTargetGroup)|OSX;
-      $(DefaultTargetGroup)|Windows_NT;
+      netstandard1.7|Linux;
+      netstandard1.7|OSX;
+      netstandard1.7|Windows_NT;
       net463|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>

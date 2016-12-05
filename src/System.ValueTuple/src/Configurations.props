@@ -3,7 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       portable-net40+sl4+win8+wp8|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.0|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -3,8 +3,8 @@
   <PropertyGroup>
     <BuildConfigurations>
       uap101aot|Windows_NT;
-      $(DefaultTargetGroup)|Unix;
-      $(DefaultTargetGroup)|Windows_NT;
+      netcoreapp1.0|Unix;
+      netcoreapp1.0|Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

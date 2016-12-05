@@ -3,9 +3,9 @@
   <PropertyGroup>
     <BuildConfigurations>
       uap101|Windows_NT;
-      $(DefaultTargetGroup)|Linux;
-      $(DefaultTargetGroup)|OSX;
-      $(DefaultTargetGroup)|Windows_NT;
+      netstandard1.7|Linux;
+      netstandard1.7|OSX;
+      netstandard1.7|Windows_NT;
       net463|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>

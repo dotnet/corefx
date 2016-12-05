@@ -3,7 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netcoreapp1.1|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netcoreapp1.0|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

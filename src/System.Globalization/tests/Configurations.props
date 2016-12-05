@@ -4,7 +4,7 @@
     <BuildConfigurations>
       netstandard1.3|Windows_NT;
       netstandard1.3|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.7|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

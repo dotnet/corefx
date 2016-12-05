@@ -4,7 +4,7 @@
     <BuildConfigurations>
       uap101aot|AnyOS;
       net463|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.7|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

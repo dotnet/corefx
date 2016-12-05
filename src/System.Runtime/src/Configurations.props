@@ -6,7 +6,7 @@
       net463|AnyOS;
       net462|AnyOS;
       uap101aot|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netcoreapp1.0|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

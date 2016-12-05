@@ -3,10 +3,10 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard1.5|Windows_NT;
-      $(DefaultTargetGroup)|Windows_NT;
+      netstandard1.7|Windows_NT;
       netstandard1.5|AnyOS;
       netcoreapp1.1|AnyOS;
-      $(DefaultTargetGroup)|AnyOS;
+      netstandard1.7|AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" InitialTargets="BuildAllProjects" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="src\Tools\GenerateProps\targetgroups.props" />
   <Target Name="BuildAllProjects">
     <Error Condition="'$(VerticalGroup)' != ''" Text="This project should be overridden with the BuildAllProjects target from buildvertical.targets if VerticalGroup is specified." />
     <PropertyGroup>
@@ -33,12 +34,26 @@
       <Output TaskParameter="TargetOutputs"
               ItemName="_ConfigProject" />
     </MSBuild>
-
+    <ItemGroup>
+      <_defaultitem Remove="@(_defaultitem)" />
+      <_defaultitem Include="$(_ConfigurationProject)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_buildsprojfile>%(_defaultitem.RootDir)%(_defaultitem.Directory)%(_defaultitem.Filename).csproj</_buildsprojfile>
+    </PropertyGroup>
+    <Message Importance="High" Text="Checking proj file '$(_buildsprojfile)'" />
+    <MSBuild Targets="GetDefaultTargetGroup"
+             Projects="$(_buildsprojfile)"
+             Condition="Exists('$(_buildsprojfile)')">
+      <Output TaskParameter="TargetOutputs"
+              PropertyName="_DefaultTargetGroup" />
+    </MSBuild>
+<Message Importance="High" Text="DefaultTargetGroup: $(_DefaultTargetGroup)" />
     <ItemGroup>
       <_Configurations Condition="'%(_ConfigProject.TargetGroup)' != '' and '%(_ConfigProject.OSGroup)' != ''" Include="%20%20%20%20%20%20%(_ConfigProject.TargetGroup)|%(_ConfigProject.OSGroup)%3B" />
-      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' != ''" Include="%20%20%20%20%20%20%24(DefaultTargetGroup)|%(_ConfigProject.OSGroup)%3B" />
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' != ''" Include="%20%20%20%20%20%20$(_DefaultTargetGroup)|%(_ConfigProject.OSGroup)%3B" />
       <_Configurations Condition="'%(_ConfigProject.TargetGroup)' != '' and '%(_ConfigProject.OSGroup)' == ''" Include="%20%20%20%20%20%20%(_ConfigProject.TargetGroup)|AnyOS%3B" />
-      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' == ''" Include="%20%20%20%20%20%20%24(DefaultTargetGroup)|AnyOS%3B" />
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' == ''" Include="%20%20%20%20%20%20$(_DefaultTargetGroup)|AnyOS%3B" />
     </ItemGroup>
     <ItemGroup>
       <ConfigurationLines Include="%3C?xml version=%221.0%22 encoding=%22utf-8%22?%3E" />
@@ -56,10 +71,27 @@
 <WriteLinesToFile File="$(_ConfigurationsFilename)"
                   Lines="@(ConfigurationLines)"
                   Overwrite="true" 
-                  Condition="'@(_Configurations)' != '%20%20%20%20%20%20%24(DefaultTargetGroup)|AnyOS%3B'" />
+                  Condition="'@(_Configurations)' != '%20%20%20%20%20%20$(_DefaultTargetGroup)|AnyOS%3B' and Exists('$(_buildsprojfile)')" />
   </Target>
 
   <Target Name="GetProjects"
           Returns="@(Project)" />
+
+  <!-- Evaluate each project with TargetGroup == '', then read the derived NuGetTargetMoniker and determine TargetGroup -->
+  <Target Name="GetDefaultTargetGroup"
+          Inputs="$(MSBuildProjectFullPath)"
+          Outputs="fake"
+          Returns="$(_DefaultTargetGroup)">
+    <MSBuild Targets="GetNuGetTargetMoniker"
+             Projects="$(MSBuildProjectFullPath)">
+       <Output TaskParameter="TargetOutputs"
+               PropertyName="_NuGetTargetMoniker" />
+    </MSBuild>
+    <PropertyGroup>
+      <_DefaultTargetGroup Condition="'%(TargetGroups.NuGetTargetMoniker)%(TargetGroups.PackageTargetRuntime)' == '$(_NuGetTargetMoniker)'">%(TargetGroups.Identity)</_DefaultTargetGroup>
+    </PropertyGroup>
+
+    <Message Importance="Low" Text="Default target group for '$(MSBuildProjectFullPath)' is '$(_DefaultTargetGroup)' with NuGetTargetMoniker '$(_NuGetTargetMoniker)'" />
+  </Target>
   
 </Project>

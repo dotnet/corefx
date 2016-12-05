@@ -5,9 +5,9 @@
       netstandard1.3|Linux;
       netstandard1.3|OSX;
       netstandard1.3|Windows_NT;
-      $(DefaultTargetGroup)|Linux;
-      $(DefaultTargetGroup)|OSX;
-      $(DefaultTargetGroup)|Windows_NT;
+      netstandard1.7|Linux;
+      netstandard1.7|OSX;
+      netstandard1.7|Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

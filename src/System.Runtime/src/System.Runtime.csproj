@@ -56,7 +56,9 @@
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" Condition="'$(TargetGroup)' != 'net462' And '$(TargetGroup)' != 'net463' And '$(TargetGroup)' != 'uap101aot'">
       <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" Condition="'$(TargetGroup)' == 'uap101aot'" />
+    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" Condition="'$(TargetGroup)' == 'uap101aot'">
+      <OSGroup>Windows_NT</OSGroup>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net462' AND '$(TargetGroup)' != 'net463'">
     <TargetingPackReference Include="System.Private.CoreLib" />
