@@ -287,7 +287,6 @@ public static class XmlDictionaryWriterTest
         writer.SetOutput(ms, encoding, true);
     }
 
-    [ActiveIssue(13375)]
     [Fact]
     public static void FragmentTest()
     {
@@ -295,25 +294,12 @@ public static class XmlDictionaryWriterTest
         ReaderWriterFactory.ReaderWriterType rwType = (ReaderWriterFactory.ReaderWriterType)
             Enum.Parse(typeof(ReaderWriterFactory.ReaderWriterType), rwTypeStr, true);
         Encoding encoding = Encoding.GetEncoding("utf-8");
-        int numberOfNestedFragments = 1;
         MemoryStream ms1 = new MemoryStream();
         MemoryStream ms2 = new MemoryStream();
         XmlDictionaryWriter writer1 = (XmlDictionaryWriter)ReaderWriterFactory.CreateXmlWriter(rwType, ms1, encoding);
         XmlDictionaryWriter writer2 = (XmlDictionaryWriter)ReaderWriterFactory.CreateXmlWriter(rwType, ms2, encoding);
-        Assert.True(FragmentHelper.CanFragment(writer1));
-        Assert.True(FragmentHelper.CanFragment(writer2));
-        writer1.WriteStartDocument(); writer2.WriteStartDocument();
-        writer1.WriteStartElement(ReaderWriterConstants.RootElementName); writer2.WriteStartElement(ReaderWriterConstants.RootElementName);
-        SimulateWriteFragment(writer1, true, numberOfNestedFragments);
-        SimulateWriteFragment(writer2, false, numberOfNestedFragments);
-        writer1.WriteEndElement(); writer2.WriteEndElement();
-        writer1.WriteEndDocument(); writer2.WriteEndDocument();
-        writer1.Flush();
-        writer2.Flush();
-
-        byte[] doc1 = ms1.ToArray();
-        byte[] doc2 = ms2.ToArray();
-        CompareArrays(doc1, 0, doc2, 0, doc1.Length);
+        Assert.False(FragmentHelper.CanFragment(writer1));
+        Assert.False(FragmentHelper.CanFragment(writer2));
     }
     private static bool ReadTest(MemoryStream ms, Encoding encoding, ReaderWriterFactory.ReaderWriterType rwType, byte[] byteArray)
     {
@@ -414,15 +400,6 @@ public static class XmlDictionaryWriterTest
         }
 
     }
-
-    private static void CompareArrays(byte[] array1, int offset1, byte[] array2, int offset2, int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            Assert.Equal(array1[i + offset1], array2[i + offset2]);
-        }
-    }
-
     private static void SimulateWriteFragment(XmlDictionaryWriter writer, bool useFragmentAPI, int nestedLevelsLeft)
     {
         if (nestedLevelsLeft <= 0)
