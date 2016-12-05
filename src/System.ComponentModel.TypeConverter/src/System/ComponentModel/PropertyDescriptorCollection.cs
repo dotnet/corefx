@@ -385,7 +385,7 @@ namespace System.ComponentModel
 
             if (names != null && names.Length > 0)
             {
-                List<PropertyDescriptor> propArrayList = new List<PropertyDescriptor>(_properties);
+                List<PropertyDescriptor> propList = new List<PropertyDescriptor>(_properties);
                 int foundCount = 0;
                 int propCount = _properties.Length;
 
@@ -393,7 +393,7 @@ namespace System.ComponentModel
                 {
                     for (int j = 0; j < propCount; j++)
                     {
-                        PropertyDescriptor currentProp = propArrayList[j];
+                        PropertyDescriptor currentProp = propList[j];
 
                         // Found a matching property.  Here, we add it to our array.  We also
                         // mark it as null in our array list so we don't add it twice later.
@@ -401,7 +401,7 @@ namespace System.ComponentModel
                         if (currentProp != null && currentProp.Name.Equals(names[i]))
                         {
                             _properties[foundCount++] = currentProp;
-                            propArrayList[j] = null;
+                            propList[j] = null;
                             break;
                         }
                     }
@@ -414,9 +414,9 @@ namespace System.ComponentModel
                 //
                 for (int i = 0; i < propCount; i++)
                 {
-                    if (propArrayList[i] != null)
+                    if (propList[i] != null)
                     {
-                        _properties[foundCount++] = propArrayList[i];
+                        _properties[foundCount++] = propList[i];
                     }
                 }
 

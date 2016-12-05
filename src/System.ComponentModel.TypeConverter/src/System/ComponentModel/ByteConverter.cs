@@ -16,7 +16,7 @@ namespace System.ComponentModel
         /// <summary>
         /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
         /// </summary>
-        internal override Type TargetType => typeof(Byte);
+        internal override Type TargetType => typeof(byte);
 
         /// <summary>
         /// Convert the given string to a Byte using the given radix

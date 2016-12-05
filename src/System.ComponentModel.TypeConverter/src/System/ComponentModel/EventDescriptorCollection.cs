@@ -39,7 +39,6 @@ namespace System.ComponentModel
             if (events == null)
             {
                 _events = Array.Empty<EventDescriptor>();
-                Count = 0;
             }
             else
             {
@@ -368,7 +367,7 @@ namespace System.ComponentModel
 
             if (names != null && names.Length > 0)
             {
-                List<EventDescriptor> eventArrayList = new List<EventDescriptor>(_events);
+                List<EventDescriptor> eventList = new List<EventDescriptor>(_events);
                 int foundCount = 0;
                 int eventCount = _events.Length;
 
@@ -376,7 +375,7 @@ namespace System.ComponentModel
                 {
                     for (int j = 0; j < eventCount; j++)
                     {
-                        EventDescriptor currentEvent = eventArrayList[j];
+                        EventDescriptor currentEvent = eventList[j];
 
                         // Found a matching event.  Here, we add it to our array.  We also
                         // mark it as null in our array list so we don't add it twice later.
@@ -384,7 +383,7 @@ namespace System.ComponentModel
                         if (currentEvent != null && currentEvent.Name.Equals(names[i]))
                         {
                             _events[foundCount++] = currentEvent;
-                            eventArrayList[j] = null;
+                            eventList[j] = null;
                             break;
                         }
                     }
@@ -397,9 +396,9 @@ namespace System.ComponentModel
                 //
                 for (int i = 0; i < eventCount; i++)
                 {
-                    if (eventArrayList[i] != null)
+                    if (eventList[i] != null)
                     {
-                        _events[foundCount++] = eventArrayList[i];
+                        _events[foundCount++] = eventList[i];
                     }
                 }
 

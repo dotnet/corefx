@@ -22,7 +22,6 @@ namespace System.ComponentModel
         /// </summary>
         public DefaultBindingPropertyAttribute()
         {
-            Name = null;
         }
 
         /// <summary>

@@ -97,13 +97,13 @@ namespace System.ComponentModel
             _displayName = oldMemberDescriptor.DisplayName;
             _nameHash = _name.GetHashCode();
 
-            List<Attribute> newArray = new List<Attribute>();
+            List<Attribute> newList = new List<Attribute>();
 
             if (oldMemberDescriptor.Attributes.Count != 0)
             {
                 foreach (Attribute o in oldMemberDescriptor.Attributes)
                 {
-                    newArray.Add(o);
+                    newList.Add(o);
                 }
             }
 
@@ -111,12 +111,12 @@ namespace System.ComponentModel
             {
                 foreach (Attribute o in newAttributes)
                 {
-                    newArray.Add(o);
+                    newList.Add(o);
                 }
             }
 
-            _attributes = new Attribute[newArray.Count];
-            newArray.CopyTo(_attributes, 0);
+            _attributes = new Attribute[newList.Count];
+            newList.CopyTo(_attributes, 0);
             _attributesFiltered = false;
 
             _originalAttributes = _attributes;
