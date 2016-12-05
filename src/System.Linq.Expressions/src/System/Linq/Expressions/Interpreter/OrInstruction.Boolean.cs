@@ -22,17 +22,17 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         frame.Push((bool)right ? Utils.BoxedTrue : null);
                     }
-                    return +1;
+                    return 1;
                 }
 
                 if (right == null)
                 {
                     frame.Push((bool)left ? Utils.BoxedTrue : null);
-                    return +1;
+                    return 1;
                 }
 
                 frame.Push((bool)left | (bool)right);
-                return +1;
+                return 1;
             }
         }
     }

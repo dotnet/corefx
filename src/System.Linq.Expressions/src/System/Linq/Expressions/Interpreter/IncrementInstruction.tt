@@ -2,7 +2,7 @@
 <#@ output extension=".cs" #>
 <#
 string instruction = "Increment";
-string format = "{0} + 1";
+string format = "1 + {0}";
 bool hasChecked = false;
 Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
 #>

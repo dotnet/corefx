@@ -11,7 +11,7 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 frame.Push(frame.Pop() == frame.Pop());
-                return +1;
+                return 1;
             }
         }
     }

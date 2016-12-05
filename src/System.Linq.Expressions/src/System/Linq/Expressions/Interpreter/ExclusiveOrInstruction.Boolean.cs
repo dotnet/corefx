@@ -15,10 +15,10 @@ namespace System.Linq.Expressions.Interpreter
                 if (left == null || right == null)
                 {
                     frame.Push(null);
-                    return +1;
+                    return 1;
                 }
                 frame.Push(((bool)left) ^ ((bool)right));
-                return +1;
+                return 1;
             }
         }
     }
