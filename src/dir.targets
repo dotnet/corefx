@@ -2,6 +2,26 @@
   <PropertyGroup>
     <ErrorIfBuildToolsRestoredFromIndividualProject Condition="!Exists('$(ToolsDir)')">true</ErrorIfBuildToolsRestoredFromIndividualProject>
   </PropertyGroup>
+  <Import Project="Tools\GenerateProps\targetgroups.props" />
+  <!-- Evaluate each project with TargetGroup == '', then read the derived NuGetTargetMoniker and determine TargetGroup -->
+  <Target Name="GetDefaultTargetGroup"
+          Inputs="$(MSBuildProjectFullPath)"
+          Outputs="fake"
+          Returns="$(_DefaultTargetGroup)">
+    <MSBuild Targets="GetNuGetTargetMoniker"
+             Projects="$(MSBuildProjectFullPath)">
+       <Output TaskParameter="TargetOutputs"
+               PropertyName="_NuGetTargetMoniker" />
+    </MSBuild>
+    <PropertyGroup>
+      <_DefaultTargetGroup Condition="'%(TargetGroups.NuGetTargetMoniker)%(TargetGroups.PackageTargetRuntime)' == '$(_NuGetTargetMoniker)'">%(TargetGroups.Identity)</_DefaultTargetGroup>
+    </PropertyGroup>
+
+    <Message Importance="Low" Text="Default target group for '$(MSBuildProjectFullPath)' is '$(_DefaultTargetGroup)' with NuGetTargetMoniker '$(_NuGetTargetMoniker)'" />
+  </Target>
+  <!-- Used to determine default target group -->
+  <Target Name="GetNuGetTargetMoniker"
+          Returns="$(NuGetTargetMoniker)" />
 
   <Import Project="..\dir.targets" />
 

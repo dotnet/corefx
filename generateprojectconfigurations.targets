@@ -13,7 +13,8 @@
   <Target Name="GenerateConfigurationsProps"
           BeforeTargets="GenerateConfigurationProps">
     <ItemGroup>
-      <ConfigurationProject Include="$(ProjectDir)src/*/**/*.builds" />
+      <ConfigurationProject Include="$(ProjectDir)src/*/src/*.builds" />
+      <ConfigurationProject Include="$(ProjectDir)src/*/ref/*.builds" />
     </ItemGroup>
 
   </Target>
