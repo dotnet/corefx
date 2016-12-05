@@ -294,13 +294,11 @@ public static class XmlDictionaryWriterTest
         ReaderWriterFactory.ReaderWriterType rwType = (ReaderWriterFactory.ReaderWriterType)
             Enum.Parse(typeof(ReaderWriterFactory.ReaderWriterType), rwTypeStr, true);
         Encoding encoding = Encoding.GetEncoding("utf-8");
-        MemoryStream ms1 = new MemoryStream();
-        MemoryStream ms2 = new MemoryStream();
-        XmlDictionaryWriter writer1 = (XmlDictionaryWriter)ReaderWriterFactory.CreateXmlWriter(rwType, ms1, encoding);
-        XmlDictionaryWriter writer2 = (XmlDictionaryWriter)ReaderWriterFactory.CreateXmlWriter(rwType, ms2, encoding);
-        Assert.False(FragmentHelper.CanFragment(writer1));
-        Assert.False(FragmentHelper.CanFragment(writer2));
+        MemoryStream ms = new MemoryStream();
+        XmlDictionaryWriter writer = (XmlDictionaryWriter)ReaderWriterFactory.CreateXmlWriter(rwType, ms, encoding);
+        Assert.False(FragmentHelper.CanFragment(writer));
     }
+
     private static bool ReadTest(MemoryStream ms, Encoding encoding, ReaderWriterFactory.ReaderWriterType rwType, byte[] byteArray)
     {
         ms.Position = 0;
