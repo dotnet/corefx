@@ -19,7 +19,6 @@ namespace System.Collections.Concurrent.Tests
         protected override int CreateT(int seed) => new Random(seed).Next();
         protected override EnumerableOrder Order => EnumerableOrder.Unspecified;
         protected override bool ResetImplemented => false;
-        protected override bool Enumerator_NonGeneric_Current_UndefinedOperation_Throws => false;
 
         [Fact]
         public void Ctor_NoArg_ItemsAndCountMatch()

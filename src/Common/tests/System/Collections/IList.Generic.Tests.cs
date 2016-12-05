@@ -616,7 +616,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly && (Enumerator_Generic_Current_UndefinedOperation_Throws || Enumerator_NonGeneric_Current_UndefinedOperation_Throws))
+            if (!IsReadOnly)
             {
                 IList<T> collection = GenericIListFactory(count);
 
@@ -624,26 +624,29 @@ namespace System.Collections.Tests
                 {
                     while (enumerator.MoveNext()) ; // Go to end of enumerator
 
-                    if (Enumerator_Generic_Current_UndefinedOperation_Throws)
+                    T current = default(T);
+                    if (Enumerator_Current_UndefinedOperation_Throws)
+                    {
                         Assert.Throws<InvalidOperationException>(() => enumerator.Current); // enumerator.Current should fail
-
-                    if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
-                        Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // (enumerator as IEnumerator).Current should fail
+                    }
+                    else
+                    {
+                        current = enumerator.Current;
+                        Assert.Equal(default(T), current);
+                    }
 
                     int seed = 3538963;
                     collection.Add(CreateT(seed++));
 
-                    if (Enumerator_Generic_Current_UndefinedOperation_Throws)
-                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // enumerator.Current should fail
-
-                    if (Enumerator_NonGeneric_Current_UndefinedOperation_Throws)
+                    // Test after add
+                    if (Enumerator_Current_UndefinedOperation_Throws)
                     {
-                        // (List<T>.Enumerator as IEnumerator).Current have breaking issue here
-                        if (enumerator is List<T>.Enumerator)
-                            Assert.Equal(default(T), (enumerator as IEnumerator).Current);
-                        else
-                            Assert.Throws<InvalidOperationException>(() => (enumerator as IEnumerator).Current); // (enumerator as IEnumerator).Current should fail
-
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // enumerator.Current should fail
+                    }
+                    else
+                    {
+                        current = enumerator.Current;
+                        Assert.Equal(default(T), current);
                     }
                 }
             }

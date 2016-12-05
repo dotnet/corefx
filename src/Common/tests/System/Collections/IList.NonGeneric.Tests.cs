@@ -74,6 +74,17 @@ namespace System.Collections.Tests
 
         protected virtual bool IList_NonGeneric_RemoveNonExistent_Throws => false;
 
+        /// <summary>
+        /// When calling Current of the enumerator after the end of the list and list is extended by new items.
+        /// Tests are included to cover two behavioral scenarios:
+        ///   - Throwing an InvalidOperationException
+        ///   - Returning an undefined value.
+        /// 
+        /// If this property is set to true, the tests ensure that the exception is thrown. The default value is
+        /// the same as Enumerator_Current_UndefinedOperation_Throws.
+        /// </summary>
+        protected virtual bool IList_CurrentAfterAdd_Throws => Enumerator_Current_UndefinedOperation_Throws;
+
         #endregion
 
         #region ICollection Helper Methods
@@ -1058,29 +1069,33 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly && !ExpectedFixedSize && Enumerator_Current_UndefinedOperation_Throws)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 IEnumerator enumerator = collection.GetEnumerator();
                 while (enumerator.MoveNext()) ; // Go to end of enumerator
-                Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+
+                if (Enumerator_Current_UndefinedOperation_Throws)
+                {
+                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                }
+                else
+                {
+                    var current = enumerator.Current; // Enumerator.Current should not fail
+                }
 
                 int seed = 523561;
                 collection.Add(CreateT(seed++));
 
-                // (List<T>.Enumerator as IEnumerator).Current have breaking issue here
-                bool isGenericList = false;
+                // Test after add
+                if (IList_CurrentAfterAdd_Throws)
                 {
-                    var typeInfo = enumerator.GetType().GetTypeInfo();
-                    isGenericList = typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(List<>.Enumerator);
-                }
-
-                if (isGenericList)
-                {
-                    var current = enumerator.Current;
+                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
                 }
                 else
-                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail again
+                {
+                    var current = enumerator.Current; // Enumerator.Current should not fail
+                }
             }
         }
 
