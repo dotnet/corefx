@@ -271,18 +271,16 @@ namespace System.Collections.Tests
             {
                 for (var i = 0; i < 3; i++)
                 {
-                    Assert.False(
-                        enumerator.MoveNext(),
-                        "enumerator.MoveNext() returned true past the expected end.");
-                }
+                    Assert.False(enumerator.MoveNext(), "enumerator.MoveNext() returned true past the expected end.");
 
-                if (Enumerator_Current_UndefinedOperation_Throws)
-                {
-                    Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-                }
-                else
-                {
-                    var cur = enumerator.Current;
+                    if (Enumerator_Current_UndefinedOperation_Throws)
+                    {
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+                    }
+                    else
+                    {
+                        var cur = enumerator.Current;
+                    }
                 }
             }
         }
