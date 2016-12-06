@@ -11,6 +11,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net463'">None</ResourcesSourceOutputDirectory>
+    <NoWarn Condition="'$(TargetsUnix)' == 'true'">CS0809</NoWarn>
     <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
@@ -18,17 +19,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT_Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' != 'net463' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Security\Cryptography\AesCryptoServiceProvider.cs" />
-    <Compile Include="System\Security\Cryptography\CspProviderFlags.cs" />
-    <Compile Include="System\Security\Cryptography\ICspAsymmetricAlgorithm.cs" />
-    <Compile Include="System\Security\Cryptography\KeyNumber.cs" />
     <Compile Include="System\Security\Cryptography\CapiHelper.cs" />
     <Compile Include="System\Security\Cryptography\CapiHelper.DSA.cs" />
     <Compile Include="System\Security\Cryptography\CapiHelper.SymmetricKey.cs" />
     <Compile Include="System\Security\Cryptography\CspKeyContainerInfo.cs" />
     <Compile Include="System\Security\Cryptography\CspParameters.cs" />
+    <Compile Include="System\Security\Cryptography\CspProviderFlags.cs" />
     <Compile Include="System\Security\Cryptography\DESCryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\DSACryptoServiceProvider.cs" />
+    <Compile Include="System\Security\Cryptography\ICspAsymmetricAlgorithm.cs" />
+    <Compile Include="System\Security\Cryptography\KeyNumber.cs" />
     <Compile Include="System\Security\Cryptography\MD5CryptoServiceProvider.cs" />
+    <Compile Include="System\Security\Cryptography\PasswordDeriveBytes.cs" />
     <Compile Include="System\Security\Cryptography\RC2CryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\RNGCryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\RSACryptoServiceProvider.cs" />
@@ -66,6 +68,9 @@
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+    <ProjectReference Include="../../System.Security.Cryptography.Primitives/src/System.Security.Cryptography.Primitives.csproj" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Core" />
@@ -77,6 +82,9 @@
     <!-- ToDo: Remove once prerelease gets updated again -->
     <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
       <Name>System.Security.Cryptography.Algorithms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\pkg\System.Security.Cryptography.Primitives.pkgproj">
+      <Name>System.Security.Cryptography.Primitives</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

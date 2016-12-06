@@ -435,6 +435,10 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\SR.Core.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\StringNormalizationExtensions.cs" />
+    <Compile Include="System\Globalization\Extensions.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
       <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>

@@ -8,7 +8,7 @@ namespace System.Linq.Expressions.Interpreter
 {
     internal abstract class NotInstruction : Instruction
     {
-        public static Instruction _Bool, _Int64, _Int32, _Int16, _UInt64, _UInt32, _UInt16, _Byte, _SByte;
+        public static Instruction s_Boolean, s_Int64, s_Int32, s_Int16, s_UInt64, s_UInt32, s_UInt16, s_Byte, s_SByte;
 
         private NotInstruction() { }
 
@@ -44,7 +44,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((long)~(long)value);
+                    frame.Push(~(long)value);
                 }
                 return +1;
             }
@@ -61,7 +61,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((int)(~(int)value));
+                    frame.Push(~(int)value);
                 }
                 return +1;
             }
@@ -95,7 +95,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ulong)(~(ulong)value));
+                    frame.Push(~(ulong)value);
                 }
                 return +1;
             }
@@ -112,7 +112,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((uint)(~(uint)value));
+                    frame.Push(~(uint)value);
                 }
                 return +1;
             }
@@ -146,7 +146,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((object)(byte)(~(byte)value));
+                    frame.Push((byte)(~(byte)value));
                 }
                 return +1;
             }
@@ -163,7 +163,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((object)(sbyte)(~(sbyte)value));
+                    frame.Push((sbyte)(~(sbyte)value));
                 }
                 return +1;
             }
@@ -173,15 +173,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             switch (type.GetNonNullableType().GetTypeCode())
             {
-                case TypeCode.Boolean: return _Bool ?? (_Bool = new BoolNot());
-                case TypeCode.Int64: return _Int64 ?? (_Int64 = new Int64Not());
-                case TypeCode.Int32: return _Int32 ?? (_Int32 = new Int32Not());
-                case TypeCode.Int16: return _Int16 ?? (_Int16 = new Int16Not());
-                case TypeCode.UInt64: return _UInt64 ?? (_UInt64 = new UInt64Not());
-                case TypeCode.UInt32: return _UInt32 ?? (_UInt32 = new UInt32Not());
-                case TypeCode.UInt16: return _UInt16 ?? (_UInt16 = new UInt16Not());
-                case TypeCode.Byte: return _Byte ?? (_Byte = new ByteNot());
-                case TypeCode.SByte: return _SByte ?? (_SByte = new SByteNot());
+                case TypeCode.Boolean: return s_Boolean ?? (s_Boolean = new BoolNot());
+                case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new Int64Not());
+                case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new Int32Not());
+                case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new Int16Not());
+                case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new UInt64Not());
+                case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new UInt32Not());
+                case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new UInt16Not());
+                case TypeCode.Byte: return s_Byte ?? (s_Byte = new ByteNot());
+                case TypeCode.SByte: return s_SByte ?? (s_SByte = new SByteNot());
 
                 default:
                     throw Error.ExpressionNotSupportedForType("Not", type);

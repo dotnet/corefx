@@ -14,12 +14,17 @@ namespace System.Security.Cryptography
         protected int KeySizeValue;
         protected System.Security.Cryptography.KeySizes[] LegalKeySizesValue;
         protected AsymmetricAlgorithm() { }
+        public virtual string KeyExchangeAlgorithm { get { throw null; } }
         public virtual int KeySize { get { throw null; } set { } }
         public virtual System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
         public static System.Security.Cryptography.AsymmetricAlgorithm Create() { throw null; }
         public static System.Security.Cryptography.AsymmetricAlgorithm Create(string algName) { throw null; }
+        public virtual string SignatureAlgorithm { get { throw null; } }
+        public void Clear() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public virtual void FromXmlString(string xmlString) { }
+        public virtual string ToXmlString(bool includePrivateParameters) { throw null; }
     }
     public enum CipherMode
     {
@@ -54,6 +59,7 @@ namespace System.Security.Cryptography
         public override long Position { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         public override void Flush() { }
+        public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public void FlushFinalBlock() { }
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
@@ -72,6 +78,7 @@ namespace System.Security.Cryptography
     public abstract partial class HashAlgorithm : System.IDisposable, System.Security.Cryptography.ICryptoTransform
     {
         protected internal byte[] HashValue;
+        protected int HashSizeValue;
         protected int State;
         protected HashAlgorithm() { }
         public virtual bool CanReuseTransform { get { throw null; } }
@@ -154,9 +161,12 @@ namespace System.Security.Cryptography
         None = 1,
         PKCS7 = 2,
         Zeros = 3,
+        ANSIX923 = 4,
+        ISO10126 = 5,
     }
     public abstract partial class SymmetricAlgorithm : System.IDisposable
     {
+        protected int FeedbackSizeValue;
         protected int BlockSizeValue;
         protected byte[] IVValue;
         protected int KeySizeValue;
@@ -166,6 +176,7 @@ namespace System.Security.Cryptography
         protected System.Security.Cryptography.CipherMode ModeValue;
         protected System.Security.Cryptography.PaddingMode PaddingValue;
         protected SymmetricAlgorithm() { }
+        public virtual int FeedbackSize { get { throw null; } set { } }
         public virtual int BlockSize { get { throw null; } set { } }
         public virtual byte[] IV { get { throw null; } set { } }
         public virtual byte[] Key { get { throw null; } set { } }
@@ -185,5 +196,6 @@ namespace System.Security.Cryptography
         protected virtual void Dispose(bool disposing) { }
         public abstract void GenerateIV();
         public abstract void GenerateKey();
+        public bool ValidKeySize(int bitLength) { throw null; }
     }
 }
