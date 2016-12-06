@@ -215,7 +215,7 @@ namespace System.IO
             fixed (char* pathStart = path)
             {
                 uint result = 0;
-                while ((result = Interop.mincore.GetFullPathNameW(pathStart + startIndex, fullPath.CharCapacity, fullPath.GetHandle(), IntPtr.Zero)) > fullPath.CharCapacity)
+                while ((result = Interop.Kernel32.GetFullPathNameW(pathStart + startIndex, fullPath.CharCapacity, fullPath.GetHandle(), IntPtr.Zero)) > fullPath.CharCapacity)
                 {
                     // Reported size (which does not include the null) is greater than the buffer size. Increase the capacity.
                     fullPath.EnsureCharCapacity(result);
@@ -226,7 +226,7 @@ namespace System.IO
                     // Failure, get the error and throw
                     int errorCode = Marshal.GetLastWin32Error();
                     if (errorCode == 0)
-                        errorCode = Interop.mincore.Errors.ERROR_BAD_PATHNAME;
+                        errorCode = Interop.Errors.ERROR_BAD_PATHNAME;
                     throw Win32Marshal.GetExceptionForWin32Error(errorCode, path);
                 }
 
@@ -238,15 +238,26 @@ namespace System.IO
         {
             uint length = content.Length;
 
-            length += isDosUnc ? (uint)PathInternal.UncExtendedPrefixToInsert.Length : (uint)PathInternal.ExtendedPathPrefix.Length;
+            length += isDosUnc
+                ? (uint)PathInternal.UncExtendedPrefixLength - PathInternal.UncPrefixLength
+                : PathInternal.DevicePrefixLength;
+
             buffer = new StringBuffer(length);
 
             if (isDosUnc)
             {
+                // Put the extended UNC prefix (\\?\UNC\) in front of the path
                 buffer.CopyFrom(bufferIndex: 0, source: PathInternal.UncExtendedPathPrefix);
-                uint prefixDifference = (uint)(PathInternal.UncExtendedPathPrefix.Length - PathInternal.UncPathPrefix.Length);
-                content.CopyTo(bufferIndex: prefixDifference, destination: buffer, destinationIndex: (uint)PathInternal.ExtendedPathPrefix.Length, count: content.Length - prefixDifference);
-                return prefixDifference;
+
+                // Copy the source buffer over after the existing UNC prefix
+                content.CopyTo(
+                    bufferIndex: PathInternal.UncPrefixLength,
+                    destination: buffer,
+                    destinationIndex: PathInternal.UncExtendedPrefixLength,
+                    count: content.Length - PathInternal.UncPrefixLength);
+
+                // Return the prefix difference
+                return (uint)PathInternal.UncExtendedPrefixLength - PathInternal.UncPrefixLength;
             }
             else
             {
@@ -309,7 +320,7 @@ namespace System.IO
 
             while (!success)
             {
-                uint result = Interop.mincore.GetLongPathNameW(inputBuffer.GetHandle(), outputBuffer.GetHandle(), outputBuffer.CharCapacity);
+                uint result = Interop.Kernel32.GetLongPathNameW(inputBuffer.GetHandle(), outputBuffer.GetHandle(), outputBuffer.CharCapacity);
 
                 // Replace any temporary null we added
                 if (inputBuffer[foundIndex] == '\0') inputBuffer[foundIndex] = '\\';
@@ -318,7 +329,7 @@ namespace System.IO
                 {
                     // Look to see if we couldn't find the file
                     int error = Marshal.GetLastWin32Error();
-                    if (error != Interop.mincore.Errors.ERROR_FILE_NOT_FOUND && error != Interop.mincore.Errors.ERROR_PATH_NOT_FOUND)
+                    if (error != Interop.Errors.ERROR_FILE_NOT_FOUND && error != Interop.Errors.ERROR_PATH_NOT_FOUND)
                     {
                         // Some other failure, give up
                         break;
@@ -343,7 +354,7 @@ namespace System.IO
                 {
                     // Not enough space. The result count for this API does not include the null terminator.
                     outputBuffer.EnsureCharCapacity(result);
-                    result = Interop.mincore.GetLongPathNameW(inputBuffer.GetHandle(), outputBuffer.GetHandle(), outputBuffer.CharCapacity);
+                    result = Interop.Kernel32.GetLongPathNameW(inputBuffer.GetHandle(), outputBuffer.GetHandle(), outputBuffer.CharCapacity);
                 }
                 else
                 {
@@ -360,6 +371,8 @@ namespace System.IO
 
             // Strip out the prefix and return the string
             StringBuffer bufferToUse = success ? outputBuffer : inputBuffer;
+
+            // Switch back from \\?\ to \\.\ if necessary
             if (wasDotDevice)
                 bufferToUse[2] = '.';
 
@@ -369,7 +382,7 @@ namespace System.IO
             if (isDosUnc)
             {
                 // Need to go from \\?\UNC\ to \\?\UN\\
-                bufferToUse[(uint)PathInternal.UncExtendedPathPrefix.Length - 1] = '\\';
+                bufferToUse[PathInternal.UncExtendedPrefixLength - PathInternal.UncPrefixLength] = '\\';
             }
 
             // We now need to strip out any added characters at the front of the string

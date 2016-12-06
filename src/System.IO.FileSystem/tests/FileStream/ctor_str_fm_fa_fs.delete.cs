@@ -85,7 +85,7 @@ namespace System.IO.Tests
             }
         }
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // file sharing restriction limitations on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // file sharing restriction limitations on Unix
         public void FileShareDeleteExistingMultipleClients()
         {
             // create the file
@@ -119,7 +119,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // file sharing restriction limitations on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // file sharing restriction limitations on Unix
         public void FileShareWithoutDeleteThrows()
         {
             string fileName = GetTestFilePath();

@@ -120,7 +120,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_DirectoryDoesntExist_ReturnDefaultValues()
         {
             string path = GetTestFilePath();
@@ -149,7 +149,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Unix_DirectoryDoesntExist_Throws()
         {
             string path = GetTestFilePath();

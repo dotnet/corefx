@@ -2,12 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Diagnostics.Tests
 {
+    // These tests test the static Debug class. They cannot be run in parallel
+    [Collection("System.Diagnostics.Debug")]
     public class DebugTests
     {
+        private readonly string s_newline = // avoid Environment direct dependency, due to it being visible from both System.Private.Corelib and System.Runtime.Extensions
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\r\n" : "\n";
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void Asserts()
@@ -50,17 +57,25 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
+        public void Print()
+        {
+            VerifyLogged(() => { Debug.Print("logged"); }, "logged");
+            VerifyLogged(() => { Debug.Print("logged {0}", 5); }, "logged 5");
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void WriteLine()
         {
-            VerifyLogged(() => { Debug.WriteLine(5); }, "5" + Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine((string)null); }, Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine((object)null); }, Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine(5, "category"); }, "category:5" + Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine((object)null, "category"); }, "category:" + Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine("logged"); }, "logged" + Environment.NewLine);         
-            VerifyLogged(() => { Debug.WriteLine("logged", "category"); }, "category:logged" + Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine("logged", (string)null); }, "logged" + Environment.NewLine);
-            VerifyLogged(() => { Debug.WriteLine("{0} {1}", 'a', 'b'); }, "a b" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLine(5); }, "5" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine((string)null); }, s_newline);
+            VerifyLogged(() => { Debug.WriteLine((object)null); }, s_newline);
+            VerifyLogged(() => { Debug.WriteLine(5, "category"); }, "category:5" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine((object)null, "category"); }, "category:" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine("logged"); }, "logged" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine("logged", "category"); }, "category:logged" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine("logged", (string)null); }, "logged" + s_newline);
+            VerifyLogged(() => { Debug.WriteLine("{0} {1}", 'a', 'b'); }, "a b" + s_newline);
         }
 
         [Fact]
@@ -84,17 +99,37 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
         public void WriteLineIf()
         {
-            VerifyLogged(() => { Debug.WriteLineIf(true, 5); }, "5" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLineIf(true, 5); }, "5" + s_newline);
             VerifyLogged(() => { Debug.WriteLineIf(false, 5); }, "");
 
-            VerifyLogged(() => { Debug.WriteLineIf(true, 5, "category"); }, "category:5" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLineIf(true, 5, "category"); }, "category:5" + s_newline);
             VerifyLogged(() => { Debug.WriteLineIf(false, 5, "category"); }, "");
 
-            VerifyLogged(() => { Debug.WriteLineIf(true, "logged"); }, "logged" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLineIf(true, "logged"); }, "logged" + s_newline);
             VerifyLogged(() => { Debug.WriteLineIf(false, "logged"); }, "");
 
-            VerifyLogged(() => { Debug.WriteLineIf(true, "logged", "category"); }, "category:logged" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLineIf(true, "logged", "category"); }, "category:logged" + s_newline);
             VerifyLogged(() => { Debug.WriteLineIf(false, "logged", "category"); }, "");     
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(4)]
+        [InlineData(3)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46)]
+        public void Indentation(int indentSize)
+        {
+            Debug.IndentLevel = 0;
+            Debug.IndentSize = indentSize;
+            VerifyLogged(() => { Debug.WriteLine("pizza"); }, "pizza" + s_newline);
+            Debug.Indent();
+            string expectedIndent = new string(' ', indentSize);
+            VerifyLogged(() => { Debug.WriteLine("pizza"); }, expectedIndent + "pizza" + s_newline);
+            Debug.Indent();
+            expectedIndent = new string(' ', indentSize * 2);
+            VerifyLogged(() => { Debug.WriteLine("pizza"); }, expectedIndent + "pizza" + s_newline);
+            Debug.Unindent();
+            Debug.Unindent();
         }
 
 

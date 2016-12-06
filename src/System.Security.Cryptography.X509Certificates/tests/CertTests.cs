@@ -67,6 +67,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 Assert.Equal(notAfter, cert2.NotAfter);
                 Assert.Equal(notBefore, cert2.NotBefore);
+#if netstandard17
+                Assert.Equal(notAfter.ToString(), cert2.GetExpirationDateString());
+                Assert.Equal(notBefore.ToString(), cert2.GetEffectiveDateString());
+#endif
 
                 Assert.Equal("00D01E4090000046520000000100000004", cert2.SerialNumber);
                 Assert.Equal("1.2.840.113549.1.1.5", cert2.SignatureAlgorithm.Value);
@@ -74,6 +78,28 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(3, cert2.Version);
             }
         }
+
+#if netstandard17
+        [Fact]
+        public static void TestVerify()
+        {
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            {
+                // Fails because expired (NotAfter = 10/16/2016)
+                Assert.False(microsoftDotCom.Verify());
+            }
+
+            using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
+            {
+                Assert.True(microsoftDotComIssuer.Verify()); // NotAfter=10/31/2023
+            }
+
+            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            {
+                Assert.True(microsoftDotComRoot.Verify()); // NotAfter=7/17/2036
+            }
+        }
+#endif
 
         [Fact]
         public static void X509CertEmptyToString()
@@ -181,6 +207,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // causing ObjectDisposedExceptions.
                 h = c.Handle;
                 Assert.Equal(IntPtr.Zero, h);
+
+                // State held on X509Certificate
                 Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
@@ -189,6 +217,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumber());
                 Assert.ThrowsAny<CryptographicException>(() => c.Issuer);
                 Assert.ThrowsAny<CryptographicException>(() => c.Subject);
+                Assert.ThrowsAny<CryptographicException>(() => c.NotBefore);
+                Assert.ThrowsAny<CryptographicException>(() => c.NotAfter);
+
+                // State held on X509Certificate2
+                Assert.ThrowsAny<CryptographicException>(() => c.RawData);
+                Assert.ThrowsAny<CryptographicException>(() => c.SignatureAlgorithm);
+                Assert.ThrowsAny<CryptographicException>(() => c.Version);
+                Assert.ThrowsAny<CryptographicException>(() => c.SubjectName);
+                Assert.ThrowsAny<CryptographicException>(() => c.IssuerName);
+                Assert.ThrowsAny<CryptographicException>(() => c.PublicKey);
+                Assert.ThrowsAny<CryptographicException>(() => c.Extensions);
+#if netstandard17
+                Assert.ThrowsAny<CryptographicException>(() => c.PrivateKey);
+#endif
             }
         }
 

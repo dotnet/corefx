@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class TimeZoneInfoTests
+    public static partial class TimeZoneInfoTests
     {
         private static readonly bool s_isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly bool s_isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
@@ -101,7 +101,7 @@ namespace System.Tests
             {
                 tripoli = TimeZoneInfo.FindSystemTimeZoneById(s_strLibya);
             }
-            catch (Exception /* TimeZoneNotFoundException */ )
+            catch (Exception /* TimeZoneNotFoundException in netstandard1.7 test*/ )
             {
                 // Libya time zone not found
                 Console.WriteLine("Warning: Libya time zone is not exist in this machine");
@@ -138,10 +138,7 @@ namespace System.Tests
 
             VerifyConvertException<ArgumentNullException>(time1, null);
 
-            //
-            // We catch Exception here instead of TimeZoneNotFoundException because TimeZoneNotFoundException is not exposed 
-            // in .NET Core
-            //
+            // We catch TimeZoneNotFoundException in then netstandard1.7 tests
 
             VerifyConvertException<Exception>(time1, string.Empty);
             VerifyConvertException<Exception>(time1, "    ");
@@ -799,6 +796,10 @@ namespace System.Tests
             VerifyRoundTrip(new DateTime(2003, 8, 4, 12, 0, 0, DateTimeKind.Utc), "UTC", TimeZoneInfo.Local.Id);
             VerifyRoundTrip(new DateTime(1929, 3, 9, 23, 59, 59, DateTimeKind.Utc), "UTC", TimeZoneInfo.Local.Id);
             VerifyRoundTrip(new DateTime(2000, 2, 28, 23, 59, 59, DateTimeKind.Utc), "UTC", TimeZoneInfo.Local.Id);
+
+            // DateTime(2016, 11, 6, 8, 1, 17, DateTimeKind.Utc) is ambiguous time for Pacific Time Zone
+            VerifyRoundTrip(new DateTime(2016, 11, 6, 8, 1, 17, DateTimeKind.Utc), "UTC", TimeZoneInfo.Local.Id);
+
             VerifyRoundTrip(DateTime.UtcNow, "UTC", TimeZoneInfo.Local.Id);
 
             var time1 = new DateTime(2006, 5, 12, 7, 34, 59);
@@ -1671,7 +1672,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void IsDaylightSavingTime_CatamarcaMultiYearDaylightSavings()
         {
             // America/Catamarca had DST from
@@ -1694,7 +1695,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [InlineData("1940-02-24T23:59:59.0000000Z", false, "0:00:00")]
         [InlineData("1940-02-25T00:00:00.0000000Z", true, "1:00:00")]
         [InlineData("1940-11-20T00:00:00.0000000Z", true, "1:00:00")]
@@ -1718,7 +1719,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         // in 1996 Europe/Lisbon changed from standard time to DST without changing the UTC offset
         [InlineData("1995-09-30T17:00:00.0000000Z", false, "1:00:00")]
         [InlineData("1996-03-31T00:59:59.0000000Z", false, "1:00:00")]
@@ -1835,7 +1836,7 @@ namespace System.Tests
         /// See https://github.com/dotnet/coreclr/issues/2185
         /// </summary>
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void DaylightTransitionsExactTime_Johannesburg()
         {
             DateTimeOffset transition = new DateTimeOffset(1943, 3, 20, 23, 0, 0, TimeSpan.Zero);
@@ -1930,7 +1931,11 @@ namespace System.Tests
             DateTime dt2 = TimeZoneInfo.ConvertTime(dt1, sourceTzi, destTzi);
             DateTime dt3 = TimeZoneInfo.ConvertTime(dt2, destTzi, sourceTzi);
 
-            Assert.True(dt1.Equals(dt3), string.Format("{0} failed to round trip using source '{1}' and '{2}' zones. wrong result {3}", dt1, sourceTimeZoneId, destinationTimeZoneId, dt3));
+            if (!destTzi.IsAmbiguousTime(dt2))
+            {
+                // the ambiguous time can be mapped to 2 UTC times so it is not guaranteed to round trip
+                Assert.True(dt1.Equals(dt3), string.Format("{0} failed to round trip using source '{1}' and '{2}' zones. wrong result {3}", dt1, sourceTimeZoneId, destinationTimeZoneId, dt3));
+            }
 
             if (sourceTimeZoneId == TimeZoneInfo.Utc.Id)
             {

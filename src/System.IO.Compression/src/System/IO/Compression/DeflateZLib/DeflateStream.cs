@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace System.IO.Compression
 {
     public partial class DeflateStream : Stream
     {
-        internal const int DefaultBufferSize = 8192;
+        private const int DefaultBufferSize = 8192;
 
         private Stream _stream;
         private CompressionMode _mode;
@@ -19,7 +20,7 @@ namespace System.IO.Compression
         private Inflater _inflater;
         private Deflater _deflater;
         private byte[] _buffer;
-        private int _asyncOperations;
+        private int _activeAsyncOperation; // 1 == true, 0 == false
         private bool _wroteBytes;
 
         #region Public Constructors
@@ -95,7 +96,6 @@ namespace System.IO.Compression
             _stream = stream;
             _mode = CompressionMode.Decompress;
             _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
         }
 
         /// <summary>
@@ -112,7 +112,21 @@ namespace System.IO.Compression
             _stream = stream;
             _mode = CompressionMode.Compress;
             _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            InitializeBuffer();
+        }
+
+        private void InitializeBuffer()
+        {
+            Debug.Assert(_buffer == null);
+            _buffer = ArrayPool<byte>.Shared.Rent(DefaultBufferSize);
+        }
+
+        private void EnsureBufferInitialized()
+        {
+            if (_buffer == null)
+            {
+                InitializeBuffer();
+            }
         }
 
         #endregion
@@ -189,9 +203,7 @@ namespace System.IO.Compression
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            if (_asyncOperations != 0)
-                throw new InvalidOperationException(SR.InvalidBeginCall);
-
+            EnsureNoActiveAsyncOperation();
             EnsureNotDisposed();
 
             if (cancellationToken.IsCancellationRequested)
@@ -202,7 +214,7 @@ namespace System.IO.Compression
 
         private async Task FlushAsyncCore(CancellationToken cancellationToken)
         {
-            Interlocked.Increment(ref _asyncOperations);
+            AsyncOperationStarting();
             try
             {
                 // Compress any bytes left:
@@ -223,7 +235,7 @@ namespace System.IO.Compression
             }
             finally
             {
-                Interlocked.Decrement(ref _asyncOperations);
+                AsyncOperationCompleting();
             }
         }
 
@@ -253,6 +265,7 @@ namespace System.IO.Compression
             EnsureDecompressionMode();
             ValidateParameters(array, offset, count);
             EnsureNotDisposed();
+            EnsureBufferInitialized();
 
             int bytesRead;
             int currentOffset = offset;
@@ -345,14 +358,19 @@ namespace System.IO.Compression
             throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
 
-        public override Task<int> ReadAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+#if netstandard17
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override int EndRead(IAsyncResult asyncResult) =>
+            TaskToApm.End<int>(asyncResult);
+#endif
+
+        public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
-            EnsureDecompressionMode();
-
             // We use this checking order for compat to earlier versions:
-            if (_asyncOperations != 0)
-                throw new InvalidOperationException(SR.InvalidBeginCall);
-
+            EnsureDecompressionMode();
+            EnsureNoActiveAsyncOperation();
             ValidateParameters(array, offset, count);
             EnsureNotDisposed();
 
@@ -361,9 +379,10 @@ namespace System.IO.Compression
                 return Task.FromCanceled<int>(cancellationToken);
             }
 
-            Interlocked.Increment(ref _asyncOperations);
+            EnsureBufferInitialized();
             Task<int> readTask = null;
 
+            AsyncOperationStarting();
             try
             {
                 // Try to read decompressed data in output buffer
@@ -395,7 +414,7 @@ namespace System.IO.Compression
                 // if we haven't started any async work, decrement the counter to end the transaction
                 if (readTask == null)
                 {
-                    Interlocked.Decrement(ref _asyncOperations);
+                    AsyncOperationCompleting();
                 }
             }
         }
@@ -445,7 +464,7 @@ namespace System.IO.Compression
             }
             finally
             {
-                Interlocked.Decrement(ref _asyncOperations);
+                AsyncOperationCompleting();
             }
         }
 
@@ -563,8 +582,8 @@ namespace System.IO.Compression
                 // In this case, we still need to clean up internal resources, hence the inner finally blocks.
                 try
                 {
-                    if (disposing && !_leaveOpen && _stream != null)
-                        _stream.Dispose();
+                    if (disposing && !_leaveOpen)
+                        _stream?.Dispose();
                 }
                 finally
                 {
@@ -572,29 +591,43 @@ namespace System.IO.Compression
 
                     try
                     {
-                        if (_deflater != null)
-                            _deflater.Dispose();
-                        if (_inflater != null)
-                            _inflater.Dispose();
+                        _deflater?.Dispose();
+                        _inflater?.Dispose();
                     }
                     finally
                     {
                         _deflater = null;
                         _inflater = null;
+
+                        byte[] buffer = _buffer;
+                        if (buffer != null)
+                        {
+                            _buffer = null;
+                            if (!AsyncOperationIsActive)
+                            {
+                                ArrayPool<byte>.Shared.Return(buffer);
+                            }
+                        }
+
                         base.Dispose(disposing);
                     }
                 }
             }
         }
 
-        public override Task WriteAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+#if netstandard17
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override void EndWrite(IAsyncResult asyncResult) =>
+            TaskToApm.End(asyncResult);
+#endif
+
+        public override Task WriteAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
-            EnsureCompressionMode();
-
             // We use this checking order for compat to earlier versions:
-            if (_asyncOperations != 0)
-                throw new InvalidOperationException(SR.InvalidBeginCall);
-
+            EnsureCompressionMode();
+            EnsureNoActiveAsyncOperation();
             ValidateParameters(array, offset, count);
             EnsureNotDisposed();
 
@@ -604,9 +637,9 @@ namespace System.IO.Compression
             return WriteAsyncCore(array, offset, count, cancellationToken);
         }
 
-        private async Task WriteAsyncCore(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+        private async Task WriteAsyncCore(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
-            Interlocked.Increment(ref _asyncOperations);
+            AsyncOperationStarting();
             try
             {
                 await WriteDeflaterOutputAsync(cancellationToken).ConfigureAwait(false);
@@ -620,7 +653,7 @@ namespace System.IO.Compression
             }
             finally
             {
-                Interlocked.Decrement(ref _asyncOperations);
+                AsyncOperationCompleting();
             }
         }
 
@@ -638,6 +671,148 @@ namespace System.IO.Compression
                 }
             }
         }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            // Validation as base CopyToAsync would do
+            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+
+            // Validation as ReadAsync would do
+            EnsureDecompressionMode();
+            EnsureNoActiveAsyncOperation();
+            EnsureNotDisposed();
+
+            // Early check for cancellation
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            // Do the copy
+            return new CopyToAsyncStream(this, destination, bufferSize, cancellationToken).CopyFromSourceToDestination();
+        }
+
+        private sealed class CopyToAsyncStream : Stream
+        {
+            private readonly DeflateStream _deflateStream;
+            private readonly Stream _destination;
+            private readonly CancellationToken _cancellationToken;
+            private byte[] _arrayPoolBuffer;
+            private int _arrayPoolBufferHighWaterMark;
+
+            public CopyToAsyncStream(DeflateStream deflateStream, Stream destination, int bufferSize, CancellationToken cancellationToken)
+            {
+                Debug.Assert(deflateStream != null);
+                Debug.Assert(destination != null);
+                Debug.Assert(bufferSize > 0);
+
+                _deflateStream = deflateStream;
+                _destination = destination;
+                _cancellationToken = cancellationToken;
+                _arrayPoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            }
+
+            public async Task CopyFromSourceToDestination()
+            {
+                _deflateStream.AsyncOperationStarting();
+                try
+                {
+                    // Flush any existing data in the inflater to the destination stream.
+                    while (true)
+                    {
+                        int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                        if (bytesRead > 0)
+                        {
+                            if (bytesRead > _arrayPoolBufferHighWaterMark) _arrayPoolBufferHighWaterMark = bytesRead;
+                            await _destination.WriteAsync(_arrayPoolBuffer, 0, bytesRead, _cancellationToken).ConfigureAwait(false);
+                        }
+                        else break;
+                    }
+
+                    // Now, use the source stream's CopyToAsync to push directly to our inflater via this helper stream
+                    await _deflateStream._stream.CopyToAsync(this, _arrayPoolBuffer.Length, _cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _deflateStream.AsyncOperationCompleting();
+
+                    Array.Clear(_arrayPoolBuffer, 0, _arrayPoolBufferHighWaterMark); // clear only the most we used
+                    ArrayPool<byte>.Shared.Return(_arrayPoolBuffer, clearArray: false);
+                    _arrayPoolBuffer = null;
+                }
+            }
+
+            public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                // Validate inputs
+                Debug.Assert(buffer != _arrayPoolBuffer);
+                _deflateStream.EnsureNotDisposed();
+                if (count <= 0)
+                {
+                    return;
+                }
+                else if (count > buffer.Length - offset)
+                {
+                    // The source stream is either malicious or poorly implemented and returned a number of
+                    // bytes larger than the buffer supplied to it.
+                    throw new InvalidDataException(SR.GenericInvalidData);
+                }
+
+                // Feed the data from base stream into the decompression engine.
+                _deflateStream._inflater.SetInput(buffer, offset, count);
+
+                // While there's more decompressed data available, forward it to the destination stream.
+                while (true)
+                {
+                    int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                    if (bytesRead > 0)
+                    {
+                        if (bytesRead > _arrayPoolBufferHighWaterMark) _arrayPoolBufferHighWaterMark = bytesRead;
+                        await _destination.WriteAsync(_arrayPoolBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                    }
+                    else break;
+                }
+            }
+
+            public override void Write(byte[] buffer, int offset, int count) => WriteAsync(buffer, offset, count, default(CancellationToken)).GetAwaiter().GetResult();
+            public override bool CanWrite => true;
+            public override void Flush() { }
+
+            public override bool CanRead => false;
+            public override bool CanSeek => false;
+            public override long Length { get { throw new NotSupportedException(); } }
+            public override long Position { get { throw new NotSupportedException(); } set { throw new NotSupportedException(); } }
+            public override int Read(byte[] buffer, int offset, int count) { throw new NotSupportedException(); }
+            public override long Seek(long offset, SeekOrigin origin) { throw new NotSupportedException(); }
+            public override void SetLength(long value) { throw new NotSupportedException(); }
+        }
+
+        private bool AsyncOperationIsActive => _activeAsyncOperation != 0;
+
+        private void EnsureNoActiveAsyncOperation()
+        {
+            if (AsyncOperationIsActive)
+                ThrowInvalidBeginCall();
+        }
+
+        private void AsyncOperationStarting()
+        {
+            if (Interlocked.CompareExchange(ref _activeAsyncOperation, 1, 0) != 0)
+            {
+                ThrowInvalidBeginCall();
+            }
+        }
+
+        private void AsyncOperationCompleting()
+        {
+            int oldValue = Interlocked.CompareExchange(ref _activeAsyncOperation, 0, 1);
+            Debug.Assert(oldValue == 1, $"Expected {nameof(_activeAsyncOperation)} to be 1, got {oldValue}");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowInvalidBeginCall()
+        {
+            throw new InvalidOperationException(SR.InvalidBeginCall);
+        }
     }
 }
-

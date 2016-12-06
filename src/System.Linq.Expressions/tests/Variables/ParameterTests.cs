@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
@@ -42,6 +42,14 @@ namespace System.Linq.Expressions.Tests
         {
             Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void)));
             Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void), "var"));
+        }
+
+        [Theory]
+        [ClassData(typeof(InvalidTypesData))]
+        public void OpenGenericType_ThrowsArgumentException(Type type)
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(type));
+            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(type, "name"));
         }
 
         [Fact]
@@ -120,7 +128,52 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(6, argument);
         }
 
-        public delegate T ByRefReadFunc<T>(ref T arg);
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void CanUseAsLambdaByRefParameter_String(bool useInterpreter)
+        {
+            ParameterExpression param = Expression.Parameter(typeof(string).MakeByRefType());
+            ByRefFunc<string> f = Expression.Lambda<ByRefFunc<string>>(
+                Expression.Assign(param, Expression.Call(param, typeof(string).GetMethod(nameof(string.ToUpper), Type.EmptyTypes))),
+                param
+                ).Compile(useInterpreter);
+            string argument = "bar";
+            f(ref argument);
+            Assert.Equal("BAR", argument);
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void CanUseAsLambdaByRefParameter_Char(bool useInterpreter)
+        {
+            ParameterExpression param = Expression.Parameter(typeof(char).MakeByRefType());
+            ByRefFunc<char> f = Expression.Lambda<ByRefFunc<char>>(
+                Expression.Assign(param, Expression.Call(typeof(char).GetMethod(nameof(char.ToUpper), new[] { typeof(char) }), param)),
+                param
+                ).Compile(useInterpreter);
+            char argument = 'a';
+            f(ref argument);
+            Assert.Equal('A', argument);
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void CanUseAsLambdaByRefParameter_Bool(bool useInterpreter)
+        {
+            ParameterExpression param = Expression.Parameter(typeof(bool).MakeByRefType());
+            ByRefFunc<bool> f = Expression.Lambda<ByRefFunc<bool>>(
+                Expression.ExclusiveOrAssign(param, Expression.Constant(true)),
+                param
+                ).Compile(useInterpreter);
+
+            bool b1 = false;
+            f(ref b1);
+            Assert.Equal(false ^ true, b1);
+
+            bool b2 = true;
+            f(ref b2);
+            Assert.Equal(true ^ true, b2);
+        }
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
@@ -163,6 +216,8 @@ namespace System.Linq.Expressions.Tests
             AssertCanReadFromRefParameter<DateTime?>(null, useInterpreter);
             AssertCanReadFromRefParameter<DateTime?>(new DateTime(1983, 2, 11), useInterpreter);
         }
+
+        public delegate T ByRefReadFunc<T>(ref T arg);
 
         private void AssertCanReadFromRefParameter<T>(T value, bool useInterpreter)
         {
@@ -226,7 +281,7 @@ namespace System.Linq.Expressions.Tests
             ParameterExpression @ref = Expression.Parameter(typeof(T).MakeByRefType());
             ParameterExpression val = Expression.Parameter(typeof(T));
 
-            ByRefWriteAction<T> f = 
+            ByRefWriteAction<T> f =
                 Expression.Lambda<ByRefWriteAction<T>>(
                     Expression.Assign(@ref, val),
                     @ref, val
@@ -253,5 +308,46 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*)));
             Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*), "pointer"));
         }
+
+        [Theory]
+        [MemberData(nameof(ReadAndWriteRefCases))]
+        public void ReadAndWriteRefParameters(bool useInterpreter, object value, object increment, object result)
+        {
+            Type type = value.GetType();
+
+            MethodInfo method = typeof(ParameterTests).GetMethod(nameof(AssertReadAndWriteRefParameters), BindingFlags.NonPublic | BindingFlags.Static);
+
+            method.MakeGenericMethod(type).Invoke(null, new object[] { useInterpreter, value, increment, result });
+        }
+
+        private static void AssertReadAndWriteRefParameters<T>(bool useInterpreter, T value, T increment, T result)
+        {
+            ParameterExpression param = Expression.Parameter(typeof(T).MakeByRefType());
+            ByRefFunc<T> addOneInPlace = Expression.Lambda<ByRefFunc<T>>(
+                Expression.AddAssign(param, Expression.Constant(increment, typeof(T))),
+                param
+                ).Compile(useInterpreter);
+            T argument = value;
+            addOneInPlace(ref argument);
+            Assert.Equal(result, argument);
+        }
+
+        public static IEnumerable<object[]> ReadAndWriteRefCases()
+        {
+            foreach (var useInterpreter in new[] { true, false })
+            {
+                yield return new object[] { useInterpreter, (short)41, (short)1, (short)42 };
+                yield return new object[] { useInterpreter, (ushort)41, (ushort)1, (ushort)42 };
+                yield return new object[] { useInterpreter, 41, 1, 42 };
+                yield return new object[] { useInterpreter, 41U, 1U, 42U };
+                yield return new object[] { useInterpreter, 41L, 1L, 42L };
+                yield return new object[] { useInterpreter, 41UL, 1UL, 42UL };
+                yield return new object[] { useInterpreter, 41.0F, 1.0F, Apply((x, y) => x + y, 41.0F, 1.0F) };
+                yield return new object[] { useInterpreter, 41.0D, 1.0D, Apply((x, y) => x + y, 41.0D, 1.0D) };
+                yield return new object[] { useInterpreter, TimeSpan.FromSeconds(41), TimeSpan.FromSeconds(1), Apply((x, y) => x + y, TimeSpan.FromSeconds(41), TimeSpan.FromSeconds(1)) };
+            }
+        }
+
+        private static T Apply<T>(Func<T, T, T> f, T x, T y) => f(x, y);
     }
 }

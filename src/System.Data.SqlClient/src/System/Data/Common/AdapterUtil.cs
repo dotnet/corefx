@@ -892,6 +892,10 @@ namespace System.Data.Common
             return result;
         }
 
+        static internal string MachineName() 
+        {
+            return Environment.MachineName;
+        }
 
         static internal string BuildQuotedString(string quotePrefix, string quoteSuffix, string unQuotedString)
         {
@@ -1070,6 +1074,44 @@ namespace System.Data.Common
             }
 
             return s_systemDataVersion;
+        }
+
+
+        static internal readonly string[] AzureSqlServerEndpoints = {Res.GetString(Res.AZURESQL_GenericEndpoint),
+                                                                     Res.GetString(Res.AZURESQL_GermanEndpoint),
+                                                                     Res.GetString(Res.AZURESQL_UsGovEndpoint),
+                                                                     Res.GetString(Res.AZURESQL_ChinaEndpoint)};
+
+        // This method assumes dataSource parameter is in TCP connection string format.
+        static internal bool IsAzureSqlServerEndpoint(string dataSource)
+        {
+            // remove server port
+            int i = dataSource.LastIndexOf(',');
+            if (i >= 0)
+            {
+                dataSource = dataSource.Substring(0, i);
+            }
+
+            // check for the instance name
+            i = dataSource.LastIndexOf('\\');
+            if (i >= 0)
+            {
+                dataSource = dataSource.Substring(0, i);
+            }
+
+            // trim redundant whitespaces
+            dataSource = dataSource.Trim();
+
+            // check if servername end with any azure endpoints
+            for (i = 0; i < AzureSqlServerEndpoints.Length; i++)
+            {
+                if (dataSource.EndsWith(AzureSqlServerEndpoints[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

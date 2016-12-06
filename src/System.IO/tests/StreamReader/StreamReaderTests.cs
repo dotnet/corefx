@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class StreamReaderTests
+    public partial class StreamReaderTests
     {
         protected virtual Stream CreateStream()
         {
@@ -289,7 +289,7 @@ namespace System.IO.Tests
             ms.Dispose();
             Assert.Throws<ObjectDisposedException>(() => sr.ReadLine());
         }
-       
+
         [Fact]
         public void VanillaReadLines()
         {

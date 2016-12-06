@@ -38,7 +38,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DriveOnlyReturnsPeriod_Windows()
         {
             string path = @"C:";

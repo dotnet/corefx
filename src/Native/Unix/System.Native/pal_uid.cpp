@@ -25,7 +25,7 @@ extern "C" int32_t SystemNative_GetPwUidR(uint32_t uid, Passwd* pwd, char* buf, 
     struct passwd nativePwd;
     struct passwd* result;
     int error;
-    while ((error = getpwuid_r(uid, &nativePwd, buf, UnsignedCast(buflen), &result) == EINTR));
+    while ((error = getpwuid_r(uid, &nativePwd, buf, UnsignedCast(buflen), &result)) == EINTR);
 
     // positive error number returned -> failure other than entry-not-found
     if (error != 0)
@@ -62,4 +62,9 @@ extern "C" uint32_t SystemNative_GetEUid()
 extern "C" uint32_t SystemNative_GetEGid()
 {
     return getegid();
+}
+
+extern "C" int32_t SystemNative_SetEUid(uid_t euid)
+{
+    return seteuid(euid);
 }

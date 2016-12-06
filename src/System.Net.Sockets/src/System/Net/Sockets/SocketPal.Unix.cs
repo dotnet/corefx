@@ -78,7 +78,7 @@ namespace System.Net.Sockets
             fixed (byte* b = buffer)
             {
                 var iov = new Interop.Sys.IOVector {
-                    Base = &b[offset],
+                    Base = (b == null) ? null : &b[offset],
                     Count = (UIntPtr)count
                 };
 
@@ -484,13 +484,14 @@ namespace System.Net.Sockets
             {
                 Interop.Error errno;
                 int received;
-                if (buffer != null)
+                if (buffers != null)
                 {
-                    received = Receive(socket, flags, buffer, offset, count, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
+                    Debug.Assert(buffer == null);
+                    received = Receive(socket, flags, buffers, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
                 }
                 else
                 {
-                    received = Receive(socket, flags, buffers, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
+                    received = Receive(socket, flags, buffer, offset, count, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
                 }
 
                 if (received != -1)
@@ -703,11 +704,6 @@ namespace System.Net.Sockets
             {
                 return SocketError.WouldBlock;
             }
-        }
-
-        public static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
-        {
-            throw new PlatformNotSupportedException();
         }
 
         public static SocketError Send(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out int bytesTransferred)
@@ -945,6 +941,11 @@ namespace System.Net.Sockets
             {
                 socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             }
+        }
+
+        public static void SetIPProtectionLevel(Socket socket, SocketOptionLevel optionLevel, int protectionLevel)
+        {
+            throw new PlatformNotSupportedException();
         }
 
         public static unsafe SocketError GetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, out int optionValue)
@@ -1320,6 +1321,16 @@ namespace System.Net.Sockets
             byte[] socketAddressBuffer = new byte[socketAddressSize];
 
             return handle.AsyncContext.AcceptAsync(socketAddressBuffer, socketAddressSize, asyncResult.CompletionCallback);
+        }
+
+        internal static SocketError DisconnectAsync(Socket socket, SafeCloseSocket handle, bool reuseSocket, DisconnectOverlappedAsyncResult asyncResult)
+        {
+            throw new PlatformNotSupportedException(SR.net_sockets_disconnect_notsupported);
+        }
+
+        internal static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
+        {
+            throw new PlatformNotSupportedException(SR.net_sockets_disconnect_notsupported);
         }
     }
 }

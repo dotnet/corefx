@@ -8,6 +8,7 @@
  *
  */
 
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace System.Collections.Specialized
@@ -16,6 +17,7 @@ namespace System.Collections.Specialized
     /// <para>Represents a sorted collection of associated <see cref='System.String' qualify='true'/> keys and <see cref='System.String' qualify='true'/> values that
     ///    can be accessed either with the hash code of the key or with the index.</para>
     /// </devdoc>
+    [Serializable]
     public class NameValueCollection : NameObjectCollectionBase
     {
         private String[] _all;
@@ -43,6 +45,11 @@ namespace System.Collections.Specialized
             : base(col != null ? col.Comparer : null)
         {
             Add(col);
+        }
+
+        [Obsolete("Please use NameValueCollection(IEqualityComparer) instead.")]
+        public NameValueCollection(IHashCodeProvider hashProvider, IComparer comparer) 
+            : base(hashProvider, comparer) {
         }
 
         /// <devdoc>
@@ -79,6 +86,15 @@ namespace System.Collections.Specialized
 
             this.Comparer = col.Comparer;
             Add(col);
+        }
+
+        [Obsolete("Please use NameValueCollection(Int32, IEqualityComparer) instead.")]
+        public NameValueCollection(int capacity, IHashCodeProvider hashProvider, IComparer comparer) 
+            : base(capacity, hashProvider, comparer) {
+        }
+
+        protected NameValueCollection(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
 
         //

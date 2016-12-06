@@ -1,19 +1,23 @@
 {
   "frameworks": {
-    "netstandard1.1": {
+    "netstandard1.7": {
       "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1",
-        "System.Diagnostics.Contracts": "4.0.1",
-        "System.Runtime": "4.0.0",
-        "System.Runtime.Extensions": "4.0.0"
-      },
-      "imports": [
-        "dotnet5.2"
-      ]
+        "System.Collections": "4.3.0",
+        "System.Diagnostics.Contracts": "4.3.0",
+        "System.Diagnostics.Debug": "4.3.0",
+        "System.Diagnostics.Tools": "4.3.0",
+        "System.Reflection": "4.4.0-beta-24721-02",
+        "System.Reflection.Primitives": "4.4.0-beta-24721-02",
+        "System.Resources.ResourceManager": "4.3.0",
+        "System.Runtime": "4.4.0-beta-24721-02",
+        "System.Runtime.Extensions": "4.3.0",
+        "System.Threading": "4.3.0",
+        "System.Threading.Tasks": "4.4.0-beta-24721-02"
+      }
     },
-    "net45": {
+    "net463": {
       "dependencies": {
-        "Microsoft.TargetingPack.NETFramework.v4.5": "1.0.1"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

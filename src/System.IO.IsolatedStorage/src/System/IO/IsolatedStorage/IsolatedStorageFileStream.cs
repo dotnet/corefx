@@ -2,63 +2,99 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using Microsoft.Win32.SafeHandles;
-using System.Security;
-using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO.IsolatedStorage
 {
-    public class IsolatedStorageFileStream : Stream
+    public class IsolatedStorageFileStream : FileStream
     {
-        private const String s_BackSlash = "\\";
+        private const string BackSlash = "\\";
+        private const int DefaultBufferSize = 1024;
 
         private FileStream _fs;
         private IsolatedStorageFile _isf;
-        private String _givenPath;
-        private String _fullPath;
+        private string _givenPath;
+        private string _fullPath;
 
-        private IsolatedStorageFileStream() { }
+        public IsolatedStorageFileStream(string path, FileMode mode)
+            : this(path, mode, (mode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite), FileShare.None, null)
+        {
+        }
 
-        public IsolatedStorageFileStream(String path, FileMode mode,
-                IsolatedStorageFile isf)
+        public IsolatedStorageFileStream(string path, FileMode mode, IsolatedStorageFile isf)
             : this(path, mode, (mode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite), FileShare.None, isf)
         {
         }
-        public IsolatedStorageFileStream(String path, FileMode mode,
-                FileAccess access, IsolatedStorageFile isf)
-            : this(path, mode, access, access == FileAccess.Read ?
-                FileShare.Read : FileShare.None, DefaultBufferSize, isf)
+
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access)
+            : this(path, mode, access, access == FileAccess.Read ? FileShare.Read : FileShare.None, DefaultBufferSize, null)
         {
         }
-        public IsolatedStorageFileStream(String path, FileMode mode,
-                FileAccess access, FileShare share, IsolatedStorageFile isf)
+
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, IsolatedStorageFile isf)
+            : this(path, mode, access, access == FileAccess.Read ? FileShare.Read : FileShare.None, DefaultBufferSize, isf)
+        {
+        }
+
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+            : this(path, mode, access, share, DefaultBufferSize, null)
+        {
+        }
+
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, IsolatedStorageFile isf)
             : this(path, mode, access, share, DefaultBufferSize, isf)
         {
         }
 
-        private const int DefaultBufferSize = 1024;
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize)
+            : this(path, mode, access, share, bufferSize, null)
+        {
+        }
 
-        // If the isolated storage file is null, then we default to using a file
-        // that is scoped by user, appdomain, and assembly.
-        public IsolatedStorageFileStream(String path, FileMode mode,
-            FileAccess access, FileShare share, int bufferSize,
-            IsolatedStorageFile isf)
+        public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, IsolatedStorageFile isf)
+            : this(path, mode, access, share, bufferSize, InitializeFileStream(path, mode, access, share, bufferSize, isf))
+        {
+        }
+
+        // On NetFX FileStream has an internal no arg constructor that we utilize to provide the facade. We don't have access
+        // to internals in CoreFX so we'll do the next best thing and contort ourselves into the SafeFileHandle constructor.
+        // (A path constructor would try and create the requested file and give us two open handles.)
+        //
+        // We only expose our own nested FileStream so the base class having a handle doesn't matter. Passing a new SafeFileHandle
+        // with ownsHandle: false avoids the parent class closing without our knowledge.
+        private IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, InitialiationData initializationData)
+            : base(new SafeFileHandle(initializationData.NestedStream.SafeFileHandle.DangerousGetHandle(), ownsHandle: false), access, bufferSize)
+        {
+            _isf = initializationData.StorageFile;
+            _givenPath = path;
+            _fullPath = initializationData.FullPath;
+            _fs = initializationData.NestedStream;
+        }
+
+        private struct InitialiationData
+        {
+            public FileStream NestedStream;
+            public IsolatedStorageFile StorageFile;
+            public string FullPath;
+        }
+
+        // If IsolatedStorageFile is null, then we default to using a file that is scoped by user, appdomain, and assembly.
+        private static InitialiationData InitializeFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, IsolatedStorageFile isf)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
-            if ((path.Length == 0) || path.Equals(s_BackSlash))
+            if ((path.Length == 0) || path.Equals(BackSlash))
                 throw new ArgumentException(
                    SR.IsolatedStorage_Path);
 
+            bool createdStore = false;
             if (isf == null)
             {
-                throw new ArgumentNullException(nameof(isf));
+                isf = IsolatedStorageFile.GetUserStoreForDomain();
+                createdStore = true;
             }
 
             if (isf.Disposed)
@@ -78,30 +114,43 @@ namespace System.IO.IsolatedStorage
                     throw new ArgumentException(SR.IsolatedStorage_FileOpenMode);
             }
 
-            _isf = isf;
-            _givenPath = path;
-            _fullPath = _isf.GetFullPath(_givenPath);
+            InitialiationData data = new InitialiationData
+            {
+                FullPath = isf.GetFullPath(path),
+                StorageFile = isf
+            };
 
             try
             {
-                _fs = new
-                   FileStream(_fullPath, mode, access, share, bufferSize,
-                       FileOptions.None);
+                data.NestedStream = new FileStream(data.FullPath, mode, access, share, bufferSize, FileOptions.None);
             }
             catch (Exception e)
             {
+                // Make an attempt to clean up the StorageFile if we created it
+                try
+                {
+                    if (createdStore)
+                    {
+                        data.StorageFile?.Dispose();
+                    }
+                }
+                catch
+                {
+                }
+
                 // Exception message might leak the IsolatedStorage path. The desktop prevented this by calling an
                 // internal API which made sure that the exception message was scrubbed. However since the innerException
                 // is never returned to the user(GetIsolatedStorageException() does not populate the innerexception
                 // in retail bits we leak the path only under the debugger via IsolatedStorageException._underlyingException which
                 // they can any way look at via IsolatedStorageFile instance as well.
-                throw IsolatedStorageFile.GetIsolatedStorageException("IsolatedStorage_Operation_ISFS", e);
+                throw IsolatedStorageFile.GetIsolatedStorageException(SR.IsolatedStorage_Operation_ISFS, e);
             }
+
+            return data;
         }
 
         public override bool CanRead
         {
-            [Pure]
             get
             {
                 return _fs.CanRead;
@@ -110,7 +159,6 @@ namespace System.IO.IsolatedStorage
 
         public override bool CanWrite
         {
-            [Pure]
             get
             {
                 return _fs.CanWrite;
@@ -119,7 +167,6 @@ namespace System.IO.IsolatedStorage
 
         public override bool CanSeek
         {
-            [Pure]
             get
             {
                 return _fs.CanSeek;
@@ -140,19 +187,9 @@ namespace System.IO.IsolatedStorage
             {
                 return _fs.Position;
             }
-
             set
             {
                 _fs.Position = value;
-            }
-        }
-
-        public string Name
-        {
-            [SecurityCritical]
-            get
-            {
-                return _fullPath;
             }
         }
 
@@ -222,6 +259,42 @@ namespace System.IO.IsolatedStorage
         public override void WriteByte(byte value)
         {
             _fs.WriteByte(value);
+        }
+
+        public override IAsyncResult BeginRead(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        {
+            return _fs.BeginRead(array, offset, numBytes, userCallback, stateObject);
+        }
+
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        {
+            return _fs.BeginWrite(array, offset, numBytes, userCallback, stateObject);
+        }
+
+        public override int EndRead(IAsyncResult asyncResult)
+        {
+            return _fs.EndRead(asyncResult);
+        }
+
+        public override void EndWrite(IAsyncResult asyncResult)
+        {
+            _fs.EndWrite(asyncResult);
+        }
+
+        [Obsolete("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public override IntPtr Handle
+        {
+            get { return _fs.Handle; }
+        }
+
+        public override void Unlock(long position, long length)
+        {
+            _fs.Unlock(position, length);
+        }
+
+        public override void Lock(long position, long length)
+        {
+            _fs.Lock(position, length);
         }
     }
 }

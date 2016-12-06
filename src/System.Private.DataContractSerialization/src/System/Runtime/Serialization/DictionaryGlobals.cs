@@ -5,16 +5,9 @@
 using System;
 using System.Xml;
 using System.Xml.Schema;
-using System.Security;
-
 
 namespace System.Runtime.Serialization
 {
-    /// <SecurityNote>
-    /// Review - Static fields are marked SecurityCritical or readonly to prevent
-    ///          data from being modified or leaked to other components in appdomain.
-    ///          changes to static fields could affect serialization/deserialization; should be reviewed.
-    /// </SecurityNote>
 #if USE_REFEMIT
     public static class DictionaryGlobals
 #else
@@ -33,6 +26,7 @@ namespace System.Runtime.Serialization
         public readonly static XmlDictionaryString ArraySizeLocalName;
         public readonly static XmlDictionaryString IdLocalName;
         public readonly static XmlDictionaryString RefLocalName;
+        public readonly static XmlDictionaryString ISerializableFactoryTypeLocalName;
         public readonly static XmlDictionaryString CharLocalName;
         public readonly static XmlDictionaryString BooleanLocalName;
         public readonly static XmlDictionaryString SignedByteLocalName;
@@ -76,6 +70,8 @@ namespace System.Runtime.Serialization
                 RefLocalName = dictionary.Add(Globals.RefLocalName);
                 ArraySizeLocalName = dictionary.Add(Globals.ArraySizeLocalName);
                 EmptyString = dictionary.Add(String.Empty);
+                ISerializableFactoryTypeLocalName = dictionary.Add(Globals.ISerializableFactoryTypeLocalName);
+
                 // 10
                 XmlnsNamespace = dictionary.Add(Globals.XmlnsNamespace);
                 CharLocalName = dictionary.Add("char");

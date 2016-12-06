@@ -55,7 +55,7 @@ namespace System
             }
             set
             {
-                CheckNonNull(value, "value");
+                CheckNonNull(value, nameof(value));
                 lock (InternalSyncObject)
                 {
                     // Set the terminal console encoding.
@@ -79,7 +79,7 @@ namespace System
             }
             set
             {
-                CheckNonNull(value, "value");
+                CheckNonNull(value, nameof(value));
 
                 lock (InternalSyncObject)
                 {
@@ -409,9 +409,29 @@ namespace System
             return ConsolePal.OpenStandardInput();
         }
 
+        public static Stream OpenStandardInput(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardInput();
+        }
+
         public static Stream OpenStandardOutput()
         {
             return ConsolePal.OpenStandardOutput();
+        }
+
+        public static Stream OpenStandardOutput(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardOutput();
         }
 
         public static Stream OpenStandardError()
@@ -419,9 +439,19 @@ namespace System
             return ConsolePal.OpenStandardError();
         }
 
+        public static Stream OpenStandardError(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardError();
+        }
+
         public static void SetIn(TextReader newIn)
         {
-            CheckNonNull(newIn, "newIn");
+            CheckNonNull(newIn, nameof(newIn));
             newIn = SyncTextReader.GetSynchronizedTextReader(newIn);
             lock (InternalSyncObject)
             {
@@ -431,7 +461,7 @@ namespace System
 
         public static void SetOut(TextWriter newOut)
         {
-            CheckNonNull(newOut, "newOut");
+            CheckNonNull(newOut, nameof(newOut));
             newOut = SyncTextWriter.GetSynchronizedTextWriter(newOut);
             Volatile.Write(ref s_isOutTextWriterRedirected, true);
 
@@ -443,7 +473,7 @@ namespace System
 
         public static void SetError(TextWriter newError)
         {
-            CheckNonNull(newError, "newError");
+            CheckNonNull(newError, nameof(newError));
             newError = SyncTextWriter.GetSynchronizedTextWriter(newError);
             Volatile.Write(ref s_isErrorTextWriterRedirected, true);
 
@@ -697,6 +727,32 @@ namespace System
         {
             Out.Write(value);
         }
+
+        // TODO: Uncomment when ArgIterator and friends are available in System.Runtime.dll
+        //
+        //[CLSCompliant(false)]
+        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
+        //public static void WriteLine(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
+        //{
+        //    Out.WriteLine(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
+        //}
+        //
+        //[CLSCompliant(false)]
+        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
+        //public static void Write(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
+        //{
+        //    Out.Write(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
+        //}
+        //
+        //private static object[] ToObjectArgs(object arg0, object arg1, object arg2, object arg3, ArgIterator args)
+        //{
+        //    var objArgs = new object[4 + args.GetRemainingCount()] { arg0, arg1, arg2, arg3 };
+        //    for (int i = 4; i < objArgs.Length; i++)
+        //    {
+        //        objArgs[i] = TypedReference.ToObject(args.GetNextArg());
+        //    }
+        //    return objArgs;
+        //}
 
         private sealed class ControlCDelegateData
         {

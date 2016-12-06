@@ -17,6 +17,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -32,6 +33,7 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
+    [Serializable]
     public class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
         /// <summary>
@@ -54,10 +56,17 @@ namespace System.Collections.Concurrent
             }
         }
 
+        [NonSerialized]
         private volatile Tables _tables; // Internal tables of the dictionary
-        private readonly IEqualityComparer<TKey> _comparer; // Key equality comparer
+        private IEqualityComparer<TKey> _comparer; // Key equality comparer
+        [NonSerialized]
         private readonly bool _growLockArray; // Whether to dynamically increase the size of the striped lock
+        [NonSerialized]
         private int _budget; // The maximum number of elements per lock before a resize operation is triggered
+
+        private KeyValuePair<TKey, TValue>[] _serializationArray; // Used for custom serialization
+        private int _serializationConcurrencyLevel; // used to save the concurrency level in serialization
+        private int _serializationCapacity; // used to save the capacity in serialization
 
         // The default capacity, i.e. the initial # of buckets. When choosing this value, we are making
         // a trade-off between the size of a very small dictionary, and the number of resizes when
@@ -290,6 +299,43 @@ namespace System.Collections.Concurrent
             _budget = buckets.Length / locks.Length;
         }
 
+        /// <summary>Get the data array to be serialized.</summary>
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            Tables tables = _tables;
+
+            // save the data into the serialization array to be saved
+            _serializationArray = ToArray();
+            _serializationConcurrencyLevel = tables._locks.Length;
+            _serializationCapacity = tables._buckets.Length;
+        }
+
+        /// <summary>Clear the serialized state.</summary>
+        [OnSerialized]
+        private void OnSerialized(StreamingContext context)
+        {
+            _serializationArray = null;
+        }
+
+        /// <summary>Construct the dictionary from a previously serialized one</summary>
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            KeyValuePair<TKey, TValue>[] array = _serializationArray;
+
+            var buckets = new Node[_serializationCapacity];
+            var countPerLock = new int[_serializationConcurrencyLevel];
+            var locks = new object[_serializationConcurrencyLevel];
+            for (int i = 0; i < locks.Length; i++)
+            {
+                locks[i] = new object();
+            }
+            _tables = new Tables(buckets, locks, countPerLock);
+
+            InitializeFromCollection(array);
+            _serializationArray = null;
+        }
 
         /// <summary>
         /// Attempts to add the specified key and value to the <see cref="ConcurrentDictionary{TKey,
@@ -925,28 +971,45 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                int count = 0;
-
                 int acquiredLocks = 0;
                 try
                 {
                     // Acquire all locks
                     AcquireAllLocks(ref acquiredLocks);
 
-                    // Compute the count, we allow overflow
-                    for (int i = 0; i < _tables._countPerLock.Length; i++)
-                    {
-                        count += _tables._countPerLock[i];
-                    }
+                    return GetCountInternal();
                 }
                 finally
                 {
                     // Release locks that have been acquired earlier
                     ReleaseLocks(0, acquiredLocks);
                 }
-
-                return count;
             }
+        }
+
+        /// <summary>
+        /// Gets the number of key/value pairs contained in the <see
+        /// cref="ConcurrentDictionary{TKey,TValue}"/>. Should only be used after all locks
+        /// have been aquired.
+        /// </summary>
+        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// elements.</exception>
+        /// <value>The number of key/value pairs contained in the <see
+        /// cref="ConcurrentDictionary{TKey,TValue}"/>.</value>
+        /// <remarks>Count has snapshot semantics and represents the number of items in the <see
+        /// cref="ConcurrentDictionary{TKey,TValue}"/>
+        /// at the moment when Count was accessed.</remarks>
+        private int GetCountInternal()
+        {
+            int count = 0;
+
+            // Compute the count, we allow overflow
+            for (int i = 0; i < _tables._countPerLock.Length; i++)
+            {
+                count += _tables._countPerLock[i];
+            }
+
+            return count;
         }
 
         /// <summary>
@@ -1771,12 +1834,10 @@ namespace System.Collections.Concurrent
         /// </summary>
         private void AcquireAllLocks(ref int locksAcquired)
         {
-#if FEATURE_TRACING
             if (CDSCollectionETWBCLProvider.Log.IsEnabled())
             {
                 CDSCollectionETWBCLProvider.Log.ConcurrentDictionary_AcquiringAllLocks(_tables._buckets.Length);
             }
-#endif
 
             // First, acquire lock 0
             AcquireLocks(0, 1, ref locksAcquired);
@@ -1836,8 +1897,11 @@ namespace System.Collections.Concurrent
             try
             {
                 AcquireAllLocks(ref locksAcquired);
-                List<TKey> keys = new List<TKey>();
 
+                int count = GetCountInternal();
+                if (count < 0) throw new OutOfMemoryException();
+
+                List<TKey> keys = new List<TKey>(count);
                 for (int i = 0; i < _tables._buckets.Length; i++)
                 {
                     Node current = _tables._buckets[i];
@@ -1865,8 +1929,11 @@ namespace System.Collections.Concurrent
             try
             {
                 AcquireAllLocks(ref locksAcquired);
-                List<TValue> values = new List<TValue>();
 
+                int count = GetCountInternal();
+                if (count < 0) throw new OutOfMemoryException();
+
+                List<TValue> values = new List<TValue>(count);
                 for (int i = 0; i < _tables._buckets.Length; i++)
                 {
                     Node current = _tables._buckets[i];
@@ -1888,6 +1955,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// A node in a singly-linked list representing a particular hash table bucket.
         /// </summary>
+        [Serializable]
         private sealed class Node
         {
             internal readonly TKey _key;
@@ -1908,6 +1976,7 @@ namespace System.Collections.Concurrent
         /// A private class to represent enumeration over the dictionary that implements the 
         /// IDictionaryEnumerator interface.
         /// </summary>
+        [Serializable]
         private sealed class DictionaryEnumerator : IDictionaryEnumerator
         {
             IEnumerator<KeyValuePair<TKey, TValue>> _enumerator; // Enumerator over the dictionary.

@@ -1,14 +1,17 @@
 {
   "dependencies": {
-    "System.Runtime": "4.0.0",
-    "System.Threading.Tasks": "4.0.0",
-    "System.IO": "4.0.0"
+    "System.Collections.NonGeneric": "4.4.0-beta-24721-02",
+    "System.ComponentModel": "4.4.0-beta-24721-02",
+    "System.ComponentModel.Primitives": "4.4.0-beta-24721-02",
+    "System.ComponentModel.TypeConverter": "4.4.0-beta-24721-02",
+    "System.IO": "4.4.0-beta-24721-02",
+    "System.ObjectModel": "4.4.0-beta-24721-02",
+    "System.Runtime": "4.4.0-beta-24721-02",
+    "System.Runtime.Extensions": "4.4.0-beta-24721-02",
+    "System.Transactions": "4.4.0-beta-24721-02",
+    "System.Xml.ReaderWriter": "4.4.0-beta-24721-02"
   },
   "frameworks": {
-    "netstandard1.0": {
-      "imports": [
-        "dotnet5.1"
-      ]
-    }
+    "netstandard1.7": {}
   }
 }

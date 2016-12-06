@@ -1,58 +1,43 @@
 {
   "frameworks": {
-    "netstandard1.5": {
+    "netstandard1.7": {
       "dependencies": {
-        "System.Collections": "4.0.0",
-        "System.Collections.NonGeneric": "4.0.0",
-        "System.Collections.Specialized": "4.0.0",
-        "System.ComponentModel": "4.0.0",
-        "System.ComponentModel.Primitives": "4.1.0",
-        "System.Diagnostics.Contracts": "4.0.0",
-        "System.Diagnostics.Debug": "4.0.10",
-        "System.Diagnostics.Tools": "4.0.0",
-        "System.Globalization": "4.0.0",
-        "System.Linq": "4.0.0",
-        "System.Reflection": "4.1.0",
-        "System.Reflection.Extensions": "4.0.0",
-        "System.Reflection.TypeExtensions": "4.1.0",
-        "System.Resources.ResourceManager": "4.0.0",
-        "System.Runtime": "4.0.20",
-        "System.Runtime.Extensions": "4.0.0",
-        "System.Threading": "4.0.10"
-      },
-      "imports": [
-        "dotnet5.6"
-      ]
-    },
-    "netstandard1.0": {
-      "dependencies": {
-        "System.Collections": "4.0.0",
-        "System.ComponentModel": "4.0.0",
-        "System.ComponentModel.Primitives": "4.1.0",
-        "System.Diagnostics.Contracts": "4.0.0",
-        "System.Diagnostics.Debug": "4.0.0",
-        "System.Diagnostics.Tools": "4.0.0",
-        "System.Globalization": "4.0.0",
-        "System.Reflection": "4.0.0",
-        "System.Reflection.Extensions": "4.0.0",
-        "System.Reflection.Primitives": "4.0.0",
-        "System.Resources.ResourceManager": "4.0.0",
-        "System.Runtime": "4.0.0",
-        "System.Runtime.Extensions": "4.0.0",
-        "System.Threading": "4.0.0"
-      },
-      "imports": [
-        "dotnet5.1"
-      ]
-    },
-    "net462": {
-      "dependencies": {
-        "Microsoft.TargetingPack.NETFramework.v4.6.2": "1.0.1"
+        "System.Collections": "4.4.0-beta-24721-02",
+        "System.Collections.NonGeneric": "4.4.0-beta-24721-02",
+        "System.Collections.Specialized": "4.4.0-beta-24721-02",
+        "System.ComponentModel": "4.4.0-beta-24721-02",
+        "System.ComponentModel.EventBasedAsync": "4.4.0-beta-24721-02",
+        "System.ComponentModel.Primitives": "4.4.0-beta-24721-02",
+        "System.Diagnostics.Contracts": "4.4.0-beta-24721-02",
+        "System.Diagnostics.Debug": "4.4.0-beta-24721-02",
+        "System.Diagnostics.Tools": "4.4.0-beta-24721-02",
+        "System.Diagnostics.TraceSource": "4.4.0-beta-24721-02",
+        "System.Drawing.Primitives": "4.4.0-beta-24721-02",
+        "System.Globalization": "4.4.0-beta-24721-02",
+        "System.IO": "4.4.0-beta-24721-02",
+        "System.IO.FileSystem": "4.4.0-beta-24721-02",
+        "System.Linq": "4.4.0-beta-24721-02",
+        "System.Net.WebClient": "4.4.0-beta-24721-02",
+        "System.ObjectModel": "4.3.0",
+        "System.Reflection": "4.4.0-beta-24721-02",
+        "System.Reflection.Extensions": "4.4.0-beta-24721-02",
+        "System.Reflection.TypeExtensions": "4.4.0-beta-24721-02",
+        "System.Resources.ResourceManager": "4.4.0-beta-24721-02",
+        "System.Resources.Writer": "4.4.0-beta-24721-02",
+        "System.Runtime": "4.4.0-beta-24721-02",
+        "System.Runtime.Extensions": "4.4.0-beta-24721-02",
+        "System.Runtime.InteropServices": "4.4.0-beta-24721-02",
+        "System.Runtime.Serialization.Formatters": "4.4.0-beta-24721-02",
+        "System.Runtime.Serialization.Primitives": "4.4.0-beta-24721-02",
+        "System.Security.Permissions": "4.4.0-beta-24721-02",
+        "System.Text.RegularExpressions": "4.4.0-beta-24721-02",
+        "System.Threading.Tasks": "4.4.0-beta-24721-02",
+        "System.Threading.Timer": "4.4.0-beta-24721-02"
       }
     },
-    "net45": {
+    "net463": {
       "dependencies": {
-        "Microsoft.TargetingPack.NETFramework.v4.5": "1.0.1"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

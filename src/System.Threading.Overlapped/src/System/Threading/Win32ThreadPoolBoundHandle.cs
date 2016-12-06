@@ -44,7 +44,7 @@ namespace System.Threading
             if (callback == null)
                 s_nativeIoCompletionCallback = callback = new Interop.NativeIoCompletionCallback(OnNativeIOCompleted);
 
-            SafeThreadPoolIOHandle threadPoolHandle = Interop.mincore.CreateThreadpoolIo(handle, s_nativeIoCompletionCallback, IntPtr.Zero, IntPtr.Zero);
+            SafeThreadPoolIOHandle threadPoolHandle = Interop.Kernel32.CreateThreadpoolIo(handle, s_nativeIoCompletionCallback, IntPtr.Zero, IntPtr.Zero);
             if (threadPoolHandle.IsInvalid)
             {
                 int hr = Marshal.GetHRForLastWin32Error();
@@ -54,7 +54,7 @@ namespace System.Threading
                 if (hr == System.HResults.E_INVALIDARG)     // Handle already bound or sync handle
                     throw new ArgumentException(SR.Argument_AlreadyBoundOrSyncHandle, nameof(handle));
 
-                throw Marshal.GetExceptionForHR(hr);
+                throw Marshal.GetExceptionForHR(hr, new IntPtr(-1));
             }
 
             return new ThreadPoolBoundHandle(handle, threadPoolHandle);
@@ -72,7 +72,7 @@ namespace System.Threading
                 Win32ThreadPoolNativeOverlapped* overlapped = Win32ThreadPoolNativeOverlapped.Allocate(callback, state, pinData, preAllocated: null);
                 overlapped->Data._boundHandle = this;
 
-                Interop.mincore.StartThreadpoolIo(_threadPoolHandle);
+                Interop.Kernel32.StartThreadpoolIo(_threadPoolHandle);
 
                 return Win32ThreadPoolNativeOverlapped.ToNativeOverlapped(overlapped);
             }
@@ -102,7 +102,7 @@ namespace System.Threading
 
                 data._boundHandle = this;
 
-                Interop.mincore.StartThreadpoolIo(_threadPoolHandle);
+                Interop.Kernel32.StartThreadpoolIo(_threadPoolHandle);
 
                 return Win32ThreadPoolNativeOverlapped.ToNativeOverlapped(preAllocated._overlapped);
             }
@@ -127,7 +127,7 @@ namespace System.Threading
 
             if (!data._completed)
             {
-                Interop.mincore.CancelThreadpoolIo(_threadPoolHandle);
+                Interop.Kernel32.CancelThreadpoolIo(_threadPoolHandle);
                 Release();
             }
 

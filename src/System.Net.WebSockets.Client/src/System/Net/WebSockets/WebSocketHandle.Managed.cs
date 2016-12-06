@@ -73,9 +73,11 @@ namespace System.Net.WebSockets
 
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
-            // TODO: Not currently implemented:
+            // TODO: Not currently implemented, or explicitly ignored:
+            // - ClientWebSocketOptions.UseDefaultCredentials
             // - ClientWebSocketOptions.Credentials
             // - ClientWebSocketOptions.Proxy
+            // - ClientWebSocketOptions._sendBufferSize
 
             // Establish connection to the server
             CancellationTokenRegistration registration = cancellationToken.Register(s => ((WebSocketHandle)s).Abort(), this);
@@ -107,7 +109,8 @@ namespace System.Net.WebSockets
                 // Parse the response and store our state for the remainder of the connection
                 string subprotocol = await ParseAndValidateConnectResponseAsync(stream, options, secKeyAndSecWebSocketAccept.Value, cancellationToken).ConfigureAwait(false);
 
-                _webSocket = ManagedWebSocket.CreateFromConnectedStream(stream, false, subprotocol);
+                _webSocket = ManagedWebSocket.CreateFromConnectedStream(
+                    stream, false, subprotocol, options.KeepAliveInterval, options.ReceiveBufferSize, options.Buffer);
 
                 // If a concurrent Abort or Dispose came in before we set _webSocket, make sure to update it appropriately
                 if (_state == WebSocketState.Aborted)
@@ -256,6 +259,7 @@ namespace System.Net.WebSockets
         /// the associated response we expect to receive as the Sec-WebSocket-Accept header value.
         /// </summary>
         /// <returns>A key-value pair of the request header security key and expected response header value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "Required by RFC6455")]
         private static KeyValuePair<string, string> CreateSecKeyAndSecWebSocketAccept()
         {
             string secKey = Convert.ToBase64String(Guid.NewGuid().ToByteArray());

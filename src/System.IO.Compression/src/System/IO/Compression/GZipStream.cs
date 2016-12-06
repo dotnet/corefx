@@ -116,11 +116,27 @@ namespace System.IO.Compression
             return _deflateStream.ReadByte();
         }
 
+#if netstandard17
+        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override int EndRead(IAsyncResult asyncResult) =>
+            TaskToApm.End<int>(asyncResult);
+#endif
+
         public override int Read(byte[] array, int offset, int count)
         {
             CheckDeflateStream();
             return _deflateStream.Read(array, offset, count);
         }
+
+#if netstandard17
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override void EndWrite(IAsyncResult asyncResult) =>
+            TaskToApm.End(asyncResult);
+#endif            
 
         public override void Write(byte[] array, int offset, int count)
         {
@@ -159,13 +175,13 @@ namespace System.IO.Compression
             }
         }
 
-        public override Task<int> ReadAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+        public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDeflateStream();
             return _deflateStream.ReadAsync(array, offset, count, cancellationToken);
         }
 
-        public override Task WriteAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+        public override Task WriteAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDeflateStream();
             return _deflateStream.WriteAsync(array, offset, count, cancellationToken);
@@ -175,6 +191,12 @@ namespace System.IO.Compression
         {
             CheckDeflateStream();
             return _deflateStream.FlushAsync(cancellationToken);
+        }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            CheckDeflateStream();
+            return _deflateStream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
         private void CheckDeflateStream()

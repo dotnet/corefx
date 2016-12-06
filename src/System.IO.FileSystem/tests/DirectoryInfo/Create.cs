@@ -20,7 +20,7 @@ namespace System.IO.Tests
         #endregion
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // UNC shares for constructor
+        [PlatformSpecific(TestPlatforms.Windows)] // UNC shares for constructor
         public void NetworkShare()
         {
             string dirName = new string(Path.DirectorySeparatorChar, 2) + Path.Combine("contoso", "amusement", "device");
@@ -42,7 +42,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".")]
         [InlineData("............")]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsInvalidExtensionsAreRemoved(string extension)
         {
             string testDir = GetTestFilePath();
@@ -53,7 +53,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s", ".s....")]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsCurtailTrailingDots(string extension, string trailing)
         {
             string testDir = GetTestFilePath();
@@ -65,7 +65,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s.s....", ".ls")]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixLastDotIsExtension(string extension, string trailing)
         {
             string testDir = GetTestFilePath();

@@ -22,12 +22,14 @@ namespace System.Collections
     // so Push can be O(n).  Pop is O(1).
     [DebuggerTypeProxy(typeof(System.Collections.Stack.StackDebugView))]
     [DebuggerDisplay("Count = {Count}")]
-    public class Stack : ICollection
+    [Serializable]
+    public class Stack : ICollection, ICloneable
     {
         private Object[] _array;     // Storage for stack elements
         [ContractPublicPropertyName("Count")]
         private int _size;           // Number of items in the stack.
         private int _version;        // Used to keep enumerator in sync w/ collection.
+        [NonSerialized]
         private Object _syncRoot;
 
         private const int _defaultCapacity = 10;
@@ -239,6 +241,7 @@ namespace System.Collections
             return objArray;
         }
 
+        [Serializable]
         private class SyncStack : Stack
         {
             private Stack _s;
@@ -349,8 +352,8 @@ namespace System.Collections
             }
         }
 
-
-        private class StackEnumerator : IEnumerator
+        [Serializable]
+        private class StackEnumerator : IEnumerator, ICloneable
         {
             private Stack _stack;
             private int _index;
@@ -364,6 +367,8 @@ namespace System.Collections
                 _index = -2;
                 _currentElement = null;
             }
+
+            public object Clone() => MemberwiseClone();
 
             public virtual bool MoveNext()
             {

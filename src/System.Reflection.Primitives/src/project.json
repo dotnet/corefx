@@ -1,21 +1,19 @@
 {
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.7": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.1.0-beta-24512-02"
+        "Microsoft.NETCore.Platforms": "1.1.0",
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24805-03"
       }
     },
-    "netcore50": {
-      "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1",
-        "System.Diagnostics.Contracts": "4.0.0",
-        "System.Runtime": "4.0.0",
-        "System.Threading": "4.0.10"
-      }
-    },
-    "net46": {
+    "net463": {
       "dependencies": {
         "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
+      }
+    },
+    "uap10.1": {
+      "dependencies": {
+        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24806-00"
       }
     }
   }

@@ -12,11 +12,11 @@ using System.Threading;
 
 namespace System.Dynamic.Utils
 {
-    internal static class ExpressionUtils
+    internal static partial class ExpressionUtils
     {
-        public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
+        public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IReadOnlyList<T> collection)
         {
-            IList<T> value = collection;
+            IReadOnlyList<T> value = collection;
 
             // if it's already read-only just return it.
             ReadOnlyCollection<T> res = value as ReadOnlyCollection<T>;
@@ -25,8 +25,8 @@ namespace System.Dynamic.Utils
                 return res;
             }
 
-            // otherwise make sure only readonly collection every gets exposed
-            Interlocked.CompareExchange<IList<T>>(
+            // otherwise make sure only read-only collection every gets exposed
+            Interlocked.CompareExchange<IReadOnlyList<T>>(
                 ref collection,
                 value.ToReadOnly(),
                 value
@@ -38,24 +38,24 @@ namespace System.Dynamic.Utils
 
         /// <summary>
         /// Helper used for ensuring we only return 1 instance of a ReadOnlyCollection of T.
-        /// 
-        /// This is similar to the ReturnReadOnly of T. This version supports nodes which hold 
+        ///
+        /// This is similar to the ReturnReadOnly of T. This version supports nodes which hold
         /// onto multiple Expressions where one is typed to object.  That object field holds either
         /// an expression or a ReadOnlyCollection of Expressions.  When it holds a ReadOnlyCollection
         /// the IList which backs it is a ListArgumentProvider which uses the Expression which
-        /// implements IArgumentProvider to get 2nd and additional values.  The ListArgumentProvider 
-        /// continues to hold onto the 1st expression.  
-        /// 
-        /// This enables users to get the ReadOnlyCollection w/o it consuming more memory than if 
-        /// it was just an array.  Meanwhile The DLR internally avoids accessing  which would force 
-        /// the readonly collection to be created resulting in a typical memory savings.
+        /// implements IArgumentProvider to get 2nd and additional values.  The ListArgumentProvider
+        /// continues to hold onto the 1st expression.
+        ///
+        /// This enables users to get the ReadOnlyCollection w/o it consuming more memory than if
+        /// it was just an array.  Meanwhile The DLR internally avoids accessing  which would force
+        /// the read-only collection to be created resulting in a typical memory savings.
         /// </summary>
         public static ReadOnlyCollection<Expression> ReturnReadOnly(IArgumentProvider provider, ref object collection)
         {
             Expression tObj = collection as Expression;
             if (tObj != null)
             {
-                // otherwise make sure only one readonly collection ever gets exposed
+                // otherwise make sure only one read-only collection ever gets exposed
                 Interlocked.CompareExchange(
                     ref collection,
                     new ReadOnlyCollection<Expression>(new ListArgumentProvider(provider, tObj)),
@@ -63,15 +63,14 @@ namespace System.Dynamic.Utils
                 );
             }
 
-            // and return what is not guaranteed to be a readonly collection
+            // and return what is not guaranteed to be a read-only collection
             return (ReadOnlyCollection<Expression>)collection;
         }
 
-
         /// <summary>
-        /// Helper which is used for specialized subtypes which use ReturnReadOnly(ref object, ...). 
+        /// Helper which is used for specialized subtypes which use ReturnReadOnly(ref object, ...).
         /// This is the reverse version of ReturnReadOnly which takes an IArgumentProvider.
-        /// 
+        ///
         /// This is used to return the 1st argument.  The 1st argument is typed as object and either
         /// contains a ReadOnlyCollection or the Expression.  We check for the Expression and if it's
         /// present we return that, otherwise we return the 1st element of the ReadOnlyCollection.

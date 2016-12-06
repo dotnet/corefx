@@ -13,7 +13,7 @@ namespace System.Security.Cryptography
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
     public partial class RSA : AsymmetricAlgorithm
     {
-        public static RSA Create()
+        public static new RSA Create()
         {
             return new RSAImplementation.RSAOpenSsl();
         }
@@ -223,7 +223,7 @@ namespace System.Security.Cryptography
             }
 
             FreeKey();
-            _key = new Lazy<SafeRsaHandle>(() => key);
+            _key = new Lazy<SafeRsaHandle>(() => key, isThreadSafe:true);
 
             // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
             // with the already loaded key.

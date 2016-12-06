@@ -13,11 +13,14 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Globalization;
 using System.Collections.Generic;
-using System.Security;
-
 
 namespace System.Xml
 {
+    public interface IXmlBinaryWriterInitializer
+    {
+        void SetOutput(Stream stream, IXmlDictionary dictionary, XmlBinaryWriterSession session, bool ownsStream);
+    }
+
     internal class XmlBinaryNodeWriter : XmlStreamNodeWriter
     {
         private IXmlDictionary _dictionary;
@@ -372,11 +375,6 @@ namespace System.Xml
             WriteMultiByteInt32(key);
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         private unsafe void WriteName(string s)
         {
             int length = s.Length;
@@ -393,11 +391,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         private unsafe void UnsafeWriteName(char* chars, int charCount)
         {
             if (charCount < 128 / maxBytesPerChar)
@@ -610,11 +603,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteText(string value)
         {
             if (_inAttribute)
@@ -637,11 +625,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteText(char[] chars, int offset, int count)
         {
             if (_inAttribute)
@@ -670,11 +653,6 @@ namespace System.Xml
             WriteBytes(chars, charOffset, charCount);
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         private unsafe void UnsafeWriteText(char* chars, int charCount)
         {
             // Callers should handle zero
@@ -769,11 +747,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteFloatText(float f)
         {
             long l;
@@ -795,11 +768,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteDoubleText(double d)
         {
             float f;
@@ -825,11 +793,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteDecimalText(decimal d)
         {
             int offset;
@@ -928,22 +891,12 @@ namespace System.Xml
             WriteMultiByteInt32(count);
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         unsafe public void UnsafeWriteArray(XmlBinaryNodeType nodeType, int count, byte* array, byte* arrayMax)
         {
             WriteArrayInfo(nodeType, count);
             UnsafeWriteArray(array, (int)(arrayMax - array));
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         private unsafe void UnsafeWriteArray(byte* array, int byteCount)
         {
             base.UnsafeWriteBytes(array, byteCount);
@@ -1116,7 +1069,7 @@ namespace System.Xml
         }
     }
 
-    internal class XmlBinaryWriter : XmlBaseWriter
+    internal class XmlBinaryWriter : XmlBaseWriter, IXmlBinaryWriterInitializer
     {
         private XmlBinaryNodeWriter _writer;
         private char[] _chars;
@@ -1237,11 +1190,6 @@ namespace System.Xml
             EndArray();
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         private unsafe void UnsafeWriteArray(string prefix, string localName, string namespaceUri,
                                XmlBinaryNodeType nodeType, int count, byte* array, byte* arrayMax)
         {
@@ -1250,11 +1198,6 @@ namespace System.Xml
             WriteEndArray();
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        ///            caller needs to validate arguments
-        /// </SecurityNote>
-        [SecurityCritical]
         private unsafe void UnsafeWriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri,
                                XmlBinaryNodeType nodeType, int count, byte* array, byte* arrayMax)
         {
@@ -1277,12 +1220,6 @@ namespace System.Xml
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, array.Length - offset)));
         }
 
-        // bool
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, bool[] array, int offset, int count)
         {
             {
@@ -1297,11 +1234,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, bool[] array, int offset, int count)
         {
             {
@@ -1316,12 +1248,6 @@ namespace System.Xml
             }
         }
 
-        // Int16
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, Int16[] array, int offset, int count)
         {
             {
@@ -1336,11 +1262,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int16[] array, int offset, int count)
         {
             {
@@ -1355,12 +1276,6 @@ namespace System.Xml
             }
         }
 
-        // Int32
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, Int32[] array, int offset, int count)
         {
             {
@@ -1375,11 +1290,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int32[] array, int offset, int count)
         {
             {
@@ -1394,12 +1304,6 @@ namespace System.Xml
             }
         }
 
-        // Int64
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, Int64[] array, int offset, int count)
         {
             {
@@ -1414,11 +1318,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int64[] array, int offset, int count)
         {
             {
@@ -1433,12 +1332,6 @@ namespace System.Xml
             }
         }
 
-        // float
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, float[] array, int offset, int count)
         {
             {
@@ -1453,11 +1346,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, float[] array, int offset, int count)
         {
             {
@@ -1472,12 +1360,6 @@ namespace System.Xml
             }
         }
 
-        // double
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, double[] array, int offset, int count)
         {
             {
@@ -1492,11 +1374,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, double[] array, int offset, int count)
         {
             {
@@ -1511,12 +1388,6 @@ namespace System.Xml
             }
         }
 
-        // decimal
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, string localName, string namespaceUri, decimal[] array, int offset, int count)
         {
             {
@@ -1531,11 +1402,6 @@ namespace System.Xml
             }
         }
 
-        /// <SecurityNote>
-        /// Critical - contains unsafe code
-        /// Safe - unsafe code is effectively encapsulated, all inputs are validated
-        /// </SecurityNote>
-        [SecuritySafeCritical]
         unsafe public override void WriteArray(string prefix, XmlDictionaryString localName, XmlDictionaryString namespaceUri, decimal[] array, int offset, int count)
         {
             {

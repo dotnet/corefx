@@ -7,6 +7,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Drawing;
 
 namespace System.ComponentModel
 {
@@ -110,38 +111,44 @@ namespace System.ComponentModel
                 //
                 if (s_intrinsicTypeConverters == null)
                 {
-                    Hashtable temp = new Hashtable();
-
                     // Add the intrinsics
                     //
-                    temp[typeof(bool)] = typeof(BooleanConverter);
-                    temp[typeof(byte)] = typeof(ByteConverter);
-                    temp[typeof(SByte)] = typeof(SByteConverter);
-                    temp[typeof(char)] = typeof(CharConverter);
-                    temp[typeof(double)] = typeof(DoubleConverter);
-                    temp[typeof(string)] = typeof(StringConverter);
-                    temp[typeof(int)] = typeof(Int32Converter);
-                    temp[typeof(short)] = typeof(Int16Converter);
-                    temp[typeof(long)] = typeof(Int64Converter);
-                    temp[typeof(float)] = typeof(SingleConverter);
-                    temp[typeof(UInt16)] = typeof(UInt16Converter);
-                    temp[typeof(UInt32)] = typeof(UInt32Converter);
-                    temp[typeof(UInt64)] = typeof(UInt64Converter);
-                    temp[typeof(object)] = typeof(TypeConverter);
-                    temp[typeof(void)] = typeof(TypeConverter);
-                    temp[typeof(DateTime)] = typeof(DateTimeConverter);
-                    temp[typeof(DateTimeOffset)] = typeof(DateTimeOffsetConverter);
-                    temp[typeof(Decimal)] = typeof(DecimalConverter);
-                    temp[typeof(TimeSpan)] = typeof(TimeSpanConverter);
-                    temp[typeof(Guid)] = typeof(GuidConverter);
-                    temp[typeof(Array)] = typeof(ArrayConverter);
-                    temp[typeof(ICollection)] = typeof(CollectionConverter);
-                    temp[typeof(Enum)] = typeof(EnumConverter);
-                    temp[typeof(Uri)] = typeof(UriTypeConverter);
+                    Hashtable temp = new Hashtable
+                    {
+                        [typeof(bool)] = typeof(BooleanConverter),
+                        [typeof(byte)] = typeof(ByteConverter),
+                        [typeof(SByte)] = typeof(SByteConverter),
+                        [typeof(char)] = typeof(CharConverter),
+                        [typeof(double)] = typeof(DoubleConverter),
+                        [typeof(string)] = typeof(StringConverter),
+                        [typeof(int)] = typeof(Int32Converter),
+                        [typeof(short)] = typeof(Int16Converter),
+                        [typeof(long)] = typeof(Int64Converter),
+                        [typeof(float)] = typeof(SingleConverter),
+                        [typeof(UInt16)] = typeof(UInt16Converter),
+                        [typeof(UInt32)] = typeof(UInt32Converter),
+                        [typeof(UInt64)] = typeof(UInt64Converter),
+                        [typeof(object)] = typeof(TypeConverter),
+                        [typeof(void)] = typeof(TypeConverter),
+                        [typeof(DateTime)] = typeof(DateTimeConverter),
+                        [typeof(DateTimeOffset)] = typeof(DateTimeOffsetConverter),
+                        [typeof(Decimal)] = typeof(DecimalConverter),
+                        [typeof(TimeSpan)] = typeof(TimeSpanConverter),
+                        [typeof(Guid)] = typeof(GuidConverter),
+                        [typeof(Uri)] = typeof(UriTypeConverter),
+                        [typeof(Color)] = typeof(ColorConverter),
+                        [typeof(Point)] = typeof(PointConverter),
+                        [typeof(Rectangle)] = typeof(RectangleConverter),
+                        [typeof(Size)] = typeof(SizeConverter),
+                        [typeof(SizeF)] = typeof(SizeFConverter),
+                        // Special cases for things that are not bound to a specific type
+                        //
+                        [typeof(Array)] = typeof(ArrayConverter),
+                        [typeof(ICollection)] = typeof(CollectionConverter),
+                        [typeof(Enum)] = typeof(EnumConverter),
+                        [s_intrinsicNullableKey] = typeof(NullableConverter),
+                    };
 
-                    // Special cases for things that are not bound to a specific type
-                    //
-                    temp[s_intrinsicNullableKey] = typeof(NullableConverter);
 
                     s_intrinsicTypeConverters = temp;
                 }
@@ -322,7 +329,6 @@ namespace System.ComponentModel
             return td.GetDefaultProperty(instance);
         }
 
-#if FEATURE_EDITOR
         /// <summary>
         ///     Retrieves the editor for the given base type.
         /// </summary>
@@ -331,7 +337,6 @@ namespace System.ComponentModel
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetEditor(instance, editorBaseType);
         }
-#endif
 
         /// <summary> 
         ///      Retrieves a default editor table for the given editor base type. 
@@ -450,7 +455,6 @@ namespace System.ComponentModel
             return null; // extender properties are never the default.
         }
 
-#if FEATURE_EDITOR
         /// <summary>
         ///     Retrieves the editor for the given base type.
         /// </summary>
@@ -458,7 +462,6 @@ namespace System.ComponentModel
         {
             return GetEditor(instance.GetType(), instance, editorBaseType);
         }
-#endif
 
         /// <summary>
         ///     Retrieves the events for this type.
@@ -569,7 +572,7 @@ namespace System.ComponentModel
         {
             if (instance == null)
             {
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
             }
 
             IComponent component = instance as IComponent;
@@ -761,7 +764,6 @@ namespace System.ComponentModel
         /// </summary>
         public override string GetFullComponentName(object component)
         {
-#if FEATURE_NESTED_SITE
             IComponent comp = component as IComponent;
             if (comp != null)
             {
@@ -771,7 +773,6 @@ namespace System.ComponentModel
                     return ns.FullName;
                 }
             }
-#endif
 
             return TypeDescriptor.GetComponentName(component);
         }
@@ -957,7 +958,7 @@ namespace System.ComponentModel
                 {
                     // Get the type's attributes.
                     //
-                    attrs = type.GetTypeInfo().GetCustomAttributes(typeof(Attribute), false).ToArray();
+                    attrs = type.GetTypeInfo().GetCustomAttributes(typeof(Attribute), false).OfType<Attribute>().ToArray();
                     s_attributeCache[type] = attrs;
                 }
             }
@@ -995,7 +996,7 @@ namespace System.ComponentModel
                 {
                     // Get the member's attributes.
                     //
-                    attrs = member.GetCustomAttributes(typeof(Attribute), false).ToArray();
+                    attrs = member.GetCustomAttributes(typeof(Attribute), false).OfType<Attribute>().ToArray();
                     s_attributeCache[member] = attrs;
                 }
             }
