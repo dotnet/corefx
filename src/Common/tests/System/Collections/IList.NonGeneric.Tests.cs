@@ -1064,7 +1064,7 @@ namespace System.Collections.Tests
 
         #region Enumerator.Current
 
-        // Enumerator.Current should fail at end after new elements was added
+        // Test Enumerator.Current at end after new elements was added
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
@@ -1084,17 +1084,20 @@ namespace System.Collections.Tests
                     var current = enumerator.Current; // Enumerator.Current should not fail
                 }
 
-                int seed = 523561;
-                collection.Add(CreateT(seed++));
-
                 // Test after add
-                if (IList_CurrentAfterAdd_Throws)
+                int seed = 523561;
+                for (int i = 0; i < 3; i++)
                 {
-                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
-                }
-                else
-                {
-                    var current = enumerator.Current; // Enumerator.Current should not fail
+                    collection.Add(CreateT(seed++));
+
+                    if (IList_CurrentAfterAdd_Throws)
+                    {
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                    }
+                    else
+                    {
+                        var current = enumerator.Current; // Enumerator.Current should not fail
+                    }
                 }
             }
         }
