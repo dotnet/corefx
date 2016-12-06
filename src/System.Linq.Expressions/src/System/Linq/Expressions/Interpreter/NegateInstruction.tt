@@ -4,6 +4,7 @@
 string instruction = "Negate";
 string format = "-{0}";
 bool hasChecked = true;
+bool emitExplicitUnchecked = false;
 Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(float), typeof(double) };
 #>
 <#@ include file="UnaryInstruction.t4" #>

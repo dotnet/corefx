@@ -31,7 +31,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((short)((short)obj - 1));
+                    frame.Push(unchecked((short)((short)obj - 1)));
                 }
                 return 1;
             }
@@ -48,7 +48,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((int)obj - 1);
+                    frame.Push(unchecked((int)obj - 1));
                 }
                 return 1;
             }
@@ -65,7 +65,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((long)obj - 1);
+                    frame.Push(unchecked((long)obj - 1));
                 }
                 return 1;
             }
@@ -82,7 +82,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ushort)((ushort)obj - 1));
+                    frame.Push(unchecked((ushort)((ushort)obj - 1)));
                 }
                 return 1;
             }
@@ -99,7 +99,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((uint)obj - 1);
+                    frame.Push(unchecked((uint)obj - 1));
                 }
                 return 1;
             }
@@ -116,7 +116,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ulong)obj - 1);
+                    frame.Push(unchecked((ulong)obj - 1));
                 }
                 return 1;
             }
@@ -133,7 +133,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((float)obj - 1);
+                    frame.Push(unchecked((float)obj - 1));
                 }
                 return 1;
             }
@@ -150,7 +150,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((double)obj - 1);
+                    frame.Push(unchecked((double)obj - 1));
                 }
                 return 1;
             }

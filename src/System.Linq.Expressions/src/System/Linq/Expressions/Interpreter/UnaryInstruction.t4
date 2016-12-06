@@ -52,7 +52,7 @@ foreach (Type type in operands)
         op = "(" + typeAlias + ")(" + op + ")";
     }
 
-    if (hasChecked)
+    if (hasChecked || emitExplicitUnchecked)
     {
         op = "unchecked(" + op + ")";
     }

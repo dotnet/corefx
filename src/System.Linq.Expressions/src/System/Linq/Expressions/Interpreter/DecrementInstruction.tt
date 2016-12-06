@@ -4,6 +4,7 @@
 string instruction = "Decrement";
 string format = "{0} - 1";
 bool hasChecked = false;
+bool emitExplicitUnchecked = true;
 Type[] operands = new[] { typeof(short), typeof(int), typeof(long), typeof(ushort), typeof(uint), typeof(ulong), typeof(float), typeof(double) };
 #>
 <#@ include file="UnaryInstruction.t4" #>
