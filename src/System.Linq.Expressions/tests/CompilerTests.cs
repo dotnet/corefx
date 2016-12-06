@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Xunit;
 
@@ -9,6 +10,21 @@ namespace System.Linq.Expressions.Tests
 {
     public static class CompilerTests
     {
+        [Fact]
+        public static void Test()
+        {
+            var e = (Expression<Func<List<int>, int>>)(xs => xs[-1]);
+            var f = e.Compile(true);
+            try
+            {
+                f(new List<int>());
+            }
+            catch (Exception ex)
+            {
+                Assert.NotNull(ex);
+            }
+        }
+
         [Theory]
         [ClassData(typeof(CompilationTypes))]
         [OuterLoop("Takes over a minute to complete")]
