@@ -526,7 +526,6 @@ namespace System.Collections.Tests
                     Assert.Throws<InvalidOperationException>(() => enumerator.Current);
                 else
                     current = enumerator.Current;
-
             }
         }
 
