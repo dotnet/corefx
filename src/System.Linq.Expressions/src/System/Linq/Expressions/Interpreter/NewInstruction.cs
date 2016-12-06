@@ -35,8 +35,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             catch (TargetInvocationException e)
             {
-                ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                throw e.InnerException;
+                throw ExceptionHelpers.UnwrapAndRethrow(e);
             }
 
             frame.Data[first] = ret;
@@ -95,7 +94,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                    throw ExceptionHelpers.UnwrapAndRethrow(e);
                 }
 
                 frame.Data[first] = ret;

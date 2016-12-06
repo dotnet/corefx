@@ -329,7 +329,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                    throw ExceptionHelpers.UnwrapAndRethrow(e);
                 }
             }
             else
@@ -353,7 +353,7 @@ namespace System.Linq.Expressions.Interpreter
                     }
                     catch (TargetInvocationException e)
                     {
-                        throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                        throw ExceptionHelpers.UnwrapAndRethrow(e);
                     }
                 }
             }
@@ -425,7 +425,7 @@ namespace System.Linq.Expressions.Interpreter
                     }
                     catch (TargetInvocationException e)
                     {
-                        throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                        throw ExceptionHelpers.UnwrapAndRethrow(e);
                     }
                 }
                 else
@@ -449,7 +449,7 @@ namespace System.Linq.Expressions.Interpreter
                         }
                         catch (TargetInvocationException e)
                         {
-                            throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                            throw ExceptionHelpers.UnwrapAndRethrow(e);
                         }
                     }
                 }

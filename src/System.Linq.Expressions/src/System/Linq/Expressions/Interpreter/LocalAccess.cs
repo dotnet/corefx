@@ -388,8 +388,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                    throw e.InnerException;
+                    throw ExceptionHelpers.UnwrapAndRethrow(e);
                 }
 
                 return 1;
@@ -423,8 +422,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                    throw e.InnerException;
+                    throw ExceptionHelpers.UnwrapAndRethrow(e);
                 }
 
                 frame.Data[_index] = new StrongBox<object>(value);
