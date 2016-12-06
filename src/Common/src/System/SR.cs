@@ -2,25 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace System
 {
-    internal partial class SR
+    internal partial class Sr
     {
-        private static ResourceManager s_resourceManager;
+        private static ResourceManager s_ResourceManager;
 
         private static ResourceManager ResourceManager
         {
             get
             {
-                if (SR.s_resourceManager == null)
-                {
-                    SR.s_resourceManager = new ResourceManager(SR.ResourceType);
-                }
+                if (s_ResourceManager == null)
+                    s_ResourceManager = new ResourceManager(ResourceType);
 
-                return SR.s_resourceManager;
+                return s_ResourceManager;
             }
         }
 
@@ -35,13 +30,14 @@ namespace System
         internal static string GetResourceString(string resourceKey, string defaultString)
         {
             string resourceString = null;
-            try { resourceString = ResourceManager.GetString(resourceKey); }
-            catch (MissingManifestResourceException) { }
-
-            if (defaultString != null && resourceKey.Equals(resourceString, StringComparison.Ordinal))
+            try
             {
-                return defaultString;
+                resourceString = ResourceManager.GetString(resourceKey);
             }
+            catch (MissingManifestResourceException) {}
+
+            if ((defaultString != null) && resourceKey.Equals(resourceString, StringComparison.Ordinal))
+                return defaultString;
 
             return resourceString;
         }
@@ -51,9 +47,7 @@ namespace System
             if (args != null)
             {
                 if (UsingResourceKeys())
-                {
                     return resourceFormat + string.Join(", ", args);
-                }
 
                 return string.Format(resourceFormat, args);
             }
@@ -64,9 +58,7 @@ namespace System
         internal static string Format(string resourceFormat, object p1)
         {
             if (UsingResourceKeys())
-            {
                 return string.Join(", ", resourceFormat, p1);
-            }
 
             return string.Format(resourceFormat, p1);
         }
@@ -74,9 +66,7 @@ namespace System
         internal static string Format(string resourceFormat, object p1, object p2)
         {
             if (UsingResourceKeys())
-            {
                 return string.Join(", ", resourceFormat, p1, p2);
-            }
 
             return string.Format(resourceFormat, p1, p2);
         }
@@ -84,9 +74,7 @@ namespace System
         internal static string Format(string resourceFormat, object p1, object p2, object p3)
         {
             if (UsingResourceKeys())
-            {
                 return string.Join(", ", resourceFormat, p1, p2, p3);
-            }
 
             return string.Format(resourceFormat, p1, p2, p3);
         }
