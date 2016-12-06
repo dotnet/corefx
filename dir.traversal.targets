@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-<!-- Temporarily added to assist with auto-generating configurations.props files -->
   <Target Name="GetProjects"
           Returns="@(Project)" />
-
+          
   <Target Name="FilterProjects">
     <PropertyGroup>
       <FilterToOSGroup Condition="'$(FilterToOSGroup)'=='' and '$(OSGroup)'!='' and '$(OSGroup)'!='AnyOS'">$(OSGroup)</FilterToOSGroup>
@@ -342,5 +341,4 @@
   <Target Name="GenerateTestProjectJson" />
 
   <Import Condition="'$(_BuildAgainstPackages)' == 'true'" Project="$(ToolsDir)/buildagainstpackages.targets" />
-  <Import Condition="'$(_BuildVertical)' == 'true'" Project="buildvertical.traversal.targets" />
 </Project>

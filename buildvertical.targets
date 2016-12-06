@@ -12,9 +12,7 @@
   <Target Name="GatherProjectsForVerticalBuild"
           BeforeTargets="DetermineBuildVerticalProjects">
     <ItemGroup>
-    <!-->
       <VerticalProject Include="$(ProjectDir)**/src/*.vbproj" />
-    -->
       <VerticalProject Include="$(ProjectDir)**/src/*.csproj" />
     </ItemGroup>
     <Message Text="Projects: @(VerticalProject)" Importance="Low" />

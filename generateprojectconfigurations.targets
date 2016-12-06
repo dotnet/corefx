@@ -72,7 +72,7 @@
 <WriteLinesToFile File="$(_ConfigurationsFilename)"
                   Lines="@(ConfigurationLines)"
                   Overwrite="true" 
-                  Condition="'@(_Configurations)' != '%20%20%20%20%20%20$(_DefaultTargetGroup)|AnyOS%3B' and Exists('$(_buildsprojfile)')" />
+                  Condition="Exists('$(_buildsprojfile)')" />
   </Target>
 
   <Target Name="GetProjects"
