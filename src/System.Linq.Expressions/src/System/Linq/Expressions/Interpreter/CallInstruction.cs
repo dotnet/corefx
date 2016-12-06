@@ -248,6 +248,7 @@ namespace System.Linq.Expressions.Interpreter
             catch (TargetInvocationException e)
             {
                 ExceptionHelpers.UnwrapAndRethrow(e);
+                throw ContractUtils.Unreachable;
             }
         }
 #endif
