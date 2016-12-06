@@ -118,13 +118,12 @@ namespace System.ComponentModel
         /// </summary>
         private class Site : INestedSite
         {
-            private NestedContainer _container;
             private string _name;
 
             internal Site(IComponent component, NestedContainer container, string name)
             {
                 Component = component;
-                _container = container;
+                Container = container;
                 _name = name;
             }
 
@@ -132,11 +131,11 @@ namespace System.ComponentModel
             public IComponent Component { get; }
 
             // The container in which the component is sited.
-            public IContainer Container => _container;
+            public IContainer Container { get; }
 
             public Object GetService(Type service)
             {
-                return ((service == typeof(ISite)) ? this : _container.GetService(service));
+                return ((service == typeof(ISite)) ? this : ((NestedContainer)Container).GetService(service));
             }
 
             // Indicates whether the component is in design mode.
@@ -144,7 +143,7 @@ namespace System.ComponentModel
             {
                 get
                 {
-                    IComponent owner = _container.Owner;
+                    IComponent owner = ((NestedContainer)Container).Owner;
                     if (owner != null && owner.Site != null)
                     {
                         return owner.Site.DesignMode;
@@ -159,7 +158,7 @@ namespace System.ComponentModel
                 {
                     if (_name != null)
                     {
-                        string ownerName = _container.OwnerName;
+                        string ownerName = ((NestedContainer)Container).OwnerName;
                         string childName = _name;
                         if (ownerName != null)
                         {
@@ -185,7 +184,7 @@ namespace System.ComponentModel
                 {
                     if (value == null || _name == null || !value.Equals(_name))
                     {
-                        _container.ValidateName(Component, value);
+                        ((NestedContainer)Container).ValidateName(Component, value);
                         _name = value;
                     }
                 }

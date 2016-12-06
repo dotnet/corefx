@@ -19,9 +19,6 @@ namespace System.ComponentModel.Design
     /// </summary>
     public class CommandID
     {
-        private readonly Guid _menuGroup;
-        private readonly int _commandID;
-
         /// <summary>
         ///    <para>
         ///       Initializes a new instance of the <see cref='System.ComponentModel.Design.CommandID'/>
@@ -31,8 +28,8 @@ namespace System.ComponentModel.Design
         /// </summary>
         public CommandID(Guid menuGroup, int commandID)
         {
-            _menuGroup = menuGroup;
-            _commandID = commandID;
+            Guid = menuGroup;
+            ID = commandID;
         }
 
         /// <summary>
@@ -40,7 +37,7 @@ namespace System.ComponentModel.Design
         ///       Gets or sets the numeric command ID.
         ///    </para>
         /// </summary>
-        public virtual int ID => _commandID;
+        public virtual int ID { get; }
 
         /// <summary>
         ///    <para>
@@ -54,7 +51,7 @@ namespace System.ComponentModel.Design
                 return false;
             }
             CommandID cid = (CommandID)obj;
-            return cid._menuGroup.Equals(_menuGroup) && cid._commandID == _commandID;
+            return cid.Guid.Equals(Guid) && cid.ID == ID;
         }
 
         /// <summary>
@@ -62,7 +59,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public override int GetHashCode()
         {
-            return _menuGroup.GetHashCode() << 2 | _commandID;
+            return Guid.GetHashCode() << 2 | ID;
         }
 
         /// <summary>
@@ -73,7 +70,7 @@ namespace System.ComponentModel.Design
         ///       represents belongs to.
         ///    </para>
         /// </summary>
-        public virtual Guid Guid => _menuGroup;
+        public virtual Guid Guid { get; }
 
         /// <summary>
         ///    <para>
@@ -82,7 +79,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public override string ToString()
         {
-            return _menuGroup.ToString() + " : " + _commandID.ToString(CultureInfo.CurrentCulture);
+            return Guid.ToString() + " : " + ID.ToString(CultureInfo.CurrentCulture);
         }
     }
 }

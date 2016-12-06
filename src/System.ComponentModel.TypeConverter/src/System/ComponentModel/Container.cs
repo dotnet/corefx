@@ -285,13 +285,12 @@ namespace System.ComponentModel
 
         private class Site : ISite
         {
-            private Container _container;
             private String _name;
 
             internal Site(IComponent component, Container container, String name)
             {
                 Component = component;
-                _container = container;
+                Container = container;
                 _name = name;
             }
 
@@ -299,11 +298,11 @@ namespace System.ComponentModel
             public IComponent Component { get; }
 
             // The container in which the component is sited.
-            public IContainer Container => _container;
+            public IContainer Container { get; }
 
             public Object GetService(Type service)
             {
-                return ((service == typeof(ISite)) ? this : _container.GetService(service));
+                return ((service == typeof(ISite)) ? this : ((Container)Container).GetService(service));
             }
 
 
@@ -320,7 +319,7 @@ namespace System.ComponentModel
                     if (value == null || _name == null || !value.Equals(_name))
                     {
                         // UNDONE : This is a breaking change.  
-                        _container.ValidateName(Component, value);
+                       ((Container)Container).ValidateName(Component, value);
                         _name = value;
                     }
                 }

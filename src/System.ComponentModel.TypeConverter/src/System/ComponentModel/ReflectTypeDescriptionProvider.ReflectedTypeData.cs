@@ -171,14 +171,7 @@ namespace System.ComponentModel
                 if (site != null)
                 {
                     INestedSite nestedSite = site as INestedSite;
-                    if (nestedSite != null)
-                    {
-                        return nestedSite.FullName;
-                    }
-                    else
-                    {
-                        return site.Name;
-                    }
+                    return (nestedSite?.FullName) ?? site.Name;
                 }
 
                 return null;

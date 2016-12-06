@@ -65,9 +65,7 @@ namespace System.ComponentModel
         /// </summary>
         public ToolboxItemFilterAttribute(string filterString, ToolboxItemFilterType filterType)
         {
-            if (filterString == null) filterString = String.Empty;
-
-            FilterString = filterString;
+            FilterString = filterString ?? string.Empty;
             FilterType = filterType;
         }
 
