@@ -140,6 +140,7 @@ namespace System.Collections.Concurrent
         public T[] ToArray() { throw null; }
         public bool TryDequeue(out T result) { throw null; }
         public bool TryPeek(out T result) { throw null; }
+	public void Clear() { }
     }
     public partial class ConcurrentStack<T> : System.Collections.Concurrent.IProducerConsumerCollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.ICollection, System.Collections.IEnumerable
     {
