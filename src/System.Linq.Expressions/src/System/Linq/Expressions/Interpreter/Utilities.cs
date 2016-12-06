@@ -169,10 +169,9 @@ namespace System.Linq.Expressions.Interpreter
         /// Updates an exception before it's getting re-thrown so
         /// we can present a reasonable stack trace to the user.
         /// </summary>
-        public static Exception UnwrapAndRethrow(TargetInvocationException exception)
+        public static void UnwrapAndRethrow(TargetInvocationException exception)
         {
             ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
-            return ContractUtils.Unreachable;
         }
     }
 

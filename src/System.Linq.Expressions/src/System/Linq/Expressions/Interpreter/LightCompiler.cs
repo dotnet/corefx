@@ -3197,7 +3197,8 @@ namespace System.Linq.Expressions.Interpreter
             }
             catch (TargetInvocationException e)
             {
-                throw ExceptionHelpers.UnwrapAndRethrow(e);
+                ExceptionHelpers.UnwrapAndRethrow(e);
+                throw ContractUtils.Unreachable;
             }
         }
 
@@ -3241,7 +3242,8 @@ namespace System.Linq.Expressions.Interpreter
             }
             catch (TargetInvocationException e)
             {
-                throw ExceptionHelpers.UnwrapAndRethrow(e);
+                ExceptionHelpers.UnwrapAndRethrow(e);
+                throw ContractUtils.Unreachable;
             }
         }
 
