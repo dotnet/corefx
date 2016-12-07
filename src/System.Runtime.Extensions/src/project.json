@@ -2,12 +2,12 @@
   "frameworks": {
     "netstandard1.7": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24802-03"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24805-03"
       }
     },
     "netstandard1.5": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24802-03"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24805-03"
       }
     },
     "net463": {
@@ -20,9 +20,9 @@
         "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     },
-    "netcore50": {
+    "uap10.1": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24802-00",
+        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24807-00",
         "Microsoft.TargetingPack.Private.WinRT": "1.0.3"
       }
     }
