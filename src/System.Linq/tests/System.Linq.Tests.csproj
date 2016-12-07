@@ -79,6 +79,10 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
     <Compile Include="ToHashSetTests.netcoreapp1.1.cs" />
+    <Compile Include="TryElementAtTests.netcoreapp1.1.cs" />
+    <Compile Include="TryFirstTests.netcoreapp1.1.cs" />
+    <Compile Include="TryLastTests.netcoreapp1.1.cs" />
+    <Compile Include="TrySingleTests.netcoreapp1.1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Linq.pkgproj">

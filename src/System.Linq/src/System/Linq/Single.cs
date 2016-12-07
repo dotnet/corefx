@@ -117,6 +117,7 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
+
             if (source == null)
             {
                 throw Error.ArgumentNull(nameof(source));
@@ -148,6 +149,80 @@ namespace System.Linq
             }
 
             return default(TSource);
+        }
+
+        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, out TSource element)
+        {
+            if (source == null)
+            {
+                throw Error.ArgumentNull(nameof(source));
+            }
+
+            IList<TSource> list = source as IList<TSource>;
+            if (list != null)
+            {
+                if (list.Count == 1)
+                {
+                    element = list[0];
+                    return true;
+                }
+            }
+            else
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if (e.MoveNext())
+                    {
+                        TSource result = e.Current;
+                        if (!e.MoveNext())
+                        {
+                            element = result;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            element = default(TSource);
+            return false;
+        }
+
+        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
+        {
+            if (source == null)
+            {
+                throw Error.ArgumentNull(nameof(source));
+            }
+
+            if (predicate == null)
+            {
+                throw Error.ArgumentNull(nameof(predicate));
+            }
+
+            using (IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current))
+                            {
+                                element = default(TSource);
+                                return false;
+                            }
+                        }
+
+                        element = result;
+                        return true;
+                    }
+                }
+            }
+
+            element = default(TSource);
+            return false;
         }
     }
 }
