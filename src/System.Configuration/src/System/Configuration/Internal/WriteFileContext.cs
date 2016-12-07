@@ -4,7 +4,6 @@
 
 using System.CodeDom.Compiler;
 using System.IO;
-using System.Security.AccessControl;
 using System.Threading;
 
 namespace System.Configuration.Internal
@@ -13,16 +12,9 @@ namespace System.Configuration.Internal
     {
         private const int SavingTimeout = 10000; // 10 seconds
         private const int SavingRetryInterval = 100; // 100 milliseconds
-        private static volatile bool s_osPlatformDetermined;
-        private static volatile PlatformID s_osPlatform;
         private readonly string _templateFilename;
 
         private TempFileCollection _tempFiles;
-
-        static WriteFileContext()
-        {
-            s_osPlatformDetermined = false;
-        }
 
         internal WriteFileContext(string filename, string templateFilename)
         {
@@ -43,24 +35,6 @@ namespace System.Configuration.Internal
         }
 
         internal string TempNewFilename { get; }
-
-        // IsWinNT
-        //
-        // Are we running in WinNT or not?
-        //
-        private bool IsWinNT
-        {
-            get
-            {
-                if (!s_osPlatformDetermined)
-                {
-                    s_osPlatform = Environment.OSVersion.Platform;
-                    s_osPlatformDetermined = true;
-                }
-
-                return s_osPlatform == PlatformID.Win32NT;
-            }
-        }
 
         // Complete
         //
@@ -135,22 +109,8 @@ namespace System.Configuration.Internal
         // As of right now this is just acl's
         private void DuplicateTemplateAttributes(string source, string destination)
         {
-            if (IsWinNT)
-            {
-                FileSecurity fileSecurity;
-
-                // Copy Security information
-                fileSecurity = File.GetAccessControl(source, AccessControlSections.Access);
-
-                // Mark dirty, so effective for write
-                fileSecurity.SetAccessRuleProtection(fileSecurity.AreAccessRulesProtected, true);
-                File.SetAccessControl(destination, fileSecurity);
-            }
-            else
-            {
-                FileAttributes fileAttributes = File.GetAttributes(source);
-                File.SetAttributes(destination, fileAttributes);
-            }
+            FileAttributes fileAttributes = File.GetAttributes(source);
+            File.SetAttributes(destination, fileAttributes);
         }
 
         // Validate that we can write to the file.  This will enforce the ACL's
@@ -214,53 +174,29 @@ namespace System.Configuration.Internal
 
             if (!writeSucceeded)
             {
-                throw new ConfigurationErrorsException(
-                    string.Format(SR.Config_write_failed, target));
+                throw new ConfigurationErrorsException(string.Format(SR.Config_write_failed, target));
             }
         }
 
         // Attempt to move a file from one location to another
-        //
-        // Return Values:
-        //   TRUE  - Move Successful
-        //   FALSE - Move Failed
         private bool AttemptMove(string source, string target)
         {
-            bool moveSuccessful;
-
-            if (IsWinNT)
+            try
             {
-                // We can only call this when we have kernel32.dll
-                moveSuccessful = UnsafeNativeMethods.MoveFileEx(
-                    source,
-                    target,
-                    UnsafeNativeMethods.MOVEFILE_REPLACE_EXISTING);
+                File.Move(source, target);
+                return true;
             }
-            else
+            catch
             {
-                try
-                {
-                    // File.Move isn't supported on Win9x.  We'll use File.Copy
-                    // instead.  Please note that Source is a temporary file which 
-                    // will be deleted when _tempFiles is disposed.
-                    File.Copy(source, target, true);
-                    moveSuccessful = true;
-                }
-                catch
-                {
-                    moveSuccessful = false;
-                }
+                return false;
             }
-
-            return moveSuccessful;
         }
 
-        private bool FileIsWriteLocked(string fileName)
+        private static bool FileIsWriteLocked(string fileName)
         {
             Stream fileStream = null;
-            bool writeLocked = true;
 
-            if (!FileUtil.FileExists(fileName, true))
+            if (!File.Exists(fileName))
             {
                 // It can't be locked if it doesn't exist
                 return false;
@@ -268,26 +204,23 @@ namespace System.Configuration.Internal
 
             try
             {
-                FileShare fileShare = FileShare.Read;
-
-                if (IsWinNT) fileShare |= FileShare.Delete;
-
                 // Try to open for shared reading
                 fileStream = new FileStream(fileName,
                     FileMode.Open,
                     FileAccess.Read,
-                    fileShare);
+                    FileShare.Read | FileShare.Delete);
 
-                // If we can open it for shared reading, it is not 
-                // write locked
-                writeLocked = false;
+                // If we can open it for shared reading, it is not write locked
+                return false;
+            }
+            catch
+            {
+                return true;
             }
             finally
             {
                 fileStream?.Close();
             }
-
-            return writeLocked;
         }
     }
 }

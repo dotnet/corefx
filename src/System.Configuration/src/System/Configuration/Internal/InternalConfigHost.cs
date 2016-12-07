@@ -3,27 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
-using System.Security.AccessControl;
-using System.Security.Permissions;
 
 namespace System.Configuration.Internal
 {
     internal sealed class InternalConfigHost : IInternalConfigHost
     {
         private const FileAttributes InvalidAttributesForWrite = FileAttributes.ReadOnly | FileAttributes.Hidden;
-        private IInternalConfigRoot _configRoot;
 
         void IInternalConfigHost.Init(IInternalConfigRoot configRoot, params object[] hostInitParams)
-        {
-            _configRoot = configRoot;
-        }
+        { }
 
         void IInternalConfigHost.InitForConfiguration(ref string locationSubPath, out string configPath,
             out string locationConfigPath,
             IInternalConfigRoot configRoot, params object[] hostInitConfigurationParams)
         {
-            _configRoot = configRoot;
             configPath = null;
             locationConfigPath = null;
         }
@@ -68,30 +61,7 @@ namespace System.Configuration.Internal
 
         Stream IInternalConfigHost.OpenStreamForRead(string streamName, bool assertPermissions)
         {
-            Stream stream;
-            bool revertAssert = false;
-
-            // Runtime config: assert access to the file
-            // Designtime config: require caller to have all required permissions
-            //
-            // assertPermissions: if true, we'll assert permission.  Used by ClientSettingsConfigurationHost.
-            if (assertPermissions || !_configRoot.IsDesignTime)
-            {
-                new FileIOPermission(FileIOPermissionAccess.Read | FileIOPermissionAccess.PathDiscovery, streamName)
-                    .Assert();
-                revertAssert = true;
-            }
-
-            try
-            {
-                stream = StaticOpenStreamForRead(streamName);
-            }
-            finally
-            {
-                if (revertAssert) CodeAccessPermission.RevertAssert();
-            }
-
-            return stream;
+            return StaticOpenStreamForRead(streamName);
         }
 
 
@@ -177,30 +147,6 @@ namespace System.Configuration.Internal
             throw ExceptionUtil.UnexpectedError("IInternalConfigHost.IsLocationApplicable");
         }
 
-        bool IInternalConfigHost.IsTrustedConfigPath(string configPath)
-        {
-            throw ExceptionUtil.UnexpectedError("IInternalConfigHost.IsTrustedConfigPath");
-        }
-
-        // Default implementation: ensure that the caller has full trust.
-        bool IInternalConfigHost.IsFullTrustSectionWithoutAptcaAllowed(IInternalConfigRecord configRecord)
-        {
-            return TypeUtil.IsCallerFullTrust;
-        }
-
-        // security support
-        void IInternalConfigHost.GetRestrictedPermissions(IInternalConfigRecord configRecord,
-            out PermissionSet permissionSet, out bool isHostReady)
-        {
-            permissionSet = null;
-            isHostReady = true;
-        }
-
-        IDisposable IInternalConfigHost.Impersonate()
-        {
-            return null;
-        }
-
         // prefetch support
         bool IInternalConfigHost.PrefetchAll(string configPath, string streamName)
         {
@@ -279,25 +225,10 @@ namespace System.Configuration.Internal
 
         internal static object StaticGetStreamVersion(string streamName)
         {
-            bool exists = false;
-            long fileSize = 0;
-            DateTime utcCreationTime = DateTime.MinValue;
-            DateTime utcLastWriteTime = DateTime.MinValue;
-
-            UnsafeNativeMethods.WIN32_FILE_ATTRIBUTE_DATA data;
-            if (
-                UnsafeNativeMethods.GetFileAttributesEx(streamName, UnsafeNativeMethods.GetFileExInfoStandard, out data) &&
-                ((data.fileAttributes & (int)FileAttributes.Directory) == 0))
-            {
-                exists = true;
-                fileSize = ((long)(uint)data.fileSizeHigh << 32) | (uint)data.fileSizeLow;
-                utcCreationTime =
-                    DateTime.FromFileTimeUtc(((long)data.ftCreationTimeHigh << 32) | (long)data.ftCreationTimeLow);
-                utcLastWriteTime =
-                    DateTime.FromFileTimeUtc(((long)data.ftLastWriteTimeHigh << 32) | (long)data.ftLastWriteTimeLow);
-            }
-
-            return new FileVersion(exists, fileSize, utcCreationTime, utcLastWriteTime);
+            FileInfo info = new FileInfo(streamName);
+            return info.Exists
+                ? new FileVersion(true, info.Length, info.CreationTimeUtc, info.LastWriteTimeUtc)
+                : new FileVersion(false, 0, DateTime.MinValue, DateTime.MinValue);
         }
 
         // default impl treats name as a file name
@@ -307,7 +238,7 @@ namespace System.Configuration.Internal
             if (string.IsNullOrEmpty(streamName))
                 throw ExceptionUtil.UnexpectedError("InternalConfigHost::StaticOpenStreamForRead");
 
-            return !FileUtil.FileExists(streamName, true)
+            return !File.Exists(streamName)
                 ? null
                 : new FileStream(streamName, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
@@ -321,52 +252,18 @@ namespace System.Configuration.Internal
         internal static Stream StaticOpenStreamForWrite(string streamName, string templateStreamName,
             ref object writeContext, bool assertPermissions)
         {
-            bool revertAssert = false;
-
             if (string.IsNullOrEmpty(streamName))
                 throw new ConfigurationErrorsException(SR.Config_no_stream_to_write);
 
             // Create directory if it does not exist.
             // Ignore errors, allow any failure to come when trying to open the file.
             string dir = Path.GetDirectoryName(streamName);
-            try
-            {
-                if (!Directory.Exists(dir))
-                {
-                    // TODO: This Assert( ) should be moved to before we call
-                    // Directory.Exists because we
-                    // discovered that under partial trust Directory.Exists will
-                    // always return false.  But for Whidbey RTM it's okay to not
-                    // fix it because Directory.CreateDirectory will not throw if
-                    // the directory already exists.
-                    if (assertPermissions)
-                    {
-                        new FileIOPermission(PermissionState.Unrestricted).Assert();
-                        revertAssert = true;
-                    }
 
-                    Directory.CreateDirectory(dir);
-                }
-            }
-            catch { }
-            finally
-            {
-                if (revertAssert) CodeAccessPermission.RevertAssert();
-            }
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
             Stream stream;
             WriteFileContext writeFileContext = null;
-            revertAssert = false;
-
-            if (assertPermissions)
-            {
-                // If we're asked to assert permission, we will assert allAccess on the directory (instead of just the file).
-                // We need to assert for the whole directory because WriteFileContext will call TempFileCollection.AddExtension,
-                // which will generate a temporary file and make a AllAccess Demand on that file.
-                // Since we don't know the name of the temporary file right now, we need to assert for the whole dir.
-                new FileIOPermission(FileIOPermissionAccess.AllAccess, dir).Assert();
-                revertAssert = true;
-            }
 
             try
             {
@@ -376,19 +273,21 @@ namespace System.Configuration.Internal
                 {
                     FileInfo fi = new FileInfo(streamName);
                     FileAttributes attrs = fi.Attributes;
-                    if ((int)(attrs & InvalidAttributesForWrite) != 0)
+                    if ((attrs & InvalidAttributesForWrite) != 0)
+                    {
                         throw new IOException(string.Format(SR.Config_invalid_attributes_for_write, streamName));
+                    }
                 }
 
                 try
                 {
-                    stream = new FileStream(writeFileContext.TempNewFilename, FileMode.Create, FileAccess.Write,
-                        FileShare.Read);
+                    stream = new FileStream(writeFileContext.TempNewFilename, FileMode.Create, FileAccess.Write, FileShare.Read);
                 }
                 catch (Exception e)
                 {
                     // Wrap all exceptions so that we provide a meaningful filename - otherwise the end user
                     // will just see the temporary file name, which is meaningless.
+
                     throw new ConfigurationErrorsException(string.Format(SR.Config_write_failed, streamName), e);
                 }
             }
@@ -397,45 +296,16 @@ namespace System.Configuration.Internal
                 writeFileContext?.Complete(streamName, false);
                 throw;
             }
-            finally
-            {
-                if (revertAssert) CodeAccessPermission.RevertAssert();
-            }
 
             writeContext = writeFileContext;
             return stream;
+
         }
 
-        // Parameters:
-        //  assertPermissions - If true, then we'll assert all required permissions.  Used by ClientSettingsConfigurationHost.
-        //                      to allow low-trust apps to use ClientSettingsStore.
         internal static void StaticWriteCompleted(string streamName, bool success, object writeContext,
             bool assertPermissions)
         {
-            WriteFileContext writeFileContext = (WriteFileContext)writeContext;
-            bool revertAssert = false;
-
-            if (assertPermissions)
-            {
-                // If asked to assert permissions, we will assert allAccess on the streamName, the temporary file 
-                // created by WriteContext, and also the directory itself.  The last one is needed because 
-                // WriteFileContext will call TempFileCollection.Dispose, which will remove a .tmp file it created.
-                string dir = Path.GetDirectoryName(streamName);
-                string[] filePaths = { streamName, writeFileContext.TempNewFilename, dir };
-                FileIOPermission fileIOPerm = new FileIOPermission(FileIOPermissionAccess.AllAccess,
-                    AccessControlActions.View | AccessControlActions.Change, filePaths);
-                fileIOPerm.Assert();
-                revertAssert = true;
-            }
-
-            try
-            {
-                writeFileContext.Complete(streamName, success);
-            }
-            finally
-            {
-                if (revertAssert) CodeAccessPermission.RevertAssert();
-            }
+            ((WriteFileContext)writeContext).Complete(streamName, success);
         }
 
         internal static void StaticDeleteStream(string streamName)

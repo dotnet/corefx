@@ -4,10 +4,11 @@
 
 using System.Collections;
 using System.Collections.Specialized;
+using System.Runtime.Serialization;
 
 namespace System.Configuration
 {
-    [Serializable()]
+    [Serializable]
     public sealed class ConfigurationSectionCollection : NameObjectCollectionBase
     {
         private readonly ConfigurationSectionGroup _configSectionGroup;
@@ -25,6 +26,11 @@ namespace System.Configuration
                 FactoryId factoryId = (FactoryId)de.Value;
                 if (factoryId.Group == _configSectionGroup.SectionGroupName) BaseAdd(factoryId.Name, factoryId.Name);
             }
+        }
+
+        private ConfigurationSectionCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
 
         public ConfigurationSection this[string name] => Get(name);

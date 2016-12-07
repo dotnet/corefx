@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace System.Configuration
@@ -81,8 +82,7 @@ namespace System.Configuration
                 if (attribute is TypeConverterAttribute)
                 {
                     TypeConverterAttribute attribConverter = (TypeConverterAttribute)attribute;
-                    typeConverter = TypeUtil.CreateInstance<TypeConverter>(info.DeclaringType,
-                        attribConverter.ConverterTypeName);
+                    typeConverter = TypeUtil.CreateInstance<TypeConverter>(attribConverter.ConverterTypeName);
                 }
                 else
                 {

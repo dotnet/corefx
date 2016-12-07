@@ -56,33 +56,6 @@ namespace System.Configuration
             return parentResult;
         }
 
-        private object GetRuntimeObjectWithFullTrust(ConfigurationSection section)
-        {
-            return section.GetRuntimeObject();
-        }
-
-        private object GetRuntimeObjectWithRestrictedPermissions(ConfigurationSection section)
-        {
-            // Run configuration section handlers as if user code was on the stack
-            bool revertPermitOnly = false;
-
-            try
-            {
-                PermissionSet permissionSet = GetRestrictedPermissions();
-                if (permissionSet != null)
-                {
-                    permissionSet.PermitOnly();
-                    revertPermitOnly = true;
-                }
-
-                return section.GetRuntimeObject();
-            }
-            finally
-            {
-                if (revertPermitOnly) CodeAccessPermission.RevertPermitOnly();
-            }
-        }
-
         protected override object GetRuntimeObject(object result)
         {
             object runtimeObject;
@@ -94,13 +67,8 @@ namespace System.Configuration
                 // so that the section could read files from disk if needed
                 try
                 {
-                    using (Impersonate())
-                    {
-                        // If this configRecord is trusted, ignore user code on stack
-                        runtimeObject = _flags[IsTrusted]
-                            ? GetRuntimeObjectWithFullTrust(section)
-                            : GetRuntimeObjectWithRestrictedPermissions(section);
-                    }
+                    // If this configRecord is trusted, ignore user code on stack
+                    runtimeObject = section.GetRuntimeObject();
                 }
                 catch (Exception e)
                 {
@@ -120,13 +88,7 @@ namespace System.Configuration
 
             internal RuntimeConfigurationFactory(RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord)
             {
-                // If the factory record was defined in a trusted config record, ignore user code on stack
-                if (factoryRecord.IsFromTrustedConfigRecord) InitWithFullTrust(configRecord, factoryRecord);
-                else
-                {
-                    // Run configuration section handlers as if user code was on the stack
-                    InitWithRestrictedPermissions(configRecord, factoryRecord);
-                }
+                Init(configRecord, factoryRecord);
             }
 
             private void Init(RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord)
@@ -155,33 +117,6 @@ namespace System.Configuration
                 }
             }
 
-            private void InitWithFullTrust(RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord)
-            {
-                Init(configRecord, factoryRecord);
-            }
-
-            private void InitWithRestrictedPermissions(RuntimeConfigurationRecord configRecord,
-                FactoryRecord factoryRecord)
-            {
-                // Run configuration section handlers as if user code was on the stack
-                bool revertPermitOnly = false;
-                try
-                {
-                    PermissionSet permissionSet = configRecord.GetRestrictedPermissions();
-                    if (permissionSet != null)
-                    {
-                        permissionSet.PermitOnly();
-                        revertPermitOnly = true;
-                    }
-
-                    Init(configRecord, factoryRecord);
-                }
-                finally
-                {
-                    if (revertPermitOnly) CodeAccessPermission.RevertPermitOnly();
-                }
-            }
-
             // Throw an exception if an attribute within a legacy section is one of our
             // reserved locking attributes. We do not want admins to think they can lock
             // an attribute or element within a legacy section.
@@ -202,9 +137,8 @@ namespace System.Configuration
                     if (xmlNode.NodeType == XmlNodeType.Element) CheckForLockAttributes(sectionName, child);
             }
 
-            private object CreateSectionImpl(
-                RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord, SectionRecord sectionRecord,
-                object parentConfig, ConfigXmlReader reader)
+            internal object CreateSection(bool inputIsTrusted, RuntimeConfigurationRecord configRecord,
+                FactoryRecord factoryRecord, SectionRecord sectionRecord, object parentConfig, ConfigXmlReader reader)
             {
                 object config;
 
@@ -252,48 +186,6 @@ namespace System.Configuration
                 }
 
                 return config;
-            }
-
-            private object CreateSectionWithFullTrust(
-                RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord, SectionRecord sectionRecord,
-                object parentConfig, ConfigXmlReader reader)
-            {
-                return CreateSectionImpl(configRecord, factoryRecord, sectionRecord, parentConfig, reader);
-            }
-
-            private object CreateSectionWithRestrictedPermissions(
-                RuntimeConfigurationRecord configRecord, FactoryRecord factoryRecord, SectionRecord sectionRecord,
-                object parentConfig, ConfigXmlReader reader)
-            {
-                // run configuration section handlers as if user code was on the stack
-                bool revertPermitOnly = false;
-                try
-                {
-                    PermissionSet permissionSet = configRecord.GetRestrictedPermissions();
-                    if (permissionSet != null)
-                    {
-                        permissionSet.PermitOnly();
-                        revertPermitOnly = true;
-                    }
-
-                    return CreateSectionImpl(configRecord, factoryRecord, sectionRecord, parentConfig, reader);
-                }
-                finally
-                {
-                    if (revertPermitOnly) CodeAccessPermission.RevertPermitOnly();
-                }
-            }
-
-            internal object CreateSection(bool inputIsTrusted, RuntimeConfigurationRecord configRecord,
-                FactoryRecord factoryRecord, SectionRecord sectionRecord, object parentConfig, ConfigXmlReader reader)
-            {
-                if (inputIsTrusted)
-                    return CreateSectionWithFullTrust(configRecord, factoryRecord, sectionRecord, parentConfig, reader);
-                else
-                {
-                    return CreateSectionWithRestrictedPermissions(configRecord, factoryRecord, sectionRecord,
-                        parentConfig, reader);
-                }
             }
         }
     }

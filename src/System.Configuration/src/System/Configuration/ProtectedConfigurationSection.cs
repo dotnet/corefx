@@ -22,19 +22,17 @@ namespace System.Configuration
 
         private static readonly ConfigurationProperty s_propDefaultProvider =
             new ConfigurationProperty("defaultProvider",
-                typeof(string),
-                "RsaProtectedConfigurationProvider",
-                null,
-                ConfigurationProperty.s_nonEmptyStringValidator,
-                ConfigurationPropertyOptions.None);
+                type: typeof(string),
+                defaultValue: "RsaProtectedConfigurationProvider",
+                typeConverter: null,
+                validator: ConfigurationProperty.s_nonEmptyStringValidator,
+                options: ConfigurationPropertyOptions.None);
 
         static ProtectedConfigurationSection()
         {
             // Property initialization
             s_properties = new ConfigurationPropertyCollection { s_propProviders, s_propDefaultProvider };
         }
-
-        public ProtectedConfigurationSection() { }
 
         protected internal override ConfigurationPropertyCollection Properties => s_properties;
 
@@ -87,11 +85,6 @@ namespace System.Configuration
             if (!typeof(ProtectedConfigurationProvider).IsAssignableFrom(t))
                 throw new Exception(SR.WrongType_of_Protected_provider);
 
-            // Needs to check APTCA bit.
-            if (!TypeUtil.IsTypeAllowedInConfig(t))
-                throw new Exception(string.Format(SR.Type_from_untrusted_assembly, t.FullName));
-
-            // Needs to check Assert Fulltrust in order for runtime to work.  See VSWhidbey 429996.
             return CreateAndInitializeProviderWithAssert(t, pn);
         }
 

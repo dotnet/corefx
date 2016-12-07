@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
 
 namespace System.Configuration
@@ -9,20 +10,18 @@ namespace System.Configuration
     // This is a class that abstracts the usage of the override mode setting
     internal struct OverrideModeSetting
     {
-        private const byte ApiDefinedLegacy = 0x10; // allowOverride was set thourhg the API  
-        private const byte ApiDefinedNewMode = 0x20; // overrideMode was set thourhg the API  
+        private const byte ApiDefinedLegacy = 0x10; // allowOverride was set through the API
+        private const byte ApiDefinedNewMode = 0x20; // overrideMode was set through the API
 
+        // allowOverride or overrideMode was set through the API
         private const byte ApiDefinedAny = ApiDefinedLegacy | ApiDefinedNewMode;
-        // allowOverride or overrideMode was set through the API  
-
         private const byte XmlDefinedLegacy = 0x40; // allowOverride was defined in the XML
         private const byte XmlDefinedNewMode = 0x80; // overrideMode was defined in the XML
 
-        private const byte XmlDefinedAny = XmlDefinedLegacy | XmlDefinedNewMode;
         // overrideMode or allowOverride was defined in the XML
+        private const byte XmlDefinedAny = XmlDefinedLegacy | XmlDefinedNewMode;
 
-        private const byte ModeMask = 0x0f; // logical AND this with the current value to get the mode part only       
-
+        private const byte ModeMask = 0x0f; // logical AND this with the current value to get the mode part only
 
         private byte _mode;
 
@@ -133,20 +132,22 @@ namespace System.Configuration
 
             bool result = false;
 
-            // If "y" was modified through the API as well - the modified setting must be the same ( i.e. allowOvverride or overrideMode must be modified in both settings )
-            if ((y._mode & ApiDefinedAny) != 0) result = (x._mode & ApiDefinedAny) == (y._mode & ApiDefinedAny);
-            // "y" was not API modified  - they are still a match if "y" was a XML setting from the same mode
+            if ((y._mode & ApiDefinedAny) != 0)
+            {
+                // If "y" was modified through the API as well - the modified setting must be the same ( i.e. allowOvverride or overrideMode must be modified in both settings )
+                result = (x._mode & ApiDefinedAny) == (y._mode & ApiDefinedAny);
+            }
             else
             {
+                // "y" was not API modified  - they are still a match if "y" was a XML setting from the same mode
                 if ((y._mode & XmlDefinedAny) != 0)
                 {
+                    // "x" was API changed in Legacy and "y" was XML defined in Legacy
                     result = (((x._mode & ApiDefinedLegacy) != 0) && ((y._mode & XmlDefinedLegacy) != 0)) ||
-                        // "x" was API changed in Legacy and "y" was XML defined in Legacy
-                        (((x._mode & ApiDefinedNewMode) != 0) && ((y._mode & XmlDefinedNewMode) != 0));
                     // "x" was API changed in New and "y" was XML defined in New
+                        (((x._mode & ApiDefinedNewMode) != 0) && ((y._mode & XmlDefinedNewMode) != 0));
                 }
                 // "y" was not API or XML modified - since "x" was API modified - they are not a match ( i.e. "y" should go to an <location> with no explicit mode written out )
-                else { }
             }
 
             return result;

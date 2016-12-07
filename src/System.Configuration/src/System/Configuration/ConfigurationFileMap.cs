@@ -7,9 +7,10 @@ using System.Security.Permissions;
 
 namespace System.Configuration
 {
-    // Holds the configuration file mapping for
-    // machine.config. It is the base class for
-    // ExeConfigurationFileMap and WebConfigurationFileMap.
+    /// <summary>
+    /// Holds the configuration file mapping for machine.config. It is the base class for
+    /// ExeConfigurationFileMap and WebConfigurationFileMap.
+    /// </summary>
     public class ConfigurationFileMap : ICloneable
     {
         // This used to be two fields: one containing the filename and the other containing

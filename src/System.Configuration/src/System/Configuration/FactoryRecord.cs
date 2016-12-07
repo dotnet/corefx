@@ -19,7 +19,6 @@ namespace System.Configuration
 
         private const int FlagIsGroup = 0x0008; // factory represents a group
         private const int FlagIsFromTrustedConfigRecord = 0x0010; // Factory is defined in trusted config record
-        private const int FlagIsFactoryTrustedWithoutAptca = 0x0020; // Factory is from trusted assembly without aptca
         private const int FlagIsUndeclared = 0x0040; // Factory is not declared - either implicit or unrecognized
 
         private List<ConfigurationException> _errors; // errors
@@ -151,17 +150,6 @@ namespace System.Configuration
         {
             get { return _flags[FlagIsUndeclared]; }
             set { _flags[FlagIsUndeclared] = value; }
-        }
-
-        internal bool IsFactoryTrustedWithoutAptca
-        {
-            get
-            {
-                Debug.Assert(Factory != null, "_factory != null");
-                return _flags[FlagIsFactoryTrustedWithoutAptca];
-            }
-
-            set { _flags[FlagIsFactoryTrustedWithoutAptca] = value; }
         }
 
         internal bool HasFile => LineNumber >= 0;

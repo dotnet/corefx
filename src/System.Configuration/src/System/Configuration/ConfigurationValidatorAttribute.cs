@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Configuration
 {
     [AttributeUsage(AttributeTargets.Property)]
@@ -25,7 +27,7 @@ namespace System.Configuration
         }
 
         public virtual ConfigurationValidatorBase ValidatorInstance
-            => (ConfigurationValidatorBase)TypeUtil.CreateInstanceRestricted(_declaringType, ValidatorType);
+            => (ConfigurationValidatorBase)TypeUtil.CreateInstance(ValidatorType);
 
         public Type ValidatorType { get; }
 

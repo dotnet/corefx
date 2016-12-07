@@ -3,13 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration.Internal;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
-using System.Security.Policy;
-using System.Security.Principal;
 
 namespace System.Configuration
 {
@@ -170,12 +167,6 @@ namespace System.Configuration
                             _fileMap.LocalUserConfigFilename = Path.GetFullPath(exeFileMap.LocalUserConfigFilename);
                     }
                 }
-            }
-            catch (SecurityException)
-            {
-                // Lets try to give them some information telling them 
-                // they don't have enough security privileges
-                throw new ConfigurationErrorsException(SR.Config_client_config_init_security);
             }
             catch
             {
@@ -416,47 +407,6 @@ namespace System.Configuration
             return sectionGroupName == "system.net";
         }
 
-        // we trust machine.config - admins settings do not have security restrictions.
-        public override bool IsTrustedConfigPath(string configPath)
-        {
-            return configPath == MachineConfigPath;
-        }
-
-        public override void GetRestrictedPermissions(IInternalConfigRecord configRecord,
-            out PermissionSet permissionSet, out bool isHostReady)
-        {
-            // Get the stream name as a URL
-            string url;
-            bool isFile = IsFile(configRecord.StreamName);
-            if (isFile) url = UrlPath.ConvertFileNameToUrl(configRecord.StreamName);
-            else url = configRecord.StreamName;
-
-            Evidence evidence = new Evidence();
-
-            // Add Url evidence, which is simply the URL.
-            evidence.AddHostEvidence(new Url(url));
-
-            // Add Zone evidence - My Computer, Intranet, Internet, etc.
-            evidence.AddHostEvidence(Zone.CreateFromUrl(url));
-
-            // Add Site evidence if the url is http.
-            if (!isFile) evidence.AddHostEvidence(Site.CreateFromUrl(url));
-
-            // Get the resulting permission set.
-            permissionSet = SecurityManager.GetStandardSandbox(evidence);
-
-            // Client host is always ready to return permissions.
-            isHostReady = true;
-        }
-
-        // Impersonate for Client Config
-        // Use the process identity
-        public override IDisposable Impersonate()
-        {
-            // Use the process identity
-            return WindowsIdentity.Impersonate(IntPtr.Zero);
-        }
-
         public override object CreateDeprecatedConfigContext(string configPath)
         {
             return null;
@@ -502,13 +452,12 @@ namespace System.Configuration
             // validate userLevel argument
             switch (userLevel)
             {
-                default:
-                    throw ExceptionUtil.ParameterInvalid("userLevel");
-
                 case ConfigurationUserLevel.None:
                 case ConfigurationUserLevel.PerUserRoaming:
                 case ConfigurationUserLevel.PerUserRoamingAndLocal:
                     break;
+                default:
+                    throw ExceptionUtil.ParameterInvalid(nameof(userLevel));
             }
 
             // validate fileMap arguments
@@ -556,8 +505,7 @@ namespace System.Configuration
                 }
             }
 
-            Configuration configuration = new Configuration(null, typeof(ClientConfigurationHost), fileMap, exePath,
-                configPath);
+            Configuration configuration = new Configuration(null, typeof(ClientConfigurationHost), fileMap, exePath, configPath);
 
             return configuration;
         }

@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 
 namespace System.Configuration
 {
-    [Serializable()]
+    [Serializable]
     public sealed class ConfigurationSectionGroupCollection : NameObjectCollectionBase
     {
         private readonly ConfigurationSectionGroup _configSectionGroup;
@@ -26,6 +26,11 @@ namespace System.Configuration
                 FactoryId factoryId = (FactoryId)de.Value;
                 if (factoryId.Group == _configSectionGroup.SectionGroupName) BaseAdd(factoryId.Name, factoryId.Name);
             }
+        }
+
+        private ConfigurationSectionGroupCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
 
         // Indexer via name

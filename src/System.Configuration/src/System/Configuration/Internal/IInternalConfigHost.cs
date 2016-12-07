@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
 using System.Runtime.InteropServices;
 
 namespace System.Configuration.Internal
@@ -71,15 +70,6 @@ namespace System.Configuration.Internal
 
         void VerifyDefinitionAllowed(string configPath, ConfigurationAllowDefinition allowDefinition,
             ConfigurationAllowExeDefinition allowExeDefinition, IConfigErrorInfo errorInfo);
-
-        // security support
-        bool IsTrustedConfigPath(string configPath);
-        bool IsFullTrustSectionWithoutAptcaAllowed(IInternalConfigRecord configRecord);
-
-        void GetRestrictedPermissions(IInternalConfigRecord configRecord, out PermissionSet permissionSet,
-            out bool isHostReady);
-
-        IDisposable Impersonate();
 
         // prefetch support
         bool PrefetchAll(string configPath, string streamName);

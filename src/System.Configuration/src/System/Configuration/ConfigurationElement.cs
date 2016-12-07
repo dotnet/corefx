@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -228,18 +229,11 @@ namespace System.Configuration
 
         internal ConfigurationElement CreateElement(Type type)
         {
-            // We use this.GetType() as the calling type since all code paths which lead to
-            // CreateElement are protected methods, so inputs are provided by somebody in
-            // the current type hierarchy. Since we expect that the most subclassed type
-            // will be the most restricted security-wise, we'll use it as the calling type.
-
-            ConfigurationElement element = (ConfigurationElement)TypeUtil.CreateInstanceRestricted(GetType(), type);
+            ConfigurationElement element = (ConfigurationElement)TypeUtil.CreateInstance(type);
             element.CallInit();
             return element;
         }
 
-        // Give elements that are added to a collection an opportunity to
-        //
         protected internal virtual void Init()
         {
             // If Init is called by the derived class, we may be able
@@ -789,7 +783,6 @@ namespace System.Configuration
         private static bool PropertiesFromType(Type type, out ConfigurationPropertyCollection result)
         {
             ConfigurationPropertyCollection properties = (ConfigurationPropertyCollection)s_propertyBags[type];
-            result = null;
             bool firstTimeInit = false;
             if (properties == null)
             {

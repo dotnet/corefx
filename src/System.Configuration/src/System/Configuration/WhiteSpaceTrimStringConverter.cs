@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace System.Configuration
 {

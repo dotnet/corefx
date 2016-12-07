@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration.Internal;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -348,7 +349,7 @@ namespace System.Configuration
             int depth = Reader.Depth;
 #endif
 
-            Debug.Assert(Reader.NodeType == XmlNodeType.Element, "_reader.NodeType == XmlNodeType.Element");
+            Debug.Assert(Reader.NodeType == XmlNodeType.Element, "Reader.NodeType == XmlNodeType.Element");
 
             CopyXmlNode(utilWriter);
 

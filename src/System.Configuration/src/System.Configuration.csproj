@@ -10,6 +10,8 @@
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Configuration\AppSettingsSection.cs" />
     <Compile Include="System\Configuration\BaseConfigurationRecord.cs" />
@@ -38,7 +40,6 @@
     <Compile Include="System\Configuration\ConfigurationLockCollection.cs" />
     <Compile Include="System\Configuration\ConfigurationLockCollectionType.cs" />
     <Compile Include="System\Configuration\ConfigurationManager.cs" />
-    <Compile Include="System\Configuration\ConfigurationManagerHelperFactory.cs" />
     <Compile Include="System\Configuration\ConfigurationPermission.cs" />
     <Compile Include="System\Configuration\ConfigurationProperty.cs" />
     <Compile Include="System\Configuration\ConfigurationPropertyAttribute.cs" />
@@ -70,7 +71,6 @@
     <Compile Include="System\Configuration\ContextInformation.cs" />
     <Compile Include="System\Configuration\DateTimeConfigurationCollection.cs" />
     <Compile Include="System\Configuration\DateTimeConfigurationElement.cs" />
-    <Compile Include="System\Configuration\Debug.cs" />
     <Compile Include="System\Configuration\DeclarationUpdate.cs" />
     <Compile Include="System\Configuration\DefaultSection.cs" />
     <Compile Include="System\Configuration\DefaultValidator.cs" />
@@ -85,9 +85,9 @@
     <Compile Include="System\Configuration\ExeContext.cs" />
     <Compile Include="System\Configuration\FactoryId.cs" />
     <Compile Include="System\Configuration\FactoryRecord.cs" />
-    <Compile Include="System\Configuration\FileUtil.cs" />
     <Compile Include="System\Configuration\GenericEnumConverter.cs" />
     <Compile Include="System\Configuration\IConfigurationSectionHandler.cs" />
+    <Compile Include="System\Configuration\IdentityHelper.cs" />
     <Compile Include="System\Configuration\IgnoreSection.cs" />
     <Compile Include="System\Configuration\IgnoreSectionHandler.cs" />
     <Compile Include="System\Configuration\InfiniteIntConverter.cs" />
@@ -134,6 +134,7 @@
     <Compile Include="System\Configuration\OverrideModeSetting.cs" />
     <Compile Include="System\Configuration\PositiveTimeSpanValidator.cs" />
     <Compile Include="System\Configuration\PositiveTimeSpanValidatorAttribute.cs" />
+    <Compile Include="System\Configuration\PrivilegedConfigurationManager.cs" />
     <Compile Include="System\Configuration\PropertyInformation.cs" />
     <Compile Include="System\Configuration\PropertyInformationCollection.cs" />
     <Compile Include="System\Configuration\PropertySourceInfo.cs" />
@@ -186,6 +187,5 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

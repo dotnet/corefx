@@ -22,9 +22,6 @@ namespace System.Configuration
         // lock children of this section
         private const int FlagLockChildren = 0x00000002;
 
-        // propagation of FactoryRecord.IsFactoryTrustedWithoutAptca
-        private const int FlagIsResultTrustedWithoutAptca = 0x00000004;
-
         // propagation of FactoryRecord.RequirePermission
         private const int FlagRequirePermission = 0x00000008;
 
@@ -93,12 +90,6 @@ namespace System.Configuration
 
                 return result;
             }
-        }
-
-        internal bool IsResultTrustedWithoutAptca
-        {
-            get { return _flags[FlagIsResultTrustedWithoutAptca]; }
-            set { _flags[FlagIsResultTrustedWithoutAptca] = value; }
         }
 
         internal bool RequirePermission

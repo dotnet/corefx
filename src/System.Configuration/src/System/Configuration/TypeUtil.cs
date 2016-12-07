@@ -102,9 +102,9 @@ namespace System.Configuration
             if (type == null)
                 return null;
 
-            const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            const BindingFlags BindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-            ConstructorInfo ctor = type.GetConstructor(bindingFlags, null, CallingConventions.HasThis, Type.EmptyTypes,
+            ConstructorInfo ctor = type.GetConstructor(BindingFlags, null, CallingConventions.HasThis, Type.EmptyTypes,
                 null);
             if ((ctor == null) && throwOnError)
                 throw new TypeLoadException(string.Format(SR.TypeNotPublic, type.AssemblyQualifiedName));

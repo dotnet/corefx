@@ -126,12 +126,16 @@ namespace System.Configuration
                     // when application configuration is downloaded via http.
                     _isMachineConfigInited = true;
 
-                    // Prevent deadlocks in the networking classes by loading 
-                    // networking config before making a networking request. 
-                    // Any requests for sections used in initialization during 
-                    // the call to EnsureConfigLoaded() will be served by 
-                    // _machine.config or will return null.
-                    if (_isAppConfigHttp) ConfigurationManagerHelperFactory.Instance.EnsureNetConfigLoaded();
+                    // If we add System.Net.Configuration we'll need to kick the initialization here
+                    // to prevent deadlocks in the networking classes by loading networking config
+                    // before making any networking requests.
+                    //
+                    // Any requests for sections used in initialization during the call to
+                    // EnsureConfigLoaded() will be served by _machine.config or will return null.
+
+                    //if (_isAppConfigHttp)
+                    //{
+                    //}
 
                     // Now load the rest of configuration
                     _configHost.RefreshConfigPaths();

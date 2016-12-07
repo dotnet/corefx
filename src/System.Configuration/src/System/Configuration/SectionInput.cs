@@ -16,16 +16,8 @@ namespace System.Configuration
         // accummulated errors related to this input
         private readonly List<ConfigurationException> _errors;
 
-        // Has the protection provider been determined for this input?
-
         // Provider to use for encryption
         private ProtectedConfigurationProvider _protectionProvider;
-
-        // the result of evaluating this section
-
-        // the result of evaluating this section after GetRuntimeObject is called
-
-        // input from the XML file
 
         internal SectionInput(SectionXmlInfo sectionXmlInfo, List<ConfigurationException> errors)
         {

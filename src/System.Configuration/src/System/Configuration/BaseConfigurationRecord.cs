@@ -9,8 +9,6 @@ using System.Configuration.Internal;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -63,19 +61,12 @@ namespace System.Configuration
         internal const string KeywordOverridemodeInherit = "Inherit";
         internal const string KeywordOverridemodeAllow = "Allow";
         internal const string KeywordOverridemodeDeny = "Deny";
-
-
         protected const string FormatLocationNopath = "<location {0} inheritInChildApplications=\"{1}\">\r\n";
-
-        protected const string FormatLocationPath =
-            "<location path=\"{2}\" {0} inheritInChildApplications=\"{1}\">\r\n";
-
+        protected const string FormatLocationPath = "<location path=\"{2}\" {0} inheritInChildApplications=\"{1}\">\r\n";
         protected const string FormatLocationEndelement = "</location>";
         internal const string KeywordLocationOverridemodeString = "{0}=\"{1}\"";
-
         protected const string FormatSectionConfigsource = "<{0} configSource=\"{1}\" />";
         protected const string FormatConfigsourceFile = "<?xml version=\"1.0\" encoding=\"{0}\"?>\r\n";
-
         protected const string FormatSectiongroupEndelement = "</sectionGroup>";
 
         // Class flags should only be used with the ClassFlags property.
@@ -95,11 +86,7 @@ namespace System.Configuration
         private const int ContextEvaluated = 0x00000080;
         private const int IsLocationListResolved = 0x00000100;
         protected const int NamespacePresentInFile = 0x00000200;
-
-        private const int RestrictedPermissionsResolved = 0x00000800;
-
         protected const int IsTrusted = 0x00002000;
-
         protected const int SupportsChangeNotifications = 0x00010000;
         protected const int SupportsRefresh = 0x00020000;
         protected const int SupportsPath = 0x00040000;
@@ -114,38 +101,23 @@ namespace System.Configuration
         internal const char ConfigPathSeparatorChar = '/';
         internal const string ConfigPathSeparatorString = "/";
 
-        /*
-        From http://www.w3.org/Addressing/
-
-          reserved    = ';' | '/' | '?' | ':' | '@' | '&' | '=' | '+' | '$' | ','
-
-        From Platform SDK
-
-          reserved    = '\' |  '/' | '|' | ':' |  '"' |  '<' | '>'
-
-        */
+        // From http://www.w3.org/Addressing/
+        //  reserved    = ';' | '/' | '?' | ':' | '@' | '&' | '=' | '+' | '$' | ','
+        // From Platform SDK
+        //  reserved    = '\' |  '/' | '|' | ':' |  '"' |  '<' | '>'
 
         // NOTE: If you change these strings, you must change the associated error message
         private const string InvalidFirstSubPathCharacters = @"\./";
         private const string InvalidLastSubPathCharacters = @"\./";
         private const string InvalidSubPathCharactersString = @"\?:*""<>|";
 
+        // TODO: Figure this out
         private const string ProtectedConfigurationSectionTypeName =
-            "System.Configuration.ProtectedConfigurationSection, " + AssemblyRef.SystemConfiguration;
+            "System.Configuration.ProtectedConfigurationSection, "
+            + "System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
         internal const string ReservedSectionProtectedConfiguration = "configProtectedData";
-
-        internal const string WinformsConfigurationSection =
-            ConfigurationStringConstants.WinformsApplicationConfigurationSectionName;
-
-        private const string SystemConfigurationSectionTypeName =
-            "System.Configuration.AppSettingsSection, " + AssemblyRef.SystemConfiguration;
-
         internal static readonly char[] s_configPathSeparatorParams = { ConfigPathSeparatorChar };
-
-        private static volatile ConfigurationPermission s_unrestrictedConfigPermission;
-
-        // (Perf) 4,000 location sections in web.config file degrades working set
         private static string s_appConfigPath;
 
         // Comparer used in sorting IndirectInputs.
@@ -174,7 +146,6 @@ namespace System.Configuration
         protected string _locationSubPath; // subPath for the config record when editing a location configuration
         protected BaseConfigurationRecord _parent; // parent record
         private ProtectedConfigurationSection _protectedConfig; // section containing the encryption providers
-        private PermissionSet _restrictedPermissions; // cached restricted permission set
 
         // Records information about sections that apply to this path,
         // which may be found in this web.config file, in a parent through
@@ -209,10 +180,6 @@ namespace System.Configuration
 
         protected ConfigRecordStreamInfo ConfigStreamInfo
             => IsLocationConfig ? _parent._configStreamInfo : _configStreamInfo;
-
-        // Create a single cached instance of UnrestrictedConfigPermission.
-        private static ConfigurationPermission UnrestrictedConfigPermission => s_unrestrictedConfigPermission ??
-            (s_unrestrictedConfigPermission = new ConfigurationPermission(PermissionState.Unrestricted));
 
         internal string DefaultProviderName => ProtectedConfig.DefaultProvider;
 
@@ -285,14 +252,7 @@ namespace System.Configuration
 
         public object GetSection(string configKey)
         {
-#if DEBUG
-            // On debug builds, the config system depends on system.diagnostics,
-            // so we must always return a valid result and never throw.
-            return GetSection(configKey, (configKey == "system.diagnostics") && !ClassFlags[ClassIgnoreLocalErrors],
-                true);
-#else
             return GetSection(configKey, false, true);
-#endif
         }
 
         public object GetLkgSection(string configKey)
@@ -341,54 +301,6 @@ namespace System.Configuration
             return Host.PrefetchSection(factoryRecord.Group, factoryRecord.Name);
         }
 
-        protected IDisposable Impersonate()
-        {
-            IDisposable context = null;
-            if (ClassFlags[ClassSupportsImpersonation]) context = Host.Impersonate();
-
-            return context ?? EmptyImpersonationContext.GetStaticInstance();
-        }
-
-        internal PermissionSet GetRestrictedPermissions()
-        {
-            if (_flags[RestrictedPermissionsResolved]) return _restrictedPermissions;
-            lock (this)
-            {
-                if (_flags[RestrictedPermissionsResolved]) return _restrictedPermissions;
-
-                if (AppDomain.CurrentDomain.IsHomogenous)
-                {
-                    // in a homogenous domain, just call PermitOnly() on the AppDomain's existing permission set
-                    _restrictedPermissions = AppDomain.CurrentDomain.PermissionSet;
-                    _flags[RestrictedPermissionsResolved] = true;
-                }
-                else
-                {
-                    // in a non-homogenous domain, use Evidence to calculate the current security policy
-                    PermissionSet restrictedPermissions;
-                    bool isHostReady;
-
-                    GetRestrictedPermissionsWithAssert(out restrictedPermissions, out isHostReady);
-                    if (isHostReady)
-                    {
-                        _restrictedPermissions = restrictedPermissions;
-                        _flags[RestrictedPermissionsResolved] = true;
-                    }
-                }
-
-                // calling PermitOnly() on an unrestricted PermissionSet is a no-op
-                if ((_restrictedPermissions != null) && _restrictedPermissions.IsUnrestricted())
-                    _restrictedPermissions = null;
-            }
-
-            return _restrictedPermissions;
-        }
-
-        private void GetRestrictedPermissionsWithAssert(out PermissionSet permissionSet, out bool isHostReady)
-        {
-            Host.GetRestrictedPermissions(this, out permissionSet, out isHostReady);
-        }
-
         internal void Init(
             IInternalConfigRoot configRoot,
             BaseConfigurationRecord parent,
@@ -425,7 +337,7 @@ namespace System.Configuration
                 // get static state based on the configPath
                 if (_flags[SupportsLocation]) _flags[IsAboveApplication] = Host.IsAboveApplication(_configPath);
 
-                _flags[IsTrusted] = Host.IsTrustedConfigPath(_configPath);
+                _flags[IsTrusted] = true;
 
                 ArrayList locationSubPathInputs = null;
 
@@ -638,46 +550,43 @@ namespace System.Configuration
                     // not be initDelayed.
                     Debug.Assert(!_parent.IsInitDelayed, "!_parent.IsInitDelayed");
 
-                    using (Impersonate())
+                    // Get the stream name. Note that this may be an expensive operation
+                    // for the client configuration host, which is why it comes after the
+                    // check for delayed init.
+                    ConfigStreamInfo.StreamName = Host.GetStreamName(_configPath);
+                    if (!string.IsNullOrEmpty(ConfigStreamInfo.StreamName))
                     {
-                        // Get the stream name. Note that this may be an expensive operation
-                        // for the client configuration host, which is why it comes after the
-                        // check for delayed init.
-                        ConfigStreamInfo.StreamName = Host.GetStreamName(_configPath);
-                        if (!string.IsNullOrEmpty(ConfigStreamInfo.StreamName))
+                        // Lets listen to the stream
+                        ConfigStreamInfo.StreamVersion = MonitorStream(null, null, ConfigStreamInfo.StreamName);
+                        using (Stream stream = Host.OpenStreamForRead(ConfigStreamInfo.StreamName))
                         {
-                            // Lets listen to the stream
-                            ConfigStreamInfo.StreamVersion = MonitorStream(null, null, ConfigStreamInfo.StreamName);
-                            using (Stream stream = Host.OpenStreamForRead(ConfigStreamInfo.StreamName))
+                            if (stream == null)
                             {
-                                if (stream == null)
-                                {
-                                    // There is no stream to load from
-                                    return;
-                                }
+                                // There is no stream to load from
+                                return;
+                            }
 
-                                ConfigStreamInfo.HasStream = true;
+                            ConfigStreamInfo.HasStream = true;
 
-                                // Determine whether or not to prefetch.
-                                _flags[PrefetchAll] = Host.PrefetchAll(_configPath, ConfigStreamInfo.StreamName);
+                            // Determine whether or not to prefetch.
+                            _flags[PrefetchAll] = Host.PrefetchAll(_configPath, ConfigStreamInfo.StreamName);
 
-                                using (
-                                    XmlUtil xmlUtil = new XmlUtil(stream, ConfigStreamInfo.StreamName, true, _initErrors)
-                                    )
-                                {
-                                    ConfigStreamInfo.StreamEncoding = xmlUtil.Reader.Encoding;
+                            using (
+                                XmlUtil xmlUtil = new XmlUtil(stream, ConfigStreamInfo.StreamName, true, _initErrors)
+                                )
+                            {
+                                ConfigStreamInfo.StreamEncoding = xmlUtil.Reader.Encoding;
 
-                                    // Read the factories
-                                    Hashtable factoryList = ScanFactories(xmlUtil);
-                                    _factoryRecords = factoryList;
+                                // Read the factories
+                                Hashtable factoryList = ScanFactories(xmlUtil);
+                                _factoryRecords = factoryList;
 
-                                    // Add implicit sections before scanning sections
-                                    AddImplicitSections(null);
-                                    implicitSectionsAdded = true;
+                                // Add implicit sections before scanning sections
+                                AddImplicitSections(null);
+                                implicitSectionsAdded = true;
 
-                                    // Read the sections themselves
-                                    if (xmlUtil.Reader.Depth == 1) ScanSections(xmlUtil);
-                                }
+                                // Read the sections themselves
+                                if (xmlUtil.Reader.Depth == 1) ScanSections(xmlUtil);
                             }
                         }
                     }
@@ -797,26 +706,23 @@ namespace System.Configuration
             int lineNumber = 0;
             try
             {
-                using (Impersonate())
+                using (Stream stream = Host.OpenStreamForRead(ConfigStreamInfo.StreamName))
                 {
-                    using (Stream stream = Host.OpenStreamForRead(ConfigStreamInfo.StreamName))
+                    if (stream != null)
                     {
-                        if (stream != null)
-                        {
-                            ConfigStreamInfo.HasStream = true;
+                        ConfigStreamInfo.HasStream = true;
 
-                            using (XmlUtil xmlUtil = new XmlUtil(stream, ConfigStreamInfo.StreamName, true, errors))
+                        using (XmlUtil xmlUtil = new XmlUtil(stream, ConfigStreamInfo.StreamName, true, errors))
+                        {
+                            try
                             {
-                                try
-                                {
-                                    factoryList = ScanFactories(xmlUtil);
-                                    ThrowIfParseErrors(xmlUtil.SchemaErrors);
-                                }
-                                catch
-                                {
-                                    lineNumber = xmlUtil.LineNumber;
-                                    throw;
-                                }
+                                factoryList = ScanFactories(xmlUtil);
+                                ThrowIfParseErrors(xmlUtil.SchemaErrors);
+                            }
+                            catch
+                            {
+                                lineNumber = xmlUtil.LineNumber;
+                                throw;
                             }
                         }
                     }
@@ -887,12 +793,8 @@ namespace System.Configuration
             }
 #endif
 
-            // Store results in temporary variables, because we don't want to return
-            // results if an exception is thrown by CheckPermissionAllowed.
             object tmpResult = null;
             object tmpResultRuntimeObject = null;
-            bool requirePermission = true;
-            bool isResultTrustedWithoutAptca = true;
 
             // Throw errors from initial parse, if any.
             if (!getLkg) ThrowIfInitErrors();
@@ -923,8 +825,6 @@ namespace System.Configuration
                 // Get the cached result.
                 if (!getRuntimeObject || sectionRecord.HasResultRuntimeObject)
                 {
-                    requirePermission = sectionRecord.RequirePermission;
-                    isResultTrustedWithoutAptca = sectionRecord.IsResultTrustedWithoutAptca;
                     tmpResult = sectionRecord.Result;
                     if (getRuntimeObject) tmpResultRuntimeObject = sectionRecord.ResultRuntimeObject;
 
@@ -1172,11 +1072,7 @@ namespace System.Configuration
                     // Determine which permissions are required of the caller.
                     if (cacheResults || checkPermission)
                     {
-                        if (factoryRecord != null)
-                        {
-                            requirePermission = factoryRecord.RequirePermission;
-                            isResultTrustedWithoutAptca = factoryRecord.IsFactoryTrustedWithoutAptca;
-                        }
+                        bool requirePermission = factoryRecord.RequirePermission;
 
                         // Cache the results.
                         if (cacheResults)
@@ -1187,7 +1083,6 @@ namespace System.Configuration
                             if (getRuntimeObject) sectionRecord.ResultRuntimeObject = tmpResultRuntimeObject;
 
                             sectionRecord.RequirePermission = requirePermission;
-                            sectionRecord.IsResultTrustedWithoutAptca = isResultTrustedWithoutAptca;
                         }
                     }
 
@@ -1218,9 +1113,6 @@ namespace System.Configuration
                     return;
                 }
             }
-
-            // Check if permission to access the section is allowed.
-            if (checkPermission) CheckPermissionAllowed(configKey, requirePermission, isResultTrustedWithoutAptca);
 
             // Return the results.
             result = tmpResult;
@@ -1348,8 +1240,7 @@ namespace System.Configuration
                             if (!input.HasResult)
                             {
                                 input.ThrowOnErrors();
-                                bool isTrusted = Host.IsTrustedConfigPath(input.SectionXmlInfo.DefinitionConfigPath);
-                                input.Result = EvaluateOne(keys, input, isTrusted, factoryRecord, sectionRecord,
+                                input.Result = EvaluateOne(keys, input, true, factoryRecord, sectionRecord,
                                     currentResult);
                             }
 
@@ -1365,9 +1256,7 @@ namespace System.Configuration
                             if (!locationInput.HasResult)
                             {
                                 locationInput.ThrowOnErrors();
-                                bool isTrusted =
-                                    Host.IsTrustedConfigPath(locationInput.SectionXmlInfo.DefinitionConfigPath);
-                                locationInput.Result = EvaluateOne(keys, locationInput, isTrusted, factoryRecord,
+                                locationInput.Result = EvaluateOne(keys, locationInput, true, factoryRecord,
                                     sectionRecord, currentResult);
                             }
 
@@ -1484,97 +1373,67 @@ namespace System.Configuration
             return result;
         }
 
-        // Check whether permission to the section is allowed to the caller.
-        private void CheckPermissionAllowed(string configKey, bool requirePermission, bool isTrustedWithoutAptca)
-        {
-            // Demand unrestricted ConfigurationPermission if the section requires it
-            if (requirePermission)
-            {
-                try
-                {
-                    UnrestrictedConfigPermission.Demand();
-                }
-                catch (SecurityException e)
-                {
-                    // Add a nice error message that includes the sectionName and explains
-                    // how to use the requirePermission attribute.
-                    throw new SecurityException(
-                        string.Format(SR.ConfigurationPermission_Denied, configKey),
-                        e);
-                }
-            }
-
-            // Ensure that the recepient isn't receiving an object they otherwise
-            // wouldn't be able to create due to Aptca.
-            if (isTrustedWithoutAptca && !Host.IsFullTrustSectionWithoutAptcaAllowed(this))
-                throw new ConfigurationErrorsException(string.Format(SR.Section_from_untrusted_assembly, configKey));
-        }
-
-
         private ConfigXmlReader FindSection(string[] keys, SectionXmlInfo sectionXmlInfo, out int lineNumber)
         {
             lineNumber = 0;
             ConfigXmlReader section = null;
 
-            using (Impersonate())
+            using (Stream stream = Host.OpenStreamForRead(sectionXmlInfo.Filename))
             {
-                using (Stream stream = Host.OpenStreamForRead(sectionXmlInfo.Filename))
+                if (!_flags[SupportsRefresh]
+                    &&
+                    ((stream == null) || HasStreamChanged(sectionXmlInfo.Filename, sectionXmlInfo.StreamVersion)))
                 {
-                    if (!_flags[SupportsRefresh]
-                        &&
-                        ((stream == null) || HasStreamChanged(sectionXmlInfo.Filename, sectionXmlInfo.StreamVersion)))
-                    {
-                        throw new ConfigurationErrorsException(SR.Config_file_has_changed,
-                            sectionXmlInfo.Filename, 0);
-                    }
+                    throw new ConfigurationErrorsException(SR.Config_file_has_changed,
+                        sectionXmlInfo.Filename, 0);
+                }
 
-                    if (stream == null) return null;
+                if (stream == null) return null;
 
-                    // CONSIDER: In refresh case, need to recheck validity of file - can't make assumptions
-                    using (XmlUtil xmlUtil = new XmlUtil(stream, sectionXmlInfo.Filename, true))
+                // CONSIDER: In refresh case, need to recheck validity of file - can't make assumptions
+                using (XmlUtil xmlUtil = new XmlUtil(stream, sectionXmlInfo.Filename, true))
+                {
+                    if (sectionXmlInfo.SubPath == null)
+                        section = FindSectionRecursive(keys, 0, xmlUtil, ref lineNumber);
+                    else
                     {
-                        if (sectionXmlInfo.SubPath == null)
-                            section = FindSectionRecursive(keys, 0, xmlUtil, ref lineNumber);
-                        else
+                        // search children of <configuration> for <location>
+                        xmlUtil.ReadToNextElement();
+                        while (xmlUtil.Reader.Depth > 0)
                         {
-                            // search children of <configuration> for <location>
-                            xmlUtil.ReadToNextElement();
-                            while (xmlUtil.Reader.Depth > 0)
+                            if (xmlUtil.Reader.Name == KeywordLocation)
                             {
-                                if (xmlUtil.Reader.Name == KeywordLocation)
+                                bool locationValid = false;
+                                string locationSubPathAttribute =
+                                    xmlUtil.Reader.GetAttribute(KeywordLocationPath);
+
+                                try
                                 {
-                                    bool locationValid = false;
-                                    string locationSubPathAttribute =
-                                        xmlUtil.Reader.GetAttribute(KeywordLocationPath);
-
-                                    try
-                                    {
-                                        locationSubPathAttribute =
-                                            NormalizeLocationSubPath(locationSubPathAttribute, xmlUtil);
-                                        locationValid = true;
-                                    }
-                                    catch (ConfigurationException ce)
-                                    {
-                                        xmlUtil.SchemaErrors.AddError(ce, ExceptionAction.NonSpecific);
-                                    }
-
-                                    if (locationValid &&
-                                        StringUtil.EqualsIgnoreCase(sectionXmlInfo.SubPath,
-                                            locationSubPathAttribute))
-                                    {
-                                        section = FindSectionRecursive(keys, 0, xmlUtil, ref lineNumber);
-                                        if (section != null)
-                                            break;
-                                    }
+                                    locationSubPathAttribute =
+                                        NormalizeLocationSubPath(locationSubPathAttribute, xmlUtil);
+                                    locationValid = true;
+                                }
+                                catch (ConfigurationException ce)
+                                {
+                                    xmlUtil.SchemaErrors.AddError(ce, ExceptionAction.NonSpecific);
                                 }
 
-                                xmlUtil.SkipToNextElement();
+                                if (locationValid &&
+                                    StringUtil.EqualsIgnoreCase(sectionXmlInfo.SubPath,
+                                        locationSubPathAttribute))
+                                {
+                                    section = FindSectionRecursive(keys, 0, xmlUtil, ref lineNumber);
+                                    if (section != null)
+                                        break;
+                                }
                             }
-                        }
 
-                        // Throw accumulated errors
-                        ThrowIfParseErrors(xmlUtil.SchemaErrors);
+                            xmlUtil.SkipToNextElement();
+                        }
                     }
+
+                    // Throw accumulated errors
+                    ThrowIfParseErrors(xmlUtil.SchemaErrors);
                 }
             }
 
@@ -1645,52 +1504,49 @@ namespace System.Configuration
         {
             string configSourceStreamName = sectionXmlInfo.ConfigSourceStreamName;
 
-            using (Impersonate())
+            using (Stream stream = Host.OpenStreamForRead(configSourceStreamName))
             {
-                using (Stream stream = Host.OpenStreamForRead(configSourceStreamName))
+                if (stream == null)
                 {
-                    if (stream == null)
+                    throw new ConfigurationErrorsException(
+                        string.Format(SR.Config_cannot_open_config_source, sectionXmlInfo.ConfigSource),
+                        sectionXmlInfo);
+                }
+
+                using (XmlUtil xmlUtil = new XmlUtil(stream, configSourceStreamName, true))
+                {
+                    if (xmlUtil.Reader.Name != name)
+                        throw new ConfigurationErrorsException(SR.Config_source_file_format, xmlUtil);
+
+                    // Check for protectionProvider
+                    string protectionProviderAttribute = xmlUtil.Reader.GetAttribute(KeywordProtectionProvider);
+                    if (protectionProviderAttribute != null)
                     {
-                        throw new ConfigurationErrorsException(
-                            string.Format(SR.Config_cannot_open_config_source, sectionXmlInfo.ConfigSource),
-                            sectionXmlInfo);
+                        if (xmlUtil.Reader.AttributeCount != 1)
+                        {
+                            // Error: elements with protectionProvider should not have other attributes
+                            throw new ConfigurationErrorsException(SR.Protection_provider_syntax_error, xmlUtil);
+                        }
+
+                        sectionXmlInfo.ProtectionProviderName =
+                            ValidateProtectionProviderAttribute(protectionProviderAttribute, xmlUtil);
                     }
 
-                    using (XmlUtil xmlUtil = new XmlUtil(stream, configSourceStreamName, true))
+                    int lineOffset = xmlUtil.Reader.LineNumber;
+                    string rawXml = xmlUtil.CopySection();
+
+                    // Detect if there is any XML left over after the section
+                    while (!xmlUtil.Reader.EOF)
                     {
-                        if (xmlUtil.Reader.Name != name)
+                        XmlNodeType t = xmlUtil.Reader.NodeType;
+                        if (t != XmlNodeType.Comment)
                             throw new ConfigurationErrorsException(SR.Config_source_file_format, xmlUtil);
 
-                        // Check for protectionProvider
-                        string protectionProviderAttribute = xmlUtil.Reader.GetAttribute(KeywordProtectionProvider);
-                        if (protectionProviderAttribute != null)
-                        {
-                            if (xmlUtil.Reader.AttributeCount != 1)
-                            {
-                                // Error: elements with protectionProvider should not have other attributes
-                                throw new ConfigurationErrorsException(SR.Protection_provider_syntax_error, xmlUtil);
-                            }
-
-                            sectionXmlInfo.ProtectionProviderName =
-                                ValidateProtectionProviderAttribute(protectionProviderAttribute, xmlUtil);
-                        }
-
-                        int lineOffset = xmlUtil.Reader.LineNumber;
-                        string rawXml = xmlUtil.CopySection();
-
-                        // Detect if there is any XML left over after the section
-                        while (!xmlUtil.Reader.EOF)
-                        {
-                            XmlNodeType t = xmlUtil.Reader.NodeType;
-                            if (t != XmlNodeType.Comment)
-                                throw new ConfigurationErrorsException(SR.Config_source_file_format, xmlUtil);
-
-                            xmlUtil.Reader.Read();
-                        }
-
-                        ConfigXmlReader section = new ConfigXmlReader(rawXml, configSourceStreamName, lineOffset);
-                        return section;
+                        xmlUtil.Reader.Read();
                     }
+
+                    ConfigXmlReader section = new ConfigXmlReader(rawXml, configSourceStreamName, lineOffset);
+                    return section;
                 }
             }
         }
@@ -1781,12 +1637,9 @@ namespace System.Configuration
             // so that the section could read files from disk if needed
             try
             {
-                using (Impersonate())
-                {
-                    config = CreateSection(inputIsTrusted, factoryRecord, sectionRecord, parentConfig, reader);
-                    if ((config == null) && (parentConfig != null))
-                        throw new ConfigurationErrorsException(SR.Config_object_is_null, filename, line);
-                }
+                config = CreateSection(inputIsTrusted, factoryRecord, sectionRecord, parentConfig, reader);
+                if ((config == null) && (parentConfig != null))
+                    throw new ConfigurationErrorsException(SR.Config_object_is_null, filename, line);
             }
             catch (ThreadAbortException)
             {
@@ -1899,10 +1752,7 @@ namespace System.Configuration
                 {
                     // Create the factory from the type string, and cache it
                     object factory = rootConfigRecord.CreateSectionFactory(rootFactoryRecord);
-                    bool isFactoryTrustedWithoutAptca =
-                        TypeUtil.IsTypeFromTrustedAssemblyWithoutAptca(factory.GetType());
                     rootFactoryRecord.Factory = factory;
-                    rootFactoryRecord.IsFactoryTrustedWithoutAptca = isFactoryTrustedWithoutAptca;
                 }
                 catch (Exception e)
                 {
@@ -1915,7 +1765,6 @@ namespace System.Configuration
             if (factoryRecord.Factory == null)
             {
                 factoryRecord.Factory = rootFactoryRecord.Factory;
-                factoryRecord.IsFactoryTrustedWithoutAptca = rootFactoryRecord.IsFactoryTrustedWithoutAptca;
             }
 
             isRootDeclaredHere = ReferenceEquals(this, rootConfigRecord);
@@ -3670,11 +3519,8 @@ namespace System.Configuration
 
             string childConfigPath = ConfigPathUtility.Combine(_configPath, configName);
 
-            using (Impersonate())
-            {
-                // check host if required
-                if (Host.IsConfigRecordRequired(childConfigPath)) return true;
-            }
+            // check host if required
+            if (Host.IsConfigRecordRequired(childConfigPath)) return true;
 
             // see if there's a location
             if (!_flags[SupportsLocation]) return false;
@@ -3876,8 +3722,7 @@ namespace System.Configuration
 
         internal static bool IsImplicitSection(string configKey)
         {
-            return string.Equals(configKey, ReservedSectionProtectedConfiguration, StringComparison.Ordinal) ||
-                string.Equals(configKey, WinformsConfigurationSection, StringComparison.Ordinal);
+            return string.Equals(configKey, ReservedSectionProtectedConfiguration, StringComparison.Ordinal);
         }
 
         // Add implicit sections to the factory list.
@@ -3903,49 +3748,20 @@ namespace System.Configuration
             {
                 factoryList[ReservedSectionProtectedConfiguration] =
                     new FactoryRecord(
-                        ReservedSectionProtectedConfiguration,
-                        string.Empty,
-                        ReservedSectionProtectedConfiguration,
-                        ProtectedConfigurationSectionTypeName,
-                        true,
-                        ConfigurationAllowDefinition.Everywhere,
-                        ConfigurationAllowExeDefinition.MachineToApplication,
-                        OverrideModeSetting.s_sectionDefault,
-                        true,
-                        true,
-                        true,
-                        true,
-                        null,
-                        -1);
-            }
-
-            factoryRecord = (FactoryRecord)factoryList[WinformsConfigurationSection];
-
-            // If the user has mistakenly declared an implicit section, we should leave the factoryRecord
-            // alone because it contains the error and the error will be thrown later.
-            if (factoryRecord != null)
-            {
-                Debug.Assert(factoryRecord.HasErrors,
-                    "If the user has mistakenly declared an implicit section, we should have recorded an error.");
-            }
-            else
-            {
-                factoryList[WinformsConfigurationSection] =
-                    new FactoryRecord(
-                        WinformsConfigurationSection,
-                        string.Empty,
-                        WinformsConfigurationSection,
-                        SystemConfigurationSectionTypeName,
-                        true,
-                        ConfigurationAllowDefinition.Everywhere,
-                        ConfigurationAllowExeDefinition.MachineToApplication,
-                        OverrideModeSetting.s_sectionDefault,
-                        true,
-                        true,
-                        true,
-                        true,
-                        null,
-                        -1);
+                        configKey: ReservedSectionProtectedConfiguration,
+                        group: string.Empty,
+                        name: ReservedSectionProtectedConfiguration,
+                        factoryTypeName: ProtectedConfigurationSectionTypeName,
+                        allowLocation: true,
+                        allowDefinition: ConfigurationAllowDefinition.Everywhere,
+                        allowExeDefinition: ConfigurationAllowExeDefinition.MachineToApplication,
+                        overrideModeDefault: OverrideModeSetting.s_sectionDefault,
+                        restartOnExternalChanges: true,
+                        requirePermission: true,
+                        isFromTrustedConfigRecord: true,
+                        isUndeclared: true,
+                        filename: null,
+                        lineNumber: -1);
             }
         }
 

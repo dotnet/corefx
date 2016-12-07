@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
 
 namespace System.Configuration.Internal
 {
@@ -168,27 +167,6 @@ namespace System.Configuration.Internal
         public virtual bool IsLocationApplicable(string configPath)
         {
             return Host.IsLocationApplicable(configPath);
-        }
-
-        public virtual bool IsTrustedConfigPath(string configPath)
-        {
-            return Host.IsTrustedConfigPath(configPath);
-        }
-
-        public virtual bool IsFullTrustSectionWithoutAptcaAllowed(IInternalConfigRecord configRecord)
-        {
-            return Host.IsFullTrustSectionWithoutAptcaAllowed(configRecord);
-        }
-
-        public virtual void GetRestrictedPermissions(IInternalConfigRecord configRecord, out PermissionSet permissionSet,
-            out bool isHostReady)
-        {
-            Host.GetRestrictedPermissions(configRecord, out permissionSet, out isHostReady);
-        }
-
-        public virtual IDisposable Impersonate()
-        {
-            return Host.Impersonate();
         }
 
         public virtual bool PrefetchAll(string configPath, string streamName)

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration.Internal;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -83,10 +84,7 @@ namespace System.Configuration
         {
             get
             {
-                if (_flags[NamespacePresentCurrent] ==
-                    _flags[NamespacePresentInFile])
-                    return NamespaceChange.None;
-
+                if (_flags[NamespacePresentCurrent] == _flags[NamespacePresentInFile]) return NamespaceChange.None;
                 return _flags[NamespacePresentCurrent] ? NamespaceChange.Add : NamespaceChange.Remove;
             }
         }
@@ -719,8 +717,6 @@ namespace System.Configuration
             {
                 Factory = TypeUtil.GetConstructor(
                         configSection.GetType(), typeof(ConfigurationSection), true),
-                IsFactoryTrustedWithoutAptca =
-                        TypeUtil.IsTypeFromTrustedAssemblyWithoutAptca(configSection.GetType())
             };
 
             // Construct a factory for the section
@@ -969,7 +965,7 @@ namespace System.Configuration
         internal void SaveAs(string filename, ConfigurationSaveMode saveMode, bool forceUpdateAll)
         {
             // Get the updates.
-            SectionUpdates declarationUpdates = GetConfigDeclarationUpdates(saveMode, forceUpdateAll);
+            SectionUpdates declarationUpdates = GetConfigDeclarationUpdates(saveMode);
 
             ConfigDefinitionUpdates definitionUpdates;
             ArrayList configSourceUpdates;
@@ -1317,7 +1313,7 @@ namespace System.Configuration
         }
 
         // Gather all the updates to the configuration section declarations.
-        private SectionUpdates GetConfigDeclarationUpdates(ConfigurationSaveMode saveMode, bool forceUpdateAll)
+        private SectionUpdates GetConfigDeclarationUpdates(ConfigurationSaveMode saveMode)
         {
             if (IsLocationConfig)
                 return null;
@@ -2514,10 +2510,6 @@ namespace System.Configuration
                     bool writeGroupUpdate = groupUpdate?.UpdatedXml != null;
                     if (recurse)
                     {
-#if DEBUG
-                        string startElementName = reader.Name;
-#endif
-
                         // create a checkpoint that we can revert to if no children are written
                         object checkpoint = utilWriter.CreateStreamCheckpoint();
                         string closingElement = null;
@@ -3084,15 +3076,13 @@ namespace System.Configuration
                 catch
                 {
                     if (streamOpened) Host.WriteCompleted(configSourceStreamName, false, writeContext);
-
                     throw;
                 }
             }
-
-            // Guarantee that exceptions contain at least the name of the stream by wrapping them
-            // in a ConfigurationException.
             catch (Exception e)
             {
+                // Guarantee that exceptions contain at least the name of the stream by wrapping them
+                // in a ConfigurationException.
                 throw ExceptionUtil.WrapAsConfigException(SR.Config_error_loading_XML_file, e, configSourceStreamName, 0);
             }
 
@@ -3106,7 +3096,7 @@ namespace System.Configuration
             byte[] preamble;
             using (Stream stream = new MemoryStream(buffer))
             {
-                using (XmlUtil xmlUtil = new XmlUtil(stream, configSourceStreamName, true))
+                using (new XmlUtil(stream, configSourceStreamName, true))
                 {
                     preamble = ConfigStreamInfo.StreamEncoding.GetPreamble();
                 }

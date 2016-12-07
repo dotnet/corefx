@@ -102,10 +102,6 @@ namespace System.Configuration
             }
             else Writer.Write(s);
 
-#if DEBUG_WRITE
-            Flush();
-#endif
-
             return s.Length;
         }
 
@@ -115,10 +111,6 @@ namespace System.Configuration
         {
             Writer.Write(ch);
             if (TrackPosition) UpdatePosition(ch);
-#if DEBUG_WRITE
-            Flush();
-#endif
-
             return 1;
         }
 
@@ -289,8 +281,6 @@ namespace System.Configuration
         // current line position of the writer.
         internal int AppendSpacesToLinePosition(int linePosition)
         {
-            Debug.Assert(TrackPosition, "_trackPosition");
-
             if (linePosition <= 0) return 0;
 
             int delta = linePosition - LinePosition;
@@ -348,7 +338,6 @@ namespace System.Configuration
         // Reset the stream to the beginning of the current blank line.
         internal void SeekToLineStart()
         {
-            Debug.Assert(IsLastLineBlank, "_isLastLineBlank");
             RestoreStreamCheckpoint(_lineStartCheckpoint);
         }
 
