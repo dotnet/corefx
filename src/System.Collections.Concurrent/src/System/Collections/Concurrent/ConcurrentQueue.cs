@@ -916,7 +916,8 @@ namespace System.Collections.Concurrent
             {
                 get
                 {
-                    return Math.Min(_low, SEGMENT_SIZE);
+                    int low = _low; // jit won't inline Math.Min if passed a volatile
+                    return Math.Min(low, SEGMENT_SIZE);
                 }
             }
 
@@ -930,7 +931,8 @@ namespace System.Collections.Concurrent
                 {
                     //if _high > SEGMENT_SIZE, it means it's out of range, we should return
                     //SEGMENT_SIZE-1 as the logical position
-                    return Math.Min(_high, SEGMENT_SIZE - 1);
+                    int high = _high; // jit won't inline Math.Min if passed a volatile
+                    return Math.Min(high, SEGMENT_SIZE - 1);
                 }
             }
         }
