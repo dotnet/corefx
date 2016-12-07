@@ -16,7 +16,7 @@ namespace System.Linq.Tests
             var q = from x in new[] { 0.12335f }
                     select x;
 
-            int r1, r2;
+            float r1, r2;
             Assert.Equal(q.TrySingle(out r1), q.TrySingle(out r2));
             Assert.Equal(r1, r2);
         }
