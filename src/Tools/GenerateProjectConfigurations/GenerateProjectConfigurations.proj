@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" InitialTargets="BuildAllProjects" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="GenerateProjectConfigurations.Shared.targets" />
+
+  <Target Name="BuildAllProjects">
+    <Error Condition="'$(VerticalGroup)' != ''" Text="This project should be overridden with the BuildAllProjects target from buildvertical.targets if VerticalGroup is specified." />
+    <PropertyGroup>
+      <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GenerateConfigurationsProps"
+          BeforeTargets="GenerateConfigurationProps">
+    <ItemGroup>
+      <ConfigurationProject Include="../../../src/*/src/*.builds" />
+      <ConfigurationProject Include="../../../src/*/ref/*.builds" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GenerateConfigurationProps"
+          Inputs="%(ConfigurationProject.Identity)"
+          Outputs="fake"
+          BeforeTargets="BuildAllProjects"
+          DependsOnTargets="GenerateConfigurationsProps;">
+    <PropertyGroup>
+      <_ConfigurationProject>%(ConfigurationProject.Identity)</_ConfigurationProject>
+      <_ConfigurationsFilename>%(ConfigurationProject.RootDir)%(ConfigurationProject.Directory)/Configurations.props</_ConfigurationsFilename>
+    </PropertyGroup>
+
+<Message Text="Project: $(_ConfigurationProject)" Importance="High" />
+    <MSBuild Targets="GetProjects"
+             Projects="$(_ConfigurationProject)">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="_ConfigProject" />
+    </MSBuild>
+    <ItemGroup>
+      <_defaultitem Remove="@(_defaultitem)" />
+      <_defaultitem Include="$(_ConfigurationProject)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_buildsprojfile>%(_defaultitem.RootDir)%(_defaultitem.Directory)%(_defaultitem.Filename).csproj</_buildsprojfile>
+    </PropertyGroup>
+    <Message Importance="High" Text="Checking proj file '$(_buildsprojfile)'" />
+    <MSBuild Targets="GetDefaultTargetGroup"
+             Projects="$(_buildsprojfile)"
+             Condition="Exists('$(_buildsprojfile)')">
+      <Output TaskParameter="TargetOutputs"
+              PropertyName="_DefaultTargetGroup" />
+    </MSBuild>
+    <PropertyGroup>
+      <_DefaultTargetGroup Condition="'$(_DefaultTargetGroup)' == ''">netcoreapp1.1</_DefaultTargetGroup>
+    </PropertyGroup>
+<Message Importance="High" Text="DefaultTargetGroup: $(_DefaultTargetGroup)" />
+    <ItemGroup>
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' != '' and '%(_ConfigProject.OSGroup)' != ''" Include="%20%20%20%20%20%20%(_ConfigProject.TargetGroup)-%(_ConfigProject.OSGroup)%3B" />
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' != ''" Include="%20%20%20%20%20%20$(_DefaultTargetGroup)-%(_ConfigProject.OSGroup)%3B" />
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' != '' and '%(_ConfigProject.OSGroup)' == ''" Include="%20%20%20%20%20%20%(_ConfigProject.TargetGroup)-AnyOS%3B" />
+      <_Configurations Condition="'%(_ConfigProject.TargetGroup)' == '' and '%(_ConfigProject.OSGroup)' == ''" Include="%20%20%20%20%20%20$(_DefaultTargetGroup)-AnyOS%3B" />
+    </ItemGroup>
+    <ItemGroup>
+      <ConfigurationLines Include="%3C?xml version=%221.0%22 encoding=%22utf-8%22?%3E" />
+      <ConfigurationLines Include="%3CProject ToolsVersion=%2214.0%22 DefaultTargets=%22Build%22 xmlns=%22http://schemas.microsoft.com/developer/msbuild/2003%22%3E" />
+      <ConfigurationLines Include="%20%20%3CPropertyGroup%3E" />
+      <ConfigurationLines Include="%20%20%20%20%3CBuildConfigurations%3E" />
+      <ConfigurationLines Include="@(_Configurations)" />
+      <ConfigurationLines Include="%20%20%20%20%3C/BuildConfigurations%3E" />
+      <ConfigurationLines Include="%20%20%3C/PropertyGroup%3E" />
+      <ConfigurationLines Include="%3C/Project%3E" />
+    </ItemGroup>
+
+    <Message Text="Converting: $(_ConfigurationProject)" Importance="High" />
+
+    <WriteLinesToFile File="$(_ConfigurationsFilename)"
+                      Lines="@(ConfigurationLines)"
+                      Overwrite="true" 
+                      Condition="Exists('$(_buildsprojfile)')" />
+  </Target>
+
+</Project>

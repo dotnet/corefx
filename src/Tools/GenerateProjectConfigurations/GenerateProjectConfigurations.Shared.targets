@@ -1,0 +1,25 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\GenerateProps\targetgroups.props" />
+  <Target Name="GetNuGetTargetMoniker"
+          Returns="$(NuGetTargetMoniker)" />
+
+  <Target Name="GetProjects"
+          Returns="@(Project)" />
+
+  <!-- Evaluate each project with TargetGroup == '', then read the derived NuGetTargetMoniker and determine TargetGroup -->
+  <Target Name="GetDefaultTargetGroup"
+          Inputs="$(MSBuildProjectFullPath)"
+          Outputs="fake"
+          Returns="$(_DefaultTargetGroup)">
+    <MSBuild Targets="GetNuGetTargetMoniker"
+             Projects="$(MSBuildProjectFullPath)"
+             Properties="UndefineProperties=TargetGroup">
+       <Output TaskParameter="TargetOutputs"
+               PropertyName="_NuGetTargetMoniker" />
+    </MSBuild>
+    <PropertyGroup>
+      <_DefaultTargetGroup Condition="'%(TargetGroups.NuGetTargetMoniker)%(TargetGroups.PackageTargetRuntime)' == '$(_NuGetTargetMoniker)'">%(TargetGroups.Identity)</_DefaultTargetGroup>
+    </PropertyGroup>
+    <Message Importance="High" Text="Default target group for '$(MSBuildProjectFullPath)' is '$(_DefaultTargetGroup)' with NuGetTargetMoniker '$(_NuGetTargetMoniker)', current TargetGroup == '$(TargetGroup)'" />
+  </Target>
+</Project>

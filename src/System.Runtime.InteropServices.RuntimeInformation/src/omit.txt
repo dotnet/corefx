@@ -1,0 +1,1 @@
+GeneratePlatformNotSupportedAssembly is true for netstandard1.1?  Is configurations.props correct?

@@ -2,11 +2,11 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildConfigurations>
-      uap101|Windows_NT;
-      netstandard1.7|Linux;
-      netstandard1.7|OSX;
-      netstandard1.7|Windows_NT;
-      net463|AnyOS;
+      uap101-Windows_NT;
+      netstandard1.7-Linux;
+      netstandard1.7-OSX;
+      netstandard1.7-Windows_NT;
+      net463-AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -2,11 +2,11 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildConfigurations>
-      netcore50aot|Windows_NT;
-      uap101aot|Windows_NT;
-      netstandard1.3|AnyOS;
-      net463|AnyOS;
-      netstandard1.7|AnyOS;
+      netcore50aot-Windows_NT;
+      uap101aot-Windows_NT;
+      netstandard1.3-AnyOS;
+      net463-AnyOS;
+      netstandard1.7-AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

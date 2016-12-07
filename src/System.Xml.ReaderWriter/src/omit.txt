@@ -1,0 +1,1 @@
+Contains csproj reference and I'm not building project references at the moment.

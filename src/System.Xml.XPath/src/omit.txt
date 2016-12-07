@@ -1,0 +1,1 @@
+Contains a project reference to a csproj, and not building project references at the moment.

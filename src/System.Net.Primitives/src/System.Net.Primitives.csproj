@@ -11,9 +11,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableWinRT Condition="'$(TargetGroup)' == 'uap101'">true</EnableWinRT>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(EnableWinRT)' != 'true' AND '$(TargetGroup)' == ''">
+  <PropertyGroup Condition="'$(EnableWinRT)' != 'true' AND '$(TargetGroup)' != 'net463' and '$(TargetGroup)' != 'uap101'">
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(EnableWinRT)' == 'true'">
@@ -55,7 +54,7 @@
     <Compile Include="System\Net\NetworkCredential.cs" />
     <Compile Include="System\Net\TransportContext.cs" />
     <Compile Include="System\Net\SocketException.cs" />
-    <Compile Include="System\Net\SocketException.netstandard17.cs" Condition="'$(TargetGroup)' == ''" />
+    <Compile Include="System\Net\SocketException.netstandard17.cs" Condition="'$(TargetGroup)' != 'net463'" />
     <Compile Include="System\Net\SecureProtocols\NegotiateEnumTypes.cs" />
     <Compile Include="System\Net\SecureProtocols\SslEnumTypes.cs" />
     <Compile Include="System\Net\Security\SslPolicyErrors.cs" />

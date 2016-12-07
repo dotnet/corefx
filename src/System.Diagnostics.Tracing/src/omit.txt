@@ -1,0 +1,1 @@
+ProjectReference to csproj and not currently building project references

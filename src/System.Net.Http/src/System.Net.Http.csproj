@@ -13,7 +13,6 @@
     <WindowsRID>win</WindowsRID>
     <!-- Suppress warnings for type conflicts between SR in partial facade and mscorlib -->
     <NoWarn>$(NoWarn);0436</NoWarn>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
@@ -135,7 +134,7 @@
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'uap101' ">
     <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == '' ">
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' and '$(TargetGroup)' != 'uap101'">
     <DefineConstants>$(DefineConstants);HTTP_DLL</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'net46' ">

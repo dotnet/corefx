@@ -5,6 +5,8 @@
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
+    <UseDefaultTargetGroup>false</UseDefaultTargetGroup>
+    <UseDefaultTargetGroup Condition="'$(TargetGroup)' != 'net46' and '$(TargetGroup)' != 'wpa81' and '$(TargetGroup)' != 'win8' and '$(TargetGroup)' != 'netcore50' and '$(TargetGroup)' != 'netcore50aot'">true</UseDefaultTargetGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
@@ -59,7 +61,7 @@
     </Compile>
     <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.Unix.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)'=='true' And ('$(TargetGroup)'=='' OR '$(TargetGroup)'=='net45')">
+  <ItemGroup Condition="'$(TargetsWindows)'=='true' And ('$(UseDefaultTargetGroup)' == 'true' OR '$(TargetGroup)'=='net45')">
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.RtlGetVersion.cs">
       <Link>Common\Interop\Windows\NtDll\Interop.RtlGetVersion.cs</Link>
     </Compile>

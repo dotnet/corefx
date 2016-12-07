@@ -2,9 +2,9 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildConfigurations>
-      uap101aot|AnyOS;
-      net463|AnyOS;
-      netstandard1.7|AnyOS;
+      uap101aot-AnyOS;
+      net463-AnyOS;
+      netstandard1.7-AnyOS;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
