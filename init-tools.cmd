@@ -77,9 +77,6 @@ if %UPDATE_CLI_ERRORLEVEL% GTR 1 (
   exit /b %UPDATE_CLI_ERRORLEVEL%
 )
 
-Echo Building CoreFx.Tools...
-"%TOOLRUNTIME_DIR%\msbuild.cmd" "%~dp0src\Tools\tools.builds"
-
 echo Copying supplemental overrides from Tools-Override.
 copy %~dp0Tools-Override\* %~dp0Tools
 
