@@ -306,11 +306,6 @@ namespace System.ComponentModel
         public InvalidAsynchronousStateException(string message, System.Exception innerException) { }
         protected InvalidAsynchronousStateException(SerializationInfo info, StreamingContext context) { }
     }
-    public partial interface ISupportInitialize
-    {
-        void BeginInit();
-        void EndInit();
-    }
     public partial interface ITypeDescriptorContext : System.IServiceProvider
     {
         System.ComponentModel.IContainer Container { get; }
