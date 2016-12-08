@@ -8,24 +8,24 @@ using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
-    internal abstract class GreaterThanInstruction : Instruction
+    internal abstract class GreaterThanOrEqualInstruction : Instruction
     {
         private readonly object _nullValue;
-        private static Instruction s_SByte, s_Int16, s_Char, s_Int32, s_Int64, s_Byte, s_UInt16, s_UInt32, s_UInt64, s_Single, s_Double;
+        private static Instruction s_SByte, s_Int16, s_char, s_Int32, s_Int64, s_Byte, s_UInt16, s_UInt32, s_UInt64, s_Single, s_Double;
         private static Instruction s_liftedToNullSByte, s_liftedToNullInt16, s_liftedToNullChar, s_liftedToNullInt32, s_liftedToNullInt64, s_liftedToNullByte, s_liftedToNullUInt16, s_liftedToNullUInt32, s_liftedToNullUInt64, s_liftedToNullSingle, s_liftedToNullDouble;
 
         public override int ConsumedStack => 2;
         public override int ProducedStack => 1;
-        public override string InstructionName => "GreaterThan";
+        public override string InstructionName => "GreaterThanOrEqual";
 
-        private GreaterThanInstruction(object nullValue)
+        private GreaterThanOrEqualInstruction(object nullValue)
         {
             _nullValue = nullValue;
         }
 
-        private sealed class GreaterThanSByte : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualSByte : GreaterThanOrEqualInstruction
         {
-            public GreaterThanSByte(object nullValue)
+            public GreaterThanOrEqualSByte(object nullValue)
                 : base(nullValue)
             {
             }
@@ -40,15 +40,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((sbyte)left > (sbyte)right);
+                    frame.Push((sbyte)left >= (sbyte)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanInt16 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualInt16 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanInt16(object nullValue)
+            public GreaterThanOrEqualInt16(object nullValue)
                 : base(nullValue)
             {
             }
@@ -63,15 +63,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((short)left > (short)right);
+                    frame.Push((short)left >= (short)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanChar : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualChar : GreaterThanOrEqualInstruction
         {
-            public GreaterThanChar(object nullValue)
+            public GreaterThanOrEqualChar(object nullValue)
                 : base(nullValue)
             {
             }
@@ -86,15 +86,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((char)left > (char)right);
+                    frame.Push((char)left >= (char)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanInt32 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualInt32 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanInt32(object nullValue)
+            public GreaterThanOrEqualInt32(object nullValue)
                 : base(nullValue)
             {
             }
@@ -109,15 +109,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((int)left > (int)right);
+                    frame.Push((int)left >= (int)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanInt64 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualInt64 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanInt64(object nullValue)
+            public GreaterThanOrEqualInt64(object nullValue)
                 : base(nullValue)
             {
             }
@@ -132,15 +132,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((long)left > (long)right);
+                    frame.Push((long)left >= (long)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanByte : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualByte : GreaterThanOrEqualInstruction
         {
-            public GreaterThanByte(object nullValue)
+            public GreaterThanOrEqualByte(object nullValue)
                 : base(nullValue)
             {
             }
@@ -155,15 +155,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((byte)left > (byte)right);
+                    frame.Push((byte)left >= (byte)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanUInt16 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualUInt16 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanUInt16(object nullValue)
+            public GreaterThanOrEqualUInt16(object nullValue)
                 : base(nullValue)
             {
             }
@@ -178,15 +178,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ushort)left > (ushort)right);
+                    frame.Push((ushort)left >= (ushort)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanUInt32 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualUInt32 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanUInt32(object nullValue)
+            public GreaterThanOrEqualUInt32(object nullValue)
                 : base(nullValue)
             {
             }
@@ -201,15 +201,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((uint)left > (uint)right);
+                    frame.Push((uint)left >= (uint)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanUInt64 : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualUInt64 : GreaterThanOrEqualInstruction
         {
-            public GreaterThanUInt64(object nullValue)
+            public GreaterThanOrEqualUInt64(object nullValue)
                 : base(nullValue)
             {
             }
@@ -224,15 +224,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ulong)left > (ulong)right);
+                    frame.Push((ulong)left >= (ulong)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanSingle : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualSingle : GreaterThanOrEqualInstruction
         {
-            public GreaterThanSingle(object nullValue)
+            public GreaterThanOrEqualSingle(object nullValue)
                 : base(nullValue)
             {
             }
@@ -247,15 +247,15 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((float)left > (float)right);
+                    frame.Push((float)left >= (float)right);
                 }
                 return 1;
             }
         }
 
-        private sealed class GreaterThanDouble : GreaterThanInstruction
+        private sealed class GreaterThanOrEqualDouble : GreaterThanOrEqualInstruction
         {
-            public GreaterThanDouble(object nullValue)
+            public GreaterThanOrEqualDouble(object nullValue)
                 : base(nullValue)
             {
             }
@@ -270,7 +270,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((double)left > (double)right);
+                    frame.Push((double)left >= (double)right);
                 }
                 return 1;
             }
@@ -283,44 +283,44 @@ namespace System.Linq.Expressions.Interpreter
             {
                 switch (type.GetNonNullableType().GetTypeCode())
                 {
-                    case TypeCode.SByte: return s_liftedToNullSByte ?? (s_liftedToNullSByte = new GreaterThanSByte(null));
-                    case TypeCode.Byte: return s_liftedToNullByte ?? (s_liftedToNullByte = new GreaterThanByte(null));
-                    case TypeCode.Char: return s_liftedToNullChar ?? (s_liftedToNullChar = new GreaterThanChar(null));
-                    case TypeCode.Int16: return s_liftedToNullInt16 ?? (s_liftedToNullInt16 = new GreaterThanInt16(null));
-                    case TypeCode.Int32: return s_liftedToNullInt32 ?? (s_liftedToNullInt32 = new GreaterThanInt32(null));
-                    case TypeCode.Int64: return s_liftedToNullInt64 ?? (s_liftedToNullInt64 = new GreaterThanInt64(null));
-                    case TypeCode.UInt16: return s_liftedToNullUInt16 ?? (s_liftedToNullUInt16 = new GreaterThanUInt16(null));
-                    case TypeCode.UInt32: return s_liftedToNullUInt32 ?? (s_liftedToNullUInt32 = new GreaterThanUInt32(null));
-                    case TypeCode.UInt64: return s_liftedToNullUInt64 ?? (s_liftedToNullUInt64 = new GreaterThanUInt64(null));
-                    case TypeCode.Single: return s_liftedToNullSingle ?? (s_liftedToNullSingle = new GreaterThanSingle(null));
-                    case TypeCode.Double: return s_liftedToNullDouble ?? (s_liftedToNullDouble = new GreaterThanDouble(null));
+                    case TypeCode.SByte: return s_liftedToNullSByte ?? (s_liftedToNullSByte = new GreaterThanOrEqualSByte(null));
+                    case TypeCode.Byte: return s_liftedToNullByte ?? (s_liftedToNullByte = new GreaterThanOrEqualByte(null));
+                    case TypeCode.Char: return s_liftedToNullChar ?? (s_liftedToNullChar = new GreaterThanOrEqualChar(null));
+                    case TypeCode.Int16: return s_liftedToNullInt16 ?? (s_liftedToNullInt16 = new GreaterThanOrEqualInt16(null));
+                    case TypeCode.Int32: return s_liftedToNullInt32 ?? (s_liftedToNullInt32 = new GreaterThanOrEqualInt32(null));
+                    case TypeCode.Int64: return s_liftedToNullInt64 ?? (s_liftedToNullInt64 = new GreaterThanOrEqualInt64(null));
+                    case TypeCode.UInt16: return s_liftedToNullUInt16 ?? (s_liftedToNullUInt16 = new GreaterThanOrEqualUInt16(null));
+                    case TypeCode.UInt32: return s_liftedToNullUInt32 ?? (s_liftedToNullUInt32 = new GreaterThanOrEqualUInt32(null));
+                    case TypeCode.UInt64: return s_liftedToNullUInt64 ?? (s_liftedToNullUInt64 = new GreaterThanOrEqualUInt64(null));
+                    case TypeCode.Single: return s_liftedToNullSingle ?? (s_liftedToNullSingle = new GreaterThanOrEqualSingle(null));
+                    case TypeCode.Double: return s_liftedToNullDouble ?? (s_liftedToNullDouble = new GreaterThanOrEqualDouble(null));
 
                     default:
-                        throw Error.ExpressionNotSupportedForType("GreaterThan", type);
+                        throw Error.ExpressionNotSupportedForType("GreaterThanOrEqual", type);
                 }
             }
             else
             {
                 switch (type.GetNonNullableType().GetTypeCode())
                 {
-                    case TypeCode.SByte: return s_SByte ?? (s_SByte = new GreaterThanSByte(Utils.BoxedFalse));
-                    case TypeCode.Byte: return s_Byte ?? (s_Byte = new GreaterThanByte(Utils.BoxedFalse));
-                    case TypeCode.Char: return s_Char ?? (s_Char = new GreaterThanChar(Utils.BoxedFalse));
-                    case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new GreaterThanInt16(Utils.BoxedFalse));
-                    case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new GreaterThanInt32(Utils.BoxedFalse));
-                    case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new GreaterThanInt64(Utils.BoxedFalse));
-                    case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new GreaterThanUInt16(Utils.BoxedFalse));
-                    case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new GreaterThanUInt32(Utils.BoxedFalse));
-                    case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new GreaterThanUInt64(Utils.BoxedFalse));
-                    case TypeCode.Single: return s_Single ?? (s_Single = new GreaterThanSingle(Utils.BoxedFalse));
-                    case TypeCode.Double: return s_Double ?? (s_Double = new GreaterThanDouble(Utils.BoxedFalse));
+                    case TypeCode.SByte: return s_SByte ?? (s_SByte = new GreaterThanOrEqualSByte(Utils.BoxedFalse));
+                    case TypeCode.Byte: return s_Byte ?? (s_Byte = new GreaterThanOrEqualByte(Utils.BoxedFalse));
+                    case TypeCode.Char: return s_char ?? (s_char = new GreaterThanOrEqualChar(Utils.BoxedFalse));
+                    case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new GreaterThanOrEqualInt16(Utils.BoxedFalse));
+                    case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new GreaterThanOrEqualInt32(Utils.BoxedFalse));
+                    case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new GreaterThanOrEqualInt64(Utils.BoxedFalse));
+                    case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new GreaterThanOrEqualUInt16(Utils.BoxedFalse));
+                    case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new GreaterThanOrEqualUInt32(Utils.BoxedFalse));
+                    case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new GreaterThanOrEqualUInt64(Utils.BoxedFalse));
+                    case TypeCode.Single: return s_Single ?? (s_Single = new GreaterThanOrEqualSingle(Utils.BoxedFalse));
+                    case TypeCode.Double: return s_Double ?? (s_Double = new GreaterThanOrEqualDouble(Utils.BoxedFalse));
 
                     default:
-                        throw Error.ExpressionNotSupportedForType("GreaterThan", type);
+                        throw Error.ExpressionNotSupportedForType("GreaterThanOrEqual", type);
                 }
             }
         }
 
-        public override string ToString() => "GreaterThan()";
+        public override string ToString() => "GreaterThanOrEqual()";
     }
 }
