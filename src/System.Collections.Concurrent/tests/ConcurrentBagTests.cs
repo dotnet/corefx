@@ -12,6 +12,7 @@ namespace System.Collections.Concurrent.Tests
 {
     public class ConcurrentBagTests : ProducerConsumerCollectionTests
     {
+        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
         protected override IProducerConsumerCollection<int> CreateProducerConsumerCollection() => new ConcurrentBag<int>();
         protected override IProducerConsumerCollection<int> CreateProducerConsumerCollection(IEnumerable<int> collection) => new ConcurrentBag<int>(collection);
         protected override bool IsEmpty(IProducerConsumerCollection<int> pcc) => ((ConcurrentBag<int>)pcc).IsEmpty;
@@ -127,6 +128,54 @@ namespace System.Collections.Concurrent.Tests
             Assert.Equal(initialCount, bag.Count);
         }
 
+        [Fact]
+        public static void CopyTo_TypeMismatch()
+        {
+            const int Size = 10;
+
+            var c = new ConcurrentBag<Exception>(Enumerable.Range(0, Size).Select(_ => new Exception()));
+            c.CopyTo(new Exception[Size], 0);
+            Assert.Throws<InvalidCastException>(() => c.CopyTo(new InvalidOperationException[Size], 0));
+        }
+
+        [Fact]
+        public static void ICollectionCopyTo_TypeMismatch()
+        {
+            const int Size = 10;
+            ICollection c;
+
+            c = new ConcurrentBag<Exception>(Enumerable.Range(0, Size).Select(_ => new Exception()));
+            c.CopyTo(new Exception[Size], 0);
+            Assert.Throws<InvalidCastException>(() => c.CopyTo(new InvalidOperationException[Size], 0));
+
+            c = new ConcurrentBag<ArgumentException>(Enumerable.Range(0, Size).Select(_ => new ArgumentException()));
+            c.CopyTo(new Exception[Size], 0);
+            c.CopyTo(new ArgumentException[Size], 0);
+            Assert.Throws<InvalidCastException>(() => c.CopyTo(new ArgumentNullException[Size], 0));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(10)]
+        public static void ToArray_AddTakeDifferentThreads_ExpectedResultsAfterAddsAndTakes(int initialCount)
+        {
+            var bag = new ConcurrentBag<int>(Enumerable.Range(0, initialCount));
+            int items = 20 + initialCount;
+
+            for (int i = 0; i < items; i++)
+            {
+                bag.Add(i + initialCount);
+                ThreadFactory.StartNew(() =>
+                {
+                    int item;
+                    Assert.True(bag.TryTake(out item));
+                    Assert.Equal(item, i);
+                }).GetAwaiter().GetResult();
+                Assert.Equal(Enumerable.Range(i + 1, initialCount).Reverse(), bag.ToArray());
+            }
+        }
+
         protected sealed class BagOracle : IProducerConsumerCollection<int>
         {
             private readonly Stack<int> _stack;
@@ -134,10 +183,10 @@ namespace System.Collections.Concurrent.Tests
             public int Count => _stack.Count;
             public bool IsSynchronized => false;
             public object SyncRoot => null;
-            public void CopyTo(Array array, int index) => _stack.Reverse().ToArray().CopyTo(array, index);
-            public void CopyTo(int[] array, int index) => _stack.Reverse().ToArray().CopyTo(array, index);
-            public IEnumerator<int> GetEnumerator() => _stack.Reverse().GetEnumerator();
-            public int[] ToArray() => _stack.Reverse().ToArray();
+            public void CopyTo(Array array, int index) => _stack.ToArray().CopyTo(array, index);
+            public void CopyTo(int[] array, int index) => _stack.ToArray().CopyTo(array, index);
+            public IEnumerator<int> GetEnumerator() => _stack.GetEnumerator();
+            public int[] ToArray() => _stack.ToArray();
             public bool TryAdd(int item) { _stack.Push(item); return true; }
             public bool TryTake(out int item)
             {
