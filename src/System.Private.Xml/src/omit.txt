@@ -1,1 +1,0 @@
-Contains a ProjectReference to a csproj file and I'm not currently building ProjectReferences

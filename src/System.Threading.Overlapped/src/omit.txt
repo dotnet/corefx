@@ -1,1 +1,0 @@
-CSC : error CS0009: Metadata file 'C:\gh\chcosta\corefx\bin\Windows_NT-netcoreapp1.1-Debug\Windows_NT.AnyCPU.Debug\System.Diagnostics.Debug\netstandard1.7\System.Diagnostics.Debug.dll' could not be opened -- Image is too small. [C:\gh\chcosta\corefx\src\System.Threading.Overlapped\src\System.Threading.Overlapped.csproj]

@@ -1,1 +1,0 @@
-Investigation required, looking System.Diagnostics.Debug in the wrong location - CSC : error CS0006: Metadata file 'E:\gh\chcosta\corefx\bin\Windows_NT.AnyCPU.Debug\System.Diagnostics.Debug\netstandard1.7\System.Diagnostics.Debug.dll' could not be found [E:\gh\chcosta\corefx\src\System.Collections\src\System.Collections.csproj]

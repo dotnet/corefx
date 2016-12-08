@@ -9,12 +9,6 @@
     <MinorVersion>6</MinorVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <_BuildVertical Condition="'$(VerticalGroup)' != ''">true</_BuildVertical>
-    <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">$(VerticalGroup)</BuildConfiguration>
-  </PropertyGroup>
-  <Import Condition="Exists('$(MSBuildProjectDirectory)/Configurations.props')" Project="$(MSBuildProjectDirectory)/Configurations.props" />
-
   <!--
     $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
   -->
@@ -23,6 +17,13 @@
     <OsEnvironment Condition="'$(OsEnvironment)'=='' AND '$(OS)'=='OSX'">Unix</OsEnvironment>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <_BuildVertical>true</_BuildVertical>
+    <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">netcoreapp1.1-$(OSEnvironment)</BuildConfiguration>
+  </PropertyGroup>
+  
+  <Import Condition="Exists('$(MSBuildProjectDirectory)/Configurations.props')" Project="$(MSBuildProjectDirectory)/Configurations.props" />
 
   <PropertyGroup>
     <InputOSGroup Condition="'$(InputOSGroup)'==''">$(OSEnvironment)</InputOSGroup>

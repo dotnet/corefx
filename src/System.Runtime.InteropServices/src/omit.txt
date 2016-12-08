@@ -1,1 +1,0 @@
-error CS0122: 'SR' is inaccessible due to its protection level

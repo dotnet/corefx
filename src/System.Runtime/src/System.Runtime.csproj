@@ -2,6 +2,8 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
+    <UseDefaultTargetGroup>false</UseDefaultTargetGroup>
+    <UseDefaultTargetGroup Condition="'$(TargetGroup)' != 'netstandard1.5' and '$(TargetGroup)' != 'net463' and '$(TargetGroup)' != 'net462' and '$(TargetGroup)' != 'uap101aot'">true</UseDefaultTargetGroup>
     <ProjectGuid>{56B9D0A9-44D3-488E-8B42-C14A6E30CAB2}</ProjectGuid>
     <AssemblyName>System.Runtime</AssemblyName>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net462' OR '$(TargetGroup)'=='netstandard1.5'">4.1.1.0</AssemblyVersion>
@@ -39,7 +41,7 @@
     <Compile Include="System\Runtime\CompilerServices\Attributes.cs" />
     <Compile Include="System\IO\FileAttributes.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == '' or '$(TargetGroup)' == 'netstandard1.7' or '$(TargetGroup)' == 'uap101aot'">
+  <ItemGroup Condition="('$(UseDefaultTargetGroup)' == 'true') or '$(TargetGroup)' == 'netstandard1.7' or '$(TargetGroup)' == 'uap101aot'">
     <Compile Include="System\Runtime\NgenServicingAttributes.cs" />
     <Compile Include="System\IO\HandleInheritability.cs" />
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttribute.cs" />
@@ -69,7 +71,6 @@
     <TargetingPackReference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Private.CoreLib" />
     <Reference Include="System.Private.CoreLib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
