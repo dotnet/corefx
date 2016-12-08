@@ -194,7 +194,7 @@
   <PropertyGroup>
     <BuildConfigurationImportFile>$(BinDir)tools/configuration/configuration.props</BuildConfigurationImportFile>
   </PropertyGroup>
-  <Import Project="$(BuildConfigurationImportFile)" /> 
+  <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" /> 
 
   <!-- Default Test platform to deploy the netstandard compiled tests to -->
   <PropertyGroup>

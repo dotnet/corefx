@@ -87,7 +87,7 @@
 
     <Message Text="$(MSBuildProjectFullPath) - BuildConfigurations: $(BuildConfigurations)" Importance="Low" />
 
-    <Message Importance="Medium" Condition="'$(BuildConfigurations)' == ''" Text="Project '$(MSBuildProjectFullPath)' does not specify the BuildConfigurations property." />
+    <Message Importance="Normal" Condition="'$(BuildConfigurations)' == ''" Text="Project '$(MSBuildProjectFullPath)' does not specify the BuildConfigurations property." />
 
      <!-- Clear the VerticalTargets item -->
     <ItemGroup><VerticalTargets Remove="@(VerticalTargets)" /></ItemGroup>
