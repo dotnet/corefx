@@ -103,12 +103,9 @@ namespace System.Linq
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)
             {
-                try
-                {
-                    element = ordered.Last(predicate);
-                    return true;
-                }
-                catch (InvalidOperationException) { }
+                bool found;
+                element = ordered.TryGetLast(predicate, out found);
+                return found;
             }
             else
             {

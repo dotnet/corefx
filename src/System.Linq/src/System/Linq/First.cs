@@ -92,12 +92,9 @@ namespace System.Linq
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)
             {
-                try
-                {
-                    element = ordered.First(predicate);
-                    return true;
-                }
-                catch (InvalidOperationException) { }
+                bool found;
+                element = ordered.TryGetFirst(predicate, out found);
+                return found;
             }
             else
             {
