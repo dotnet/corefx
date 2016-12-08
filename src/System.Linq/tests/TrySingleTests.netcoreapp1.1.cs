@@ -49,7 +49,7 @@ namespace System.Linq.Tests
             int[] source = { 4 };
             int expected = 4;
 
-            int? r1;
+            int r1;
             Assert.Equal(true, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
