@@ -19,7 +19,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <_BuildVertical>true</_BuildVertical>
+    <!-- Temporarily omit code analysis -->
+    <SkipImportCodeAnalysisTargets>true</SkipImportCodeAnalysisTargets>
+    <!-- Hacky BuildConfiguration -->
     <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">netcoreapp1.1-$(OSEnvironment)</BuildConfiguration>
   </PropertyGroup>
   
