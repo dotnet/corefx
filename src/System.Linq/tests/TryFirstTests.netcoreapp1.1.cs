@@ -41,7 +41,7 @@ namespace System.Linq.Tests
             
             Assert.IsAssignableFrom<IList<T>>(source);
 
-            int r1;
+            T r1;
             Assert.Equal(false, source.TryFirst(out r1));
             Assert.Equal(expected, r1);
         }

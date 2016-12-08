@@ -39,7 +39,7 @@ namespace System.Linq.Tests
             int? expected = null;
 
             int? r1;
-            Assert.Equal(false, q.TrySingle(out r1));
+            Assert.Equal(false, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -50,7 +50,7 @@ namespace System.Linq.Tests
             int expected = 4;
 
             int? r1;
-            Assert.Equal(true, q.TrySingle(out r1));
+            Assert.Equal(true, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -61,7 +61,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(out r1));
+            Assert.Equal(false, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -72,7 +72,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(out r1));
+            Assert.Equal(false, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -83,7 +83,7 @@ namespace System.Linq.Tests
             int expected = -5;
 
             int r1;
-            Assert.Equal(true, q.TrySingle(out r1));
+            Assert.Equal(true, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -94,7 +94,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(out r1));
+            Assert.Equal(false, source.TrySingle(out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -105,7 +105,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(false, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -116,7 +116,7 @@ namespace System.Linq.Tests
             int expected = 4;
 
             int r1;
-            Assert.Equal(true, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(true, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -127,7 +127,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(false, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -138,7 +138,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(false, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -149,7 +149,7 @@ namespace System.Linq.Tests
             int expected = 20;
 
             int r1;
-            Assert.Equal(true, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(true, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 
@@ -160,7 +160,7 @@ namespace System.Linq.Tests
             int expected = default(int);
 
             int r1;
-            Assert.Equal(false, q.TrySingle(i => i % 2 == 0, out r1));
+            Assert.Equal(false, source.TrySingle(i => i % 2 == 0, out r1));
             Assert.Equal(expected, r1);
         }
 

@@ -84,7 +84,7 @@ namespace System.Linq.Tests
         public void NullSource_ThrowsArgumentNullException()
         {
             int r1;
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).TyrElementAt(2,out r1));
+            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).TryElementAt(2, out r1));
         }
     }
 }
