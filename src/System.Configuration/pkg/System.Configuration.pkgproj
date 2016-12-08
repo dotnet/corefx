@@ -6,6 +6,7 @@
       <SupportedFramework>netcoreapp1.1;net463;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Configuration.builds" />
+    <InboxOnTargetFramework Include="net463" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

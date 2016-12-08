@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Configuration.Internal;
 using System.IO;
-using System.Security.Permissions;
 using System.Runtime.Versioning;
 
 namespace System.Configuration
@@ -116,7 +115,6 @@ namespace System.Configuration
         public Func<string, string> TypeStringTransformer
         {
             get { return _typeStringTransformer; }
-            [ConfigurationPermission(SecurityAction.Demand, Unrestricted = true)]
             set
             {
                 if (_typeStringTransformer != value)
@@ -130,7 +128,6 @@ namespace System.Configuration
         public Func<string, string> AssemblyStringTransformer
         {
             get { return _assemblyStringTransformer; }
-            [ConfigurationPermission(SecurityAction.Demand, Unrestricted = true)]
             set
             {
                 if (_assemblyStringTransformer != value)
@@ -143,8 +140,7 @@ namespace System.Configuration
 
         public FrameworkName TargetFramework
         {
-            get;
-            [ConfigurationPermission(SecurityAction.Demand, Unrestricted = true)] set;
+            get; set;
         } = null;
 
         internal bool TypeStringTransformerIsSet { get; private set; }

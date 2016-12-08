@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security.Permissions;
 
 namespace System.Configuration
 {
@@ -56,9 +55,7 @@ namespace System.Configuration
 
         private static string GetFilenameFromMachineConfigFilePath()
         {
-            string filename = ClientConfigurationHost.MachineConfigFilePath;
-            new FileIOPermission(FileIOPermissionAccess.PathDiscovery, filename).Demand();
-            return filename;
+            return ClientConfigurationHost.MachineConfigFilePath;
         }
     }
 }

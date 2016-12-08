@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Security.Permissions;
 using System.Text;
 using System.Xml;
 
@@ -55,18 +54,7 @@ namespace System.Configuration
         internal Hashtable SectionGroupFactories
             => _sectionGroupFactories ?? (_sectionGroupFactories = GetAllFactories(true));
 
-        internal string ConfigurationFilePath
-        {
-            get
-            {
-                string filepath = UpdateConfigHost.GetNewStreamname(ConfigStreamInfo.StreamName) ?? string.Empty;
-
-                if (!string.IsNullOrEmpty(filepath))
-                    new FileIOPermission(FileIOPermissionAccess.PathDiscovery, filepath).Demand();
-
-                return filepath;
-            }
-        }
+        internal string ConfigurationFilePath => UpdateConfigHost.GetNewStreamname(ConfigStreamInfo.StreamName) ?? string.Empty;
 
         private bool HasRemovedSectionsOrGroups => ((_removedSections != null) && (_removedSections.Count > 0))
             || ((_removedSectionGroups != null) && (_removedSectionGroups.Count > 0));

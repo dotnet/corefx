@@ -93,8 +93,8 @@ namespace System.Configuration
             StreamUpdate streamUpdate = GetStreamUpdate(streamName, true);
             if (streamUpdate != null)
             {
-                return InternalConfigHost.StaticOpenStreamForWrite(streamUpdate.NewStreamname, templateStreamName,
-                    ref writeContext, false);
+                return InternalConfigHost.StaticOpenStreamForWrite(
+                    streamUpdate.NewStreamname, templateStreamName, ref writeContext);
             }
             return Host.OpenStreamForWrite(streamName, templateStreamName, ref writeContext);
         }
@@ -104,13 +104,16 @@ namespace System.Configuration
             StreamUpdate streamUpdate = GetStreamUpdate(streamName, true);
             if (streamUpdate != null)
             {
-                InternalConfigHost.StaticWriteCompleted(streamUpdate.NewStreamname, success, writeContext, false);
+                InternalConfigHost.StaticWriteCompleted(streamUpdate.NewStreamname, success, writeContext);
 
                 // Mark the write as having successfully completed, so that subsequent calls 
                 // to Read() will use the new stream name.
                 if (success) streamUpdate.WriteCompleted = true;
             }
-            else Host.WriteCompleted(streamName, success, writeContext);
+            else
+            {
+                Host.WriteCompleted(streamName, success, writeContext);
+            }
         }
 
         public override bool IsConfigRecordRequired(string configPath)

@@ -56,7 +56,7 @@ namespace System.Configuration.Internal
 
         Stream IInternalConfigHost.OpenStreamForRead(string streamName)
         {
-            return ((IInternalConfigHost)this).OpenStreamForRead(streamName, false);
+            return StaticOpenStreamForRead(streamName);
         }
 
         Stream IInternalConfigHost.OpenStreamForRead(string streamName, bool assertPermissions)
@@ -64,30 +64,27 @@ namespace System.Configuration.Internal
             return StaticOpenStreamForRead(streamName);
         }
 
-
         Stream IInternalConfigHost.OpenStreamForWrite(string streamName, string templateStreamName,
             ref object writeContext)
         {
-            return ((IInternalConfigHost)this).OpenStreamForWrite(streamName, templateStreamName, ref writeContext,
-                false);
+            return StaticOpenStreamForWrite(streamName, templateStreamName, ref writeContext);
         }
-
 
         Stream IInternalConfigHost.OpenStreamForWrite(string streamName, string templateStreamName,
             ref object writeContext, bool assertPermissions)
         {
-            return StaticOpenStreamForWrite(streamName, templateStreamName, ref writeContext, assertPermissions);
+            return StaticOpenStreamForWrite(streamName, templateStreamName, ref writeContext);
         }
 
         void IInternalConfigHost.WriteCompleted(string streamName, bool success, object writeContext)
         {
-            ((IInternalConfigHost)this).WriteCompleted(streamName, success, writeContext, false);
+            StaticWriteCompleted(streamName, success, writeContext);
         }
 
         void IInternalConfigHost.WriteCompleted(string streamName, bool success, object writeContext,
             bool assertPermissions)
         {
-            StaticWriteCompleted(streamName, success, writeContext, assertPermissions);
+            StaticWriteCompleted(streamName, success, writeContext);
         }
 
         void IInternalConfigHost.DeleteStream(string streamName)
@@ -100,7 +97,6 @@ namespace System.Configuration.Internal
             return StaticIsFile(streamName);
         }
 
-        // change notification support - runtime only
         bool IInternalConfigHost.SupportsChangeNotifications => false;
 
         object IInternalConfigHost.StartMonitoringStreamForChanges(string streamName, StreamChangeCallback callback)
@@ -113,10 +109,8 @@ namespace System.Configuration.Internal
             throw ExceptionUtil.UnexpectedError("IInternalConfigHost.StopMonitoringStreamForChanges");
         }
 
-        // RefreshConfig support - runtime only
         bool IInternalConfigHost.SupportsRefresh => false;
 
-        // path support
         bool IInternalConfigHost.SupportsPath => false;
 
         bool IInternalConfigHost.IsDefinitionAllowed(string configPath, ConfigurationAllowDefinition allowDefinition,
@@ -129,7 +123,6 @@ namespace System.Configuration.Internal
             ConfigurationAllowExeDefinition allowExeDefinition, IConfigErrorInfo errorInfo)
         { }
 
-        // Do we support location tags?
         bool IInternalConfigHost.SupportsLocation => false;
 
         bool IInternalConfigHost.IsAboveApplication(string configPath)
@@ -147,7 +140,6 @@ namespace System.Configuration.Internal
             throw ExceptionUtil.UnexpectedError("IInternalConfigHost.IsLocationApplicable");
         }
 
-        // prefetch support
         bool IInternalConfigHost.PrefetchAll(string configPath, string streamName)
         {
             return false;
@@ -196,13 +188,7 @@ namespace System.Configuration.Internal
         {
             // RemoteWebConfigurationHost also redirects GetStreamNameForConfigSource to this
             // method, and that means streamName is referring to a path that's on the remote
-            // machine.  The problem is that Path.GetFullPath will demand FileIOPermission on
-            // that file and *assume* the file is referring to one on the local machine.
-            // This can be a potential problem for RemoteWebConfigurationHost.  However, since
-            // we Assert the PathDiscovery permission at this method, so this problem is handled
-            // and we're okay.  But in the future if we modify this method to handle anything
-            // that assumes streamName is a local path, then RemoteWebConfigurationHost has to
-            // override GetStreamNameForConfigSource.
+            // machine.
 
             // don't allow relative paths for stream name
             if (!Path.IsPathRooted(streamName)) throw ExceptionUtil.ParameterInvalid("streamName");
@@ -223,7 +209,7 @@ namespace System.Configuration.Internal
             return result;
         }
 
-        internal static object StaticGetStreamVersion(string streamName)
+        internal static FileVersion StaticGetStreamVersion(string streamName)
         {
             FileInfo info = new FileInfo(streamName);
             return info.Exists
@@ -245,12 +231,7 @@ namespace System.Configuration.Internal
 
         // This method doesn't really open the streamName for write.  Instead, using WriteFileContext
         // it opens a stream on a temporary file created in the same directory as streamName.
-        //
-        // Parameters:
-        //  assertPermissions - If true, then we'll assert all required permissions.  Used by ClientSettingsConfigurationHost.
-        //                      to allow low-trust apps to use ClientSettingsStore.
-        internal static Stream StaticOpenStreamForWrite(string streamName, string templateStreamName,
-            ref object writeContext, bool assertPermissions)
+        internal static Stream StaticOpenStreamForWrite(string streamName, string templateStreamName, ref object writeContext)
         {
             if (string.IsNullOrEmpty(streamName))
                 throw new ConfigurationErrorsException(SR.Config_no_stream_to_write);
@@ -302,8 +283,7 @@ namespace System.Configuration.Internal
 
         }
 
-        internal static void StaticWriteCompleted(string streamName, bool success, object writeContext,
-            bool assertPermissions)
+        internal static void StaticWriteCompleted(string streamName, bool success, object writeContext)
         {
             ((WriteFileContext)writeContext).Complete(streamName, success);
         }
@@ -313,12 +293,8 @@ namespace System.Configuration.Internal
             File.Delete(streamName);
         }
 
-        // ConfigurationErrorsException support
         internal static bool StaticIsFile(string streamName)
         {
-            // We want to avoid loading configuration before machine.config
-            // is instantiated. Referencing the Uri class will cause config
-            // to be loaded, so we use Path.IsPathRooted.
             return Path.IsPathRooted(streamName);
         }
     }

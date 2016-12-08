@@ -67,7 +67,6 @@ namespace System.Configuration
                 // so that the section could read files from disk if needed
                 try
                 {
-                    // If this configRecord is trusted, ignore user code on stack
                     runtimeObject = section.GetRuntimeObject();
                 }
                 catch (Exception e)

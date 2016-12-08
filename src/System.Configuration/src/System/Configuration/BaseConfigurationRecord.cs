@@ -1708,13 +1708,9 @@ namespace System.Configuration
             return FindFactoryRecord(configKey, permitErrors, out dummy);
         }
 
-        // FindAndEnsureFactoryRecord:
-        //
         // - Find the nearest factory record
         // - Determine if it is the root
         // - Create the factory in the root if it doesn't exist.
-        // - Determine if the factory type is from a global assembly without APTCA
-        // - Copy the factory and IsFactoryTrustedWithoutAptca bit into the child record
         private FactoryRecord FindAndEnsureFactoryRecord(string configKey, out bool isRootDeclaredHere)
         {
             isRootDeclaredHere = false;
@@ -3625,7 +3621,6 @@ namespace System.Configuration
             return currentVersion != null;
         }
 
-        // RuntimeConfigurationRecord will override it in order to Assert Fulltrust before calling the provider.
         protected virtual string CallHostDecryptSection(string encryptedXml,
             ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedConfig)
         {

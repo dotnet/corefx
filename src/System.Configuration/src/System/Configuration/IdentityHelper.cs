@@ -37,30 +37,26 @@ namespace System.Configuration
 
             // Emulate what we get from StrongName.Normalize().
             using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter bw = new BinaryWriter(ms))
             {
-                using (BinaryWriter bw = new BinaryWriter(ms))
-                {
-                    bw.Write(publicKey);
-                    bw.Write(name.Version.Major);
-                    bw.Write(name.Name);
+                bw.Write(publicKey);
+                bw.Write(name.Version.Major);
+                bw.Write(name.Name);
 
-                    ms.Position = 0;
-                    return GetStrongHashSuitableForObjectName(ms);
-                }
+                ms.Position = 0;
+                return GetStrongHashSuitableForObjectName(ms);
             }
         }
 
         internal static string GetStrongHashSuitableForObjectName(string name)
         {
             using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter b = new BinaryWriter(ms))
             {
-                using (BinaryWriter b = new BinaryWriter(ms))
-                {
-                    b.Write(name.ToUpperInvariant());
+                b.Write(name.ToUpperInvariant());
 
-                    ms.Position = 0;
-                    return GetStrongHashSuitableForObjectName(ms);
-                }
+                ms.Position = 0;
+                return GetStrongHashSuitableForObjectName(ms);
             }
         }
 

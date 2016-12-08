@@ -104,15 +104,10 @@ namespace System.Configuration
             if (!_includesUserConfig) return;
 
             bool isHttp = StringUtil.StartsWithOrdinalIgnoreCase(ApplicationConfigUri, HttpUri);
-
             SetNamesAndVersion(applicationFilename, exeAssembly, isHttp);
-
             if (isHttp) return;
 
-            // If we get the config from http, we do not have a roaming or local config directory,
-            // as it cannot be edited by the app in those cases because it does not have Full Trust.
             string part1 = Validate(_companyName, true);
-
             string validAppDomainName = Validate(AppDomain.CurrentDomain.FriendlyName, true);
             string applicationUriLower = !string.IsNullOrEmpty(ApplicationUri)
                 ? ApplicationUri.ToLower(CultureInfo.InvariantCulture)
@@ -211,9 +206,10 @@ namespace System.Configuration
             return returnPath;
         }
 
-        // Returns a type and hash suffix based on app domain evidence. The evidence we use, in
-        // priority order, is Strong Name, Url and Exe Path. If one of these is found, we compute a 
-        // SHA1 hash of it and return a suffix based on that. If none is found, we return null.
+        // Returns a type and hash suffix based on what used to come from app domain evidence.
+        // The evidence we use, in priority order, is Strong Name, Url and Exe Path. If one of
+        // these is found, we compute a SHA1 hash of it and return a suffix based on that.
+        // If none is found, we return null.
         private static string GetTypeAndHashSuffix(string exePath)
         {
             Assembly assembly = Assembly.GetEntryAssembly();
