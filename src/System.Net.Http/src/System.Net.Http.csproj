@@ -134,7 +134,7 @@
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'uap101' ">
     <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' and '$(TargetGroup)' != 'uap101'">
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netstandard1.7'">
     <DefineConstants>$(DefineConstants);HTTP_DLL</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'net46' ">

@@ -2,8 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <UseDefaultTargetGroup>false</UseDefaultTargetGroup>
-    <UseDefaultTargetGroup Condition="'$(TargetGroup)' != 'netcore50aot' and '$(TargetGroup)' != 'uap101aot' and '$(TargetGroup)' != 'netstandard1.1' and '$(TargetGroup)' != 'net463'">true</UseDefaultTargetGroup>
     <AssemblyName>System.Runtime.Serialization.Primitives</AssemblyName>
     <AssemblyVersion Condition="'$(TargetGroup)'=='netstandard1.3' Or '$(TargetGroup)'=='netcore50aot'">4.1.1.0</AssemblyVersion>
     <ContractProject Condition="'$(AssemblyVersion)'=='4.1.1.0'">../ref/4.1.1/System.Runtime.Serialization.Primitives.depproj</ContractProject>
@@ -14,7 +12,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ProjectGuid>{CDF0ACB5-1361-4E48-8ECB-22E8022F5F01}</ProjectGuid>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net463'">true</IsPartialFacadeAssembly>
-    <PackageTargetFramework Condition="'$(UseDefaultTargetGroup)' == 'true'">netstandard1.7;uap10.1</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.7'">netstandard1.7;uap10.1</PackageTargetFramework>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.3'">netstandard1.3;netcore50</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -43,10 +41,8 @@
     <Compile Include="System\Runtime\Serialization\SerializationException.cs" />
     <Compile Include="System\Runtime\Serialization\StreamingContext.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(UseDefaultTargetGroup)' == 'true' Or '$(TargetGroup)'=='uap101aot'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7' Or '$(TargetGroup)'=='uap101aot'">
     <Compile Include="System\Runtime\Serialization\InvalidDataContractException.Serialization.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(UseDefaultTargetGroup)' == 'true' Or '$(TargetGroup)'=='uap101aot'">
     <Compile Include="System.Runtime.Serialization.Primitives.TypeForwards.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='net463'">

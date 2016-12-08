@@ -10,11 +10,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+  <ItemGroup>
     <ProjectReference Include="$(SourceDir)System.Private.DataContractSerialization\src\System.Private.DataContractSerialization.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <TargetingPackReference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />

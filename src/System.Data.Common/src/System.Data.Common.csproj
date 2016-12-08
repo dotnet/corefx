@@ -297,7 +297,7 @@
     <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

@@ -13,7 +13,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3'">
     <Compile Include="System\IO\Compression\ZipFile.cs" />
     <Compile Include="System\IO\Compression\ZipFileExtensions.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">

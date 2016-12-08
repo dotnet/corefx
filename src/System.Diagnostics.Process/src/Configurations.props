@@ -5,7 +5,7 @@
       netstandard1.7-Linux;
       netstandard1.7-OSX;
       netstandard1.7-Windows_NT;
-      net463-AnyOS;
+      net463-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

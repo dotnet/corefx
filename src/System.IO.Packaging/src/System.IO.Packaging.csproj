@@ -27,7 +27,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Globalization" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'!='net46'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.3'">
     <Compile Include="System\IO\Packaging\CompressionOption.cs" />
     <Compile Include="System\IO\Packaging\ContentType.cs" />
     <Compile Include="System\IO\Packaging\EncryptionOption.cs" />

@@ -17,9 +17,7 @@
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+  <ItemGroup>
     <Compile Include="$(CommonPath)\System\ValueTuple.cs">
       <Link>Common\System\ValueTuple.cs</Link>
     </Compile>
@@ -504,7 +502,7 @@
       <LogicalName>rss-0.91.dtd</LogicalName>
     </EmbeddedResource>-->
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+  <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>

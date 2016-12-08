@@ -3,7 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netcore50aot-Windows_NT;
-      netstandard1.3-AnyOS;
+      netstandard1.3;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

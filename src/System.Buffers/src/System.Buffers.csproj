@@ -11,7 +11,7 @@
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp1.1'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
     <Compile Include="System\Buffers\ArrayPool.cs" />
     <Compile Include="System\Buffers\ArrayPoolEventSource.cs" />
     <Compile Include="System\Buffers\DefaultArrayPool.cs" />
