@@ -844,7 +844,7 @@ namespace System.Linq
 
         public static bool TrySingle<TSource>(this IQueryable<TSource> source, out TSource element)
         {
-            var result = TrySingle(source);
+            Tuple<bool, TSource> result = TrySingle(source);
             element = result.Item2;
             return result.Item1;
         }
