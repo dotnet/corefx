@@ -161,6 +161,10 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         fi
     fi
 
+    Echo Building CoreFx.Tools...
+    $__TOOLRUNTIME_DIR/msbuild.sh $__scriptpath/src/Tools/tools.builds
+
+
     echo Copying supplemental overrides from Tools-Override.
     cp $__scriptpath/Tools-Override/* $__scriptpath/Tools
 
