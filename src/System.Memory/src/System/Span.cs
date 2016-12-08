@@ -403,10 +403,7 @@ namespace System
         /// <summary>
         /// Returns a 0-length span whose base is the null pointer.
         /// </summary>
-        public static Span<T> Empty
-        {
-            get { return default(Span<T>); }
-        }
+        public static Span<T> Empty => default(Span<T>);
 
         /// <summary>
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
