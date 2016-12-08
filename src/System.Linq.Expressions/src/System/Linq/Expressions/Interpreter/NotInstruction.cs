@@ -50,7 +50,7 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        private sealed class NotIn32 : NotInstruction
+        private sealed class NotInt32 : NotInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -175,7 +175,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 case TypeCode.Boolean: return s_Boolean ?? (s_Boolean = new NotBoolean());
                 case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new NotInt64());
-                case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new NotIn32());
+                case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new NotInt32());
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new NotInt16());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new NotUInt64());
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new NotUInt32());
