@@ -180,6 +180,25 @@
     <Configuration Condition="'$(OSGroup)' == 'AnyOS'">$(TargetGroup)</Configuration>
   </PropertyGroup>
 
+  <!-- Set up Default symbol and optimization for Configuration --> 
+  <Choose> 
+    <When Condition="'$(ConfigurationGroup)'=='Debug'"> 
+      <PropertyGroup> 
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols> 
+        <Optimize Condition="'$(Optimize)' == ''">false</Optimize> 
+        <DebugType Condition="'$(DebugType)' == ''">full</DebugType> 
+        <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(ConfigurationGroup)' == 'Release'"> 
+      <PropertyGroup> 
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols> 
+        <Optimize Condition="'$(Optimize)' == ''">true</Optimize> 
+        <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType> 
+        <DefineConstants>$(DefineConstants),TRACE</DefineConstants> 
+      </PropertyGroup>
+    </When> 
+  </Choose> 
 
   <!-- initialize all the targets variables to false as they should only be set below -->
   <PropertyGroup>
@@ -190,6 +209,44 @@
     <TargetsFreeBSD>false</TargetsFreeBSD>
     <TargetsNetBSD>false</TargetsNetBSD>
   </PropertyGroup>
+
+<!-- Probably want to make these be generated into configurations.props --> 
+  <Choose> 
+    <When Condition="'$(OSGroup)'=='Windows_NT'"> 
+      <PropertyGroup> 
+        <TargetsWindows>true</TargetsWindows> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(OSGroup)'=='Unix'"> 
+      <PropertyGroup> 
+        <TargetsUnix>true</TargetsUnix> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(OSGroup)'=='Linux'"> 
+      <PropertyGroup> 
+        <TargetsUnix>true</TargetsUnix> 
+        <TargetsLinux>true</TargetsLinux> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(OSGroup)'=='OSX'"> 
+      <PropertyGroup> 
+        <TargetsUnix>true</TargetsUnix> 
+        <TargetsOSX>true</TargetsOSX> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(OSGroup)'=='FreeBSD'"> 
+      <PropertyGroup> 
+        <TargetsUnix>true</TargetsUnix> 
+        <TargetsFreeBSD>true</TargetsFreeBSD> 
+      </PropertyGroup> 
+    </When> 
+    <When Condition="'$(OSGroup)'=='NetBSD'"> 
+      <PropertyGroup> 
+        <TargetsUnix>true</TargetsUnix> 
+        <TargetsNetBSD>true</TargetsNetBSD> 
+      </PropertyGroup> 
+    </When> 
+  </Choose> 
 
   <PropertyGroup>
     <BuildConfigurationImportFile>$(BinDir)tools/configuration/configuration.props</BuildConfigurationImportFile>

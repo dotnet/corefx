@@ -3,6 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard1.7-Unix;
+      netstandard1.7-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

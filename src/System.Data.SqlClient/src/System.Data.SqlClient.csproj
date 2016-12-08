@@ -9,7 +9,6 @@
     <AssemblyName>System.Data.SqlClient</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsWindows)' != 'true' ">
     <DefineConstants>$(DefineConstants);MANAGED_SNI</DefineConstants>
