@@ -602,6 +602,13 @@ namespace System.Linq
              (s_SingleOrDefault_TSource_2 = new Func<IQueryable<object>, Expression<Func<object, bool>>, object>(Queryable.SingleOrDefault).GetMethodInfo().GetGenericMethodDefinition()))
               .MakeGenericMethod(TSource);
 
+        private static MethodInfo s_TrySingle_TSource_1;
+
+        public static MethodInfo TrySingle_TSource_1(Type TSource) =>
+             (s_TrySingle_TSource_1 ??
+             (s_TrySingle_TSource_1 = new Func<IQueryable<object>, Tuple<bool, object>>(Queryable.TrySingle).GetMethodInfo().GetGenericMethodDefinition()))
+              .MakeGenericMethod(TSource);
+
         private static MethodInfo s_Skip_TSource_2;
 
         public static MethodInfo Skip_TSource_2(Type TSource) =>

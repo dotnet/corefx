@@ -842,6 +842,23 @@ namespace System.Linq
                     ));
         }
 
+        public static bool TrySingle<TSource>(this IQueryable<TSource> source, out TSource element)
+        {
+            var result = TrySingle(source);
+            element = result.Item2;
+            return result.Item1;
+        }
+
+        internal static Tuple<bool, TSource> TrySingle<TSource>(this IQueryable<TSource> source)
+        {
+            if (source == null)
+                throw Error.ArgumentNull(nameof(source));
+            return source.Provider.Execute<Tuple<bool, TSource>>(
+                Expression.Call(
+                    null,
+                    CachedReflectionInfo.TrySingle_TSource_1(typeof(TSource)), source.Expression));
+        }
+
         public static TSource ElementAt<TSource>(this IQueryable<TSource> source, int index)
         {
             if (source == null)
