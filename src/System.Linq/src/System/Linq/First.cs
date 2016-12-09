@@ -12,7 +12,9 @@ namespace System.Linq
         {
             TSource result;
             if (TryFirst(source, out result))
+            {
                 return result;
+            }
 
             throw Error.NoElements();
         }
@@ -21,7 +23,9 @@ namespace System.Linq
         {
             TSource result;
             if (TryFirst(source, predicate, out result))
+            {
                 return result;
+            }
 
             throw Error.NoMatch();
         }
@@ -96,15 +100,13 @@ namespace System.Linq
                 element = ordered.TryGetFirst(predicate, out found);
                 return found;
             }
-            else
+
+            foreach (TSource item in source)
             {
-                foreach (TSource item in source)
+                if (predicate(item))
                 {
-                    if (predicate(item))
-                    {
-                        element = item;
-                        return true;
-                    }
+                    element = item;
+                    return true;
                 }
             }
 

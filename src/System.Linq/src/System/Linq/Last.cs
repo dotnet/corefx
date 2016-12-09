@@ -12,7 +12,9 @@ namespace System.Linq
         {
             TSource result;
             if (TryLast(source, out result))
+            {
                 return result;
+            }
 
             throw Error.NoElements();
         }
@@ -21,7 +23,9 @@ namespace System.Linq
         {
             TSource result;
             if (TryLast(source, predicate, out result))
+            {
                 return result;
+            }
 
             throw Error.NoMatch();
         }
@@ -107,37 +111,35 @@ namespace System.Linq
                 element = ordered.TryGetLast(predicate, out found);
                 return found;
             }
+
+            IList<TSource> list = source as IList<TSource>;
+            if (list != null)
+            {
+                for (int i = list.Count - 1; i >= 0; --i)
+                {
+                    TSource item = list[i];
+                    if (predicate(item))
+                    {
+                        element = item;
+                        return true;
+                    }
+                }
+            }
             else
             {
-                IList<TSource> list = source as IList<TSource>;
-                if (list != null)
+                TSource result = default(TSource);
+                bool found = false;
+                foreach (TSource item in source)
                 {
-                    for (int i = list.Count - 1; i >= 0; --i)
+                    if (predicate(item))
                     {
-                        TSource item = list[i];
-                        if (predicate(item))
-                        {
-                            element = item;
-                            return true;
-                        }
+                        result = item;
+                        found = true;
                     }
                 }
-                else
-                {
-                    TSource result = default(TSource);
-                    bool found = false;
-                    foreach (TSource item in source)
-                    {
-                        if (predicate(item))
-                        {
-                            result = item;
-                            found = true;
-                        }
-                    }
 
-                    element = result;
-                    return found;
-                }
+                element = result;
+                return found;
             }
 
             element = default(TSource);

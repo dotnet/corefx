@@ -12,7 +12,9 @@ namespace System.Linq
         {
             TSource result;
             if (TryElementAt(source, index, out result))
+            {
                 return result;
+            }
 
             throw Error.ArgumentOutOfRange(nameof(index));
         }

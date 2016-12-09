@@ -8,37 +8,23 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
+        private enum TrySingleResult
+        {
+            NoElements,
+            SingleElement,
+            MoreThanOneElement
+        }
+
         public static TSource Single<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
+            TSource result;
+            switch (TrySingleCore(source, out result))
             {
-                throw Error.ArgumentNull(nameof(source));
-            }
+                case TrySingleResult.NoElements:
+                    throw Error.NoElements();
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
-            {
-                switch (list.Count)
-                {
-                    case 0: throw Error.NoElements();
-                    case 1: return list[0];
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    if (!e.MoveNext())
-                    {
-                        throw Error.NoElements();
-                    }
-
-                    TSource result = e.Current;
-                    if (!e.MoveNext())
-                    {
-                        return result;
-                    }
-                }
+                case TrySingleResult.SingleElement:
+                    return result;
             }
 
             throw Error.MoreThanOneElement();
@@ -46,40 +32,56 @@ namespace System.Linq
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
+            TSource result;
+            switch (TrySingleCore(source, predicate, out result))
             {
-                throw Error.ArgumentNull(nameof(source));
+                case TrySingleResult.NoElements:
+                    throw Error.NoMatch();
+
+                case TrySingleResult.SingleElement:
+                    return result;
             }
 
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
-
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                while (e.MoveNext())
-                {
-                    TSource result = e.Current;
-                    if (predicate(result))
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (predicate(e.Current))
-                            {
-                                throw Error.MoreThanOneMatch();
-                            }
-                        }
-
-                        return result;
-                    }
-                }
-            }
-
-            throw Error.NoMatch();
+            throw Error.MoreThanOneMatch();
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
+        {
+            TSource result;
+            switch (TrySingleCore(source, out result))
+            {
+                case TrySingleResult.NoElements:
+                case TrySingleResult.SingleElement:
+                    return result;
+            }
+
+            throw Error.MoreThanOneElement();
+        }
+
+        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        {
+            TSource result;
+            switch (TrySingleCore(source, predicate, out result))
+            {
+                case TrySingleResult.NoElements:
+                case TrySingleResult.SingleElement:
+                    return result;
+            }
+
+            throw Error.MoreThanOneElement();
+        }
+
+        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, out TSource element)
+        {
+            return TrySingleCore(source, out element) == TrySingleResult.SingleElement;
+        }
+
+        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
+        {
+            return TrySingleCore(source, predicate, out element) == TrySingleResult.SingleElement;
+        }
+
+        private static TrySingleResult TrySingleCore<TSource>(IEnumerable<TSource> source, out TSource element)
         {
             if (source == null)
             {
@@ -91,8 +93,16 @@ namespace System.Linq
             {
                 switch (list.Count)
                 {
-                    case 0: return default(TSource);
-                    case 1: return list[0];
+                    case 0:
+                        {
+                            element = default(TSource);
+                            return TryGetSingleCoreResult.NoElements;
+                        }
+                    case 1:
+                        {
+                            element = list[0];
+                            return TryGetSingleCoreResult.OneElement;
+                        }
                 }
             }
             else
@@ -101,93 +111,24 @@ namespace System.Linq
                 {
                     if (!e.MoveNext())
                     {
-                        return default(TSource);
+                        element = default(TSource);
+                        return TryGetSingleCoreResult.NoElements;
                     }
 
-                    TSource result = e.Current;
+                    TSource item = e.Current;
                     if (!e.MoveNext())
                     {
-                        return result;
-                    }
-                }
-            }
-
-            throw Error.MoreThanOneElement();
-        }
-
-        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
-
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                while (e.MoveNext())
-                {
-                    TSource result = e.Current;
-                    if (predicate(result))
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (predicate(e.Current))
-                            {
-                                throw Error.MoreThanOneMatch();
-                            }
-                        }
-
-                        return result;
-                    }
-                }
-            }
-
-            return default(TSource);
-        }
-
-        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, out TSource element)
-        {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
-            {
-                if (list.Count == 1)
-                {
-                    element = list[0];
-                    return true;
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    if (e.MoveNext())
-                    {
-                        TSource result = e.Current;
-                        if (!e.MoveNext())
-                        {
-                            element = result;
-                            return true;
-                        }
+                        element = item;
+                        return TryGetSingleCoreResult.OneElement;
                     }
                 }
             }
 
             element = default(TSource);
-            return false;
+            return TryGetSingleCoreResult.MoreThanOneElement;
         }
 
-        public static bool TrySingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
+        private static TrySingleResult TrySingleCore<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
         {
             if (source == null)
             {
@@ -203,26 +144,26 @@ namespace System.Linq
             {
                 while (e.MoveNext())
                 {
-                    TSource result = e.Current;
-                    if (predicate(result))
+                    TSource item = e.Current;
+                    if (predicate(item))
                     {
                         while (e.MoveNext())
                         {
                             if (predicate(e.Current))
                             {
                                 element = default(TSource);
-                                return false;
+                                return TrySingleResult.MoreThanOneElement;
                             }
                         }
 
-                        element = result;
-                        return true;
+                        element = item;
+                        return TrySingleResult.SingleElement;
                     }
                 }
             }
 
             element = default(TSource);
-            return false;
+            return TrySingleResult.NoElements;
         }
     }
 }
