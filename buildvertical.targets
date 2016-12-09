@@ -6,7 +6,7 @@
 
    <!-- Gather the projects used for building a vertical (all the src\proj files ) --> 
    <Target Name="GatherProjectsForVerticalBuild" 
-           BeforeTargets="DetermineBuildVerticalProjects"> 
+           BeforeTargets="DetermineProjectsConfiguration"> 
      <ItemGroup> 
        <Project Remove="@(Project)" /> 
        <ReferenceProject Include="src\*\ref\*.*proj">
