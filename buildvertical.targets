@@ -9,7 +9,11 @@
            BeforeTargets="DetermineBuildVerticalProjects"> 
      <ItemGroup> 
        <Project Remove="@(Project)" /> 
-       <ReferenceProject Include="$(ProjectDir)src/ref.builds" />
+       <ReferenceProject Include="src\*\ref\*.*proj">
+         <UndefineProperties>OSGroup;TargetGroup</UndefineProperties>
+         <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
+       </ReferenceProject>
+       
        <Project Include="$(ProjectDir)**/src/*.csproj" /> 
        <Project Include="$(ProjectDir)**/src/*.vbproj" />       
      </ItemGroup> 

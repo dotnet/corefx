@@ -113,9 +113,6 @@
     <Message Text="%(PackageIds.Identity)" Importance="High" />
   </Target>
 
-
-
-
   <Target Name="BuildAllProjects" DependsOnTargets="FilterProjects">
     <PropertyGroup>
       <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
@@ -123,8 +120,14 @@
 
     <MSBuild Targets="$(DefaultBuildAllTarget)"
              Projects="@(ReferenceProject)"
+             Condition="'$(SerializeProjects)'!='true'"
+             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration)"
+             ContinueOnError="ErrorAndContinue" />
+
+    <MSBuild Targets="$(DefaultBuildAllTarget)"
+             Projects="@(ReferenceProject)"
              Condition="'$(SerializeProjects)'=='true' AND '%(Identity)' != ''"
-             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;ImportBuildVerticalTargets=false"
+             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration)"
              ContinueOnError="ErrorAndContinue" />
 
     <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
