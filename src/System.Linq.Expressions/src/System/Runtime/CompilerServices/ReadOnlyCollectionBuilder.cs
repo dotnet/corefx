@@ -245,7 +245,7 @@ namespace System.Runtime.CompilerServices
         {
             if (Count > 0)
             {
-                Array.Clear(_items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+                Array.Clear(_items, 0, Count); // Clear to release any references
                 Count = 0;
             }
             _version++;
