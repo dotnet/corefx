@@ -96,12 +96,12 @@ namespace System.Linq
                     case 0:
                         {
                             element = default(TSource);
-                            return TryGetSingleCoreResult.NoElements;
+                            return TrySingleResult.NoElements;
                         }
                     case 1:
                         {
                             element = list[0];
-                            return TryGetSingleCoreResult.OneElement;
+                            return TrySingleResult.SingleElement;
                         }
                 }
             }
@@ -112,20 +112,20 @@ namespace System.Linq
                     if (!e.MoveNext())
                     {
                         element = default(TSource);
-                        return TryGetSingleCoreResult.NoElements;
+                        return TrySingleResult.NoElements;
                     }
 
                     TSource item = e.Current;
                     if (!e.MoveNext())
                     {
                         element = item;
-                        return TryGetSingleCoreResult.OneElement;
+                        return TrySingleResult.SingleElement;
                     }
                 }
             }
 
             element = default(TSource);
-            return TryGetSingleCoreResult.MoreThanOneElement;
+            return TrySingleResult.MoreThanOneElement;
         }
 
         private static TrySingleResult TrySingleCore<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
