@@ -258,6 +258,12 @@
   <!-- Target will be overriden if buildvertical.targets is imported -->
   <Target Name="GetBuildConfigurations" />
   <Target Name="FindBestConfiguration" />
-
+  <Target Name="AnnotateProjectsWithConfiguration"
+          Returns="@(ProjectWithConfiguration)" >
+    <ItemGroup>
+      <ProjectWithConfiguration Include="@(Project)" />
+    </ItemGroup>
+  </Target>
+  
   <Import Condition="'$(_BuildAgainstPackages)' == 'true'" Project="$(ToolsDir)/buildagainstpackages.targets" />
 </Project>
