@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="FindBestConfiguration" AssemblyFile="$(CoreFxToolsTaskDir)CoreFx.Tools.dll"/>
 
   <Import Project="buildvertical.props" />
 
-   <!-- Gather the projects used for building a vertical (all the src\proj files ) --> 
-   <Target Name="GatherProjectsForVerticalBuild" 
-           BeforeTargets="DetermineProjectsConfiguration"> 
-     <ItemGroup> 
-       <Project Remove="@(Project)" /> 
-       <ReferenceProject Include="src\*\ref\*.*proj">
-         <UndefineProperties>OSGroup;TargetGroup</UndefineProperties>
-         <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
-       </ReferenceProject>
-       
-       <Project Include="$(ProjectDir)**/src/*.csproj" /> 
-       <Project Include="$(ProjectDir)**/src/*.vbproj" />       
-     </ItemGroup> 
-     <Message Text="Projects: @(Project)" Importance="Low" /> 
-   </Target> 
+  <PropertyGroup>
+    <ImportedBuildVerticalTargets>true</ImportedBuildVerticalTargets>
+  </PropertyGroup>
+  
+  <Target Name="AnnotateProjectsWithConfiguration"
+          Returns="@(ProjectWithConfiguration)" >
+    <ItemGroup>
+      <ProjectWithConfiguration Include="@(Project)">
+        <AdditionalProperties Condition="'%(Project.TargetGroup)' != ''">%(ProjectWithConfiguration.AdditionalProperties);TargetGroup=%(Project.TargetGroup);OSGroup=%(Project.OSGroup)</AdditionalProperties>
+        <UndefineProperties Condition="'%(Project.TargetGroup)' == ''">TargetGroup;OSGroup</UndefineProperties>
+      </ProjectWithConfiguration>
+    </ItemGroup>
+  </Target>
 
   <!-- Add vertical projects to the project group for BuildAllProjects -->
   <Target Name="AddVerticalProjects"
-          DependsOnTargets="DetermineProjectsConfiguration"
-          BeforeTargets="BuildAllProjects">
+          Inputs="%(Project.Identity)"
+          Outputs="fake"
+          DependsOnTargets="DetermineProjectsConfiguration;TrimUnconvertedProjects"
+          BeforeTargets="AnnotateProjectsWithConfiguration">
     <ItemGroup>
       <OmitProject Include="%(Project.Identity)" Condition="'%(Project.OmitReason)' != ''">
         <OmitReason>%(Project.OmitReason)</OmitReason>
@@ -38,7 +38,7 @@
           Outputs="fake"
           Returns="@(Project)"
           DependsOnTargets="TrimUnconvertedProjects"
-          BeforeTargets="BuildAllProjects">
+          BeforeTargets="AnnotateProjectsWithConfiguration">
     <PropertyGroup>
       <_VerticalProject>%(Project.Identity)</_VerticalProject>
       <_VerticalProjectName>%(Project.FullPath)</_VerticalProjectName>
@@ -57,24 +57,29 @@
     <PropertyGroup>
       <_SelectedOSGroup>%(VerticalTargets.OSGroup)</_SelectedOSGroup>
       <_SelectedTargetGroup>%(VerticalTargets.TargetGroup)</_SelectedTargetGroup>
+      <_KeepProject>%(VerticalTargets.NoBuildConfigurations)</_KeepProject>
     </PropertyGroup>
 
-    <Message Importance="Low" Text="Adding '$(_VerticalProject)', SelectedTargetGroup: $(_SelectedTargetGroup), SelectedOSGroup: $(_SelectedOSGroup)" />
-    <ItemGroup>
+    <Message Importance="Low" Text="Adding '$(_VerticalProject) KP:$(_KeepProject)', SelectedTargetGroup: $(_SelectedTargetGroup), SelectedOSGroup: $(_SelectedOSGroup)" />
+    <ItemGroup Condition="'$(_KeepProject)' != 'true'">
       <Project Remove="$(_VerticalProject)" />
-      <Project Condition="'$(_SelectedTargetGroup)' != '' and '$(_SelectedOSGroup)' != ''" Include="$(_VerticalProject)">  
+      <Project Condition="'$(_SelectedTargetGroup)' != '' and '$(_SelectedOSGroup)' != ''" Include="$(_VerticalProjectName)">  
         <TargetGroup>$(_SelectedTargetGroup)</TargetGroup>
         <OSGroup>$(_SelectedOSGroup)</OSGroup>
       </Project>
-      <Project Condition="'$(_SelectedTargetGroup)' == ''" Include="$(_VerticalProject)">
+      <Project Condition="'$(_SelectedTargetGroup)' == ''" Include="$(_VerticalProjectName)">
         <OmitReason>No applicable TargetGroup</OmitReason>
       </Project>
-      <Project Condition="'$(_SelectedOSGroup)' == ''" Include="$(_VerticalProject)">
+      <Project Condition="'$(_SelectedOSGroup)' == ''" Include="$(_VerticalProjectName)">
         <OmitReason>No applicable OSGroup</OmitReason>
       </Project>
       <Project Condition="'$(_OmitReason)' != ''">
         <OmitReason>$(_OmitReason)</OmitReason>
       </Project>
+    </ItemGroup>
+    <ItemGroup Condition="'$(_KeepProject)' == 'true'">
+      <Project Remove="$(_VerticalProject)" />
+      <Project Include="$(_VerticalProjectName)" />
     </ItemGroup>
   </Target>
 
@@ -105,15 +110,11 @@
       <Output TaskParameter="BestConfiguration" ItemName="VerticalTargets" />                          
     </FindBestConfiguration>  
 
-    <PropertyGroup>
-      <_SelectedTargetGroup>%(VerticalTargets.TargetGroup)</_SelectedTargetGroup>
-      <_SelectedOSGroup>%(VerticalTargets.OSGroup)</_SelectedOSGroup>
-      <TargetGroup>$(_SelectedTargetGroup)</TargetGroup>
-      <OSGroup>$(_SelectedOSGroup)</OSGroup>
-      <NuGetTargetMoniker Condition="'%(TargetGroups.Identity)' == '$(_SelectedTargetGroup)'">%(TargetGroups.NuGetTargetMoniker)</NuGetTargetMoniker>
-    </PropertyGroup>
-
-    <Message Importance="Low" Text="FindBestConfigurations: $(MSBuildProjectFullPath) - TargetGroup: $(TargetGroup) OSGroup: $(OSGroup) DefaultTargetGroup: $(_DefaultTargetGroup)" />    
+    <ItemGroup Condition="'$(BuildConfigurations)' == ''">
+      <VerticalTargets Include="$(MSBuildProjectFullPath)">
+        <NoBuildConfigurations>true</NoBuildConfigurations>
+      </VerticalTargets>
+    </ItemGroup>
   </Target>
 
   <!-- Given a project reference, determine compatible target group and add it to the project reference metadata -->
@@ -164,21 +165,10 @@
   <Target Name="GetBuildConfigurations"
           Returns="$(BuildConfigurations)" />
 
-  <!-- Summary message after BuildAllProjects completes -->
-  <Target Name="PrintVerticalSummary"
-          AfterTargets="BuildAllProjects">
-    <Message Text="Summary" Importance="High" />
-    <Message Text=" Libraries contributing to $(BuildConfiguration) ($(BaseOutputPath)):" Importance="High" />
-    <Message Text="   %(Project.Identity) (%(Project.TargetGroup) - %(Project.OSGroup))" Importance="High" />
-    <Message Text=" Libraries ommitted:" Importance="High" />
-    <Message Text="   %(OmitProject.Identity) because '%(OmitProject.OmitReason)'" Importance="High" />
-  </Target>
-
   <!-- Temporary target which intentionally omits projects that don't specify the "BuildConfigurations" property. -->
   <Target Name="TrimUnconvertedProjects"
           Inputs="%(Project.Identity)"
-          Outputs="fake"
-          DependsOnTargets="GatherProjectsForVerticalBuild">
+          Outputs="fake">
     <PropertyGroup>
       <_ProjectToTestForTrim>%(Project.Identity)</_ProjectToTestForTrim>
       <_ProjectToTestForTrimDirectory>%(Project.RootDir)%(Project.Directory)/</_ProjectToTestForTrimDirectory>
@@ -188,12 +178,6 @@
       <Output TaskParameter="TargetOutputs"
               PropertyName="BuildConfigurations" />
     </MSBuild>
-
-    <ItemGroup Condition="'$(BuildConfigurations)' == ''">
-      <Project>
-        <OmitReason>%(Project.OmitReason) No project configurations specified.</OmitReason>
-      </Project>
-    </ItemGroup>
 
     <PropertyGroup>
       <_OmitReason />
