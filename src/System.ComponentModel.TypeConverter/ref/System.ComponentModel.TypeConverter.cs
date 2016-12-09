@@ -8,6 +8,7 @@
 using System.Runtime.Serialization;
 
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.Component))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
 
 namespace System
 {
