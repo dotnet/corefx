@@ -94,15 +94,12 @@ namespace System.Linq
                 switch (list.Count)
                 {
                     case 0:
-                        {
-                            element = default(TSource);
-                            return TrySingleResult.NoElements;
-                        }
+                        element = default(TSource);
+                        return TrySingleResult.NoElements;
+
                     case 1:
-                        {
-                            element = list[0];
-                            return TrySingleResult.SingleElement;
-                        }
+                        element = list[0];
+                        return TrySingleResult.SingleElement;
                 }
             }
             else

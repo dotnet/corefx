@@ -129,6 +129,7 @@ namespace System.Linq
             {
                 TSource result = default(TSource);
                 bool found = false;
+
                 foreach (TSource item in source)
                 {
                     if (predicate(item))
