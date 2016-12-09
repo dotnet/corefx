@@ -18,7 +18,7 @@
   <Target Name="GenerateAllTestProjectJsons" />
 
   <!-- build vertical requires the FindBestConfiguration task which is currently in CoreFx.Tools.dll -->
-  <Import Project="buildvertical.targets" Condition="Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll')" />
+  <Import Project="buildvertical.targets" Condition="Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll') and '$(ImportBuildVerticalTargets)' != 'false'" />
 
   <Target Name="UndefineTestTFM" BeforeTargets="AssignProjectConfiguration">
     <ItemGroup>

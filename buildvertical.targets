@@ -9,7 +9,7 @@
            BeforeTargets="DetermineBuildVerticalProjects"> 
      <ItemGroup> 
        <Project Remove="@(Project)" /> 
-       <Project Include="$(ProjectDir)src/ref.builds" />
+       <ReferenceProject Include="$(ProjectDir)src/ref.builds" />
        <Project Include="$(ProjectDir)**/src/*.csproj" /> 
        <Project Include="$(ProjectDir)**/src/*.vbproj" />       
      </ItemGroup> 
@@ -45,7 +45,7 @@
     <ItemGroup><VerticalTargets Remove="@(VerticalTargets)" /></ItemGroup>
     <MSBuild Targets="FindBestConfiguration"
              Projects="$(_VerticalProject)"
-             Condition="'$(_OmitReason)' == '' and !$(_VerticalProject.EndsWith('.builds'))">
+             Condition="'$(_OmitReason)' == ''">
       <Output TaskParameter="TargetOutputs"
               ItemName="VerticalTargets" />
     </MSBuild>
@@ -56,7 +56,7 @@
     </PropertyGroup>
 
     <Message Importance="Low" Text="Adding '$(_VerticalProject)', SelectedTargetGroup: $(_SelectedTargetGroup), SelectedOSGroup: $(_SelectedOSGroup)" />
-    <ItemGroup Condition="!$(_VerticalProject.EndsWith('.builds'))">
+    <ItemGroup>
       <Project Remove="$(_VerticalProject)" />
       <Project Condition="'$(_SelectedTargetGroup)' != '' and '$(_SelectedOSGroup)' != ''" Include="$(_VerticalProject)">  
         <TargetGroup>$(_SelectedTargetGroup)</TargetGroup>
@@ -180,13 +180,12 @@
       <_ProjectToTestForTrimDirectory>%(Project.RootDir)%(Project.Directory)/</_ProjectToTestForTrimDirectory>
     </PropertyGroup>
     <MSBuild Targets="GetBuildConfigurations"
-             Projects="$(_ProjectToTestForTrim)"
-             Condition="!$(_ProjectToTestForTrim.EndsWith('.builds'))">
+             Projects="$(_ProjectToTestForTrim)">
       <Output TaskParameter="TargetOutputs"
               PropertyName="BuildConfigurations" />
     </MSBuild>
 
-    <ItemGroup Condition="!$(_ProjectToTestForTrim.EndsWith('.builds')) and '$(BuildConfigurations)' == ''">
+    <ItemGroup Condition="'$(BuildConfigurations)' == ''">
       <Project>
         <OmitReason>%(Project.OmitReason) No project configurations specified.</OmitReason>
       </Project>
