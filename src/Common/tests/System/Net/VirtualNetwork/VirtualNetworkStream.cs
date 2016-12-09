@@ -15,6 +15,7 @@ namespace System.Net.Test.Common
         private readonly bool _isServer;
         private object _readStreamLock = new object();
         private TaskCompletionSource<object> _flushTcs;
+        private bool _isFlushed;
 
         public VirtualNetworkStream(VirtualNetwork network, bool isServer)
         {
@@ -69,7 +70,7 @@ namespace System.Net.Test.Common
 
         public override void Flush()
         {
-            // No-op.
+            _isFlushed = true;
         }
 
         public override Task FlushAsync(CancellationToken cancellationToken)
@@ -82,6 +83,8 @@ namespace System.Net.Test.Common
 
             return _flushTcs.Task;
         }
+
+        public bool HasBeenSyncFlushed => _isFlushed;
 
         public void CompleteAsyncFlush()
         {

@@ -502,20 +502,10 @@ namespace System.Net.Security
 #endif
         }
 
-#if DEBUG
-        public override async Task FlushAsync(CancellationToken cancellationToken)
-        {
-            using (DebugThreadTracking.SetThreadKind(ThreadKinds.User | ThreadKinds.Async))
-            {
-                await InnerStream.FlushAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-#else
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
             return InnerStream.FlushAsync(cancellationToken);
         }
-#endif
 
         protected override void Dispose(bool disposing)
         {
