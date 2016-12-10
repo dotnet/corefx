@@ -106,6 +106,9 @@ namespace System
             return true;
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
+        public struct Reg16 {  }
+
         public static class PerTypeValues<T>
         {
             //

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
+using Reg16 = System.SpanHelpers.Reg16;
 
 #pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
 
@@ -324,18 +325,18 @@ namespace System
                 }
 
                 // TODO: Use Reg16 value type (.e.g long long 16 bytes) for better zeroing in large steps first
-
-                while (i < (byteLength - (ptrSize * 8)))
+                while (i < (byteLength - (16 * 4)))
                 {
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 0 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 1 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 2 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 3 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 4 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 5 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 6 * ptrSize)) = default(IntPtr);
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 7 * ptrSize)) = default(IntPtr);
-                    i += ptrSize * 8;
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 1 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 2 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 3 * 16)) = default(Reg16);
+                    i += 16 * 4;
+                }
+                while (i < (byteLength - 16))
+                {
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
+                    i += 16;
                 }
                 while (i < (byteLength - ptrSize))
                 {
