@@ -107,7 +107,64 @@ namespace System
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 16)]
-        public struct Reg16 {  }
+        public struct Reg16 { long l1; long l2; }
+
+        public static byte MemSetClear(ref byte b, int byteLength)
+        {
+            var ptrSize = Unsafe.SizeOf<IntPtr>();
+            int i = 0;
+            if (byteLength >= ptrSize)
+            {
+                // Zero used for filling and as a location known to be aligned to pointer
+                var zero = IntPtr.Zero;
+
+                IntPtr byteOffset = Unsafe.ByteOffset(ref b, ref Unsafe.As<IntPtr, byte>(ref zero));
+
+                // IntPtr does not support arithmetic so need to go through hoops and loops to make mask
+                IntPtr byteOffsetAligned = ptrSize == 4
+                    ? new IntPtr((int)byteOffset & ~(ptrSize - 1))
+                    : new IntPtr((long)byteOffset & ~((long)(ptrSize - 1)));
+
+                // Align to be sure we do not tear an object reference
+                int bytesBeforeReferenceAlignment = ptrSize == 4
+                    ? (int)((int)byteOffset - (int)byteOffsetAligned)
+                    : (int)((long)byteOffset - (long)byteOffsetAligned);
+                bytesBeforeReferenceAlignment = bytesBeforeReferenceAlignment > byteLength
+                    ? byteLength : bytesBeforeReferenceAlignment;
+
+                while (i < bytesBeforeReferenceAlignment)
+                {
+                    Unsafe.Add<byte>(ref b, i) = 0;
+                    ++i;
+                }
+
+                while (i < (byteLength - (16 * 4)))
+                {
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 1 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 2 * 16)) = default(Reg16);
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 3 * 16)) = default(Reg16);
+                    i += 16 * 4;
+                }
+                while (i < (byteLength - 16))
+                {
+                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
+                    i += 16;
+                }
+                while (i < (byteLength - ptrSize))
+                {
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtr);
+                    i += ptrSize;
+                }
+            }
+            while (i < byteLength)
+            {
+                Unsafe.Add<byte>(ref b, i) = 0;
+                ++i;
+            }
+
+            return b;
+        }
 
         public static class PerTypeValues<T>
         {

@@ -264,12 +264,13 @@ namespace System
             //    Unsafe.Add<T>(ref r, i + 6) = default(T);
             //    Unsafe.Add<T>(ref r, i + 7) = default(T);
             //}
-            //for (; i < (length & ~3); i += 4)
+            //if (i < (length & ~3))
             //{
             //    Unsafe.Add<T>(ref r, i + 0) = default(T);
             //    Unsafe.Add<T>(ref r, i + 1) = default(T);
             //    Unsafe.Add<T>(ref r, i + 2) = default(T);
             //    Unsafe.Add<T>(ref r, i + 3) = default(T);
+            //    i += 4:
             //}
             //for (; i < length; i++)
             //{
@@ -294,60 +295,9 @@ namespace System
             //Unsafe.InitBlockUnaligned(ref r, 0, (UIntPtr)(length * Unsafe.SizeOf<T>()));
             #endregion
             #region memset like impl
-            var ptrSize = Unsafe.SizeOf<IntPtr>();
-            int i = 0;
-            ref byte b = ref Unsafe.As<T, byte>(ref r);
             // TODO: Need to handle pointer sized length...
             var byteLength = length * Unsafe.SizeOf<T>();
-            if (byteLength >= ptrSize)
-            {
-                // Zero used for filling and as a location known to be aligned to pointer
-                var zero = IntPtr.Zero;
-
-                IntPtr byteOffset = Unsafe.ByteOffset(ref b, ref Unsafe.As<IntPtr, byte>(ref zero));
-
-                // IntPtr does not support arithmetic so need to go through hoops and loops to make mask
-                IntPtr byteOffsetAligned = ptrSize == 4
-                    ? new IntPtr((int)byteOffset & ~(ptrSize - 1))
-                    : new IntPtr((long)byteOffset & ~((long)(ptrSize - 1)));
-
-                // Align to be sure we do not tear an object reference
-                int bytesBeforeReferenceAlignment = ptrSize == 4
-                    ? (int)((int)byteOffset - (int)byteOffsetAligned)
-                    : (int)((long)byteOffset - (long)byteOffsetAligned);
-                bytesBeforeReferenceAlignment = bytesBeforeReferenceAlignment > byteLength 
-                    ? byteLength : bytesBeforeReferenceAlignment;
-
-                while (i < bytesBeforeReferenceAlignment)
-                {
-                    Unsafe.Add<byte>(ref b, i) = 0;
-                    ++i;
-                }
-
-                while (i < (byteLength - (16 * 4)))
-                {
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 1 * 16)) = default(Reg16);
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 2 * 16)) = default(Reg16);
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 3 * 16)) = default(Reg16);
-                    i += 16 * 4;
-                }
-                while (i < (byteLength - 16))
-                {
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
-                    i += 16;
-                }
-                while (i < (byteLength - ptrSize))
-                {
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtr);
-                    i += ptrSize;
-                }
-            }
-            while (i < byteLength)
-            {
-                Unsafe.Add<byte>(ref b, i) = 0;
-                ++i;
-            }
+            SpanHelpers.MemSetClear(ref Unsafe.As<T, byte>(ref r), byteLength);
             #endregion
             #region Other memset like impl
             //size_t blockIdx;
@@ -393,6 +343,8 @@ namespace System
             #endregion
         }
 
+
+
         /// <summary>
         /// Fills the contents of this span with the given value.
         /// </summary>
@@ -422,12 +374,13 @@ namespace System
                 Unsafe.Add<T>(ref r, i + 6) = value;
                 Unsafe.Add<T>(ref r, i + 7) = value;
             }
-            for (; i < (length & ~3); i += 4)
+            if (i < (length & ~3))
             {
                 Unsafe.Add<T>(ref r, i + 0) = value;
                 Unsafe.Add<T>(ref r, i + 1) = value;
                 Unsafe.Add<T>(ref r, i + 2) = value;
                 Unsafe.Add<T>(ref r, i + 3) = value;
+                i += 4;
             }
             for (; i < length; i++)
             {
