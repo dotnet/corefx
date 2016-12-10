@@ -277,7 +277,7 @@
         "os": {
           "description": "Sets OSGroup to the OS name where the build is going to run or it is set to the value passed by the user.",
           "settings": {
-            "OSGroup": "default"
+            "HostOS": "default"
           }
         },        
         "target-os": {
@@ -322,6 +322,7 @@
         "toolName": "msbuild",
         "settings": {
           "TargetOS": "default",
+          "HostOs": "default",          
           "ConfigurationGroup": "default",
           "MsBuildLogging":"default",
           "MsBuildWarning":"default",
