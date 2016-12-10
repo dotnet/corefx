@@ -700,6 +700,26 @@ namespace System
         User = 1,
         Machine = 2,
     }
+#if netcoreapp11
+    public struct HashCode : IEquatable<System.HashCode>
+    {
+        public static System.HashCode Empty { get { throw null; } }
+        public static System.HashCode Create(int hash) { throw null; }
+        public static System.HashCode Create<T>(T value) { throw null; }
+        public static System.HashCode Create<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { throw null; }
+        public System.HashCode Combine(int hash) { throw null; }
+        public System.HashCode Combine<T>(T value) { throw null; }
+        public System.HashCode Combine<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { throw null; }
+        public int Value { get { throw null; } }
+        public static implicit operator int(System.HashCode hashCode) { throw null; }
+        public static bool operator ==(System.HashCode left, System.HashCode right) { throw null; }
+        public static bool operator !=(System.HashCode left, System.HashCode right) { throw null; }
+        public bool Equals(System.HashCode other) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+    }
+#endif
     public enum LoaderOptimization
     {
         [System.ObsoleteAttribute("This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202")]

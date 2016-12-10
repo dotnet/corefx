@@ -857,7 +857,8 @@
       "BaselineVersion": "4.4.0",
       "AssemblyVersionInPackageVersion": {
         "4.1.1.0": "4.4.0",
-        "4.2.0.0": "4.4.0"
+        "4.2.0.0": "4.4.0",
+        "4.3.0.0": "4.4.0"
       }
     },
     "runtime.win.Microsoft.Win32.Primitives": {
@@ -937,7 +938,8 @@
       "AssemblyVersionInPackageVersion": {
         "4.0.10.0": "4.4.0",
         "4.1.1.0": "4.4.0",
-        "4.2.0.0": "4.4.0"
+        "4.2.0.0": "4.4.0",
+        "4.3.0.0": "4.4.0"
       }
     },
     "runtime.win10-x86-aot.runtime.native.System.IO.Compression": {
@@ -2142,7 +2144,8 @@
         "4.0.10.0": "4.0.10",
         "4.1.0.0": "4.1.0",
         "4.1.1.0": "4.3.0",
-        "4.2.0.0": "4.4.0"
+        "4.2.0.0": "4.4.0",
+        "4.3.0.0": "4.4.0"
       }
     },
     "System.Runtime.Handles": {
