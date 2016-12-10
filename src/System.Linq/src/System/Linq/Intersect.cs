@@ -20,9 +20,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
            
-            foreach (TSource element in first)
+            var first2 = first.Distinct();
+            var second2 = second.Distinct();
+
+            foreach (TSource element in first2)
             {
-                if (second.Contains(element))
+                if (second2.Contains(element))
                 {
                     yield return element;
                 }
