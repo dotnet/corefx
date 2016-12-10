@@ -161,5 +161,8 @@
     <Reference Include="System.Net.Sockets" />
     <Reference Include="Microsoft.Win32.Primitives" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Diagnostics.Process" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

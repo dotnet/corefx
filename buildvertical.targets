@@ -163,15 +163,7 @@
       <_ProjectToTestForTrim>%(Project.Identity)</_ProjectToTestForTrim>
       <_ProjectToTestForTrimDirectory>%(Project.RootDir)%(Project.Directory)/</_ProjectToTestForTrimDirectory>
     </PropertyGroup>
-    <MSBuild Targets="GetBuildConfigurations"
-             Projects="$(_ProjectToTestForTrim)">
-      <Output TaskParameter="TargetOutputs"
-              PropertyName="BuildConfigurations" />
-    </MSBuild>
 
-    <PropertyGroup>
-      <_OmitReason />
-    </PropertyGroup>
     <ReadLinesFromFile File="$(_ProjectToTestForTrimDirectory)omit.txt"
                        Condition="Exists('$(_ProjectToTestForTrimDirectory)omit.txt')">
       <Output TaskParameter="Lines"
@@ -182,7 +174,7 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(OmitReason)' != ''">
-      <Project>
+      <Project Condition="'%(Project.Identity)' == '$(_ProjectToTestForTrim)'">
         <OmitReason>%(Project.OmitReason) $(OmitReason)</OmitReason>
       </Project>
     </ItemGroup>  

@@ -246,19 +246,20 @@
     <TargetingPackReference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Runtime" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading.Overlapped" />
+    <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Principal" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Overlapped" />
     <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.Sockets" />
   </ItemGroup>

@@ -144,6 +144,9 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Net.Sockets" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Threading.Timer" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

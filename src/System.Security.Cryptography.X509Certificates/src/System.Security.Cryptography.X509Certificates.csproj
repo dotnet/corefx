@@ -317,5 +317,8 @@
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Security.Cryptography.OpenSsl" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
