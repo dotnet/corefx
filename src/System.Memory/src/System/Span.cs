@@ -296,7 +296,17 @@ namespace System
             #region memset like impl
             // TODO: Need to handle pointer sized length...
             var byteLength = length * Unsafe.SizeOf<T>();
-            SpanHelpers.MemSetClear(ref Unsafe.As<T, byte>(ref r), byteLength);
+            // TODO: Rename and negate IsReferenceFree => IsReferenceOrContainsReferences then swap if and remove !
+            //if (SpanHelpers.IsReferenceFree<T>())// && !SpanHelpers.HasAtLeastNativeSizeAlignment<T>())
+            {
+                SpanHelpers.ClearUnaligned(ref Unsafe.As<T, byte>(ref r), byteLength);
+            }
+            //else
+            //{
+            //    // TODO: There seems to be alignment issues when not running with clear unaligned...
+            //    int i = 0;
+            //    SpanHelpers.ClearNativeSizeAligned(ref Unsafe.As<T, byte>(ref r), byteLength, ref i);
+            //}
             #endregion
             #region Other memset like impl
             //size_t blockIdx;

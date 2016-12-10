@@ -106,6 +106,39 @@ namespace System
             return true;
         }
 
+        public static bool HasAtLeastNativeSizeAlignment<T>() => PerTypeValues<T>.HasAtLeastNativeSizeAlignment;
+
+        private static bool HasAtLeastNativeSizeAlignmentCore<T>()
+        {
+            if (typeof(T) == typeof(byte))
+                return false;
+            if (typeof(T) == typeof(sbyte))
+                return false;
+            if (typeof(T) == typeof(bool))
+                return false;
+            if (typeof(T) == typeof(char))
+                return false;
+            if (typeof(T) == typeof(short))
+                return false;
+            if (typeof(T) == typeof(ushort))
+                return false;
+            if (typeof(T) == typeof(int) && Unsafe.SizeOf<IntPtr>() == sizeof(int))
+                return true;
+            if (typeof(T) == typeof(uint) && Unsafe.SizeOf<IntPtr>() == sizeof(uint))
+                return true;
+            if (typeof(T) == typeof(long))
+                return true;
+            if (typeof(T) == typeof(ulong))
+                return true;
+            if (typeof(T) == typeof(IntPtr))
+                return true;
+            if (typeof(T) == typeof(UIntPtr))
+                return true;
+            if (typeof(T).GetTypeInfo().IsPrimitive && ((Unsafe.SizeOf<T>() % Unsafe.SizeOf<IntPtr>()) == 0))
+                return true;
+            return false;
+        }
+
         [StructLayout(LayoutKind.Sequential, Size = 64)]
         private struct Reg64 { }
         [StructLayout(LayoutKind.Sequential, Size = 32)]
@@ -113,13 +146,12 @@ namespace System
         [StructLayout(LayoutKind.Sequential, Size = 16)]
         private struct Reg16 { }
 
-        public static void MemSetClear(ref byte b, int byteLength)
+        public static void ClearUnaligned(ref byte b, int byteLength)
         {
-            var ptrSize = Unsafe.SizeOf<IntPtr>();
             int i = 0;
+            var ptrSize = Unsafe.SizeOf<IntPtr>();
             if (byteLength >= ptrSize)
             {
-                // Zero IntPtr used as a known location to be used for aligning `ref` location
                 var zero = IntPtr.Zero;
                 IntPtr byteOffset = Unsafe.ByteOffset(ref b, ref Unsafe.As<IntPtr, byte>(ref zero));
 
@@ -140,37 +172,43 @@ namespace System
                     Unsafe.Add<byte>(ref b, i) = 0;
                     ++i;
                 }
-                // TODO: Perhaps do switch casing...
-                while (i < (byteLength - 64))
-                {
-                    Unsafe.As<byte, Reg64>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg64);
-                    i += 64;
-                }
-                if (i < (byteLength - 32))
-                {
-                    Unsafe.As<byte, Reg32>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg32);
-                    i += 32;
-                }
-                if (i < (byteLength - 16))
-                {
-                    Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg16);
-                    i += 16;
-                }
-                if (i < (byteLength - 8))
-                {
-                    Unsafe.As<byte, long>(ref Unsafe.Add<byte>(ref b, i)) = default(long);
-                    i += 8;
-                }
-                if (i < (byteLength - ptrSize))
-                {
-                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtr);
-                    i += ptrSize;
-                }
+
+                ClearNativeSizeAligned(ref b, byteLength, ref i);
             }
             while (i < byteLength)
             {
                 Unsafe.Add<byte>(ref b, i) = 0;
                 ++i;
+            }
+        }
+
+        public static void ClearNativeSizeAligned(ref byte b, int byteLength, ref int i)
+        {
+            // TODO: Perhaps do switch casing...
+            while (i < (byteLength - 64))
+            {
+                Unsafe.As<byte, Reg64>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg64);
+                i += 64;
+            }
+            if (i < (byteLength - 32))
+            {
+                Unsafe.As<byte, Reg32>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg32);
+                i += 32;
+            }
+            if (i < (byteLength - 16))
+            {
+                Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg16);
+                i += 16;
+            }
+            if (i < (byteLength - 8))
+            {
+                Unsafe.As<byte, long>(ref Unsafe.Add<byte>(ref b, i)) = 0;
+                i += 8;
+            }
+            if (i < (byteLength - 4))
+            {
+                Unsafe.As<byte, int>(ref Unsafe.Add<byte>(ref b, i)) = 0;
+                i += 4;
             }
         }
 
@@ -184,6 +222,8 @@ namespace System
             // true == confirmed reference free
             //
             public static readonly bool IsReferenceFree = IsReferenceFreeCore<T>();
+
+            public static readonly bool HasAtLeastNativeSizeAlignment = HasAtLeastNativeSizeAlignmentCore<T>();
 
             public static readonly T[] EmptyArray = new T[0];
 
