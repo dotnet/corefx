@@ -9,6 +9,49 @@ namespace System.SpanTests
     public static partial class SpanTests
     {
         [Fact]
+        public static void FillEmpty()
+        {
+            var span = Span<byte>.Empty;
+            span.Fill(1);
+        }
+
+        [Fact]
+        public static void FillByteLonger()
+        {
+            const byte fill = 5;
+            var expected = new byte[2048];
+            for (int i = 0; i < expected.Length; i++)
+            {
+                expected[i] = fill;
+            }
+            var actual = new byte[2048];
+            var span = new Span<byte>(actual);
+            span.Fill(fill);
+            Assert.Equal<byte>(expected, actual);
+        }
+
+        [Fact]
+        public static void FillByteUnaligned()
+        {
+            const byte fill = 5;
+            var expectedFull = new byte[2048];
+            for (int i = 0; i < expectedFull.Length; i++)
+            {
+                expectedFull[i] = fill;
+            }
+            var actualFull = new byte[expectedFull.Length];
+
+            var start = 1;
+            var expectedSpan = new Span<byte>(actualFull, start);
+            var actualSpan = new Span<byte>(actualFull, start);
+            actualSpan.Fill(fill);
+
+            var actual = actualSpan.ToArray();
+            var expected = expectedSpan.ToArray();
+            Assert.Equal<byte>(expected, actual);
+        }
+
+        [Fact]
         public static void FillValueTypeWithoutReferences()
         {
             int[] actual = { 1, 2, 3 };
