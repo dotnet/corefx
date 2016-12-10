@@ -385,5 +385,8 @@
     <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Security.Claims" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Secuirty.Cryptography.OpenSsl" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -158,6 +158,7 @@
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.ComponentModel.EventBasedAsync" />
     <Reference Include="System.Net.NameResolution" />
+    <Reference Include="System.Net.Sockets" />
     <Reference Include="Microsoft.Win32.Primitives" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

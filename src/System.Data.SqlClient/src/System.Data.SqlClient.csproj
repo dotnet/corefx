@@ -197,6 +197,7 @@
     <Reference Include="System.Net.Sockets" />
     <Reference Include="System.Net.Security" />
     <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Net.NameResolution" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <Import Project=".\GenerateThisAssemblyCs.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />
