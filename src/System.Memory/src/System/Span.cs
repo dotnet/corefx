@@ -324,7 +324,6 @@ namespace System
                     ++i;
                 }
 
-                // TODO: Use Reg16 value type (.e.g long long 16 bytes) for better zeroing in large steps first
                 while (i < (byteLength - (16 * 4)))
                 {
                     Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i + 0 * 16)) = default(Reg16);
