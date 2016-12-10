@@ -25,6 +25,7 @@ namespace System.SpanTests
                 expected[i] = fill;
             }
             var actual = new byte[2048];
+
             var span = new Span<byte>(actual);
             span.Fill(fill);
             Assert.Equal<byte>(expected, actual);
@@ -34,21 +35,24 @@ namespace System.SpanTests
         public static void FillByteUnaligned()
         {
             const byte fill = 5;
-            var expectedFull = new byte[2048];
-            for (int i = 0; i < expectedFull.Length; i++)
+            const int length = 32;
+            var expectedFull = new byte[length];
+            for (int i = 0; i < length; i++)
             {
                 expectedFull[i] = fill;
             }
-            var actualFull = new byte[expectedFull.Length];
+            var actualFull = new byte[length];
 
             var start = 1;
-            var expectedSpan = new Span<byte>(actualFull, start);
-            var actualSpan = new Span<byte>(actualFull, start);
+            var expectedSpan = new Span<byte>(expectedFull, start, length - start - 1);
+            var actualSpan = new Span<byte>(actualFull, start, length - start - 1);
             actualSpan.Fill(fill);
 
             var actual = actualSpan.ToArray();
             var expected = expectedSpan.ToArray();
             Assert.Equal<byte>(expected, actual);
+            Assert.Equal(0, actualFull[0]);
+            Assert.Equal(0, actualFull[length - 1]);
         }
 
         [Fact]

@@ -241,10 +241,145 @@ namespace System
 
             ref T r = ref DangerousGetPinnableReference();
             int length = _length;
-            for (int i = 0; i < length; i++)
+
+            // TODO: Remove ugly regions when the right impl has been found
+            #region Naive impl
+            //for (int i = 0; i < length; i++)
+            //{
+            //    Unsafe.Add<T>(ref r, i) = default(T);
+            //}
+            #endregion
+            #region Simple loop unrolling
+            int i = 0;
+            for (; i < (length & ~7); i += 8)
+            {
+                Unsafe.Add<T>(ref r, i + 0) = default(T);
+                Unsafe.Add<T>(ref r, i + 1) = default(T);
+                Unsafe.Add<T>(ref r, i + 2) = default(T);
+                Unsafe.Add<T>(ref r, i + 3) = default(T);
+                Unsafe.Add<T>(ref r, i + 4) = default(T);
+                Unsafe.Add<T>(ref r, i + 5) = default(T);
+                Unsafe.Add<T>(ref r, i + 6) = default(T);
+                Unsafe.Add<T>(ref r, i + 7) = default(T);
+            }
+            for (; i < (length & ~3); i += 4)
+            {
+                Unsafe.Add<T>(ref r, i + 0) = default(T);
+                Unsafe.Add<T>(ref r, i + 1) = default(T);
+                Unsafe.Add<T>(ref r, i + 2) = default(T);
+                Unsafe.Add<T>(ref r, i + 3) = default(T);
+            }
+            for (; i < length; i++)
             {
                 Unsafe.Add<T>(ref r, i) = default(T);
             }
+            #endregion
+            #region unsafe.initblock impl (fixed until ref versions added)
+            //Unsafe.Add
+            #endregion
+            #region memset like impl (glibc)
+            // https://www.gnu.org/software/libc/sources.html
+            //long int dstp = (long int) dstpp;
+
+            //if (len >= 8)
+            //{
+            //    size_t xlen;
+            //    op_t cccc;
+
+            //    cccc = (unsigned char) c;
+            //    cccc |= cccc << 8;
+            //    cccc |= cccc << 16;
+            //    if (OPSIZ > 4)
+            //        /* Do the shift in two steps to avoid warning if long has 32 bits.  */
+            //        cccc |= (cccc << 16) << 16;
+
+            //    /* There are at least some bytes to set.
+            //   No need to test for LEN == 0 in this alignment loop.  */
+            //    while (dstp % OPSIZ != 0)
+            //    {
+            //        ((byte*)dstp)[0] = c;
+            //        dstp += 1;
+            //        len -= 1;
+            //    }
+
+            //    /* Write 8 `op_t' per iteration until less than 8 `op_t' remain.  */
+            //    xlen = len / (OPSIZ * 8);
+            //    while (xlen > 0)
+            //    {
+            //        ((op_t*)dstp)[0] = cccc;
+            //        ((op_t*)dstp)[1] = cccc;
+            //        ((op_t*)dstp)[2] = cccc;
+            //        ((op_t*)dstp)[3] = cccc;
+            //        ((op_t*)dstp)[4] = cccc;
+            //        ((op_t*)dstp)[5] = cccc;
+            //        ((op_t*)dstp)[6] = cccc;
+            //        ((op_t*)dstp)[7] = cccc;
+            //        dstp += 8 * OPSIZ;
+            //        xlen -= 1;
+            //    }
+            //    len %= OPSIZ * 8;
+
+            //    /* Write 1 `op_t' per iteration until less than OPSIZ bytes remain.  */
+            //    xlen = len / OPSIZ;
+            //    while (xlen > 0)
+            //    {
+            //        ((op_t*)dstp)[0] = cccc;
+            //        dstp += OPSIZ;
+            //        xlen -= 1;
+            //    }
+            //    len %= OPSIZ;
+            //}
+
+            // Write the last few bytes. 
+            //while (len > 0)
+            //{
+            //    ((byte*)dstp)[0] = c;
+            //    dstp += 1;
+            //    len -= 1;
+            //}
+            #endregion
+            #region Other memset like impl
+            //size_t blockIdx;
+            //size_t blocks = count >> 3;
+            //size_t bytesLeft = count - (blocks << 3);
+            //_UINT64 cUll =
+            //    c
+            //    | (((_UINT64)c) << 8)
+            //    | (((_UINT64)c) << 16)
+            //    | (((_UINT64)c) << 24)
+            //    | (((_UINT64)c) << 32)
+            //    | (((_UINT64)c) << 40)
+            //    | (((_UINT64)c) << 48)
+            //    | (((_UINT64)c) << 56);
+
+            //_UINT64* destPtr8 = (_UINT64*)dest;
+            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr8[blockIdx] = cUll;
+
+            //if (!bytesLeft) return dest;
+
+            //blocks = bytesLeft >> 2;
+            //bytesLeft = bytesLeft - (blocks << 2);
+
+            //_UINT32* destPtr4 = (_UINT32*)&destPtr8[blockIdx];
+            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr4[blockIdx] = (_UINT32)cUll;
+
+            //if (!bytesLeft) return dest;
+
+            //blocks = bytesLeft >> 1;
+            //bytesLeft = bytesLeft - (blocks << 1);
+
+            //_UINT16* destPtr2 = (_UINT16*)&destPtr4[blockIdx];
+            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr2[blockIdx] = (_UINT16)cUll;
+
+            //if (!bytesLeft) return dest;
+
+            //_UINT8* destPtr1 = (_UINT8*)&destPtr2[blockIdx];
+            //for (blockIdx = 0; blockIdx < bytesLeft; blockIdx++) destPtr1[blockIdx] = (_UINT8)cUll;
+
+            //return dest;
+            #endregion
+            #region custom align, stride in type size impl
+            #endregion
         }
 
         /// <summary>
@@ -256,10 +391,38 @@ namespace System
 
             ref T r = ref DangerousGetPinnableReference();
             int length = _length;
-            for (int i = 0; i < length; i++)
+            // TODO: Remove ugly regions when the right impl has been found
+            #region Naive impl
+            //for (int i = 0; i < length; i++)
+            //{
+            //    Unsafe.Add<T>(ref r, i) = value;
+            //}
+            #endregion
+            #region Simple loop unrolling
+            int i = 0;
+            for (; i < (length & ~7); i += 8)
+            {
+                Unsafe.Add<T>(ref r, i + 0) = value;
+                Unsafe.Add<T>(ref r, i + 1) = value;
+                Unsafe.Add<T>(ref r, i + 2) = value;
+                Unsafe.Add<T>(ref r, i + 3) = value;
+                Unsafe.Add<T>(ref r, i + 4) = value;
+                Unsafe.Add<T>(ref r, i + 5) = value;
+                Unsafe.Add<T>(ref r, i + 6) = value;
+                Unsafe.Add<T>(ref r, i + 7) = value;
+            }
+            for (; i < (length & ~3); i += 4)
+            {
+                Unsafe.Add<T>(ref r, i + 0) = value;
+                Unsafe.Add<T>(ref r, i + 1) = value;
+                Unsafe.Add<T>(ref r, i + 2) = value;
+                Unsafe.Add<T>(ref r, i + 3) = value;
+            }
+            for (; i < length; i++)
             {
                 Unsafe.Add<T>(ref r, i) = value;
             }
+            #endregion
         }
 
         /// <summary>

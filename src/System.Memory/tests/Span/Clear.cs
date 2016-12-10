@@ -35,21 +35,24 @@ namespace System.SpanTests
         public static void ClearByteUnaligned()
         {
             const byte initial = 5;
-            var actualFull = new byte[32];
-            for (int i = 0; i < actualFull.Length; i++)
+            const int length = 32;
+            var actualFull = new byte[length];
+            for (int i = 0; i < length; i++)
             {
                 actualFull[i] = initial;
             }
-            var expectedFull = new byte[actualFull.Length];
+            var expectedFull = new byte[length];
 
             var start = 1;
-            var expectedSpan = new Span<byte>(actualFull, start);
-            var actualSpan = new Span<byte>(actualFull, start);
+            var expectedSpan = new Span<byte>(expectedFull, start, length - start - 1);
+            var actualSpan = new Span<byte>(actualFull, start, length - start - 1);
             actualSpan.Clear();
 
             var actual = actualSpan.ToArray();
             var expected = expectedSpan.ToArray();
             Assert.Equal<byte>(expected, actual);
+            Assert.Equal(initial, actualFull[0]);
+            Assert.Equal(initial, actualFull[length - 1]);
         }
 
         [Fact]
