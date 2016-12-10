@@ -190,6 +190,14 @@
     <Reference Include="System.Security.Principal" />
     <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.IO.Pipes" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Net.Sockets" />
+    <Reference Include="System.Net.Security" />
+    <Reference Include="System.Net.Primitives" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <Import Project=".\GenerateThisAssemblyCs.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />
 </Project>
