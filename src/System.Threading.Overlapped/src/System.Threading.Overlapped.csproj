@@ -58,12 +58,14 @@
       <Link>Microsoft\Win32\SafeHandles\SafeThreadPoolIOHandle.cs</Link>
     </Compile>
     <Compile Include="System\Threading\IOCompletionCallback.cs" />
-    <Compile Include="System\Threading\NativeOverlapped.cs" />
     <Compile Include="System\Threading\Win32ThreadPoolBoundHandle.cs" />
     <Compile Include="System\Threading\Win32ThreadPoolNativeOverlapped.ExecutionContextCallbackArgs.cs" />
     <Compile Include="System\Threading\Win32ThreadPoolNativeOverlapped.OverlappedData.cs" />
     <Compile Include="System\Threading\Win32ThreadPoolNativeOverlapped.cs" />
     <Compile Include="System\Threading\Win32ThreadPoolPreAllocatedOverlapped.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="System\Threading\NativeOverlapped.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Private.CoreLib" />
