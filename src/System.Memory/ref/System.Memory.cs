@@ -57,6 +57,8 @@ namespace System
         public T this[int index] { [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]get { throw null; } [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]set { throw null; }}
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]public ref T GetItem(int index) { throw null; }
         public int Length { get { throw null; } }
+        public void Clear() { }
+        public void Fill(T value) { }
         public void CopyTo(System.Span<T> destination) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]public static System.Span<T> DangerousCreate(object obj, ref T objectData, int length) { throw null; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]public ref T DangerousGetPinnableReference() { throw null; }
