@@ -235,6 +235,7 @@ namespace System
         /// <summary>
         /// Clears the contents of this span.
         /// </summary>
+        
         public void Clear()
         {
             if (_length == 0) { return; }
@@ -250,93 +251,103 @@ namespace System
             //}
             #endregion
             #region Simple loop unrolling
+            //int i = 0;
+            //for (; i < (length & ~7); i += 8)
+            //{
+            //    Unsafe.Add<T>(ref r, i + 0) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 1) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 2) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 3) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 4) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 5) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 6) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 7) = default(T);
+            //}
+            //for (; i < (length & ~3); i += 4)
+            //{
+            //    Unsafe.Add<T>(ref r, i + 0) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 1) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 2) = default(T);
+            //    Unsafe.Add<T>(ref r, i + 3) = default(T);
+            //}
+            //for (; i < length; i++)
+            //{
+            //    Unsafe.Add<T>(ref r, i) = default(T);
+            //}
+            #endregion
+            #region Unsafe.InitBlockUnaligned fixed impl (until ref versions of InitBlock added)
+            //unsafe
+            //{
+            //    fixed (byte* p = &Unsafe.As<T, byte>(ref r))
+            //    {
+            //        // For `IsReferenceOrContainsReferences`-types we cannot use
+            //        // InitBlock* since this fills byte-wise, which may cause object reference
+            //        // tearing.
+            //        Unsafe.InitBlockUnaligned(p, 0, (UIntPtr)(length * Unsafe.SizeOf<T>()));
+            //    }
+            //}
+            #endregion
+            #region Unsafe.InitBlockUnaligned impl (ref based)
+            // TODO: Is this safe to do for `IsReferenceOrContainsReferences`-types,
+            //       or might it cause reference tearing, partial clear of address?
+            //Unsafe.InitBlockUnaligned(ref r, 0, (UIntPtr)(length * Unsafe.SizeOf<T>()));
+            #endregion
+            #region memset like impl
+            var ptrSize = Unsafe.SizeOf<IntPtr>();
             int i = 0;
-            for (; i < (length & ~7); i += 8)
+            ref byte b = ref Unsafe.As<T, byte>(ref r);
+            // TODO: Need to handle pointer sized length...
+            var byteLength = length * Unsafe.SizeOf<T>();
+            if (byteLength >= ptrSize)
             {
-                Unsafe.Add<T>(ref r, i + 0) = default(T);
-                Unsafe.Add<T>(ref r, i + 1) = default(T);
-                Unsafe.Add<T>(ref r, i + 2) = default(T);
-                Unsafe.Add<T>(ref r, i + 3) = default(T);
-                Unsafe.Add<T>(ref r, i + 4) = default(T);
-                Unsafe.Add<T>(ref r, i + 5) = default(T);
-                Unsafe.Add<T>(ref r, i + 6) = default(T);
-                Unsafe.Add<T>(ref r, i + 7) = default(T);
+                // Zero used for filling and as a location known to be aligned to pointer
+                var zero = IntPtr.Zero;
+
+                IntPtr byteOffset = Unsafe.ByteOffset(ref b, ref Unsafe.As<IntPtr, byte>(ref zero));
+
+                // IntPtr does not support arithmetic so need to go through hoops and loops to make mask
+                IntPtr byteOffsetAligned = ptrSize == 4
+                    ? new IntPtr((int)byteOffset & ~(ptrSize - 1))
+                    : new IntPtr((long)byteOffset & ~((long)(ptrSize - 1)));
+
+                // Align to be sure we do not tear an object reference
+                int bytesBeforeReferenceAlignment = ptrSize == 4
+                    ? (int)((int)byteOffset - (int)byteOffsetAligned)
+                    : (int)((long)byteOffset - (long)byteOffsetAligned);
+                bytesBeforeReferenceAlignment = bytesBeforeReferenceAlignment > byteLength 
+                    ? byteLength : bytesBeforeReferenceAlignment;
+
+                while (i < bytesBeforeReferenceAlignment)
+                {
+                    Unsafe.Add<byte>(ref b, i) = 0;
+                    ++i;
+                }
+
+                // TODO: Use Reg16 value type (.e.g long long 16 bytes) for better zeroing in large steps first
+
+                while (i < (byteLength - (ptrSize * 8)))
+                {
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 0 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 1 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 2 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 3 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 4 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 5 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 6 * ptrSize)) = default(IntPtr);
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i + 7 * ptrSize)) = default(IntPtr);
+                    i += ptrSize * 8;
+                }
+                while (i < (byteLength - ptrSize))
+                {
+                    Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtr);
+                    i += ptrSize;
+                }
             }
-            for (; i < (length & ~3); i += 4)
+            while (i < byteLength)
             {
-                Unsafe.Add<T>(ref r, i + 0) = default(T);
-                Unsafe.Add<T>(ref r, i + 1) = default(T);
-                Unsafe.Add<T>(ref r, i + 2) = default(T);
-                Unsafe.Add<T>(ref r, i + 3) = default(T);
+                Unsafe.Add<byte>(ref b, i) = 0;
+                ++i;
             }
-            for (; i < length; i++)
-            {
-                Unsafe.Add<T>(ref r, i) = default(T);
-            }
-            #endregion
-            #region unsafe.initblock impl (fixed until ref versions added)
-            //Unsafe.Add
-            #endregion
-            #region memset like impl (glibc)
-            // https://www.gnu.org/software/libc/sources.html
-            //long int dstp = (long int) dstpp;
-
-            //if (len >= 8)
-            //{
-            //    size_t xlen;
-            //    op_t cccc;
-
-            //    cccc = (unsigned char) c;
-            //    cccc |= cccc << 8;
-            //    cccc |= cccc << 16;
-            //    if (OPSIZ > 4)
-            //        /* Do the shift in two steps to avoid warning if long has 32 bits.  */
-            //        cccc |= (cccc << 16) << 16;
-
-            //    /* There are at least some bytes to set.
-            //   No need to test for LEN == 0 in this alignment loop.  */
-            //    while (dstp % OPSIZ != 0)
-            //    {
-            //        ((byte*)dstp)[0] = c;
-            //        dstp += 1;
-            //        len -= 1;
-            //    }
-
-            //    /* Write 8 `op_t' per iteration until less than 8 `op_t' remain.  */
-            //    xlen = len / (OPSIZ * 8);
-            //    while (xlen > 0)
-            //    {
-            //        ((op_t*)dstp)[0] = cccc;
-            //        ((op_t*)dstp)[1] = cccc;
-            //        ((op_t*)dstp)[2] = cccc;
-            //        ((op_t*)dstp)[3] = cccc;
-            //        ((op_t*)dstp)[4] = cccc;
-            //        ((op_t*)dstp)[5] = cccc;
-            //        ((op_t*)dstp)[6] = cccc;
-            //        ((op_t*)dstp)[7] = cccc;
-            //        dstp += 8 * OPSIZ;
-            //        xlen -= 1;
-            //    }
-            //    len %= OPSIZ * 8;
-
-            //    /* Write 1 `op_t' per iteration until less than OPSIZ bytes remain.  */
-            //    xlen = len / OPSIZ;
-            //    while (xlen > 0)
-            //    {
-            //        ((op_t*)dstp)[0] = cccc;
-            //        dstp += OPSIZ;
-            //        xlen -= 1;
-            //    }
-            //    len %= OPSIZ;
-            //}
-
-            // Write the last few bytes. 
-            //while (len > 0)
-            //{
-            //    ((byte*)dstp)[0] = c;
-            //    dstp += 1;
-            //    len -= 1;
-            //}
             #endregion
             #region Other memset like impl
             //size_t blockIdx;
