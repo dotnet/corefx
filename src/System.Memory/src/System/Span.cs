@@ -233,6 +233,36 @@ namespace System
         }
 
         /// <summary>
+        /// Clears the contents of this span.
+        /// </summary>
+        public void Clear()
+        {
+            if (_length == 0) { return; }
+
+            ref T r = ref DangerousGetPinnableReference();
+            int length = _length;
+            for (int i = 0; i < length; i++)
+            {
+                Unsafe.Add<T>(ref r, i) = default(T);
+            }
+        }
+
+        /// <summary>
+        /// Fills the contents of this span with the given value.
+        /// </summary>
+        public void Fill(T value)
+        {
+            if (_length == 0) { return; }
+
+            ref T r = ref DangerousGetPinnableReference();
+            int length = _length;
+            for (int i = 0; i < length; i++)
+            {
+                Unsafe.Add<T>(ref r, i) = value;
+            }
+        }
+
+        /// <summary>
         /// Copies the contents of this span into destination span. If the source
         /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
