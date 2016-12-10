@@ -19,8 +19,14 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(second));
             }
-
-            return IntersectIterator(first, second, null);
+           
+            foreach (TSource element in first)
+            {
+                if (second.Contains(element))
+                {
+                    yield return element;
+                }
+            }
         }
 
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
