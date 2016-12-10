@@ -143,6 +143,7 @@
     <Reference Include="System.Diagnostics.Tools" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Net.NameResolution" />
     <Reference Include="System.Net.Security" />
     <Reference Include="System.Net.Sockets" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
