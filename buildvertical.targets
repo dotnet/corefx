@@ -8,16 +8,6 @@
     <ImportedBuildVerticalTargets>true</ImportedBuildVerticalTargets>
   </PropertyGroup>
   
-  <Target Name="AnnotateProjectsWithConfiguration"
-          Returns="@(ProjectWithConfiguration)" >
-    <ItemGroup>
-      <ProjectWithConfiguration Include="@(Project)">
-        <AdditionalProperties Condition="'%(Project.TargetGroup)' != ''">%(ProjectWithConfiguration.AdditionalProperties);TargetGroup=%(Project.TargetGroup);OSGroup=%(Project.OSGroup)</AdditionalProperties>
-        <UndefineProperties Condition="'%(Project.TargetGroup)' == ''">TargetGroup;OSGroup</UndefineProperties>
-      </ProjectWithConfiguration>
-    </ItemGroup>
-  </Target>
-
   <!-- Add vertical projects to the project group for BuildAllProjects -->
   <Target Name="AddVerticalProjects"
           Inputs="%(Project.Identity)"

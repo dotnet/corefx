@@ -41,6 +41,8 @@
               ItemName="ProjectWithConfiguration" />
     </MSBuild>
 
+    <Message Text="%(ProjectWithConfiguration.Identity) - %(ProjectWithConfiguration.AdditionalProperties)" Importance="High" />
+
     <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
          however since the project names are unique it will essentially force each to run in its own batch -->
     <MSBuild Targets="$(DefaultBuildAllTarget)"
@@ -260,10 +262,13 @@
   <Target Name="FindBestConfiguration" />
   <Target Name="AnnotateProjectsWithConfiguration"
           Returns="@(ProjectWithConfiguration)" >
+    <Message Text="%(Project.Identity) - (%(Project.TargetGroup) - %(Project.OSGroup))" Importance="High" />
     <ItemGroup>
-      <ProjectWithConfiguration Include="@(Project)" />
+      <ProjectWithConfiguration Include="%(Project.Identity)">
+        <AdditionalProperties Condition="'%(Project.TargetGroup)' != ''">TargetGroup=%(Project.TargetGroup);OSGroup=%(Project.OSGroup)</AdditionalProperties>
+      </ProjectWithConfiguration>
     </ItemGroup>
   </Target>
-  
+
   <Import Condition="'$(_BuildAgainstPackages)' == 'true'" Project="$(ToolsDir)/buildagainstpackages.targets" />
 </Project>
