@@ -274,6 +274,12 @@
             "ConfigurationGroup": "Release"
           }
         },
+        "os": {
+          "description": "Sets OSGroup to the OS name where the build is going to run or it is set to the value passed by the user.",
+          "settings": {
+            "OSGroup": "default"
+          }
+        },        
         "target-os": {
           "description": "Sets TargetOS to the OS name where the build is going to run or it is set to the value passed by the user.",
           "settings": {
