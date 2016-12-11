@@ -20,23 +20,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
            
-            IEnumerable<TSource> big = null;
-            IEnumerable<TSource> small = null;
-
-            if (first.Count() > second.Count())
+            IEnumerable<TSource> first2 = first.Distinct();
+            IEnumerable<TSource> second2 = second.Distinct();
+            
+            foreach (TSource element in first2)
             {
-                big = first.Distinct();
-                small = second.Distinct();
-            }
-            else
-            {
-                big = second.Distinct();
-                small = first.Distinct();
-            }
-
-            foreach (TSource element in big)
-            {
-                if (small.Contains(element))
+                if (second2.Contains(element))
                 {
                     yield return element;
                 }
