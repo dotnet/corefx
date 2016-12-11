@@ -19,7 +19,12 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(second));
             }
-           
+            
+            return IntersectIteratorNoComparer(first, second);          
+        }
+        
+        private static IEnumerable<TSource> IntersectIteratorNoComparer<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second)
+        {
             IEnumerable<TSource> first2 = first.Distinct();
             IEnumerable<TSource> second2 = second.Distinct();
             
@@ -29,9 +34,9 @@ namespace System.Linq
                 {
                     yield return element;
                 }
-            }
+            }            
         }
-
+        
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
             if (first == null)
