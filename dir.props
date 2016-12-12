@@ -389,6 +389,20 @@
         <NuGetTargetMoniker>.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
       </PropertyGroup>
     </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.2'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.2</PackageTargetFramework>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.2corert'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.2</PackageTargetFramework>
+        <PackageTargetRuntime Condition="'$(PackageTargetRuntime)' != ''">$(PackageTargetRuntime)-corert</PackageTargetRuntime>
+        <PackageTargetRuntime Condition="'$(PackageTargetRuntime)' == ''">corert</PackageTargetRuntime>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(TargetGroup)'=='dnxcore50'">
       <PropertyGroup>
         <ConfigurationErrorMsg>$(ConfigurationErrorMsg);DNXCore50 has been deprecated.  Please use NETStandard1.X or NETCoreApp1.0 instead.</ConfigurationErrorMsg>
@@ -496,6 +510,8 @@
     <TestTFM Condition="'$(TestTFM)'==''">$(DefaultTestTFM)</TestTFM>
     <!-- we default FilterToTestTFM to DefaultTestTFM if it is not explicity defined -->
     <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">$(DefaultTestTFM)</FilterToTestTFM>
+    <!-- FilterTestNugetTargetMoniker needs to stay in the long form to be used for Framework and Runtime filtering purposes -->
+    <FilterTestNugetTargetMoniker Condition="'$(FilterTestNugetTargetMoniker)'==''">.NETCoreApp,Version=v1.1</FilterTestNugetTargetMoniker>
   </PropertyGroup>
 
   <PropertyGroup>
