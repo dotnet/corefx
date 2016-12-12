@@ -106,39 +106,6 @@ namespace System
             return true;
         }
 
-        public static bool HasAtLeastNativeSizeAlignment<T>() => PerTypeValues<T>.HasAtLeastNativeSizeAlignment;
-
-        private static bool HasAtLeastNativeSizeAlignmentCore<T>()
-        {
-            if (typeof(T) == typeof(byte))
-                return false;
-            if (typeof(T) == typeof(sbyte))
-                return false;
-            if (typeof(T) == typeof(bool))
-                return false;
-            if (typeof(T) == typeof(char))
-                return false;
-            if (typeof(T) == typeof(short))
-                return false;
-            if (typeof(T) == typeof(ushort))
-                return false;
-            if (typeof(T) == typeof(int) && Unsafe.SizeOf<IntPtr>() == sizeof(int))
-                return true;
-            if (typeof(T) == typeof(uint) && Unsafe.SizeOf<IntPtr>() == sizeof(uint))
-                return true;
-            if (typeof(T) == typeof(long))
-                return true;
-            if (typeof(T) == typeof(ulong))
-                return true;
-            if (typeof(T) == typeof(IntPtr))
-                return true;
-            if (typeof(T) == typeof(UIntPtr))
-                return true;
-            if (typeof(T).GetTypeInfo().IsPrimitive && ((Unsafe.SizeOf<T>() % Unsafe.SizeOf<IntPtr>()) == 0))
-                return true;
-            return false;
-        }
-
         [StructLayout(LayoutKind.Sequential, Size = 64)]
         private struct Reg64 { }
         [StructLayout(LayoutKind.Sequential, Size = 32)]
@@ -146,69 +113,73 @@ namespace System
         [StructLayout(LayoutKind.Sequential, Size = 16)]
         private struct Reg16 { }
 
-        public static void ClearUnaligned(ref byte b, int byteLength)
+        unsafe static readonly UIntPtr UIntPtrMask4 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~3u) : new UIntPtr(~((ulong)(3u)));
+        unsafe static readonly UIntPtr UIntPtrMask8 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~7u) : new UIntPtr(~((ulong)(7u)));
+        unsafe static readonly UIntPtr UIntPtrMask16 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~15u) : new UIntPtr(~((ulong)(15u)));
+        unsafe static readonly UIntPtr UIntPtrMask32 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~31u) : new UIntPtr(~((ulong)(31u)));
+        unsafe static readonly UIntPtr UIntPtrMask64 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~63u) : new UIntPtr(~((ulong)(63u)));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        unsafe static UIntPtr BitwiseAnd(this UIntPtr ptr, UIntPtr mask)
         {
-            int i = 0;
-            var ptrSize = Unsafe.SizeOf<IntPtr>();
-            if (byteLength >= ptrSize)
-            {
-                var zero = IntPtr.Zero;
-                IntPtr byteOffset = Unsafe.ByteOffset(ref b, ref Unsafe.As<IntPtr, byte>(ref zero));
-
-                // IntPtr does not support arithmetic so need to go through hoops and loops to make mask
-                IntPtr byteOffsetAligned = ptrSize == 4
-                    ? new IntPtr((int)byteOffset & ~(ptrSize - 1))
-                    : new IntPtr((long)byteOffset & ~((long)(ptrSize - 1)));
-
-                // Align to be sure we do not tear an object reference
-                int bytesBeforeReferenceAlignment = ptrSize == 4
-                    ? (int)((int)byteOffset - (int)byteOffsetAligned)
-                    : (int)((long)byteOffset - (long)byteOffsetAligned);
-                bytesBeforeReferenceAlignment = bytesBeforeReferenceAlignment > byteLength
-                    ? byteLength : bytesBeforeReferenceAlignment;
-
-                while (i < bytesBeforeReferenceAlignment)
-                {
-                    Unsafe.Add<byte>(ref b, i) = 0;
-                    ++i;
-                }
-
-                ClearNativeSizeAligned(ref b, byteLength, ref i);
-            }
-            while (i < byteLength)
-            {
-                Unsafe.Add<byte>(ref b, i) = 0;
-                ++i;
-            }
+            return (sizeof(UIntPtr) == sizeof(uint)) 
+                ? new UIntPtr((uint)ptr & (uint)mask)
+                : new UIntPtr((ulong)ptr & (ulong)mask);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        unsafe static bool LessThan(this IntPtr index, UIntPtr length)
+        {
+            return (sizeof(UIntPtr) == sizeof(uint))
+                ? (uint)index < (uint)length
+                : (ulong)index < (ulong)length;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        unsafe static bool LessThanEqual(this IntPtr index, UIntPtr length)
+        {
+            return (sizeof(UIntPtr) == sizeof(uint))
+                ? (int)index <= (int)length
+                : (long)index <= (long)length;
         }
 
-        public static void ClearNativeSizeAligned(ref byte b, int byteLength, ref int i)
+        public unsafe static void ClearPointerSized(ref byte b, UIntPtr byteLength)
         {
-            // TODO: Perhaps do switch casing...
-            while (i < (byteLength - 64))
+            // TODO: Perhaps do switch casing... 
+            // TODO: Bitwise masking generates weird assembly 64-bit
+                
+            var i = IntPtr.Zero;
+            //while (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask64)))
+            while (i.LessThanEqual(byteLength - sizeof(Reg64)))
             {
                 Unsafe.As<byte, Reg64>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg64);
-                i += 64;
+                i += sizeof(Reg64);
             }
-            if (i < (byteLength - 32))
+            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask32)))
+            if (i.LessThanEqual(byteLength - sizeof(Reg32)))
             {
                 Unsafe.As<byte, Reg32>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg32);
-                i += 32;
+                i += sizeof(Reg32);
             }
-            if (i < (byteLength - 16))
+            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask16)))
+            if (i.LessThanEqual(byteLength - sizeof(Reg16)))
             {
                 Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg16);
-                i += 16;
+                i += sizeof(Reg16);
             }
-            if (i < (byteLength - 8))
+            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask8)))
+            if (i.LessThanEqual(byteLength - sizeof(long)))
             {
                 Unsafe.As<byte, long>(ref Unsafe.Add<byte>(ref b, i)) = 0;
-                i += 8;
+                i += sizeof(long);
             }
-            if (i < (byteLength - 4))
+            // JIT: Should elide this if 64-bit
+            if (sizeof(IntPtr) == sizeof(int))
             {
-                Unsafe.As<byte, int>(ref Unsafe.Add<byte>(ref b, i)) = 0;
-                i += 4;
+                //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask4)))
+                if (i.LessThanEqual(byteLength - sizeof(int)))
+                {
+                    Unsafe.As<byte, int>(ref Unsafe.Add<byte>(ref b, i)) = 0;
+                    i += sizeof(int);
+                }
             }
         }
 
@@ -222,8 +193,6 @@ namespace System
             // true == confirmed reference free
             //
             public static readonly bool IsReferenceFree = IsReferenceFreeCore<T>();
-
-            public static readonly bool HasAtLeastNativeSizeAlignment = HasAtLeastNativeSizeAlignmentCore<T>();
 
             public static readonly T[] EmptyArray = new T[0];
 

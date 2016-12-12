@@ -56,6 +56,33 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public unsafe static void ClearByteUnalignedFixed()
+        {
+            const byte initial = 5;
+            const int length = 32;
+            var actualFull = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                actualFull[i] = initial;
+            }
+            var expectedFull = new byte[length];
+
+            var start = 1;
+            var expectedSpan = new Span<byte>(expectedFull, start, length - start - 1);
+            fixed (byte* p = actualFull)
+            {
+                var actualSpan = new Span<byte>(p + start, length - start - 1);
+                actualSpan.Clear();
+
+                var actual = actualSpan.ToArray();
+                var expected = expectedSpan.ToArray();
+                Assert.Equal<byte>(expected, actual);
+                Assert.Equal(initial, actualFull[0]);
+                Assert.Equal(initial, actualFull[length - 1]);
+            }
+        }
+
+        [Fact]
         public static void ClearValueTypeWithoutReferences()
         {
             int[] actual = { 1, 2, 3 };
@@ -67,10 +94,40 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ClearValueTypeWithoutReferencesLonger()
+        {
+            int[] actual = new int[2048];
+            for (int i = 0; i < actual.Length; i++)
+            {
+                actual[i] = i + 1;
+            }
+            int[] expected = new int[actual.Length];
+
+            var span = new Span<int>(actual);
+            span.Clear();
+            Assert.Equal<int>(expected, actual);
+        }
+
+        [Fact]
         public static void ClearReferenceType()
         {
             string[] actual = { "a", "b", "c" };
             string[] expected = { null, null, null };
+
+            var span = new Span<string>(actual);
+            span.Clear();
+            Assert.Equal<string>(expected, actual);
+        }
+
+        [Fact]
+        public static void ClearReferenceTypeLonger()
+        {
+            string[] actual = new string[2048];
+            for (int i = 0; i < actual.Length; i++)
+            {
+                actual[i] = (i + 1).ToString();
+            }
+            string[] expected = new string[actual.Length];
 
             var span = new Span<string>(actual);
             span.Clear();

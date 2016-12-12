@@ -235,121 +235,32 @@ namespace System
         /// <summary>
         /// Clears the contents of this span.
         /// </summary>
-        
-        public void Clear()
+        public unsafe void Clear()
         {
             if (_length == 0) { return; }
 
-            ref T r = ref DangerousGetPinnableReference();
-            int length = _length;
+            UIntPtr byteLength = (UIntPtr)(_length * Unsafe.SizeOf<T>());
 
-            // TODO: Remove ugly regions when the right impl has been found
-            #region Naive impl
-            //for (int i = 0; i < length; i++)
-            //{
-            //    Unsafe.Add<T>(ref r, i) = default(T);
-            //}
-            #endregion
-            #region Simple loop unrolling
-            //int i = 0;
-            //for (; i < (length & ~7); i += 8)
-            //{
-            //    Unsafe.Add<T>(ref r, i + 0) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 1) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 2) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 3) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 4) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 5) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 6) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 7) = default(T);
-            //}
-            //if (i < (length & ~3))
-            //{
-            //    Unsafe.Add<T>(ref r, i + 0) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 1) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 2) = default(T);
-            //    Unsafe.Add<T>(ref r, i + 3) = default(T);
-            //    i += 4:
-            //}
-            //for (; i < length; i++)
-            //{
-            //    Unsafe.Add<T>(ref r, i) = default(T);
-            //}
-            #endregion
-            #region Unsafe.InitBlockUnaligned fixed impl (until ref versions of InitBlock added)
-            //unsafe
-            //{
-            //    fixed (byte* p = &Unsafe.As<T, byte>(ref r))
-            //    {
-            //        // For `IsReferenceOrContainsReferences`-types we cannot use
-            //        // InitBlock* since this fills byte-wise, which may cause object reference
-            //        // tearing.
-            //        Unsafe.InitBlockUnaligned(p, 0, (UIntPtr)(length * Unsafe.SizeOf<T>()));
-            //    }
-            //}
-            #endregion
-            #region Unsafe.InitBlockUnaligned impl (ref based)
-            // TODO: Is this safe to do for `IsReferenceOrContainsReferences`-types,
-            //       or might it cause reference tearing, partial clear of address?
-            //Unsafe.InitBlockUnaligned(ref r, 0, (UIntPtr)(length * Unsafe.SizeOf<T>()));
-            #endregion
-            #region memset like impl
-            // TODO: Need to handle pointer sized length...
-            var byteLength = length * Unsafe.SizeOf<T>();
-            // TODO: Rename and negate IsReferenceFree => IsReferenceOrContainsReferences then swap if and remove !
-            //if (SpanHelpers.IsReferenceFree<T>())// && !SpanHelpers.HasAtLeastNativeSizeAlignment<T>())
+            if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
             {
-                SpanHelpers.ClearUnaligned(ref Unsafe.As<T, byte>(ref r), byteLength);
+                if (_pinnable == null)
+                {
+                    Unsafe.InitBlockUnaligned(_byteOffset.ToPointer(), 0, byteLength);
+                }
+                else
+                {
+                    // TODO: Replace with ref version of InitBlockUnaligned
+                    fixed (byte* p = &Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset)))
+                    {
+                        Unsafe.InitBlockUnaligned(p, 0, byteLength);
+                    }
+                }
             }
-            //else
-            //{
-            //    // TODO: There seems to be alignment issues when not running with clear unaligned...
-            //    int i = 0;
-            //    SpanHelpers.ClearNativeSizeAligned(ref Unsafe.As<T, byte>(ref r), byteLength, ref i);
-            //}
-            #endregion
-            #region Other memset like impl
-            //size_t blockIdx;
-            //size_t blocks = count >> 3;
-            //size_t bytesLeft = count - (blocks << 3);
-            //_UINT64 cUll =
-            //    c
-            //    | (((_UINT64)c) << 8)
-            //    | (((_UINT64)c) << 16)
-            //    | (((_UINT64)c) << 24)
-            //    | (((_UINT64)c) << 32)
-            //    | (((_UINT64)c) << 40)
-            //    | (((_UINT64)c) << 48)
-            //    | (((_UINT64)c) << 56);
-
-            //_UINT64* destPtr8 = (_UINT64*)dest;
-            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr8[blockIdx] = cUll;
-
-            //if (!bytesLeft) return dest;
-
-            //blocks = bytesLeft >> 2;
-            //bytesLeft = bytesLeft - (blocks << 2);
-
-            //_UINT32* destPtr4 = (_UINT32*)&destPtr8[blockIdx];
-            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr4[blockIdx] = (_UINT32)cUll;
-
-            //if (!bytesLeft) return dest;
-
-            //blocks = bytesLeft >> 1;
-            //bytesLeft = bytesLeft - (blocks << 1);
-
-            //_UINT16* destPtr2 = (_UINT16*)&destPtr4[blockIdx];
-            //for (blockIdx = 0; blockIdx < blocks; blockIdx++) destPtr2[blockIdx] = (_UINT16)cUll;
-
-            //if (!bytesLeft) return dest;
-
-            //_UINT8* destPtr1 = (_UINT8*)&destPtr2[blockIdx];
-            //for (blockIdx = 0; blockIdx < bytesLeft; blockIdx++) destPtr1[blockIdx] = (_UINT8)cUll;
-
-            //return dest;
-            #endregion
-            #region custom align, stride in type size impl
-            #endregion
+            else
+            {
+                ref T r = ref DangerousGetPinnableReference();
+                SpanHelpers.ClearPointerSized(ref Unsafe.As<T, byte>(ref r), byteLength);
+            }
         }
 
 
