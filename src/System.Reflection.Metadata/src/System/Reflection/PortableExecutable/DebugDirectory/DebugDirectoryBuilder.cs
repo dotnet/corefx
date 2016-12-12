@@ -4,8 +4,11 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection.Metadata;
+
+#if !CORERT
+using System.IO.Compression;
+#endif
 
 namespace System.Reflection.PortableExecutable
 {
@@ -116,6 +119,9 @@ namespace System.Reflection.PortableExecutable
 
         private static int WriteEmbeddedPortablePdbData(BlobBuilder builder, BlobBuilder debugMetadata)
         {
+#if CORERT
+			throw new PlatformNotSupportedException();
+#else
             int start = builder.Count;
 
             // header (signature, decompressed size):
@@ -137,6 +143,7 @@ namespace System.Reflection.PortableExecutable
             builder.WriteBytes(compressed.ToArray());
 
             return builder.Count - start;
+#endif
         }
 
         private static int WriteCodeViewData(BlobBuilder builder, string pdbPath, Guid pdbGuid)

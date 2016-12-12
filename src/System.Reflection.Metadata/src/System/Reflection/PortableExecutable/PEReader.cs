@@ -5,11 +5,14 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection.Internal;
 using System.Reflection.Metadata;
 using System.Runtime.ExceptionServices;
 using System.Threading;
+
+#if !CORERT
+using System.IO.Compression;
+#endif
 
 namespace System.Reflection.PortableExecutable
 {
@@ -674,6 +677,9 @@ namespace System.Reflection.PortableExecutable
         // internal for testing
         internal static unsafe ImmutableArray<byte> DecodeEmbeddedPortablePdbDebugDirectoryData(AbstractMemoryBlock block)
         {
+#if CORERT
+			throw new PlatformNotSupportedException();
+#else
             byte[] decompressed;
             
             var headerReader = block.GetReader();
@@ -724,6 +730,7 @@ namespace System.Reflection.PortableExecutable
             }
 
             return ImmutableByteArrayInterop.DangerousCreateFromUnderlyingArray(ref decompressed);
+#endif
         }
 
         /// <summary>
