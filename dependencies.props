@@ -2,13 +2,13 @@
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
   <PropertyGroup>
     <CoreFxCurrentRef>ca092b654a4a4b3eb0abd63fbf019442874e161d</CoreFxCurrentRef>
-    <CoreClrCurrentRef>260155849520b4382eb58d13f1d601da9f954959</CoreClrCurrentRef>
+    <CoreClrCurrentRef>4057ab980792d3d337fbf1487da11a101291c284</CoreClrCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <CoreFxExpectedPrerelease>preview1-24705-01</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>servicing-24812-01</CoreClrExpectedPrerelease>
+    <CoreClrExpectedPrerelease>servicing-24812-02</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>rc3-24214-00</ExternalExpectedPrerelease>
   </PropertyGroup>
 
