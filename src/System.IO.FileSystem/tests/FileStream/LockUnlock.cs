@@ -38,7 +38,7 @@ namespace System.IO.Tests
             Assert.Throws<ObjectDisposedException>(() => fs.Lock(0, 1));
         }
 
-		[ActiveIssue(5964, TestPlatforms.OSX)]		
+        [ActiveIssue(5964, TestPlatforms.OSX)]
         [Theory]
         [InlineData(100, 0, 100)]
         [InlineData(200, 0, 100)]
@@ -57,7 +57,7 @@ namespace System.IO.Tests
             }
         }
 
-		[ActiveIssue(5964, TestPlatforms.OSX)]		
+        [ActiveIssue(5964, TestPlatforms.OSX)]
         [Theory]
         [InlineData(10, 0, 2, 3, 5)]
         public void NonOverlappingRegions_Success(long fileLength, long firstPosition, long firstLength, long secondPosition, long secondLength)
@@ -114,7 +114,7 @@ namespace System.IO.Tests
             }
         }
 
-		[ActiveIssue(5964, TestPlatforms.OSX)]		
+        [ActiveIssue(5964, TestPlatforms.OSX)]
         [Theory]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix locks are on a per-process basis, so overlapping locks from the same process are allowed.
         [InlineData(10, 0, 10, 1, 2)]
@@ -139,7 +139,7 @@ namespace System.IO.Tests
             }
         }
 
-		[ActiveIssue(5964, TestPlatforms.OSX)]		
+        [ActiveIssue(5964, TestPlatforms.OSX)]
         [Theory]
         [InlineData(10, 0, 10, 1, 2)]
         [InlineData(10, 3, 5, 3, 5)]
