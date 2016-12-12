@@ -120,11 +120,11 @@ namespace System
         unsafe static readonly UIntPtr UIntPtrMask64 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~63u) : new UIntPtr(~((ulong)(63u)));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static UIntPtr BitwiseAnd(this UIntPtr ptr, UIntPtr mask)
+        unsafe static UIntPtr BitwiseAnd(this UIntPtr value, UIntPtr mask)
         {
             return (sizeof(UIntPtr) == sizeof(uint)) 
-                ? new UIntPtr((uint)ptr & (uint)mask)
-                : new UIntPtr((ulong)ptr & (ulong)mask);
+                ? new UIntPtr((uint)value & (uint)mask)
+                : new UIntPtr((ulong)value & (ulong)mask);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe static bool LessThan(this IntPtr index, UIntPtr length)
@@ -144,8 +144,8 @@ namespace System
         public unsafe static void ClearPointerSized(ref byte b, UIntPtr byteLength)
         {
             // TODO: Perhaps do switch casing... 
-            // TODO: Bitwise masking generates weird assembly 64-bit
-                
+            // TODO: Bitwise masking generates weird assembly 64-bit, including not inlining calls.
+
             var i = IntPtr.Zero;
             //while (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask64)))
             while (i.LessThanEqual(byteLength - sizeof(Reg64)))

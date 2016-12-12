@@ -263,50 +263,63 @@ namespace System
             }
         }
 
-
-
         /// <summary>
         /// Fills the contents of this span with the given value.
         /// </summary>
-        public void Fill(T value)
+        public unsafe void Fill(T value)
         {
             if (_length == 0) { return; }
 
-            ref T r = ref DangerousGetPinnableReference();
             int length = _length;
-            // TODO: Remove ugly regions when the right impl has been found
-            #region Naive impl
-            //for (int i = 0; i < length; i++)
-            //{
-            //    Unsafe.Add<T>(ref r, i) = value;
-            //}
-            #endregion
-            #region Simple loop unrolling
-            int i = 0;
-            for (; i < (length & ~7); i += 8)
+
+            if (Unsafe.SizeOf<T>() == 1)
             {
-                Unsafe.Add<T>(ref r, i + 0) = value;
-                Unsafe.Add<T>(ref r, i + 1) = value;
-                Unsafe.Add<T>(ref r, i + 2) = value;
-                Unsafe.Add<T>(ref r, i + 3) = value;
-                Unsafe.Add<T>(ref r, i + 4) = value;
-                Unsafe.Add<T>(ref r, i + 5) = value;
-                Unsafe.Add<T>(ref r, i + 6) = value;
-                Unsafe.Add<T>(ref r, i + 7) = value;
+                byte fill = Unsafe.As<T, byte>(ref value);
+                if (_pinnable == null)
+                {
+                    Unsafe.InitBlockUnaligned(_byteOffset.ToPointer(), fill, (uint)length);
+                }
+                else
+                {
+                    // TODO: Replace with ref version of InitBlockUnaligned
+                    fixed (byte* p = &Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset)))
+                    {
+                        Unsafe.InitBlockUnaligned(p, fill, (uint)length);
+                    }
+                }
             }
-            if (i < (length & ~3))
+            else
             {
-                Unsafe.Add<T>(ref r, i + 0) = value;
-                Unsafe.Add<T>(ref r, i + 1) = value;
-                Unsafe.Add<T>(ref r, i + 2) = value;
-                Unsafe.Add<T>(ref r, i + 3) = value;
-                i += 4;
+                ref T r = ref DangerousGetPinnableReference();
+
+                // TODO: Create block fill for value types of power of two sizes e.g. 2,4,8,16
+
+                // Simple loop unrolling
+                int i = 0;
+                for (; i < (length & ~7); i += 8)
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    Unsafe.Add<T>(ref r, i + 4) = value;
+                    Unsafe.Add<T>(ref r, i + 5) = value;
+                    Unsafe.Add<T>(ref r, i + 6) = value;
+                    Unsafe.Add<T>(ref r, i + 7) = value;
+                }
+                if (i < (length & ~3))
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    i += 4;
+                }
+                for (; i < length; i++)
+                {
+                    Unsafe.Add<T>(ref r, i) = value;
+                }
             }
-            for (; i < length; i++)
-            {
-                Unsafe.Add<T>(ref r, i) = value;
-            }
-            #endregion
         }
 
         /// <summary>
