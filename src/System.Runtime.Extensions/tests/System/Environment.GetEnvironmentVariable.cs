@@ -136,7 +136,7 @@ namespace System.Tests
 
         public void EnumerateYieldsDictionaryEntryFromIEnumerable()
         {
-            // GetEnvrionmentVariables has always yielded DictionaryEntry from IEnumerable
+            // GetEnvironmentVariables has always yielded DictionaryEntry from IEnumerable
             IDictionary vars = Environment.GetEnvironmentVariables();
             IEnumerator enumerator = ((IEnumerable)vars).GetEnumerator();
             if (enumerator.MoveNext())
@@ -170,7 +170,7 @@ namespace System.Tests
         [InlineData(EnvironmentVariableTarget.User)]
         public void EnumerateYieldsDictionaryEntryFromIEnumerable(EnvironmentVariableTarget target)
         {
-            // GetEnvrionmentVariables has always yielded DictionaryEntry from IEnumerable
+            // GetEnvironmentVariables has always yielded DictionaryEntry from IEnumerable
             IDictionary vars = Environment.GetEnvironmentVariables(target);
             IEnumerator enumerator = ((IEnumerable)vars).GetEnumerator();
             if (enumerator.MoveNext())
