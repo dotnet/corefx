@@ -10,7 +10,7 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
-        [Fact(Skip = "Issue # 14484 - Disabling IndexOverflow test until FastSpan has a GetItem implementation. Related: issue # 13681")]
+        [Fact]
         public static void IndexOverflow()
         {
             //
