@@ -3,8 +3,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);ReflectionOnly</DefineConstants>
-    <RootNamespace>System.Runtime.Serialization.Json.ReflectionOnly.Tests</RootNamespace>
-    <AssemblyName>System.Runtime.Serialization.Json.ReflectionOnly.Tests</AssemblyName>
     <ProjectGuid>{C99A835E-46F3-4C05-AD34-7DD84FB7466B}</ProjectGuid>
     <ProjectJson>../project.json</ProjectJson>
     <ProjectLockJson>../project.lock.json</ProjectLockJson>
