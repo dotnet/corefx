@@ -17,11 +17,6 @@
     <Compile Include="DcjsPerformanceTest.cs" />
     <Compile Include="JsonNetPerformanceTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(UseContractReferences)' == ''">
-    <ProjectReference Include="..\..\..\System.Private.DataContractSerialization\src\System.Private.DataContractSerialization.csproj" />
-    <ProjectReference Include="..\..\..\System.Runtime.Serialization.Xml\src\System.Runtime.Serialization.Xml.csproj" />
-    <ProjectReference Include="..\..\..\System.Runtime.Serialization.Json\src\System.Runtime.Serialization.Json.csproj" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
