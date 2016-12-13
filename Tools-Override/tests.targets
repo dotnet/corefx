@@ -5,8 +5,8 @@
 
   <PropertyGroup>
     <TestRuntimeDir>$(RuntimeDir)</TestRuntimeDir>
-    <TestHostExecutable>$(TestRuntimeDir)/corerun</TestHostExecutable>
-    <XunitExecutable>$(TestRuntimeDir)/xunit.console.netcore.exe</XunitExecutable>
+    <TestHostExecutable Condition="'$(TestHostExecutable)' == ''">$(TestRuntimeDir)/corerun</TestHostExecutable>
+    <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestRuntimeDir)/xunit.console.netcore.exe</XunitExecutable>
   </PropertyGroup>
 
     <!-- Which categories of tests to run by default -->
