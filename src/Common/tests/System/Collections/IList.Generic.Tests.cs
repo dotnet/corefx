@@ -260,7 +260,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_ItemSet_InvalidValue(int count)
         {
-            if (!IsReadOnly)
+            if (count > 0&& !IsReadOnly)
             {
                 Assert.All(InvalidValues, value =>
                 {
@@ -447,7 +447,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_Insert_FirstItemToDefaultValue(int count)
         {
-            if (!IsReadOnly && DefaultValueAllowed && !AddRemoveClear_ThrowsNotSupported)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed)
             {
                 IList<T> list = GenericIListFactory(count);
                 T value = default(T);
@@ -476,7 +476,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_Insert_LastItemToDefaultValue(int count)
         {
-            if (!IsReadOnly && DefaultValueAllowed && !AddRemoveClear_ThrowsNotSupported)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed)
             {
                 IList<T> list = GenericIListFactory(count);
                 T value = default(T);
@@ -491,7 +491,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_Insert_DuplicateValues(int count)
         {
-            if (!IsReadOnly && DuplicateValuesAllowed && !AddRemoveClear_ThrowsNotSupported)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DuplicateValuesAllowed)
             {
                 IList<T> list = GenericIListFactory(count);
                 T value = CreateT(123452);
@@ -608,7 +608,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_Generic_CurrentAtEnd_AfterAdd(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 IList<T> collection = GenericIListFactory(count);
 

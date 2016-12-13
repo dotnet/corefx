@@ -26,7 +26,7 @@ namespace System.Tests
         }
 
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
-        protected override bool Enumerator_MoveNext_ModifiedDuringEnumeration_ThrowsInvalidOperationException => false;
+        protected override bool Enumerator_ModifiedDuringEnumeration_ThrowsInvalidOperationException => false;
         protected override bool IsReadOnly_ValidityValue => true;
         protected override bool AddRemoveClear_ThrowsNotSupported => true;
 

@@ -143,19 +143,11 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_DefaultValue(int count)
         {
-            if (DefaultValueAllowed && !IsReadOnly)
+            if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
-                if (!AddRemoveClear_ThrowsNotSupported)
-                {
-                    collection.Add(default(T));
-                    Assert.Equal(count + 1, collection.Count);
-                }
-                else
-                {
-                    Assert.Throws<NotSupportedException>(() => collection.Add(default(T)));
-                    Assert.Equal(count, collection.Count);
-                }
+                collection.Add(default(T));
+                Assert.Equal(count + 1, collection.Count);
             }
         }
 
@@ -163,7 +155,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToMiddleOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -180,7 +172,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToBeginningOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -197,7 +189,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToEndOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -384,9 +376,9 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
         {
-            ICollection<T> collection = GenericICollectionFactory(count);
             if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
+                ICollection<T> collection = GenericICollectionFactory(count);
                 collection.Add(default(T));
                 Assert.True(collection.Contains(default(T)));
             }
@@ -420,9 +412,9 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_Generic_Contains_DefaultValueWhenNotAllowed(int count)
         {
-            ICollection<T> collection = GenericICollectionFactory(count);
             if (!DefaultValueAllowed && !IsReadOnly)
             {
+                ICollection<T> collection = GenericICollectionFactory(count);
                 if (DefaultValueWhenNotAllowed_Throws)
                     Assert.Throws<ArgumentNullException>("item", () => collection.Contains(default(T)));
                 else
