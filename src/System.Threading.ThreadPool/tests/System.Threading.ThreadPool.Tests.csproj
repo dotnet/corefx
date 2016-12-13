@@ -17,8 +17,5 @@
       <Link>CommonTest\System\Threading\ThreadTestHelpers.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Threading.ThreadPool.pkgproj" />
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

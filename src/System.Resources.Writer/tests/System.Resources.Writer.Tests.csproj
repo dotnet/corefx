@@ -10,14 +10,5 @@
   <ItemGroup>
     <Compile Include="ResourceWriterUnitTest.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\System.Resources.ResourceManager\pkg\System.Resources.ResourceManager.pkgproj">
-      <Name>System.Resources.ResourceManager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\pkg\System.Resources.Writer.pkgproj">
-      <Project>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</Project>
-      <Name>System.Resources.Writer</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

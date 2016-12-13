@@ -16,9 +16,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\pkg\System.Reflection.TypeExtensions.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="MemberInfoTests.CoreCLR.cs" />
     <Compile Include="ModuleTests.CoreCLR.cs" />
   </ItemGroup>

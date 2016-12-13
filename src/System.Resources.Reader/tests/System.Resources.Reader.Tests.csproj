@@ -13,10 +13,5 @@
   <ItemGroup>
     <Compile Include="ResourceReaderUnitTest.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Resources.Reader.pkgproj">
-      <Name>System.Resources.Reader</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

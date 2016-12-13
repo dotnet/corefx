@@ -23,11 +23,5 @@
     <Compile Include="MethodBaseTests.cs" />
     <Compile Include="ModuleTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Reflection.TypeExtensions.pkgproj">
-      <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
-      <Name>System.Reflection.TypeExtensions</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

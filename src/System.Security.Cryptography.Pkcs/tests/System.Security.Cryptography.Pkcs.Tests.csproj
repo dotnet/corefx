@@ -16,12 +16,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Security.Cryptography.Pkcs.pkgproj">
-      <Project>{03D84CBD-896D-4B2F-9A22-07034F51E73D}</Project>
-      <Name>System.Security.Cryptography.Pkcs</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>
     </Compile>

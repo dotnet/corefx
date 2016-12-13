@@ -35,12 +35,5 @@
       <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Threading.Tasks.Parallel.pkgproj">
-      <Project>{A6BA5DF2-772E-4DA1-BC2D-89FF4A21EE4F}</Project>
-      <Name>System.Threading.Tasks.Parallel</Name>
-      <Private>true</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

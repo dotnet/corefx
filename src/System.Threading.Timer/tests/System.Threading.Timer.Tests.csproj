@@ -17,8 +17,5 @@
     <Compile Include="TimerChangeTests.netstandard1.7.cs" />
     <Compile Include="TimerFiringTests.netstandard1.7.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Threading.Timer.pkgproj" />
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

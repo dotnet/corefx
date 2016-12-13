@@ -22,7 +22,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\pkg\System.Reflection.pkgproj" />
     <ProjectReference Include="..\TestExe\System.Reflection.Tests.TestExe.csproj">
       <Project>{8c19b991-41e9-4b38-9602-e19375397f1d}</Project>
       <Name>System.Reflection.Tests.TestExe</Name>

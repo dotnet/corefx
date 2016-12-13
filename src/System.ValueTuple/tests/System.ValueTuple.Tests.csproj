@@ -12,11 +12,5 @@
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="ValueTupleTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.ValueTuple.pkgproj">
-      <Name>System.ValueTuple</Name>
-      <Project>{4C2655DB-BD9E-4C86-83A6-744ECDDBDF29}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

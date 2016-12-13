@@ -10,11 +10,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT_Release|AnyCPU'" />
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Runtime.Handles.pkgproj" />
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="CriticalHandle.cs" />
     <Compile Include="SafeHandle.cs" />
     <Compile Include="SafeWaitHandle.cs" />

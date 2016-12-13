@@ -9,10 +9,5 @@
   <ItemGroup>
     <Compile Include="UnsafeTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Runtime.CompilerServices.Unsafe.pkgproj">
-      <Name>System.Runtime.CompilerServices.Unsafe</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

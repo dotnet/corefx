@@ -35,11 +35,6 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\pkg\System.Runtime.Serialization.Formatters.pkgproj">
-      <Project>{ca488507-3b6e-4494-b7be-7b4eeeb2c4d1}</Project>
-      <Name>System.Runtime.Serialization.Formatters</Name>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

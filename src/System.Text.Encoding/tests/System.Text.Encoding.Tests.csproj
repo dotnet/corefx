@@ -79,13 +79,5 @@
     <Compile Include="Decoder\Decoder.netstandard1.7.cs" />
     <Compile Include="Encoder\Encoder.netstandard1.7.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\System.Text.Encoding.Extensions\pkg\System.Text.Encoding.Extensions.pkgproj">
-      <Name>System.Text.Encoding.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj">
-      <Name>System.Runtime</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -11,11 +11,5 @@
     <Compile Include="AsyncValueTaskMethodBuilderTests.cs" />
     <Compile Include="ValueTaskTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Threading.Tasks.Extensions.pkgproj">
-      <Project>{F24D3391-2928-4E83-AADE-B34423498750}</Project>
-      <Name>System.Threading.Tasks.Extensions</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

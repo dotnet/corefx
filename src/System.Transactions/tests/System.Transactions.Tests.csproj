@@ -16,10 +16,5 @@
     <Compile Include="HelperFunctions.cs" />
     <Compile Include="TestEnlistments.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Transactions.pkgproj">
-      <Name>System.Transactions</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -9,12 +9,6 @@
     <Compile Include="HttpUtility\HttpUtilityTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Web.HttpUtility.pkgproj">
-      <Name>System.Web.HttpUtility</Name>
-      <Project>{53D09AF4-0C13-4197-B8AD-9746F0374E88}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

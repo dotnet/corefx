@@ -37,9 +37,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../pkg/System.Resources.ResourceManager.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TestResx.Designer.cs</LastGenOutput>
