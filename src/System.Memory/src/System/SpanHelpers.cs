@@ -106,33 +106,33 @@ namespace System
             return true;
         }
 
-        [StructLayout(LayoutKind.Sequential, Size = 64)]
-        private struct Reg64 { }
-        [StructLayout(LayoutKind.Sequential, Size = 32)]
-        private struct Reg32 { }
-        [StructLayout(LayoutKind.Sequential, Size = 16)]
-        private struct Reg16 { }
-
-        unsafe static readonly UIntPtr UIntPtrMask4 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~3u) : new UIntPtr(~((ulong)(3u)));
-        unsafe static readonly UIntPtr UIntPtrMask8 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~7u) : new UIntPtr(~((ulong)(7u)));
-        unsafe static readonly UIntPtr UIntPtrMask16 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~15u) : new UIntPtr(~((ulong)(15u)));
-        unsafe static readonly UIntPtr UIntPtrMask32 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~31u) : new UIntPtr(~((ulong)(31u)));
-        unsafe static readonly UIntPtr UIntPtrMask64 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~63u) : new UIntPtr(~((ulong)(63u)));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static UIntPtr BitwiseAnd(this UIntPtr value, UIntPtr mask)
+        [StructLayout(LayoutKind.Sequential)]
+        struct IntPtrs8
         {
-            return (sizeof(UIntPtr) == sizeof(uint)) 
-                ? new UIntPtr((uint)value & (uint)mask)
-                : new UIntPtr((ulong)value & (ulong)mask);
+            readonly IntPtr ip0;
+            readonly IntPtr ip1;
+            readonly IntPtr ip2;
+            readonly IntPtr ip3;
+            readonly IntPtr ip4;
+            readonly IntPtr ip5;
+            readonly IntPtr ip6;
+            readonly IntPtr ip7;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static bool LessThan(this IntPtr index, UIntPtr length)
+        [StructLayout(LayoutKind.Sequential)]
+        struct IntPtrs4
         {
-            return (sizeof(UIntPtr) == sizeof(uint))
-                ? (uint)index < (uint)length
-                : (ulong)index < (ulong)length;
+            readonly IntPtr ip0;
+            readonly IntPtr ip1;
+            readonly IntPtr ip2;
+            readonly IntPtr ip3;
         }
+        [StructLayout(LayoutKind.Sequential)]
+        struct IntPtrs2
+        {
+            readonly IntPtr ip0;
+            readonly IntPtr ip1;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe static bool LessThanEqual(this IntPtr index, UIntPtr length)
         {
@@ -143,43 +143,26 @@ namespace System
 
         public unsafe static void ClearPointerSized(ref byte b, UIntPtr byteLength)
         {
-            // TODO: Perhaps do switch casing... 
-            // TODO: Bitwise masking generates weird assembly 64-bit, including not inlining calls.
-
             var i = IntPtr.Zero;
-            //while (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask64)))
-            while (i.LessThanEqual(byteLength - sizeof(Reg64)))
+            while (i.LessThanEqual(byteLength - sizeof(IntPtrs8)))
             {
-                Unsafe.As<byte, Reg64>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg64);
-                i += sizeof(Reg64);
+                Unsafe.As<byte, IntPtrs8>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtrs8);
+                i += sizeof(IntPtrs8);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask32)))
-            if (i.LessThanEqual(byteLength - sizeof(Reg32)))
+            if (i.LessThanEqual(byteLength - sizeof(IntPtrs4)))
             {
-                Unsafe.As<byte, Reg32>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg32);
-                i += sizeof(Reg32);
+                Unsafe.As<byte, IntPtrs4>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtrs4);
+                i += sizeof(IntPtrs4);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask16)))
-            if (i.LessThanEqual(byteLength - sizeof(Reg16)))
+            if (i.LessThanEqual(byteLength - sizeof(IntPtrs2)))
             {
-                Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg16);
-                i += sizeof(Reg16);
+                Unsafe.As<byte, IntPtrs2>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtrs2);
+                i += sizeof(IntPtrs2);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask8)))
-            if (i.LessThanEqual(byteLength - sizeof(long)))
+            if (i.LessThanEqual(byteLength - sizeof(IntPtr)))
             {
-                Unsafe.As<byte, long>(ref Unsafe.Add<byte>(ref b, i)) = 0;
-                i += sizeof(long);
-            }
-            // JIT: Should elide this if 64-bit
-            if (sizeof(IntPtr) == sizeof(int))
-            {
-                //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask4)))
-                if (i.LessThanEqual(byteLength - sizeof(int)))
-                {
-                    Unsafe.As<byte, int>(ref Unsafe.Add<byte>(ref b, i)) = 0;
-                    i += sizeof(int);
-                }
+                Unsafe.As<byte, IntPtr>(ref Unsafe.Add<byte>(ref b, i)) = default(IntPtr);
+                i += sizeof(IntPtr);
             }
         }
 
