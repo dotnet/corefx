@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <Target Name="CheckForBuildTools">
     <Error Condition="!Exists('$(ToolsDir)') and '$(OverrideToolsDir)'=='true'"
            Text="The tools directory [$(ToolsDir)] does not exist. Please run sync in your enlistment to ensure the tools are installed before attempting to build an individual project." />
@@ -16,17 +16,6 @@
   <!-- Targets will be overridden if buildagainstpackages.targets is imported. -->
   <Target Name="GenerateTestProjectJson" />
   <Target Name="GenerateAllTestProjectJsons" />
-
-  <Target Name="AnnotateProjectsWithConfiguration"
-          Returns="@(ProjectWithConfiguration)" >
-    <ItemGroup>
-      <ProjectWithConfiguration Include="@(Project)" />
-    </ItemGroup>
-  </Target>
-
-
-  <!-- build vertical requires the FindBestConfiguration task which is currently in CoreFx.Tools.dll -->
-  <Import Project="buildvertical.targets" Condition="Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll')" />
 
   <Target Name="UndefineTestTFM" BeforeTargets="AssignProjectConfiguration">
     <ItemGroup>
@@ -102,6 +91,12 @@
     <ItemGroup>
       <PackageIds Include="$(Id)" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="ReportGroups"
+          BeforeTargets="PrepareForBuild"
+           Condition="'$(BuildConfigurations)' != ''" >
+    <Message Importance="High" Condition="'$(ConfigurationErrorMsg)' != ''" Text="ConfigurationErrorMessage: $(ConfigurationErrorMsg)" />
   </Target>
 
 </Project>

@@ -28,7 +28,8 @@
           Outputs="fake"
           Returns="@(Project)"
           DependsOnTargets="TrimUnconvertedProjects"
-          BeforeTargets="AnnotateProjectsWithConfiguration">
+          BeforeTargets="AnnotateProjectsWithConfiguration"
+          Condition="!Exists('$(BuildConfigurationImportFile)')"          >
     <PropertyGroup>
       <_VerticalProject>%(Project.Identity)</_VerticalProject>
       <_VerticalProjectName>%(Project.FullPath)</_VerticalProjectName>
@@ -76,8 +77,10 @@
   <!-- For the current project, target which determines compatibility for targets -->
   <Target Name="FindBestConfiguration"
           Returns="@(VerticalTargets)"
-          BeforeTargets="BeforeResolveReferences">
+          BeforeTargets="BeforeResolveReferences"
+          Condition="!Exists('$(BuildConfigurationImportFile)')">
     
+    <Message Importance="High" Text="FindBestConfiguration: $(MSBuildProjectFullPath) - $(BuildConfigurationImportFile)" />
     <MSBuild Targets="GetBuildConfigurations"
              Projects="$(MSBuildProjectFullPath)"
              Properties="DefaultTargetGroup=$(_DefaultTargetGroup)">
@@ -111,7 +114,9 @@
   <Target Name="AnnotateVerticalProjectReferences"
           Inputs="%(ProjectReference.Identity)"
           Outputs="fake"
-          BeforeTargets="BeforeResolveReferences">
+          BeforeTargets="BeforeResolveReferences"
+          Condition="!Exists('$(BuildConfigurationImportFile)')">
+    <Message Importance="High" Text="AnnotateVerticalProjectReferences: %(ProjectReference.Identity)" />
     <PropertyGroup>
       <_ProjectReferenceToAnnotate>%(ProjectReference.Identity)</_ProjectReferenceToAnnotate>
     </PropertyGroup>
