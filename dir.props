@@ -16,7 +16,6 @@
     <!-- Temp change to make OS X build behave as a Linux build -->
     <OsEnvironment Condition="'$(OsEnvironment)'=='' AND '$(OS)'=='OSX'">Unix</OsEnvironment>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
-    <OriginalConfiguration>$(Configuration)</OriginalConfiguration>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -158,6 +157,9 @@
     <RunApiCompat>true</RunApiCompat>
   </PropertyGroup>
 
+
+  <Import Project="$(BinDir)tools/configuration/configuration.props" Condition="Exists('$(BinDir)tools/configuration/configuration.props')" /> 
+
   <!-- Set up Default symbol and optimization for Configuration --> 
   <Choose> 
     <When Condition="'$(ConfigurationGroup)'=='Debug'"> 
@@ -185,8 +187,6 @@
       </PropertyGroup>
     </When>
   </Choose>
-
-  <Import Project="$(BinDir)tools/configuration/configuration.props" Condition="Exists('$(BinDir)tools/configuration/configuration.props')" /> 
 
   <!-- initialize all the targets variables to false as they should only be set below -->
   <PropertyGroup>
