@@ -1,5 +1,5 @@
 Microsoft.CSharp 4.0.1
-Microsoft.NETCore.Platforms 1.0.1
+Microsoft.NETCore.Platforms 1.0.2
 Microsoft.NETCore.Targets 1.0.1
 Microsoft.VisualBasic 10.0.1
 Microsoft.Win32.Primitives 4.0.1
@@ -144,9 +144,9 @@ System.Linq 4.1.0
 System.Linq.Expressions 4.1.0
 System.Linq.Parallel 4.0.1
 System.Linq.Queryable 4.0.1
-System.Net.Http 4.1.0
+System.Net.Http 4.1.1
 System.Net.Http.Rtc 4.0.1
-System.Net.Http.WinHttpHandler 4.0.0
+System.Net.Http.WinHttpHandler 4.0.1
 System.Net.NameResolution 4.0.0
 System.Net.NetworkInformation 4.1.0
 System.Net.Ping 4.0.0
