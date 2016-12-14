@@ -130,17 +130,6 @@
         ret
   } // end of method Unsafe::CopyBlock
 
-  .method public hidebysig static void CopyBlock(void* destination, void* source, native unsigned int byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        cpblk
-        ret
-  } // end of method Unsafe::CopyBlock
-
   .method public hidebysig static void CopyBlock(uint8& destination, uint8& source, uint32 byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
@@ -152,30 +141,7 @@
         ret
   } // end of method Unsafe::CopyBlock
 
-  .method public hidebysig static void CopyBlock(uint8& destination, uint8& source, native unsigned int byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        cpblk
-        ret
-  } // end of method Unsafe::CopyBlock
-
   .method public hidebysig static void CopyBlockUnaligned(void* destination, void* source, uint32 byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        unaligned. 0x1
-        cpblk
-        ret
-  } // end of method Unsafe::CopyBlockUnaligned
-
-  .method public hidebysig static void CopyBlockUnaligned(void* destination, void* source, native unsigned int byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
         .maxstack 3
@@ -199,18 +165,6 @@
         ret
   } // end of method Unsafe::CopyBlockUnaligned
 
-  .method public hidebysig static void CopyBlockUnaligned(uint8& destination, uint8& source, native unsigned int byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        unaligned. 0x1
-        cpblk
-        ret
-  } // end of method Unsafe::CopyBlockUnaligned
-
   .method public hidebysig static void InitBlock(void* startAddress, uint8 'value', uint32 byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
@@ -222,29 +176,7 @@
         ret
   } // end of method Unsafe::InitBlock
 
-  .method public hidebysig static void InitBlock(void* startAddress, uint8 'value', native unsigned int byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        initblk
-        ret
-  } // end of method Unsafe::InitBlock
-
   .method public hidebysig static void InitBlock(uint8& startAddress, uint8 'value', uint32 byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        initblk
-        ret
-  } // end of method Unsafe::InitBlock
-
-  .method public hidebysig static void InitBlock(uint8& startAddress, uint8 'value', native unsigned int byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
         .maxstack 3
@@ -267,31 +199,7 @@
         ret
   } // end of method Unsafe::InitBlockUnaligned
 
-  .method public hidebysig static void InitBlockUnaligned(void* startAddress, uint8 'value', native unsigned int byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        unaligned. 0x1
-        initblk
-        ret
-  } // end of method Unsafe::InitBlockUnaligned
-
   .method public hidebysig static void InitBlockUnaligned(uint8& startAddress, uint8 'value', uint32 byteCount) cil managed aggressiveinlining
-  {
-        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
-        ldarg.0
-        ldarg.1
-        ldarg.2
-        unaligned. 0x1
-        initblk
-        ret
-  } // end of method Unsafe::InitBlockUnaligned
-
-  .method public hidebysig static void InitBlockUnaligned(uint8& startAddress, uint8 'value', native unsigned int byteCount) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
         .maxstack 3
