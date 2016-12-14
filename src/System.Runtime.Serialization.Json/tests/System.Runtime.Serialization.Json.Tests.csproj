@@ -11,5 +11,5 @@
     <Compile Include="$(TestSourceFolder)DataContractJsonSerializer.cs" />
     <Compile Include="$(TestSourceFolder)DataContractJsonSerializer.CoreCLR.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), System.Runtime.Serialization.Json.Tests.settings.targets))\System.Runtime.Serialization.Json.Tests.settings.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

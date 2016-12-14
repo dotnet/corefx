@@ -5,10 +5,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <IncludePerformanceTests>true</IncludePerformanceTests>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(UseContractReferences)' == 'true'">
-    <ProjectJson>ContractReferences/project.json</ProjectJson>
-    <ProjectLockJson>ContractReferences/project.lock.json</ProjectLockJson>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Utils.cs" />
     <Compile Include="..\SerializationTypes.cs" />

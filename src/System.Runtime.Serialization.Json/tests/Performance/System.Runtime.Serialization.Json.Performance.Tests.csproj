@@ -3,11 +3,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <KeepAllProjectReferences>true</KeepAllProjectReferences>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(UseContractReferences)' == 'true'">
-    <ProjectJson>ContractReferences/project.json</ProjectJson>
-    <ProjectLockJson>ContractReferences/project.lock.json</ProjectLockJson>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
