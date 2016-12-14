@@ -21,8 +21,9 @@
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            if (dictionary.ContainsKey(key))
-                return dictionary[key];
+            TValue value;
+            if (dictionary.TryGetValue(key, out value))
+                return value;
             return defaultValue;
         }
 
@@ -45,8 +46,9 @@
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            if (dictionary.ContainsKey(key))
-                return dictionary[key];
+            TValue value;
+            if (dictionary.TryGetValue(key, out value))
+                return value;
             return defaultValue;
         }
     }
