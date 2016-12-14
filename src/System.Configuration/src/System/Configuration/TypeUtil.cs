@@ -13,15 +13,34 @@ namespace System.Configuration
         // things simpler for consumers of System.Configuration.
         private static string[] s_implicitAssemblies =
         {
+            // Historically we would find types in System.dll here.
+            // This is because Configuration used to live in System.dll
+            // and by resolution rules, typenames without an assembly
+            // specifier would be found there:
+            //
+            // (current executing assembly -> mscorlib / now s.p.c.l)
+            //
+            // When Configuration types moved to System.Configuration
+            // the implicit lookup for System had to be added to keep
+            // existing configuration files working.
+
+            // We also need to find types in mscorlib.dll as currently
+            // only types found in System.Private.CoreLib.dll are
+            // implicitly resolved. If this changes we can remove the
+            // explicit mscorlib lookup.
+
+            "mscorlib",
+            "System",
+
+            // TODO: ISSUE #14528
+            // System facade isn't currently part of the framework
+            // package. Once it is added the following locations can
+            // be removed. There are tests for types from each of
+            // these locations.
             "System.Runtime",
-            "System.Runtime.Extensions",
             "System.Collections",
             "System.Collections.Concurrent",
             "System.Collections.Specialized",
-
-            // Historically this is the assembly we would look in
-            // Keeping it here to help facilitate running on Mono
-            "System"
         };
 
         /// <summary>
