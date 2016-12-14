@@ -26,7 +26,7 @@
     <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">netcoreapp1.1-$(OSEnvironment)</BuildConfiguration>
 
   </PropertyGroup>
-  
+
   <Import Condition="Exists('$(MSBuildProjectDirectory)/Configurations.props')" Project="$(MSBuildProjectDirectory)/Configurations.props" />
 
   <PropertyGroup>
@@ -151,11 +151,6 @@
     <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configfile $(NuGetConfigPath)</DnuRestoreCommand>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
-    <!-- When we do a traversal build we get all packages up front, don't restore them again -->
-    <RestorePackages>false</RestorePackages>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!-- By default make all libraries to be AnyCPU but individual projects can override it if they need to -->
     <Platform>AnyCPU</Platform>
@@ -180,8 +175,16 @@
         <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType> 
         <DefineConstants>$(DefineConstants),TRACE</DefineConstants> 
       </PropertyGroup>
-    </When> 
-  </Choose> 
+    </When>
+    <When Condition="'$(ConfigurationGroup)' == 'Release'">
+      <PropertyGroup>
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+        <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+        <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+        <DefineConstants>$(DefineConstants),TRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
 
   <Import Project="$(BinDir)tools/configuration/configuration.props" Condition="Exists('$(BinDir)tools/configuration/configuration.props')" /> 
 
@@ -195,43 +198,43 @@
     <TargetsNetBSD>false</TargetsNetBSD>
   </PropertyGroup>
 
-<!-- Probably want to make these be generated into configurations.props --> 
-  <Choose> 
-    <When Condition="'$(OSGroup)'=='Windows_NT'"> 
-      <PropertyGroup> 
-        <TargetsWindows>true</TargetsWindows> 
-      </PropertyGroup> 
-    </When> 
-    <When Condition="'$(OSGroup)'=='Unix'"> 
-      <PropertyGroup> 
-        <TargetsUnix>true</TargetsUnix> 
-      </PropertyGroup> 
-    </When> 
-    <When Condition="'$(OSGroup)'=='Linux'"> 
-      <PropertyGroup> 
-        <TargetsUnix>true</TargetsUnix> 
-        <TargetsLinux>true</TargetsLinux> 
-      </PropertyGroup> 
-    </When> 
-    <When Condition="'$(OSGroup)'=='OSX'"> 
-      <PropertyGroup> 
-        <TargetsUnix>true</TargetsUnix> 
-        <TargetsOSX>true</TargetsOSX> 
-      </PropertyGroup> 
-    </When> 
-    <When Condition="'$(OSGroup)'=='FreeBSD'"> 
-      <PropertyGroup> 
-        <TargetsUnix>true</TargetsUnix> 
-        <TargetsFreeBSD>true</TargetsFreeBSD> 
-      </PropertyGroup> 
-    </When> 
-    <When Condition="'$(OSGroup)'=='NetBSD'"> 
-      <PropertyGroup> 
-        <TargetsUnix>true</TargetsUnix> 
-        <TargetsNetBSD>true</TargetsNetBSD> 
-      </PropertyGroup> 
-    </When> 
-  </Choose> 
+<!-- Probably want to make these be generated into configurations.props -->
+  <Choose>
+    <When Condition="'$(OSGroup)'=='Windows_NT'">
+      <PropertyGroup>
+        <TargetsWindows>true</TargetsWindows>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Unix'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Linux'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsLinux>true</TargetsLinux>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='OSX'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsOSX>true</TargetsOSX>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='FreeBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsFreeBSD>true</TargetsFreeBSD>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='NetBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsNetBSD>true</TargetsNetBSD>
+      </PropertyGroup>
+    </When>
+  </Choose>
 
   <!-- Default Test platform to deploy the netstandard compiled tests to -->
   <PropertyGroup>
@@ -265,6 +268,7 @@
     <NoExplicitReferenceToStdLib>true</NoExplicitReferenceToStdLib>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
 
   <!-- Set up handling of build warnings -->
@@ -287,7 +291,7 @@
     <TestTargetOutputRelPath Condition="'$(TestTargetOutputRelPath)'=='' And '$(TargetGroup)'=='' And '$(TestTFM)'!=''">default.$(TestTFM)/</TestTargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
-    
+
     <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)$(OutputPathSubfolder)</OutputPath>
 
