@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -844,12 +845,20 @@ namespace System.Linq
 
         public static bool TrySingle<TSource>(this IQueryable<TSource> source, out TSource element)
         {
-            Tuple<bool, TSource> result = TrySingle(source);
+            if (source == null)
+                throw Error.ArgumentNull(nameof(source));
+
+            Tuple<bool, TSource> result = source.Provider.Execute<Tuple<bool, TSource>>(
+                Expression.Call(
+                    null,
+                    CachedReflectionInfo.TrySingle_TSource_1(typeof(TSource)), source.Expression));
+
             element = result.Item2;
             return result.Item1;
         }
 
-        internal static Tuple<bool, TSource> TrySingle<TSource>(this IQueryable<TSource> source)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Tuple<bool, TSource> TrySingle<TSource>(IQueryable<TSource> source)
         {
             if (source == null)
                 throw Error.ArgumentNull(nameof(source));

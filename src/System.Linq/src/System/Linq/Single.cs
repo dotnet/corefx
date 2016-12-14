@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace System.Linq
 {
@@ -81,6 +82,22 @@ namespace System.Linq
             return TrySingleCore(source, predicate, out element) == TrySingleResult.SingleElement;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Tuple<bool, TSource> TrySingle<TSource>(IEnumerable<TSource> source)
+        {
+            TSource element;
+            bool result = TrySingleCore(source, out element) == TrySingleResult.SingleElement;
+            return Tuple.Create(result, element);
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Tuple<bool, TSource> TrySingle<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        {
+            TSource element;
+            bool result = TrySingleCore(source, predicate, out element) == TrySingleResult.SingleElement;
+            return Tuple.Create(result, element);
+        }
+
         private static TrySingleResult TrySingleCore<TSource>(IEnumerable<TSource> source, out TSource element)
         {
             if (source == null)
@@ -125,7 +142,7 @@ namespace System.Linq
             return TrySingleResult.MoreThanOneElement;
         }
 
-        private static TrySingleResult TrySingleCore<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
+        private static TrySingleResult TrySingleCore<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
         {
             if (source == null)
             {
