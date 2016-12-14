@@ -1,16 +1,3 @@
 Compat issues with assembly System.Memory:
-MembersMustExist : Member 'System.ReadOnlySpan<T> System.ReadOnlySpan<T>.Empty' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.ReadOnlySpan<T>.CopyTo(System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.ReadOnlySpan<T>.DangerousCreate(System.Object, T, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.ReadOnlySpan<T>.DangerousGetPinnableReference()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.ReadOnlySpan<T>.op_Equality(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.ReadOnlySpan<T>.op_Inequality(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T> System.Span<T>.Empty' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.CopyTo(System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.DangerousCreate(System.Object, T, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.DangerousGetPinnableReference()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Span<T>.GetItem(System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.op_Equality(System.Span<T>, System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.op_Implicit(System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Span<T>.op_Inequality(System.Span<T>, System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 14
+Total Issues: 1
