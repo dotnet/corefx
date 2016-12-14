@@ -74,7 +74,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="ReportGroups"
+  <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="PrepareForBuild"
            Condition="'$(BuildConfigurations)' != ''" >
     <Message Importance="High" Condition="'$(ConfigurationErrorMsg)' != ''" Text="ConfigurationErrorMessage: $(ConfigurationErrorMsg)" />
