@@ -9,25 +9,65 @@ namespace System.Configuration
 {
     internal static class TypeUtil
     {
-        // Since the config APIs were originally implemented in System.dll,
-        // references to types without assembly names could be resolved to
-        // System.dll in Everett. Emulate that behavior by trying to get the
-        // type from System.dll
-        private static Type GetLegacyType(string typeString)
+        // Deliberately not being explicit about the versions to make
+        // things simpler for consumers of System.Configuration.
+        private static string[] s_implicitAssemblies =
         {
-            Type type = null;
+            "System.Runtime",
+            "System.Runtime.Extensions",
+            "System.Collections",
+            "System.Collections.Concurrent",
+            "System.Collections.Specialized",
+
+            // Historically this is the assembly we would look in
+            // Keeping it here to help facilitate running on Mono
+            "System"
+        };
+
+        /// <summary>
+        /// Find type references that used to be found without assembly names
+        /// </summary>
+        private static Type GetImplicitType(string typeString)
+        {
+            // Since the config APIs were originally implemented in System.dll,
+            // references to types without assembly names could be resolved if
+            // they lived in System.dll.
+            //
+            // On NetFX we would try to emulate that behavior by looking in
+            // System. As types have moved around in CoreFX- we'll try to load
+            // from the a variety of assemblies to mimick the old behavior.
+
+            // Don't bother to look around if we've already got something that
+            // is clearly not a simple type name.
+            if (string.IsNullOrEmpty(typeString) || typeString.IndexOf(',') != -1)
+                return null;
 
             // Ignore all exceptions, otherwise callers will get unexpected
             // exceptions not related to the original failure to load the
             // desired type.
+
+            // First attempt is against our own System.Configuration types
             try
             {
-                Assembly systemAssembly = typeof(ConfigurationException).Assembly;
-                type = systemAssembly.GetType(typeString, false);
+                Assembly configurationAssembly = typeof(ConfigurationException).Assembly;
+                Type type = configurationAssembly.GetType(typeString, false);
+                if (type != null)
+                    return type;
             }
             catch { }
 
-            return type;
+            foreach (string assembly in s_implicitAssemblies)
+            {
+                try
+                {
+                    Type type = Type.GetType($"{typeString}, {assembly}");
+                    if (type != null)
+                        return type;
+                }
+                catch { }
+            }
+
+            return null;
         }
 
         // Get the type specified by typeString. If it fails, try to retrieve it 
@@ -49,7 +89,7 @@ namespace System.Configuration
 
             if (type == null)
             {
-                type = GetLegacyType(typeString);
+                type = GetImplicitType(typeString);
                 if ((type == null) && (originalException != null))
                     throw originalException;
             }
@@ -76,7 +116,7 @@ namespace System.Configuration
 
             if (type == null)
             {
-                type = GetLegacyType(typeString);
+                type = GetImplicitType(typeString);
                 if ((type == null) && (originalException != null))
                     throw originalException;
             }
