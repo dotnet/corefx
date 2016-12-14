@@ -28,6 +28,14 @@
     </Project>
 
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="System.Private.DataContractSerialization\pkg\System.Private.DataContractSerialization.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+
+    <Project Include="System.Linq.Expressions\pkg\System.Linq.Expressions.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
