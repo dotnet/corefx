@@ -22,12 +22,8 @@
     <!-- Temporarily omit code analysis -->
     <SkipImportCodeAnalysisTargets>true</SkipImportCodeAnalysisTargets>
 
-    <BuildConfiguration_TargetGroup>netcoreapp1.1</BuildConfiguration_TargetGroup>
-    <BuildConfiguration_TargetGroup Condition="'$(TargetGroup)' != ''">$(TargetGroup)</BuildConfiguration_TargetGroup>
-    <BuildConfiguration_OSGroup>$(OS)</BuildConfiguration_OSGroup>
-    <BuildConfiguration_OSGroup Condition="'$(OSGroup)' != ''">$(OSGroup)</BuildConfiguration_OSGroup>
     <!-- Hacky BuildConfiguration -->
-    <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">$(BuildConfiguration_TargetGroup)-$(BuildConfiguration_OSGroup)</BuildConfiguration>
+    <BuildConfiguration>netcoreapp1.1-$(OS)</BuildConfiguration>
 
   </PropertyGroup>
 
@@ -163,7 +159,11 @@
   </PropertyGroup>
 
 
-  <Import Project="$(BinDir)tools/configuration/configuration.props" Condition="Exists('$(BinDir)tools/configuration/configuration.props')" /> 
+  <PropertyGroup>
+    <BuildConfigurationImportFile>$(BinDir)tools/configuration/configuration.props</BuildConfigurationImportFile>
+  </PropertyGroup>
+
+  <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)') and '$(BuildConfigurations)' != ''" /> 
 
   <!-- Set up Default symbol and optimization for Configuration --> 
   <Choose> 
@@ -201,6 +201,15 @@
     <TargetsOSX>false</TargetsOSX>
     <TargetsFreeBSD>false</TargetsFreeBSD>
     <TargetsNetBSD>false</TargetsNetBSD>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildConfigurations)' == ''">
+    <TargetsWindows>true</TargetsWindows>
+    <TargetsUnix>true</TargetsUnix>
+    <TargetsLinux>true</TargetsLinux>
+    <TargetsOSX>true</TargetsOSX>
+    <TargetsFreeBSD>true</TargetsFreeBSD>
+    <TargetsNetBSD>true</TargetsNetBSD>
   </PropertyGroup>
 
 <!-- Probably want to make these be generated into configurations.props -->
