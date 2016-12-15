@@ -27,6 +27,7 @@
     <Compile Include="SmtpDateTimeTest.cs" />
     <Compile Include="WriteStateInfoTest.cs" />
   </ItemGroup>
+  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.Mail" />
   </ItemGroup>

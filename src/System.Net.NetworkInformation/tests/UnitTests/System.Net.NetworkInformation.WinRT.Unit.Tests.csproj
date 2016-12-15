@@ -17,6 +17,7 @@
     <Compile Include="Fakes\FakeNetwork.cs" />
     <Compile Include="Fakes\FakeWinRT.cs" />
   </ItemGroup>
+  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.NetworkInformation" />
     <TargetingPackExclusions Include="Windows" />

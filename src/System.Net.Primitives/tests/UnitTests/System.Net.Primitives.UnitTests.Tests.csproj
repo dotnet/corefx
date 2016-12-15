@@ -17,6 +17,7 @@
          System.Net.Internals namespace. -->
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
   </PropertyGroup>
+  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.Primitives" />
   </ItemGroup>
