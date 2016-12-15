@@ -17,20 +17,14 @@
  <Import Project="buildvertical.targets" Condition="Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll')" /> 
 
   <Target Name="UndefineTestTFM" 
-          BeforeTargets="AssignProjectConfiguration"
-          Inputs="%(ProjectReference.Identity)"
-          Outputs="fake">
-    <PropertyGroup>
-      <_ProjectReference>%(ProjectReference.Identity)</_ProjectReference>
-      <_UndefineProperties>%(ProjectReference.UndefineProperties)</_UndefineProperties>
-    </PropertyGroup>
+          BeforeTargets="AssignProjectConfiguration">
     <ItemGroup>
         <!--
         Always undefine TestTFM and FilterToTestTFM for all project reference as not needed for compilation and
         avoid bin clash tool to fail
         -->
-      <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(ProjectReference)'">
-        <UndefineProperties>$(_UndefineProperties);TestTFM;FilterToTestTFM</UndefineProperties>
+      <ProjectReference>
+        <UndefineProperties>%(ProjectReference.UndefineProperties);TestTFM;FilterToTestTFM</UndefineProperties>
       </ProjectReference>
     </ItemGroup>
   </Target>
@@ -87,7 +81,7 @@
   <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="ResolveProjectReferences"
            Condition="'$(BuildConfigurations)' != ''" >
-    <Message Importance="High" Text="$(MSBuildProjectFullPath), Configuration: $(Configuration)" />
+    <Message Importance="High" Text="$(MSBuildProjectFullPath), C: $(Configuration) BC: $(BuildConfiguration) BCs: $(BuildConfigurations)" />
     <Message Importance="High" Condition="'$(ConfigurationErrorMsg)' != ''" Text="$(MSBuildProjectFullPath) ConfigurationErrorMessage: $(ConfigurationErrorMsg)" />
   </Target>
 

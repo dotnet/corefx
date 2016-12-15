@@ -217,7 +217,7 @@
 
  <Target Name="AnnotateProjectsWithConfiguration" 
          Returns="@(ProjectWithConfiguration)" > 
-   <Message Text="%(Project.Identity) - (%(Project.TargetGroup) - %(Project.OSGroup))" Importance="High" /> 
+   <Message Text="%(Project.Identity) - %(Project.Configuration)" Importance="High" /> 
    <ItemGroup> 
      <ProjectWithConfiguration Include="@(ProjectConfigurations)" /> 
    </ItemGroup> 
@@ -229,21 +229,16 @@
           Outputs="fake">
     <PropertyGroup>
       <_ProjectName>%(Project.Identity)</_ProjectName>
-      <_TargetGroup>%(Project.TargetGroup)</_TargetGroup>
-      <_OSGroup>%(Project.OSGroup)</_OSGroup>
+      <_Configuration>%(Project.Configuration)</_Configuration>
     </PropertyGroup>
           
     <PropertyGroup>
-      <_Configuration>$(_TargetGroup)</_Configuration>
-      <_Configuration Condition="'$(_OSGroup)' != '' and '$(_OSGroup)' != 'AnyOS'">$(_Configuration)-$(_OSGroup)</_Configuration>
-      <_AdditionalProperties Condition="'$(_TargetGroup)' != ''">TargetGroup=$(_TargetGroup)</_AdditionalProperties>
-      <_AdditionalProperties Condition="'$(_OSGroup)' != '' and '$(_OSGroup)' != 'AnyOS'">$(_AdditionalProperties);OSGroup=$(_OSGroup)</_AdditionalProperties>
       <_AdditionalProperties Condition="'$(_Configuration)' != ''">$(_AdditionalProperties);Configuration=$(_Configuration)</_AdditionalProperties>
     </PropertyGroup>
     <ItemGroup>
 
      <ProjectConfigurations Include="$(_ProjectName)">
-       <AdditionalProperties>$(_AdditionalProperties)</AdditionalProperties>
+       <AdditionalProperties Condition="'$(_AdditionalProperties)' != ''">$(_AdditionalProperties)</AdditionalProperties>
      </ProjectConfigurations>
     </ItemGroup>    
   </Target> 

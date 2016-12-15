@@ -21,10 +21,6 @@
   <PropertyGroup>
     <!-- Temporarily omit code analysis -->
     <SkipImportCodeAnalysisTargets>true</SkipImportCodeAnalysisTargets>
-
-    <!-- Hacky BuildConfiguration -->
-    <BuildConfiguration>netcoreapp1.1-$(OS)</BuildConfiguration>
-
   </PropertyGroup>
 
   <Import Condition="Exists('$(MSBuildProjectDirectory)/Configurations.props')" Project="$(MSBuildProjectDirectory)/Configurations.props" />
@@ -160,6 +156,10 @@
 
 
   <PropertyGroup>
+    <!-- Hacky BuildConfiguration -->
+    <ArchGroup Condition="'$(ArchGroup)'==''">x64</ArchGroup>
+    <BuildConfiguration>netcoreapp1.1-$(OS)-Debug-$(ArchGroup)</BuildConfiguration>
+
     <BuildConfigurationImportFile>$(BinDir)tools/configuration/configuration.props</BuildConfigurationImportFile>
   </PropertyGroup>
 
