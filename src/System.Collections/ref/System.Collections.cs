@@ -40,6 +40,15 @@ namespace System.Collections
 }
 namespace System.Collections.Generic
 {
+#if netcoreapp11
+    public static class CollectionExtensions
+    {
+        public static TValue GetValueOrDefault<TKey, TValue>(System.Collections.Generic.IDictionary<TKey, TValue> dictionary, TKey key) { throw null; }
+        public static TValue GetValueOrDefault<TKey, TValue>(System.Collections.Generic.IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue) { throw null; }
+        public static TValue GetValueOrDefault<TKey, TValue>(System.Collections.Generic.IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) { throw null; }
+        public static TValue GetValueOrDefault<TKey, TValue>(System.Collections.Generic.IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue) { throw null; }
+    }
+#endif
     public abstract partial class Comparer<T> : System.Collections.Generic.IComparer<T>, System.Collections.IComparer
     {
         protected Comparer() { }
@@ -80,6 +89,10 @@ namespace System.Collections.Generic
         public bool ContainsValue(TValue value) { throw null; }
         public System.Collections.Generic.Dictionary<TKey, TValue>.Enumerator GetEnumerator() { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+#if netcoreapp11
+        public TValue GetValueOrDefault(TKey key) { throw null; }
+        public TValue GetValueOrDefault(TKey key, TValue defaultValue) { throw null; }
+#endif
         public virtual void OnDeserialization(object sender) { }
         public bool Remove(TKey key) { throw null; }
         void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Add(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { }
