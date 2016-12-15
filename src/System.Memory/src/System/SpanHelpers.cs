@@ -107,32 +107,12 @@ namespace System
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 64)]
-        private struct Reg64 { }
+        struct Reg64 { }
         [StructLayout(LayoutKind.Sequential, Size = 32)]
-        private struct Reg32 { }
+        struct Reg32 { }
         [StructLayout(LayoutKind.Sequential, Size = 16)]
-        private struct Reg16 { }
+        struct Reg16 { }
 
-        unsafe static readonly UIntPtr UIntPtrMask4 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~3u) : new UIntPtr(~((ulong)(3u)));
-        unsafe static readonly UIntPtr UIntPtrMask8 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~7u) : new UIntPtr(~((ulong)(7u)));
-        unsafe static readonly UIntPtr UIntPtrMask16 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~15u) : new UIntPtr(~((ulong)(15u)));
-        unsafe static readonly UIntPtr UIntPtrMask32 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~31u) : new UIntPtr(~((ulong)(31u)));
-        unsafe static readonly UIntPtr UIntPtrMask64 = sizeof(UIntPtr) == sizeof(uint) ? new UIntPtr(~63u) : new UIntPtr(~((ulong)(63u)));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static UIntPtr BitwiseAnd(this UIntPtr value, UIntPtr mask)
-        {
-            return (sizeof(UIntPtr) == sizeof(uint)) 
-                ? new UIntPtr((uint)value & (uint)mask)
-                : new UIntPtr((ulong)value & (ulong)mask);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static bool LessThan(this IntPtr index, UIntPtr length)
-        {
-            return (sizeof(UIntPtr) == sizeof(uint))
-                ? (uint)index < (uint)length
-                : (ulong)index < (ulong)length;
-        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe static bool LessThanEqual(this IntPtr index, UIntPtr length)
         {
@@ -141,31 +121,75 @@ namespace System
                 : (long)index <= (long)length;
         }
 
-        public unsafe static void ClearPointerSized(ref byte b, UIntPtr byteLength)
+        public unsafe static void ClearLessThanPointerSized(byte* ptr, UIntPtr byteLength)
+        {
+            if (sizeof(UIntPtr) == sizeof(uint))
+            {
+                Unsafe.InitBlockUnaligned(ptr, 0, (uint)byteLength);
+            }
+            else
+            {
+                ulong byteLengthULong = (ulong)byteLength;
+                // PERF: Optimizing for the case where byteLength is less than or equal to uint.MaxValue
+                uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
+                do
+                {
+                    Unsafe.InitBlockUnaligned(ptr, 0, byteLengthUInt);
+                    ptr += byteLengthUInt;
+                    byteLengthULong -= byteLengthUInt;
+                    byteLengthUInt = byteLengthULong <= uint.MaxValue ? (uint)byteLengthULong : uint.MaxValue;
+                } while (byteLengthULong > 0);
+            }
+        }
+
+        public static unsafe void ClearLessThanPointerSized(ref byte b, UIntPtr byteLength)
+        {
+            fixed (byte* p = &b)
+            {
+                // TODO: Replace with ref version of InitBlockUnaligned
+                ClearLessThanPointerSized(p, byteLength);
+            }
+            //if (sizeof(UIntPtr) == sizeof(uint))
+            //{
+            //    Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
+            //}
+            //else
+            //{
+            //    var byteLengthULong = (ulong)byteLength;
+            //    // Optimizing for the case where byteLength is less than or equal to uint.MaxValue
+            //    var byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
+            //    do
+            //    {
+            // TODO: Offset b to where we are...
+            // ref next = Unsafe.Add<byte>(ref b, byteLengthULong -)
+            //        Unsafe.InitBlockUnaligned(, 0, byteLengthUInt);
+            //        byteLengthULong -= byteLengthUInt;
+            //        byteLengthUInt = byteLengthULong <= uint.MaxValue ? (uint)byteLength : uint.MaxValue;
+            //    }
+            //    while (byteLengthUInt > 0);
+            //}
+        }
+
+        public unsafe static void ClearPointerSizedWithoutReferences(ref byte b, UIntPtr byteLength)
         {
             // TODO: Perhaps do switch casing... 
-            // TODO: Bitwise masking generates weird assembly 64-bit, including not inlining calls.
 
             var i = IntPtr.Zero;
-            //while (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask64)))
             while (i.LessThanEqual(byteLength - sizeof(Reg64)))
             {
                 Unsafe.As<byte, Reg64>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg64);
                 i += sizeof(Reg64);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask32)))
             if (i.LessThanEqual(byteLength - sizeof(Reg32)))
             {
                 Unsafe.As<byte, Reg32>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg32);
                 i += sizeof(Reg32);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask16)))
             if (i.LessThanEqual(byteLength - sizeof(Reg16)))
             {
                 Unsafe.As<byte, Reg16>(ref Unsafe.Add<byte>(ref b, i)) = default(Reg16);
                 i += sizeof(Reg16);
             }
-            //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask8)))
             if (i.LessThanEqual(byteLength - sizeof(long)))
             {
                 Unsafe.As<byte, long>(ref Unsafe.Add<byte>(ref b, i)) = 0;
@@ -174,12 +198,49 @@ namespace System
             // JIT: Should elide this if 64-bit
             if (sizeof(IntPtr) == sizeof(int))
             {
-                //if (i.LessThan(byteLength.BitwiseAnd(UIntPtrMask4)))
                 if (i.LessThanEqual(byteLength - sizeof(int)))
                 {
                     Unsafe.As<byte, int>(ref Unsafe.Add<byte>(ref b, i)) = 0;
                     i += sizeof(int);
                 }
+            }
+        }
+
+        public unsafe static void ClearPointerSizedWithReferences(ref IntPtr ip, UIntPtr pointerSizeLength)
+        {
+            // TODO: Perhaps do switch casing... 
+
+            var i = IntPtr.Zero;
+            var n = IntPtr.Zero;
+            while ((n = i + 8).LessThanEqual(pointerSizeLength))
+            {
+                Unsafe.Add<IntPtr>(ref ip, i + 0) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 1) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 2) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 3) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 4) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 5) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 6) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 7) = default(IntPtr);
+                i = n;
+            }
+            if ((n = i + 4).LessThanEqual(pointerSizeLength))
+            {
+                Unsafe.Add<IntPtr>(ref ip, i + 0) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 1) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 2) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 3) = default(IntPtr);
+                i = n;
+            }
+            if ((n = i + 2).LessThanEqual(pointerSizeLength))
+            {
+                Unsafe.Add<IntPtr>(ref ip, i + 0) = default(IntPtr);
+                Unsafe.Add<IntPtr>(ref ip, i + 1) = default(IntPtr);
+                i = n;
+            }
+            if ((i + 1).LessThanEqual(pointerSizeLength))
+            {
+                Unsafe.Add<IntPtr>(ref ip, i) = default(IntPtr);
             }
         }
 

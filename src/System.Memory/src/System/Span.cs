@@ -239,29 +239,43 @@ namespace System
         {
             if (_length == 0) { return; }
 
-            UIntPtr byteLength = (UIntPtr)(_length * Unsafe.SizeOf<T>());
+            var byteLength = (UIntPtr)(_length * Unsafe.SizeOf<T>());
 
             if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
             {
                 if (_pinnable == null)
                 {
-                    Unsafe.InitBlockUnaligned(_byteOffset.ToPointer(), 0, byteLength);
+                    var ptr = (byte*)_byteOffset.ToPointer();
+                    
+                    SpanHelpers.ClearLessThanPointerSized(ptr, byteLength);
                 }
                 else
                 {
-                    // TODO: Replace with ref version of InitBlockUnaligned
-                    fixed (byte* p = &Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset)))
-                    {
-                        Unsafe.InitBlockUnaligned(p, 0, byteLength);
-                    }
+                    ref byte b = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+
+                    SpanHelpers.ClearLessThanPointerSized(ref b, byteLength);
                 }
             }
             else
             {
-                ref T r = ref DangerousGetPinnableReference();
-                SpanHelpers.ClearPointerSized(ref Unsafe.As<T, byte>(ref r), byteLength);
+                if (SpanHelpers.IsReferenceFree<T>())
+                {
+                    ref byte b = ref Unsafe.As<T, byte>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithoutReferences(ref b, byteLength);
+                }
+                else
+                {
+                    UIntPtr pointerSizedLength = (UIntPtr)((_length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
+
+                    ref IntPtr ip = ref Unsafe.As<T, IntPtr>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithReferences(ref ip, pointerSizedLength);
+                }
             }
         }
+
+
 
         /// <summary>
         /// Fills the contents of this span with the given value.

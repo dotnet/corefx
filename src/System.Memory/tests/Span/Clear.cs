@@ -83,6 +83,47 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ClearIntPtrOffset()
+        {
+            IntPtr initial = IntPtr.Zero + 5;
+            const int length = 32;
+            var actualFull = new IntPtr[length];
+            for (int i = 0; i < length; i++)
+            {
+                actualFull[i] = initial;
+            }
+            var expectedFull = new IntPtr[length];
+
+            var start = 2;
+            var expectedSpan = new Span<IntPtr>(expectedFull, start, length - start - 1);
+            var actualSpan = new Span<IntPtr>(actualFull, start, length - start - 1);
+            actualSpan.Clear();
+
+            var actual = actualSpan.ToArray();
+            var expected = expectedSpan.ToArray();
+            Assert.Equal<IntPtr>(expected, actual);
+            Assert.Equal(initial, actualFull[0]);
+            Assert.Equal(initial, actualFull[length - 1]);
+        }
+
+        [Fact]
+        public static void ClearIntPtrLonger()
+        {
+            IntPtr initial = IntPtr.Zero + 5;
+            var actual = new IntPtr[2048];
+            for (int i = 0; i < actual.Length; i++)
+            {
+                actual[i] = initial;
+            }
+            var expected = new IntPtr[actual.Length];
+
+            var span = new Span<IntPtr>(actual);
+            span.Clear();
+            Assert.Equal<IntPtr>(expected, actual);
+        }
+
+
+        [Fact]
         public static void ClearValueTypeWithoutReferences()
         {
             int[] actual = { 1, 2, 3 };
