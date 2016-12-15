@@ -32,6 +32,7 @@
       <ContractProject> 
         <UndefineProperties>Configuration;%(ContractProject.UndefineProperties)</UndefineProperties> 
       </ContractProject> 
+    
       <ProjectReference Include="@(ContractProject)">
         <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         <OutputItemType>ResolvedMatchingContract</OutputItemType>

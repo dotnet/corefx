@@ -137,7 +137,7 @@
     <Error ContinueOnError="true" Condition="$(_ProjectReferenceToAnnotate.EndsWith('.builds')) or $(_ProjectReferenceToAnnotate.EndsWith('.pkgproj'))" Text="Warning: $(MSBuildProjectFullPath) contains ProjectReference to a multi-build project, '$(_ProjectReferenceToAnnotate)'" />
     <!-- Annotate the ProjectReference -->
     <ItemGroup>
-        <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(_ProjectReferenceToAnnotate)' and '$(BuildConfigurations)' != ''">
+        <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(_ProjectReferenceToAnnotate)' and '$(BuildConfigurations)' != '' and '%(ProjectReference.OutputItemTime)' != 'ResolvedMatchingContract'">
           <Configuration>$(_BestConfiguration)</Configuration>
           <AdditionalProperties>$(_AdditionalProperties);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
         </ProjectReference>
