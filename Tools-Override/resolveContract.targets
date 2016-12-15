@@ -28,7 +28,7 @@
     <Error Condition="'@(ContractProject->Count())' &gt; '1'" Text="Only one value may be specified for ContractProject item but '@(ContractProject)' is '@(ContractProject->Count())' items." />
 
     <ItemGroup Condition="'@(ContractProject)' != ''">
-      <!--Don't flow the values for OSGroup/TargetGroup unless explicitly defined --> 
+      <!--Don't flow the values for Configuration --> 
       <ContractProject> 
         <UndefineProperties>Configuration;%(ContractProject.UndefineProperties)</UndefineProperties> 
       </ContractProject> 
