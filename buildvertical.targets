@@ -27,7 +27,7 @@
     <PropertyGroup>
       <_ProjectName>$(MSBuildProjectFullPath)</_ProjectName>
     </PropertyGroup>
-    <Message Importance="High" Text="AnnotateProjectsWithConfiguration: $(_ProjectName) - BestC: $(_BestConfiguration)" />
+    <Message Importance="Low" Text="AnnotateProjectsWithConfiguration: $(_ProjectName) - BestC: $(_BestConfiguration)" />
     <ItemGroup> 
        <ProjectWithConfiguration Include="$(_ProjectName)" > 
         <AdditionalProperties Condition="'$(_BestConfiguration)' != ''">Configuration=$(_BestConfiguration)</AdditionalProperties>
