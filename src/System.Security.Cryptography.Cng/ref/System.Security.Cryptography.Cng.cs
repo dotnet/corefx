@@ -8,10 +8,10 @@
 
 namespace Microsoft.Win32.SafeHandles
 {
-    public abstract partial class SafeNCryptHandle : System.Runtime.InteropServices.SafeHandle
+    public abstract partial class SafeNCryptHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {
-        protected SafeNCryptHandle() : base(default(System.IntPtr), default(bool)) { }
-        protected SafeNCryptHandle(System.IntPtr handle, System.Runtime.InteropServices.SafeHandle parentHandle) : base(default(System.IntPtr), default(bool)) { }
+        protected SafeNCryptHandle() : base (default(bool)) { }
+        protected SafeNCryptHandle(System.IntPtr handle, System.Runtime.InteropServices.SafeHandle parentHandle) : base(default(bool)) { }
         public override bool IsInvalid { get { throw null; } }
         protected override bool ReleaseHandle() { throw null; }
         protected abstract bool ReleaseNativeHandle();
@@ -200,7 +200,7 @@ namespace System.Security.Cryptography
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct CngProperty : System.IEquatable<System.Security.Cryptography.CngProperty>
     {
-        public CngProperty(string name, byte[] value, System.Security.Cryptography.CngPropertyOptions options) { throw null;}
+        public CngProperty(string name, byte[] value, System.Security.Cryptography.CngPropertyOptions options) { throw null; }
         public string Name { get { throw null; } }
         public System.Security.Cryptography.CngPropertyOptions Options { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
@@ -260,14 +260,16 @@ namespace System.Security.Cryptography
         public DSACng(int keySize) { }
         public DSACng(System.Security.Cryptography.CngKey key) { }
         public System.Security.Cryptography.CngKey Key { get { throw null; } }
+        public override string KeyExchangeAlgorithm { get { throw null; } }
         public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
-        public override byte[] CreateSignature(byte[] hash) { throw null; }
+        public override byte[] CreateSignature(byte[] rgbHash) { throw null; }
+        public override string SignatureAlgorithm { get { throw null; } }
         protected override void Dispose(bool disposing) { }
         public override System.Security.Cryptography.DSAParameters ExportParameters(bool includePrivateParameters) { throw null; }
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public override void ImportParameters(System.Security.Cryptography.DSAParameters parameters) { }
-        public override bool VerifySignature(byte[] hash, byte[] signature) { throw null; }
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) { throw null; }
     }
     public sealed partial class ECDsaCng : System.Security.Cryptography.ECDsa
     {

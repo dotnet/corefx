@@ -53,7 +53,7 @@ namespace System.Xml.Tests
             // These steps use to be part of javascript files and these were copied and executed as test setup step.
             // I belive this to be a much better way of accomplishing the same task.
             // Logic from CreateApiTestFiles.js
-            string sourceFile = Path.Combine(FilePathUtil.GetTestDataPath(), @"XsltApiV2\xmlResolver_document_function.xml");
+            string sourceFile = Path.Combine(FilePathUtil.GetTestDataPath(), "XsltApiV2", "xmlResolver_document_function.xml");
             string targetFile = @"c:\temp\xmlResolver_document_function.xml";
             if (!Directory.Exists(@"c:\temp"))
                 Directory.CreateDirectory(@"c:\temp");
@@ -232,9 +232,9 @@ namespace System.Xml.Tests
             _readerType = GetReaderType(InitStringValue("readertype"));
 
             //This is a temporary fix to restore the baselines. Refer to Test bug #
-            _strPath = Path.Combine(@"TestFiles\", FilePathUtil.GetTestDataPath(), @"XsltApiV2\");
-            _httpPath = FilePathUtil.GetHttpTestDataPath() + @"/XsltApiV2/";
-            _standardTests = Path.Combine(@"TestFiles\", FilePathUtil.GetHttpStandardPath() + @"/xslt10/Current/");
+            _strPath = Path.Combine("TestFiles", FilePathUtil.GetTestDataPath(), "XsltApiV2");
+            _httpPath = Path.Combine(FilePathUtil.GetHttpTestDataPath(), "XsltApiV2");
+            _standardTests = Path.Combine("TestFiles", FilePathUtil.GetHttpStandardPath(), "xslt10","Current");
 
             return;
         }
@@ -246,7 +246,7 @@ namespace System.Xml.Tests
             if (szFile.Length > 5)
             {
                 if (szFile.Substring(0, 5) != "http:")
-                    szFile = _strPath + szFile;
+                    szFile = Path.Combine(_strPath, szFile);
             }
             return szFile;
         }
@@ -255,7 +255,7 @@ namespace System.Xml.Tests
         {
             if (szFile == null || szFile == String.Empty)
                 return szFile;
-            szFile = _httpPath + szFile;
+            szFile = Path.Combine(_httpPath, szFile);
             return szFile;
         }
 
@@ -274,7 +274,7 @@ namespace System.Xml.Tests
         //  -------------------------------------------------------------------------------------------------------------
         public void CheckExpectedError(Exception ex, string assembly)
         {
-            CExceptionHandler handler = new CExceptionHandler(_strPath + "exceptions.xml", assembly, _output);
+            CExceptionHandler handler = new CExceptionHandler(Path.Combine(_strPath, "Exceptions.xml"), assembly, _output);
             bool result = handler.VerifyException(ex);
             if (handler.res != _expectedErrorCode)
             {
@@ -294,7 +294,7 @@ namespace System.Xml.Tests
         //  -------------------------------------------------------------------------------------------------------------
         public void CheckExpectedError(Exception ex, string assembly, string res, string[] strParams)
         {
-            CExceptionHandler handler = new CExceptionHandler(_strPath + "exceptions.xml", assembly, _output);
+            CExceptionHandler handler = new CExceptionHandler(Path.Combine(_strPath, "Exceptions.xml"), assembly, _output);
             if (!handler.VerifyException(ex, res, strParams))
             {
                 Assert.True(false);
@@ -359,10 +359,6 @@ namespace System.Xml.Tests
                                 _output.WriteLine("Loading style sheet as XmlTextReader " + _strXslFile);
                                 xslt.Load(trTemp, XsltSettings.TrustedXslt, xr);
                             }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
-                            }
                             finally
                             {
                                 if (trTemp != null)
@@ -378,10 +374,6 @@ namespace System.Xml.Tests
                             {
                                 _output.WriteLine("Loading style sheet as XmlNodeReader " + _strXslFile);
                                 xslt.Load(nrTemp);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
                             }
                             finally
                             {
@@ -402,10 +394,6 @@ namespace System.Xml.Tests
                             {
                                 _output.WriteLine("Loading style sheet as XmlValidatingReader " + _strXslFile);
                                 xslt.Load(xvr, XsltSettings.TrustedXslt, xr);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
                             }
                             finally
                             {
@@ -458,10 +446,6 @@ namespace System.Xml.Tests
                                 _output.WriteLine("Loading style sheet as XmlTextReader " + _strXslFile);
                                 xslt.Load(trTemp, XsltSettings.TrustedXslt, xr);
                             }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
-                            }
                             finally
                             {
                                 if (trTemp != null)
@@ -477,10 +461,6 @@ namespace System.Xml.Tests
                             {
                                 _output.WriteLine("Loading style sheet as XmlNodeReader " + _strXslFile);
                                 xslt.Load(nrTemp, XsltSettings.TrustedXslt, xr);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
                             }
                             finally
                             {
@@ -500,10 +480,6 @@ namespace System.Xml.Tests
                             {
                                 _output.WriteLine("Loading style sheet as XmlValidatingReader " + _strXslFile);
                                 xslt.Load(vrTemp, XsltSettings.TrustedXslt, xr);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw (ex);
                             }
                             finally
                             {
@@ -625,7 +601,7 @@ namespace System.Xml.Tests
         public void VerifyResult(string expectedValue)
         {
             XmlDiff.XmlDiff xmldiff = new XmlDiff.XmlDiff();
-            xmldiff.Option = XmlDiffOption.InfosetComparison | XmlDiffOption.IgnoreEmptyElement;
+            xmldiff.Option = XmlDiffOption.InfosetComparison | XmlDiffOption.IgnoreEmptyElement | XmlDiffOption.NormalizeNewline;
 
             StreamReader sr = new StreamReader(new FileStream("out.xml", FileMode.Open, FileAccess.Read));
             string actualValue = sr.ReadToEnd();
@@ -639,28 +615,25 @@ namespace System.Xml.Tests
             XmlTextReader tr1 = new XmlTextReader("out.xml");
             XmlTextReader tr2 = new XmlTextReader(new StringReader(expectedValue));
 
-            bool bResult = xmldiff.Compare(tr1, tr2);
+            bool result = xmldiff.Compare(tr1, tr2);
 
             //Close the readers
             tr1.Dispose();
             tr2.Dispose();
 
-            if (bResult)
-                return;
-            else
-                Assert.True(false);
+             Assert.True(result);
         }
 
         //VerifyResult which compares 2 arguments using XmlDiff.
         public void VerifyResult(string baseline, string outputFile)
         {
-            bool bResult = false;
+            bool result = false;
             FileStream fsExpected;
 
             baseline = FullFilePath(baseline);
 
             XmlDiff.XmlDiff diff = new XmlDiff.XmlDiff();
-            diff.Option = XmlDiffOption.IgnoreEmptyElement | XmlDiffOption.IgnoreAttributeOrder | XmlDiffOption.InfosetComparison | XmlDiffOption.IgnoreWhitespace;
+            diff.Option = XmlDiffOption.IgnoreEmptyElement | XmlDiffOption.IgnoreAttributeOrder | XmlDiffOption.InfosetComparison | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.NormalizeNewline;
             XmlParserContext context = new XmlParserContext(new NameTable(), null, "", XmlSpace.None);
 
             fsExpected = new FileStream(baseline, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -669,7 +642,7 @@ namespace System.Xml.Tests
             _output.WriteLine("Verifying o/p with baseline result {0}...", baseline);
             try
             {
-                bResult = diff.Compare(new XmlTextReader(fsActual, XmlNodeType.Element, context), new XmlTextReader(fsExpected, XmlNodeType.Element, context));
+                result = diff.Compare(new XmlTextReader(fsActual, XmlNodeType.Element, context), new XmlTextReader(fsExpected, XmlNodeType.Element, context));
             }
             catch (Exception e)
             {
@@ -681,7 +654,7 @@ namespace System.Xml.Tests
                 fsExpected.Dispose();
                 fsActual.Dispose();
             }
-            if (!bResult)
+            if (!result)
             {
                 // Write out the actual and expected o/p
                 _output.WriteLine("Expected o/p: ");
@@ -704,13 +677,7 @@ namespace System.Xml.Tests
                 }
             }
 
-            if (bResult)
-                return;
-            else
-            {
-                _output.WriteLine("**** Baseline mis-matched ****");
-                Assert.True(false);
-            }
+            Assert.True(result, "**** Baseline mis-matched ****");
         }
 
         // --------------------------------------------------------------------------------------------------------------
@@ -741,10 +708,6 @@ namespace System.Xml.Tests
                         strmTemp = new FileStream(_strOutFile, FileMode.Create, FileAccess.ReadWrite);
                         xslt.Transform(xd, null, strmTemp);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (strmTemp != null)
@@ -762,10 +725,6 @@ namespace System.Xml.Tests
                         xw.WriteStartDocument();
                         xslt.Transform(xd, null, xw);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (xw != null)
@@ -779,10 +738,6 @@ namespace System.Xml.Tests
                     {
                         tw = new StreamWriter(new FileStream(_strOutFile, FileMode.Create, FileAccess.Write), Encoding.UTF8);
                         xslt.Transform(xd, null, tw);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
                     }
                     finally
                     {
@@ -822,10 +777,6 @@ namespace System.Xml.Tests
                         strmTemp = new FileStream(_strOutFile, FileMode.Create, FileAccess.ReadWrite);
                         xslt.Transform(xd, m_xsltArg, strmTemp);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (strmTemp != null)
@@ -841,10 +792,6 @@ namespace System.Xml.Tests
                         xw.WriteStartDocument();
                         xslt.Transform(xd, m_xsltArg, xw);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (xw != null)
@@ -858,10 +805,6 @@ namespace System.Xml.Tests
                     {
                         tw = new StreamWriter(new FileStream(_strOutFile, FileMode.Create, FileAccess.Write), Encoding.UTF8);
                         xslt.Transform(xd, m_xsltArg, tw);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
                     }
                     finally
                     {
@@ -904,10 +847,6 @@ namespace System.Xml.Tests
                         strmTemp = new FileStream(_strOutFile, FileMode.Create, FileAccess.ReadWrite);
                         xslt.Transform(xd, null, strmTemp);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (strmTemp != null)
@@ -923,10 +862,6 @@ namespace System.Xml.Tests
                         xw.WriteStartDocument();
                         xslt.Transform(xd, null, xw);
                     }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
-                    }
                     finally
                     {
                         if (xw != null)
@@ -940,10 +875,6 @@ namespace System.Xml.Tests
                     {
                         tw = new StreamWriter(new FileStream(_strOutFile, FileMode.Create, FileAccess.Write), Encoding.UTF8);
                         xslt.Transform(xd, null, tw);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw (ex);
                     }
                     finally
                     {
@@ -1027,7 +958,7 @@ namespace System.Xml.Tests
 
         public CExceptionHandler(string strXmlFile, string ns, ITestOutputHelper output)
         {
-            _exVer = new ExceptionVerifier(ns, ExceptionVerificationFlags.IgnoreMultipleDots, _output);
+            _exVer = new ExceptionVerifier(ns, ExceptionVerificationFlags.IgnoreMultipleDots, output);
 
             _doc = new XPathDocument(strXmlFile);
             _nav = ((IXPathNavigable)_doc).CreateNavigator();

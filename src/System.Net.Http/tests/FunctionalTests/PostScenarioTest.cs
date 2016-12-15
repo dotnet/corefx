@@ -15,6 +15,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
     public class PostScenarioTest
@@ -22,16 +24,16 @@ namespace System.Net.Http.Functional.Tests
         private const string ExpectedContent = "Test contest";
         private const string UserName = "user1";
         private const string Password = "password1";
-        private readonly static Uri BasicAuthServerUri =
+        private static readonly Uri BasicAuthServerUri =
             Configuration.Http.BasicAuthUriForCreds(false, UserName, Password);
-        private readonly static Uri SecureBasicAuthServerUri =
+        private static readonly Uri SecureBasicAuthServerUri =
             Configuration.Http.BasicAuthUriForCreds(true, UserName, Password);
 
         private readonly ITestOutputHelper _output;
 
-        public readonly static object[][] EchoServers = Configuration.Http.EchoServers;
+        public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
 
-        public readonly static object[][] BasicAuthEchoServers =
+        public static readonly object[][] BasicAuthEchoServers =
             new object[][]
                 {
                     new object[] { BasicAuthServerUri },
@@ -60,7 +62,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(5485, TestPlatforms.Windows)]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostEmptyContentUsingChunkedEncoding_Success(Uri serverUri)
         {
@@ -216,8 +217,7 @@ namespace System.Net.Http.Functional.Tests
                 // Send HEAD request to help bypass the 401 auth challenge for the latter POST assuming
                 // that the authentication will be cached and re-used later when PreAuthenticate is true.
                 var request = new HttpRequestMessage(HttpMethod.Head, serverUri);
-                HttpResponseMessage response;
-                using (response = await client.SendAsync(request))
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -228,7 +228,7 @@ namespace System.Net.Http.Functional.Tests
                 requestContent.Headers.ContentLength = null;
                 request.Headers.TransferEncodingChunked = true;
 
-                using (response = await client.PostAsync(serverUri, requestContent))
+                using (HttpResponseMessage response = await client.PostAsync(serverUri, requestContent))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     string responseContent = await response.Content.ReadAsStringAsync();

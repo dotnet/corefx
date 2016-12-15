@@ -59,29 +59,13 @@ namespace System.ComponentModel.Design
         ///     types.  You may override this proeprty and return your own types, modifying the default behavior
         ///     of GetService.
         /// </summary>
-        protected virtual Type[] DefaultServices
-        {
-            get
-            {
-                return s_defaultServices;
-            }
-        }
+        protected virtual Type[] DefaultServices => s_defaultServices;
 
         /// <summary>
         ///     Our collection of services.  The service collection is demand
         ///     created here.
         /// </summary>
-        private ServiceCollection<object> Services
-        {
-            get
-            {
-                if (_services == null)
-                {
-                    _services = new ServiceCollection<object>();
-                }
-                return _services;
-            }
-        }
+        private ServiceCollection<object> Services => _services ?? (_services = new ServiceCollection<object>());
 
         /// <summary>
         ///     Adds the given service to the service container.
@@ -96,7 +80,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public virtual void AddService(Type serviceType, object serviceInstance, bool promote)
         {
-            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Adding service (instance) " + serviceType.Name + ".  Promoting: " + promote.ToString());
+            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, $"Adding service (instance) {serviceType.Name}.  Promoting: {promote.ToString()}");
             if (promote)
             {
                 IServiceContainer container = Container;
@@ -111,8 +95,8 @@ namespace System.ComponentModel.Design
             // We're going to add this locally.  Ensure that the service instance
             // is correct.
             //
-            if (serviceType == null) throw new ArgumentNullException("serviceType");
-            if (serviceInstance == null) throw new ArgumentNullException("serviceInstance");
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (serviceInstance == null) throw new ArgumentNullException(nameof(serviceInstance));
             if (!(serviceInstance is ServiceCreatorCallback) && !serviceInstance.GetType().IsCOMObject && !serviceType.IsAssignableFrom(serviceInstance.GetType()))
             {
                 throw new ArgumentException(SR.Format(SR.ErrorInvalidServiceInstance, serviceType.FullName));
@@ -120,7 +104,7 @@ namespace System.ComponentModel.Design
 
             if (Services.ContainsKey(serviceType))
             {
-                throw new ArgumentException(SR.Format(SR.ErrorServiceExists, serviceType.FullName), "serviceType");
+                throw new ArgumentException(SR.Format(SR.ErrorServiceExists, serviceType.FullName), nameof(serviceType));
             }
 
             Services[serviceType] = serviceInstance;
@@ -139,7 +123,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public virtual void AddService(Type serviceType, ServiceCreatorCallback callback, bool promote)
         {
-            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Adding service (callback) " + serviceType.Name + ".  Promoting: " + promote.ToString());
+            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, $"Adding service (callback) {serviceType.Name}.  Promoting: {promote.ToString()}");
             if (promote)
             {
                 IServiceContainer container = Container;
@@ -154,12 +138,12 @@ namespace System.ComponentModel.Design
             // We're going to add this locally.  Ensure that the service instance
             // is correct.
             //
-            if (serviceType == null) throw new ArgumentNullException("serviceType");
-            if (callback == null) throw new ArgumentNullException("callback");
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
             if (Services.ContainsKey(serviceType))
             {
-                throw new ArgumentException(SR.Format(SR.ErrorServiceExists, serviceType.FullName), "serviceType");
+                throw new ArgumentException(SR.Format(SR.ErrorServiceExists, serviceType.FullName), nameof(serviceType));
             }
 
             Services[serviceType] = callback;
@@ -204,7 +188,7 @@ namespace System.ComponentModel.Design
         {
             object service = null;
 
-            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Searching for service " + serviceType.Name);
+            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, $"Searching for service {serviceType.Name}");
 
             // Try locally.  We first test for services we
             // implement and then look in our service collection.
@@ -230,12 +214,12 @@ namespace System.ComponentModel.Design
             {
                 Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Encountered a callback. Invoking it");
                 service = ((ServiceCreatorCallback)service)(this, serviceType);
-                Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Callback return object: " + (service == null ? "(null)" : service.ToString()));
+                Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, $"Callback return object: {(service == null ? "(null)" : service.ToString())}");
                 if (service != null && !service.GetType().IsCOMObject && !serviceType.IsAssignableFrom(service.GetType()))
                 {
                     // Callback passed us a bad service.  NULL it, rather than throwing an exception.
                     // Callers here do not need to be prepared to handle bad callback implemetations.
-                    Debug.Fail("Object " + service.GetType().Name + " was returned from a service creator callback but it does not implement the registered type of " + serviceType.Name);
+                    Debug.Fail($"Object {service.GetType().Name} was returned from a service creator callback but it does not implement the registered type of {serviceType.Name}");
                     Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "**** Object does not implement service interface");
                     service = null;
                 }
@@ -277,7 +261,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public virtual void RemoveService(Type serviceType, bool promote)
         {
-            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, "Removing service: " + serviceType.Name + ", Promote: " + promote.ToString());
+            Debug.WriteLineIf(s_TRACESERVICE.TraceVerbose, $"Removing service: {serviceType.Name}, Promote: {promote.ToString()}");
             if (promote)
             {
                 IServiceContainer container = Container;
@@ -291,7 +275,7 @@ namespace System.ComponentModel.Design
 
             // We're going to remove this from our local list.
             //
-            if (serviceType == null) throw new ArgumentNullException("serviceType");
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
             Services.Remove(serviceType);
         }
 

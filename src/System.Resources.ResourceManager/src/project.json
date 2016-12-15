@@ -1,25 +1,26 @@
 {
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.7": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24605-01"
-      },
-      "imports": [
-        "dotnet5.4"
-      ]
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24814-02"
+      }
     },
     "uap10.1": {
       "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1",
-        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24604-01",
-        "Microsoft.TargetingPack.Private.WinRT": "1.0.1",
-        "System.Diagnostics.Debug": "4.0.0",
-        "System.Diagnostics.Tools": "4.0.0",
-        "System.Diagnostics.Tracing": "4.0.0",
-        "System.Globalization": "4.0.0",
-        "System.Reflection": "4.0.10",
-        "System.Runtime": "4.0.20",
-        "System.Threading": "4.0.10"
+        "Microsoft.NETCore.Platforms": "1.1.0",
+        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24814-00",
+        "Microsoft.TargetingPack.Private.WinRT": "1.0.3",
+        "System.Diagnostics.Debug": "4.4.0-beta-24814-01",
+        "System.Diagnostics.Tools": "4.4.0-beta-24814-01",
+        "System.Diagnostics.Tracing": "4.4.0-beta-24814-01",
+        "System.Reflection": "4.4.0-beta-24814-01",
+        "System.Runtime": "4.4.0-beta-24814-01",
+        "System.Threading": "4.4.0-beta-24814-01"
+      }
+    },
+    "net463": {
+      "dependencies": {
+        "Microsoft.TargetingPack.NETFramework.v4.6.2": "1.0.1"
       }
     }
   }

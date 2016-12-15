@@ -343,7 +343,7 @@ namespace System.Xml.Tests
                 Assert.True(false);
             }
 
-            XPathDocument xd = new XPathDocument(FullFilePath("fish.xml"));
+            XPathDocument xd = new XPathDocument(FullFilePath("Fish.xml"));
 
             m_xsltArg.AddParam("myArg5", szEmpty, ((IXPathNavigable)xd).CreateNavigator());
             retObj = m_xsltArg.GetParam("myArg5", szEmpty);
@@ -653,9 +653,11 @@ namespace System.Xml.Tests
             }
 
             string expXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><result xmlns:myObj=\"urn:my-object\"><func1>1.Test1</func1><func2>2.Test2</func2><func3>3.Test3</func3></result>";
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(expXml) == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expXml);
                 return;
+            }
             else
                 Assert.True(false);
         }
@@ -684,7 +686,7 @@ namespace System.Xml.Tests
         [Theory]
         public void GetExtObject3(object param)
         {
-            string Baseline = "baseline\\" + param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             try
@@ -722,7 +724,7 @@ namespace System.Xml.Tests
             }
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml");
             }
             catch (System.Xml.Xsl.XsltException)
@@ -751,9 +753,11 @@ namespace System.Xml.Tests
             }
 
             string expXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><result xmlns:myObj=\"http://www.microsoft.com/this/is/a/very/long/namespace/uri/to/do/the/api/testing/for/xslt/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/\"><func1>1.Test1</func1><func2>2.Test2</func2><func3>3.Test3</func3></result>";
-            if ((LoadXSL("MyObjectLongNS.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(expXml) == 1))
+            if ((LoadXSL("myObjectLongNS.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expXml);
                 return;
+            }
             else
                 Assert.True(false);
         }
@@ -872,9 +876,11 @@ namespace System.Xml.Tests
             }
 
             string expXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><result xmlns:myObj=\"urn:my-object\"><func1>1.Test1</func1><func2>2.Test2</func2><func3>3.Test3</func3></result>";
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(expXml) == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expXml);
                 return;
+            }
             else
                 Assert.True(false);
         }
@@ -903,7 +909,7 @@ namespace System.Xml.Tests
 
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml");
             }
             catch (System.Xml.Xsl.XsltException)
@@ -934,7 +940,7 @@ namespace System.Xml.Tests
 
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml");
             }
             catch (System.Xml.Xsl.XsltException)
@@ -965,9 +971,11 @@ namespace System.Xml.Tests
                 }
             }
             string expXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><result xmlns:myObj=\"urn:my-object\"><func1>1.Test1</func1><func2>2.Test2</func2><func3>3.Test3</func3></result>";
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(expXml) == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expXml);
                 return;
+            }
             else
                 Assert.True(false);
         }
@@ -1018,7 +1026,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam1(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -1079,7 +1087,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam4(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam(szLongString, szEmpty, "Test1");
@@ -1140,7 +1148,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam7(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test7");
@@ -1164,7 +1172,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam8(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szLongNS, "Test8");
@@ -1218,7 +1226,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam12(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
 
             m_xsltArg = new XsltArgumentList();
 
@@ -1255,7 +1263,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam13(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -1291,7 +1299,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam14(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -1351,7 +1359,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam16(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             String obj = "Test";
 
@@ -1402,7 +1410,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam17(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             int i = 1;
             int errCount = 0;
             m_xsltArg = new XsltArgumentList();
@@ -1457,7 +1465,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam18(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             String obj = "Test";
 
@@ -1483,7 +1491,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam19(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             String obj = "Test";
 
@@ -1517,7 +1525,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddParam20(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
 
             m_xsltArg = new XsltArgumentList();
 
@@ -1571,20 +1579,27 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject32()
         {
+            string expected1 = @"<?xml version=""1.0"" encoding=""utf-8""?><out>Param: first</out>";
+            string expected2 = @"<?xml version=""1.0"" encoding=""utf-8""?><out>Param: second</out>";
+
             if (LoadXSL("test_Param.xsl") == 1)
             {
                 m_xsltArg = new XsltArgumentList();
                 m_xsltArg.AddParam("myParam1", szEmpty, "first");
 
                 // Transform once
-                if ((Transform_ArgList("foo.xml") == 1) && (CheckResult(383.6292620645) == 1))
+                if (Transform_ArgList("foo.xml") == 1)
                 {
+                    VerifyResult(expected1);
                     m_xsltArg = new XsltArgumentList();
                     m_xsltArg.AddParam("myParam1", szEmpty, "second");
 
                     // Transform again to make sure that parameter from first transform are not cached
-                    if ((Transform_ArgList("foo.xml") == 1) && (CheckResult(384.9801823644) == 1))
+                    if (Transform_ArgList("foo.xml") == 1)
+                    {
+                        VerifyResult(expected2);
                         return;
+                    }
                 }
             }
             Assert.True(false);
@@ -1846,11 +1861,11 @@ namespace System.Xml.Tests
         {
             MyObject obj = new MyObject(1, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly();
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -1896,18 +1911,18 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Very long namespace System.Xml.Tests", Param = "myObjectLongNs.txt")]
-        [InlineData("myObjectLongNs.txt")]
+        [InlineData("myObjectLongNS.txt")]
         [Theory]
         public void AddExtObject4(object param)
         {
             m_xsltArg = new XsltArgumentList();
             MyObject obj = new MyObject(4, _output);
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szLongNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
 
-            if ((LoadXSL("MyObjectLongNS.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectLongNS.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -1959,7 +1974,7 @@ namespace System.Xml.Tests
         {
             MyObject obj = new MyObject(1, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject("urn:my-object", obj);
 
@@ -1973,7 +1988,7 @@ namespace System.Xml.Tests
             m_xsltArg.AddExtensionObject("urn:My-Object", obj);
             m_xsltArg.AddExtensionObject("urn-my:object", obj);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -2009,14 +2024,21 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject10()
         {
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result xmlns:myObj=""urn:my-object"">
+
+		Test1
+		Test2: 0</result>";
+
             MyObject obj = new MyObject(10, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObject_Null.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(424.8906559839) == 1 || CheckResult(425.0247531107) == 1 /* for writer */))
+            if ((LoadXSL("MyObject_Null.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expected);
                 return;
+            }
             else
                 Assert.True(false);
         }
@@ -2026,7 +2048,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject11(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             MyObject obj1 = new MyObject(100, _output);
@@ -2040,7 +2062,7 @@ namespace System.Xml.Tests
             }
 
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -2068,7 +2090,7 @@ namespace System.Xml.Tests
 
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml", true);
             }
             catch (System.Xml.Xsl.XsltException)
@@ -2106,7 +2128,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject14(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(14, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -2117,7 +2139,7 @@ namespace System.Xml.Tests
             }
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -2138,7 +2160,7 @@ namespace System.Xml.Tests
             ///CodeAccessPermission.RevertPermitOnly();
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml", true);
             }
             catch (System.Xml.Xsl.XsltException)
@@ -2192,26 +2214,32 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject17()
         {
+            string expected = @"<?xml version=""1.0"" encoding=""utf-8""?><result xmlns:myObj=""urn:my-object"">
+		Here:End
+		</result>";
+
             MyObject obj = new MyObject(17, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObject_ConsoleWrite.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1) &&
-                (CheckResult(421.8660259804) == 1 || CheckResult(421.8527116762) == 1 /* for writer */))
+            if ((LoadXSL("MyObject_ConsoleWrite.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            {
+                VerifyResult(expected);
                 return;
+            }
             else
                 Assert.True(false);
         }
 
         //[Variation("Recursive Functions", Param = "myObject_Recursion.txt")]
-        [InlineData("myObject_Recursion.txt")]
+        [InlineData("MyObject_Recursion.txt")]
         [Theory]
         public void AddExtObject18(object param)
         {
             MyObject obj = new MyObject(18, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
@@ -2229,7 +2257,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject20(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(20, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -2249,7 +2277,7 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject21(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(1, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -2346,7 +2374,7 @@ namespace System.Xml.Tests
         {
             MyObject obj = new MyObject(27, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
@@ -2360,14 +2388,13 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Deliberately Messing Up the Stylesheet", Param = "MyObject_KillerStrings.txt")]
-        [ActiveIssue(9877)]
         [InlineData("MyObject_KillerStrings.txt")]
         [Theory]
         public void AddExtObject28(object param)
         {
             MyObject obj = new MyObject(28, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             ///CodeAccessPermission.RevertPermitOnly();
@@ -2428,8 +2455,8 @@ namespace System.Xml.Tests
         [Theory]
         public void AddExtObject32(object param)
         {
-            string Baseline1 = "baseline\\" + (string)param + "a.txt";
-            string Baseline2 = "baseline\\" + (string)param + "b.txt";
+            string Baseline1 = Path.Combine("baseline", (string)param) + "a.txt";
+            string Baseline2 = Path.Combine("baseline", (string)param) + "b.txt";
 
             if (LoadXSL("Bug78587.xsl") == 1)
             {
@@ -2456,11 +2483,10 @@ namespace System.Xml.Tests
             Assert.True(false);
         }
 
-        [ActiveIssue(9997)]
         //[Variation(id = 36, Desc = "Calling extension object from select in xsl:sort", Params = new object[] { "sort.xsl", "sort.txt" })]
         [InlineData("sort.xsl", "sort.txt")]
         [Theory]
-        public void AddExtObject33_ActiveIssue9877(object param0, object param1)
+        public void AddExtObject33_ActiveIssue9997(object param0, object param1)
         {
             AddExtObject33(param0, param1);
         }
@@ -2485,7 +2511,7 @@ namespace System.Xml.Tests
             ExObj obj = new ExObj(0, _output);
             m_xsltArg = new XsltArgumentList();
             string xslFile = param0.ToString();
-            string Baseline = "baseline\\" + param1.ToString();
+            string Baseline = Path.Combine("baseline", param1.ToString());
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject("urn-myobject", obj);
             ///CodeAccessPermission.RevertPermitOnly();
@@ -2521,7 +2547,7 @@ namespace System.Xml.Tests
             ExObj obj = new ExObj(0, _output);
             m_xsltArg = new XsltArgumentList();
             string xslFile = param0.ToString();
-            string Baseline = "baseline\\" + param1.ToString();
+            string Baseline = "baseline" + Path.DirectorySeparatorChar + param1.ToString();
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject("urn-myobject", obj);
             ///CodeAccessPermission.RevertPermitOnly();
@@ -2605,7 +2631,7 @@ namespace System.Xml.Tests
                 Assert.True(false);
             }
 
-            _baseline = "baseline\\" + (string)param;
+            _baseline = Path.Combine("baseline", (string)param);
             if ((LoadXSL("showParam.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(_baseline, "out.xml");
@@ -2635,7 +2661,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam3(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             m_xsltArg.RemoveParam(szEmpty, szEmpty);
 
@@ -2653,7 +2679,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam4(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             m_xsltArg.RemoveParam(szSimple, szEmpty);
 
@@ -2671,7 +2697,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam5(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             m_xsltArg.RemoveParam(szInvalid, szEmpty);
 
@@ -2689,7 +2715,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam6(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam(szLongString, szEmpty, "Test1");
@@ -2725,7 +2751,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam8(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -2745,7 +2771,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam9(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -2765,7 +2791,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam10(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szLongString, "Test1");
@@ -2785,7 +2811,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam11(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
 
             double d1 = double.PositiveInfinity;
             double d2 = double.NegativeInfinity;
@@ -2990,7 +3016,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam12(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3013,7 +3039,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam13(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             int i = 1;
             m_xsltArg = new XsltArgumentList();
 
@@ -3059,7 +3085,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveParam14(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3120,7 +3146,7 @@ namespace System.Xml.Tests
 
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml", true);
             }
             catch (System.Xml.Xsl.XsltException)
@@ -3156,7 +3182,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveExtObj3(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(10, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -3174,18 +3200,18 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Namespace URI is non-existent", Param = "MyObjectDef.txt")]
-        [InlineData("MyObjectDef.txt")]
+        [InlineData("myObjectDef.txt")]
         [Theory]
         public void RemoveExtObj4(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(4, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject(szDefaultNS, obj);
             m_xsltArg.RemoveExtensionObject(szSimple);
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -3207,7 +3233,7 @@ namespace System.Xml.Tests
             ///CodeAccessPermission.RevertPermitOnly();
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml", true);
             }
             catch (System.Xml.Xsl.XsltException)
@@ -3223,7 +3249,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveExtObj6(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(6, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -3255,13 +3281,13 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Case Sensitivity", Param = "MyObjectDef.txt")]
-        [InlineData("MyObjectDef.txt")]
+        [InlineData("myObjectDef.txt")]
         [Theory]
         public void RemoveExtObj7(object param)
         {
             MyObject obj = new MyObject(7, _output);
             m_xsltArg = new XsltArgumentList();
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             ///nonePermSet.PermitOnly(); ;
             m_xsltArg.AddExtensionObject("urn:my-object", obj);
 
@@ -3270,7 +3296,7 @@ namespace System.Xml.Tests
             m_xsltArg.RemoveExtensionObject("urn-my:object");
             m_xsltArg.RemoveExtensionObject("urn:my-object ");
             ///CodeAccessPermission.RevertPermitOnly();
-            if ((LoadXSL("MyObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1) && (Transform_ArgList("fruits.xml") == 1))
             {
                 VerifyResult(Baseline, _strOutFile);
                 return;
@@ -3305,7 +3331,7 @@ namespace System.Xml.Tests
 
             try
             {
-                if ((LoadXSL("MyObjectDef.xsl") == 1))
+                if ((LoadXSL("myObjectDef.xsl") == 1))
                     Transform_ArgList("fruits.xml", true);
             }
             catch (System.Xml.Xsl.XsltException)
@@ -3321,7 +3347,7 @@ namespace System.Xml.Tests
         [Theory]
         public void RemoveExtObj9(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             MyObject obj = new MyObject(10, _output);
             m_xsltArg = new XsltArgumentList();
             ///nonePermSet.PermitOnly(); ;
@@ -3356,7 +3382,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear1(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3383,7 +3409,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear2(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.Clear();
@@ -3401,7 +3427,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear3(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3440,7 +3466,7 @@ namespace System.Xml.Tests
                 Assert.True(false);
             }
 
-            if ((LoadXSL("MyObjectDef.xsl") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1))
             {
                 try
                 {
@@ -3460,7 +3486,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear5(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             String obj = "Test";
 
@@ -3507,7 +3533,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear6(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3535,7 +3561,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear7(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
             XsltArgumentList m_2 = new XsltArgumentList();
 
@@ -3560,7 +3586,7 @@ namespace System.Xml.Tests
         [Theory]
         public void Clear8(object param)
         {
-            string Baseline = "baseline\\" + (string)param;
+            string Baseline = Path.Combine("baseline", (string)param);
             m_xsltArg = new XsltArgumentList();
 
             m_xsltArg.AddParam("myArg1", szEmpty, "Test1");
@@ -3581,7 +3607,7 @@ namespace System.Xml.Tests
             m_xsltArg.RemoveExtensionObject(szDefaultNS);
             m_xsltArg.Clear();
 
-            if ((LoadXSL("MyObjectDef.xsl") == 1))
+            if ((LoadXSL("myObjectDef.xsl") == 1))
             {
                 try
                 {
@@ -3651,11 +3677,11 @@ namespace System.Xml.Tests
             XsltArgumentList argList = new XsltArgumentList();
 
             //Collect the test data
-            string SourceFile = FullFilePath("Message.xml");
+            string SourceFile = FullFilePath("message.xml");
             string XslFile = FullFilePath(param0.ToString());
             string XslMessageTerminate = param1.ToString();
             string EventHandlerExists = param2.ToString();
-            string Baseline = "baseline\\" + param3.ToString();
+            string Baseline = "baseline" + Path.DirectorySeparatorChar + param3.ToString();
             OutFile = "Message.txt";
 
             //Check if the EventHandler Exists

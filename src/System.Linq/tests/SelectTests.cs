@@ -55,6 +55,22 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RunOnce()
+        {
+            var source = new[]{
+                new { name="Prakash", custID=98088 },
+                new { name="Bob", custID=29099 },
+                new { name="Chris", custID=39033 },
+                new { name=(string)null, custID=30349 },
+                new { name="Prakash", custID=39030 }
+            };
+            string[] expected = { "Prakash", "Bob", "Chris", null, "Prakash" };
+            Assert.Equal(expected, source.RunOnce().Select(e => e.name));
+            Assert.Equal(expected, source.ToArray().RunOnce().Select(e => e.name));
+            Assert.Equal(expected, source.ToList().RunOnce().Select(e => e.name));
+        }
+
+        [Fact]
         public void EmptyWithIndexedSelector()
         {
             Assert.Equal(Enumerable.Empty<int>(), Enumerable.Empty<string>().Select((s, i) => s.Length + i));
@@ -1117,6 +1133,40 @@ namespace System.Linq.Tests
             Assert.Equal(new[] { 2, 4, 6, 8 }, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Take(9).ToList());
             Assert.Equal(new[] { 6, 8 }, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Skip(2).ToList());
             Assert.Empty(new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Skip(8).ToList());
+        }
+
+        [Theory]
+        [MemberData(nameof(MoveNextAfterDisposeData))]
+        public void MoveNextAfterDispose(IEnumerable<int> source)
+        {
+            // Select is specialized for a bunch of different types, so we want
+            // to make sure this holds true for all of them.
+            var identityTransforms = new List<Func<IEnumerable<int>, IEnumerable<int>>>
+            {
+                e => e,
+                e => ForceNotCollection(e),
+                e => e.ToArray(),
+                e => e.ToList(),
+                e => new LinkedList<int>(e), // IList<T> that's not a List
+                e => e.Select(i => i) // Multiple Select() chains are optimized
+            };
+
+            foreach (IEnumerable<int> equivalentSource in identityTransforms.Select(t => t(source)))
+            {
+                IEnumerable<int> result = equivalentSource.Select(i => i);
+                using (IEnumerator<int> e = result.GetEnumerator())
+                {
+                    while (e.MoveNext()) ; // Loop until we reach the end of the iterator, @ which pt it gets disposed.
+                    Assert.False(e.MoveNext()); // MoveNext should not throw an exception after Dispose.
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> MoveNextAfterDisposeData()
+        {
+            yield return new object[] { Array.Empty<int>() };
+            yield return new object[] { new int[1] };
+            yield return new object[] { Enumerable.Range(1, 30) };
         }
     }
 }

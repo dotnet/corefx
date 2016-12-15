@@ -4,7 +4,7 @@ usage()
 {
     echo "Usage: $0 [BuildArch] [UbuntuCodeName]"
     echo "BuildArch can be: arm, arm-softfp, arm64"
-    echo "UbuntuCodeName - optional, Code name for Ubuntu, can be: trusty(default), vivid, wily. If BuildArch is arm-softfp, UbuntuCodeName is ignored."
+    echo "UbuntuCodeName - optional, Code name for Ubuntu, can be: trusty(default), vivid, wily, xenial. If BuildArch is arm-softfp, UbuntuCodeName is ignored."
 
     exit 1
 }
@@ -49,7 +49,6 @@ for i in "$@" ; do
         arm)
             __BuildArch=arm
             __UbuntuArch=armhf
-            __UbuntuPackages+=" ${__LLDB_Package:-}"
             __MachineTriple=arm-linux-gnueabihf
             ;;
         arm64)
@@ -75,11 +74,20 @@ for i in "$@" ; do
                 __UbuntuCodeName=wily
             fi
             ;;
+        xenial)
+            if [ "$__UbuntuCodeName" != "jessie" ]; then
+                __UbuntuCodeName=xenial
+            fi
+            ;;
         *)
             __UnprocessedBuildArgs="$__UnprocessedBuildArgs $i"
             ;;
     esac
 done
+
+if [[ "$__BuildArch" == "arm" ]]; then
+    __UbuntuPackages+=" ${__LLDB_Package:-}"
+fi
 
 __RootfsDir="$__CrossDir/rootfs/$__BuildArch"
 

@@ -38,6 +38,7 @@ namespace System.Net
     // Currently, only represents client-side cookies. The cookie classes know
     // how to parse a set-cookie format string, but not a cookie format string
     // (e.g. "Cookie: $Version=1; name=value; $Path=/foo; $Secure")
+    [Serializable]
     public sealed class Cookie
     {
         // NOTE: these two constants must change together.
@@ -684,11 +685,7 @@ namespace System.Net
 #if !NETNative_SystemNetHttp
                 if (value != CookieVariant.Rfc2965)
                 {
-                    if (GlobalLog.IsEnabled)
-                    {
-                        GlobalLog.AssertFormat("Cookie#{0}::set_Variant()|value:{1}", LoggingHash.HashString(this), value);
-                    }
-                    Debug.Fail("Cookie#" + LoggingHash.HashString(this) + "::set_Variant()|value:" + value);
+                    NetEventSource.Fail(this, $"value != Rfc2965:{value}");
                 }
 #endif
                 _cookieVariant = value;
@@ -856,9 +853,10 @@ namespace System.Net
         internal void Dump()
         {
 #if !NETNative_SystemNetHttp
-            if (GlobalLog.IsEnabled)
+            if (NetEventSource.IsEnabled)
             {
-                GlobalLog.Print("Cookie: " + ToString() + "->\n"
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, 
+                                  "Cookie: "        + ToString() + "->\n"
                                 + "\tComment    = " + Comment + "\n"
                                 + "\tCommentUri = " + CommentUri + "\n"
                                 + "\tDiscard    = " + Discard + "\n"
@@ -1335,7 +1333,7 @@ namespace System.Net
         }
 
         // Recognized attributes in order of expected frequency.
-        private readonly static RecognizedAttribute[] s_recognizedAttributes = {
+        private static readonly RecognizedAttribute[] s_recognizedAttributes = {
             new RecognizedAttribute(Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute(Cookie.MaxAgeAttributeName, CookieToken.MaxAge),
             new RecognizedAttribute(Cookie.ExpiresAttributeName, CookieToken.Expires),
@@ -1349,7 +1347,7 @@ namespace System.Net
             new RecognizedAttribute(Cookie.HttpOnlyAttributeName, CookieToken.HttpOnly),
         };
 
-        private readonly static RecognizedAttribute[] s_recognizedServerAttributes = {
+        private static readonly RecognizedAttribute[] s_recognizedServerAttributes = {
             new RecognizedAttribute('$' + Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute('$' + Cookie.VersionAttributeName, CookieToken.Version),
             new RecognizedAttribute('$' + Cookie.DomainAttributeName, CookieToken.Domain),

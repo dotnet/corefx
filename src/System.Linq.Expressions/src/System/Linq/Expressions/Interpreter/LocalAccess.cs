@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic.Utils;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -23,7 +24,7 @@ namespace System.Linq.Expressions.Interpreter
             _index = index;
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
             return cookie == null ?
                 InstructionName + "(" + _index + ")" :
@@ -46,7 +47,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[frame.StackIndex++] = frame.Data[_index];
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -69,7 +70,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             frame.Data[frame.StackIndex++] = box.Value;
-            return +1;
+            return 1;
         }
     }
 
@@ -85,9 +86,9 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box.Value;
-            return +1;
+            return 1;
         }
     }
 
@@ -103,9 +104,9 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box;
-            return +1;
+            return 1;
         }
     }
 
@@ -127,7 +128,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[_index] = frame.Peek();
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -149,7 +150,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[_index] = frame.Pop();
-            return +1;
+            return 1;
         }
 
         public Instruction BoxIfIndexMatches(int index)
@@ -173,7 +174,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             box.Value = frame.Peek();
-            return +1;
+            return 1;
         }
     }
 
@@ -192,7 +193,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             var box = (IStrongBox)frame.Data[_index];
             box.Value = frame.Data[--frame.StackIndex];
-            return +1;
+            return 1;
         }
     }
 
@@ -209,9 +210,9 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             box.Value = frame.Peek();
-            return +1;
+            return 1;
         }
     }
 
@@ -229,7 +230,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             object o = frame.Pop();
             frame.Push(o == null ? o : RuntimeHelpers.GetObjectValue(o));
-            return +1;
+            return 1;
         }
     }
 
@@ -388,8 +389,8 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                    throw e.InnerException;
+                    ExceptionHelpers.UnwrapAndRethrow(e);
+                    throw ContractUtils.Unreachable;
                 }
 
                 return 1;
@@ -415,7 +416,7 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var value = default(object);
+                object value;
 
                 try
                 {
@@ -423,8 +424,8 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                    throw e.InnerException;
+                    ExceptionHelpers.UnwrapAndRethrow(e);
+                    throw ContractUtils.Unreachable;
                 }
 
                 frame.Data[_index] = new StrongBox<object>(value);
@@ -451,6 +452,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int ProducedStack => 1;
         public override int ConsumedStack => _count;
+        public override string InstructionName => "GetRuntimeVariables";
 
         public override int Run(InterpretedFrame frame)
         {
@@ -460,12 +462,11 @@ namespace System.Linq.Expressions.Interpreter
                 ret[i] = (IStrongBox)frame.Pop();
             }
             frame.Push(RuntimeVariables.Create(ret));
-            return +1;
+            return 1;
         }
-
-        public override string InstructionName => "GetRuntimeVariables";
 
         public override string ToString() => "GetRuntimeVariables()";
     }
+
     #endregion
 }

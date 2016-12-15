@@ -4,11 +4,19 @@
 
 using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
 {
-    public static class CertTests
+    public class CertTests
     {
+        private readonly ITestOutputHelper _log;
+
+        public CertTests(ITestOutputHelper output)
+        {
+            _log = output;
+        }
+
         [Fact]
         public static void X509CertTest()
         {
@@ -78,6 +86,69 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(3, cert2.Version);
             }
         }
+
+#if netstandard17
+        [Fact]
+        [OuterLoop("May require using the network, to download CRLs and intermediates")]
+        public void TestVerify()
+        {
+            bool success;
+
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            {
+                // Fails because expired (NotAfter = 10/16/2016)
+                Assert.False(microsoftDotCom.Verify(), "MicrosoftDotComSslCertBytes");
+            }
+
+            using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
+            {
+                // NotAfter=10/31/2023
+                success = microsoftDotComIssuer.Verify();
+                if (!success)
+                {
+                    LogVerifyErrors(microsoftDotComIssuer, "MicrosoftDotComIssuerBytes");
+                }
+                Assert.True(success, "MicrosoftDotComIssuerBytes");
+            }
+
+            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            {
+                // NotAfter=7/17/2036
+                success = microsoftDotComRoot.Verify();
+                if (!success)
+                {
+                    LogVerifyErrors(microsoftDotComRoot, "MicrosoftDotComRootBytes");
+                }
+                Assert.True(success, "MicrosoftDotComRootBytes");
+            }
+        }
+
+        private void LogVerifyErrors(X509Certificate2 cert, string testName)
+        {
+            // Emulate cert.Verify() implementation in order to capture and log errors.
+            try
+            {
+                using (var chain = new X509Chain())
+                {
+                    if (!chain.Build(cert))
+                    {
+                        foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+                        {
+                            _log.WriteLine(string.Format($"X509Certificate2.Verify error: {testName}, {chainStatus.Status}, {chainStatus.StatusInformation}"));
+                        }
+                    }
+                    else
+                    {
+                        _log.WriteLine(string.Format($"X509Certificate2.Verify expected error; received none: {testName}"));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _log.WriteLine($"X509Certificate2.Verify exception: {testName}, {e}");
+            }
+        }
+#endif
 
         [Fact]
         public static void X509CertEmptyToString()
@@ -185,6 +256,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // causing ObjectDisposedExceptions.
                 h = c.Handle;
                 Assert.Equal(IntPtr.Zero, h);
+
+                // State held on X509Certificate
                 Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
@@ -193,6 +266,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumber());
                 Assert.ThrowsAny<CryptographicException>(() => c.Issuer);
                 Assert.ThrowsAny<CryptographicException>(() => c.Subject);
+                Assert.ThrowsAny<CryptographicException>(() => c.NotBefore);
+                Assert.ThrowsAny<CryptographicException>(() => c.NotAfter);
+
+                // State held on X509Certificate2
+                Assert.ThrowsAny<CryptographicException>(() => c.RawData);
+                Assert.ThrowsAny<CryptographicException>(() => c.SignatureAlgorithm);
+                Assert.ThrowsAny<CryptographicException>(() => c.Version);
+                Assert.ThrowsAny<CryptographicException>(() => c.SubjectName);
+                Assert.ThrowsAny<CryptographicException>(() => c.IssuerName);
+                Assert.ThrowsAny<CryptographicException>(() => c.PublicKey);
+                Assert.ThrowsAny<CryptographicException>(() => c.Extensions);
+#if netstandard17
+                Assert.ThrowsAny<CryptographicException>(() => c.PrivateKey);
+#endif
             }
         }
 

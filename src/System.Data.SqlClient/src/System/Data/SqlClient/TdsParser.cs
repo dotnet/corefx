@@ -3228,9 +3228,9 @@ namespace System.Data.SqlClient
 
             if (tdsType == TdsEnums.SQLUDT)
             {
-                _state = TdsParserState.Broken;
-                _connHandler.BreakConnection();
-                throw SQL.UnsupportedFeatureAndToken(_connHandler, SqlDbType.Udt.ToString());
+                if (!TryProcessUDTMetaData((SqlMetaDataPriv) rec, stateObj)) {
+                    return false;
+                }
             }
 
             if (rec.type == SqlDbType.Xml)
@@ -3682,7 +3682,10 @@ namespace System.Data.SqlClient
             {
                 if (TdsEnums.SQLUDT == tdsType)
                 {
-                    throw SQL.UnsupportedFeatureAndToken(_connHandler, SqlDbType.Udt.ToString());
+                    if (!TryProcessUDTMetaData((SqlMetaDataPriv)col, stateObj))
+                    {
+                        return false;
+                    }
                 }
 
                 if (col.length == TdsEnums.SQL_USHORTVARMAXLEN)
@@ -4425,7 +4428,6 @@ namespace System.Data.SqlClient
                     break;
 
                 case TdsEnums.SQLUDT:
-                    throw SQL.UnsupportedFeatureAndToken(_connHandler, SqlDbType.Udt.ToString());
                 case TdsEnums.SQLBINARY:
                 case TdsEnums.SQLBIGBINARY:
                 case TdsEnums.SQLBIGVARBINARY:
@@ -4454,7 +4456,7 @@ namespace System.Data.SqlClient
                         }
                     }
 
-                    value.SqlBinary = new SqlBinary(b, true);   // doesn't copy the byte array
+                    value.SqlBinary = SqlTypeWorkarounds.SqlBinaryCtor(b, true);
 
                     break;
 
@@ -4732,7 +4734,7 @@ namespace System.Data.SqlClient
                         {
                             return false;
                         }
-                        value.SqlGuid = new SqlGuid(b, true);   // doesn't copy the byte array
+                        value.SqlGuid = SqlTypeWorkarounds.SqlGuidCtor(b, true);
                         break;
                     }
 
@@ -4749,7 +4751,7 @@ namespace System.Data.SqlClient
                         {
                             return false;
                         }
-                        value.SqlBinary = new SqlBinary(b, true);   // doesn't copy the byte array
+                        value.SqlBinary = SqlTypeWorkarounds.SqlBinaryCtor(b, true);
 
                         break;
                     }
@@ -5454,7 +5456,7 @@ namespace System.Data.SqlClient
             return true;
         }
 
-        static internal SqlDecimal AdjustSqlDecimalScale(SqlDecimal d, int newScale)
+        internal static SqlDecimal AdjustSqlDecimalScale(SqlDecimal d, int newScale)
         {
             if (d.Scale != newScale)
             {
@@ -5464,7 +5466,7 @@ namespace System.Data.SqlClient
             return d;
         }
 
-        static internal decimal AdjustDecimalScale(decimal value, int newScale)
+        internal static decimal AdjustDecimalScale(decimal value, int newScale)
         {
             int oldScale = (Decimal.GetBits(value)[3] & 0x00ff0000) >> 0x10;
 
@@ -5487,10 +5489,12 @@ namespace System.Data.SqlClient
             else
                 stateObj.WriteByte(0);
 
-            WriteUnsignedInt(d.m_data1, stateObj);
-            WriteUnsignedInt(d.m_data2, stateObj);
-            WriteUnsignedInt(d.m_data3, stateObj);
-            WriteUnsignedInt(d.m_data4, stateObj);
+            uint data1, data2, data3, data4;
+            SqlTypeWorkarounds.SqlDecimalExtractData(d, out data1, out data2, out data3, out data4);
+            WriteUnsignedInt(data1, stateObj);
+            WriteUnsignedInt(data2, stateObj);
+            WriteUnsignedInt(data3, stateObj);
+            WriteUnsignedInt(data4, stateObj);
         }
 
         private void WriteDecimal(decimal value, TdsParserStateObject stateObj)
@@ -5839,7 +5843,7 @@ namespace System.Data.SqlClient
             Debug.Assert(!stateObj._attentionSent, "Invalid attentionSent state at end of ProcessAttention");
         }
 
-        static private int StateValueLength(int dataLen)
+        private static int StateValueLength(int dataLen)
         {
             return dataLen < 0xFF ? (dataLen + 1) : (dataLen + 5);
         }
@@ -9385,5 +9389,57 @@ namespace System.Data.SqlClient
 
             return stateObj._longlen;
         }
+
+         private bool TryProcessUDTMetaData(SqlMetaDataPriv metaData, TdsParserStateObject stateObj) {
+
+            ushort shortLength;
+            byte byteLength;
+
+            if (!stateObj.TryReadUInt16(out shortLength)) { // max byte size
+                return false;
+            }
+            metaData.length = shortLength;
+
+            // database name
+            if (!stateObj.TryReadByte(out byteLength)) {
+                return false;
+            }
+            if (byteLength != 0) {
+                if (!stateObj.TryReadString(byteLength, out metaData.udtDatabaseName)) {
+                    return false;
+                }
+            }
+
+            // schema name
+            if (!stateObj.TryReadByte(out byteLength)) {
+                return false;
+            }
+            if (byteLength != 0) {
+                if (!stateObj.TryReadString(byteLength, out metaData.udtSchemaName)) {
+                    return false;
+                }
+            }
+
+            // type name
+            if (!stateObj.TryReadByte(out byteLength)) {
+                return false;
+            }
+            if (byteLength != 0) {
+                if (!stateObj.TryReadString(byteLength, out metaData.udtTypeName)) {
+                    return false;
+                }
+            }
+
+            if (!stateObj.TryReadUInt16(out shortLength)) {
+                return false;
+            }
+            if (shortLength != 0) {
+                if (!stateObj.TryReadString(shortLength, out metaData.udtAssemblyQualifiedName)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }       
     }    // tdsparser
 }//namespace

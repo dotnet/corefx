@@ -215,6 +215,36 @@ namespace System.Tests
 
                 Assert.False(valueTuple.Equals(null));
                 Assert.False(((IStructuralEquatable)valueTuple).Equals(null));
+                IStructuralEquatable_Equals_NullComparer_ThrowsNullReferenceException();
+                IStructuralEquatable_GetHashCode_NullComparer_ThrowsNullReferenceException();
+            }
+
+            public void IStructuralEquatable_Equals_NullComparer_ThrowsNullReferenceException()
+            {
+                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13429
+                IStructuralEquatable equatable = (IStructuralEquatable)valueTuple;
+                if (valueTuple is ValueTuple)
+                {
+                    Assert.True(equatable.Equals(valueTuple, null));
+                }
+                else
+                {
+                    Assert.Throws<NullReferenceException>(() => equatable.Equals(valueTuple, null));
+                }
+            }
+
+            public void IStructuralEquatable_GetHashCode_NullComparer_ThrowsNullReferenceException()
+            {
+                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13429
+                IStructuralEquatable equatable = (IStructuralEquatable)valueTuple;
+                if (valueTuple is ValueTuple)
+                {
+                    Assert.Equal(0, valueTuple.GetHashCode());
+                }
+                else
+                {
+                    Assert.Throws<NullReferenceException>(() => equatable.GetHashCode(null));
+                }
             }
 
             public void TestCompareTo(ValueTupleTestDriver<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> other, int expectedResult, int expectedStructuralResult)
@@ -222,6 +252,22 @@ namespace System.Tests
                 Assert.Equal(expectedResult, ((IComparable)valueTuple).CompareTo(other.valueTuple));
                 Assert.Equal(expectedStructuralResult, ((IStructuralComparable)valueTuple).CompareTo(other.valueTuple, DummyTestComparer.Instance));
                 Assert.Equal(1, ((IComparable)valueTuple).CompareTo(null));
+
+                IStructuralComparable_NullComparer_ThrowsNullReferenceException();
+            }
+
+            public void IStructuralComparable_NullComparer_ThrowsNullReferenceException()
+            {
+                // This was not fixed in order to be compatible with the full .NET framework and Xamarin. See #13429
+                IStructuralComparable comparable = (IStructuralComparable)valueTuple;
+                if (valueTuple is ValueTuple)
+                {
+                    Assert.Equal(0, comparable.CompareTo(valueTuple, null));
+                }
+                else
+                {
+                    Assert.Throws<NullReferenceException>(() => comparable.CompareTo(valueTuple, null));
+                }
             }
 
             public void TestNotEqual()
@@ -984,28 +1030,6 @@ namespace System.Tests
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 1, 1, 1, 1, 1, 3, ValueTuple.Create(1)), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 1, 1, 1, 1, 1, 1, ValueTuple.Create(3)), TestComparer.Instance));
 
-            Assert.Equal(2138941962, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create()).GetHashCode());
-            Assert.Equal(2138941954, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8)).GetHashCode());
-            Assert.Equal(-1746596640, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9)).GetHashCode());
-            Assert.Equal(121964360, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10)).GetHashCode());
-            Assert.Equal(4363008, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11)).GetHashCode());
-            Assert.Equal(9413384, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12)).GetHashCode());
-            Assert.Equal(305131744, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13)).GetHashCode());
-            Assert.Equal(1479338186, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13, 14)).GetHashCode());
-            Assert.Equal(1573514559, CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create())).GetHashCode());
-            Assert.Equal(1573514711, CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create(15))).GetHashCode());
-
-            Assert.Equal(2138941962, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create())).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(2138941954, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(-1746596640, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(121964360, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(4363008, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(9413384, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(305131744, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1479338186, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13, 14))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1573514559, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create()))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1573514711, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create(15)))).GetHashCode(TestEqualityComparer.Instance));
-
             Assert.False(se.Equals(t, DummyTestEqualityComparer.Instance));
 
             // Notice that 0-tuple prints as empty position
@@ -1082,18 +1106,10 @@ namespace System.Tests
         [Fact]
         public static void EightTuplesWithBadRest()
         {
-            // Change as necessary if in the future
-            // the hash algorithm is modified again.
-            const int ExpectedHash = 1291467969;
-
             var d = default(ValueTuple<int, int, int, int, int, int, int, int>);
             d.Item1 = 1;
             d.Rest = 42;
-            Assert.Equal(ExpectedHash, d.GetHashCode());
-            Assert.Equal(ExpectedHash, ((IStructuralEquatable)d).GetHashCode());
             Assert.Equal("(1, 0, 0, 0, 0, 0, 0, 42)", d.ToString());
-
-            Assert.Equal(ExpectedHash, CreateLong(1, 2, 3, 4, 5, 6, 7, d).GetHashCode());
 
             // GetHashCode only tries to hash the first 7 elements when rest is not ITupleInternal
             Assert.Equal(ValueTuple.Create(1, 0, 0, 0, 0, 0, 0).GetHashCode(), d.GetHashCode());

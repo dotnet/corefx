@@ -1,13 +1,12 @@
 {
   "dependencies": {
-    "System.Runtime": "4.0.0",
-    "System.IO": "4.0.0"
+    "System.IO": "4.4.0-beta-24814-01",
+    "System.Runtime": "4.4.0-beta-24814-01",
+    "System.Runtime.Serialization.Xml": "4.4.0-beta-24814-01",
+    "System.Text.Encoding": "4.4.0-beta-24814-01",
+    "System.Xml.ReaderWriter": "4.4.0-beta-24814-01"
   },
   "frameworks": {
-    "netstandard1.0": {
-      "imports": [
-        "dotnet5.1"
-      ]
-    }
+    "netstandard1.7": {}
   }
 }

@@ -5,14 +5,9 @@
     <ProjectGuid>{853BB14F-8A5B-42B4-A053-21DE1AEBB335}</ProjectGuid>
     <RootNamespace>ConventionsUnitTests</RootNamespace>
     <AssemblyName>System.Composition.Convention.Tests</AssemblyName>
-    <!-- Don't allow project reference to package dependency conversion -->
-    <KeepAllProjectReferences>true</KeepAllProjectReferences>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\System.Composition\tests\Util\AssertX.cs">
       <Link>Util\AssertX.cs</Link>

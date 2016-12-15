@@ -11,14 +11,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <Compile Include="System\IO\FileAttributes.cs" />
-    <Compile Include="System\IO\FileMode.cs" />
-    <Compile Include="System\IO\FileShare.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
-    <TargetingPackReference Include="System.Private.CoreLib" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
   </ItemGroup>

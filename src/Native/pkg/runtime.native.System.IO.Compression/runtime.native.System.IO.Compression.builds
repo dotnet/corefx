@@ -43,6 +43,10 @@
       <OSGroup>opensuse.42.1</OSGroup>
       <Platform>amd64</Platform>
     </Project>
+    <Project Include="alpine\3.4.3\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>alpine.3.4.3</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>x86</Platform>
@@ -56,6 +60,22 @@
       <Platform>arm</Platform>
     </Project>
     <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <Platform>arm64</Platform>
+    </Project>
+    <Project Include="win_aot\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <Platform>x86</Platform>
+    </Project>
+    <Project Include="win_aot\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="win_aot\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <Platform>arm</Platform>
+    </Project>
+    <Project Include="win_aot\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>arm64</Platform>
     </Project>

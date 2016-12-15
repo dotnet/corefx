@@ -21,10 +21,10 @@ namespace System.Net.Http.Tests
 
         private const string invalidChars = "()<>@,;\\\"/[]?={} \t";
 
-        public readonly static IEnumerable<object[]> ValidStatusCodeLines = GetStatusCodeLines(StatusCodeTemplate);
-        public readonly static IEnumerable<object[]> InvalidStatusCodeLines = GetStatusCodeLines(MissingSpaceFormat);
-        public readonly static IEnumerable<object[]> StatusCodeVersionLines = GetStatusCodeLinesForVersions(1, 10);
-        public readonly static IEnumerable<object[]> InvalidHeaderLines = GetInvalidHeaderLines();
+        public static readonly IEnumerable<object[]> ValidStatusCodeLines = GetStatusCodeLines(StatusCodeTemplate);
+        public static readonly IEnumerable<object[]> InvalidStatusCodeLines = GetStatusCodeLines(MissingSpaceFormat);
+        public static readonly IEnumerable<object[]> StatusCodeVersionLines = GetStatusCodeLinesForVersions(1, 10);
+        public static readonly IEnumerable<object[]> InvalidHeaderLines = GetInvalidHeaderLines();
 
         private static IEnumerable<object[]> GetStatusCodeLines(string template)
         {
@@ -63,10 +63,12 @@ namespace System.Net.Http.Tests
             fixed (byte* pBuffer = buffer)
             {
                 var reader = new CurlResponseHeaderReader(new IntPtr(pBuffer), checked((ulong)buffer.Length));
-                var response = new HttpResponseMessage();
-                Assert.True(reader.ReadStatusLine(response));
-                Assert.Equal(expectedCode, response.StatusCode);
-                Assert.Equal(expectedPhrase, response.ReasonPhrase);
+                using (var response = new HttpResponseMessage())
+                {
+                    Assert.True(reader.ReadStatusLine(response));
+                    Assert.Equal(expectedCode, response.StatusCode);
+                    Assert.Equal(expectedPhrase, response.ReasonPhrase);
+                }
             }
         }
 
@@ -78,8 +80,10 @@ namespace System.Net.Http.Tests
             fixed (byte* pBuffer = buffer)
             {
                 var reader = new CurlResponseHeaderReader(new IntPtr(pBuffer), checked((ulong)buffer.Length));
-                var response = new HttpResponseMessage();
-                Assert.Throws<HttpRequestException>(() => reader.ReadStatusLine(response));
+                using (var response = new HttpResponseMessage())
+                {
+                    Assert.Throws<HttpRequestException>(() => reader.ReadStatusLine(response));
+                }
             }
         }
 
@@ -91,18 +95,20 @@ namespace System.Net.Http.Tests
             fixed (byte* pBuffer = buffer)
             {
                 var reader = new CurlResponseHeaderReader(new IntPtr(pBuffer), checked((ulong)buffer.Length));
-                var response = new HttpResponseMessage();
-                Assert.True(reader.ReadStatusLine(response));
-                int expectedMajor = 0;
-                int expectedMinor = 0;
-                if (major == 1 && (minor == 0 || minor == 1))
+                using (var response = new HttpResponseMessage())
                 {
-                    expectedMajor = 1;
-                    expectedMinor = minor;
-                }
+                    Assert.True(reader.ReadStatusLine(response));
+                    int expectedMajor = 0;
+                    int expectedMinor = 0;
+                    if (major == 1 && (minor == 0 || minor == 1))
+                    {
+                        expectedMajor = 1;
+                        expectedMinor = minor;
+                    }
 
-                Assert.Equal(expectedMajor, response.Version.Major);
-                Assert.Equal(expectedMinor, response.Version.Minor);
+                    Assert.Equal(expectedMajor, response.Version.Major);
+                    Assert.Equal(expectedMinor, response.Version.Minor);
+                }
             }
         }
 

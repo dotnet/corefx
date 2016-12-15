@@ -29,9 +29,7 @@ namespace System.Xml.Serialization
     internal class CodeGenerator
     {
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Method does validation only without any user input")]
-        internal static bool IsValidLanguageIndependentIdentifier(string ident) { return System.CodeDom.Compiler.CodeGenerator.IsValidLanguageIndependentIdentifier(ident); }
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Method does validation only without any user input")]
-        internal static void ValidateIdentifiers(System.CodeDom.CodeObject e) { System.CodeDom.Compiler.CodeGenerator.ValidateIdentifiers(e); }
+        internal static bool IsValidLanguageIndependentIdentifier(string ident) { return CSharpHelpers.IsValidLanguageIndependentIdentifier(ident); }
         internal static BindingFlags InstancePublicBindingFlags = BindingFlags.Instance | BindingFlags.Public;
         internal static BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         internal static BindingFlags StaticBindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
@@ -1284,7 +1282,7 @@ namespace System.Xml.Serialization
             return ifState;
         }
 
-        static internal AssemblyBuilder CreateAssemblyBuilder(string name)
+        internal static AssemblyBuilder CreateAssemblyBuilder(string name)
         {
             AssemblyName assemblyName = new AssemblyName();
             assemblyName.Name = name;
@@ -1292,11 +1290,11 @@ namespace System.Xml.Serialization
             return AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
         }
 
-        static internal ModuleBuilder CreateModuleBuilder(AssemblyBuilder assemblyBuilder, string name)
+        internal static ModuleBuilder CreateModuleBuilder(AssemblyBuilder assemblyBuilder, string name)
         {
             return assemblyBuilder.DefineDynamicModule(name);
         }
-        static internal TypeBuilder CreateTypeBuilder(ModuleBuilder moduleBuilder, string name, TypeAttributes attributes, Type parent, Type[] interfaces)
+        internal static TypeBuilder CreateTypeBuilder(ModuleBuilder moduleBuilder, string name, TypeAttributes attributes, Type parent, Type[] interfaces)
         {
             // parent is nullable if no base class
             return moduleBuilder.DefineType(TempAssembly.GeneratedAssemblyNamespace + "." + name,

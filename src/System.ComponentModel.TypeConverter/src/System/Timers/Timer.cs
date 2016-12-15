@@ -51,12 +51,12 @@ namespace System.Timers
         : this()
         {
             if (interval <= 0)
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, "interval", interval));
+                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(interval), interval));
 
             double roundedInterval = Math.Ceiling(interval);
             if (roundedInterval > int.MaxValue || roundedInterval <= 0)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, "interval", interval));
+                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(interval), interval));
             }
 
             _interval = (int)roundedInterval;
@@ -231,12 +231,9 @@ namespace System.Timers
                 if (_synchronizingObject == null && DesignMode)
                 {
                     IDesignerHost host = (IDesignerHost)GetService(typeof(IDesignerHost));
-                    if (host != null)
-                    {
-                        object baseComponent = host.RootComponent;
-                        if (baseComponent != null && baseComponent is ISynchronizeInvoke)
-                            _synchronizingObject = (ISynchronizeInvoke)baseComponent;
-                    }
+                    object baseComponent = host?.RootComponent;
+                    if (baseComponent != null && baseComponent is ISynchronizeInvoke)
+                        _synchronizingObject = (ISynchronizeInvoke)baseComponent;
                 }
 
                 return _synchronizingObject;

@@ -11,22 +11,6 @@ namespace System.Linq.Tests
 {
     public class ConcatTests : EnumerableTests
     {
-        private static List<Func<IEnumerable<T>, IEnumerable<T>>> IdentityTransforms<T>()
-        {
-            // All of these transforms should take an enumerable and produce
-            // another enumerable with the same contents.
-            return new List<Func<IEnumerable<T>, IEnumerable<T>>>
-            {
-                e => e,
-                e => e.ToArray(),
-                e => e.ToList(),
-                e => e.Select(i => i),
-                e => e.Concat(Array.Empty<T>()),
-                e => ForceNotCollection(e),
-                e => e.Concat(ForceNotCollection(Array.Empty<T>()))
-            };
-        }
-
         [Theory]
         [InlineData(new int[] { 2, 3, 2, 4, 5 }, new int[] { 1, 9, 4 })]
         public void SameResultsWithQueryAndRepeatCalls(IEnumerable<int> first, IEnumerable<int> second)
@@ -93,6 +77,7 @@ namespace System.Linq.Tests
         [MemberData(nameof(ConcatOfConcatsData))]
         [MemberData(nameof(ConcatWithSelfData))]
         [MemberData(nameof(ChainedCollectionConcatData))]
+        [MemberData(nameof(AppendedPrependedConcatAlternationsData))]
         public void VerifyEquals(IEnumerable<int> expected, IEnumerable<int> actual)
         {
             // workaround: xUnit type inference doesn't work if the input type is not T (like IEnumerable<T>)
@@ -151,6 +136,54 @@ namespace System.Linq.Tests
 
         public static IEnumerable<object[]> ChainedCollectionConcatData() => GenerateSourcesData(innerTransform: e => e.ToList());
 
+        public static IEnumerable<object[]> AppendedPrependedConcatAlternationsData()
+        {
+            const int EnumerableCount = 4; // How many enumerables to concat together per test case.
+
+            var foundation = Array.Empty<int>();
+            var expected = new List<int>();
+            IEnumerable<int> actual = foundation;
+
+            // each bit in the last EnumerableCount bits of i represent whether we want to prepend/append a sequence for this iteration.
+            // if it's set, we'll prepend. otherwise, we'll append.
+            for (int i = 0; i < (1 << EnumerableCount); i++)
+            {
+                // each bit in last EnumerableCount bits of j is set if we want to ensure the nth enumerable
+                // concat'd is an ICollection.
+                // Note: It is important we run over the all-bits-set case, since currently
+                // Concat is specialized for when all inputs are ICollection.
+                for (int j = 0; j < (1 << EnumerableCount); j++)
+                {
+                    for (int k = 0; k < EnumerableCount; k++) // k is how much bits we shift by, and also the item that gets appended/prepended.
+                    {
+                        var nextRange = Enumerable.Range(k, 1);
+                        bool prepend = ((i >> k) & 1) != 0;
+                        bool forceCollection = ((j >> k) & 1) != 0;
+
+                        if (forceCollection)
+                        {
+                            nextRange = nextRange.ToList();
+                        }
+
+                        actual = prepend ? nextRange.Concat(actual) : actual.Concat(nextRange);
+                        if (prepend)
+                        {
+                            expected.Insert(0, k);
+                        }
+                        else
+                        {
+                            expected.Add(k);
+                        }
+                    }
+
+                    yield return new object[] { expected.ToArray(), actual.ToArray() };
+
+                    actual = foundation;
+                    expected.Clear();
+                }
+            }
+        }
+
         private static IEnumerable<object[]> GenerateSourcesData(
             Func<IEnumerable<int>, IEnumerable<int>> outerTransform = null,
             Func<IEnumerable<int>, IEnumerable<int>> innerTransform = null)
@@ -185,6 +218,22 @@ namespace System.Linq.Tests
 
                 Assert.Equal(sources.Sum(s => s.Count()), concatee.Count());
                 VerifyEqualsWorker(sources.SelectMany(s => s), concatee);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ManyConcatsData))]
+        public void ManyConcatsRunOnce(IEnumerable<IEnumerable<int>> sources, IEnumerable<int> expected)
+        {
+            foreach (var transform in IdentityTransforms<int>())
+            {
+                IEnumerable<int> concatee = Enumerable.Empty<int>();
+                foreach (var source in sources)
+                {
+                    concatee = concatee.RunOnce().Concat(transform(source));
+                }
+
+                Assert.Equal(sources.Sum(s => s.Count()), concatee.Count());
             }
         }
 

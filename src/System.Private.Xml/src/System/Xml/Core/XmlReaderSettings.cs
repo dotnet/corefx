@@ -8,7 +8,6 @@ using Microsoft.Win32;
 using System.Globalization;
 using System.Security;
 using System.Xml.Schema;
-using System.Xml.XmlConfiguration;
 using System.Runtime.Versioning;
 
 namespace System.Xml
@@ -126,7 +125,7 @@ namespace System.Xml
         //notice we must keep GetXmlResolver() to avoid dead lock when init System.Config.ConfigurationManager
         internal XmlResolver GetXmlResolver_CheckConfig()
         {
-            if (LocalAppContextSwitches.ProhibitDefaultUrlResolver && !IsXmlResolverSet)
+            if (!IsXmlResolverSet)
                 return null;
             else
                 return _xmlResolver;
@@ -752,7 +751,7 @@ namespace System.Xml
 
         private static bool? s_enableLegacyXmlSettings = null;
 
-        static internal bool EnableLegacyXmlSettings()
+        internal static bool EnableLegacyXmlSettings()
         {
             if (s_enableLegacyXmlSettings.HasValue)
             {

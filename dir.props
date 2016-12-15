@@ -29,7 +29,7 @@
   <PropertyGroup>
     <BuildToolsTargets45 Condition="'$(OsEnvironment)'=='Windows_NT'">true</BuildToolsTargets45>
   </PropertyGroup>
-
+  
   <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
@@ -45,12 +45,18 @@
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
+    
+    <!-- Temporarily outside BinDir -->
+    <PackageInstallPath>$(ProjectDir)bin.localpkg/</PackageInstallPath>
+    
     <ToolsDir Condition="'$(UseToolRuntimeForToolsDir)'=='true'">$(ToolRuntimePath)</ToolsDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ToolsDir)</ToolRuntimePath>
 
     <!-- needs to be defined all the time to avoid indexing every file from the root -->
     <GeneratedProjectJsonDir>$(ObjDir)generated</GeneratedProjectJsonDir>
+
+    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
   </PropertyGroup>
 
   <Import Project="$(ToolRuntimePath)BuildVersion.targets" Condition="Exists('$(ToolRuntimePath)BuildVersion.targets')" />
@@ -85,7 +91,10 @@
 
   <!-- list of nuget package sources passed to dnu -->
   <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
-    <!-- PackagesDrops is passed in via the commandline "/p:PackagesDrops=[drop location]" -->
+    <!-- Example to consume local CoreCLR package:
+         /t:BatchRestorePackages /p:OverridePackageSource=C:\coreclr\bin\Product\Windows_NT.x64.Debug\.nuget\pkg
+    -->
+    <DnuSourceList Include="$(OverridePackageSource)" />
     <DnuSourceList Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(PackagesDrops)" />
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
     <!-- Including buildtools to pull in TestSuite packages and repackaged xunit dependencies-->
@@ -93,18 +102,30 @@
     <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <DnuSourceList Condition="'$(BuildTestsAgainstPackages)' == 'true'  and '$(RestoreForTestsAgainstPackagesOnly)' == 'true'" Include="$(PackageInstallPath)" />
+  </ItemGroup>
+  
   <!-- This is the directory where we dynamically generate project.json's for our test build package dependencies -->
   <PropertyGroup Condition="'$(BuildTestsAgainstPackages)' == 'true'">
     <BuildTestsAgainstPackagesIdentityRegex>$(CoreFxVersionsIdentityRegex)</BuildTestsAgainstPackagesIdentityRegex>
     <SkipVerifyPackageVersions>true</SkipVerifyPackageVersions>
   </PropertyGroup>
 
+ 
+  <!-- When restoring test projects with generated project.json's (during build.cmd), only restore using local packages -->
+  <PropertyGroup Condition="'$(RestoreForTestsAgainstPackagesOnly)' == 'true'">
+    <ExcludeInternetFeeds Condition="'$(ExcludeInternetFeeds)' == ''">true</ExcludeInternetFeeds>
+    <ExcludeNonTestRestores Condition="'$(ExcludeNonTestRestores)' == ''">true</ExcludeNonTestRestores>
+  </PropertyGroup>
+  
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)src" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)pkg" />
-    <DnuRestoreDir Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)" />
+    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)src/" />
+    <DnuRestoreDir Condition="'$(ExcludeNonTestRestores)' != 'true'" Include="$(MSBuildThisFileDirectory)pkg/" />
+    <DnuRestoreDir Condition="'$(ExcludeNonTestRestores)' != 'true'" Include="$(MSBuildThisFileDirectory)layout" />
+    <DnuRestoreDir Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)/" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -119,19 +140,17 @@
 
     <DnuRestoreCommand>"$(DnuToolPath)"</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) restore</DnuRestoreCommand>
+    
+    <DnuRestoreCommandForBuildTestsAgainstPackages Condition="'$(BuildTestsAgainstPackages)' == 'true' and '$(RestoreForTestsAgainstPackagesOnly)' == 'true'">$(DnuRestoreCommand) --packages "$(PackageInstallPath)" --source $(PackagesDir)</DnuRestoreCommandForBuildTestsAgainstPackages>
+    
     <DnuRestoreCommand Condition="'$(ParallelRestore)'=='true'">$(DnuRestoreCommand) --parallel</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(UseNuGetHttpCache)'!='true'">$(DnuRestoreCommand) --no-cache</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configfile $(NuGetConfigPath)</DnuRestoreCommand>
+    
+    <DnuRestoreCommand Condition="'$(BuildTestsAgainstPackages)' == 'true' and '$(RestoreForTestsAgainstPackagesOnly)' == 'true'">$(DnuRestoreCommandForBuildTestsAgainstPackages)</DnuRestoreCommand>
   </PropertyGroup>
-
-  <!-- Create a collection of all project.json files for dependency updates. -->
-  <ItemGroup>
-    <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
-    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg/**/project.json" />
-    <ProjectJsonFiles Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)/**/project.json" />
-  </ItemGroup>
 
   <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
     <!-- When we do a traversal build we get all packages up front, don't restore them again -->
@@ -142,8 +161,7 @@
     <!-- By default make all libraries to be AnyCPU but individual projects can override it if they need to -->
     <Platform>AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <!-- dotnet/corefx#8899 tracks fixing this -->
-    <RunApiCompat Condition="'$(OSEnvironment)' == 'Windows_NT'">true</RunApiCompat>
+    <RunApiCompat>true</RunApiCompat>
   </PropertyGroup>
 
   <!--
@@ -249,14 +267,13 @@
     <When Condition="'$(OSGroup)'=='Windows_NT'">
       <PropertyGroup>
         <TargetsWindows>true</TargetsWindows>
-        <TestNugetRuntimeId>win7-x64</TestNugetRuntimeId>
         <PackageTargetRuntime>win</PackageTargetRuntime>
+        <UseWin32Apis>true</UseWin32Apis>
       </PropertyGroup>
     </When>
     <When Condition="'$(OSGroup)'=='Unix'">
       <PropertyGroup>
         <TargetsUnix>true</TargetsUnix>
-        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
         <PackageTargetRuntime>unix</PackageTargetRuntime>
       </PropertyGroup>
     </When>
@@ -264,7 +281,6 @@
       <PropertyGroup>
         <TargetsUnix>true</TargetsUnix>
         <TargetsLinux>true</TargetsLinux>
-        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
         <PackageTargetRuntime>linux</PackageTargetRuntime>
       </PropertyGroup>
     </When>
@@ -272,7 +288,6 @@
       <PropertyGroup>
         <TargetsUnix>true</TargetsUnix>
         <TargetsOSX>true</TargetsOSX>
-        <TestNugetRuntimeId>osx.10.10-x64</TestNugetRuntimeId>
         <PackageTargetRuntime>osx</PackageTargetRuntime>
       </PropertyGroup>
     </When>
@@ -280,14 +295,12 @@
       <PropertyGroup>
         <TargetsUnix>true</TargetsUnix>
         <TargetsFreeBSD>true</TargetsFreeBSD>
-        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
       </PropertyGroup>
     </When>
     <When Condition="'$(OSGroup)'=='NetBSD'">
       <PropertyGroup>
         <TargetsUnix>true</TargetsUnix>
         <TargetsNetBSD>true</TargetsNetBSD>
-        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>   <!-- TODO -->
       </PropertyGroup>
     </When>
     <Otherwise>
@@ -394,6 +407,20 @@
       <PropertyGroup>
         <PackageTargetFramework>netcoreapp1.1</PackageTargetFramework>
         <NuGetTargetMoniker>.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.2'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.2</PackageTargetFramework>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.2corert'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.2</PackageTargetFramework>
+        <PackageTargetRuntime Condition="'$(PackageTargetRuntime)' != ''">$(PackageTargetRuntime)-corert</PackageTargetRuntime>
+        <PackageTargetRuntime Condition="'$(PackageTargetRuntime)' == ''">corert</PackageTargetRuntime>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.2</NuGetTargetMoniker>
       </PropertyGroup>
     </When>
     <When Condition="'$(TargetGroup)'=='dnxcore50'">
@@ -503,6 +530,8 @@
     <TestTFM Condition="'$(TestTFM)'==''">$(DefaultTestTFM)</TestTFM>
     <!-- we default FilterToTestTFM to DefaultTestTFM if it is not explicity defined -->
     <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">$(DefaultTestTFM)</FilterToTestTFM>
+    <!-- FilterTestNugetTargetMoniker needs to stay in the long form to be used for Framework and Runtime filtering purposes -->
+    <FilterTestNugetTargetMoniker Condition="'$(FilterTestNugetTargetMoniker)'==''">.NETCoreApp,Version=v1.1</FilterTestNugetTargetMoniker>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -547,6 +576,8 @@
   <PropertyGroup>
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
+    <TestTargetOutputRelPath Condition="'$(TestTargetOutputRelPath)'=='' And '$(TargetGroup)'!='' And '$(TestTFM)'!=''">$(TargetGroup).$(TestTFM)/</TestTargetOutputRelPath>
+    <TestTargetOutputRelPath Condition="'$(TestTargetOutputRelPath)'=='' And '$(TargetGroup)'=='' And '$(TestTFM)'!=''">default.$(TestTFM)/</TestTargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <OutputPathSubfolder Condition="'$(IsCompatAssembly)'=='true'">/Compat</OutputPathSubfolder>
@@ -555,11 +586,16 @@
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)/</IntermediateOutputRootPath>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)/$(TargetOutputRelPath)</IntermediateOutputPath>
 
-    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)</TestPath>
+    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TestTargetOutputRelPath)</TestPath>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
     <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
+    
+    <!-- When testing against packages, we want to run against just the localpackages cache -->
+    <PackagesDir Condition="'$(BuildTestsAgainstPackages)'=='true'">$(PackageInstallPath)</PackagesDir>
+    <!-- PackageDrops is set to the bin folder where packages are built to generate the new test project.json for these -->
+    <PackagesDrops Condition="'$(PackagesDrops)'==''">$(PackageOutputPath)</PackagesDrops>
   </PropertyGroup>
 
   <PropertyGroup>

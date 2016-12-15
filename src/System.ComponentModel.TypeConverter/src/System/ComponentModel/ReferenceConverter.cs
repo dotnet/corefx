@@ -4,6 +4,7 @@
 
 using Microsoft.Win32;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
@@ -95,7 +96,7 @@ namespace System.ComponentModel
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string))
@@ -104,16 +105,13 @@ namespace System.ComponentModel
                 {
                     // Try the reference service first.
                     //
-                    if (context != null)
+                    IReferenceService refSvc = (IReferenceService) context?.GetService(typeof(IReferenceService));
+                    if (refSvc != null)
                     {
-                        IReferenceService refSvc = (IReferenceService)context.GetService(typeof(IReferenceService));
-                        if (refSvc != null)
+                        string name = refSvc.GetName(value);
+                        if (name != null)
                         {
-                            string name = refSvc.GetName(value);
-                            if (name != null)
-                            {
-                                return name;
-                            }
+                            return name;
                         }
                     }
 
@@ -123,13 +121,10 @@ namespace System.ComponentModel
                     {
                         IComponent comp = (IComponent)value;
                         ISite site = comp.Site;
-                        if (site != null)
+                        string name = site?.Name;
+                        if (name != null)
                         {
-                            string name = site.Name;
-                            if (name != null)
-                            {
-                                return name;
-                            }
+                            return name;
                         }
                     }
 
@@ -152,7 +147,7 @@ namespace System.ComponentModel
 
             if (context != null)
             {
-                ArrayList list = new ArrayList();
+                List<object> list = new List<object>();
                 list.Add(null);
 
                 // Try the reference service first.

@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
-    public class HttpWebRequestTest
+    public partial class HttpWebRequestTest
     {
         private const string RequestBody = "This is data to POST.";
         private readonly byte[] _requestBodyBytes = Encoding.UTF8.GetBytes(RequestBody);
@@ -28,7 +28,7 @@ namespace System.Net.Tests
         private int _responseCallbackCallCount = 0;
         private readonly ITestOutputHelper _output;
 
-        public readonly static object[][] EchoServers = System.Net.Test.Common.Configuration.Http.EchoServers;
+        public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.Http.EchoServers;
 
         public HttpWebRequestTest(ITestOutputHelper output)
         {
@@ -111,6 +111,7 @@ namespace System.Net.Tests
             Assert.True(request.AllowReadStreamBuffering);
         }
 
+        [ActiveIssue(12637)]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ContentLength_Get_ExpectSameAsGetResponseStream(Uri remoteServer)
         {
@@ -380,6 +381,7 @@ namespace System.Net.Tests
             new object[] { System.Net.Test.Common.Configuration.Http.StatusCodeUri(true, 404) },
         };
 
+        [ActiveIssue(12236, TestPlatforms.Linux)]
         [Theory, MemberData(nameof(StatusCodeServers))]
         public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException(Uri remoteServer)
         {

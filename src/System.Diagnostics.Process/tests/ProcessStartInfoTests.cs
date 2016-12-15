@@ -183,6 +183,7 @@ namespace System.Diagnostics.Tests
             });
         }
 
+        [ActiveIssue(14417)]
         [Fact]
         public void TestEnvironmentOfChildProcess()
         {
@@ -346,6 +347,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [ActiveIssue(12696)]
         [Fact, PlatformSpecific(TestPlatforms.Windows), OuterLoop] // Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {

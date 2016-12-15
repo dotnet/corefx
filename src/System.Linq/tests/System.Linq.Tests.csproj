@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Linq.Tests</AssemblyName>
     <RootNamespace>System.Linq.Tests</RootNamespace>
-    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.6</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
@@ -64,6 +64,7 @@
     <Compile Include="SumTests.cs" />
     <Compile Include="TakeTests.cs" />
     <Compile Include="TakeWhileTests.cs" />
+    <Compile Include="TestExtensions.cs" />
     <Compile Include="ThenByDescendingTests.cs" />
     <Compile Include="ThenByTests.cs" />
     <Compile Include="ToArrayTests.cs" />
@@ -77,8 +78,8 @@
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
+    <Compile Include="ToHashSetTests.netcoreapp1.1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Linq.pkgproj">

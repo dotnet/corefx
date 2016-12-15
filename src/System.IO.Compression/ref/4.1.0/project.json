@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "System.IO.Compression": "4.1.0"
+    "System.IO.Compression": "4.3.0"
   },
   "frameworks": {
-    "netstandard1.3": { }
+    "netstandard1.3": {}
   }
 }

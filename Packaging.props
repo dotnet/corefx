@@ -22,9 +22,17 @@
     <!-- by default all packages will use the same version which revs with respect to product version -->
     <PackageVersion Condition="'$(PackageVersion)' == ''">4.4.0</PackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
+    <SkipGenerationCheck>true</SkipGenerationCheck>
   </PropertyGroup>
 
   <Import Condition="Exists('pkg/baseline/baseline.props') AND '$(MSBuildProjectExtension)' == '.pkgproj'" Project="pkg/baseline/baseline.props" />
+
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.pkgproj'">
+    <ValidatePackageSuppression Include="SuppressNETStandardInference">
+      <!-- desktop assemblies must version past NETStandard refs -->
+      <Value>.NETFramework,Version=v4.6;.NETFramework,Version=v4.6.1;.NETFramework,Version=v4.6.2;.NETFramework,Version=v4.6.3</Value>
+    </ValidatePackageSuppression>
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
     <!--
@@ -35,14 +43,26 @@
     <SkipBuildPackages>true</SkipBuildPackages>
   </PropertyGroup>
 
-  <!-- Add required legal files to packages -->
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.pkgproj'">
+    <!-- Add required legal files to packages -->
     <File Condition="Exists('$(PackageLicenseFile)')"
           Include="$(PackageLicenseFile)" >
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
     <File Condition="Exists('$(PackageThirdPartyNoticesFile)')"
           Include="$(PackageThirdPartyNoticesFile)" >
+        <SkipPackageFileCheck>true</SkipPackageFileCheck>
+    </File>
+
+    <!-- Add version file to packages -->
+    <File Condition="Exists('$(SyncInfoFile)')"
+          Include="$(SyncInfoFile)" >
+        <SkipPackageFileCheck>true</SkipPackageFileCheck>
+    </File>
+    
+    <!-- Add a marker to help the designer optimize & share .NET Core packages -->
+    <File Condition="'$(IncludeDesignerMarker)' != 'false'"
+          Include="$(ProjectDir)pkg/useSharedDesignerContext.txt">
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
   </ItemGroup>

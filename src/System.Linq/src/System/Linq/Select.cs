@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using static System.Linq.Utilities;
 
 namespace System.Linq
 {
@@ -85,11 +86,6 @@ namespace System.Linq
             }
         }
 
-        private static Func<TSource, TResult> CombineSelectors<TSource, TMiddle, TResult>(Func<TSource, TMiddle> selector1, Func<TMiddle, TResult> selector2)
-        {
-            return x => selector2(selector1(x));
-        }
-
         internal sealed class SelectEnumerableIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
         {
             private readonly IEnumerable<TSource> _source;
@@ -147,7 +143,17 @@ namespace System.Linq
                 return new SelectEnumerableIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
             }
 
-            public TResult[] ToArray() => EnumerableHelpers.ToArray(this);
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+                
+                foreach (TSource item in _source)
+                {
+                    builder.Add(_selector(item));
+                }
+
+                return builder.ToArray();
+            }
 
             public List<TResult> ToList() => new List<TResult>(this);
 
@@ -175,7 +181,7 @@ namespace System.Linq
 
             public override bool MoveNext()
             {
-                if (_state == 0 | _state == _source.Length + 1)
+                if (_state < 1 | _state == _source.Length + 1)
                 {
                     Dispose();
                     return false;
@@ -629,25 +635,45 @@ namespace System.Linq
                 return sourceFound ? _selector(input) : default(TResult);
             }
 
+            private TResult[] LazyToArray()
+            {
+                Debug.Assert(_source.GetCount(onlyIfCheap: true) == -1);
+
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+                foreach (TSource input in _source)
+                {
+                    builder.Add(_selector(input));
+                }
+                return builder.ToArray();
+            }
+
+            private TResult[] PreallocatingToArray(int count)
+            {
+                Debug.Assert(count > 0);
+                Debug.Assert(count == _source.GetCount(onlyIfCheap: true));
+
+                TResult[] array = new TResult[count];
+                int index = 0;
+                foreach (TSource input in _source)
+                {
+                    array[index] = _selector(input);
+                    ++index;
+                }
+
+                return array;
+            }
+
             public TResult[] ToArray()
             {
                 int count = _source.GetCount(onlyIfCheap: true);
                 switch (count)
                 {
                     case -1:
-                        return EnumerableHelpers.ToArray(this);
+                        return LazyToArray();
                     case 0:
                         return Array.Empty<TResult>();
                     default:
-                        TResult[] array = new TResult[count];
-                        int index = 0;
-                        foreach (TSource input in _source)
-                        {
-                            array[index] = _selector(input);
-                            ++index;
-                        }
-
-                        return array;
+                        return PreallocatingToArray(count);
                 }
             }
 
