@@ -10,36 +10,46 @@
   
   <!-- Add vertical projects to the project group for BuildAllProjects -->
   <Target Name="AddVerticalProjects"
-          Inputs="%(Project.Identity)"
+          Inputs="$(MSBuildProjectFullPath)"
           Outputs="fake"
-          DependsOnTargets="DetermineProjectsConfiguration;TrimUnconvertedProjects"
+          DependsOnTargets="DetermineProjectsConfiguration"
           BeforeTargets="AnnotateProjectsWithConfiguration">
     <ItemGroup>
-      <OmitProject Include="%(Project.Identity)" Condition="'%(Project.OmitReason)' != ''">
-        <OmitReason>%(Project.OmitReason)</OmitReason>
+      <OmitProject Include="$(MSBuildProjectFullPath)" Condition="'$(OmitReason)' != ''">
+        <OmitReason>$(OmitReason)</OmitReason>
       </OmitProject>
       <Project Remove="@(OmitProject)" />
     </ItemGroup>
   </Target>
 
+ <Target Name="AnnotateProjectsWithConfiguration" 
+         Returns="@(ProjectWithConfiguration)" > 
+    <PropertyGroup>
+      <_ProjectName>$(MSBuildProjectFullPath)</_ProjectName>
+    </PropertyGroup>
+    <Message Importance="High" Text="AnnotateProjectsWithConfiguration: $(_ProjectName) - BestC: $(_BestConfiguration)" />
+    <ItemGroup> 
+       <ProjectWithConfiguration Include="$(_ProjectName)" > 
+        <AdditionalProperties Condition="'$(_BestConfiguration)' != ''">Configuration=$(_BestConfiguration)</AdditionalProperties>
+        <UndefineProperties Condition="'$(_BestConfiguration)' == ''">Configuration</UndefineProperties>
+       </ProjectWithConfiguration>
+     </ItemGroup> 
+  </Target>
+
   <!-- The initial shaking target for trimming down applicable projects for specified vertical -->
   <Target Name="DetermineProjectsConfiguration"
-          Inputs="%(Project.Identity)"
+          Inputs="$(MSBuildProjectFullPath)"
           Outputs="fake"
           Returns="@(Project)"
-          DependsOnTargets="TrimUnconvertedProjects"
           BeforeTargets="AnnotateProjectsWithConfiguration">
     <PropertyGroup>
-      <_VerticalProject>%(Project.Identity)</_VerticalProject>
-      <_VerticalProjectName>%(Project.FullPath)</_VerticalProjectName>
-      <_OmitReason>%(Project.OmitReason)</_OmitReason>
+      <_VerticalProject>$(MSBuildProjectFullPath)</_VerticalProject>
     </PropertyGroup>
 
     <!-- Clear the _Configuration item -->
     <ItemGroup><_Configuration Remove="@(_Configuration)" /></ItemGroup>
     <MSBuild Targets="FindBestConfiguration"
-             Projects="$(_VerticalProject)"
-             Condition="'$(_OmitReason)' == ''">
+             Projects="$(_VerticalProject)">
       <Output TaskParameter="TargetOutputs"
               ItemName="_Configuration" />
     </MSBuild>
@@ -49,23 +59,10 @@
       <_KeepProject>%(_Configuration.NoBuildConfigurations)</_KeepProject>
     </PropertyGroup>
 
-    <Message Importance="High" Text="$(MSBuildProjectFullPath) Adding $(_VerticalProject)  _Configuration: $(_BestConfiguration)" />
-    <ItemGroup Condition="'$(_KeepProject)' != 'true'">
-      <Project Remove="$(_VerticalProject)" />
-      <Project Condition="'$(_BestConfiguration)' != ''" Include="$(_VerticalProjectName)">  
-        <Configuration Condition="'$(_BestConfiguration)' != ''">$(_BestConfiguration)</Configuration>
-      </Project>
-      <Project Condition="'$(_BestConfiguration)' == ''" Include="$(_VerticalProjectName)">
-        <OmitReason>No applicable Configuration</OmitReason>
-      </Project>
-      <Project Condition="'$(_OmitReason)' != ''">
-        <OmitReason>$(_OmitReason)</OmitReason>
-      </Project>
-    </ItemGroup>
-    <ItemGroup Condition="'$(_KeepProject)' == 'true'">
-      <Project Remove="$(_VerticalProject)" />
-      <Project Include="$(_VerticalProjectName)" />
-    </ItemGroup>
+    <Message Importance="Low" Text="$(MSBuildProjectFullPath) Adding $(_VerticalProject)  _Configuration: $(_BestConfiguration)" />
+    <PropertyGroup Condition="'$(_KeepProject)' != 'true'">
+       <OmitReason Condition="'$(_BestConfiguration)' == ''">No applicable Configuration</OmitReason>
+    </PropertyGroup>
   </Target>
 
   <!-- For the current project, target which determines compatibility for targets -->
@@ -122,7 +119,7 @@
 <!-->    <Error Condition="!$(_ProjectReferenceToAnnotate.Contains('/ref/')) and !$(_ProjectReferenceToAnnotate.Contains('\\ref\\')) and '$(BuildConfigurations)' == ''" Text=" ProjectReference '$(_ProjectReferenceToAnnotate)' does not support any vertical groups." ContinueOnError="true" /> -->
 
      <!-- Clear the VerticalTargets item -->
-    <ItemGroup><VerticalTargets Remove="@(VerticalTargets)" /></ItemGroup>
+    <ItemGroup><_Configuration Remove="@(_Configuration)" /></ItemGroup>
     <FindBestConfiguration Properties="@(Property)"
                            PropertyValues="@(PropertyValue)"
                            BuildConfigurations="$(BuildConfigurations)"
@@ -145,38 +142,14 @@
           <AdditionalProperties>$(_AdditionalProperties);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
         </ProjectReference>
 
-        <ProjectReference Condition="'$(_BestConfiguration)' == ''">
-          <UndefineProperties Condition="'%(ProjectReference.Configuration)' == ''">Configuration;%(ProjectReference.UndefineProperties)</UndefineProperties>
+        <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(_ProjectReferenceToAnnotate)' and '$(_BestConfiguration)' == ''">
+          <UndefineProperties>Configuration;%(ProjectReference.UndefineProperties)</UndefineProperties>
         </ProjectReference>
     </ItemGroup>
   </Target>
 
   <!-- Used to retrieve properties from projects (via project evaluation) -->
   <Target Name="GetBuildConfigurations"
-          Returns="$(BuildConfigurations)" />
-
-  <!-- Temporary target which intentionally omits projects that don't specify the "BuildConfigurations" property. -->
-  <Target Name="TrimUnconvertedProjects"
-          Inputs="%(Project.Identity)"
-          Outputs="fake">
-    <PropertyGroup>
-      <_ProjectToTestForTrim>%(Project.Identity)</_ProjectToTestForTrim>
-      <_ProjectToTestForTrimDirectory>%(Project.RootDir)%(Project.Directory)/</_ProjectToTestForTrimDirectory>
-    </PropertyGroup>
-
-    <ReadLinesFromFile File="$(_ProjectToTestForTrimDirectory)omit.txt"
-                       Condition="Exists('$(_ProjectToTestForTrimDirectory)omit.txt')">
-      <Output TaskParameter="Lines"
-              ItemName="ItemsFromFile" />
-    </ReadLinesFromFile>
-    <PropertyGroup>
-      <OmitReason>@(ItemsFromFile)</OmitReason>
-    </PropertyGroup>
-
-    <ItemGroup Condition="'$(OmitReason)' != ''">
-      <Project Condition="'%(Project.Identity)' == '$(_ProjectToTestForTrim)'">
-        <OmitReason>%(Project.OmitReason) $(OmitReason)</OmitReason>
-      </Project>
-    </ItemGroup>  
-  </Target>          
+          Returns="$(BuildConfigurations)"
+          BeforeTargets="BeforeResolveReferences" />
 </Project>

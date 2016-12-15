@@ -30,8 +30,7 @@
     <ItemGroup Condition="'@(ContractProject)' != ''">
       <!--Don't flow the values for OSGroup/TargetGroup unless explicitly defined --> 
       <ContractProject> 
-        <UndefineProperties Condition="'%(ContractProject.Configuration)'==''">Configuration;%(ContractProject.UndefineProperties)</UndefineProperties> 
-        <AdditionalProperties Condition="'%(ContractProject.Configuration)'!=''">Configuration=%(ContractProject.Configuration);%(ContractProject.AdditionalProperties)</AdditionalProperties> 
+        <UndefineProperties>Configuration;%(ContractProject.UndefineProperties)</UndefineProperties> 
       </ContractProject> 
       <ProjectReference Include="@(ContractProject)">
         <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

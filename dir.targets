@@ -79,7 +79,7 @@
   </Target>
 
   <Target Name="ReportConfigurationErrorMessage"
-          BeforeTargets="ResolveProjectReferences"
+          BeforeTargets="AssignProjectConfiguration"
            Condition="'$(BuildConfigurations)' != ''" >
     <Message Importance="High" Text="$(MSBuildProjectFullPath), C: $(Configuration) BC: $(BuildConfiguration) BCs: $(BuildConfigurations)" />
     <Message Importance="High" Condition="'$(ConfigurationErrorMsg)' != ''" Text="$(MSBuildProjectFullPath) ConfigurationErrorMessage: $(ConfigurationErrorMsg)" />
