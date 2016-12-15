@@ -18,6 +18,9 @@
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.Primitives" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="CookieCollectionTest.cs" />
     <Compile Include="CookieContainerTest.cs" />
     <Compile Include="CookieInternalTest.cs" />

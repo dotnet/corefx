@@ -12,6 +12,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.NameResolution" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="InitializationTest.cs" />
     <Compile Include="XunitTestAssemblyAtrributes.cs" />
     <!-- Fakes -->

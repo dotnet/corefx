@@ -28,6 +28,9 @@
     <Compile Include="WriteStateInfoTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.Mail" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\..\src\System\Net\Base64Stream.cs">
       <Link>ProductionCode\Base64Stream.cs</Link>
     </Compile>

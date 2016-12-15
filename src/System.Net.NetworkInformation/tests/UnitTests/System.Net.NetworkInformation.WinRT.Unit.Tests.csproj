@@ -18,6 +18,10 @@
     <Compile Include="Fakes\FakeWinRT.cs" />
   </ItemGroup>
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.NetworkInformation" />
+    <TargetingPackExclusions Include="Windows" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- Production code references -->
     <Compile Include="..\..\src\System\Net\NetworkInformation\NetworkInterface.cs">
       <Link>ProductionCode\System\Net\NetworkInformation\NetworkInterface.cs</Link>

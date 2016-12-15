@@ -12,6 +12,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.NameResolution" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="NameResolutionPalTests.cs" />
     <Compile Include="Fakes\DebugThreadTracking.cs" />
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">

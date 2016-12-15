@@ -12,6 +12,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.Http" />
+    <TargetingPackExclusions Include="System.Net.Mail" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
     </Compile>

@@ -17,6 +17,9 @@
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.Primitives" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="IPAddressPalTest.cs" />
     <Compile Include="HostInformationPalTest.cs" />
     <Compile Include="SocketAddressPalTest.cs" />
