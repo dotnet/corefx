@@ -28,7 +28,7 @@
   </Target>
 
   <!-- build vertical requires the FindBestConfiguration task which is currently in CoreFx.Tools.dll -->
-  <Import Project="buildvertical.targets" Condition="Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll')" />
+  <Import Project="buildvertical.targets" Condition="'$(ImportedBuildVerticalTargets)' != 'true' and Exists('$(CoreFxToolsTaskDir)CoreFx.Tools.dll')" />
 
   <Target Name="BuildAllProjects">
     <PropertyGroup>
