@@ -37,6 +37,9 @@
     <Project Include="System.Runtime.Serialization.Xml\pkg\System.Runtime.Serialization.Xml.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Linq.Expressions\pkg\System.Linq.Expressions.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
 
   </ItemGroup>
 
