@@ -1032,7 +1032,6 @@ namespace System.DirectoryServices
         ///    <para>Reads
         ///       a property on the native Active Directory object.</para>
         /// </devdoc>
-        [ComVisible(false)]
         public object InvokeGet(string propertyName)
         {
             object target = this.NativeObject;
@@ -1069,7 +1068,6 @@ namespace System.DirectoryServices
         ///    <para>Sets
         ///       a property on the native Active Directory object.</para>
         /// </devdoc>
-        [ComVisible(false)]
         public void InvokeSet(string propertyName, params object[] args)
         {
             object target = this.NativeObject;

@@ -7,7 +7,6 @@ using ClassConfiguration = System.Configuration.Configuration;
 
 namespace System.Configuration.Internal
 {
-    [ComVisible(false)]
     public interface IInternalConfigConfigurationFactory
     {
         ClassConfiguration Create(Type typeConfigHost, params object[] hostInitConfigurationParams);

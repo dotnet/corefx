@@ -14,10 +14,8 @@ namespace System.Threading
     // the contract vs. the manual source code that was originally used for this contract.
     // The attributes are not actually meaningful since we don't emit ComVisible(false) at
     // the assembly level in contracts.
-    [ComVisible(true)]
     public partial class Timer { }
 
     // This is providedInSource as it's the only way to add an attribute to a delegate.
-    [ComVisible(true)]
     public delegate void TimerCallback(object state);
 }

@@ -44,7 +44,6 @@ namespace System.DirectoryServices.Interop
         public static extern int FormatMessageW(int dwFlags, int lpSource, int dwMessageId,
                                                 int dwLanguageId, StringBuilder lpBuffer, int nSize, int arguments);
 
-        [System.Runtime.InteropServices.ComVisible(false)]
         public class EnumVariant
         {
             private static readonly object s_noMoreValues = new object();
