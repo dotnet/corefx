@@ -9,15 +9,15 @@
   </PropertyGroup>
   
  <Target Name="AnnotateProjectsWithConfiguration" 
-         Returns="@(ProjectWithConfiguration)" > 
+         Returns="@(ProjectWithConfiguration)"> 
     <PropertyGroup>
       <_ProjectName>$(MSBuildProjectFullPath)</_ProjectName>
     </PropertyGroup>
     <Message Importance="Low" Text="$(MSBuildProjectFullPath), Configuration - $(_BestConfiguration)" />
     <ItemGroup> 
        <ProjectWithConfiguration Include="$(_ProjectName)" Exclude="@(OmitProject)"> 
-         <AdditionalProperties Condition="'$(_BestConfiguration)' != '' and '$(_BestConfiguration)' != 'None'">Configuration=$(_BestConfiguration)</AdditionalProperties>
-         <UndefineProperties Condition="'$(_BestConfiguration)' == '' or '$(_BestConfiguration)' == 'None'">Configuration</UndefineProperties>
+         <AdditionalProperties Condition="'$(_BestConfiguration)' != '' and '$(_BestConfiguration)' != 'None'">Configuration=$(_BestConfiguration);%(ProjectWithConfiguration.AdditionalProperties)</AdditionalProperties>
+         <UndefineProperties Condition="'$(_BestConfiguration)' == '' or '$(_BestConfiguration)' == 'None'">Configuration;%(ProjectWithConfiguration.UndefineProperties)</UndefineProperties>
        </ProjectWithConfiguration>
        <ProjectWithConfiguration Remove="@(OmitProject)" />
      </ItemGroup>
