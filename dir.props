@@ -156,9 +156,10 @@
 
 
   <PropertyGroup>
-    <!-- Hacky BuildConfiguration -->
     <ArchGroup Condition="'$(ArchGroup)'==''">x64</ArchGroup>
-    <BuildConfiguration>netcoreapp1.1-$(OS)-Debug-$(ArchGroup)</BuildConfiguration>
+    <BuildConfiguration_OSGroup>$(OS)</BuildConfiguration_OSGroup>
+    <BuildConfiguration_OSGroup Condition="'$(OSGroup)' != ''">$(OSGroup)</BuildConfiguration_OSGroup>
+    <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">netcoreapp1.1-$(BuildConfiguration_OSGroup)-Debug-$(ArchGroup)</BuildConfiguration>
 
     <BuildConfigurationImportFile>$(BinDir)tools/configuration/configuration.props</BuildConfigurationImportFile>
   </PropertyGroup>

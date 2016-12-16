@@ -8,39 +8,26 @@
     <ImportedBuildVerticalTargets>true</ImportedBuildVerticalTargets>
   </PropertyGroup>
   
-  <!-- Add vertical projects to the project group for BuildAllProjects -->
-  <Target Name="AddVerticalProjects"
-          Inputs="$(MSBuildProjectFullPath)"
-          Outputs="fake"
-          DependsOnTargets="DetermineProjectsConfiguration"
-          BeforeTargets="AnnotateProjectsWithConfiguration">
-    <ItemGroup>
-      <OmitProject Include="$(MSBuildProjectFullPath)" Condition="'$(OmitReason)' != ''">
-        <OmitReason>$(OmitReason)</OmitReason>
-      </OmitProject>
-      <Project Remove="@(OmitProject)" />
-    </ItemGroup>
-  </Target>
-
  <Target Name="AnnotateProjectsWithConfiguration" 
          Returns="@(ProjectWithConfiguration)" > 
     <PropertyGroup>
       <_ProjectName>$(MSBuildProjectFullPath)</_ProjectName>
     </PropertyGroup>
-    <Message Importance="Low" Text="AnnotateProjectsWithConfiguration: $(_ProjectName) - BestC: $(_BestConfiguration)" />
+    <Message Importance="Low" Text="$(MSBuildProjectFullPath), Configuration - $(_BestConfiguration)" />
     <ItemGroup> 
-       <ProjectWithConfiguration Include="$(_ProjectName)" > 
-        <AdditionalProperties Condition="'$(_BestConfiguration)' != ''">Configuration=$(_BestConfiguration)</AdditionalProperties>
-        <UndefineProperties Condition="'$(_BestConfiguration)' == ''">Configuration</UndefineProperties>
+       <ProjectWithConfiguration Include="$(_ProjectName)" Exclude="@(OmitProject)"> 
+         <AdditionalProperties Condition="'$(_BestConfiguration)' != '' and '$(_BestConfiguration)' != 'None'">Configuration=$(_BestConfiguration)</AdditionalProperties>
+         <UndefineProperties Condition="'$(_BestConfiguration)' == '' or '$(_BestConfiguration)' == 'None'">Configuration</UndefineProperties>
        </ProjectWithConfiguration>
-     </ItemGroup> 
+       <ProjectWithConfiguration Remove="@(OmitProject)" />
+     </ItemGroup>
   </Target>
 
   <!-- The initial shaking target for trimming down applicable projects for specified vertical -->
   <Target Name="DetermineProjectsConfiguration"
           Inputs="$(MSBuildProjectFullPath)"
           Outputs="fake"
-          Returns="@(Project)"
+          Returns="@(OmitProject)"
           BeforeTargets="AnnotateProjectsWithConfiguration">
     <PropertyGroup>
       <_VerticalProject>$(MSBuildProjectFullPath)</_VerticalProject>
@@ -56,13 +43,23 @@
 
     <PropertyGroup>
       <_BestConfiguration>%(_Configuration.Identity)</_BestConfiguration>
-      <_KeepProject>%(_Configuration.NoBuildConfigurations)</_KeepProject>
+      <_KeepProject>false</_KeepProject>
+      <_KeepProject Condition="'%(_Configuration.KeepProject)' != ''">%(_Configuration.KeepProject)</_KeepProject>
     </PropertyGroup>
 
     <Message Importance="Low" Text="$(MSBuildProjectFullPath) Adding $(_VerticalProject)  _Configuration: $(_BestConfiguration)" />
-    <PropertyGroup Condition="'$(_KeepProject)' != 'true'">
-       <OmitReason Condition="'$(_BestConfiguration)' == ''">No applicable Configuration</OmitReason>
+    <Message Importance="Low" Text="NoBuildConfigurations: $(_KeepProject)" />
+    <PropertyGroup>
+       <OmitReason />
+       <OmitReason Condition="'$(_KeepProject)' != 'true' and '$(_BestConfiguration)' == ''">BuildConfigurations found but no applicable Configuration</OmitReason>
     </PropertyGroup>
+
+    <ItemGroup>
+      <OmitProject Include="$(MSBuildProjectFullPath)" Condition="'$(OmitReason)' != ''"/>
+      <_Configuration Condition="'%(_Configuration.Identity)' == 'None'" Remove="@(_Configuration)" />
+    </ItemGroup>
+      
+    <Message Importance="Low" Condition="'$(OmitReason)' != ''" Text="$(MSBuildProjectFullPath) omitted because $(OmitReason)" />
   </Target>
 
   <!-- For the current project, target which determines compatibility for targets -->
@@ -79,7 +76,7 @@
 
     <Message Importance="Low" Text="$(MSBuildProjectFullPath) - BuildConfigurations: $(BuildConfigurations)" />
 
-    <Message Importance="Normal" Condition="'$(BuildConfigurations)' == ''" Text="Project '$(MSBuildProjectFullPath)' does not specify the BuildConfigurations property." />
+    <Message Importance="Low" Condition="'$(BuildConfigurations)' == ''" Text="Project '$(MSBuildProjectFullPath)' does not specify the BuildConfigurations property." />
 
      <!-- Clear the VerticalTargets item -->
     <ItemGroup><_Configuration Remove="@(_Configuration)" /></ItemGroup>
@@ -92,10 +89,11 @@
       <Output TaskParameter="BestConfiguration" ItemName="_Configuration" />                          
     </FindBestConfiguration>  
 
-    <ItemGroup Condition="'$(BuildConfigurations)' == ''">
-      <VerticalTargets Include="$(MSBuildProjectFullPath)">
-        <NoBuildConfigurations>true</NoBuildConfigurations>
-      </VerticalTargets>
+    <!-- We want to keep projects which do not have a BuildConfigurations specified and therefore do not return a valid Configuration -->
+    <ItemGroup Condition="'$(BuildConfigurations)' == '' and '@(_Configuration)' == ''">
+      <_Configuration Include="None">
+        <KeepProject>true</KeepProject>
+      </_Configuration>
     </ItemGroup>
   </Target>
 
@@ -142,7 +140,7 @@
           <AdditionalProperties>$(_AdditionalProperties);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
         </ProjectReference>
 
-        <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(_ProjectReferenceToAnnotate)' and '$(_BestConfiguration)' == ''">
+        <ProjectReference Condition="'%(ProjectReference.Identity)' == '$(_ProjectReferenceToAnnotate)' and ('$(_BestConfiguration)' == '' or '$(_BestConfiguration)' == 'None')">
           <UndefineProperties>Configuration;%(ProjectReference.UndefineProperties)</UndefineProperties>
         </ProjectReference>
     </ItemGroup>
