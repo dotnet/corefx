@@ -31,8 +31,10 @@
     <Project Include="System.Private.DataContractSerialization\pkg\System.Private.DataContractSerialization.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-
-    <Project Include="System.Linq.Expressions\pkg\System.Linq.Expressions.builds">
+    <Project Include="System.Runtime.Serialization.Json\pkg\System.Runtime.Serialization.Json.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Runtime.Serialization.Xml\pkg\System.Runtime.Serialization.Xml.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
 
