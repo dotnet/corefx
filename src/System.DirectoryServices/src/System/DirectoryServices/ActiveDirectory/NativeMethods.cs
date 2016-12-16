@@ -592,7 +592,6 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     [
-        ComVisible(false),
         SuppressUnmanagedCodeSecurityAttribute()
         ]
     internal sealed class NativeComInterfaces

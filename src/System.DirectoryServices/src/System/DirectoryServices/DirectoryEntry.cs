@@ -631,8 +631,7 @@ namespace System.DirectoryServices
         [
             Browsable(false),
             DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-            DSDescriptionAttribute(Res.DSOptions),
-            ComVisible(false)
+            DSDescriptionAttribute(Res.DSOptions)
         ]
         public DirectoryEntryConfiguration Options
         {

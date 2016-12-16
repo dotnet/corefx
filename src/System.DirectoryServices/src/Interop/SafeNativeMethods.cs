@@ -11,7 +11,6 @@ namespace System.DirectoryServices.Interop
     using System.Runtime.InteropServices;
 
     [
-    ComVisible(false),
     SuppressUnmanagedCodeSecurityAttribute()
     ]
     internal class SafeNativeMethods
