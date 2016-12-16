@@ -67,5 +67,50 @@ namespace System.Linq
                 throw Error.NotSupported();
             }
         }
+
+        internal abstract class ManualIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
+        {
+            private readonly int _threadId;
+            internal int _state;
+
+            protected ManualIterator()
+            {
+                _threadId = Environment.CurrentManagedThreadId;
+            }
+
+            public abstract TSource Current { get; }
+
+            public abstract ManualIterator<TSource> Clone();
+
+            public virtual void Dispose() => _state = -1;
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                ManualIterator<TSource> enumerator = _state == 0 && _threadId == Environment.CurrentManagedThreadId ? this : Clone();
+                enumerator._state = 1;
+                return enumerator;
+            }
+
+            public abstract bool MoveNext();
+
+            public virtual IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
+            {
+                return new SelectEnumerableIterator<TSource, TResult>(this, selector);
+            }
+
+            public virtual IEnumerable<TSource> Where(Func<TSource, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TSource>(this, predicate);
+            }
+
+            object IEnumerator.Current => Current;
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
+            }
+        }
     }
 }

@@ -54,8 +54,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipErrorWhenSourceErrors()
         {
-            var source = NumberRangeGuaranteedNotCollectionType(-2, 5).Select(i => (decimal)i).Select(m => 1 / m).Skip(4);
-            using(var en = source.GetEnumerator())
+            var source = ForceNotCollection(NumberRangeGuaranteedNotCollectionType(-2, 5).Select(i => (decimal)i).Select(m => 1 / m)).Skip(4);
+            using (var en = source.GetEnumerator())
             {
                 Assert.Throws<DivideByZeroException>(() => en.MoveNext());
             }

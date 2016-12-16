@@ -1078,11 +1078,8 @@ namespace System.Linq.Tests
                         Assert.True(en.MoveNext());
                     }
 
-                    Assert.False(en.MoveNext()); // No more items, this should dispose.
-                    Assert.Equal(0, en.Current); // Reset to default value
-
-                    Assert.False(en.MoveNext()); // Want to be sure MoveNext after disposing still works.
-                    Assert.Equal(0, en.Current);
+                    Assert.False(en.MoveNext()); // There are no more items, so this should call Dispose.
+                    Assert.False(en.MoveNext()); // Be sure that calling MoveNext after Dispose still works.
                 }
             }
         }

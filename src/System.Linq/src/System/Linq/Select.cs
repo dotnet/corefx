@@ -86,7 +86,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class SelectEnumerableIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        internal sealed class SelectEnumerableIterator<TSource, TResult> : ManualIterator<TResult>, IIListProvider<TResult>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -100,7 +100,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_enumerator.Current);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectEnumerableIterator<TSource, TResult>(_source, _selector);
             }
@@ -127,7 +129,6 @@ namespace System.Linq
                     case 2:
                         if (_enumerator.MoveNext())
                         {
-                            _current = _selector(_enumerator.Current);
                             return true;
                         }
 
@@ -160,7 +161,7 @@ namespace System.Linq
             public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : _source.Count();
         }
 
-        internal sealed class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectArrayIterator<TSource, TResult> : ManualIterator<TResult>, IPartition<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, TResult> _selector;
@@ -174,7 +175,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_source[_state - 2]);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectArrayIterator<TSource, TResult>(_source, _selector);
             }
@@ -187,8 +190,7 @@ namespace System.Linq
                     return false;
                 }
 
-                int index = _state++ - 1;
-                _current = _selector(_source[index]);
+                _state++;
                 return true;
             }
 
@@ -274,7 +276,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class SelectListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectListIterator<TSource, TResult> : ManualIterator<TResult>, IPartition<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -288,7 +290,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_enumerator.Current);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectListIterator<TSource, TResult>(_source, _selector);
             }
@@ -304,7 +308,6 @@ namespace System.Linq
                     case 2:
                         if (_enumerator.MoveNext())
                         {
-                            _current = _selector(_enumerator.Current);
                             return true;
                         }
 
@@ -403,7 +406,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class SelectIListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectIListIterator<TSource, TResult> : ManualIterator<TResult>, IPartition<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -417,7 +420,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_enumerator.Current);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectIListIterator<TSource, TResult>(_source, _selector);
             }
@@ -433,7 +438,6 @@ namespace System.Linq
                     case 2:
                         if (_enumerator.MoveNext())
                         {
-                            _current = _selector(_enumerator.Current);
                             return true;
                         }
 
@@ -543,7 +547,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class SelectIPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectIPartitionIterator<TSource, TResult> : ManualIterator<TResult>, IPartition<TResult>
         {
             private readonly IPartition<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -557,7 +561,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_enumerator.Current);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectIPartitionIterator<TSource, TResult>(_source, _selector);
             }
@@ -573,7 +579,6 @@ namespace System.Linq
                     case 2:
                         if (_enumerator.MoveNext())
                         {
-                            _current = _selector(_enumerator.Current);
                             return true;
                         }
 
@@ -707,7 +712,7 @@ namespace System.Linq
             }
         }
 
-        private sealed class SelectListPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        private sealed class SelectListPartitionIterator<TSource, TResult> : ManualIterator<TResult>, IPartition<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -728,7 +733,9 @@ namespace System.Linq
                 _index = minIndexInclusive;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_source[_index - 1]);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, _minIndexInclusive, _maxIndexInclusive);
             }
@@ -737,7 +744,6 @@ namespace System.Linq
             {
                 if ((_state == 1 & _index <= _maxIndexInclusive) && _index < _source.Count)
                 {
-                    _current = _selector(_source[_index]);
                     ++_index;
                     return true;
                 }

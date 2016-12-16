@@ -370,76 +370,6 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_SourceIsAnArray_CurrentIsDefaultOfTAfterEnumeration()
-        {
-            int[] source = new[] { 1 };
-            Func<int, int> selector = i => i + 1;
-
-            IEnumerable<int> query = source.Select(selector);
-
-            var enumerator = query.GetEnumerator();
-            while (enumerator.MoveNext()) ;
-
-            Assert.Equal(default(int), enumerator.Current);
-        }
-
-        [Fact]
-        public void Select_SourceIsAList_CurrentIsDefaultOfTAfterEnumeration()
-        {
-            List<int> source = new List<int>() { 1 };
-            Func<int, int> selector = i => i + 1;
-
-            IEnumerable<int> query = source.Select(selector);
-
-            var enumerator = query.GetEnumerator();
-            while (enumerator.MoveNext()) ;
-
-            Assert.Equal(default(int), enumerator.Current);
-        }
-
-        [Fact]
-        public void Select_SourceIsIReadOnlyCollection_CurrentIsDefaultOfTAfterEnumeration()
-        {
-            IReadOnlyCollection<int> source = new ReadOnlyCollection<int>(new List<int>() { 1 });
-            Func<int, int> selector = i => i + 1;
-
-            IEnumerable<int> query = source.Select(selector);
-
-            var enumerator = query.GetEnumerator();
-            while (enumerator.MoveNext()) ;
-
-            Assert.Equal(default(int), enumerator.Current);
-        }
-
-        [Fact]
-        public void Select_SourceIsICollection_CurrentIsDefaultOfTAfterEnumeration()
-        {
-            ICollection<int> source = new LinkedList<int>(new List<int>() { 1 });
-            Func<int, int> selector = i => i + 1;
-
-            IEnumerable<int> query = source.Select(selector);
-
-            var enumerator = query.GetEnumerator();
-            while (enumerator.MoveNext()) ;
-
-            Assert.Equal(default(int), enumerator.Current);
-        }
-
-        [Fact]
-        public void Select_SourceIsIEnumerable_CurrentIsDefaultOfTAfterEnumeration()
-        {
-            IEnumerable<int> source = Enumerable.Repeat(1, 1);
-            Func<int, int> selector = i => i + 1;
-
-            IEnumerable<int> query = source.Select(selector);
-
-            var enumerator = query.GetEnumerator();
-            while (enumerator.MoveNext()) ;
-
-            Assert.Equal(default(int), enumerator.Current);
-        }
-
-        [Fact]
         public void SelectSelect_SourceIsAnArray_ReturnsExpectedValues()
         {
             Func<int, int> selector = i => i + 1;
@@ -561,8 +491,9 @@ namespace System.Linq.Tests
 
             var result = source.Select(selector);
             var enumerator = result.GetEnumerator();
+            enumerator.MoveNext();
 
-            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
         }
 
         [Fact]
@@ -578,8 +509,9 @@ namespace System.Linq.Tests
 
             var result = source.Select(selector);
             var enumerator = result.GetEnumerator();
+            enumerator.MoveNext();
 
-            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
             enumerator.MoveNext();
             Assert.Equal(3 /* 2 + 1 */, enumerator.Current);
         }
@@ -592,8 +524,9 @@ namespace System.Linq.Tests
 
             var result = source.Select(selector);
             var enumerator = result.GetEnumerator();
+            enumerator.MoveNext();
 
-            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
         }
 
         [Fact]
@@ -604,8 +537,9 @@ namespace System.Linq.Tests
 
             var result = source.Select(selector);
             var enumerator = result.GetEnumerator();
+            enumerator.MoveNext();
 
-            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
             enumerator.MoveNext();
             Assert.Equal(3 /* 2 + 1 */, enumerator.Current);
         }
@@ -666,7 +600,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_ExceptionThrownFromGetEnumeratorOnSource_CurrentIsSetToDefaultOfItemTypeAndIteratorCanBeUsedAfterExceptionIsCaught()
+        public void Select_ExceptionThrownFromGetEnumeratorOnSource_IteratorCanBeUsedAfterExceptionIsCaught()
         {
             IEnumerable<int> source = new ThrowsOnGetEnumerator();
             Func<int, string> selector = i => i.ToString();
@@ -675,8 +609,6 @@ namespace System.Linq.Tests
             var enumerator = result.GetEnumerator();
 
             Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
-            string currentValue = enumerator.Current;
-            Assert.Equal(default(string), currentValue);
 
             Assert.True(enumerator.MoveNext());
             Assert.Equal("1", enumerator.Current);
