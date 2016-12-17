@@ -164,6 +164,8 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.net46.cs" />
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />
