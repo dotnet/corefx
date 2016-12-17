@@ -1,0 +1,34 @@
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+
+  <!-- required to build the projects in their specified order -->
+  <PropertyGroup>
+    <SerializeProjects>true</SerializeProjects>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Project Include="Common\test-runtime\XUnit.Runtime.depproj" />
+    <Project Include="tests.builds" />
+  </ItemGroup>
+
+  <Import Project="..\dir.targets" />
+  <Import Project="..\dir.traversal.targets" />
+
+  <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
+  <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
+
+  <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
+    <TraversalBuildDependsOn>
+      $(TraversalBuildDependsOn);
+      BuildPackages;
+    </TraversalBuildDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="Exists('$(ToolsDir)toolruntime.targets')">
+    <TraversalBuildDependsOn>
+      EnsureBuildToolsRuntime;
+      $(TraversalBuildDependsOn)
+    </TraversalBuildDependsOn>
+  </PropertyGroup>
+
+</Project>
