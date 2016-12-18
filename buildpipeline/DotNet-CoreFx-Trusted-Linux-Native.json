@@ -101,7 +101,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run -d -w $(GitDirectory) --name $(DockerContainerName) $(DockerImageName) sleep infinity",
+        "arguments": "run -d -w $(GitDirectory) --name $(DockerContainerName) $(DockerImageName) sleep 7200",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
