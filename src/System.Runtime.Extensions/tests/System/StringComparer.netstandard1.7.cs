@@ -59,5 +59,17 @@ namespace System.Tests
             Assert.Equal(StringComparer.InvariantCultureIgnoreCase.GetHashCode("test"), StringComparer.InvariantCultureIgnoreCase.GetHashCode("TEST"));
             Assert.Equal(0, StringComparer.InvariantCultureIgnoreCase.Compare("test", "TEST"));
         }
+
+        [Theory]
+        [InlineData(StringComparison.CurrentCulture, StringComparer.CurrentCulture)]
+        [InlineData(StringComparison.CurrentCultureIgnoreCase, StringComparer.CurrentCultureIgnoreCase)]
+        [InlineData(StringComparison.InvariantCulture, StringComparer.InvariantCulture)]
+        [InlineData(StringComparison.InvariantCultureIgnoreCase, StringComparer.InvariantCultureIgnoreCase)]
+        [InlineData(StringComparison.Ordinal, StringComparer.Ordinal)]
+        [InlineData(StringComparison.OrdinalIgnoreCase, StringComparer.OrdinalIgnoreCase)]
+        public static void FromComparisonTest(StringComparison ñomparison, StringComparer comparer)
+        {
+            Assert.Equal(comparer, StringComparer.FromComparison(ñomparison));
+        }
     }
 }
