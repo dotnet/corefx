@@ -1,0 +1,14 @@
+{
+  "frameworks": {
+    "netstandard1.7": {
+      "dependencies": {
+        "NetStandard.Library2": "2.0.0-beta-24814-01"
+      }
+    },
+    "net463": {
+      "dependencies": {
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
+      }
+    }
+  }
+}
