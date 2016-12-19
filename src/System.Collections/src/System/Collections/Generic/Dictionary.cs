@@ -537,24 +537,11 @@ namespace System.Collections.Generic
             return false;
         }
 
-        // This is a convenience method that were converted from using Hashtable.
-        // Many were combining key doesn't exist and key exists but null value (for non-value types) checks.
-        // This allows them to continue getting that behavior with minimal code delta. This is basically
-        // TryGetValue without the out param
-        public TValue GetValueOrDefault(TKey key)
-        {
-            int i = FindEntry(key);
-            if (i >= 0)
-            {
-                return entries[i].value;
-            }
-            return default(TValue);
-        }
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param.
+        public TValue GetValueOrDefault(TKey key) => GetValueOrDefault(key, default(TValue));
 
-        // This is a convenience method that were converted from using Hashtable.
-        // Many were combining key doesn't exist and key exists but null value (for non-value types) checks.
-        // This allows them to continue getting that behavior with minimal code delta. This is basically
-        // TryGetValue without the out param
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param. If the entry
+        // doesn't exist, returns the defaultValue instead.
         public TValue GetValueOrDefault(TKey key, TValue defaultValue)
         {
             int i = FindEntry(key);
