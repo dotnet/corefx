@@ -19,6 +19,7 @@
       <ContractProject Condition="!(Exists('$(ContractProject)'))">$(SourceDir)/$(AssemblyName)/ref/$(AssemblyName).csproj</ContractProject>
       <!-- don't add a project if one can't be found-->
       <ContractProject Condition="!(Exists('$(ContractProject)'))"></ContractProject>
+      <HasBuildConfigurations Condition="Exists('$(SourceDir)/$(AssemblyName)/ref/Configurations.props')">true</HasBuildConfigurations>
     </PropertyGroup>
 
     <ItemGroup Condition="'@(ContractProject)' == ''">
@@ -30,7 +31,9 @@
     <ItemGroup Condition="'@(ContractProject)' != ''">
       <!--Don't flow the values for Configuration --> 
       <ContractProject> 
-        <UndefineProperties>Configuration;%(ContractProject.UndefineProperties)</UndefineProperties> 
+        <UndefineProperties Condition="'$(HasBuildConfigurations)' != 'true' and '%(ContractProject.TargetGroup)' == ''">Configuration;%(ContractProject.UndefineProperties)</UndefineProperties>
+        <AdditionalProperties Condition="'$(HasBuildConfigurations)' != 'true' and '%(ContractProject.TargetGroup)' != ''">Configuration=%(ContractProject.TargetGroup);%(ContractProject.AdditionalProperties)</AdditionalProperties>
+        <AdditionalProperties Condition="'$(HasBuildConfigurations)' == 'true'">Configuration=netstandard;%(ContractProject.AdditionalProperties)</AdditionalProperties> 
       </ContractProject> 
     
       <ProjectReference Include="@(ContractProject)">
