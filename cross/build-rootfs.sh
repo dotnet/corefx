@@ -3,9 +3,8 @@
 usage()
 {
     echo "Usage: $0 [BuildArch] [UbuntuCodeName]"
-    echo "BuildArch can be: arm, arm-softfp, arm64"
+    echo "BuildArch can be: arm, arm-softfp, arm64, x86"
     echo "UbuntuCodeName - optional, Code name for Ubuntu, can be: trusty(default), vivid, wily, xenial. If BuildArch is arm-softfp, UbuntuCodeName is ignored."
-
     exit 1
 }
 
@@ -56,6 +55,11 @@ for i in "$@" ; do
             __UbuntuArch=arm64
             __MachineTriple=aarch64-linux-gnu
             ;;
+        x86)
+            __BuildArch=x86
+            __UbuntuArch=i386
+            __UbuntuRepo="http://archive.ubuntu.com/ubuntu"
+            ;;
         arm-softfp)
             __BuildArch=arm-softfp
             __UbuntuArch=armel
@@ -100,6 +104,7 @@ rm -rf $__RootfsDir
 qemu-debootstrap --arch $__UbuntuArch $__UbuntuCodeName $__RootfsDir $__UbuntuRepo
 cp $__CrossDir/$__BuildArch/sources.list.$__UbuntuCodeName $__RootfsDir/etc/apt/sources.list
 chroot $__RootfsDir apt-get update
+chroot $__RootfsDir apt-get -f -y install
 chroot $__RootfsDir apt-get -y install $__UbuntuPackages
 chroot $__RootfsDir symlinks -cr /usr
 umount $__RootfsDir/*

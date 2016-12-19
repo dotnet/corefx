@@ -39,7 +39,7 @@ namespace System.Configuration
         private MgmtConfigurationRecord MgmtParent => (MgmtConfigurationRecord)_parent;
 
         // The IInternalConfigHost cast to UpdateConfigHost.
-        private UpdateConfigHost UpdateConfigHost => (UpdateConfigHost)Host;
+        private UpdateConfigHost UpdateConfigHost => _configRoot.UpdateConfigHost;
 
         protected override SimpleBitVector32 ClassFlags => s_mgmtClassFlags;
 
@@ -985,9 +985,7 @@ namespace System.Configuration
                     ConfigStreamInfo.StreamVersion = MonitorStream(null, null, ConfigStreamInfo.StreamName);
                 }
 
-                //
                 // Update the host to redirect filenames
-                //
                 UpdateConfigHost.AddStreamname(ConfigStreamInfo.StreamName, filename, Host.IsRemote);
 
                 // Redirect also all configSource filenames
@@ -1158,14 +1156,14 @@ namespace System.Configuration
         {
             StringBuilder sb = new StringBuilder();
             sb.Append('<');
-            sb.Append(KeywordSection);
+            sb.Append(SectionTag);
             sb.Append(' ');
             string type = configSection.SectionInformation.Type ?? factoryRecord.FactoryTypeName;
             if (TypeStringTransformerIsSet)
                 type = TypeStringTransformer(type);
 
-            AppendAttribute(sb, KeywordSectionName, configSection.SectionInformation.Name);
-            AppendAttribute(sb, KeywordSectionType, type);
+            AppendAttribute(sb, SectionNameAttribute, configSection.SectionInformation.Name);
+            AppendAttribute(sb, SectionTypeAttribute, type);
 
             if (!configSection.SectionInformation.AllowLocation ||
                 (saveMode == ConfigurationSaveMode.Full) ||
@@ -1173,7 +1171,7 @@ namespace System.Configuration
                 configSection.SectionInformation.AllowLocationModified))
             {
                 AppendAttribute(sb,
-                    KeywordSectionAllowlocation,
+                    SectionAllowLocationAttribute,
                     configSection.SectionInformation.AllowLocation
                         ? KeywordTrue
                         : KeywordFalse);
@@ -1188,20 +1186,20 @@ namespace System.Configuration
                 switch (configSection.SectionInformation.AllowDefinition)
                 {
                     case ConfigurationAllowDefinition.Everywhere:
-                        v = KeywordSectionAllowdefinitionEverywhere;
+                        v = AllowDefinitionEverywhere;
                         break;
                     case ConfigurationAllowDefinition.MachineOnly:
-                        v = KeywordSectionAllowdefinitionMachineonly;
+                        v = AllowDefinitionMachineOnly;
                         break;
                     case ConfigurationAllowDefinition.MachineToWebRoot:
-                        v = KeywordSectionAllowdefinitionMachinetowebroot;
+                        v = AllowDefinitionMachineToWebRoot;
                         break;
                     case ConfigurationAllowDefinition.MachineToApplication:
-                        v = KeywordSectionAllowdefinitionMachinetoapplication;
+                        v = AllowDefinitionMachineToApplication;
                         break;
                 }
 
-                AppendAttribute(sb, KeywordSectionAllowdefinition, v);
+                AppendAttribute(sb, SectionAllowDefinitionAttribute, v);
             }
 
             if ((configSection.SectionInformation.AllowExeDefinition !=
@@ -1211,7 +1209,7 @@ namespace System.Configuration
                 configSection.SectionInformation.AllowExeDefinitionModified))
             {
                 AppendAttribute(sb,
-                    KeywordSectionAllowexedefinition,
+                    SectionAllowExeDefinitionAttribute,
                     ExeDefinitionToString(
                         configSection.SectionInformation.AllowExeDefinition)
                     );
@@ -1223,28 +1221,30 @@ namespace System.Configuration
                 configSection.SectionInformation.OverrideModeDefaultModified))
             {
                 AppendAttribute(sb,
-                    KeywordSectionOverridemodedefault,
+                    SectionOverrideModeDefaultAttribute,
                     configSection.SectionInformation.OverrideModeDefaultSetting.OverrideModeXmlValue);
             }
 
             if (!configSection.SectionInformation.RestartOnExternalChanges)
-                AppendAttribute(sb, KeywordSectionRestartonexternalchanges, KeywordFalse);
+                AppendAttribute(sb, SectionRestartonExternalChangesAttribute, KeywordFalse);
             else
             {
                 if ((saveMode == ConfigurationSaveMode.Full) ||
                     ((saveMode == ConfigurationSaveMode.Modified) &&
                     configSection.SectionInformation.RestartOnExternalChangesModified))
-                    AppendAttribute(sb, KeywordSectionRestartonexternalchanges, KeywordTrue);
+                    AppendAttribute(sb, SectionRestartonExternalChangesAttribute, KeywordTrue);
             }
 
             if (!configSection.SectionInformation.RequirePermission)
-                AppendAttribute(sb, KeywordSectionRequirepermission, KeywordFalse);
+            {
+                AppendAttribute(sb, SectionRequirePermissionAttribute, KeywordFalse);
+            }
             else
             {
                 if ((saveMode == ConfigurationSaveMode.Full) ||
                     ((saveMode == ConfigurationSaveMode.Modified) &&
                     configSection.SectionInformation.RequirePermissionModified))
-                    AppendAttribute(sb, KeywordSectionRequirepermission, KeywordTrue);
+                    AppendAttribute(sb, SectionRequirePermissionAttribute, KeywordTrue);
             }
 
             sb.Append("/>");
@@ -1262,16 +1262,16 @@ namespace System.Configuration
             switch (allowDefinition)
             {
                 case ConfigurationAllowExeDefinition.MachineOnly:
-                    return KeywordSectionAllowdefinitionMachineonly;
+                    return AllowDefinitionMachineOnly;
 
                 case ConfigurationAllowExeDefinition.MachineToApplication:
-                    return KeywordSectionAllowdefinitionMachinetoapplication;
+                    return AllowDefinitionMachineToApplication;
 
                 case ConfigurationAllowExeDefinition.MachineToRoamingUser:
-                    return KeywordSectionAllowexedefinitionMachtoroaming;
+                    return AllowExeDefinitionMachineToRoaming;
 
                 case ConfigurationAllowExeDefinition.MachineToLocalUser:
-                    return KeywordSectionAllowexedefinitionMachtolocal;
+                    return AllowExeDefinitionMachineToLocal;
             }
 
             throw ExceptionUtil.PropertyInvalid("AllowExeDefinition");
@@ -1286,14 +1286,14 @@ namespace System.Configuration
 
             StringBuilder sb = new StringBuilder();
             sb.Append('<');
-            sb.Append(KeywordSectiongroup);
+            sb.Append(SectionGroupTag);
             sb.Append(' ');
-            AppendAttribute(sb, KeywordSectiongroupName, configSectionGroup.Name);
+            AppendAttribute(sb, SectionGroupNameAttribute, configSectionGroup.Name);
             string type = configSectionGroup.Type ?? factoryRecord.FactoryTypeName;
             if (TypeStringTransformerIsSet)
                 type = TypeStringTransformer(type);
 
-            AppendAttribute(sb, KeywordSectiongroupType, type);
+            AppendAttribute(sb, SectionGroupTypeAttribute, type);
 
             sb.Append('>');
 
@@ -1956,7 +1956,7 @@ namespace System.Configuration
         {
             // Write Header
             utilWriter.Write(string.Format(CultureInfo.InvariantCulture,
-                FormatNewconfigfile,
+                FormatNewConfigFile,
                 ConfigStreamInfo.StreamEncoding.WebName));
 
             // Write <configuration> tag
@@ -1964,7 +1964,7 @@ namespace System.Configuration
             {
                 utilWriter.Write(string.Format(CultureInfo.InvariantCulture,
                     FormatConfigurationNamespace,
-                    KeywordConfigurationNamespace));
+                    ConfigurationNamespace));
             }
             else utilWriter.Write(FormatConfiguration);
 
@@ -1975,7 +1975,7 @@ namespace System.Configuration
 
             WriteNewConfigDefinitions(definitionUpdates, utilWriter, LineIndent, DefaultIndent);
 
-            utilWriter.Write(FormatConfigurationEndelement);
+            utilWriter.Write(FormatConfigurationEndElement);
         }
 
         private void WriteNewConfigDeclarations(SectionUpdates declarationUpdates, XmlUtilWriter utilWriter,
@@ -2072,7 +2072,7 @@ namespace System.Configuration
                     // write the <location> start tag
                     if (_locationSubPath == null)
                     {
-                        utilWriter.Write(string.Format(CultureInfo.InvariantCulture, FormatLocationNopath,
+                        utilWriter.Write(string.Format(CultureInfo.InvariantCulture, FormatLocationNoPath,
                             locationUpdates.OverrideMode.LocationTagXmlString,
                             BoolToString(locationUpdates.InheritInChildApps)));
                     }
@@ -2095,7 +2095,7 @@ namespace System.Configuration
                 {
                     // Write the location end tag
                     utilWriter.AppendSpacesToLinePosition(linePosition);
-                    utilWriter.Write(FormatLocationEndelement);
+                    utilWriter.Write(FormatLocationEndElement);
                     utilWriter.AppendNewLine();
                 }
             }
@@ -2112,7 +2112,7 @@ namespace System.Configuration
                 utilWriter.Write(string.Format(CultureInfo.InvariantCulture, FormatLocationPath,
                     OverrideModeSetting.s_locationDefault.LocationTagXmlString, KeywordTrue, _locationSubPath));
                 utilWriter.AppendSpacesToLinePosition(linePosition);
-                utilWriter.Write(FormatLocationEndelement);
+                utilWriter.Write(FormatLocationEndElement);
                 utilWriter.AppendNewLine();
             }
         }
@@ -2231,7 +2231,7 @@ namespace System.Configuration
                     reader.Read();
                     xmlUtil.CopyReaderToNextElement(utilWriter, false);
 
-                    Debug.Assert((reader.NodeType == XmlNodeType.Element) && (reader.Name == KeywordConfiguration),
+                    Debug.Assert((reader.NodeType == XmlNodeType.Element) && (reader.Name == ConfigurationTag),
                         "reader.NodeType == XmlNodeType.Element && reader.Name == KEYWORD_CONFIGURATION");
 
                     int indent = DefaultIndent;
@@ -2245,7 +2245,7 @@ namespace System.Configuration
                     {
                         configurationStartElement = string.Format(
                             CultureInfo.InvariantCulture, FormatConfigurationNamespace,
-                            KeywordConfigurationNamespace);
+                            ConfigurationNamespace);
                     }
                     else
                     {
@@ -2267,7 +2267,7 @@ namespace System.Configuration
                         // updateIndent
                         indent = UpdateIndent(indent, xmlUtil, utilWriter, configurationElementLinePosition);
 
-                        if ((reader.NodeType == XmlNodeType.Element) && (reader.Name == KeywordConfigsections))
+                        if ((reader.NodeType == XmlNodeType.Element) && (reader.Name == ConfigSectionsTag))
                         {
                             foundConfigSectionsElement = true;
 
@@ -2294,7 +2294,7 @@ namespace System.Configuration
 
                                     Debug.Assert(
                                         (reader.NodeType == XmlNodeType.EndElement) &&
-                                        (reader.Name == KeywordConfigsections),
+                                        (reader.Name == ConfigSectionsTag),
                                         "reader.NodeType == XmlNodeType.EndElement && reader.Name == \"KEYWORD_CONFIGSECTIONS\"");
                                 }
 
@@ -2369,7 +2369,7 @@ namespace System.Configuration
 #if DEBUG
                         Debug.Assert(
                             (configurationEndElement != null) ||
-                            ((reader.NodeType == XmlNodeType.EndElement) && (reader.Name == KeywordConfiguration)),
+                            ((reader.NodeType == XmlNodeType.EndElement) && (reader.Name == ConfigurationTag)),
                             "configurationEndElement != null || (reader.NodeType == XmlNodeType.EndElement && reader.Name == KEYWORD_CONFIGURATION)");
                         foreach (LocationUpdates l in definitionUpdates.LocationUpdatesList)
                             Debug.Assert(!l.SectionUpdates.HasUnretrievedSections(),
@@ -2468,9 +2468,9 @@ namespace System.Configuration
                     linePosition = xmlUtil.TrueLinePosition;
 
                     string directive = reader.Name;
-                    string name = reader.GetAttribute(KeywordSectiongroupName);
+                    string name = reader.GetAttribute(SectionGroupNameAttribute);
                     string configKey = CombineConfigKey(group, name);
-                    if (directive == KeywordSectiongroup)
+                    if (directive == SectionGroupTag)
                     {
                         // it's a group - get the updates for children
                         declarationUpdatesChild = declarationUpdates.GetSectionUpdatesForGroup(name);
@@ -2563,7 +2563,7 @@ namespace System.Configuration
                                 utilWriter.Write(groupUpdate.UpdatedXml);
                                 utilWriter.AppendNewLine();
                                 utilWriter.AppendSpacesToLinePosition(linePosition);
-                                utilWriter.Write(FormatSectiongroupEndelement);
+                                utilWriter.Write(FormatSectionGroupEndElement);
                                 utilWriter.AppendNewLine();
                                 utilWriter.AppendSpacesToLinePosition(linePosition);
                             }
@@ -2709,9 +2709,9 @@ namespace System.Configuration
                     linePosition = xmlUtil.TrueLinePosition;
 
                     string elementName = reader.Name;
-                    if (elementName == KeywordLocation)
+                    if (elementName == LocationTag)
                     {
-                        string locationSubPathAttribute = reader.GetAttribute(KeywordLocationPath);
+                        string locationSubPathAttribute = reader.GetAttribute(LocationPathAttribute);
                         locationSubPathAttribute = NormalizeLocationSubPath(locationSubPathAttribute, xmlUtil);
                         OverrideModeSetting overrideMode = OverrideModeSetting.s_locationDefault;
                         bool inheritInChildApps = true;
@@ -2739,14 +2739,14 @@ namespace System.Configuration
                         if (elementLocationPathApplies)
                         {
                             // Retrieve overrideMode and InheritInChildApps
-                            string allowOverrideAttribute = reader.GetAttribute(KeywordLocationAllowoverride);
+                            string allowOverrideAttribute = reader.GetAttribute(LocationAllowOverrideAttribute);
                             if (allowOverrideAttribute != null)
                             {
                                 overrideMode =
                                     OverrideModeSetting.CreateFromXmlReadValue(bool.Parse(allowOverrideAttribute));
                             }
 
-                            string overrideModeAttribute = reader.GetAttribute(KeywordLocationOverridemode);
+                            string overrideModeAttribute = reader.GetAttribute(LocationOverrideModeAttribute);
                             if (overrideModeAttribute != null)
                             {
                                 overrideMode =
@@ -2758,7 +2758,7 @@ namespace System.Configuration
                             }
 
                             string inheritInChildAppsAttribute =
-                                reader.GetAttribute(KeywordLocationInheritinchildapplications);
+                                reader.GetAttribute(LocationInheritInChildApplicationsAttribute);
                             if (inheritInChildAppsAttribute != null)
                                 inheritInChildApps = bool.Parse(inheritInChildAppsAttribute);
 
@@ -2984,7 +2984,7 @@ namespace System.Configuration
 
             if (!string.IsNullOrEmpty(configSection.SectionInformation.ConfigSource))
             {
-                updatedXml = string.Format(CultureInfo.InvariantCulture, FormatSectionConfigsource,
+                updatedXml = string.Format(CultureInfo.InvariantCulture, FormatSectionConfigSource,
                     configSection.SectionInformation.Name, configSection.SectionInformation.ConfigSource);
             }
             else updatedXml = update.UpdatedXml;
@@ -3162,7 +3162,7 @@ namespace System.Configuration
         private void CreateNewConfigSource(XmlUtilWriter utilWriter, string updatedXml, int indent)
         {
             string formattedXml = XmlUtil.FormatXmlElement(updatedXml, 0, indent, true);
-            utilWriter.Write(string.Format(CultureInfo.InvariantCulture, FormatConfigsourceFile,
+            utilWriter.Write(string.Format(CultureInfo.InvariantCulture, FormatConfigSourceFile,
                 ConfigStreamInfo.StreamEncoding.WebName));
             utilWriter.Write(formattedXml + NewLine);
         }

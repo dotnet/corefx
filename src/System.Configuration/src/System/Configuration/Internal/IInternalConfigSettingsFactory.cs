@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 
 namespace System.Configuration.Internal
 {
-    [ComVisible(false)]
     public interface IInternalConfigSettingsFactory
     {
         void SetConfigurationSystem(IInternalConfigSystem internalConfigSystem, bool initComplete);
+
         void CompleteInit();
     }
 }

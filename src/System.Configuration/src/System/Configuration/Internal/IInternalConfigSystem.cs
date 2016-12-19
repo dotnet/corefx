@@ -6,17 +6,14 @@ using System.Runtime.InteropServices;
 
 namespace System.Configuration.Internal
 {
-    [ComVisible(false)]
     public interface IInternalConfigSystem
     {
-        // Supports user config
         bool SupportsUserConfig { get; }
+
         // Returns the config object for the specified key.
-        // It's actually GetSection
         object GetSection(string configKey);
 
-        // Refreshes the configuration system.
-        // It's actually RefreshSection
+        // Refreshes the configuration section.
         void RefreshConfig(string sectionName);
     }
 }
