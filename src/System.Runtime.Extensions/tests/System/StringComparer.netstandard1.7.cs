@@ -67,9 +67,9 @@ namespace System.Tests
         [InlineData(StringComparison.InvariantCultureIgnoreCase, StringComparer.InvariantCultureIgnoreCase)]
         [InlineData(StringComparison.Ordinal, StringComparer.Ordinal)]
         [InlineData(StringComparison.OrdinalIgnoreCase, StringComparer.OrdinalIgnoreCase)]
-        public static void FromComparisonTest(StringComparison ñomparison, StringComparer comparer)
+        public static void FromComparisonTest(StringComparison comparison, StringComparer comparer)
         {
-            Assert.Equal(comparer, StringComparer.FromComparison(ñomparison));
+            Assert.Equal(comparer, StringComparer.FromComparison(comparison));
         }
     }
 }
