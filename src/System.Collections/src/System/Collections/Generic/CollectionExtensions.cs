@@ -2,18 +2,11 @@
 {
     public static class CollectionExtensions
     {
-        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param.
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key) => dictionary.GetValueOrDefault(key, default(TValue));
 
-            TValue value;
-            dictionary.TryGetValue(key, out value);
-            return value;
-        }
-
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param. If the entry
+        // doesn't exist, returns the defaultValue instead.
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
         {
             if (dictionary == null)
@@ -27,18 +20,11 @@
             return defaultValue;
         }
 
-        public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param.
+        public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) => dictionary.GetValueOrDefault(key, default(TValue));
 
-            TValue value;
-            dictionary.TryGetValue(key, out value);
-            return value;
-        }
-
+        // Method similar to TryGetValue that returns the value instead of putting it in an out param. If the entry
+        // doesn't exist, returns the defaultValue instead.
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
         {
             if (dictionary == null)
