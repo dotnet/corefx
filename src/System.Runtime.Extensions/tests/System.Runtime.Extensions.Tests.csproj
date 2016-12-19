@@ -33,6 +33,7 @@
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
     <Compile Include="System\MathTests.netcoreapp.cs" />
     <Compile Include="System\MathF.netcoreapp.cs" />
+    <Compile Include="System\StringComparer.netcoreapp.cs" />
     <Compile Include="System\UnloadingAndProcessExitTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -893,6 +893,9 @@ namespace System
         public static System.StringComparer InvariantCultureIgnoreCase { get { throw null; } }
         public static System.StringComparer Ordinal { get { throw null; } }
         public static System.StringComparer OrdinalIgnoreCase { get { throw null; } }
+#if netcoreapp
+        public static System.StringComparer FromComparison(System.StringComparison comparisonType) { throw null; }
+#endif
         public abstract int Compare(string x, string y);
         public static System.StringComparer Create(System.Globalization.CultureInfo culture, bool ignoreCase) { throw null; }
         public new bool Equals(object x, object y) { throw null; }
