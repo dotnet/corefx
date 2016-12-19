@@ -179,7 +179,6 @@ namespace System.Security.Cryptography.Xml
         /// it returns the default value.
         /// </summary>
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static int GetXmlDsigSearchDepth()
         {
             if (s_xmlDsigSearchDepth.HasValue)
@@ -200,7 +199,6 @@ namespace System.Security.Cryptography.Xml
         // entity expansion denial of service attacks.
         // Falls back to a default if none is specified.
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static long GetMaxCharactersFromEntities()
         {
             if (s_maxCharactersFromEntities.HasValue)
@@ -218,7 +216,6 @@ namespace System.Security.Cryptography.Xml
         private static long s_maxCharactersInDocument = 0;
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static long GetMaxCharactersInDocument()
         {
             // Allow machine administrators to specify a maximum document load size for SignedXml.
@@ -240,7 +237,6 @@ namespace System.Security.Cryptography.Xml
         private static bool? s_allowAmbiguousReferenceTarget = null;
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static bool AllowAmbiguousReferenceTargets()
         {
             // Allow machine administrators to specify that the legacy behavior of matching the first element
@@ -261,7 +257,6 @@ namespace System.Security.Cryptography.Xml
         private static bool? s_allowDetachedSignature = null;
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static bool AllowDetachedSignature()
         {
             // Allow machine administrators to specify that detached signatures can be processed.
@@ -283,7 +278,6 @@ namespace System.Security.Cryptography.Xml
         private static bool s_requireNCNameIdentifier = true;
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         internal static bool RequireNCNameIdentifier()
         {
             if (s_readRequireNCNameIdentifier)
@@ -737,7 +731,6 @@ namespace System.Security.Cryptography.Xml
             return index + 1;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static X509Certificate2Collection BuildBagOfCerts(KeyInfoX509Data keyInfoX509Data, CertUsageType certUsageType)
         {
             X509Certificate2Collection collection = new X509Certificate2Collection();

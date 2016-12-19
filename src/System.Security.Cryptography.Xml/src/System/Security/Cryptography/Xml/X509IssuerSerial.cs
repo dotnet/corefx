@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public struct X509IssuerSerial
     {
         private string _issuerName;

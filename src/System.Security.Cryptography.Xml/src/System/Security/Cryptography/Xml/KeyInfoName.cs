@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class KeyInfoName : KeyInfoClause
     {
         private string _keyName;

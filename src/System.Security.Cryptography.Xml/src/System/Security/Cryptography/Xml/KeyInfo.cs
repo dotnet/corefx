@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class KeyInfo : IEnumerable
     {
         private string _id = null;
@@ -109,7 +108,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        public Int32 Count
+        public int Count
         {
             get { return _keyInfoClauses.Count; }
         }

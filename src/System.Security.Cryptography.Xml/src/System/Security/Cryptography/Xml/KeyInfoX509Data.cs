@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class KeyInfoX509Data : KeyInfoClause
     {
         // An array of certificates representing the certificate chain 
@@ -43,7 +42,6 @@ namespace System.Security.Cryptography.Xml
             AddCertificate(cert);
         }
 
-        [SecuritySafeCritical]
         public KeyInfoX509Data(X509Certificate cert, X509IncludeOption includeOption)
         {
             if (cert == null)
@@ -125,7 +123,6 @@ namespace System.Security.Cryptography.Xml
             _subjectKeyIds.Add(subjectKeyId);
         }
 
-        [ComVisible(false)]
         public void AddSubjectKeyId(string subjectKeyId)
         {
             if (_subjectKeyIds == null)

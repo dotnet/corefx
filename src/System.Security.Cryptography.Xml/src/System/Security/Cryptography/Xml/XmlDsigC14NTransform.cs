@@ -15,7 +15,6 @@ using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigC14NTransform : Transform
     {
         private Type[] _inputTypes = { typeof(Stream), typeof(XmlDocument), typeof(XmlNodeList) };
@@ -86,7 +85,6 @@ namespace System.Security.Cryptography.Xml
             return new MemoryStream(_cXml.GetBytes());
         }
 
-        [ComVisible(false)]
         public override byte[] GetDigestedOutput(HashAlgorithm hash)
         {
             return _cXml.GetDigestedBytes(hash);

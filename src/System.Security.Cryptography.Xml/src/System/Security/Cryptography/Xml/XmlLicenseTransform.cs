@@ -15,7 +15,6 @@ using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlLicenseTransform : Transform
     {
         private Type[] _inputTypes = { typeof(XmlDocument) };

@@ -18,7 +18,6 @@ using Microsoft.Win32;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class SignedXml
     {
         protected Signature m_signature;
@@ -136,7 +135,6 @@ namespace System.Security.Cryptography.Xml
             set { m_strSigningKeyName = value; }
         }
 
-        [ComVisible(false)]
         public XmlResolver Resolver
         {
             // This property only has a setter. The rationale for this is that we don't have a good value
@@ -170,7 +168,6 @@ namespace System.Security.Cryptography.Xml
             set { _signingKey = value; }
         }
 
-        [ComVisible(false)]
         public EncryptedXml EncryptedXml
         {
             get
@@ -331,8 +328,6 @@ namespace System.Security.Cryptography.Xml
             return true;
         }
 
-        [ComVisible(false)]
-        [SecuritySafeCritical]
         public bool CheckSignature(X509Certificate2 certificate, bool verifySignatureOnly)
         {
             if (!verifySignatureOnly)
@@ -670,7 +665,7 @@ namespace System.Security.Cryptography.Xml
 
             // Figure out how many bits the signature is using
             int actualSignatureSize = 0;
-            if (!Int32.TryParse(SignedInfo.SignatureLength, out actualSignatureSize))
+            if (!int.TryParse(SignedInfo.SignatureLength, out actualSignatureSize))
             {
                 // If the value wasn't a valid integer, then we'll conservatively reject it all together
                 return true;
@@ -802,7 +797,6 @@ namespace System.Security.Cryptography.Xml
         // key.  Each REG_SZ entry in this key will be considered a canonicalziation algorithm URI that should be
         // allowed by SignedXml instances on this machine.
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         private static List<string> ReadAdditionalSafeCanonicalizationMethods()
         {
             return ReadFxSecurityStringValues("SafeCanonicalizationMethods");
@@ -814,7 +808,6 @@ namespace System.Security.Cryptography.Xml
         // key.  Each REG_SZ entry in this key will be considered a transform algorithm URI that should be
         // allowed by SignedXml instances on this machine.
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-        [SecuritySafeCritical]
         private static List<string> ReadAdditionalSafeTransformMethods()
         {
             return ReadFxSecurityStringValues("SafeTransformMethods");

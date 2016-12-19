@@ -13,7 +13,6 @@ using System.Runtime.Versioning;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class Reference
     {
         private string _id;
@@ -128,7 +127,6 @@ namespace System.Security.Cryptography.Xml
                     _transformChain = new TransformChain();
                 return _transformChain;
             }
-            [ComVisible(false)]
             set
             {
                 _transformChain = value;

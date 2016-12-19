@@ -29,7 +29,6 @@ namespace System.Security.Cryptography.Xml
 {
     // This class represents an ordered chain of transforms
 
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class TransformChain
     {
         private ArrayList _transforms;

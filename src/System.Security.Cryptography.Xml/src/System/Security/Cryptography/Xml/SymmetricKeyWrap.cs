@@ -105,7 +105,7 @@ namespace System.Security.Cryptography.Xml
                 return enc.TransformFinalBlock(temp, 0, temp.Length);
             }
             // second case: more than 1 block
-            Int64 t = 0;
+            long t = 0;
             byte[] rgbOutput = new byte[(N + 1) << 3];
             // initialize the R_i's
             Buffer.BlockCopy(rgbWrappedKeyData, 0, rgbOutput, 8, rgbWrappedKeyData.Length);
@@ -160,7 +160,7 @@ namespace System.Security.Cryptography.Xml
                 return rgbOutput;
             }
             // second case: more than 1 block
-            Int64 t = 0;
+            long t = 0;
             // initialize the C_i's
             Buffer.BlockCopy(rgbEncryptedWrappedKeyData, 8, rgbOutput, 0, rgbOutput.Length);
             byte[] rgbA = new byte[8];

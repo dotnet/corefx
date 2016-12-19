@@ -15,7 +15,6 @@ using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigExcC14NTransform : Transform
     {
         private Type[] _inputTypes = { typeof(Stream), typeof(XmlDocument), typeof(XmlNodeList) };

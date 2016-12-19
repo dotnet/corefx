@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace System.Security.Cryptography.Xml
 {
-    abstract internal class AncestralNamespaceContextManager
+    internal abstract class AncestralNamespaceContextManager
     {
         internal ArrayList _ancestorStack = new ArrayList();
 

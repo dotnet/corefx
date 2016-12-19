@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class DSAKeyValue : KeyInfoClause
     {
         private DSA _key;
@@ -101,11 +100,8 @@ namespace System.Security.Cryptography.Xml
 
         public override void LoadXml(XmlElement value)
         {
-            if (value == null)
-                throw new ArgumentNullException("value");
-
-            // Get the XML string 
-            _key.FromXmlString(value.OuterXml);
+            // Until DSA implements FromXmlString, throw here
+            throw new PlatformNotSupportedException();
         }
     }
 }

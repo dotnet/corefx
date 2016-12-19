@@ -27,7 +27,6 @@ using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public abstract class Transform
     {
         private string _algorithm;
@@ -73,7 +72,6 @@ namespace System.Security.Cryptography.Xml
             set { _algorithm = value; }
         }
 
-        [ComVisible(false)]
         public XmlResolver Resolver
         {
             // This property only has a setter. The rationale for this is that we don't have a good value
@@ -160,13 +158,11 @@ namespace System.Security.Cryptography.Xml
 
         public abstract object GetOutput(Type type);
 
-        [ComVisible(false)]
         public virtual byte[] GetDigestedOutput(HashAlgorithm hash)
         {
             return hash.ComputeHash((Stream)GetOutput(typeof(Stream)));
         }
 
-        [ComVisible(false)]
         public XmlElement Context
         {
             get
@@ -187,7 +183,6 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        [ComVisible(false)]
         public Hashtable PropagatedNamespaces
         {
             get

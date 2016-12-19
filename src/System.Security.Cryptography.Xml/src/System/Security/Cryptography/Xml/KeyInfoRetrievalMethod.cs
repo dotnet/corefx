@@ -12,7 +12,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class KeyInfoRetrievalMethod : KeyInfoClause
     {
         private string _uri;
@@ -45,7 +44,6 @@ namespace System.Security.Cryptography.Xml
             set { _uri = value; }
         }
 
-        [ComVisible(false)]
         public string Type
         {
             get { return _type; }

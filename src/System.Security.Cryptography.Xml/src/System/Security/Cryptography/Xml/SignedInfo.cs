@@ -10,7 +10,6 @@ using System.Globalization;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class SignedInfo : ICollection
     {
         private string _id;
@@ -43,7 +42,7 @@ namespace System.Security.Cryptography.Xml
             throw new NotSupportedException();
         }
 
-        public Int32 Count
+        public int Count
         {
             get { throw new NotSupportedException(); }
         }
@@ -93,7 +92,6 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        [ComVisible(false)]
         public Transform CanonicalizationMethodObject
         {
             get

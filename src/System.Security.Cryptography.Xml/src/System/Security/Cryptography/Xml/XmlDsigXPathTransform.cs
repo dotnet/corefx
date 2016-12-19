@@ -17,7 +17,6 @@ namespace System.Security.Cryptography.Xml
 {
     // A class representing DSIG XPath Transforms
 
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigXPathTransform : Transform
     {
         private Type[] _inputTypes = { typeof(Stream), typeof(XmlNodeList), typeof(XmlDocument) };

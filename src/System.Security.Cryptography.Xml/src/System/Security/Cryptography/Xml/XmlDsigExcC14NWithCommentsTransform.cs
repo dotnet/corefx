@@ -19,7 +19,6 @@ namespace System.Security.Cryptography.Xml
     //     <ec:InclusiveNamespaces PrefixList="dsig soap #default" xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"/>
     // </ds:Transform>
 
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigExcC14NWithCommentsTransform : XmlDsigExcC14NTransform
     {
         public XmlDsigExcC14NWithCommentsTransform() : base(true)

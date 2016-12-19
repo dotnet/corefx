@@ -13,7 +13,6 @@ using System.Xml;
 namespace System.Security.Cryptography.Xml
 {
     // This is for generic, unknown nodes
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class KeyInfoNode : KeyInfoClause
     {
         private XmlElement _node;

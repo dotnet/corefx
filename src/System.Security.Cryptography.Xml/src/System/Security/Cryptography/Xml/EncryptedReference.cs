@@ -8,7 +8,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public abstract class EncryptedReference
     {
         private string _uri;

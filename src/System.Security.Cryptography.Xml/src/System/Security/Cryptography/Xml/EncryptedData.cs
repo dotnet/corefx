@@ -8,7 +8,6 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public sealed class EncryptedData : EncryptedType
     {
         public override void LoadXml(XmlElement value)

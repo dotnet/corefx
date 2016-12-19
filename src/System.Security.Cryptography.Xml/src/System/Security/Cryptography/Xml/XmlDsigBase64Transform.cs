@@ -16,7 +16,6 @@ using System.Xml.Xsl;
 namespace System.Security.Cryptography.Xml
 {
     // A class representing conversion from Base64 using CryptoStream
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigBase64Transform : Transform
     {
         private Type[] _inputTypes = { typeof(Stream), typeof(XmlNodeList), typeof(XmlDocument) };

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public sealed class ReferenceList : IList
     {
         private ArrayList _references;

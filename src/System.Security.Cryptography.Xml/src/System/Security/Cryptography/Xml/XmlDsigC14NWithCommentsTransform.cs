@@ -15,7 +15,6 @@ using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class XmlDsigC14NWithCommentsTransform : XmlDsigC14NTransform
     {
         public XmlDsigC14NWithCommentsTransform()
