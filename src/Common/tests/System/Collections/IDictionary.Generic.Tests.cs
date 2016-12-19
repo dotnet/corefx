@@ -12,7 +12,7 @@ namespace System.Collections.Tests
     /// Contains tests that ensure the correctness of any class that implements the generic
     /// IDictionary interface
     /// </summary>
-    public abstract class IDictionary_Generic_Tests<TKey, TValue> : ICollection_Generic_Tests<KeyValuePair<TKey, TValue>>
+    public abstract partial class IDictionary_Generic_Tests<TKey, TValue> : ICollection_Generic_Tests<KeyValuePair<TKey, TValue>>
     {
         #region IDictionary<TKey, TValue> Helper Methods
 
@@ -218,6 +218,44 @@ namespace System.Collections.Tests
         /// in the parent dictionary. However, some collections (e.g. ConcurrentDictionary) don't.
         /// </summary>
         protected virtual bool IDictionary_Generic_Keys_Values_Enumeration_ResetImplemented => ResetImplemented;
+
+        #endregion
+
+        #region KeyValuePair
+
+        [Fact]
+        public void KeyValuePair_Empty()
+        {
+            KeyValuePair<TKey, TValue> pair = new KeyValuePair<TKey, TValue>();
+
+            TKey key = default(TKey);
+            TValue value = default(TValue);
+
+            Assert.Equal(key, pair.Key);
+            Assert.Equal(value, pair.Value);
+
+            KeyValuePair_ToString(pair);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void KeyValuePair_ToString(int count)
+        {
+            IDictionary<TKey, TValue> dictionary = GenericIDictionaryFactory(count);
+
+            Assert.All(dictionary, KeyValuePair_ToString);
+        }
+
+        protected void KeyValuePair_ToString(KeyValuePair<TKey, TValue> pair)
+        {
+            TKey key = pair.Key;
+            string keyStr = key == null ? string.Empty : key.ToString();
+
+            TValue value = pair.Value;
+            string valueStr = value == null ? string.Empty : value.ToString();
+
+            Assert.Equal($"[{keyStr}, {valueStr}]", pair.ToString());
+        }
 
         #endregion
 
