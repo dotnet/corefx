@@ -22,7 +22,7 @@ namespace System.Collections.Tests
         {
             IDictionary dictionary = NonGenericIDictionaryFactory(count);
 
-            Assert.All(dictionary, DictionaryEntry_Deconstruct);
+            Assert.All<DictionaryEntry>(dictionary, DictionaryEntry_Deconstruct);
             Assert.True(false);
         }
 
