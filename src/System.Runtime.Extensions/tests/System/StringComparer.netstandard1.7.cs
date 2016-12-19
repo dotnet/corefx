@@ -60,13 +60,19 @@ namespace System.Tests
             Assert.Equal(0, StringComparer.InvariantCultureIgnoreCase.Compare("test", "TEST"));
         }
 
+        public static IEnumerable<object[]> FromComparison_TestData()
+        {
+            //                          StringComparison                StringComparer
+            yield return new object[] { StringComparison.CurrentCulture, StringComparer.CurrentCulture };
+            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, StringComparer.CurrentCultureIgnoreCase };
+            yield return new object[] { StringComparison.InvariantCulture, StringComparer.InvariantCulture };
+            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, StringComparer.InvariantCultureIgnoreCase };
+            yield return new object[] { StringComparison.Ordinal, StringComparer.Ordinal };
+            yield return new object[] { StringComparison.OrdinalIgnoreCase, StringComparer.OrdinalIgnoreCase };
+        }
+
         [Theory]
-        [InlineData(StringComparison.CurrentCulture, StringComparer.CurrentCulture)]
-        [InlineData(StringComparison.CurrentCultureIgnoreCase, StringComparer.CurrentCultureIgnoreCase)]
-        [InlineData(StringComparison.InvariantCulture, StringComparer.InvariantCulture)]
-        [InlineData(StringComparison.InvariantCultureIgnoreCase, StringComparer.InvariantCultureIgnoreCase)]
-        [InlineData(StringComparison.Ordinal, StringComparer.Ordinal)]
-        [InlineData(StringComparison.OrdinalIgnoreCase, StringComparer.OrdinalIgnoreCase)]
+        [MemberData(nameof(FromComparison_TestData))]
         public static void FromComparisonTest(StringComparison comparison, StringComparer comparer)
         {
             Assert.Equal(comparer, StringComparer.FromComparison(comparison));
