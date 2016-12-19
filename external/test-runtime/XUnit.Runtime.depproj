@@ -8,7 +8,7 @@
          This RID value doesn't really matter, since the assets we are copying are not RID specific, so defaulting to Windows here
     -->
     <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
-    <OutputPath>$(RuntimeDir)</OutputPath>
+    <OutputPath>$(RuntimePath)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
