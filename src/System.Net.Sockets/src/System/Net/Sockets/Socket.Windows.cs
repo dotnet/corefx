@@ -241,7 +241,6 @@ namespace System.Net.Sockets
             FileStream fileStream = OpenFile(fileName);
 
             TransmitFileAsyncResult asyncResult = new TransmitFileAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             SocketError errorCode = SocketPal.SendFileAsync(_handle, fileStream, preBuffer, postBuffer, flags, asyncResult);
 
@@ -253,8 +252,6 @@ namespace System.Net.Sockets
                 if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
                 throw socketException;
             }
-
-            asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
 
             return asyncResult;
         }

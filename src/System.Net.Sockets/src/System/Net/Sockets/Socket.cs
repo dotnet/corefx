@@ -2,17 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
 using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net.Internals;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace System.Net.Sockets
@@ -53,17 +48,6 @@ namespace System.Net.Sockets
         private SocketType _socketType;
         private ProtocolType _protocolType;
 
-        // These caches are one degree off of Socket since they're not used in the sync case/when disabled in config.
-        private CacheSet _caches;
-
-        private class CacheSet
-        {
-            internal CallbackClosure ConnectClosureCache;
-            internal CallbackClosure AcceptClosureCache;
-            internal CallbackClosure SendClosureCache;
-            internal CallbackClosure ReceiveClosureCache;
-        }
-
         // Bool marked true if the native socket option IP_PKTINFO or IPV6_PKTINFO has been set.
         private bool _receivingPacketInformation;
 
@@ -77,7 +61,7 @@ namespace System.Net.Sockets
         internal static volatile bool s_initialized;
         internal static volatile bool s_perfCountersEnabled;
 
-        #region Constructors
+#region Constructors
         public Socket(SocketType socketType, ProtocolType protocolType)
             : this(AddressFamily.InterNetworkV6, socketType, protocolType)
         {
@@ -142,9 +126,9 @@ namespace System.Net.Sockets
             _protocolType = Sockets.ProtocolType.Unknown;
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
         // The CLR allows configuration of these properties, separately from whether the OS supports IPv4/6.  We
         // do not provide these config options, so SupportsIPvX === OSSupportsIPvX.
@@ -699,9 +683,9 @@ namespace System.Net.Sockets
         {
             return (family == _addressFamily) || (family == AddressFamily.InterNetwork && IsDualMode);
         }
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         // Associates a socket with an end point.
         public void Bind(EndPoint localEP)
@@ -2235,7 +2219,6 @@ namespace System.Net.Sockets
 
             // For connectionless protocols, Connect is not an I/O call.
             Connect(remoteEP);
-            asyncResult.FinishPostingAsyncOp();
 
             // Synchronously complete the I/O and call the user's callback.
             asyncResult.InvokeCallback();
@@ -2278,9 +2261,7 @@ namespace System.Net.Sockets
 
             ThrowIfNotSupportsMultipleConnectAttempts();
 
-            // Here, want to flow the context.  No need to lock.
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
-            result.StartPostingAsyncOp(false);
 
             IAsyncResult dnsResult = DnsAPMExtensions.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
             if (dnsResult.CompletedSynchronously)
@@ -2290,9 +2271,6 @@ namespace System.Net.Sockets
                     result.InvokeCallback();
                 }
             }
-
-            // Done posting.
-            result.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, result);
             return result;
@@ -2365,16 +2343,12 @@ namespace System.Net.Sockets
 
             // Set up the result to capture the context.  No need for a lock.
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(addresses, port, this, state, requestCallback);
-            result.StartPostingAsyncOp(false);
 
             if (DoMultipleAddressConnectCallback(PostOneBeginConnect(result), result))
             {
                 // If the call completes synchronously, invoke the callback from here.
                 result.InvokeCallback();
             }
-
-            // Finished posting async op.  Possibly will call callback.
-            result.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, result);
             return result;
@@ -2388,15 +2362,11 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
 
-            // Start context-flowing op.  No need to lock - we don't use the context till the callback.
             DisconnectOverlappedAsyncResult asyncResult = new DisconnectOverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Post the disconnect.
             DoBeginDisconnect(reuseSocket, asyncResult);
 
-            // Finish flowing (or call the callback), and return.
-            asyncResult.FinishPostingAsyncOp();
             return asyncResult;
         }
 
@@ -2655,9 +2625,7 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
 
-            // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Run the send with this asyncResult.
             errorCode = DoBeginSend(buffer, offset, size, socketFlags, asyncResult);
@@ -2667,11 +2635,6 @@ namespace System.Net.Sockets
                 asyncResult = null;
             }
             else
-            {
-                // We're not throwing, so finish the async op posting code so we can return to the user.
-                // If the operation already finished, the callback will be called from here.
-                asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
-            }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
             return asyncResult;
@@ -2761,16 +2724,10 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, nameof(buffers)), nameof(buffers));
             }
 
-            // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Run the send with this asyncResult.
             errorCode = DoBeginSend(buffers, socketFlags, asyncResult);
-
-            // We're not throwing, so finish the async op posting code so we can return to the user.
-            // If the operation already finished, the callback will be called from here.
-            asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
 
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
@@ -2988,15 +2945,10 @@ namespace System.Net.Sockets
             EndPoint endPointSnapshot = remoteEP;
             Internals.SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
-            // Set up the async result and indicate to flow the context.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Post the send.
             DoBeginSendTo(buffer, offset, size, socketFlags, endPointSnapshot, socketAddress, asyncResult);
-
-            // Finish, possibly posting the callback.  The callback won't be posted before this point is reached.
-            asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
             return asyncResult;
@@ -3172,7 +3124,6 @@ namespace System.Net.Sockets
 
             // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Run the receive with this asyncResult.
             errorCode = DoBeginReceive(buffer, offset, size, socketFlags, asyncResult);
@@ -3180,12 +3131,6 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
                 asyncResult = null;
-            }
-            else
-            {
-                // We're not throwing, so finish the async op posting code so we can return to the user.
-                // If the operation already finished, the callback will be called from here.
-                asyncResult.FinishPostingAsyncOp(ref Caches.ReceiveClosureCache);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
@@ -3285,9 +3230,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, nameof(buffers)), nameof(buffers));
             }
 
-            // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Run the receive with this asyncResult.
             errorCode = DoBeginReceive(buffers, socketFlags, asyncResult);
@@ -3295,12 +3238,6 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
                 asyncResult = null;
-            }
-            else
-            {
-                // We're not throwing, so finish the async op posting code so we can return to the user.
-                // If the operation already finished, the callback will be called from here.
-                asyncResult.FinishPostingAsyncOp(ref Caches.ReceiveClosureCache);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
@@ -3484,9 +3421,7 @@ namespace System.Net.Sockets
 
             SocketPal.CheckDualModeReceiveSupport(this);
 
-            // Set up the result and set it to collect the context.
             ReceiveMessageOverlappedAsyncResult asyncResult = new ReceiveMessageOverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Start the ReceiveFrom.
             EndPoint oldEndPoint = _rightEndPoint;
@@ -3549,8 +3484,6 @@ namespace System.Net.Sockets
                 throw socketException;
             }
 
-            // Capture the context, maybe call the callback, and return.
-            asyncResult.FinishPostingAsyncOp(ref Caches.ReceiveClosureCache);
 
             if (asyncResult.CompletedSynchronously && !asyncResult.SocketAddressOriginal.Equals(asyncResult.SocketAddress))
             {
@@ -3718,15 +3651,10 @@ namespace System.Net.Sockets
             // with the right address family
             Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref remoteEP);
 
-            // Set up the result and set it to collect the context.
             var asyncResult = new OriginalAddressOverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Start the ReceiveFrom.
             DoBeginReceiveFrom(buffer, offset, size, socketFlags, remoteEP, socketAddress, asyncResult);
-
-            // Capture the context, maybe call the callback, and return.
-            asyncResult.FinishPostingAsyncOp(ref Caches.ReceiveClosureCache);
 
             if (asyncResult.CompletedSynchronously && !asyncResult.SocketAddressOriginal.Equals(asyncResult.SocketAddress))
             {
@@ -3933,15 +3861,10 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(receiveSize));
             }
 
-            // Set up the async result with flowing.
             AcceptOverlappedAsyncResult asyncResult = new AcceptOverlappedAsyncResult(this, state, callback);
-            asyncResult.StartPostingAsyncOp(false);
 
             // Start the accept.
             DoBeginAccept(acceptSocket, receiveSize, asyncResult);
-
-            // Finish the flow capture, maybe complete here.
-            asyncResult.FinishPostingAsyncOp(ref Caches.AcceptClosureCache);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
             return asyncResult;
@@ -4108,7 +4031,7 @@ namespace System.Net.Sockets
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
-        #region Async methods
+#region Async methods
         public bool AcceptAsync(SocketAsyncEventArgs e)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, e);
@@ -4769,10 +4692,10 @@ namespace System.Net.Sockets
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, retval);
             return retval;
         }
-        #endregion
-        #endregion
+#endregion
+#endregion
 
-        #region Internal and private properties
+#region Internal and private properties
         private static object InternalSyncObject
         {
             get
@@ -4783,19 +4706,6 @@ namespace System.Net.Sockets
                     Interlocked.CompareExchange(ref s_internalSyncObject, o, null);
                 }
                 return s_internalSyncObject;
-            }
-        }
-
-        private CacheSet Caches
-        {
-            get
-            {
-                if (_caches == null)
-                {
-                    // It's not too bad if extra of these are created and lost.
-                    _caches = new CacheSet();
-                }
-                return _caches;
             }
         }
 
@@ -4819,9 +4729,9 @@ namespace System.Net.Sockets
                             TransportType.All;
             }
         }
-        #endregion
+#endregion
 
-        #region Internal and private methods
+#region Internal and private methods
         internal static void GetIPProtocolInformation(AddressFamily addressFamily, Internals.SocketAddress socketAddress, out bool isIPv4, out bool isIPv6)
         {
             bool isIPv4MappedToIPv6 = socketAddress.Family == AddressFamily.InterNetworkV6 && socketAddress.GetIPAddress().IsIPv4MappedToIPv6;
@@ -5415,12 +5325,6 @@ namespace System.Net.Sockets
             // Allocate the async result and the event we'll pass to the thread pool.
             ConnectOverlappedAsyncResult asyncResult = new ConnectOverlappedAsyncResult(this, endPointSnapshot, state, callback);
 
-            // If context flowing is enabled, set it up here.  No need to lock since the context isn't used until the callback.
-            if (flowContext)
-            {
-                asyncResult.StartPostingAsyncOp(false);
-            }
-
             EndPoint oldEndPoint = _rightEndPoint;
             if (_rightEndPoint == null)
             {
@@ -5461,10 +5365,6 @@ namespace System.Net.Sockets
                 if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
                 throw socketException;
             }
-
-            // We didn't throw, so indicate that we're returning this result to the user.  This may call the callback.
-            // This is a nop if the context isn't being flowed.
-            asyncResult.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
 
             if (NetEventSource.IsEnabled)
             {
@@ -5507,7 +5407,7 @@ namespace System.Net.Sockets
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
         }
 
-        private sealed class ConnectAsyncResult : ContextAwareResult
+        private sealed class ConnectAsyncResult : SimpleContextAwareResult
         {
             private EndPoint _endPoint;
 
@@ -5523,7 +5423,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private sealed class MultipleAddressConnectAsyncResult : ContextAwareResult
+        private sealed class MultipleAddressConnectAsyncResult : SimpleContextAwareResult
         {
             internal MultipleAddressConnectAsyncResult(IPAddress[] addresses, int port, Socket socket, object myState, AsyncCallback myCallBack) :
                 base(socket, myState, myCallBack)
@@ -5827,7 +5727,7 @@ namespace System.Net.Sockets
         // Helper for SendFile implementations
         private static FileStream OpenFile(string name) => string.IsNullOrEmpty(name) ? null : File.OpenRead(name);
 
-        #endregion
+#endregion
 
         [System.Diagnostics.Conditional("TRACE_VERBOSE")]
         internal void DebugMembers()
