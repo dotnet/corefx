@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class StringTests
+    public static partial class StringTests
     {
         private static readonly bool s_isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private const string c_SoftHyphen = "\u00AD";
@@ -1609,21 +1610,20 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 0, 2));
         }
 
-        public static IEnumerable<object[]> Join_ObjectArray_TestData()
+        public static object[][] Join_ObjectArray_TestData() => new object[][]
         {
-            yield return new object[] { "$$", new object[] { }, "" };
-            yield return new object[] { "$$", new object[] { new ObjectWithNullToString() }, "" };
-            yield return new object[] { "$$", new object[] { "Foo" }, "Foo" };
-            yield return new object[] { "$$", new object[] { "Foo", "Bar", "Baz" }, "Foo$$Bar$$Baz" };
-            yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
-            yield return new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" };
-
+            new object[] { "$$", new object[] { }, "" },
+            new object[] { "$$", new object[] { new ObjectWithNullToString() }, "" },
+            new object[] { "$$", new object[] { "Foo" }, "Foo" },
+            new object[] { "$$", new object[] { "Foo", "Bar", "Baz" }, "Foo$$Bar$$Baz" },
+            new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" },
+            new object[] { "$$", new object[] { "Foo", null, "Baz" }, "Foo$$$$Baz" },
             // Test join when first value is null
-            yield return new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" };
+            new object[] { "$$", new object[] { null, "Bar", "Baz" }, "$$Bar$$Baz" },
 
             // Join should ignore objects that have a null ToString() value
-            yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
-        }
+            new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" },
+        };
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
@@ -1651,6 +1651,51 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
             Assert.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
+        }
+
+        public static object[][] Join_Char_TestData() => new object[][]
+        {
+            new object[] { '$', new object[] { }, 0, 0, "" },
+
+            new object[] { '$', new object[] { null }, 0, 1, "" },
+            new object[] { '$', new object[] { "" }, 0, 1, "" },
+            new object[] { '$', new object[] { "Foo" }, 0, 1, "Foo" },
+
+            new object[] { '$', new object[] { null, null, null }, 0, 3, "$$$$" },
+            new object[] { '$', new object[] { "", "", "" }, 0, 3, "$$$$" },
+
+            new object[] { '$', new object[] { null, "Bar", null }, 0, 3, "$Bar$" },
+            new object[] { '$', new object[] { "", "Bar", "", }, 0, 3, "$Bar$" },
+            new object[] { '$', new object[] { "Foo", "Bar", "Baz" }, 0, 3, "Foo$Bar$Baz" },
+
+            new object[] { '$', new object[] { "Foo", "Bar", "Baz" }, 0, 3, "" },
+            new object[] { '$', new object[] { "Foo", "Bar", "Baz" }, 1, 1, "Bar" },
+        };
+
+        [Theory]
+        [MemberData(nameof(Join_Char_TestData))]
+        public static void Join_Char_Test(char separator, object[] values, int startIndex, int count, string expected)
+        {
+            string[] strings = values.Select(item => item?.ToString()).ToArray();
+            if (startIndex + count == values.Length && count != 0)
+            {
+                Assert.Equal(expected, string.Join(separator, strings));
+                Assert.Equal(expected, string.Join(separator, values));
+
+                List<string> iEnumerableStringOptimized = new List<string>(strings);
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
+                Assert.Equal(expected, string.Join<object>(separator, values));
+
+                Queue<string> iEnumerableStringNotOptimized = new Queue<string>(strings);
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringNotOptimized));
+                Queue<object> iEnumerableObjectNotOptimized = new Queue<object>(values);
+                Assert.Equal(expected, string.Join<object>(separator, iEnumerableObjectNotOptimized));
+
+            }
+            Assert.Equal(expected, string.Join(separator, strings, startIndex, count));
+            Assert.True(false);
         }
 
         [Theory]
