@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Project Include="Common\test-runtime\XUnit.Runtime.depproj" />
     <Project Include="tests.builds" />
   </ItemGroup>
 
