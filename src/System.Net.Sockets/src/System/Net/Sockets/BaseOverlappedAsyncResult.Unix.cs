@@ -15,7 +15,7 @@ namespace System.Net.Sockets
     //
     // This class is used to track state for async Socket operations such as the BeginSend, BeginSendTo,
     // BeginReceive, BeginReceiveFrom, BeginSendFile, and BeginAccept calls.
-    internal partial class BaseOverlappedAsyncResult : ContextAwareResult
+    internal partial class BaseOverlappedAsyncResult : LazyAsyncResult
     {
         public BaseOverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback)
             : base(socket, asyncState, asyncCallback)

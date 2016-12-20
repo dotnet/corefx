@@ -207,8 +207,8 @@ namespace System.Net.Sockets
             // ConnectEx uses a sockaddr buffer containing he remote address to which to connect.
             // It can also optionally take a single buffer of data to send after the connection is complete.
             //
-            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of UnsafePack.
-            // The optional buffer is pinned using the Overlapped.UnsafePack method that takes a single object to pin.
+            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of Pack.
+            // The optional buffer is pinned using the Overlapped.Pack method that takes a single object to pin.
             PinSocketAddressBuffer();
             CheckPinNoBuffer();
         }
@@ -265,11 +265,11 @@ namespace System.Net.Sockets
             // performance for the more common single buffer case.  
             //
             // For a single buffer:
-            //   The Overlapped.UnsafePack method is used that takes a single object to pin.
+            //   The Overlapped.Pack method is used that takes a single object to pin.
             //   A single WSABuffer that pre-exists in SocketAsyncEventArgs is used.
             //
             // For multiple buffers:
-            //   The Overlapped.UnsafePack method is used that takes an array of objects to pin.
+            //   The Overlapped.Pack method is used that takes an array of objects to pin.
             //   An array to reference the multiple buffer is allocated.
             //   An array of WSABuffer descriptors is allocated.
         }
@@ -321,16 +321,16 @@ namespace System.Net.Sockets
             // are handled differently so as to optimize performance for the more common single buffer case.
             //
             // For a single buffer:
-            //   The Overlapped.UnsafePack method is used that takes a single object to pin.
+            //   The Overlapped.Pack method is used that takes a single object to pin.
             //   A single WSABuffer that pre-exists in SocketAsyncEventArgs is used.
             //
             // For multiple buffers:
-            //   The Overlapped.UnsafePack method is used that takes an array of objects to pin.
+            //   The Overlapped.Pack method is used that takes an array of objects to pin.
             //   An array to reference the multiple buffer is allocated.
             //   An array of WSABuffer descriptors is allocated.
             //
             // WSARecvFrom and WSASendTo also uses a sockaddr buffer in which to store the address from which the data was received.
-            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of UnsafePack.
+            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of Pack.
             PinSocketAddressBuffer();
         }
 
@@ -492,11 +492,11 @@ namespace System.Net.Sockets
             // performance for the more common single buffer case.  
             //
             // For a single buffer:
-            //   The Overlapped.UnsafePack method is used that takes a single object to pin.
+            //   The Overlapped.Pack method is used that takes a single object to pin.
             //   A single WSABuffer that pre-exists in SocketAsyncEventArgs is used.
             //
             // For multiple buffers:
-            //   The Overlapped.UnsafePack method is used that takes an array of objects to pin.
+            //   The Overlapped.Pack method is used that takes an array of objects to pin.
             //   An array to reference the multiple buffer is allocated.
             //   An array of WSABuffer descriptors is allocated.
         }
@@ -650,16 +650,16 @@ namespace System.Net.Sockets
             // are handled differently so as to optimize performance for the more common single buffer case.
             //
             // For a single buffer:
-            //   The Overlapped.UnsafePack method is used that takes a single object to pin.
+            //   The Overlapped.Pack method is used that takes a single object to pin.
             //   A single WSABuffer that pre-exists in SocketAsyncEventArgs is used.
             //
             // For multiple buffers:
-            //   The Overlapped.UnsafePack method is used that takes an array of objects to pin.
+            //   The Overlapped.Pack method is used that takes an array of objects to pin.
             //   An array to reference the multiple buffer is allocated.
             //   An array of WSABuffer descriptors is allocated.
             //
             // WSARecvFrom and WSASendTo also uses a sockaddr buffer in which to store the address from which the data was received.
-            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of UnsafePack.
+            // The sockaddr is pinned with a GCHandle to avoid having to use the object array form of Pack.
             PinSocketAddressBuffer();
         }
 
