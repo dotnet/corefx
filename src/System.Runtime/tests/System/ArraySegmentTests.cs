@@ -39,14 +39,14 @@ namespace System.Tests
             return new ArraySegment<T>();
         }
 
-        protected virtual ArraySegment<T> Factory(int count, int offset, int lenght)
+        protected virtual ArraySegment<T> Factory(int count, int offset, int length)
         {
             T[] array = CreateEnumerable(EnumerableType.List, null, count, 0, 0).ToArray();
-            ArraySegment<T> segment = new ArraySegment<T>(array, offset, lenght);
+            ArraySegment<T> segment = new ArraySegment<T>(array, offset, length);
 
             Assert.Same(array, segment.Array);
             Assert.Equal(offset, segment.Offset);
-            Assert.Equal(lenght, segment.Count);
+            Assert.Equal(length, segment.Count);
 
             return segment;
         }
