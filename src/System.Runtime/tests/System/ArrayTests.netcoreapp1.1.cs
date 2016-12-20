@@ -40,13 +40,14 @@ namespace System.Tests
 
         private static IEnumerable<object[]> GenerateFillData<TSource, TResult>(IEnumerable<TSource> source, TSource seed, Func<TSource, TResult> transform)
         {
+            int count = source.Count();
             TResult repeatedValue = transform(seed);
             IEnumerable<TResult> transformed = source.Select(transform);
 
-            yield return new object[] { transformed, repeatedValue, 0, length }; // Fill the entire array.
-            yield return new object[] { transformed, repeatedValue, 0, length / 2 }; // Fill the beginning of the array.
-            yield return new object[] { transformed, repeatedValue, length / 2, length / 2 }; // Fill the end of the array, assuming `length` is even.
-            yield return new object[] { transformed, repeatedValue, length / 4, length / 2 }; // Fill the middle of the array.
+            yield return new object[] { transformed, repeatedValue, 0, count }; // Fill the entire array.
+            yield return new object[] { transformed, repeatedValue, 0, count / 2 }; // Fill the beginning of the array.
+            yield return new object[] { transformed, repeatedValue, count / 2, count / 2 }; // Fill the end of the array, assuming `length` is even.
+            yield return new object[] { transformed, repeatedValue, count / 4, count / 2 }; // Fill the middle of the array.
         }
 
         [Theory]
