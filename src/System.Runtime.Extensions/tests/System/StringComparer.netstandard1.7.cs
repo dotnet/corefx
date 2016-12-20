@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class MiscStringComparerTests
+    public static partial class MiscStringComparerTests
     {
         public static IEnumerable<object[]> UpperLowerCasing_TestData()
         {
@@ -58,24 +58,6 @@ namespace System.Tests
             Assert.True(StringComparer.InvariantCultureIgnoreCase.Equals((object) "test", (object) "TEST"), "same objects with different casing with StringComparer.InvariantCultureIgnoreCase should be equal");
             Assert.Equal(StringComparer.InvariantCultureIgnoreCase.GetHashCode("test"), StringComparer.InvariantCultureIgnoreCase.GetHashCode("TEST"));
             Assert.Equal(0, StringComparer.InvariantCultureIgnoreCase.Compare("test", "TEST"));
-        }
-
-        public static IEnumerable<object[]> FromComparison_TestData()
-        {
-            //                          StringComparison                StringComparer
-            yield return new object[] { StringComparison.CurrentCulture, StringComparer.CurrentCulture };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, StringComparer.CurrentCultureIgnoreCase };
-            yield return new object[] { StringComparison.InvariantCulture, StringComparer.InvariantCulture };
-            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, StringComparer.InvariantCultureIgnoreCase };
-            yield return new object[] { StringComparison.Ordinal, StringComparer.Ordinal };
-            yield return new object[] { StringComparison.OrdinalIgnoreCase, StringComparer.OrdinalIgnoreCase };
-        }
-
-        [Theory]
-        [MemberData(nameof(FromComparison_TestData))]
-        public static void FromComparisonTest(StringComparison comparison, StringComparer comparer)
-        {
-            Assert.Equal(comparer, StringComparer.FromComparison(comparison));
         }
     }
 }
