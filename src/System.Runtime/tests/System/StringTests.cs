@@ -1647,6 +1647,18 @@ namespace System.Tests
             // Start index > separators.Length
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 2, 1));
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 0, 2));
+
+#if netcoreapp11
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('$', null));
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('$$', null, 0, 0));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<string>)null));
+
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join('$', new string[] { "Foo" }, 0, -1));
+            
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, 2, 1));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, 0, 2));
+#endif
         }
 
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
@@ -1710,6 +1722,11 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
             Assert.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
+
+#if netcoreapp11
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('$', (object[])null));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('-', (IEnumerable<object>)null));
+#endif
         }
 
         [Theory]
