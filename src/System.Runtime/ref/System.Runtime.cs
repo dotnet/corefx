@@ -2039,6 +2039,12 @@ namespace System
         public bool IsNormalized(System.Text.NormalizationForm normalizationForm) { throw null; }
         public static bool IsNullOrEmpty(string value) { throw null; }
         public static bool IsNullOrWhiteSpace(string value) { throw null; }
+#if netcoreapp11
+        public static string Join(char separator, params object[] values) { throw null; }
+        public static string Join(char separator, params string[] value) { throw null; }
+        public static string Join(char separator, string[] value, int startIndex, int count) { throw null; }
+        public static string Join<T>(char separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
+#endif
         public static string Join(string separator, System.Collections.Generic.IEnumerable<string> values) { throw null; }
         public static string Join(string separator, params object[] values) { throw null; }
         public static string Join(string separator, params string[] value) { throw null; }
