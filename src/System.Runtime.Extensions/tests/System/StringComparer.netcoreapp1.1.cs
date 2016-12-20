@@ -11,7 +11,8 @@ namespace System.Tests
 {
     public static partial class MiscStringComparerTests
     {
-        public static object[][] FromComparison_TestData = new object[][] {
+        public static readonly object[][] FromComparison_TestData =
+        {
             //              StringComparison                StringComparer
             new object[] { StringComparison.CurrentCulture, StringComparer.CurrentCulture },
             new object[] { StringComparison.CurrentCultureIgnoreCase, StringComparer.CurrentCultureIgnoreCase },
