@@ -208,87 +208,38 @@ namespace System.Security.Principal
         WinNewEnterpriseReadonlyControllersSid = 77,
         /// <summary>Indicates a SID that matches the built-in DCOM certification services access group.</summary>
         WinBuiltinCertSvcDComAccessGroup = 78,
-        /// <summary>
-        /// Indicates a SID that matches the medium plus integrity label.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that matches the medium plus integrity label.</summary>
         WinMediumPlusLabelSid = 79,
-        /// <summary>
-        /// Indicates a SID that matches a local logon group.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that matches a local logon group.</summary>
         WinLocalLogonSid = 80,
-        /// <summary>
-        /// Indicates a SID that matches a console logon group.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that matches a console logon group.</summary>
         WinConsoleLogonSid = 81,
-        /// <summary>
-        /// Indicates a SID that matches a certificate for the given organization.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that matches a certificate for the given organization.</summary>
         WinThisOrganizationCertificateSid = 82,
-        /// <summary>
-        /// Indicates a SID that matches the application package authority.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that matches the application package authority.</summary>
         WinApplicationPackageAuthoritySid = 83,
-        /// <summary>
-        /// Indicates a SID that applies to all app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID that applies to all app containers.</summary>
         WinBuiltinAnyPackageSid = 84,
-        /// <summary>
-        /// Indicates a SID of Internet client capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID of Internet client capability for app containers.</summary>
         WinCapabilityInternetClientSid = 85,
-        /// <summary>
-        /// Indicates a SID of Internet client and server capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID of Internet client and server capability for app containers.</summary>
         WinCapabilityInternetClientServerSid = 86,
-        /// <summary>
-        /// Indicates a SID of private network client and server capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID of private network client and server capability for app containers.</summary>
         WinCapabilityPrivateNetworkClientServerSid = 87,
-        /// <summary>
-        /// Indicates a SID for pictures library capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for pictures library capability for app containers.</summary>
         WinCapabilityPicturesLibrarySid = 88,
-        /// <summary>
-        /// Indicates a SID for videos library capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for videos library capability for app containers.</summary>
         WinCapabilityVideosLibrarySid = 89,
-        /// <summary>
-        /// Indicates a SID for music library capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for music library capability for app containers.</summary>
         WinCapabilityMusicLibrarySid = 90,
-        /// <summary>
-        /// Indicates a SID for documents library capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for documents library capability for app containers.</summary>
         WinCapabilityDocumentsLibrarySid = 91,
-        /// <summary>
-        /// Indicates a SID for shared user certificates capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for shared user certificates capability for app containers.</summary>
         WinCapabilitySharedUserCertificatesSid = 92,
-        /// <summary>
-        /// Indicates a SID for Windows credentials capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
+        /// <summary>Indicates a SID for Windows credentials capability for app containers.</summary>
         WinCapabilityEnterpriseAuthenticationSid = 93,
-        /// <summary>
-        /// Indicates a SID for removable storage capability for app containers.
-        /// <para><strong>Windows Server 2008 R2, Windows 7, Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP:</strong> This value is not available.</para>
-        /// </summary>
-        WinCapabilityRemovableStorageSid = 94,
-        MaxDefined = WinCapabilityRemovableStorageSid,
+        /// <summary>Indicates a SID for removable storage capability for app containers.</summary>
+        WinCapabilityRemovableStorageSid = 94
     }
 
     //
