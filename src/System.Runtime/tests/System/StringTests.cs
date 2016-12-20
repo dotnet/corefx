@@ -1663,6 +1663,15 @@ namespace System.Tests
 
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
+            
+            yield return new object[] { "$", new object[] { }, "" };
+            yield return new object[] { "$", new object[] { new ObjectWithNullToString() }, "" };
+            yield return new object[] { "$", new object[] { "Foo" }, "Foo" };
+            yield return new object[] { "$", new object[] { "Foo", "Bar", "Baz" }, "Foo$Bar$Baz" };
+            yield return new object[] { "$", new object[] { "Foo", null, "Baz" }, "Foo$$Baz" };
+
+            // Test join when first value is null
+            yield return new object[] { "$", new object[] { null, "Bar", "Baz" }, "$Bar$Baz" };
         }
 
         [Theory]
@@ -1672,6 +1681,16 @@ namespace System.Tests
         {
             Assert.Equal(expected, string.Join(separator, values));
             Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+
+#if netcoreapp11
+            if (separator.Length == 1)
+            {
+                char separatorChar = separator[0];
+
+                Assert.Equal(expected, string.Join(separatorChar, values));
+                Assert.Equal(expected, string.Join(separatorChar, (IEnumerable<object>)values));
+            }
+#endif
         }
 
         [Theory]
