@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.1.0-preview1-24530-04",
-    "System.Collections": "4.3.0-preview1-24530-04",
+    "Microsoft.NETCore.Platforms": "1.1.0",
+    "System.Collections": "4.3.0",
     "System.Console": "4.0.0",
-    "System.Diagnostics.Debug": "4.3.0-preview1-24530-04",
-    "System.IO": "4.3.0-preview1-24530-04",
-    "System.Runtime": "4.3.0-preview1-24530-04",
-    "System.Text.Encoding": "4.3.0-preview1-24530-04",
+    "System.Diagnostics.Debug": "4.3.0",
+    "System.IO": "4.3.0",
+    "System.Runtime": "4.3.0",
+    "System.Text.Encoding": "4.3.0",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"

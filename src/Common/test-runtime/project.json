@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.1.0-preview1-24530-04",
-    "Microsoft.NETCore.Targets": "1.1.0-preview1-24530-04",
-    "Microsoft.NETCore.TestHost": "1.1.0-preview1-24529-02",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.0-preview1-24529-02",
-    "System.Diagnostics.Contracts": "4.3.0-preview1-24530-04",
-    "System.IO.Compression": "4.3.0-preview1-24530-04",
-    "System.Runtime.InteropServices.RuntimeInformation": "4.3.0-preview1-24530-04",
-    "System.Linq.Parallel": "4.3.0-preview1-24530-04",
+    "Microsoft.NETCore.Platforms": "1.1.0",
+    "Microsoft.NETCore.Targets": "1.1.0",
+    "Microsoft.NETCore.TestHost": "1.1.0",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.0",
+    "System.Diagnostics.Contracts": "4.3.0",
+    "System.IO.Compression": "4.3.0",
+    "System.Runtime.InteropServices.RuntimeInformation": "4.3.0",
+    "System.Linq.Parallel": "4.3.0",
     "coveralls.io": "1.4",
     "OpenCover": "4.6.519",
     "ReportGenerator": "2.4.3",
@@ -15,7 +15,7 @@
     "Microsoft.DotNet.xunit.performance.analysis.cli": "1.0.0-alpha-build0040",
     "Microsoft.DotNet.xunit.performance.runner.cli": "1.0.0-alpha-build0040",
     "Microsoft.DotNet.xunit.performance.runner.Windows": "1.0.0-alpha-build0040",
-    "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-00731-01",
+    "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-01005-01",
     "xunit.console.netcore": "1.0.3-prerelease-00607-01"
   },
   "frameworks": {
@@ -98,7 +98,7 @@
         "System.Runtime.WindowsRuntime.UI.Xaml": "4.0.1",
         "System.Text.Encoding.CodePages": "4.0.1",
         "System.Xml.XmlSerializer": "4.0.11",
-        "System.Console": "4.3.0-preview1-24530-04",
+        "System.Console": "4.3.0",
         "microsoft.xunit.runner.uwp": "1.0.3-prerelease-00614-01",
         "Microsoft.DotNet.TestILC": {
           "version": "1.4.24208-prerelease",

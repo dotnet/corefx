@@ -1,21 +1,21 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
   <PropertyGroup>
-    <CoreFxCurrentRef>2a585e9694f0087d39f3d508088245988a7179a6</CoreFxCurrentRef>
-    <CoreClrCurrentRef>8a0bac2ad271767ac728e4064e9ca1a929ede297</CoreClrCurrentRef>
+    <CoreFxCurrentRef>014ac653f680703f5b9a7bf3ebc99b1a5b912c7b</CoreFxCurrentRef>
+    <CoreClrCurrentRef>014ac653f680703f5b9a7bf3ebc99b1a5b912c7b</CoreClrCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview1-24530-04</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview1-24529-02</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview1-24820-02</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>servicing-24820-02</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>rc3-24214-00</ExternalExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
   <PropertyGroup>
     <AppXRunnerVersion>1.0.3-prerelease-00614-01</AppXRunnerVersion>
-    <RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>4.0.1</RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>
+    <RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>4.3.0</RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>
     <RuntimeWin10RuntimeNativeSystemIOCompressionVersion>4.0.1</RuntimeWin10RuntimeNativeSystemIOCompressionVersion>
 
     <!-- Depend on win10-arm64 version from master to provide support, although this will not be shipped. -->
@@ -76,7 +76,7 @@
     </StaticDependency>
 
     <StaticDependency Include="Microsoft.xunit.netcore.extensions;Microsoft.DotNet.BuildTools.TestSuite">
-      <Version>1.0.0-prerelease-00731-01</Version>
+      <Version>1.0.0-prerelease-01005-01</Version>
     </StaticDependency>
 
     <!--

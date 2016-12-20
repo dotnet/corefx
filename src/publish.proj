@@ -17,5 +17,19 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="Build" DependsOnTargets="CreateContainerName;UploadToAzure" />
+  <!-- For servicing branches, we may not be producing packages on a given platform, and that's ok. -->
+  <Target Name="DetermineIfPackagesAreAvailableForUpload">
+    <ItemGroup>
+      <_PackagesForPublishing Include="$(PublishPattern)" />
+    </ItemGroup>
+    <Message Condition="'@(_PackagesForPublishing)' == ''" Text="Skipping Azure upload, no packages available matching this pattern, '$(PublishPattern)'" />
+  </Target>
+
+  <!-- If 'BuildAllPackages' is 'false', then we are producing a servicing build and it is not an error if packages are not available. -->
+  <Target Name="UploadToAzureTargets"
+          Condition="'@(_PackagesForPublishing)' != '' and '$(BuildAllPackages)' != 'true'"
+          DependsOnTargets="CreateContainerName;UploadToAzure"
+          AfterTargets="DetermineIfPackagesAreAvailableForUpload" />
+  
+  <Target Name="Build" DependsOnTargets="DetermineIfPackagesAreAvailableForUpload" />
 </Project>
