@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Xunit;
 
 namespace System.Tests
@@ -28,6 +29,16 @@ namespace System.Tests
         public static void FromComparisonTest(StringComparison comparison, StringComparer comparer)
         {
             Assert.Equal(comparer, StringComparer.FromComparison(comparison));
+        }
+
+        [Fact]
+        public static void FromComparisonInvalidTest()
+        {
+            StringComparison minInvalid = Enum.GetValues(typeof(StringComparison)).Cast<StringComparison>().Min() - 1;
+            StringComparison maxInvalid = Enum.GetValues(typeof(StringComparison)).Cast<StringComparison>().Max() + 1;
+
+            Assert.Throw<ArgumentException>(() => { StringComparer.FromComparison(minInvalid); });
+            Assert.Throw<ArgumentException>(() => { StringComparer.FromComparison(maxInvalid); });
         }
     }
 }
