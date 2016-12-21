@@ -117,4 +117,356 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="Arg_RankMultiDimNotSupported ">
+    <value> Only single dimensional arrays are supported for the requested action.</value>
+</data>
+<data name="Arg_EnumIllegalVal ">
+    <value> Illegal enum value: {0}.</value>
+</data>
+<data name="Argument_InvalidOffLen ">
+    <value> Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
+</data>
+<data name="Argument_InvalidPermissionState ">
+    <value> Invalid permission state.</value>
+</data>
+<data name="Argument_InvalidValue ">
+    <value> Value was invalid.</value>
+</data>
+<data name="Argument_WrongType ">
+    <value> Operation on type '{0}' attempted with target of incorrect type.</value>
+</data>
+<data name="ArgumentOutOfRange_Index ">
+    <value> Index was out of range.  Must be non-negative and less than the size of the collection.</value>
+</data>
+<data name="Arg_EmptyOrNullString ">
+    <value> String cannot be empty or null.</value>
+</data>
+<data name="Argument_InvalidClassAttribute ">
+    <value> The value of "class" attribute is invalid.</value>
+</data>
+<data name="InvalidOperation_DuplicateItemNotAllowed ">
+    <value> Duplicate items are not allowed in the collection.</value>
+</data>
+<data name="Cryptography_Cms_Envelope_Empty_Content ">
+    <value> Cannot create CMS enveloped for empty content.</value>
+</data>
+<data name="Cryptography_Cms_Invalid_Subject_Identifier_Type ">
+    <value> The subject identifier type {0} is not valid.</value>
+</data>
+<data name="Cryptography_Cms_Invalid_Subject_Identifier_Type_Value_Mismatch ">
+    <value> The subject identifier type {0} does not match the value data type {1}.</value>
+</data>
+<data name="Cryptography_Cms_Key_Agree_Date_Not_Available ">
+    <value> The Date property is not available for none KID key agree recipient.</value>
+</data>
+<data name="Cryptography_Cms_Key_Agree_Other_Key_Attribute_Not_Available ">
+    <value> The OtherKeyAttribute property is not available for none KID key agree recipient.</value>
+</data>
+<data name="Cryptography_Cms_MessageNotSigned ">
+    <value> The CMS message is not signed.</value>
+</data>
+<data name="Cryptography_Cms_MessageNotEncrypted ">
+    <value> The CMS message is not encrypted.</value>
+</data>
+<data name="Cryptography_Cms_Not_Supported ">
+    <value> The Cryptographic Message Standard (CMS) is not supported on this platform.</value>
+</data>
+<data name="Cryptography_Cms_RecipientCertificateNotFound ">
+    <value> The recipient certificate is not specified.</value>
+</data>
+<data name="Cryptography_Cms_Sign_Empty_Content ">
+    <value> Cannot create CMS signature for empty content.</value>
+</data>
+<data name="Cryptography_Cms_Sign_No_Signature_First_Signer ">
+    <value> CmsSigner has to be the first signer with NoSignature.</value>
+</data>
+<data name="Cryptography_DataProtector_InvalidAppNameOrPurpose ">
+    <value> Application names and purposes must contain at least one character which is not white space.</value>
+</data>
+<data name="Cryptography_DataProtector_InvalidPurpose ">
+    <value> The purpose of the protected blob does not match the expected purpose value of this data protector instance.</value>
+</data>
+<data name="Cryptography_DpApi_InvalidMemoryLength ">
+    <value> The length of the data should be a multiple of 16 bytes.</value>
+</data>
+<data name="Cryptography_DpApi_ProfileMayNotBeLoaded ">
+    <value> The data protection operation was unsuccessful. This may have been caused by not having the user profile loaded for the current thread's user context, which may be the case when the thread is impersonating.</value>
+</data>
+<data name="Cryptography_InvalidHandle ">
+    <value> {0} is an invalid handle.</value>
+</data>
+<data name="Cryptography_InvalidContextHandle ">
+    <value> The chain context handle is invalid.</value>
+</data>
+<data name="Cryptography_Pkcs9_MultipleSigningTimeNotAllowed ">
+    <value> Cannot add multiple PKCS 9 signing time attributes.</value>
+</data>
+<data name="Cryptography_Pkcs9_AttributeMismatch ">
+    <value> The parameter should be a PKCS 9 attribute.</value>
+</data>
+<data name="Cryptography_X509_InvalidEncodingFormat ">
+    <value> Invalid encoding format.</value>
+</data>
+<data name="Cryptography_Xml_CipherValueElementRequired ">
+    <value> A Cipher Data element should have either a CipherValue or a CipherReference element.</value>
+</data>
+<data name="Cryptography_Xml_CreateHashAlgorithmFailed ">
+    <value> Could not create hash algorithm object.</value>
+</data>
+<data name="Cryptography_Xml_CreateTransformFailed ">
+    <value> Could not create the XML transformation identified by the URI {0}.</value>
+</data>
+<data name="Cryptography_Xml_CreatedKeyFailed ">
+    <value> Failed to create signing key.</value>
+</data>
+<data name="Cryptography_Xml_DigestMethodRequired ">
+    <value> A DigestMethod must be specified on a Reference prior to generating XML.</value>
+</data>
+<data name="Cryptography_Xml_DigestValueRequired ">
+    <value> A Reference must contain a DigestValue.</value>
+</data>
+<data name="Cryptography_Xml_EnvelopedSignatureRequiresContext ">
+    <value> An XmlDocument context is required for enveloped transforms.</value>
+</data>
+<data name="Cryptography_Xml_InvalidElement ">
+    <value> Malformed element {0}.</value>
+</data>
+<data name="Cryptography_Xml_InvalidEncryptionProperty ">
+    <value> Malformed encryption property element.</value>
+</data>
+<data name="Cryptography_Xml_InvalidKeySize ">
+    <value> The key size should be a non negative integer.</value>
+</data>
+<data name="Cryptography_Xml_InvalidReference ">
+    <value> Malformed reference element.</value>
+</data>
+<data name="Cryptography_Xml_InvalidSignatureLength ">
+    <value> The length of the signature with a MAC should be less than the hash output length.</value>
+</data>
+<data name="Cryptography_Xml_InvalidSignatureLength2 ">
+    <value> The length in bits of the signature with a MAC should be a multiple of 8.</value>
+</data>
+<data name="Cryptography_Xml_KeyInfoRequired ">
+    <value> A KeyInfo element is required to check the signature.</value>
+</data>
+<data name="Cryptography_Xml_KW_BadKeySize ">
+    <value> The length of the encrypted data in Key Wrap is either 32, 40 or 48 bytes.</value>
+</data>
+<data name="Cryptography_Xml_LoadKeyFailed ">
+    <value> Signing key is not loaded.</value>
+</data>
+<data name="Cryptography_Xml_MissingAlgorithm ">
+    <value> Symmetric algorithm is not specified.</value>
+</data>
+<data name="Cryptography_Xml_MissingCipherData ">
+    <value> Cipher data is not specified.</value>
+</data>
+<data name="Cryptography_Xml_MissingDecryptionKey ">
+    <value> Unable to retrieve the decryption key.</value>
+</data>
+<data name="Cryptography_Xml_MissingEncryptionKey ">
+    <value> Unable to retrieve the encryption key.</value>
+</data>
+<data name="Cryptography_Xml_NotSupportedCryptographicTransform ">
+    <value> The specified cryptographic transform is not supported.</value>
+</data>
+<data name="Cryptography_Xml_ReferenceElementRequired ">
+    <value> At least one Reference element is required.</value>
+</data>
+<data name="Cryptography_Xml_ReferenceTypeRequired ">
+    <value> The Reference type must be set in an EncryptedReference object.</value>
+</data>
+<data name="Cryptography_Xml_SelfReferenceRequiresContext ">
+    <value> An XmlDocument context is required to resolve the Reference Uri {0}.</value>
+</data>
+<data name="Cryptography_Xml_SignatureDescriptionNotCreated ">
+    <value> SignatureDescription could not be created for the signature algorithm supplied.</value>
+</data>
+<data name="Cryptography_Xml_SignatureMethodKeyMismatch ">
+    <value> The key does not fit the SignatureMethod.</value>
+</data>
+<data name="Cryptography_Xml_SignatureMethodRequired ">
+    <value> A signature method is required.</value>
+</data>
+<data name="Cryptography_Xml_SignatureValueRequired ">
+    <value> Signature requires a SignatureValue.</value>
+</data>
+<data name="Cryptography_Xml_SignedInfoRequired ">
+    <value> Signature requires a SignedInfo.</value>
+</data>
+<data name="Cryptography_Xml_TransformIncorrectInputType ">
+    <value> The input type was invalid for this transform.</value>
+</data>
+<data name="Cryptography_Xml_IncorrectObjectType ">
+    <value> Type of input object is invalid.</value>
+</data>
+<data name="Cryptography_Xml_UnknownTransform ">
+    <value> Unknown transform has been encountered.</value>
+</data>
+<data name="Cryptography_Xml_UriNotResolved ">
+    <value> Unable to resolve Uri {0}.</value>
+</data>
+<data name="Cryptography_Xml_UriNotSupported ">
+    <value>  The specified Uri is not supported.</value>
+</data>
+<data name="Cryptography_Xml_UriRequired ">
+    <value> A Uri attribute is required for a CipherReference element.</value>
+</data>
+<data name="Cryptography_Xml_XrmlMissingContext ">
+    <value> Null Context property encountered.</value>
+</data>
+<data name="Cryptography_Xml_XrmlMissingIRelDecryptor ">
+    <value> IRelDecryptor is required.</value>
+</data>
+<data name="Cryptography_Xml_XrmlMissingIssuer ">
+    <value> Issuer node is required.</value>
+</data>
+<data name="Cryptography_Xml_XrmlMissingLicence ">
+    <value> License node is required.</value>
+</data>
+<data name="Cryptography_Xml_XrmlUnableToDecryptGrant ">
+    <value> Unable to decrypt grant content.</value>
+</data>
+<data name="Environment_NotInteractive ">
+    <value> The current session is not interactive.</value>
+</data>
+<data name="NotSupported_KeyAlgorithm ">
+    <value> The certificate key algorithm is not supported.</value>
+</data>
+<data name="NotSupported_PlatformRequiresNT ">
+    <value> This operation is only supported on Windows 2000, Windows XP, and higher.</value>
+</data>
+<data name="Log_ActualHashValue">
+    <value>Actual hash value: {0}</value>
+</data>
+<data name="Log_ApplicationPolicies">
+    <value>Application policies:</value>
+</data>
+<data name="Log_BeginCanonicalization">
+    <value>Beginning canonicalization using "{0}" ({1}).</value>
+</data>
+<data name="Log_BeginSignatureComputation">
+    <value>Beginning signature computation.</value>
+</data>
+<data name="Log_BeginSignatureVerification">
+    <value>Beginning signature verification.</value>
+</data>
+<data name="Log_BuildX509Chain">
+    <value>Building and verifying the X509 chain for certificate {0}.</value>
+</data>
+<data name="Log_CanonicalizationSettings">
+    <value>Canonicalization transform is using resolver {0} and base URI "{1}".</value>
+</data>
+<data name="Log_CanonicalizedOutput">
+    <value>Output of canonicalization transform: {0}</value>
+</data>
+<data name="Log_CertificatePolicies">
+    <value>Certificate policies:</value>
+</data>
+<data name="Log_CertificateChain">
+    <value>Certificate chain:</value>
+</data>
+<data name="Log_CheckSignatureFormat">
+    <value>Checking signature format using format validator "[{0}] {1}.{2}".</value>
+</data>
+<data name="Log_CheckSignedInfo">
+    <value>Checking signature on SignedInfo with id "{0}".</value>
+</data>
+<data name="Log_ExtraCertificateForChain">
+    <value>Certificate {0} is available for chain building.</value>
+</data>
+<data name="Log_FormatValidationSuccessful">
+    <value>Signature format validation was successful.</value>
+</data>
+<data name="Log_FormatValidationNotSuccessful">
+    <value>Signature format validation failed.</value>
+</data>
+<data name="Log_KeyUsages">
+    <value>Found key usages "{0}" in extension {1} on certificate {2}.</value>
+</data>
+<data name="Log_NoNamespacesPropagated">
+    <value>No namespaces are being propagated.</value>
+</data>
+<data name="Log_PropagatingNamespace">
+    <value>Propagating namespace {0}="{1}".</value>
+</data>
+<data name="Log_RawSignatureValue">
+    <value>Raw signature: {0}</value>
+</data>
+<data name="Log_ReferenceHash">
+    <value>Reference {0} hashed with "{1}" ({2}) has hash value {3}, expected hash value {4}.</value>
+</data>
+<data name="Log_RevocationMode">
+    <value>Revocation mode for chain building: {0}.</value>
+</data>
+<data name="Log_RevocationFlag">
+    <value>Revocation flag for chain building: {0}.</value>
+</data>
+<data name="Log_SigningAsymmetric">
+    <value>Calculating signature with key {0} using signature description {1}, hash algorithm {2}, and asymmetric signature formatter {3}.</value>
+</data>
+<data name="Log_SigningHmac">
+    <value>Calculating signature using keyed hash algorithm {0}.</value>
+</data>
+<data name="Log_SigningReference">
+    <value>Hashing reference {0}, Uri "{1}", Id "{2}", Type "{3}" with hash algorithm "{4}" ({5}).</value>
+</data>
+<data name="Log_TransformedReferenceContents">
+    <value>Transformed reference contents: {0}</value>
+</data>
+<data name="Log_UnsafeCanonicalizationMethod">
+    <value>Canonicalization method "{0}" is not on the safe list. Safe canonicalization methods are: {1}.</value>
+</data>
+<data name="Log_UrlTimeout">
+    <value>URL retrieval timeout for chain building: {0}.</value>
+</data>
+<data name="Log_VerificationFailed">
+    <value>Verification failed checking {0}.</value>
+</data>
+<data name="Log_VerificationFailed_References">
+    <value>references</value>
+</data>
+<data name="Log_VerificationFailed_SignedInfo">
+    <value>SignedInfo</value>
+</data>
+<data name="Log_VerificationFailed_X509Chain">
+    <value>X509 chain verification</value>
+</data>
+<data name="Log_VerificationFailed_X509KeyUsage">
+    <value>X509 key usage verification</value>
+</data>
+<data name="Log_VerificationFlag">
+    <value>Verification flags for chain building: {0}.</value>
+</data>
+<data name="Log_VerificationTime">
+    <value>Verification time for chain building: {0}.</value>
+</data>
+<data name="Log_VerificationWithKeySuccessful">
+    <value>Verification with key {0} was successful.</value>
+</data>
+<data name="Log_VerificationWithKeyNotSuccessful">
+    <value>Verification with key {0} was not successful.</value>
+</data>
+<data name="Log_VerifyReference">
+    <value>Processing reference {0}, Uri "{1}", Id "{2}", Type "{3}".</value>
+</data>
+<data name="Log_VerifySignedInfoAsymmetric">
+    <value>Verifying SignedInfo using key {0}, signature description {1}, hash algorithm {2}, and asymmetric signature deformatter {3}.</value>
+</data>
+<data name="Log_VerifySignedInfoHmac">
+    <value>Verifying SignedInfo using keyed hash algorithm {0}.</value>
+</data>
+<data name="Log_X509ChainError">
+    <value>Error building X509 chain: {0}: {1}.</value>
+</data>
+<data name="Log_XmlContext">
+    <value>Using context: {0}</value>
+</data>
+<data name="Log_SignedXmlRecursionLimit">
+    <value>Signed xml recursion limit hit while trying to decrypt the key. Reference {0} hashed with "{1}" and ({2}).</value>
+</data>
+<data name="Log_UnsafeTransformMethod">
+    <value>Transform method "{0}" is not on the safe list. Safe transform methods are: {1}.</value>
+</data>
+
 </root>
