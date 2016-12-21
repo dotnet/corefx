@@ -214,7 +214,7 @@ NetStandard implementations for Desktop.
 
 #### Running tests in a different TFM
 
-Each test project corresponds to a test .builds file. There are some tests that might be OS-specific, or might be testing an API that is available only on some TFMs, so the tests.builds specifies the valid configurations. By default, we will build all of these different configurations always, but we will only execute the tests on one TFM. By default, our `TestTFM` is set to `netcoreapp1.1` [here](https://github.com/dotnet/corefx/blob/80ab4804aeb7bed16e64b988c7460c705fddd5cc/dir.props#L529) (see latest value of `DefaultTestTFM` [in dir.props](https://github.com/dotnet/corefx/blob/master/dir.props), which means that we will run tests for the `Project`s in the .builds file that either:
+Each test project corresponds to a test .builds file. There are some tests that might be OS-specific, or might be testing an API that is available only on some TFMs, so the tests.builds specifies the valid configurations. By default, we will build all of these different configurations always, but we will only execute the tests on one TFM. By default, our `TestTFM` is set to `netcoreapp1.1` [here](https://github.com/dotnet/corefx/blob/80ab4804aeb7bed16e64b988c7460c705fddd5cc/dir.props#L529) (see latest value of `DefaultTestTFM` [in dir.props](https://github.com/dotnet/corefx/blob/master/dir.props)), which means that we will run tests for the `Project`s in the .builds file that either:
 - Have `netcoreapp1.1` inside their `TestTFMs` metadata, or
 - Don't have `TestTFMs` metadata, indicating the default TFM.
 
