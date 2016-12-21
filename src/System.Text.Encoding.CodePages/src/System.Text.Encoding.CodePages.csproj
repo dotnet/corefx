@@ -40,13 +40,17 @@
     <Compile Include="System\Text\EncodingByteBuffer.cs" />
     <Compile Include="System\Text\EncodingCharBuffer.cs" />
     <Compile Include="System\Text\EncodingNLS.cs" />
-    <Compile Include="System\Text\EncodingTable.cs" />
-    <Compile Include="System\Text\EncodingTable.Data.cs" />
     <Compile Include="System\Text\EUCJPEncoding.cs" />
     <Compile Include="System\Text\GB18030Encoding.cs" />
     <Compile Include="System\Text\ISO2022Encoding.cs" />
     <Compile Include="System\Text\ISCIIEncoding.cs" />
     <Compile Include="System\Text\SBCSCodePageEncoding.cs" />
+    <Compile Include="$(CommonPath)\System\Text\EncodingTable.cs">
+      <Link>Common\System\Text\EncodingTable.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\EncodingTable.Data.cs">
+      <Link>Common\System\Text\EncodingTable.Data.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Text\CodePagesEncodingProvider.Windows.cs" />

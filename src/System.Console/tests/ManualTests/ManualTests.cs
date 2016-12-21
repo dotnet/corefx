@@ -145,6 +145,14 @@ namespace System
             AssertUserExpectedResults("the arrow keys move around the screen as expected with no other bad artificts");
         }
 
+        [ConditionalFact(nameof(ManualTestsEnabled))]
+        public static void EncodingTest()
+        {
+            Console.WriteLine(Console.OutputEncoding);
+            Console.WriteLine("This is nonspace mark '\u00A0'.");
+            AssertUserExpectedResults("regular characters without any gibberish characters");
+        }
+
         private static void AssertUserExpectedResults(string expected)
         {
             Console.Write($"Did you see {expected}? [y/n] ");
