@@ -20,6 +20,12 @@ namespace System.Security.Cryptography.Xml
 {
     internal class Utils
     {
+        // The maximum number of characters in an XML document (0 means no limit).
+        internal const int MaxCharactersInDocument = 0;
+
+        // The entity expansion limit. This is used to prevent entity expansion denial of service attacks.
+        internal const long MaxCharactersFromEntities = (long)1e7;
+
         private Utils() { }
 
         private static bool HasNamespace(XmlElement element, string prefix, string value)
@@ -167,8 +173,8 @@ namespace System.Security.Cryptography.Xml
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = xmlResolver;
             settings.DtdProcessing = DtdProcessing.Parse;
-            settings.MaxCharactersFromEntities = GetMaxCharactersFromEntities();
-            settings.MaxCharactersInDocument = GetMaxCharactersInDocument();
+            settings.MaxCharactersFromEntities = MaxCharactersFromEntities;
+            settings.MaxCharactersInDocument = MaxCharactersInDocument;
             return settings;
         }
 
@@ -192,60 +198,6 @@ namespace System.Security.Cryptography.Xml
             return s_xmlDsigSearchDepth.Value;
         }
 
-        private static long? s_maxCharactersFromEntities = null;
-        // Allow machine admins to specify an entity expansion limit. This is used to prevent
-        // entity expansion denial of service attacks.
-        // Falls back to a default if none is specified.
-        internal static long GetMaxCharactersFromEntities()
-        {
-            if (s_maxCharactersFromEntities.HasValue)
-            {
-                return s_maxCharactersFromEntities.Value;
-            }
-
-            s_maxCharactersFromEntities = (long)1e7;
-            return s_maxCharactersFromEntities.Value;
-        }
-
-        private static bool s_readMaxCharactersInDocument = false;
-        private static long s_maxCharactersInDocument = 0;
-
-        internal static long GetMaxCharactersInDocument()
-        {
-            // Allow machine administrators to specify a maximum document load size for SignedXml.
-            if (s_readMaxCharactersInDocument)
-            {
-                return s_maxCharactersInDocument;
-            }
-
-            // The default value, 0, is "no limit"
-            s_maxCharactersInDocument = 0;
-            Thread.MemoryBarrier();
-            s_readMaxCharactersInDocument = true;
-
-            return s_maxCharactersInDocument;
-        }
-
-        private static bool s_readRequireNCNameIdentifier = false;
-        private static bool s_requireNCNameIdentifier = true;
-
-        internal static bool RequireNCNameIdentifier()
-        {
-            if (s_readRequireNCNameIdentifier)
-            {
-                return s_requireNCNameIdentifier;
-            }
-
-            long numericValue = 1;
-            bool requireNCName = numericValue != 0;
-
-            s_requireNCNameIdentifier = requireNCName;
-            Thread.MemoryBarrier();
-            s_readRequireNCNameIdentifier = true;
-
-            return s_requireNCNameIdentifier;
-        }
-
         internal static XmlDocument PreProcessDocumentInput(XmlDocument document, XmlResolver xmlResolver, string baseUri)
         {
             if (document == null)
@@ -260,8 +212,8 @@ namespace System.Security.Cryptography.Xml
                 XmlReaderSettings settings = new XmlReaderSettings();
                 settings.XmlResolver = xmlResolver;
                 settings.DtdProcessing = DtdProcessing.Parse;
-                settings.MaxCharactersFromEntities = GetMaxCharactersFromEntities();
-                settings.MaxCharactersInDocument = GetMaxCharactersInDocument();
+                settings.MaxCharactersFromEntities = MaxCharactersFromEntities;
+                settings.MaxCharactersInDocument = MaxCharactersInDocument;
                 XmlReader reader = XmlReader.Create(stringReader, settings, baseUri);
                 doc.Load(reader);
             }
@@ -281,8 +233,8 @@ namespace System.Security.Cryptography.Xml
                 XmlReaderSettings settings = new XmlReaderSettings();
                 settings.XmlResolver = xmlResolver;
                 settings.DtdProcessing = DtdProcessing.Parse;
-                settings.MaxCharactersFromEntities = GetMaxCharactersFromEntities();
-                settings.MaxCharactersInDocument = GetMaxCharactersInDocument();
+                settings.MaxCharactersFromEntities = MaxCharactersFromEntities;
+                settings.MaxCharactersInDocument = MaxCharactersInDocument;
                 XmlReader reader = XmlReader.Create(stringReader, settings, baseUri);
                 doc.Load(reader);
             }

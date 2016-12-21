@@ -560,20 +560,17 @@ namespace System.Security.Cryptography.Xml
             if (document == null)
                 return null;
 
-            if (Utils.RequireNCNameIdentifier())
+            try
             {
-                try
-                {
-                    XmlConvert.VerifyNCName(idValue);
-                }
-                catch (XmlException)
-                {
-                    // Identifiers are required to be an NCName
-                    //   (xml:id version 1.0, part 4, paragraph 2, bullet 1)
-                    //
-                    // If it isn't an NCName, it isn't allowed to match.
-                    return null;
-                }
+                XmlConvert.VerifyNCName(idValue);
+            }
+            catch (XmlException)
+            {
+                // Identifiers are required to be an NCName
+                //   (xml:id version 1.0, part 4, paragraph 2, bullet 1)
+                //
+                // If it isn't an NCName, it isn't allowed to match.
+                return null;
             }
 
             // Get the element with idValue

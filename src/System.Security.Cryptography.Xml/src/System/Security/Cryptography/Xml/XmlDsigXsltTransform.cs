@@ -123,8 +123,8 @@ namespace System.Security.Cryptography.Xml
             XslCompiledTransform xslt = new XslCompiledTransform();
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = null;
-            settings.MaxCharactersFromEntities = Utils.GetMaxCharactersFromEntities();
-            settings.MaxCharactersInDocument = Utils.GetMaxCharactersInDocument();
+            settings.MaxCharactersFromEntities = Utils.MaxCharactersFromEntities;
+            settings.MaxCharactersInDocument = Utils.MaxCharactersInDocument;
             using (StringReader sr = new StringReader(_xslFragment))
             {
                 XmlReader readerXsl = XmlReader.Create(sr, settings, (string)null);
