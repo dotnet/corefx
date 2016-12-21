@@ -3,7 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <ItemGroup>
-    <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*.csproj">
+    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Security.AccessControl.Tests.csproj" />
+    <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*.csproj" Exclude="@(TestProjectExclusions)">
       <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
     </Project>
   </ItemGroup>
