@@ -366,9 +366,12 @@ namespace System.Security.Cryptography.Xml
                 }
             }
 
-            if (!CheckSignature(certificate.PublicKey.Key))
+            using (AsymmetricAlgorithm publicKey = Utils.GetAnyPublicKey(certificate))
             {
-                return false;
+                if (!CheckSignature(publicKey))
+                {
+                    return false;
+                }
             }
 
             SignedXmlDebugLog.LogVerificationResult(this, certificate, true);
@@ -541,7 +544,7 @@ namespace System.Security.Cryptography.Xml
             {
                 X509Certificate2 certificate = (X509Certificate2)_x509Enum.Current;
                 if (certificate != null)
-                    return certificate.PublicKey.Key;
+                    return Utils.GetAnyPublicKey(certificate);
             }
 
             return null;

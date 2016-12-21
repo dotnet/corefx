@@ -845,5 +845,10 @@ namespace System.Security.Cryptography.Xml
                 return true;
             return false;
         }
+
+        internal static AsymmetricAlgorithm GetAnyPublicKey(X509Certificate2 certificate)
+        {
+            return (AsymmetricAlgorithm)certificate.GetRSAPublicKey() ?? certificate.GetECDsaPublicKey();
+        }
     }
 }
