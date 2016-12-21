@@ -19,7 +19,7 @@ namespace System.Security.Cryptography.Xml
         //
 
         // CMS TripleDES KeyWrap as described in "http://www.w3.org/2001/04/xmlenc#kw-tripledes"
-        [SuppressMessage("Microsoft.Cryptography", "CA5350", Justification = "Ported as-is from full .NET framework")]
+        [SuppressMessage("Microsoft.Cryptography", "CA5350", Justification = "Ported as-is from netfx")]
         internal static byte[] TripleDESKeyWrapEncrypt(byte[] rgbKey, byte[] rgbWrappedKeyData)
         {
             // checksum the key
@@ -50,7 +50,7 @@ namespace System.Security.Cryptography.Xml
             return enc2.TransformFinalBlock(temp2, 0, temp2.Length);
         }
 
-        [SuppressMessage("Microsoft.Cryptography", "CA5350", Justification = "Ported as-is from full .NET framework")]
+        [SuppressMessage("Microsoft.Cryptography", "CA5350", Justification = "Ported as-is from netfx")]
         internal static byte[] TripleDESKeyWrapDecrypt(byte[] rgbKey, byte[] rgbEncryptedWrappedKeyData)
         {
             // Check to see whether the length of the encrypted key is reasonable
