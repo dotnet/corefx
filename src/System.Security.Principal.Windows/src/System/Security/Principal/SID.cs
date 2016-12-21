@@ -64,7 +64,7 @@ namespace System.Security.Principal
         CreatorOwnerServerSid = 5,
         /// <summary>Indicates a creator group server SID.</summary>
         CreatorGroupServerSid = 6,
-        /// <summary>Indicates a SID for the Windows NT authority account.</summary>
+        /// <summary>Indicates a SID for the Windows NT authority account.</summary>
         NTAuthoritySid = 7,
         /// <summary>Indicates a SID for a dial-up account.</summary>
         DialupSid = 8,
@@ -120,7 +120,7 @@ namespace System.Security.Principal
         BuiltinBackupOperatorsSid = 33,
         /// <summary>Indicates a SID that matches the replicator account.</summary>
         BuiltinReplicatorSid = 34,
-        /// <summary>Indicates a SID that matches pre-Windows 2000 compatible accounts.</summary>
+        /// <summary>Indicates a SID that matches pre-Windows 2000 compatible accounts.</summary>
         BuiltinPreWindows2000CompatibleAccessSid = 35,
         /// <summary>Indicates a SID that matches remote desktop users.</summary>
         BuiltinRemoteDesktopUsersSid = 36,
@@ -172,6 +172,7 @@ namespace System.Security.Principal
         BuiltinAuthorizationAccessSid = 59,
         /// <summary>Indicates a SID is present in a server that can issue terminal server licenses.</summary>
         WinBuiltinTerminalServerLicenseServersSid = 60,
+        MaxDefined = WinBuiltinTerminalServerLicenseServersSid, 
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
         WinBuiltinDCOMUsersSid = 61,
         /// <summary>Indicates a SID that matches the Internet built-in user group.</summary>
