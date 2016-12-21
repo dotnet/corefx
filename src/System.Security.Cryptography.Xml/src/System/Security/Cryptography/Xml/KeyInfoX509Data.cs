@@ -269,7 +269,7 @@ namespace System.Security.Cryptography.Xml
 
             if ((x509CRLNodes.Count == 0 && x509IssuerSerialNodes.Count == 0 && x509SKINodes.Count == 0
                     && x509SubjectNameNodes.Count == 0 && x509CertificateNodes.Count == 0)) // Bad X509Data tag, or Empty tag
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_InvalidElement"), "X509Data");
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "X509Data");
 
             // Flush anything in the lists
             Clear();
@@ -282,7 +282,7 @@ namespace System.Security.Cryptography.Xml
                 XmlNode x509IssuerNameNode = issuerSerialNode.SelectSingleNode("ds:X509IssuerName", nsm);
                 XmlNode x509SerialNumberNode = issuerSerialNode.SelectSingleNode("ds:X509SerialNumber", nsm);
                 if (x509IssuerNameNode == null || x509SerialNumberNode == null)
-                    throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_InvalidElement"), "IssuerSerial");
+                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "IssuerSerial");
                 InternalAddIssuerSerial(x509IssuerNameNode.InnerText.Trim(), x509SerialNumberNode.InnerText.Trim());
             }
 

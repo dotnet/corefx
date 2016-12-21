@@ -53,7 +53,7 @@ namespace System.Security.Cryptography.Xml
             // Check to see whether the length of the encrypted key is reasonable
             if (rgbEncryptedWrappedKeyData.Length != 32 && rgbEncryptedWrappedKeyData.Length != 40
                 && rgbEncryptedWrappedKeyData.Length != 48)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
 
             TripleDESCryptoServiceProvider tripleDES = new TripleDESCryptoServiceProvider();
             // Assume no padding, use CBC mode
@@ -77,7 +77,7 @@ namespace System.Security.Cryptography.Xml
             byte[] rgbCKS = sha.ComputeHash(rgbWrappedKeyData);
             for (int index = rgbWrappedKeyData.Length, index1 = 0; index < rgbWKCKS.Length; index++, index1++)
                 if (rgbWKCKS[index] != rgbCKS[index1])
-                    throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
+                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
             return rgbWrappedKeyData;
         }
 
@@ -87,7 +87,7 @@ namespace System.Security.Cryptography.Xml
             int N = rgbWrappedKeyData.Length >> 3;
             // The information wrapped need not actually be a key, but it needs to be a multiple of 64 bits
             if ((rgbWrappedKeyData.Length % 8 != 0) || N <= 0)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
 
             RijndaelManaged rijn = new RijndaelManaged();
             rijn.Key = rgbKey;
@@ -138,7 +138,7 @@ namespace System.Security.Cryptography.Xml
             int N = (rgbEncryptedWrappedKeyData.Length >> 3) - 1;
             // The information wrapped need not actually be a key, but it needs to be a multiple of 64 bits
             if ((rgbEncryptedWrappedKeyData.Length % 8 != 0) || N <= 0)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_KW_BadKeySize"));
 
             byte[] rgbOutput = new byte[N << 3];
             RijndaelManaged rijn = new RijndaelManaged();
@@ -154,7 +154,7 @@ namespace System.Security.Cryptography.Xml
                 // checksum the key
                 for (int index = 0; index < 8; index++)
                     if (temp[index] != s_rgbAES_KW_IV[index])
-                        throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
+                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
                 // rgbOutput is LSB(temp)
                 Buffer.BlockCopy(temp, 8, rgbOutput, 0, 8);
                 return rgbOutput;
@@ -186,7 +186,7 @@ namespace System.Security.Cryptography.Xml
             // checksum the key
             for (int index = 0; index < 8; index++)
                 if (rgbA[index] != s_rgbAES_KW_IV[index])
-                    throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
+                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_BadWrappedKeySize"));
             return rgbOutput;
         }
     }

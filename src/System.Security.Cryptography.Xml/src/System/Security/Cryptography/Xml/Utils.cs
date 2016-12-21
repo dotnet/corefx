@@ -178,7 +178,6 @@ namespace System.Security.Cryptography.Xml
         /// default limit in case, limit is not defined by developer or admin then
         /// it returns the default value.
         /// </summary>
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static int GetXmlDsigSearchDepth()
         {
             if (s_xmlDsigSearchDepth.HasValue)
@@ -198,7 +197,6 @@ namespace System.Security.Cryptography.Xml
         // Allow machine admins to specify an entity expansion limit. This is used to prevent
         // entity expansion denial of service attacks.
         // Falls back to a default if none is specified.
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static long GetMaxCharactersFromEntities()
         {
             if (s_maxCharactersFromEntities.HasValue)
@@ -215,7 +213,6 @@ namespace System.Security.Cryptography.Xml
         private static bool s_readMaxCharactersInDocument = false;
         private static long s_maxCharactersInDocument = 0;
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static long GetMaxCharactersInDocument()
         {
             // Allow machine administrators to specify a maximum document load size for SignedXml.
@@ -236,7 +233,6 @@ namespace System.Security.Cryptography.Xml
 
         private static bool? s_allowAmbiguousReferenceTarget = null;
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static bool AllowAmbiguousReferenceTargets()
         {
             // Allow machine administrators to specify that the legacy behavior of matching the first element
@@ -256,7 +252,6 @@ namespace System.Security.Cryptography.Xml
 
         private static bool? s_allowDetachedSignature = null;
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static bool AllowDetachedSignature()
         {
             // Allow machine administrators to specify that detached signatures can be processed.
@@ -277,7 +272,6 @@ namespace System.Security.Cryptography.Xml
         private static bool s_readRequireNCNameIdentifier = false;
         private static bool s_requireNCNameIdentifier = true;
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static bool RequireNCNameIdentifier()
         {
             if (s_readRequireNCNameIdentifier)
@@ -452,7 +446,7 @@ namespace System.Security.Cryptography.Xml
                 int startId = idref.IndexOf("id(", StringComparison.Ordinal);
                 int endId = idref.IndexOf(")", StringComparison.Ordinal);
                 if (endId < 0 || endId < startId + 3)
-                    throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_InvalidReference"));
+                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
                 idref = idref.Substring(startId + 3, endId - startId - 3);
                 idref = idref.Replace("\'", "");
                 idref = idref.Replace("\"", "");
@@ -471,7 +465,7 @@ namespace System.Security.Cryptography.Xml
                 int startId = idref.IndexOf("id(", StringComparison.Ordinal);
                 int endId = idref.IndexOf(")", StringComparison.Ordinal);
                 if (endId < 0 || endId < startId + 3)
-                    throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_InvalidReference"));
+                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
                 idref = idref.Substring(startId + 3, endId - startId - 3);
                 idref = idref.Replace("\'", "");
                 idref = idref.Replace("\"", "");

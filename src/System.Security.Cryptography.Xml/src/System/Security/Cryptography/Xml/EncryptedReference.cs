@@ -36,7 +36,7 @@ namespace System.Security.Cryptography.Xml
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException(SecurityResources.GetResourceString("Cryptography_Xml_UriRequired"));
+                    throw new ArgumentNullException(SR.GetResourceString("Cryptography_Xml_UriRequired"));
                 _uri = value;
                 _cachedXml = null;
             }
@@ -92,7 +92,7 @@ namespace System.Security.Cryptography.Xml
         internal XmlElement GetXml(XmlDocument document)
         {
             if (ReferenceType == null)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_ReferenceTypeRequired"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_ReferenceTypeRequired"));
 
             // Create the Reference
             XmlElement referenceElement = document.CreateElement(ReferenceType, EncryptedXml.XmlEncNamespaceUrl);

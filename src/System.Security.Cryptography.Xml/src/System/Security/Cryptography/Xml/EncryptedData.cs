@@ -40,7 +40,7 @@ namespace System.Security.Cryptography.Xml
             // CipherData
             XmlNode cipherDataNode = value.SelectSingleNode("enc:CipherData", nsm);
             if (cipherDataNode == null)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_MissingCipherData"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingCipherData"));
 
             CipherData = new CipherData();
             CipherData.LoadXml(cipherDataNode as XmlElement);
@@ -100,7 +100,7 @@ namespace System.Security.Cryptography.Xml
 
             // CipherData is required.
             if (CipherData == null)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_MissingCipherData"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingCipherData"));
             encryptedDataElement.AppendChild(CipherData.GetXml(document));
 
             // EncryptionProperties

@@ -7,7 +7,6 @@ using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
@@ -94,7 +93,7 @@ namespace System.Security.Cryptography.Xml
         public override void LoadInnerXml(XmlNodeList nodeList)
         {
             if (nodeList == null)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
             ExceptUris.Clear();
             foreach (XmlNode node in nodeList)
             {
@@ -104,7 +103,7 @@ namespace System.Security.Cryptography.Xml
                     // the Uri is required
                     string uri = Utils.GetAttribute(elem, "URI", XmlDecryptionTransformNamespaceUrl);
                     if (uri == null || uri.Length == 0 || uri[0] != '#')
-                        throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_UriRequired"));
+                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UriRequired"));
                     string idref = Utils.ExtractIdFromLocalUri(uri);
                     ExceptUris.Add(idref);
                 }
@@ -201,7 +200,7 @@ namespace System.Security.Cryptography.Xml
             ed.LoadXml(encryptedDataElement);
             SymmetricAlgorithm symAlg = EncryptedXml.GetDecryptionKey(ed, null);
             if (symAlg == null)
-                throw new CryptographicException(SecurityResources.GetResourceString("Cryptography_Xml_MissingDecryptionKey"));
+                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingDecryptionKey"));
             byte[] decrypted = EncryptedXml.DecryptData(ed, symAlg);
 
             ReplaceEncryptedData(encryptedDataElement, decrypted);
@@ -266,7 +265,7 @@ namespace System.Security.Cryptography.Xml
             if (type == typeof(XmlDocument))
                 return (XmlDocument)GetOutput();
             else
-                throw new ArgumentException(SecurityResources.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
+                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
         }
     }
 }

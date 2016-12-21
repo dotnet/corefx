@@ -32,6 +32,11 @@ namespace System
             return false;
         }
 
+        internal static string GetResourceString(string resourceKey)
+        {
+            return GetResourceString(resourceKey, resourceKey);
+        }
+
         internal static string GetResourceString(string resourceKey, string defaultString)
         {
             string resourceString = null;
