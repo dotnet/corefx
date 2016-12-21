@@ -751,9 +751,9 @@ namespace System.Security.Cryptography.Xml
                 if (s_knownCanonicalizationMethods == null)
                 {
                     // Start with the list that the machine admin added, if any
-                    List<string> safeAlgorithms = ReadAdditionalSafeCanonicalizationMethods();
+                    List<string> safeAlgorithms = new List<string>();
 
-                    // And add the built in algorithms as well
+                    // Built in algorithms
                     safeAlgorithms.Add(XmlDsigC14NTransformUrl);
                     safeAlgorithms.Add(XmlDsigC14NWithCommentsTransformUrl);
                     safeAlgorithms.Add(XmlDsigExcC14NTransformUrl);
@@ -772,9 +772,9 @@ namespace System.Security.Cryptography.Xml
             {
                 if (s_defaultSafeTransformMethods == null)
                 {
-                    List<string> safeAlgorithms = ReadAdditionalSafeTransformMethods();
+                    List<string> safeAlgorithms = new List<string>();
 
-                    // And the built in algorithms
+                    // Built in algorithms
 
                     // KnownCanonicalizationMethods don't need to be added here, because
                     // the validator will automatically accept those.
@@ -792,26 +792,6 @@ namespace System.Security.Cryptography.Xml
 
                 return s_defaultSafeTransformMethods;
             }
-        }
-
-        // Allow machine admins to add additional canonicalization algorithms that should be considered valid when
-        // validating XML signatuers by supplying a list in the 
-        // HKLM\Software\Microsoft\.NETFramework\Security\SafeCanonicalizationMethods
-        // key.  Each REG_SZ entry in this key will be considered a canonicalziation algorithm URI that should be
-        // allowed by SignedXml instances on this machine.
-        private static List<string> ReadAdditionalSafeCanonicalizationMethods()
-        {
-            return new List<string>();
-        }
-
-        // Allow machine admins to add additional transform algorithms that should be considered valid when
-        // validating XML signatuers by supplying a list in the 
-        // HKLM\Software\Microsoft\.NETFramework\Security\SafeTransformMethods
-        // key.  Each REG_SZ entry in this key will be considered a transform algorithm URI that should be
-        // allowed by SignedXml instances on this machine.
-        private static List<string> ReadAdditionalSafeTransformMethods()
-        {
-            return new List<string>();
         }
 
         private byte[] GetC14NDigest(HashAlgorithm hash)
