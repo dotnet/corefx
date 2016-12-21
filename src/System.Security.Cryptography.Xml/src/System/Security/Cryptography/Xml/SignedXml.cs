@@ -581,30 +581,27 @@ namespace System.Security.Cryptography.Xml
 
             if (elem != null)
             {
-                if (!Utils.AllowAmbiguousReferenceTargets())
+                // Have to check for duplicate ID values from the DTD.
+
+                XmlDocument docClone = (XmlDocument)document.CloneNode(true);
+                XmlElement cloneElem = docClone.GetElementById(idValue);
+
+                // If it's null here we want to know about it, because it means that
+                // GetElementById failed to work across the cloning, and our uniqueness
+                // test is invalid.
+                System.Diagnostics.Debug.Assert(cloneElem != null);
+
+                // Guard against null anyways
+                if (cloneElem != null)
                 {
-                    // Have to check for duplicate ID values from the DTD.
+                    cloneElem.Attributes.RemoveAll();
 
-                    XmlDocument docClone = (XmlDocument)document.CloneNode(true);
-                    XmlElement cloneElem = docClone.GetElementById(idValue);
+                    XmlElement cloneElem2 = docClone.GetElementById(idValue);
 
-                    // If it's null here we want to know about it, because it means that
-                    // GetElementById failed to work across the cloning, and our uniqueness
-                    // test is invalid.
-                    System.Diagnostics.Debug.Assert(cloneElem != null);
-
-                    // Guard against null anyways
-                    if (cloneElem != null)
+                    if (cloneElem2 != null)
                     {
-                        cloneElem.Attributes.RemoveAll();
-
-                        XmlElement cloneElem2 = docClone.GetElementById(idValue);
-
-                        if (cloneElem2 != null)
-                        {
-                            throw new CryptographicException(
-                                SR.Cryptography_Xml_InvalidReference);
-                        }
+                        throw new CryptographicException(
+                            SR.Cryptography_Xml_InvalidReference);
                     }
                 }
 
@@ -1085,11 +1082,6 @@ namespace System.Security.Cryptography.Xml
             // idValue has already been tested as an NCName (unless overridden for compatibility), so there's no
             // escaping that needs to be done here.
             string xPath = "//*[@" + idAttributeName + "=\"" + idValue + "\"]";
-
-            if (Utils.AllowAmbiguousReferenceTargets())
-            {
-                return document.SelectSingleNode(xPath) as XmlElement;
-            }
 
             // http://www.w3.org/TR/xmldsig-core/#sec-ReferenceProcessingModel says that for the form URI="#chapter1":
             //

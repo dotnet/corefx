@@ -187,9 +187,8 @@ namespace System.Security.Cryptography.Xml
             //Keeping the default recursion limit to 20. It should be
             //within limits of real world scenarios. Keeping this number low
             //will preserve some stack space
-            long maxXmlDsigSearchDepth = 20;
 
-            s_xmlDsigSearchDepth = (int)maxXmlDsigSearchDepth;
+            s_xmlDsigSearchDepth = 20;
             return s_xmlDsigSearchDepth.Value;
         }
 
@@ -204,9 +203,7 @@ namespace System.Security.Cryptography.Xml
                 return s_maxCharactersFromEntities.Value;
             }
 
-            long maxCharacters = (long)1e7;
-
-            s_maxCharactersFromEntities = maxCharacters;
+            s_maxCharactersFromEntities = (long)1e7;
             return s_maxCharactersFromEntities.Value;
         }
 
@@ -222,51 +219,11 @@ namespace System.Security.Cryptography.Xml
             }
 
             // The default value, 0, is "no limit"
-            long maxCharacters = 0;
-
-            s_maxCharactersInDocument = maxCharacters;
+            s_maxCharactersInDocument = 0;
             Thread.MemoryBarrier();
             s_readMaxCharactersInDocument = true;
 
             return s_maxCharactersInDocument;
-        }
-
-        private static bool? s_allowAmbiguousReferenceTarget = null;
-
-        internal static bool AllowAmbiguousReferenceTargets()
-        {
-            // Allow machine administrators to specify that the legacy behavior of matching the first element
-            // in an ambiguous reference situation should be persisted. The default behavior is to throw in that
-            // situation, but a REG_DWORD or REG_QWORD value of 1 will revert.
-            if (s_allowAmbiguousReferenceTarget.HasValue)
-            {
-                return s_allowAmbiguousReferenceTarget.Value;
-            }
-
-            long numericValue = 0;
-            bool allowAmbiguousReferenceTarget = numericValue != 0;
-
-            s_allowAmbiguousReferenceTarget = allowAmbiguousReferenceTarget;
-            return s_allowAmbiguousReferenceTarget.Value;
-        }
-
-        private static bool? s_allowDetachedSignature = null;
-
-        internal static bool AllowDetachedSignature()
-        {
-            // Allow machine administrators to specify that detached signatures can be processed.
-            // The default behavior is to throw when processing a detached signature,
-            // but a REG_DWORD or REG_QWORD value of 1 will revert.
-            if (s_allowDetachedSignature.HasValue)
-            {
-                return s_allowDetachedSignature.Value;
-            }
-
-            long numericValue = 0;
-            bool allowDetachedSignature = numericValue != 0;
-
-            s_allowDetachedSignature = allowDetachedSignature;
-            return s_allowDetachedSignature.Value;
         }
 
         private static bool s_readRequireNCNameIdentifier = false;

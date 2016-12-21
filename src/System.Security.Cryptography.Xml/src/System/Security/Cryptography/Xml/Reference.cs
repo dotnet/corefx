@@ -309,7 +309,6 @@ namespace System.Security.Cryptography.Xml
             // Let's go get the target.
             string baseUri = (document == null ? System.Environment.CurrentDirectory + "\\" : document.BaseURI);
             Stream hashInputStream = null;
-            WebRequest request = null;
             WebResponse response = null;
             Stream inputStream = null;
             XmlResolver resolver = null;
@@ -409,23 +408,6 @@ namespace System.Security.Cryptography.Xml
                                 // This is an XPointer reference, do not discard comments!!!
                                 hashInputStream = TransformChain.TransformToOctetStream(normDocument, resolver, baseUri);
                             }
-                        }
-                        else if (Utils.AllowDetachedSignature())
-                        {
-                            // WebRequest always expects an Absolute Uri, so try to resolve if we were passed a relative Uri.
-                            System.Uri uri = new System.Uri(_uri, UriKind.RelativeOrAbsolute);
-                            if (!uri.IsAbsoluteUri)
-                            {
-                                uri = new Uri(new Uri(baseUri), uri);
-                            }
-                            request = WebRequest.Create(uri);
-                            if (request == null) goto default;
-                            response = request.GetResponse();
-                            if (response == null) goto default;
-                            inputStream = response.GetResponseStream();
-                            if (inputStream == null) goto default;
-                            resolver = (SignedXml.ResolverSet ? SignedXml._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));
-                            hashInputStream = TransformChain.TransformToOctetStream(inputStream, resolver, _uri);
                         }
                         else
                         {
