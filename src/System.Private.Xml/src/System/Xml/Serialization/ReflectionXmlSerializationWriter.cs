@@ -713,12 +713,8 @@ namespace System.Xml.Serialization
 
                 if (memberValue != null)
                 {
-                    var a = memberValue as IEnumerable;
-
-                    // #10593: Add More Tests for Serialization Code
-                    Debug.Assert(a != null);
-
-                    var e = a.GetEnumerator();
+                    var a = (IEnumerable) memberValue;
+                    IEnumerator e = a.GetEnumerator();
                     bool shouldAppendWhitespace = false;
                     if (e != null)
                     {
