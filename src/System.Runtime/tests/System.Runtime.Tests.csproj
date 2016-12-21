@@ -20,6 +20,12 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netcoreapp1.1_Release|AnyCPU' ">
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Remove this when TypeBuilder extends TypeInfo. See https://github.com/dotnet/corefx/issues/14334 -->
+    <Compile Include="$(CommonTestPath)\System\TypeBuilderExtensions.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
       <Link>Common\System\EnumTypes.cs</Link>
