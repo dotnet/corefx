@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Xml
             }
             else
             {
-                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_IncorrectObjectType"), "obj");
+                throw new ArgumentException(SR.Cryptography_Xml_IncorrectObjectType, "obj");
             }
         }
 
@@ -80,7 +80,7 @@ namespace System.Security.Cryptography.Xml
         public override object GetOutput(Type type)
         {
             if (type != typeof(Stream) && !type.IsSubclassOf(typeof(Stream)))
-                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
             return new MemoryStream(_cXml.GetBytes());
         }
 

@@ -421,7 +421,7 @@ namespace System.Security.Cryptography.Xml
                 int startId = idref.IndexOf("id(", StringComparison.Ordinal);
                 int endId = idref.IndexOf(")", StringComparison.Ordinal);
                 if (endId < 0 || endId < startId + 3)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+                    throw new CryptographicException(SR.Cryptography_Xml_InvalidReference);
                 idref = idref.Substring(startId + 3, endId - startId - 3);
                 idref = idref.Replace("\'", "");
                 idref = idref.Replace("\"", "");
@@ -440,7 +440,7 @@ namespace System.Security.Cryptography.Xml
                 int startId = idref.IndexOf("id(", StringComparison.Ordinal);
                 int endId = idref.IndexOf(")", StringComparison.Ordinal);
                 if (endId < 0 || endId < startId + 3)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+                    throw new CryptographicException(SR.Cryptography_Xml_InvalidReference);
                 idref = idref.Substring(startId + 3, endId - startId - 3);
                 idref = idref.Replace("\'", "");
                 idref = idref.Replace("\"", "");

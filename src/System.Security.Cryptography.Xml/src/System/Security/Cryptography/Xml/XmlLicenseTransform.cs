@@ -82,7 +82,7 @@ namespace System.Security.Cryptography.Xml
                                                                 keyInfoObj, toDecrypt);
 
                         if ((decryptedContent == null) || (decryptedContent.Length == 0))
-                            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_XrmlUnableToDecryptGrant"));
+                            throw new CryptographicException(SR.Cryptography_Xml_XrmlUnableToDecryptGrant);
 
                         streamReader = new StreamReader(decryptedContent);
                         string clearContent = streamReader.ReadToEnd();
@@ -126,7 +126,7 @@ namespace System.Security.Cryptography.Xml
         public override object GetOutput(Type type)
         {
             if ((type != typeof(XmlDocument)) || (!type.IsSubclassOf(typeof(XmlDocument))))
-                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
 
             return GetOutput();
         }
@@ -138,7 +138,7 @@ namespace System.Security.Cryptography.Xml
         {
             // Check if the Context property is set before this transform is invoked.
             if (Context == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_XrmlMissingContext"));
+                throw new CryptographicException(SR.Cryptography_Xml_XrmlMissingContext);
 
             _license = new XmlDocument();
             _license.PreserveWhitespace = true;
@@ -154,7 +154,7 @@ namespace System.Security.Cryptography.Xml
             // Get the nearest issuer node
             currentIssuerContext = Context.SelectSingleNode("ancestor-or-self::r:issuer[1]", _namespaceManager) as XmlElement;
             if (currentIssuerContext == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_XrmlMissingIssuer"));
+                throw new CryptographicException(SR.Cryptography_Xml_XrmlMissingIssuer);
 
             signatureNode = currentIssuerContext.SelectSingleNode("descendant-or-self::dsig:Signature[1]", _namespaceManager) as XmlElement;
             if (signatureNode != null)
@@ -163,7 +163,7 @@ namespace System.Security.Cryptography.Xml
             // Get the nearest license node
             currentLicenseContext = currentIssuerContext.SelectSingleNode("ancestor-or-self::r:license[1]", _namespaceManager) as XmlElement;
             if (currentLicenseContext == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_XrmlMissingLicence"));
+                throw new CryptographicException(SR.Cryptography_Xml_XrmlMissingLicence);
 
             XmlNodeList issuerList = currentLicenseContext.SelectNodes("descendant-or-self::r:license[1]/r:issuer", _namespaceManager);
 
@@ -183,7 +183,7 @@ namespace System.Security.Cryptography.Xml
             if (encryptedGrantList.Count > 0)
             {
                 if (_relDecryptor == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_XrmlMissingIRelDecryptor"));
+                    throw new CryptographicException(SR.Cryptography_Xml_XrmlMissingIRelDecryptor);
 
                 DecryptEncryptedGrants(encryptedGrantList, _relDecryptor);
             }

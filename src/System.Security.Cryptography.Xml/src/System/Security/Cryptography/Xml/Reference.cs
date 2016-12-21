@@ -189,7 +189,7 @@ namespace System.Security.Cryptography.Xml
 
             // Add the DigestMethod
             if (string.IsNullOrEmpty(_digestMethod))
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_DigestMethodRequired"));
+                throw new CryptographicException(SR.Cryptography_Xml_DigestMethodRequired);
 
             XmlElement digestMethodElement = document.CreateElement("DigestMethod", SignedXml.XmlDsigNamespaceUrl);
             digestMethodElement.SetAttribute("Algorithm", _digestMethod);
@@ -198,7 +198,7 @@ namespace System.Security.Cryptography.Xml
             if (DigestValue == null)
             {
                 if (_hashAlgorithm.Hash == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_DigestValueRequired"));
+                    throw new CryptographicException(SR.Cryptography_Xml_DigestValueRequired);
                 DigestValue = _hashAlgorithm.Hash;
             }
 
@@ -235,7 +235,7 @@ namespace System.Security.Cryptography.Xml
                         string algorithm = Utils.GetAttribute(transformElement, "Algorithm", SignedXml.XmlDsigNamespaceUrl);
                         Transform transform = CryptoConfig.CreateFromName(algorithm) as Transform;
                         if (transform == null)
-                            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                            throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
                         AddTransform(transform);
                         // let the transform read the children of the transformElement for data
                         transform.LoadInnerXml(transformElement.ChildNodes);
@@ -267,13 +267,13 @@ namespace System.Security.Cryptography.Xml
             // DigestMethod
             XmlElement digestMethodElement = value.SelectSingleNode("ds:DigestMethod", nsm) as XmlElement;
             if (digestMethodElement == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "Reference/DigestMethod");
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "Reference/DigestMethod");
             _digestMethod = Utils.GetAttribute(digestMethodElement, "Algorithm", SignedXml.XmlDsigNamespaceUrl);
 
             // DigestValue
             XmlElement digestValueElement = value.SelectSingleNode("ds:DigestValue", nsm) as XmlElement;
             if (digestValueElement == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "Reference/DigestValue");
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "Reference/DigestValue");
             _digestValue = Convert.FromBase64String(Utils.DiscardWhiteSpaces(digestValueElement.InnerText));
 
             // cache the Xml
@@ -304,7 +304,7 @@ namespace System.Security.Cryptography.Xml
             // Now's the time to create our hashing algorithm
             _hashAlgorithm = CryptoConfig.CreateFromName(_digestMethod) as HashAlgorithm;
             if (_hashAlgorithm == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CreateHashAlgorithmFailed"));
+                throw new CryptographicException(SR.Cryptography_Xml_CreateHashAlgorithmFailed);
 
             // Let's go get the target.
             string baseUri = (document == null ? System.Environment.CurrentDirectory + "\\" : document.BaseURI);
@@ -341,7 +341,7 @@ namespace System.Security.Cryptography.Xml
                             // This is the self-referential case. First, check that we have a document context.
                             // The Enveloped Signature does not discard comments as per spec; those will be omitted during the transform chain process
                             if (document == null)
-                                throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.GetResourceString("Cryptography_Xml_SelfReferenceRequiresContext"), _uri));
+                                throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
 
                             // Normalize the containing document
                             resolver = (SignedXml.ResolverSet ? SignedXml._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));
@@ -358,7 +358,7 @@ namespace System.Security.Cryptography.Xml
                             {
                                 // This is a self referencial case
                                 if (document == null)
-                                    throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.GetResourceString("Cryptography_Xml_SelfReferenceRequiresContext"), _uri));
+                                    throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
 
                                 // We should not discard comments here!!!
                                 resolver = (SignedXml.ResolverSet ? SignedXml._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));
@@ -391,7 +391,7 @@ namespace System.Security.Cryptography.Xml
                             }
 
                             if (elem == null)
-                                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+                                throw new CryptographicException(SR.Cryptography_Xml_InvalidReference);
 
                             XmlDocument normDocument = Utils.PreProcessElementInput(elem, resolver, baseUri);
                             // Add the propagated attributes
@@ -429,7 +429,7 @@ namespace System.Security.Cryptography.Xml
                         }
                         else
                         {
-                            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UriNotResolved"), _uri);
+                            throw new CryptographicException(SR.Cryptography_Xml_UriNotResolved, _uri);
                         }
                         break;
                     case ReferenceTargetType.XmlElement:
@@ -438,7 +438,7 @@ namespace System.Security.Cryptography.Xml
                         hashInputStream = TransformChain.TransformToOctetStream(Utils.PreProcessElementInput((XmlElement)_refTarget, resolver, baseUri), resolver, baseUri);
                         break;
                     default:
-                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UriNotResolved"), _uri);
+                        throw new CryptographicException(SR.Cryptography_Xml_UriNotResolved, _uri);
                 }
 
                 // Compute the new hash value

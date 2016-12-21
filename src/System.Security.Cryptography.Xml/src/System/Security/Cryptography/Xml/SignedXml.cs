@@ -290,14 +290,14 @@ namespace System.Security.Cryptography.Xml
 
             if (!CheckSignedInfo(key))
             {
-                SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_SignedInfo"));
+                SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_SignedInfo);
                 return false;
             }
 
             // Now is the time to go through all the references and see if their DigestValues are good
             if (!CheckDigestedReferences())
             {
-                SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_References"));
+                SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_References);
                 return false;
             }
 
@@ -314,13 +314,13 @@ namespace System.Security.Cryptography.Xml
 
             if (!CheckSignedInfo(macAlg))
             {
-                SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_SignedInfo"));
+                SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_SignedInfo);
                 return false;
             }
 
             if (!CheckDigestedReferences())
             {
-                SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_References"));
+                SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_References);
                 return false;
             }
 
@@ -346,7 +346,7 @@ namespace System.Security.Cryptography.Xml
 
                         if (!validKeyUsage)
                         {
-                            SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_X509KeyUsage"));
+                            SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_X509KeyUsage);
                             return false;
                         }
                         break;
@@ -361,7 +361,7 @@ namespace System.Security.Cryptography.Xml
 
                 if (!chainVerified)
                 {
-                    SignedXmlDebugLog.LogVerificationFailure(this, SR.GetResourceString("Log_VerificationFailed_X509Chain"));
+                    SignedXmlDebugLog.LogVerificationFailure(this, SR.Log_VerificationFailed_X509Chain);
                     return false;
                 }
             }
@@ -385,7 +385,7 @@ namespace System.Security.Cryptography.Xml
             AsymmetricAlgorithm key = SigningKey;
 
             if (key == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_LoadKeyFailed"));
+                throw new CryptographicException(SR.Cryptography_Xml_LoadKeyFailed);
 
             // Check the signature algorithm associated with the key so that we can accordingly set the signature method
             if (SignedInfo.SignatureMethod == null)
@@ -402,17 +402,17 @@ namespace System.Security.Cryptography.Xml
                 }
                 else
                 {
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CreatedKeyFailed"));
+                    throw new CryptographicException(SR.Cryptography_Xml_CreatedKeyFailed);
                 }
             }
 
             // See if there is a signature description class defined in the Config file
             SignatureDescription signatureDescription = CryptoConfig.CreateFromName(SignedInfo.SignatureMethod) as SignatureDescription;
             if (signatureDescription == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_SignatureDescriptionNotCreated"));
+                throw new CryptographicException(SR.Cryptography_Xml_SignatureDescriptionNotCreated);
             HashAlgorithm hashAlg = signatureDescription.CreateDigest();
             if (hashAlg == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CreateHashAlgorithmFailed"));
+                throw new CryptographicException(SR.Cryptography_Xml_CreateHashAlgorithmFailed);
             byte[] hashvalue = GetC14NDigest(hashAlg);
             AsymmetricSignatureFormatter asymmetricSignatureFormatter = signatureDescription.CreateFormatter(key);
 
@@ -427,7 +427,7 @@ namespace System.Security.Cryptography.Xml
 
             HMAC hash = macAlg as HMAC;
             if (hash == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_SignatureMethodKeyMismatch"));
+                throw new CryptographicException(SR.Cryptography_Xml_SignatureMethodKeyMismatch);
 
             int signatureLength;
             if (m_signature.SignedInfo.SignatureLength == null)
@@ -436,9 +436,9 @@ namespace System.Security.Cryptography.Xml
                 signatureLength = Convert.ToInt32(m_signature.SignedInfo.SignatureLength, null);
             // signatureLength should be less than hash size
             if (signatureLength < 0 || signatureLength > hash.HashSize)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidSignatureLength"));
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidSignatureLength);
             if (signatureLength % 8 != 0)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidSignatureLength2"));
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidSignatureLength2);
 
             BuildDigestedReferences();
             switch (hash.HashName)
@@ -462,7 +462,7 @@ namespace System.Security.Cryptography.Xml
                     SignedInfo.SignatureMethod = SignedXml.XmlDsigMoreHMACRIPEMD160Url;
                     break;
                 default:
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_SignatureMethodKeyMismatch"));
+                    throw new CryptographicException(SR.Cryptography_Xml_SignatureMethodKeyMismatch);
             }
 
             byte[] hashValue = GetC14NDigest(hash);
@@ -479,7 +479,7 @@ namespace System.Security.Cryptography.Xml
         protected virtual AsymmetricAlgorithm GetPublicKey()
         {
             if (KeyInfo == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_KeyInfoRequired"));
+                throw new CryptographicException(SR.Cryptography_Xml_KeyInfoRequired);
 
             if (_x509Enum != null)
             {
@@ -600,7 +600,7 @@ namespace System.Security.Cryptography.Xml
                         if (cloneElem2 != null)
                         {
                             throw new CryptographicException(
-                                SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+                                SR.Cryptography_Xml_InvalidReference);
                         }
                     }
                 }
@@ -870,7 +870,7 @@ namespace System.Security.Cryptography.Xml
                 return 0;
             }
             // Malformed reference
-            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+            throw new CryptographicException(SR.Cryptography_Xml_InvalidReference);
         }
 
         private class ReferenceLevelSortOrder : IComparer
@@ -1041,7 +1041,7 @@ namespace System.Security.Cryptography.Xml
 
             SignatureDescription signatureDescription = CryptoConfig.CreateFromName(SignatureMethod) as SignatureDescription;
             if (signatureDescription == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_SignatureDescriptionNotCreated"));
+                throw new CryptographicException(SR.Cryptography_Xml_SignatureDescriptionNotCreated);
 
             // Let's see if the key corresponds with the SignatureMethod 
             Type ta = Type.GetType(signatureDescription.KeyAlgorithm);
@@ -1050,7 +1050,7 @@ namespace System.Security.Cryptography.Xml
 
             HashAlgorithm hashAlgorithm = signatureDescription.CreateDigest();
             if (hashAlgorithm == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CreateHashAlgorithmFailed"));
+                throw new CryptographicException(SR.Cryptography_Xml_CreateHashAlgorithmFailed);
             byte[] hashval = GetC14NDigest(hashAlgorithm);
 
             AsymmetricSignatureDeformatter asymmetricSignatureDeformatter = signatureDescription.CreateDeformatter(key);
@@ -1079,13 +1079,13 @@ namespace System.Security.Cryptography.Xml
 
             // signatureLength should be less than hash size
             if (signatureLength < 0 || signatureLength > macAlg.HashSize)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidSignatureLength"));
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidSignatureLength);
             if (signatureLength % 8 != 0)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidSignatureLength2"));
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidSignatureLength2);
             if (m_signature.SignatureValue == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_SignatureValueRequired"));
+                throw new CryptographicException(SR.Cryptography_Xml_SignatureValueRequired);
             if (m_signature.SignatureValue.Length != signatureLength / 8)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidSignatureLength"));
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidSignatureLength);
 
             // Calculate the hash
             byte[] hashValue = GetC14NDigest(macAlg);
@@ -1129,7 +1129,7 @@ namespace System.Security.Cryptography.Xml
                 return nodeList[0] as XmlElement;
             }
 
-            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidReference"));
+            throw new CryptographicException(SR.Cryptography_Xml_InvalidReference);
         }
 
         private static bool IsKeyTheCorrectAlgorithm(AsymmetricAlgorithm key, Type expectedType)

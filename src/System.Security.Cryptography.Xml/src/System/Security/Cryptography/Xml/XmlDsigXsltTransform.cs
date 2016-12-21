@@ -53,7 +53,7 @@ namespace System.Security.Cryptography.Xml
         public override void LoadInnerXml(XmlNodeList nodeList)
         {
             if (nodeList == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
             // check that the XSLT element is well formed
             XmlElement firstDataElement = null;
             int count = 0;
@@ -64,7 +64,7 @@ namespace System.Security.Cryptography.Xml
                 if (node is XmlElement)
                 {
                     if (count != 0)
-                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                        throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
                     firstDataElement = node as XmlElement;
                     count++;
                     continue;
@@ -73,7 +73,7 @@ namespace System.Security.Cryptography.Xml
                 count++;
             }
             if (count != 1 || firstDataElement == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
             _xslNodes = nodeList;
             _xslFragment = firstDataElement.OuterXml.Trim(null);
         }
@@ -148,7 +148,7 @@ namespace System.Security.Cryptography.Xml
         public override object GetOutput(Type type)
         {
             if (type != typeof(Stream) && !type.IsSubclassOf(typeof(Stream)))
-                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
             return (Stream)GetOutput();
         }
     }

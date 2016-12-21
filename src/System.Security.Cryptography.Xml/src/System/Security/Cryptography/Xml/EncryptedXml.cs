@@ -207,7 +207,7 @@ namespace System.Security.Cryptography.Xml
                 }
                 else
                 {
-                     throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UriNotResolved"), cipherData.CipherReference.Uri);
+                     throw new CryptographicException(SR.Cryptography_Xml_UriNotResolved, cipherData.CipherReference.Uri);
                 }
                 // read the output stream into a memory stream
                 byte[] cipherValue = null;
@@ -229,7 +229,7 @@ namespace System.Security.Cryptography.Xml
             }
 
             // Throw a CryptographicException if we were unable to retrieve the cipher data.
-            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingCipherData"));
+            throw new CryptographicException(SR.Cryptography_Xml_MissingCipherData);
         }
 
         //
@@ -253,7 +253,7 @@ namespace System.Security.Cryptography.Xml
             if (symmetricAlgorithmUri == null)
             {
                 if (encryptedData.EncryptionMethod == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingAlgorithm"));
+                    throw new CryptographicException(SR.Cryptography_Xml_MissingAlgorithm);
                 symmetricAlgorithmUri = encryptedData.EncryptionMethod.KeyAlgorithm;
             }
             switch (symmetricAlgorithmUri)
@@ -269,7 +269,7 @@ namespace System.Security.Cryptography.Xml
                     break;
                 default:
                     // The Uri is not supported.
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UriNotSupported"));
+                    throw new CryptographicException(SR.Cryptography_Xml_UriNotSupported);
             }
             byte[] IV = new byte[initBytesSize];
             byte[] cipherValue = GetCipherValue(encryptedData.CipherData);
@@ -345,12 +345,12 @@ namespace System.Security.Cryptography.Xml
                 if (symmetricAlgorithmUri == null)
                 {
                     if (encryptedData.EncryptionMethod == null)
-                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingAlgorithm"));
+                        throw new CryptographicException(SR.Cryptography_Xml_MissingAlgorithm);
                     symmetricAlgorithmUri = encryptedData.EncryptionMethod.KeyAlgorithm;
                 }
                 byte[] key = DecryptEncryptedKey(ek);
                 if (key == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingDecryptionKey"));
+                    throw new CryptographicException(SR.Cryptography_Xml_MissingDecryptionKey);
 
                 SymmetricAlgorithm symAlg = (SymmetricAlgorithm)CryptoConfig.CreateFromName(symmetricAlgorithmUri);
                 symAlg.Key = key;
@@ -470,7 +470,7 @@ namespace System.Security.Cryptography.Xml
                 throw new ArgumentNullException("keyObject");
 
             if (!(keyObject is SymmetricAlgorithm) && !(keyObject is RSA))
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_NotSupportedCryptographicTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_NotSupportedCryptographicTransform);
             _keyNameMapping.Add(keyName, keyObject);
         }
 
@@ -491,7 +491,7 @@ namespace System.Security.Cryptography.Xml
             using (RSA rsaPublicKey = certificate.GetRSAPublicKey())
             {
                 if (rsaPublicKey == null)
-                    throw new NotSupportedException(SR.GetResourceString("NotSupported_KeyAlgorithm"));
+                    throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
 
                 // Create the EncryptedData object, using an AES-256 session key by default.
                 EncryptedData ed = new EncryptedData();
@@ -531,7 +531,7 @@ namespace System.Security.Cryptography.Xml
                 encryptionKey = _keyNameMapping[keyName];
 
             if (encryptionKey == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingEncryptionKey"));
+                throw new CryptographicException(SR.Cryptography_Xml_MissingEncryptionKey);
 
             // kek is either a SymmetricAlgorithm or an RSA key, otherwise, we wouldn't be able to insert it in the hash table
             SymmetricAlgorithm symKey = encryptionKey as SymmetricAlgorithm;
@@ -572,7 +572,7 @@ namespace System.Security.Cryptography.Xml
             else
             {
                 // throw an exception if the transform is not in the previous categories
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_NotSupportedCryptographicTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_NotSupportedCryptographicTransform);
             }
             EncryptedKey ek = new EncryptedKey();
             ek.EncryptionMethod = new EncryptionMethod(encryptionMethod);
@@ -608,7 +608,7 @@ namespace System.Security.Cryptography.Xml
                     ed.LoadXml(encryptedDataElement);
                     SymmetricAlgorithm symAlg = GetDecryptionKey(ed, null);
                     if (symAlg == null)
-                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_MissingDecryptionKey"));
+                        throw new CryptographicException(SR.Cryptography_Xml_MissingDecryptionKey);
                     byte[] decrypted = DecryptData(ed, symAlg);
                     ReplaceData(encryptedDataElement, decrypted);
                 }
@@ -832,7 +832,7 @@ namespace System.Security.Cryptography.Xml
                 return SymmetricKeyWrap.AESKeyWrapEncrypt(symmetricAlgorithm.Key, keyData);
             }
             // throw an exception if the transform is not in the previous categories
-            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_NotSupportedCryptographicTransform"));
+            throw new CryptographicException(SR.Cryptography_Xml_NotSupportedCryptographicTransform);
         }
 
 
@@ -876,7 +876,7 @@ namespace System.Security.Cryptography.Xml
                 return SymmetricKeyWrap.AESKeyWrapDecrypt(symmetricAlgorithm.Key, keyData);
             }
             // throw an exception if the transform is not in the previous categories
-            throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_NotSupportedCryptographicTransform"));
+            throw new CryptographicException(SR.Cryptography_Xml_NotSupportedCryptographicTransform);
         }
 
         // decrypts the supplied data using an RSA key and specifies whether we want to use OAEP 

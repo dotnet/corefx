@@ -43,7 +43,7 @@ namespace System.Security.Cryptography.Xml
         {
             // XPath transform is specified by text child of first XPath child
             if (nodeList == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
 
             foreach (XmlNode node in nodeList)
             {
@@ -76,7 +76,7 @@ namespace System.Security.Cryptography.Xml
             }
 
             if (_xpathexpr == null)
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_UnknownTransform"));
+                throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
         }
 
         protected override XmlNodeList GetInnerXml()
@@ -187,7 +187,7 @@ namespace System.Security.Cryptography.Xml
         public override object GetOutput(Type type)
         {
             if (type != typeof(XmlNodeList) && !type.IsSubclassOf(typeof(XmlNodeList)))
-                throw new ArgumentException(SR.GetResourceString("Cryptography_Xml_TransformIncorrectInputType"), "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
             return (XmlNodeList)GetOutput();
         }
     }

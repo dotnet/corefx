@@ -79,7 +79,7 @@ namespace System.Security.Cryptography.Xml
                     // Can't honor the option if we only have a partial chain.
                     if ((chain.ChainStatus.Length > 0) &&
                         ((chain.ChainStatus[0].Status & X509ChainStatusFlags.PartialChain) == X509ChainStatusFlags.PartialChain))
-                        throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_E_Chaining"));
+                        throw new CryptographicException(SR.Cryptography_Xml_E_Chaining);
 
                     elements = (X509ChainElementCollection)chain.ChainElements;
                     foreach (X509ChainElement element in elements)
@@ -269,7 +269,7 @@ namespace System.Security.Cryptography.Xml
 
             if ((x509CRLNodes.Count == 0 && x509IssuerSerialNodes.Count == 0 && x509SKINodes.Count == 0
                     && x509SubjectNameNodes.Count == 0 && x509CertificateNodes.Count == 0)) // Bad X509Data tag, or Empty tag
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "X509Data");
+                throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "X509Data");
 
             // Flush anything in the lists
             Clear();
@@ -282,7 +282,7 @@ namespace System.Security.Cryptography.Xml
                 XmlNode x509IssuerNameNode = issuerSerialNode.SelectSingleNode("ds:X509IssuerName", nsm);
                 XmlNode x509SerialNumberNode = issuerSerialNode.SelectSingleNode("ds:X509SerialNumber", nsm);
                 if (x509IssuerNameNode == null || x509SerialNumberNode == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_InvalidElement"), "IssuerSerial");
+                    throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "IssuerSerial");
                 InternalAddIssuerSerial(x509IssuerNameNode.InnerText.Trim(), x509SerialNumberNode.InnerText.Trim());
             }
 

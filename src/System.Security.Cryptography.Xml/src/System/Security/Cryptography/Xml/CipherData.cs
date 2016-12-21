@@ -42,7 +42,7 @@ namespace System.Security.Cryptography.Xml
                 if (value == null)
                     throw new ArgumentNullException("value");
                 if (CipherValue != null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CipherValueElementRequired"));
+                    throw new CryptographicException(SR.Cryptography_Xml_CipherValueElementRequired);
 
                 _cipherReference = value;
                 _cachedXml = null;
@@ -57,7 +57,7 @@ namespace System.Security.Cryptography.Xml
                 if (value == null)
                     throw new ArgumentNullException("value");
                 if (CipherReference != null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CipherValueElementRequired"));
+                    throw new CryptographicException(SR.Cryptography_Xml_CipherValueElementRequired);
 
                 _cipherValue = (byte[])value.Clone();
                 _cachedXml = null;
@@ -87,7 +87,7 @@ namespace System.Security.Cryptography.Xml
             {
                 // No CipherValue specified, see if there is a CipherReference
                 if (CipherReference == null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CipherValueElementRequired"));
+                    throw new CryptographicException(SR.Cryptography_Xml_CipherValueElementRequired);
                 cipherDataElement.AppendChild(CipherReference.GetXml(document));
             }
             return cipherDataElement;
@@ -106,7 +106,7 @@ namespace System.Security.Cryptography.Xml
             if (cipherValueNode != null)
             {
                 if (cipherReferenceNode != null)
-                    throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CipherValueElementRequired"));
+                    throw new CryptographicException(SR.Cryptography_Xml_CipherValueElementRequired);
                 _cipherValue = Convert.FromBase64String(Utils.DiscardWhiteSpaces(cipherValueNode.InnerText));
             }
             else if (cipherReferenceNode != null)
@@ -116,7 +116,7 @@ namespace System.Security.Cryptography.Xml
             }
             else
             {
-                throw new CryptographicException(SR.GetResourceString("Cryptography_Xml_CipherValueElementRequired"));
+                throw new CryptographicException(SR.Cryptography_Xml_CipherValueElementRequired);
             }
 
             // Save away the cached value
