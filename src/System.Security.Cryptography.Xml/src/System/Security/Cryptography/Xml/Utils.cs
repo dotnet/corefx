@@ -187,7 +187,7 @@ namespace System.Security.Cryptography.Xml
             //Keeping the default recursion limit to 20. It should be
             //within limits of real world scenarios. Keeping this number low
             //will preserve some stack space
-            long maxXmlDsigSearchDepth = GetNetFxSecurityRegistryValue("SignedDigitalSignatureXmlMaxDepth", 20);
+            long maxXmlDsigSearchDepth = 20;
 
             s_xmlDsigSearchDepth = (int)maxXmlDsigSearchDepth;
             return s_xmlDsigSearchDepth.Value;
@@ -204,7 +204,7 @@ namespace System.Security.Cryptography.Xml
                 return s_maxCharactersFromEntities.Value;
             }
 
-            long maxCharacters = GetNetFxSecurityRegistryValue("SignedXmlMaxCharactersFromEntities", (long)1e7);
+            long maxCharacters = (long)1e7;
 
             s_maxCharactersFromEntities = maxCharacters;
             return s_maxCharactersFromEntities.Value;
@@ -222,7 +222,7 @@ namespace System.Security.Cryptography.Xml
             }
 
             // The default value, 0, is "no limit"
-            long maxCharacters = GetNetFxSecurityRegistryValue("SignedXmlMaxCharactersInDocument", 0);
+            long maxCharacters = 0;
 
             s_maxCharactersInDocument = maxCharacters;
             Thread.MemoryBarrier();
@@ -243,7 +243,7 @@ namespace System.Security.Cryptography.Xml
                 return s_allowAmbiguousReferenceTarget.Value;
             }
 
-            long numericValue = GetNetFxSecurityRegistryValue("SignedXmlAllowAmbiguousReferenceTargets", 0);
+            long numericValue = 0;
             bool allowAmbiguousReferenceTarget = numericValue != 0;
 
             s_allowAmbiguousReferenceTarget = allowAmbiguousReferenceTarget;
@@ -262,7 +262,7 @@ namespace System.Security.Cryptography.Xml
                 return s_allowDetachedSignature.Value;
             }
 
-            long numericValue = GetNetFxSecurityRegistryValue("SignedXmlAllowDetachedSignature", 0);
+            long numericValue = 0;
             bool allowDetachedSignature = numericValue != 0;
 
             s_allowDetachedSignature = allowDetachedSignature;
@@ -279,7 +279,7 @@ namespace System.Security.Cryptography.Xml
                 return s_requireNCNameIdentifier;
             }
 
-            long numericValue = GetNetFxSecurityRegistryValue("SignedXmlRequireNCNameIdentifier", 1);
+            long numericValue = 1;
             bool requireNCName = numericValue != 0;
 
             s_requireNCNameIdentifier = requireNCName;
@@ -287,31 +287,6 @@ namespace System.Security.Cryptography.Xml
             s_readRequireNCNameIdentifier = true;
 
             return s_requireNCNameIdentifier;
-        }
-
-        private static long GetNetFxSecurityRegistryValue(string regValueName, long defaultValue)
-        {
-            try
-            {
-                using (RegistryKey securityRegKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\.NETFramework\Security", false))
-                {
-                    if (securityRegKey != null)
-                    {
-                        object regValue = securityRegKey.GetValue(regValueName);
-                        if (regValue != null)
-                        {
-                            RegistryValueKind valueKind = securityRegKey.GetValueKind(regValueName);
-                            if (valueKind == RegistryValueKind.DWord || valueKind == RegistryValueKind.QWord)
-                            {
-                                return Convert.ToInt64(regValue, CultureInfo.InvariantCulture);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (SecurityException) { /* we could not open the key - that's fine, we can proceed with the default value */ }
-
-            return defaultValue;
         }
 
         internal static XmlDocument PreProcessDocumentInput(XmlDocument document, XmlResolver xmlResolver, string baseUri)
@@ -751,10 +726,6 @@ namespace System.Security.Cryptography.Xml
 
             // Open LocalMachine and CurrentUser "Other People"/"My" stores.
 
-            // Assert OpenStore since we are not giving back any certificates to the user.
-            StorePermission sp = new StorePermission(StorePermissionFlags.OpenStore);
-            sp.Assert();
-
             X509Store[] stores = new X509Store[2];
             string storeName = (certUsageType == CertUsageType.Verification ? "AddressBook" : "My");
             stores[0] = new X509Store(storeName, StoreLocation.CurrentUser);
@@ -790,7 +761,7 @@ namespace System.Security.Cryptography.Xml
                         {
                             foreach (byte[] ski in keyInfoX509Data.SubjectKeyIds)
                             {
-                                string hex = X509Utils.EncodeHexString(ski);
+                                string hex = EncodeHexString(ski);
                                 filters = filters.Find(X509FindType.FindBySubjectKeyIdentifier, hex, false);
                             }
                         }
@@ -811,6 +782,68 @@ namespace System.Security.Cryptography.Xml
             }
 
             return collection;
+        }
+
+        private static readonly char[] hexValues = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        internal static string EncodeHexString(byte[] sArray)
+        {
+            return EncodeHexString(sArray, 0, (uint)sArray.Length);
+        }
+
+        internal static string EncodeHexString(byte[] sArray, uint start, uint end)
+        {
+            String result = null;
+            if (sArray != null)
+            {
+                char[] hexOrder = new char[(end - start) * 2];
+                uint digit;
+                for (uint i = start, j = 0; i < end; i++)
+                {
+                    digit = (uint)((sArray[i] & 0xf0) >> 4);
+                    hexOrder[j++] = hexValues[digit];
+                    digit = (uint)(sArray[i] & 0x0f);
+                    hexOrder[j++] = hexValues[digit];
+                }
+                result = new String(hexOrder);
+            }
+            return result;
+        }
+
+        internal static byte[] DecodeHexString(string s)
+        {
+            string hexString = Utils.DiscardWhiteSpaces(s);
+            uint cbHex = (uint)hexString.Length / 2;
+            byte[] hex = new byte[cbHex];
+            int i = 0;
+            for (int index = 0; index < cbHex; index++)
+            {
+                hex[index] = (byte)((HexToByte(hexString[i]) << 4) | HexToByte(hexString[i + 1]));
+                i += 2;
+            }
+            return hex;
+        }
+
+        internal static byte HexToByte(char val)
+        {
+            if (val <= '9' && val >= '0')
+                return (byte)(val - '0');
+            else if (val >= 'a' && val <= 'f')
+                return (byte)((val - 'a') + 10);
+            else if (val >= 'A' && val <= 'F')
+                return (byte)((val - 'A') + 10);
+            else
+                return 0xFF;
+        }
+
+        internal static bool IsSelfSigned(X509Chain chain)
+        {
+            X509ChainElementCollection elements = chain.ChainElements;
+            if (elements.Count != 1)
+                return false;
+            X509Certificate2 certificate = elements[0].Certificate;
+            if (String.Compare(certificate.SubjectName.Name, certificate.IssuerName.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                return true;
+            return false;
         }
     }
 }

@@ -335,7 +335,7 @@ namespace System.Security.Cryptography.Xml
                 // Check key usages to make sure it is good for signing.
                 foreach (X509Extension extension in certificate.Extensions)
                 {
-                    if (string.Compare(extension.Oid.Value, CAPI.szOID_KEY_USAGE, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(extension.Oid.Value, "2.5.29.15" /* szOID_KEY_USAGE */, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         X509KeyUsageExtension keyUsage = new X509KeyUsageExtension();
                         keyUsage.CopyFrom(extension);
@@ -366,7 +366,7 @@ namespace System.Security.Cryptography.Xml
                 }
             }
 
-            if (!CheckSignature(certificate.GetAnyPublicKey()))
+            if (!CheckSignature(certificate.PublicKey.Key))
             {
                 return false;
             }
@@ -541,7 +541,7 @@ namespace System.Security.Cryptography.Xml
             {
                 X509Certificate2 certificate = (X509Certificate2)_x509Enum.Current;
                 if (certificate != null)
-                    return certificate.GetAnyPublicKey();
+                    return certificate.PublicKey.Key;
             }
 
             return null;
@@ -798,7 +798,7 @@ namespace System.Security.Cryptography.Xml
         // allowed by SignedXml instances on this machine.
         private static List<string> ReadAdditionalSafeCanonicalizationMethods()
         {
-            return ReadFxSecurityStringValues("SafeCanonicalizationMethods");
+            return new List<string>();
         }
 
         // Allow machine admins to add additional transform algorithms that should be considered valid when
@@ -808,35 +808,7 @@ namespace System.Security.Cryptography.Xml
         // allowed by SignedXml instances on this machine.
         private static List<string> ReadAdditionalSafeTransformMethods()
         {
-            return ReadFxSecurityStringValues("SafeTransformMethods");
-        }
-
-        private static List<string> ReadFxSecurityStringValues(string subkey)
-        {
-            List<string> values = new List<string>();
-
-            try
-            {
-                using (RegistryKey stringListKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\.NETFramework\Security\" + subkey, false))
-                {
-                    if (stringListKey != null)
-                    {
-                        foreach (string value in stringListKey.GetValueNames())
-                        {
-                            if (stringListKey.GetValueKind(value) == RegistryValueKind.String)
-                            {
-                                string stringValue = stringListKey.GetValue(value) as string;
-                                if (!string.IsNullOrWhiteSpace(stringValue))
-                                {
-                                    values.Add(stringValue);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (SecurityException) { /* we could not open the key - that's fine, we can proceed with no additional values */ }
-            return values;
+            return new List<string>();
         }
 
         private byte[] GetC14NDigest(HashAlgorithm hash)

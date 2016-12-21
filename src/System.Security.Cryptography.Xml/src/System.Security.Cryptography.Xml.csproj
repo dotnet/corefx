@@ -86,6 +86,9 @@
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigXPathTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlDsigXsltTransform.cs" />
     <Compile Include="System\Security\Cryptography\Xml\XmlLicenseTransform.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.certificates_types.cs">
+        <Link>Interop\Windows\Crypt32\Interop.certificates_types.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
