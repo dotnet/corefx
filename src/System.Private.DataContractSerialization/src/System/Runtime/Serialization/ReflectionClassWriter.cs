@@ -21,10 +21,9 @@ namespace System.Runtime.Serialization
         {
             InvokeOnSerializing(obj, context, classContract);
             obj = ResolveAdapterType(obj, classContract);
-            var iSerializableObj = obj as ISerializable;
-            if (iSerializableObj != null)
+            if (classContract.IsISerializable)
             {
-                context.WriteISerializable(xmlWriter, iSerializableObj);
+                context.WriteISerializable(xmlWriter, (ISerializable) obj);
             }
             else
             {
