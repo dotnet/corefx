@@ -4,7 +4,8 @@
 
   <ItemGroup>
     <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Security.AccessControl.Tests.csproj" />
-    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\WebServer.csproj" />
+    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\WebServer.csproj" Condition="'$(OS)' != 'Windows_NT'" />
+    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Runtime.CompilerServices.Unsafe.Tests.csproj" Condition="'$(OS)' != 'Windows_NT'" />
     <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*.csproj" Exclude="@(TestProjectExclusions)">
       <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
     </Project>
