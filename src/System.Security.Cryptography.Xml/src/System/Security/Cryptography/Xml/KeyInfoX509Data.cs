@@ -83,7 +83,9 @@ namespace System.Security.Cryptography.Xml
                     // Can't honor the option if we only have a partial chain.
                     if ((chain.ChainStatus.Length > 0) &&
                         ((chain.ChainStatus[0].Status & X509ChainStatusFlags.PartialChain) == X509ChainStatusFlags.PartialChain))
+                    {
                         throw new CryptographicException(SR.Cryptography_Partial_Chain);
+                    }
 
                     elements = (X509ChainElementCollection)chain.ChainElements;
                     foreach (X509ChainElement element in elements)
