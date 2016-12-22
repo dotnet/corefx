@@ -68,6 +68,16 @@ namespace System.ComponentModel.DataAnnotations
         }
 
         [Fact]
+        public static void GetDataTypeName_and_IsValid_on_whitespace_custom_DataTypeAttribute_throws_exception()
+        {
+            var attribute = new DataTypeAttribute(new String(' ', 5)); // Create a string with five whitespaces
+            Assert.Equal(DataType.Custom, attribute.DataType); // Only throw when call GetDataTypeName() or Validate()
+            AssertEx.Empty(attribute.CustomDataType); // Only throw when call GetDataTypeName() or Validate()
+            Assert.Throws<InvalidOperationException>(() => attribute.GetDataTypeName());
+            Assert.Throws<InvalidOperationException>(() => attribute.Validate(new object(), s_testValidationContext));
+        }
+
+        [Fact]
         public static void GetDataTypeName_and_IsValid_on_non_null_custom_DataTypeAttribute_is_successful()
         {
             var attribute = new DataTypeAttribute("TestCustomDataType");
@@ -108,6 +118,6 @@ namespace System.ComponentModel.DataAnnotations
                     Assert.Null(attribute.DisplayFormat);
                 }
             }
-        }
+        }        
     }
 }
