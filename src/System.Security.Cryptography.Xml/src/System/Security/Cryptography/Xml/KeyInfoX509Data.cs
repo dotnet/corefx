@@ -62,7 +62,7 @@ namespace System.Security.Cryptography.Xml
                     // Can't honor the option if we only have a partial chain.
                     if ((chain.ChainStatus.Length > 0) &&
                         ((chain.ChainStatus[0].Status & X509ChainStatusFlags.PartialChain) == X509ChainStatusFlags.PartialChain))
-                    throw new CryptographicException(unchecked((int)Interop.Crypt32.CertChainPolicyErrors.CERT_E_CHAINING));
+                    throw new CryptographicException(SR.Cryptography_Partial_Chain);
 
                 elements = (X509ChainElementCollection)chain.ChainElements;
                     for (int index = 0; index < (Utils.IsSelfSigned(chain) ? 1 : elements.Count - 1); index++)
