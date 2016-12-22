@@ -49,11 +49,14 @@
     <Compile Include="$(CommonPath)\System\Text\OSEncoding.Windows.cs">
       <Link>Common\System\Text\OSEncoding.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Text\EncodingTable.cs">
-      <Link>Common\System\Text\EncodingTable.cs</Link>
+    <Compile Include="$(CommonPath)\System\Text\OSEncoder.cs">
+      <Link>Common\System\Text\OSEncoder.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Text\EncodingTable.Data.cs">
-      <Link>Common\System\Text\EncodingTable.Data.cs</Link>
+    <Compile Include="$(CommonPath)\System\Text\DBCSDecoder.cs">
+      <Link>Common\System\Text\DBCSDecoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>

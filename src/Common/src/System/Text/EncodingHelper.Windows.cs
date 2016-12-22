@@ -30,13 +30,7 @@ namespace System.Text
 
             if ((defaultEncCodePage == codepage) || defaultEncCodePage != Encoding.UTF8.CodePage)
             {
-                try
-                {
-                    return Encoding.GetEncoding(codepage);
-                }
-                catch (NotSupportedException)
-                {
-                }
+                return Encoding.GetEncoding(codepage);
             }
 
             if (codepage != Encoding.UTF8.CodePage)

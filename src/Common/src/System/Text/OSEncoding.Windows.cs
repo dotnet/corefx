@@ -13,7 +13,6 @@ namespace System.Text
     {
         private int _codePage;
         private string _encodingName;
-        private string _webName;
 
         internal OSEncoding(int codePage) : base(codePage)
         {
@@ -36,7 +35,7 @@ namespace System.Text
 
             fixed (char* pChar = chars)
             {
-                return WideCharToMultiByte(pChar+index, count, null, 0);
+                return WideCharToMultiByte(_codePage, pChar+index, count, null, 0);
             }
         }
 
@@ -51,7 +50,7 @@ namespace System.Text
 
             fixed (char* pChars = s)
             {
-                return WideCharToMultiByte(pChars, s.Length, null, 0);
+                return WideCharToMultiByte(_codePage, pChars, s.Length, null, 0);
             }
         }
 
@@ -80,7 +79,7 @@ namespace System.Text
             fixed (char* pChars = s)
             fixed (byte *pBytes = bytes)
             {
-                return WideCharToMultiByte(pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
+                return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
             }
         }
 
@@ -109,7 +108,7 @@ namespace System.Text
             fixed (char* pChars = chars)
             fixed (byte *pBytes = bytes)
             {
-                return WideCharToMultiByte(pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
+                return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
             }
         }
 
@@ -129,7 +128,7 @@ namespace System.Text
 
             fixed (byte* pBytes = bytes)
             {
-                return MultiByteToWideChar(pBytes+index, count, null, 0);
+                return MultiByteToWideChar(_codePage, pBytes+index, count, null, 0);
             }
         }
 
@@ -156,7 +155,7 @@ namespace System.Text
             fixed (byte* pBytes = bytes)
             fixed (char* pChars = chars)
             {
-                return MultiByteToWideChar(pBytes+byteIndex, byteCount, pChars+charIndex, chars.Length - charIndex);
+                return MultiByteToWideChar(_codePage, pBytes+byteIndex, byteCount, pChars+charIndex, chars.Length - charIndex);
             }
         }
 
@@ -191,7 +190,7 @@ namespace System.Text
             {
                 if (_encodingName == null)
                 {
-                    _encodingName = EncodingTable.GetEnglishNameFromCodePage(_codePage);
+                    _encodingName = "Codepage - " + _codePage.ToString();
                 }
                 return _encodingName;
             }
@@ -201,25 +200,56 @@ namespace System.Text
         {
             get
             {
-                if (_webName == null)
-                {
-                    _webName = EncodingTable.GetWebNameFromCodePage(_codePage);
-                }
-                return _webName;
+                return EncodingName;
             }
         }
 
-        private unsafe int WideCharToMultiByte(char* pChars, int count, byte* pBytes, int byteCount)
+        public override Encoder GetEncoder()
         {
-            int result = Interop.Kernel32.WideCharToMultiByte((uint)_codePage, 0, pChars, count, pBytes, byteCount, IntPtr.Zero, IntPtr.Zero);
+            return new OSEncoder(this);
+        }
+
+        public override Decoder GetDecoder()
+        {
+            switch (CodePage)
+            {
+                case 932:   // Japanese (Shift-JIS) 
+                case 936:   // Chinese Simplified (GB2312)
+                case 949:   // Korean                                   
+                case 950:   // Chinese Traditional (Big5)
+                case 1361:  // Korean (Johab)
+                case 10001: // Japanese (Mac)
+                case 10002: // Chinese Traditional (Mac)
+                case 10003: // Korean (Mac)
+                case 10008: // Chinese Simplified (Mac)
+                case 20000: // Chinese Traditional (CNS)
+                case 20001: // TCA Taiwan
+                case 20002: // Chinese Traditional (Eten)
+                case 20003: // IBM5550 Taiwan
+                case 20004: // TeleText Taiwan
+                case 20005: // Wang Taiwan
+                case 20261: // T.61
+                case 20932: // Japanese (JIS 0208-1990 and 0212-1990)
+                case 20936: // Chinese Simplified (GB2312-80)
+                case 51949: // Korean (EUC)
+                    return new DecoderDBCS(this);
+
+                default:
+                    return base.GetDecoder();
+            }
+        }
+
+        internal static unsafe int WideCharToMultiByte(int codePage, char* pChars, int count, byte* pBytes, int byteCount)
+        {
+            int result = Interop.Kernel32.WideCharToMultiByte((uint)codePage, 0, pChars, count, pBytes, byteCount, IntPtr.Zero, IntPtr.Zero);
             if (result <= 0)
                 throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex);
             return result;
         }
 
-        private unsafe int MultiByteToWideChar(byte* pBytes, int byteCount, char* pChars, int count)
+        internal static unsafe int MultiByteToWideChar(int codePage, byte* pBytes, int byteCount, char* pChars, int count)
         {
-            int result = Interop.Kernel32.MultiByteToWideChar((uint)_codePage, 0, pBytes, byteCount, pChars, count);
+            int result = Interop.Kernel32.MultiByteToWideChar((uint)codePage, 0, pBytes, byteCount, pChars, count);
             if (result <= 0)
                 throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex);
             return result;

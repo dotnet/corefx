@@ -149,8 +149,8 @@ namespace System
         public static void EncodingTest()
         {
             Console.WriteLine(Console.OutputEncoding);
-            Console.WriteLine("This is nonspace mark '\u00A0'.");
-            AssertUserExpectedResults("regular characters without any gibberish characters");
+            Console.WriteLine("'\u03A0\u03A3'.");
+            AssertUserExpectedResults("Pi and Segma or question marks");
         }
 
         private static void AssertUserExpectedResults(string expected)
