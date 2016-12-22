@@ -123,6 +123,9 @@
   <data name="Arg_EmptyOrNullString" xml:space="preserve">
     <value>String cannot be empty or null.</value>
   </data>
+  <data name="Cryptography_Partial_Chain" xml:space="preserve">
+    <value>A certificate chain could not be built to a trusted root authority.</value>
+  </data>
   <data name="Cryptography_Xml_BadWrappedKeySize" xml:space="preserve">
     <value>Bad wrapped key size.</value>
   </data>
@@ -143,9 +146,6 @@
   </data>
   <data name="Cryptography_Xml_DigestValueRequired" xml:space="preserve">
     <value>A Reference must contain a DigestValue.</value>
-  </data>
-  <data name="Cryptography_Xml_E_Chaining" xml:space="preserve">
-    <value>An internal certificate chaining error has occurred.</value>
   </data>
   <data name="Cryptography_Xml_EnvelopedSignatureRequiresContext" xml:space="preserve">
     <value>An XmlDocument context is required for enveloped transforms.</value>

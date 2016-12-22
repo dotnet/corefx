@@ -80,6 +80,15 @@ namespace System {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A certificate chain could not be built to a trusted root authority..
+        /// </summary>
+        internal static string Cryptography_Partial_Chain {
+            get {
+                return ResourceManager.GetString("Cryptography_Partial_Chain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad wrapped key size..
         /// </summary>
         internal static string Cryptography_Xml_BadWrappedKeySize {
@@ -139,15 +148,6 @@ namespace System {
         internal static string Cryptography_Xml_DigestValueRequired {
             get {
                 return ResourceManager.GetString("Cryptography_Xml_DigestValueRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to An internal certificate chaining error has occurred..
-        /// </summary>
-        internal static string Cryptography_Xml_E_Chaining {
-            get {
-                return ResourceManager.GetString("Cryptography_Xml_E_Chaining", resourceCulture);
             }
         }
         
