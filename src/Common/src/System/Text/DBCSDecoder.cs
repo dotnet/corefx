@@ -62,8 +62,8 @@ namespace System.Text
 
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElmentArray = stackalloc byte[1]; // to avoid passing null to GetCharCount
-                byte *pBuffer = pBytes == null ?  pSingleElmentArray : pBytes + index;
+                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to GetCharCount
+                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + index;
                 
                 return GetCharCount(pBuffer, count, flush);
             }
@@ -133,8 +133,8 @@ namespace System.Text
             fixed (char* pChars = chars)
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElmentArray = stackalloc byte[1]; // to avoid passing null to GetByteCount
-                byte *pBuffer = pBytes == null ?  pSingleElmentArray : pBytes + byteIndex;
+                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to GetByteCount
+                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + byteIndex;
 
                 return GetChars(pBuffer, byteCount, pChars + charIndex, chars.Length - charIndex, flush);
             }
@@ -211,8 +211,8 @@ namespace System.Text
             fixed (char* pChars = chars)
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElmentArray = stackalloc byte[1]; // to avoid passing null to Convert
-                byte *pBuffer = pBytes == null ?  pSingleElmentArray : pBytes + byteIndex;
+                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to Convert
+                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + byteIndex;
                 
                 Convert(pBuffer, byteCount, pChars + charIndex, charCount, flush, out bytesUsed, out charsUsed, out completed);
             }
