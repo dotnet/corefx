@@ -48,8 +48,7 @@
     <MSBuild Targets="$(DefaultBuildAllTarget)"
              Projects="@(ProjectWithConfiguration)"
              Condition="'$(SerializeProjects)'=='true' AND '%(Identity)' != ''"
-             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration)"
-             ContinueOnError="ErrorAndContinue" />
+             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration)" />
 
     <MSBuild Targets="$(DefaultBuildAllTarget)"
              Projects="@(ProjectWithConfiguration)"
