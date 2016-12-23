@@ -160,7 +160,7 @@ One can build 32- or 64-bit binaries or for any architecture by specifying in th
 
 ### Tests
 
-We use the OSS testing framework [xunit](http://xunit.github.io/) with the BuildTools test targets [TODO: add link to doc when https://github.com/dotnet/buildtools/pull/1272/ is merged].
+We use the OSS testing framework [xunit](http://xunit.github.io/) with the [BuildTools test targets](https://github.com/dotnet/buildtools/blob/master/Documentation/test-targets-usage.md).
 
 #### Running tests on the command line
 
@@ -262,7 +262,7 @@ When running tests by building a test project, tests that don't apply to the `OS
 ```
 
 _**`ActiveIssue(int issue, TestPlatforms platforms)`:**_
-Use this attribute over test methods, to skip failing tests only on the specific platforms; if no platforms are specified, then the test is skipped on all platforms. This attribute returns the 'failing' category, which is disabled by default.
+Use this attribute over test methods to skip failing tests only on the specific platforms; if no platforms are specified, then the test is skipped on all platforms. This attribute returns the 'failing' category, which is disabled by default.
 
 To run all Linux-compatible tests that are failing:
 ```sh
