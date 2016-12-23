@@ -67,10 +67,12 @@ namespace System.ComponentModel.DataAnnotations
             Assert.Throws<InvalidOperationException>(() => attribute.Validate(new object(), s_testValidationContext));
         }
 
-        [Fact]
-        public static void GetDataTypeName_and_IsValid_on_whitespace_custom_DataTypeAttribute_throws_exception()
+        [Theory]
+        [InlineData(" ")]
+        [InlineData("     ")]
+        public static void GetDataTypeName_and_IsValid_on_whitespace_custom_DataTypeAttribute_throws_exception(string value)
         {
-            var attribute = new DataTypeAttribute(new String(' ', 5)); // Create a string with five whitespaces
+            var attribute = new DataTypeAttribute(value);
             Assert.Equal(DataType.Custom, attribute.DataType); // Only throw when call GetDataTypeName() or Validate()
             AssertEx.Empty(attribute.CustomDataType); // Only throw when call GetDataTypeName() or Validate()
             Assert.Throws<InvalidOperationException>(() => attribute.GetDataTypeName());
