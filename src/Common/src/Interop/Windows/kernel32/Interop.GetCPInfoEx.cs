@@ -8,8 +8,6 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        private const uint ACP = 0x0u;
-
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "GetCPInfoExW")]
         private extern static unsafe int GetCPInfoExW(uint CodePage, uint dwFlags, CPINFOEXW* lpCPInfoEx);
 
@@ -47,12 +45,12 @@ internal partial class Interop
         {
             codePage = 0;
             // Note: GetACP is not available in the Windows Store Profile, but calling
-            // GetCPInfoEx with the value ACP (0) yields the same result.
+            // GetCPInfoEx with the value CP_ACP (0) yields the same result.
             CPINFOEXW cpInfo;
             unsafe
             {
                 CPINFOEXW* lpCPInfoExPtr = &(cpInfo);
-                if (GetCPInfoExW(ACP, 0, lpCPInfoExPtr) != 0)
+                if (GetCPInfoExW(CP_ACP, 0, lpCPInfoExPtr) != 0)
                 {
                     codePage = (int)cpInfo.CodePage;
                     return true;

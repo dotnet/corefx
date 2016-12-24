@@ -55,6 +55,9 @@
     <Compile Include="$(CommonPath)\System\Text\DBCSDecoder.cs">
       <Link>Common\System\Text\DBCSDecoder.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Encoding.Constants.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.Encoding.Constants.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs</Link>
     </Compile>

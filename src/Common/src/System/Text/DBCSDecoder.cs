@@ -4,7 +4,7 @@
 
 using System;
 using System.Text;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Text
 {
@@ -62,11 +62,37 @@ namespace System.Text
 
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to GetCharCount
-                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + index;
+                byte dummyByte;
+                byte* pBuffer = pBytes == null ? &dummyByte : pBytes + index;
                 
                 return GetCharCount(pBuffer, count, flush);
             }
+        }
+
+        private unsafe int ConvertWithLeftOverByte(byte* bytes, int count, char* chars, int charCount)
+        {
+            Debug.Assert(_leftOverLeadByte != 0);
+            byte* pTempBuffer = stackalloc byte[2];
+            pTempBuffer[0] = _leftOverLeadByte;
+
+            int index = 0;
+
+            if (count > 0)
+            {
+                pTempBuffer[1] = bytes[0];
+                index++;
+            }
+
+            int result = OSEncoding.MultiByteToWideChar(_encoding.CodePage, pTempBuffer, index+1, chars, charCount);
+
+            if (count - index > 0)
+                result += OSEncoding.MultiByteToWideChar(
+                                        _encoding.CodePage, bytes + index, 
+                                        count - index,
+                                        chars == null ? null : chars + result, 
+                                        chars == null ? 0 : charCount - result);
+
+            return result;
         }
 
         public unsafe override int GetCharCount(byte* bytes, int count, bool flush)
@@ -90,17 +116,10 @@ namespace System.Text
                 return OSEncoding.MultiByteToWideChar(_encoding.CodePage, bytes, count, null, 0);
             }
 
-            // we have left over lead byte character
             if (count == 0 && !excludeLastByte && !flush)
                 return 0;
 
-            byte [] bufferToProcess = new byte[count+1];
-            bufferToProcess[0] = _leftOverLeadByte;
-            fixed (byte *pBuffer = bufferToProcess)
-            {
-                Buffer.MemoryCopy(bytes, pBuffer+1, count, count);
-                return OSEncoding.MultiByteToWideChar(_encoding.CodePage, pBuffer, bufferToProcess.Length, null, 0);
-            }
+            return ConvertWithLeftOverByte(bytes, count, null, 0);
         }
 
         public override unsafe int GetChars(byte[] bytes, int byteIndex, int byteCount,
@@ -133,8 +152,8 @@ namespace System.Text
             fixed (char* pChars = chars)
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to GetByteCount
-                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + byteIndex;
+                byte dummyByte;
+                byte* pBuffer = pBytes == null ? &dummyByte : pBytes + byteIndex;
 
                 return GetChars(pBuffer, byteCount, pChars + charIndex, chars.Length - charIndex, flush);
             }
@@ -170,15 +189,9 @@ namespace System.Text
             if (byteCount == 0 && lastByte == 0 && !flush)
                 return 0;
 
-            byte [] bufferToProcess = new byte[byteCount + 1];
-            bufferToProcess[0] = _leftOverLeadByte;
-            fixed (byte *pBuffer = bufferToProcess)
-            {
-                Buffer.MemoryCopy(bytes, pBuffer+1, byteCount, byteCount);
-                int result =  OSEncoding.MultiByteToWideChar(_encoding.CodePage, pBuffer, bufferToProcess.Length, chars, charCount);
-                _leftOverLeadByte = lastByte;
-                return result;
-            }
+            int res = ConvertWithLeftOverByte(bytes, byteCount, chars, charCount);
+            _leftOverLeadByte = lastByte;
+            return res;
         }
 
         public override unsafe void Convert(byte[] bytes, int byteIndex, int byteCount,
@@ -211,8 +224,8 @@ namespace System.Text
             fixed (char* pChars = chars)
             fixed (byte* pBytes = bytes)
             {
-                byte *pSingleElementArray = stackalloc byte[1]; // to avoid passing null to Convert
-                byte *pBuffer = pBytes == null ?  pSingleElementArray : pBytes + byteIndex;
+                byte dummyByte;
+                byte* pBuffer = pBytes == null ? &dummyByte : pBytes + byteIndex;
                 
                 Convert(pBuffer, byteCount, pChars + charIndex, charCount, flush, out bytesUsed, out charsUsed, out completed);
             }
@@ -226,32 +239,6 @@ namespace System.Text
                 throw new ArgumentNullException(chars == null ? nameof(chars) : nameof(bytes), SR.ArgumentNull_Array);
             if (byteCount < 0 || charCount < 0)
                 throw new ArgumentOutOfRangeException(byteCount < 0 ? nameof(byteCount) : nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-
-            if (_leftOverLeadByte == 0)
-            {
-                ConvertWorker(bytes, byteCount, chars, charCount, flush, out bytesUsed, out charsUsed, out completed);
-                return;
-            }
-
-            // we have left over character
-            byte [] bufferToProcess = new byte[byteCount+1];
-            bufferToProcess[0] = _leftOverLeadByte;
-
-            fixed (byte *pBuffer = bufferToProcess)
-            {
-                Buffer.MemoryCopy(bytes, pBuffer+1, byteCount, byteCount);
-                ConvertWorker(pBuffer, bufferToProcess.Length, chars, charCount, flush, out bytesUsed, out charsUsed, out completed);
-            }
-        }
-
-        private unsafe void ConvertWorker(byte* bytes, int byteCount, 
-                                    char* chars, int charCount, bool flush,
-                                    out int bytesUsed, out int charsUsed, out bool completed)
-        {
-            byte originalLeftOverByte = _leftOverLeadByte;
-            
-            // clear the state to avoid allocating any more buffers
-            _leftOverLeadByte = 0;
 
             int count = byteCount;
             while (count > 0)
@@ -267,12 +254,11 @@ namespace System.Text
             {
                 // note GetChars can change the _leftOverLeadByte state
                 charsUsed = GetChars(bytes, count, chars, charCount, flush);
-                bytesUsed = originalLeftOverByte == 0 ? count : count - 1;
+                bytesUsed = count;
                 completed = _leftOverLeadByte == 0 && byteCount == count;
                 return;
             }
 
-            _leftOverLeadByte = originalLeftOverByte; // reset the state in case of failures
             bytesUsed = 0;
             charsUsed = 0;
             completed = false;
