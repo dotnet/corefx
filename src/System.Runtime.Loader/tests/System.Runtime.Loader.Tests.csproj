@@ -9,12 +9,16 @@
     <RootNamespace>System.Runtime.Loader.Tests</RootNamespace>
     <AssemblyName>System.Runtime.Loader.Tests</AssemblyName>
     <ProjectGuid>{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}</ProjectGuid>
-    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyLoadContextTest.cs" />
     <Compile Include="CustomTPALoadContext.cs" />
     <Compile Include="ResourceAssemblyLoadContext.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
+    <ProjectReference Include="..\..\System.Runtime.Loader\pkg\System.Runtime.Loader.pkgproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
