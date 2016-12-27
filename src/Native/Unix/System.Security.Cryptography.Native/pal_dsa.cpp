@@ -100,6 +100,16 @@ extern "C" int32_t CryptoNative_DsaVerify(
     return 1;
 }
 
+extern "C" DSA* CryptoNative_DecodeDsaPublicKey(const uint8_t* buf, int32_t len)
+{
+    if (!buf || !len)
+    {
+        return nullptr;
+    }
+
+    return d2i_DSAPublicKey(nullptr, &buf, len);
+}
+
 extern "C" int32_t CryptoNative_GetDsaParameters(
     const DSA* dsa,
     BIGNUM** p, int32_t* pLength,

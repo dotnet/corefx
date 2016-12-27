@@ -362,6 +362,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.EcDsa.ImportExport.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.EcDsa.ImportExport.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.GetMax.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.GetMax.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.EcKey.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.EcKey.cs</Link>
     </Compile>

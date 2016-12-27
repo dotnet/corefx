@@ -79,6 +79,7 @@
     PER_FUNCTION_BLOCK(d2i_PKCS7, true) \
     PER_FUNCTION_BLOCK(d2i_PKCS7_bio, true) \
     PER_FUNCTION_BLOCK(d2i_RSAPublicKey, true) \
+    PER_FUNCTION_BLOCK(d2i_DSAPublicKey, true) \
     PER_FUNCTION_BLOCK(d2i_X509, true) \
     PER_FUNCTION_BLOCK(d2i_X509_bio, true) \
     PER_FUNCTION_BLOCK(d2i_X509_CRL, true) \
@@ -373,6 +374,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define d2i_PKCS7 d2i_PKCS7_ptr
 #define d2i_PKCS7_bio d2i_PKCS7_bio_ptr
 #define d2i_RSAPublicKey d2i_RSAPublicKey_ptr
+#define d2i_DSAPublicKey d2i_DSAPublicKey_ptr
 #define d2i_X509 d2i_X509_ptr
 #define d2i_X509_bio d2i_X509_bio_ptr
 #define d2i_X509_CRL d2i_X509_CRL_ptr

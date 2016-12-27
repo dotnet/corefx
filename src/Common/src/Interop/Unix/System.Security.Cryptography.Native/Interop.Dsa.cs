@@ -74,6 +74,9 @@ internal static partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool DsaVerify(SafeDsaHandle dsa, byte[] hash, int hashLength, byte[] signature, int signatureLength);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DecodeDsaPublicKey")]
+        internal static extern SafeDsaHandle DecodeDsaPublicKey(byte[] buf, int len);
+
         internal static DSAParameters ExportDsaParameters(SafeDsaHandle key, bool includePrivateParameters)
         {
             Debug.Assert(

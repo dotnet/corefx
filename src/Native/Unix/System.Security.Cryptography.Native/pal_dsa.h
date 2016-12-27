@@ -81,6 +81,11 @@ CryptoNative_DsaVerify(
     int32_t signatureLength);
 
 /*
+Shims the d2i_DsaPublicKey method and makes it easier to invoke from managed code.
+*/
+extern "C" DSA* CryptoNative_DecodeDsaPublicKey(const uint8_t* buf, int32_t len);
+
+/*
 Gets all the parameters from the DSA instance.
 
 Returns 1 upon success, otherwise 0.

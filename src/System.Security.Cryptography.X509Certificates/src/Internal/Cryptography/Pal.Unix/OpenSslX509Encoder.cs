@@ -24,6 +24,8 @@ namespace Internal.Cryptography.Pal
             {
                 case Oids.RsaRsa:
                     return BuildRsaPublicKey(encodedKeyValue);
+                case Oids.DsaDsa:
+                    return BuildDsaPublicKey(encodedKeyValue);
             }
 
             // NotSupportedException is what desktop and CoreFx-Windows throw in this situation.
@@ -417,6 +419,19 @@ namespace Internal.Cryptography.Pal
                 RSA rsa = new RSAOpenSsl();
                 rsa.ImportParameters(rsaParameters);
                 return rsa;
+            }
+        }
+
+        private static DSA BuildDsaPublicKey(byte[] encodedData)
+        {
+            using (SafeDsaHandle dsaHandle = Interop.Crypto.DecodeDsaPublicKey(encodedData, encodedData.Length))
+            {
+                Interop.Crypto.CheckValidOpenSslHandle(dsaHandle);
+
+                DSAParameters dsaParameters = Interop.Crypto.ExportDsaParameters(dsaHandle, false);
+                DSA dsa = new DSAOpenSsl();
+                dsa.ImportParameters(dsaParameters);
+                return dsa;
             }
         }
 
