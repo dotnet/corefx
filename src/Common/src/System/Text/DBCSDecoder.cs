@@ -178,7 +178,10 @@ namespace System.Text
             if (_leftOverLeadByte == 0)
             {
                 if (byteCount <= 0)
+                {
+                    _leftOverLeadByte = lastByte;
                     return 0;
+                }
 
                 int result =  OSEncoding.MultiByteToWideChar(_encoding.CodePage, bytes, byteCount, chars, charCount);
                 _leftOverLeadByte = lastByte;

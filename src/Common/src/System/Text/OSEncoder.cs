@@ -152,7 +152,10 @@ namespace System.Text
             if (_charLeftOver == NULL_CHAR)
             {
                 if (charCount <= 0)
+                {
+                    _charLeftOver = lastChar;
                     return 0;
+                }
 
                 int result =  OSEncoding.WideCharToMultiByte(_encoding.CodePage, chars, charCount, bytes, byteCount);
                 _charLeftOver = lastChar;
