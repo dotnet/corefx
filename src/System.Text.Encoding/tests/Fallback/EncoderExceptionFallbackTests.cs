@@ -49,12 +49,23 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        public void CreateFallbackBuffer_Fallback_InvalidSurrogateChars_ThrowsArgumentOutOfRangeException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
+        public void CreateFallbackBuffer_Fallback_InvalidSurrogateChars_Original_ThrowsArgumentOutOfRangeException()
         {
             EncoderFallbackBuffer buffer = new EncoderExceptionFallback().CreateFallbackBuffer();
 
             Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
             Assert.Throws<ArgumentOutOfRangeException>("CharUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
+        public void CreateFallbackBuffer_Fallback_InvalidSurrogateChars_ThrowsArgumentOutOfRangeException()
+        {
+            EncoderFallbackBuffer buffer = new EncoderExceptionFallback().CreateFallbackBuffer();
+
+            Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
+            Assert.Throws<ArgumentOutOfRangeException>("charUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
         }
     }
 }
