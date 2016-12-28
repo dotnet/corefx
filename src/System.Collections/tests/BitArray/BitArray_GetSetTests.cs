@@ -359,7 +359,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix yet.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Int_Hidden(string label, BitArray bits)
         {
@@ -380,7 +380,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix yet.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Int_Hidden_Desktop(string label, BitArray bits)
         {
@@ -397,7 +397,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix yet.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Byte_Hidden(string label, BitArray bits)
         {
@@ -419,7 +419,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix yet.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Byte_Hidden_Desktop(string label, BitArray bits)
         {
