@@ -27,7 +27,7 @@
 
   <PropertyGroup>
     <TestRuntimeDir>$(RuntimePath)</TestRuntimeDir>
-    <TestHostExecutable Condition="'$(TestHostExecutable)' == ''">$(TestRuntimeDir)\corerun.exe</TestHostExecutable>
+    <TestHostExecutable Condition="'$(TestHostExecutable)' == ''">$(TestRuntimeDir)\corerun</TestHostExecutable>
     <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestRuntimeDir)/xunit.console.netcore.exe</XunitExecutable>
   </PropertyGroup>
 
