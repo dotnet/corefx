@@ -629,34 +629,23 @@ namespace System.Text.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Append(new char[0], -1, 0)); // Start index < 0
 
+            if (RuntimeDetection.IsNetFramework)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[0], 0, -1)); // Count < 0
+
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 6, 0)); // Start index + count > value.Length
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 5, 1)); // Start index + count > value.Length
+            }
+            else
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[0], 0, -1)); // Count < 0
+
+                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[5], 6, 0)); // Start index + count > value.Length
+                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[5], 5, 1)); // Start index + count > value.Length
+            }
+
             Assert.Throws<ArgumentOutOfRangeException>("valueCount", () => builder.Append(new char[] { 'a' })); // New length > builder.MaxCapacity
             Assert.Throws<ArgumentOutOfRangeException>("valueCount", () => builder.Append(new char[] { 'a' }, 0, 1)); // New length > builder.MaxCapacity
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Append_CharArray_Count_Invalid()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[0], 0, -1)); // Count < 0
-
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 6, 0)); // Start index + count > value.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 5, 1)); // Start index + count > value.Length
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Append_CharArray_CharCount_Invalid()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-
-            Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[0], 0, -1)); // Count < 0
-
-            Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[5], 6, 0)); // Start index + count > value.Length
-            Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[5], 5, 1)); // Start index + count > value.Length
         }
 
         public static IEnumerable<object[]> AppendFormat_TestData()
@@ -1415,6 +1404,15 @@ namespace System.Text.Tests
 
             Assert.Throws<ArgumentNullException>(() => builder.Insert(0, null, 1, 1)); // Value is null (startIndex and count are not zero)
 
+            if (RuntimeDetection.IsNetFramework)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
+            }
+            else
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
+            }
+
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Insert(0, new char[0], -1, 0)); // Start index < 0
 
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Insert(0, new char[3], 4, 0)); // Start index + char count > value.Length
@@ -1423,22 +1421,6 @@ namespace System.Text.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Insert(builder.Length, new char[1])); // New length > builder.MaxCapacity
             Assert.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Insert(builder.Length, new char[] { 'a' }, 0, 1)); // New length > builder.MaxCapacity
-        }
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Insert_CharArray_Count_Invalid()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
-        }
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Insert_CharArray_CharCount_Invalid()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-            Assert.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
         }
 
         [Theory]
@@ -1473,28 +1455,19 @@ namespace System.Text.Tests
             var builder = new StringBuilder("Hello");
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Remove(-1, 0)); // Start index < 0
             Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(0, -1)); // Length < 0
-        }
 
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Remove_Index_Invalid()
-        {
-            var builder = new StringBuilder("Hello");
-
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(6, 0)); // Start index + length > 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(5, 1)); // Start index + length > 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(4, 2)); // Start index + length > 0
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Parameter name changes in error messages are breaking, not currently backported.")]
-        public static void Remove_Length_Invalid()
-        {
-            var builder = new StringBuilder("Hello");
-
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(6, 0)); // Start index + length > 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(5, 1)); // Start index + length > 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(4, 2)); // Start index + length > 0
+            if (RuntimeDetection.IsNetFramework)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(6, 0)); // Start index + length > 0
+                Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(5, 1)); // Start index + length > 0
+                Assert.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(4, 2)); // Start index + length > 0
+            }
+            else
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(6, 0)); // Start index + length > 0
+                Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(5, 1)); // Start index + length > 0
+                Assert.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(4, 2)); // Start index + length > 0
+            }
         }
 
         [Theory]
