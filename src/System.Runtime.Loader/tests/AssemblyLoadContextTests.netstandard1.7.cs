@@ -282,28 +282,28 @@ namespace System.Runtime.Loader.Tests
             private const int MaxGCRetry = 10;
             private const int MaxWaitTimePerGCRetryInMilli = 10;
 
-            private readonly int expectedCount;
-            private readonly ManualResetEvent evt;
-            private int unloadCount;
+            private readonly int _expectedCount;
+            private readonly ManualResetEvent _evt;
+            private int _unloadCount;
 
             public CollectibleChecker(int expectedCount)
             {
-                this.expectedCount = expectedCount;
-                evt = new ManualResetEvent(false);
+                _expectedCount = expectedCount;
+                _evt = new ManualResetEvent(false);
             }
 
             public void NotifyUnload()
             {
-                if (expectedCount == Interlocked.Increment(ref unloadCount))
+                if (_expectedCount == Interlocked.Increment(ref _unloadCount))
                 {
-                    evt.Set();
+                    _evt.Set();
                 }
             }
 
             public void GcAndCheck(int overrideExpect = -1, int gcCount = MaxGCRetry)
             {
                 CollectAndWait(gcCount);
-                Assert.Equal(overrideExpect >= 0 ? overrideExpect : expectedCount, unloadCount);
+                Assert.Equal(overrideExpect >= 0 ? overrideExpect : _expectedCount, _unloadCount);
             }
 
             private void CollectAndWait(int gcCount)
@@ -311,7 +311,7 @@ namespace System.Runtime.Loader.Tests
                 for (int i = 0; i < gcCount; i++)
                 {
                     GC.Collect(2, GCCollectionMode.Forced, true);
-                    if (evt.WaitOne(MaxWaitTimePerGCRetryInMilli))
+                    if (_evt.WaitOne(MaxWaitTimePerGCRetryInMilli))
                     {
                         break;
                     }
