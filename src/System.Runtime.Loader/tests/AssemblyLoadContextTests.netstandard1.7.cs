@@ -69,7 +69,7 @@ namespace System.Runtime.Loader.Tests
         public static void Unload_CollectibleWithOneAssemblyLoadedWithStatic()
         {
             // Use a collectible ALC + Load an assembly by path + New Instance + Static reference + Unload
-            // We should not receive an event because a static field is referencing an instance of the assembly
+            // Check that we receive the unloading event
 
             var checker = new CollectibleChecker(1);
             var alc = TryCollectibleWithOneAssemblyLoaded(checker, (context, type) =>
@@ -83,7 +83,7 @@ namespace System.Runtime.Loader.Tests
             alc.Unload();
 
             // The static field has an instance of the assembly
-            checker.GcAndCheck(0);
+            checker.GcAndCheck();
         }
 
         [Fact]
