@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace System.Runtime.Loader.Tests
 {
@@ -18,7 +19,7 @@ namespace System.Runtime.Loader.Tests
     {
         public LoadBy LoadBy { get; set; }
 
-        public ResourceAssemblyLoadContext()
+        public ResourceAssemblyLoadContext(bool isCollectible = false) : base(isCollectible)
         {
             LoadBy = LoadBy.Path;
         }
@@ -26,7 +27,8 @@ namespace System.Runtime.Loader.Tests
         // A custom load context which only loads a given assembly if it is an embedded resource.
         protected override Assembly Load(AssemblyName assemblyName)
         {
-            string assembly = assemblyName.Name + ".dll";
+            // Add support for alias assembly
+            string assembly =  assemblyName.Name + ".dll";
             var currentAsm = typeof(ResourceAssemblyLoadContext).GetTypeInfo().Assembly;
             var asmStream = currentAsm.GetManifestResourceStream("System.Runtime.Loader.Tests." + assembly);
 

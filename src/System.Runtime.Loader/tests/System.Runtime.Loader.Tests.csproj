@@ -16,6 +16,9 @@
     <Compile Include="CustomTPALoadContext.cs" />
     <Compile Include="ResourceAssemblyLoadContext.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == ''">
+    <Compile Include="AssemblyLoadContextTests.netstandard1.7.cs" />
+  </ItemGroup>
   <ItemGroup>
     <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
     <ProjectReference Include="..\..\System.Runtime.Loader\pkg\System.Runtime.Loader.pkgproj" />
@@ -26,5 +29,8 @@
   <ItemGroup>
     <EmbeddedResource Include="System.Runtime.Loader.Test.Assembly.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="System.Runtime.Loader.Test.Assembly2.dll" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  </Project>
+</Project>
