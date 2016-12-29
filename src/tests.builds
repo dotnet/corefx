@@ -4,6 +4,7 @@
 
   <ItemGroup>
     <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Security.AccessControl.Tests.csproj" />
+    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\WebServer.csproj" />
     <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*.csproj" Exclude="@(TestProjectExclusions)">
       <AdditionalMetadata>ConfigurationGroup=$(ConfigurationGroup)</AdditionalMetadata>
     </Project>
