@@ -12,6 +12,7 @@ namespace System.Runtime.Loader.Tests
 {
     public partial class AssemblyLoadContextTest
     {
+#if FEATURE_COLLECTIBLE_ALC
         // Tests related to Collectible assemblies
 
         [Fact]
@@ -325,5 +326,6 @@ namespace System.Runtime.Loader.Tests
             expectedContext.Unloading += context => checker.NotifyUnload();
             return new WeakReference<AssemblyLoadContext>(expectedContext);
         }
+#endif
     }
 }
