@@ -19,7 +19,12 @@ namespace System.Runtime.Loader.Tests
     {
         public LoadBy LoadBy { get; set; }
 
+#if FEATURE_COLLECTIBLE_ALC
+
         public ResourceAssemblyLoadContext(bool isCollectible = false) : base(isCollectible)
+#else
+        public ResourceAssemblyLoadContext()
+#endif
         {
             LoadBy = LoadBy.Path;
         }
