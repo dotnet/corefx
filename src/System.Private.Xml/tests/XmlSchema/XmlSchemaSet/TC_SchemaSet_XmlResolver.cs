@@ -109,7 +109,6 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v5 - schema(Local)->schema(Local)->schema(Local)", Priority = 1)]
-        [ActiveIssue(14064)]
         [Fact]
         public void v5()
         {
