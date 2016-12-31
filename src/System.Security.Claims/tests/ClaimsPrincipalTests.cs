@@ -139,7 +139,7 @@ namespace System.Security.Claims
         {
             var baseId1 = new ClaimsIdentity("baseId1");
             var baseId2 = new GenericIdentity("generic_name", "baseId2");
-            var baseId3 = WindowsIdentity.GetAnonymous();
+            var baseId3 = new ClaimsIdentity("customType");
 
             var basePrincipal = new ClaimsPrincipal(baseId1);
             basePrincipal.AddIdentity(baseId2);
