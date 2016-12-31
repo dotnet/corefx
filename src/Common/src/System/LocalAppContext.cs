@@ -8,12 +8,12 @@ namespace System
 {
     internal partial class LocalAppContext
     {
-        private static bool m_isDisableCachingInitialized;
+        private static bool s_isDisableCachingInitialized;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool GetCachedSwitchValue(string switchName, ref int switchValue)
         {
-            if (!m_isDisableCachingInitialized)
+            if (!s_isDisableCachingInitialized)
             {
                 InitDisableCaching();
             }
@@ -46,7 +46,7 @@ namespace System
                 DisableCaching = isEnabled;
             }
             
-            m_isDisableCachingInitialized = true;            
+            s_isDisableCachingInitialized = true;            
         }
 
         private static bool DisableCaching { get; set; }
