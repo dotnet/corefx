@@ -30,11 +30,6 @@
     <BuildToolsTargets45 Condition="'$(OsEnvironment)'=='Windows_NT'">true</BuildToolsTargets45>
   </PropertyGroup>
   
-  <!-- Features -->
-  <PropertyGroup>
-    <DefineConstants>$(DefineConstants),FEATURE_COLLECTIBLE_ALC</DefineConstants>
-  </PropertyGroup>
-  
   <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>

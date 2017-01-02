@@ -3,5 +3,6 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <DefineConstants>$(DefineConstants),FEATURE_COLLECTIBLE_ALC</DefineConstants>	
   </PropertyGroup>
 </Project>
