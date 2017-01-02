@@ -32,5 +32,8 @@
   <ItemGroup>
     <EmbeddedResource Include="System.Runtime.Loader.Test.Assembly2.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="System.Runtime.Loader.Test.AssemblyNotSupported.dll" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

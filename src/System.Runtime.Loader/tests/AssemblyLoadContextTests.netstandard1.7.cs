@@ -255,6 +255,22 @@ namespace System.Runtime.Loader.Tests
             checker.GcAndCheck();
         }
 
+        [Fact]
+        public static void Unsupported_ThreadStatic()
+        {
+            var asmName = new AssemblyName(TestAssemblyNotSupported);
+            var alc = new ResourceAssemblyLoadContext(true) { LoadBy = LoadBy.Path };
+            var asm = alc.LoadFromAssemblyName(asmName);
+
+            Assert.NotNull(asm);
+            var exception = Assert.Throws<ReflectionTypeLoadException>(() => asm.DefinedTypes.FirstOrDefault(t => t.Name == "TestClassNotSupported_ThreadStatic"));
+
+            Assert.Equal(2, exception.LoaderExceptions.Length);
+
+            Assert.True(exception.LoaderExceptions.Any(exp => exp.Message.Contains("Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_ThreadStatic' may not have Thread or Context static members")));
+            Assert.True(exception.LoaderExceptions.Any(exp => exp.Message.Contains("PInvoke method not permitted on type 'System.Runtime.Loader.Tests.TestClassNotSupported_DllImport' from collectible assembly")));
+        }
+
         private static AssemblyLoadContext TryCollectibleWithOneAssemblyLoaded(CollectibleChecker checker, Action<ResourceAssemblyLoadContext, Type> process = null)
         {
             var asmName = new AssemblyName(TestAssembly);
