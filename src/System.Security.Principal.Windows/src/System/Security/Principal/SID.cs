@@ -174,7 +174,7 @@ namespace System.Security.Principal
         /// <summary>Indicates a SID is present in a server that can issue terminal server licenses.</summary>
         WinBuiltinTerminalServerLicenseServersSid = 60,
         [Obsolete]
-		[EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         MaxDefined = WinBuiltinTerminalServerLicenseServersSid, 
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
         WinBuiltinDCOMUsersSid = 61,
