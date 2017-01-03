@@ -23,7 +23,8 @@ namespace System.IO.Compression.Tests
             using (var tempFolder = new TempDirectory(GetTestFilePath()))
             {
                 ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, overwriteFiles: false);
-                Assert.Throws<UnauthorizedAccessException>(ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, overwriteFiles: false));
+                Assert.Throws<UnauthorizedAccessException>(() => ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path /* default false */));
+                Assert.Throws<UnauthorizedAccessException>(() => ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, overwriteFiles: false));
                 ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, overwriteFiles: true);
 
                 DirsEqual(tempFolder.Path, folderName);
@@ -39,7 +40,8 @@ namespace System.IO.Compression.Tests
             using (var tempFolder = new TempDirectory(GetTestFilePath()))
             {
                 ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, Encoding.UTF8, overwriteFiles: false);
-                Assert.Throws<UnauthorizedAccessException>(ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, Encoding.UTF8, overwriteFiles: false));
+                Assert.Throws<UnauthorizedAccessException>(() => ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, Encoding.UTF8 /* default false */));
+                Assert.Throws<UnauthorizedAccessException>(() => ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, Encoding.UTF8, overwriteFiles: false));
                 ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path, Encoding.UTF8, overwriteFiles: true);
 
                 DirsEqual(tempFolder.Path, folderName);
@@ -57,7 +59,8 @@ namespace System.IO.Compression.Tests
                 using (ZipArchive archive = ZipFile.Open(zipFileName, ZipArchiveMode.Read))
                 {
                     archive.ExtractToDirectory(tempFolder.Path);
-                    Assert.Throws<UnauthorizedAccessException>(archive.ExtractToDirectory(tempFolder.Path, overwriteFiles: false));
+                    Assert.Throws<UnauthorizedAccessException>(() => archive.ExtractToDirectory(tempFolder.Path /* default false */));
+                    Assert.Throws<UnauthorizedAccessException>(() => archive.ExtractToDirectory(tempFolder.Path, overwriteFiles: false));
                     archive.ExtractToDirectory(tempFolder.Path, overwriteFiles: true);
 
                     DirsEqual(tempFolder.Path, folderName);
