@@ -6,7 +6,6 @@
       netcoreapp1.1-Unix;
       netstandard1.5-Unix;
       netstandard1.5-Windows_NT;
-      netstandard1.5;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
