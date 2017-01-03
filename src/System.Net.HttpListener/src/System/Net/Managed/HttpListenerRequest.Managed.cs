@@ -318,8 +318,9 @@ namespace System.Net
                     }
                     catch
                     {
-                        _referrer = new Uri("http://someone.is.screwing.with.the.headers.com/");
+                        _referrer = null;
                     }
+                    
                     break;
                 case "cookie":
                     if (_cookies == null)
