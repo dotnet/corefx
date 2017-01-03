@@ -7,7 +7,7 @@
   <PropertyGroup>
     <ProjectGuid>{BB5C85AD-C51A-4903-80E9-6F6E1AC1AD34}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
@@ -17,9 +17,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <ItemGroup>
+    <Compile Include="SocketPerformanceAPMTests.cs" />
     <Compile Include="SocketPerformanceAsyncTests.cs" />
-    <Compile Include="SocketTestClientAPMMock.cs" />    
-    <Compile Include="SocketTestServerAPMMock.cs" />
 
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\TestSettings.cs">
@@ -27,6 +26,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\SocketTestServer.cs">
       <Link>SocketCommon\SocketTestServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Sockets\SocketTestServerAPM.cs">
+      <Link>SocketCommon\SocketTestServerAPM.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\SocketTestServerAsync.cs">
       <Link>SocketCommon\SocketTestServerAsync.cs</Link>
@@ -39,6 +41,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\Performance\SocketTestClient.cs">
       <Link>SocketCommon\SocketTestClient.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Sockets\Performance\SocketTestClientAPM.cs">
+      <Link>SocketCommon\SocketTestClientAPM.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\Performance\SocketTestClientAsync.cs">
       <Link>SocketCommon\SocketTestClientAsync.cs</Link>
