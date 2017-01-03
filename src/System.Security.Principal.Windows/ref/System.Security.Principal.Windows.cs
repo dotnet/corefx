@@ -239,6 +239,7 @@ namespace System.Security.Principal
         [Obsolete]
         [EditorBrowsable(EditorBrowsableState.Never)]
         MaxDefined = WinBuiltinTerminalServerLicenseServersSid,
+        #if NETSTANDARD20
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
         WinBuiltinDCOMUsersSid = 61,
         /// <summary>Indicates a SID that matches the Internet built-in user group.</summary>
@@ -307,6 +308,7 @@ namespace System.Security.Principal
         WinCapabilityEnterpriseAuthenticationSid = 93,
         /// <summary>Indicates a SID for removable storage capability for app containers.</summary>
         WinCapabilityRemovableStorageSid = 94
+        #endif // NETSTANDARD20
     }
     public enum WindowsBuiltInRole
     {
