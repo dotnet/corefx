@@ -26,6 +26,11 @@ namespace System.Security.Cryptography.Xml
         // The entity expansion limit. This is used to prevent entity expansion denial of service attacks.
         internal const long MaxCharactersFromEntities = (long)1e7;
 
+        // The default XML Dsig recursion limit.
+        // This should be within limits of real world scenarios.
+        // Keeping this number low will preserve some stack space
+        internal const int XmlDsigSearchDepth = 20;
+
         private Utils() { }
 
         private static bool HasNamespace(XmlElement element, string prefix, string value)
@@ -176,20 +181,6 @@ namespace System.Security.Cryptography.Xml
             settings.MaxCharactersFromEntities = MaxCharactersFromEntities;
             settings.MaxCharactersInDocument = MaxCharactersInDocument;
             return settings;
-        }
-
-        /// <summary>
-        /// Function get the XML Dsig recursion limit. This function defines the
-        /// default limit in case, limit is not defined by developer or admin then
-        /// it returns the default value.
-        /// </summary>
-        internal static int GetXmlDsigSearchDepth()
-        {
-            //Keeping the default recursion limit to 20. It should be
-            //within limits of real world scenarios. Keeping this number low
-            //will preserve some stack space
-
-            return 20;
         }
 
         internal static XmlDocument PreProcessDocumentInput(XmlDocument document, XmlResolver xmlResolver, string baseUri)

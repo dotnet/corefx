@@ -91,7 +91,7 @@ namespace System.Security.Cryptography.Xml
             // By default the encoding is going to be UTF8
             _encoding = Encoding.UTF8;
             _keyNameMapping = new Hashtable(_capacity);
-            _xmlDsigSearchDepth = Utils.GetXmlDsigSearchDepth();
+            _xmlDsigSearchDepth = Utils.XmlDsigSearchDepth;
         }
 
         /// <summary>
