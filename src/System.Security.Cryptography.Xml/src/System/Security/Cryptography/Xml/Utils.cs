@@ -178,7 +178,6 @@ namespace System.Security.Cryptography.Xml
             return settings;
         }
 
-        private static int? s_xmlDsigSearchDepth = null;
         /// <summary>
         /// Function get the XML Dsig recursion limit. This function defines the
         /// default limit in case, limit is not defined by developer or admin then
@@ -186,16 +185,11 @@ namespace System.Security.Cryptography.Xml
         /// </summary>
         internal static int GetXmlDsigSearchDepth()
         {
-            if (s_xmlDsigSearchDepth.HasValue)
-            {
-                return s_xmlDsigSearchDepth.Value;
-            }
             //Keeping the default recursion limit to 20. It should be
             //within limits of real world scenarios. Keeping this number low
             //will preserve some stack space
 
-            s_xmlDsigSearchDepth = 20;
-            return s_xmlDsigSearchDepth.Value;
+            return 20;
         }
 
         internal static XmlDocument PreProcessDocumentInput(XmlDocument document, XmlResolver xmlResolver, string baseUri)
@@ -693,7 +687,7 @@ namespace System.Security.Cryptography.Xml
             return collection;
         }
 
-        private static readonly char[] hexValues = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        private static readonly char[] s_hexValues = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
         internal static string EncodeHexString(byte[] sArray)
         {
             return EncodeHexString(sArray, 0, (uint)sArray.Length);
@@ -701,7 +695,7 @@ namespace System.Security.Cryptography.Xml
 
         internal static string EncodeHexString(byte[] sArray, uint start, uint end)
         {
-            String result = null;
+            string result = null;
             if (sArray != null)
             {
                 char[] hexOrder = new char[(end - start) * 2];
@@ -709,9 +703,9 @@ namespace System.Security.Cryptography.Xml
                 for (uint i = start, j = 0; i < end; i++)
                 {
                     digit = (uint)((sArray[i] & 0xf0) >> 4);
-                    hexOrder[j++] = hexValues[digit];
+                    hexOrder[j++] = s_hexValues[digit];
                     digit = (uint)(sArray[i] & 0x0f);
-                    hexOrder[j++] = hexValues[digit];
+                    hexOrder[j++] = s_hexValues[digit];
                 }
                 result = new String(hexOrder);
             }
