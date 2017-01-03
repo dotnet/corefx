@@ -6,7 +6,6 @@
       netstandard1.3-Windows_NT;
       netstandard1.7-Unix;
       netstandard1.7-Windows_NT;
-      netstandard1.7;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
