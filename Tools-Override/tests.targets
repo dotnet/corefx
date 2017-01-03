@@ -137,11 +137,11 @@
       <Output TaskParameter="TargetOS" PropertyName="TargetOS" />
     </GetTargetMachineInfo>
     <PropertyGroup>
-      <TestDisabled Condition="'%(UnsupportedPlatformsItems.Identity)' == '$(TargetOS)' Or '$(Configuration)' == ''">true</TestDisabled>
+      <TestDisabled Condition="'%(UnsupportedPlatformsItems.Identity)' == '$(TargetOS)' Or '$(ConfigurationErrorMsg)' != ''">true</TestDisabled>
     </PropertyGroup>
     <Message Condition="'%(UnsupportedPlatformsItems.Identity)' == '$(TargetOS)'"
       Text="Skipping tests in $(AssemblyName) because it is not supported on $(TargetOS)" />
-    <Message Condition="'$(Configuration)' == ''"
+    <Message Condition="'$(ConfigurationErrorMsg)' != ''"
       Text="Skipping tests in $(AssemblyName) because there is no configuration compatible with the current BuildConfiguration." />
   </Target>
 
