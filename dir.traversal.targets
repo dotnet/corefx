@@ -87,7 +87,6 @@
         <AdditionalProperties Condition="'%(ProjectsToTest.FilterToTestTFM)'!=''">FilterToTestTFM=%(ProjectsToTest.FilterToTestTFM);%(ProjectsToTest.AdditionalProperties)</AdditionalProperties>
       </ProjectsToTest>
     </ItemGroup>
-    <Message Importance="high" Text="ProjectsToTest: @(ProjectsToTest)" />
   </Target>
 
   <!-- TestAllProjects will run all tests according to TestTFM value we are filtering with -->
