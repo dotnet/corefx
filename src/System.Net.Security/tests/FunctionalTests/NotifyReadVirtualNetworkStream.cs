@@ -18,12 +18,7 @@ namespace System.Net.Security.Tests
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            var onRead = OnRead;
-            if (onRead != null)
-            {
-                OnRead(buffer, offset, count);
-            }
-
+            OnRead?.Invoke(buffer, offset, count);
             return base.Read(buffer, offset, count);
         }
     }

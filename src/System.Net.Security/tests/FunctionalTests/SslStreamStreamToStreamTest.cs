@@ -301,18 +301,15 @@ namespace System.Net.Security.Tests
                 var tcs = new TaskCompletionSource<object>();
                 serverStream.OnRead += (buffer, offset, count) =>
                 {
-                    if (!tcs.Task.IsCompleted)
-                    {
-                        tcs.SetResult(null);
-                    }
+                    tcs.TrySetResult(null);
                 };
-                var readTask = serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length).ConfigureAwait(false);
+                Task readTask = serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length);
 
                 // Since the sequence of calls that ends in serverStream.Read() is sync, by now
                 // the read task will have acquired the semaphore shared by Stream.BeginReadInternal()
                 // and Stream.BeginWriteInternal().
                 // But to be sure, we wait until we know we're inside Read().
-                await tcs.Task.TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds).ConfigureAwait(false);
+                await tcs.Task.TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
                 // Should not hang
                 await serverSslStream.WriteAsync(new byte[] { 1 }, 0, 1)
