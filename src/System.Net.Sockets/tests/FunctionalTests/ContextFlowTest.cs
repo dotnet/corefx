@@ -42,9 +42,9 @@ namespace System.Net.Sockets.Tests
             AutoResetEvent completed = new AutoResetEvent(false);
 
             // Start async operation
-            var asyncResult = listenSocket.BeginAccept(ar =>
+            IAsyncResult asyncResult = listenSocket.BeginAccept(ar =>
             {
-                var acceptSocket = listenSocket.EndAccept(ar);
+                Socket acceptSocket = listenSocket.EndAccept(ar);
                 Assert.NotNull(acceptSocket);
                 acceptSocket.Close();
 
@@ -63,6 +63,8 @@ namespace System.Net.Sockets.Tests
 
                 // Wait for the completion routine to finish
                 completed.WaitOne();
+
+                Assert.True(asyncResult.IsCompleted);
             }
         }
 

@@ -10,7 +10,7 @@ namespace System.Net
     // This class ensures that the user callback runs in the caller's ExecutionContext.
     internal partial class SimpleContextAwareResult : LazyAsyncResult
     {
-        private ExecutionContext _context;
+        private readonly ExecutionContext _context;
 
         internal SimpleContextAwareResult(object myObject, object myState, AsyncCallback myCallBack)
             : base(myObject, myState, myCallBack)
@@ -25,6 +25,11 @@ namespace System.Net
             {
                 Debug.Assert(ExecutionContext.Capture() == _context);
 
+                CompleteCallback();
+            }
+            else if (_context == null)
+            {
+                // EC flow was suppressed.
                 CompleteCallback();
             }
             else
