@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class MiscStringComparerTests
+    public static partial class MiscStringComparerTests
     {
         public static IEnumerable<object[]> UpperLowerCasing_TestData()
         {
