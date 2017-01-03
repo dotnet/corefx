@@ -35,6 +35,9 @@
     <Compile Include="$(CommonPath)\System\Net\HttpStatusDescription.cs">
       <Link>Common\System\Net\HttpStatusDescription.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
+      <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'net461'">
     <Compile Include="System\Net\Windows\HttpListenerPrefixCollection.Windows.cs" />
@@ -67,9 +70,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
-      <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>

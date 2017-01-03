@@ -32,11 +32,11 @@ using System.Runtime.InteropServices;
 
 namespace System.Net
 {
-    internal class ChunkedInputStream : HttpRequestStream
+    internal sealed class ChunkedInputStream : HttpRequestStream
     {
         private bool _disposed;
         private ChunkStream _decoder;
-        private HttpListenerContext _context;
+        private readonly HttpListenerContext _context;
         private bool _no_more_data;
 
         private class ReadBufferState
@@ -57,8 +57,7 @@ namespace System.Net
             }
         }
 
-        public ChunkedInputStream(HttpListenerContext context, Stream stream,
-                        byte[] buffer, int offset, int length)
+        public ChunkedInputStream(HttpListenerContext context, Stream stream, byte[] buffer, int offset, int length)
                     : base(stream, buffer, offset, length)
         {
             _context = context;
@@ -72,7 +71,7 @@ namespace System.Net
             set { _decoder = value; }
         }
 
-        public override int Read([In, Out] byte[] buffer, int offset, int count)
+        public override int Read(byte[] buffer, int offset, int count)
         {
             IAsyncResult ares = BeginRead(buffer, offset, count, null, null);
             return EndRead(ares);

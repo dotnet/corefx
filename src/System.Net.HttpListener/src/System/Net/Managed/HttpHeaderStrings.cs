@@ -6,19 +6,10 @@ namespace System.Net
 {
     internal class HttpHeaderStrings
     {
-        internal const string Authorization = "Authorization";
-        internal const string ContentType = "Content-Type";
         internal const string Charset = "charset=";
-        internal const string Server = "Server";
         internal const string NetCoreServerName = ".NETCore";
-        internal const string ContentLength = "Content-Length";
-        internal const string Date = "Date";
-        internal const string Connection = "Connection";
         internal const string Close = "close";
-        internal const string TransferEncoding = "Transfer-Encoding";
         internal const string Chunked = "chunked";
-        internal const string KeepAlive = "Keep-Alive";
-        internal const string Location = "Location";
-        internal const string SetCookie = "Set-Cookie";
+        internal const string KeepAlive = "keep-alive";
     }
 }

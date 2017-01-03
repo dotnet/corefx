@@ -38,7 +38,7 @@ using System.Text;
 
 namespace System.Net
 {
-    internal class ChunkStream
+    internal sealed class ChunkStream
     {
         private enum State
         {

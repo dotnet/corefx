@@ -506,7 +506,7 @@ namespace System.Net
             {
                 force |= !_context.Request.KeepAlive;
                 if (!force)
-                    force = (_context.Response.Headers[HttpHeaderStrings.Connection] == HttpHeaderStrings.Close);
+                    force = (_context.Response.Headers[HttpKnownHeaderNames.Connection] == HttpHeaderStrings.Close);
 
                 if (!force && _context.Request.FlushInput())
                 {
