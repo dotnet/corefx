@@ -27,12 +27,15 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TestRuntimeDir>$(RuntimePath)</TestRuntimeDir>
-    <TestRuntimeEnvVar Condition="'$(OS)' == 'Windows_NT'">%RUNTIME_PATH%\</TestRuntimeEnvVar>
-    <TestRuntimeEnvVar Condition="'$(OS)' != 'Windows_NT'">$RUNTIME_PATH/</TestRuntimeEnvVar>
-    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == '' And '$(OS)' == 'Windows_NT'">$(TestRuntimeEnvVar)corerun.exe</TestHostExecutablePath>
-    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == '' And '$(OS)' != 'Windows_NT'">$(TestRuntimeEnvVar)corerun</TestHostExecutablePath>
-    <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestRuntimeEnvVar)xunit.console.netcore.exe</XunitExecutable>
+    <NewSharedFxVersion>9.9.9</NewSharedFxVersion>
+    <OldSharedFxVersion>1.0.0</OldSharedFxVersion>
+    <TestDotNetCli>$(ToolsDir)testdotnetcli</TestDotNetCli>
+    <TestDotNetCliPath>$(TestDotNetCli)\shared\Microsoft.NETCore.App\$(NewSharedFxVersion)</TestDotNetCliPath>
+    <TestDotNetCliPathHostFxr>$(TestDotNetCli)\host\fxr\9.9.9</TestDotNetCliPathHostFxr>
+    <OldDotNetCliPath>$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\$(OldSharedFxVersion)</OldDotNetCliPath>
+    <XunitRuntimeConfig>$(ToolsDir)\xunit.console.netcore.runtimeconfig.json</XunitRuntimeConfig>
+    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestDotNetCli)\dotnet.exe</TestHostExecutablePath>
+    <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestPath)\xunit.console.netcore.exe</XunitExecutable>
   </PropertyGroup>
 
   <!-- General xunit options -->
@@ -62,8 +65,60 @@
 
   <!-- The Code Coverage targets will override TestHost and TestCommandLine if coverage is enabled -->
   <Import Project="$(MSBuildThisFileDirectory)CodeCoverage.targets" />
+  
+  <!-- This will generate a version of the dotnet cli that runs with the live
+       build of corefx using the other components gathered from the stable 
+       version consumed from the Tools directory
+       To debug any issues set COREHOST_TRACE=1 and rerun dotnet
+  -->
+  <UsingTask TaskName="GenerateDepsJson" AssemblyFile="$(BuildToolsTaskDir)CoreFx.Tools.dll"/>  
+  <Target Name="ConstructTestingHost" Condition="!Exists('$(TestDotNetCli)')" >
+    <ItemGroup>
+      <HostFxrFile Include="$(RuntimePath)hostfxr.dll" />
+      <HostFxrFile Include="$(RuntimePath)libhostfxr.so" />
+      <HostFxrFile Include="$(RuntimePath)libhostfxr.dylib" />
+      <DotnetExe Include="$(RuntimePath)dotnet.exe" />
+    </ItemGroup>
+    <MakeDir Directories="$(TestDotNetCliPathHostFxr)" />
+    <Copy SourceFiles="@(HostFxrFile)" 
+          DestinationFolder="$(TestDotNetCliPathHostFxr)" 
+          Condition="Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DotnetExe)" 
+          DestinationFolder="$(TestDotNetCli)" 
+          Condition="Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <LiveDotNetCliComponents Include="$(RuntimePath)\*.*" Exclude="$(RuntimePath)\xunit.console.netcore.exe" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LiveDotNetCliComponents)" 
+          DestinationFiles="@(LiveDotNetCliComponents -> '$(TestDotNetCliPath)\%(Filename)%(Extension)')" 
+          UseHardlinksIfPossible="true" />
+    <ItemGroup>
+      <OriginalDepsJsonPathItemGroup Include="$(OldDotNetCliPath)\Microsoft.NETCore.App.deps.json" />
+    </ItemGroup>
+    <PropertyGroup>
+      <OriginalDepsJsonPath>@(OriginalDepsJsonPathItemGroup)</OriginalDepsJsonPath>
+    </PropertyGroup>
+    <ItemGroup>
+    <!-- This is for HostPolicy, CoreCLR and Jit dependencies to continue to remain inside of the dep.json -->
+          <ExceptionForDepsJson Include="Microsoft.NETCore.DotNetHostPolicy" />
+          <ExceptionForDepsJson Include="Microsoft.NETCore.DotNetHostResolver" />
+          <ExceptionForDepsJson Include="Microsoft.NETCore.Runtime.CoreCLR" />
+          <ExceptionForDepsJson Include="Microsoft.NETCore.Jit" />
+    </ItemGroup>
+    <GenerateDepsJson DepsJsonPath="$(OriginalDepsJsonPath)" 
+                      RuntimeDirectory="$(RuntimePath)"
+                      DepsExceptions="@(ExceptionForDepsJson)"
+                      OutputPath="$(TestDotNetCliPath)\Microsoft.NETCore.App.deps.json"/>
+  </Target>
+  
+  <Target Name="AddRuntimeConfig" >
+    <ItemGroup>
+       <SupplementalTestData Include="$(XunitRuntimeConfig)" />
+       <SupplementalTestData Include="$(RuntimePath)xunit.console.netcore.exe" />
+    </ItemGroup>
+  </Target>
 
-  <Target Name="DiscoverTestInputs" DependsOnTargets="ResolveReferences;GetCopyToOutputDirectoryItems">
+  <Target Name="DiscoverTestInputs" DependsOnTargets="ResolveReferences;GetCopyToOutputDirectoryItems;AddRuntimeConfig">
     <ItemGroup>
       <RunTestsForProjectInputs Include="@(ReferenceCopyLocalPaths)" />
       <RunTestsForProjectInputs Include="@(Content)" />
@@ -79,7 +134,7 @@
            directory.
        2.  Runs the tests. -->
   <Target Name="GenerateTestExecutionScripts"
-          DependsOnTargets="DiscoverTestInputs;CheckTestCategories">
+          DependsOnTargets="DiscoverTestInputs;CheckTestCategories;AddRuntimeConfig">
     <PropertyGroup>
       <TargetOSTrait Condition="'$(TargetOS)'=='Windows_NT'">nonwindowstests</TargetOSTrait>
       <TargetOSTrait Condition="'$(TargetOS)'=='Linux'">nonlinuxtests</TargetOSTrait>
@@ -132,11 +187,6 @@
       Lines="@(IncludedFileForRunnerScript -> '%(PackageRelativePath)')"
       Overwrite="true"
       Encoding="Ascii" />
-
-    <ItemGroup>
-      <TestCommandLines Condition="'$(OS)' == 'Windows_NT'" Include="set CORE_LIBRARIES=%~dp0" />
-      <TestCommandLines Condition="'$(OS)' != 'Windows_NT'" Include="export CORE_LIBRARIES=%24(dirname &quot;%240&quot;)" />
-    </ItemGroup>
 
     <!-- For .NET Native compilation, we first need to generate a native executable if possible. -->
     <ItemGroup Condition="'$(UseDotNetNativeToolchain)' == 'true' AND '$(Performance)'!='true'" >
@@ -239,6 +289,7 @@
   <PropertyGroup>
     <TestDependsOn>
       $(TestDependsOn);
+      ConstructTestingHost;
       DiscoverTestInputs;
       SetupTestProperties;
       CopySupplementalTestData;

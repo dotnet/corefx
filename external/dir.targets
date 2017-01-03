@@ -13,6 +13,8 @@
     Outputs="$(ProjectJson)"
     Condition="Exists('$(ProjectJsonTemplate)')"
     >
+    
+    <Message Importance="High" Text="Using Runtime Identifier: '$(NuGetRuntimeIdentifier)'" />
     <!-- Update project.json template -->
     <WriteLinesToFile
       File="$(ProjectJson)"
