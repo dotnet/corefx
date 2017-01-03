@@ -197,7 +197,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class WhereArrayIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        internal sealed class WhereArrayIterator<TSource> : ManualIterator<TSource>, IIListProvider<TSource>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
@@ -210,7 +210,9 @@ namespace System.Linq
                 _predicate = predicate;
             }
 
-            public override Iterator<TSource> Clone()
+            public override TSource Current => _source[_state - 2];
+
+            public override ManualIterator<TSource> Clone()
             {
                 return new WhereArrayIterator<TSource>(_source, _predicate);
             }
@@ -249,7 +251,6 @@ namespace System.Linq
                     index = _state++;
                     if (_predicate(item))
                     {
-                        _current = item;
                         return true;
                     }
                 }
@@ -299,7 +300,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class WhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        internal sealed class WhereListIterator<TSource> : ManualIterator<TSource>, IIListProvider<TSource>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -313,7 +314,9 @@ namespace System.Linq
                 _predicate = predicate;
             }
 
-            public override Iterator<TSource> Clone()
+            public override TSource Current => _enumerator.Current;
+
+            public override ManualIterator<TSource> Clone()
             {
                 return new WhereListIterator<TSource>(_source, _predicate);
             }
@@ -356,7 +359,6 @@ namespace System.Linq
                             TSource item = _enumerator.Current;
                             if (_predicate(item))
                             {
-                                _current = item;
                                 return true;
                             }
                         }
@@ -411,7 +413,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        internal sealed class WhereSelectArrayIterator<TSource, TResult> : ManualIterator<TResult>, IIListProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
@@ -427,7 +429,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_source[_state - 2]);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
             }
@@ -470,7 +474,6 @@ namespace System.Linq
                     index = _state++;
                     if (_predicate(item))
                     {
-                        _current = _selector(item);
                         return true;
                     }
                 }
@@ -515,7 +518,7 @@ namespace System.Linq
             }
         }
 
-        internal sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        internal sealed class WhereSelectListIterator<TSource, TResult> : ManualIterator<TResult>, IIListProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -532,7 +535,9 @@ namespace System.Linq
                 _selector = selector;
             }
 
-            public override Iterator<TResult> Clone()
+            public override TResult Current => _selector(_enumerator.Current);
+
+            public override ManualIterator<TResult> Clone()
             {
                 return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
             }
@@ -579,7 +584,6 @@ namespace System.Linq
                             TSource item = _enumerator.Current;
                             if (_predicate(item))
                             {
-                                _current = _selector(item);
                                 return true;
                             }
                         }
