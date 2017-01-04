@@ -9,15 +9,13 @@ using Xunit;
 
 namespace System.Net.Tests
 {
-    // TODO: #13187 Implement HttpListener on non-windows platforms.
-    [PlatformSpecific(TestPlatforms.Windows)]
     public class AuthenticationTests
     {
         private const string Basic = "Basic";
         private const string TestUser = "testuser";
         private const string TestPassword = "testpassword";
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.HasHttpApi))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(AuthenticationSchemes.Basic)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
@@ -41,7 +39,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.HasHttpApi))]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task TestAnonymousAuthentication()
         {
             string url = UrlPrefix.CreateLocal();
@@ -62,7 +60,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.HasHttpApi))]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task TestBasicAuthenticationWithDelegate()
         {
             string url = UrlPrefix.CreateLocal();
@@ -84,7 +82,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.HasHttpApi))]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task TestAnonymousAuthenticationWithDelegate()
         {
             string url = UrlPrefix.CreateLocal();

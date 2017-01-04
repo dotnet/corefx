@@ -165,7 +165,7 @@
     "BuildArchitecture": {
       "description": "Sets the value of the build architecture.",
       "valueType": "passThrough",
-      "values": ["x86", "arm", "arm-softfp", "x64", "arm64"],
+      "values": ["x86", "arm", "armel", "x64", "arm64"],
       "defaultValue": "${CPUArch}"
     },
     "CmakeBuildType": {
@@ -264,6 +264,12 @@
             "Project": "src/packages.builds",
             "FilterToOSGroup":"default",
             "MsBuildLogging":"/flp:v=normal;LogFile=build-packages.log"
+          }
+        },
+        "portableLinux":{
+          "description": "Make the build-native script generate binaries that are portable over glibc based Linux distros.",
+          "settings": {
+            "FilterToOSGroup":"linux"
           }
         },
         "tests": {
