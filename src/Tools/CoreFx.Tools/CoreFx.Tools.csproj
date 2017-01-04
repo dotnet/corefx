@@ -21,6 +21,7 @@
     <Compile Include="Configuration\PropertyInfo.cs" />
     <Compile Include="GenerateConfigurationProps.cs" />
     <Compile Include="FindBestConfiguration.cs" />
+    <Compile Include="ValidateVSConfigurations.cs" />
     <Compile Include="GenerateDepsJson.cs" />
     <Compile Include="TryGetManagedAssemblyName.cs" />
   </ItemGroup>
