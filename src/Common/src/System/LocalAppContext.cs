@@ -10,6 +10,7 @@ namespace System
     {
         private static bool s_isDisableCachingInitialized;
         private static bool s_disableCaching;
+        private static readonly object s_syncObject = new object();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool GetCachedSwitchValue(string switchName, ref int switchValue)
@@ -40,13 +41,19 @@ namespace System
             {
                 if (!s_isDisableCachingInitialized)
                 {
-                    bool isEnabled;
-                    if (AppContext.TryGetSwitch(@"TestSwitch.LocalAppContext.DisableCaching", out isEnabled))
+                    lock (s_syncObject)
                     {
-                        s_disableCaching = isEnabled;
-                    }
+                        if (!s_isDisableCachingInitialized)
+                        {
+                            bool isEnabled;
+                            if (AppContext.TryGetSwitch(@"TestSwitch.LocalAppContext.DisableCaching", out isEnabled))
+                            {
+                                s_disableCaching = isEnabled;
+                            }
 
-                    s_isDisableCachingInitialized = true;
+                            s_isDisableCachingInitialized = true;
+                        }
+                    }
                 }
 
                 return s_disableCaching;
