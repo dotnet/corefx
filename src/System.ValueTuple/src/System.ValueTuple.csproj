@@ -6,7 +6,6 @@
     <ProjectGuid>{4C2655DB-BD9E-4C86-83A6-744ECDDBDF29}</ProjectGuid>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <UseOpenKey Condition="'$(UseOpenKey)'==''">true</UseOpenKey>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'netstandard1.0'">.NETStandard,Version=v1.0</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == ''">true</IsPartialFacadeAssembly>
   </PropertyGroup>

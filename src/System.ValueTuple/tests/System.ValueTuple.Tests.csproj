@@ -7,7 +7,6 @@
     <ProjectGuid>{CBD5AE8D-8595-48E2-848F-1A3492A28FDB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.ValueTuple.Tests</AssemblyName>
-    <NugetTargetMoniker Condition="'$(TargetGroup)' == 'netstandard1.3'">.NETStandard,Version=v1.3</NugetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
     <DefineConstants Condition="'$(TargetGroup)'==''">$(DefineConstants);netcoreapp11</DefineConstants>
   </PropertyGroup>

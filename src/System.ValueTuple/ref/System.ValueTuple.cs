@@ -9,9 +9,6 @@ namespace System
 {
     public struct ValueTuple
         : IEquatable<ValueTuple>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public override bool Equals(object obj) { throw null; }
         public bool Equals(ValueTuple other) { throw null; }
@@ -22,10 +19,6 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
         public static ValueTuple Create() { throw null; }
         public static ValueTuple<T1> Create<T1>(T1 item1) { throw null; }
         public static ValueTuple<T1, T2> Create<T1, T2>(T1 item1, T2 item2) { throw null; }
@@ -38,9 +31,6 @@ namespace System
     }
     public struct ValueTuple<T1>
         : IEquatable<ValueTuple<T1>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public ValueTuple(T1 item1) { throw null; }
@@ -53,17 +43,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2>
         : IEquatable<ValueTuple<T1, T2>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -77,17 +60,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3>
         : IEquatable<ValueTuple<T1, T2, T3>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -101,17 +77,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3, T4>
         : IEquatable<ValueTuple<T1, T2, T3, T4>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -127,17 +96,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3, T4, T5>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -154,17 +116,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3, T4, T5, T6>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -182,17 +137,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -211,21 +159,11 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
     [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
         where TRest : struct
-#if netcoreapp11
-        , Runtime.CompilerServices.ITuple
-#endif
     {
         public T1 Item1;
         public T2 Item2;
@@ -245,9 +183,5 @@ namespace System
         public override int GetHashCode() { throw null; }
         int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp11
-        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
-        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
-#endif
     }
 }

@@ -3,16 +3,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.ValueTuple.Tests.csproj">
+      <TestTFMs>netcoreapp1.1</TestTFMs>
+    </Project>
+    <Project Include="System.ValueTuple.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
+      <TestTFMs>netcore50;net46</TestTFMs>
     </Project>
     <!--<Project Include="System.ValueTuple.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
       <OSGroup>Windows_NT</OSGroup>
       <TestTFMs>netcore50;net46</TestTFMs>
     </Project>-->
-    <Project Include="System.ValueTuple.Tests.csproj">
-      <TestTFMs>netcoreapp1.1</TestTFMs>
-    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
