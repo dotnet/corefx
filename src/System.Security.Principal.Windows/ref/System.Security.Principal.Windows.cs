@@ -236,8 +236,8 @@ namespace System.Security.Principal
         BuiltinAuthorizationAccessSid = 59,
         /// <summary>Indicates a SID is present in a server that can issue terminal server licenses.</summary>
         WinBuiltinTerminalServerLicenseServersSid = 60,
-        [Obsolete]
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [System.ObsoleteAttribute]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         MaxDefined = WinBuiltinTerminalServerLicenseServersSid,
         #if NETSTANDARD20
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
