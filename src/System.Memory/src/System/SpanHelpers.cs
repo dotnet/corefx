@@ -130,14 +130,12 @@ namespace System
             else
             {
                 ulong byteLengthULong = (ulong)byteLength;
-                // PERF: Optimizing for the case where byteLength is less than or equal to uint.MaxValue
-                uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                 do
                 {
+                    uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                     Unsafe.InitBlockUnaligned(ptr, 0, byteLengthUInt);
                     ptr += byteLengthUInt;
                     byteLengthULong -= byteLengthUInt;
-                    byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                 } while (byteLengthULong > 0);
             }
         }
@@ -151,16 +149,14 @@ namespace System
             else
             {
                 ulong byteLengthULong = (ulong)byteLength;
-                // PERF: Optimizing for the case where byteLength is less than or equal to uint.MaxValue
-                uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                 long byteOffset = 0;
                 do
                 {
+                    uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                     ref byte bOffset = ref Unsafe.Add(ref b, (IntPtr)byteOffset);
                     Unsafe.InitBlockUnaligned(ref bOffset, 0, byteLengthUInt);
                     byteOffset += byteLengthUInt;
                     byteLengthULong -= byteLengthUInt;
-                    byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                 } while (byteLengthULong > 0);
             }
         }
