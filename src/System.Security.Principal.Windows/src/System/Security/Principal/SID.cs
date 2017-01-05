@@ -173,7 +173,7 @@ namespace System.Security.Principal
         BuiltinAuthorizationAccessSid = 59,
         /// <summary>Indicates a SID is present in a server that can issue terminal server licenses.</summary>
         WinBuiltinTerminalServerLicenseServersSid = 60,
-        [Obsolete]
+        [Obsolete("This member has been depcreated and is only maintained for backwards compatability. WellKnownSidType values greater than MaxDefined may be defined in future releases.")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         MaxDefined = WinBuiltinTerminalServerLicenseServersSid, 
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
@@ -244,6 +244,8 @@ namespace System.Security.Principal
         WinCapabilityEnterpriseAuthenticationSid = 93,
         /// <summary>Indicates a SID for removable storage capability for app containers.</summary>
         WinCapabilityRemovableStorageSid = 94
+        // Note: Adding additional values require changes everywhere where the value above is used as the maximum defined WellKnownSidType value.
+        // E.g. System.Security.Principal.SecurityIdentifier constructor
     }
 
     //
