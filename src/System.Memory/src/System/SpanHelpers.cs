@@ -137,37 +137,32 @@ namespace System
                     Unsafe.InitBlockUnaligned(ptr, 0, byteLengthUInt);
                     ptr += byteLengthUInt;
                     byteLengthULong -= byteLengthUInt;
-                    byteLengthUInt = byteLengthULong <= uint.MaxValue ? (uint)byteLengthULong : uint.MaxValue;
+                    byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
                 } while (byteLengthULong > 0);
             }
         }
 
         public static unsafe void ClearLessThanPointerSized(ref byte b, UIntPtr byteLength)
         {
-            fixed (byte* p = &b)
+            if (sizeof(UIntPtr) == sizeof(uint))
             {
-                // TODO: Replace with ref version of InitBlockUnaligned
-                ClearLessThanPointerSized(p, byteLength);
+                Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
             }
-            //if (sizeof(UIntPtr) == sizeof(uint))
-            //{
-            //    Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
-            //}
-            //else
-            //{
-            //    var byteLengthULong = (ulong)byteLength;
-            //    // Optimizing for the case where byteLength is less than or equal to uint.MaxValue
-            //    var byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
-            //    do
-            //    {
-            // TODO: Offset b to where we are...
-            // ref next = Unsafe.Add<byte>(ref b, byteLengthULong -)
-            //        Unsafe.InitBlockUnaligned(, 0, byteLengthUInt);
-            //        byteLengthULong -= byteLengthUInt;
-            //        byteLengthUInt = byteLengthULong <= uint.MaxValue ? (uint)byteLength : uint.MaxValue;
-            //    }
-            //    while (byteLengthUInt > 0);
-            //}
+            else
+            {
+                ulong byteLengthULong = (ulong)byteLength;
+                // PERF: Optimizing for the case where byteLength is less than or equal to uint.MaxValue
+                uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
+                long byteOffset = 0;
+                do
+                {
+                    ref byte bOffset = ref Unsafe.Add(ref b, (IntPtr)byteOffset);
+                    Unsafe.InitBlockUnaligned(ref bOffset, 0, byteLengthUInt);
+                    byteOffset += byteLengthUInt;
+                    byteLengthULong -= byteLengthUInt;
+                    byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
+                } while (byteLengthULong > 0);
+            }
         }
 
         public unsafe static void ClearPointerSizedWithoutReferences(ref byte b, UIntPtr byteLength)
