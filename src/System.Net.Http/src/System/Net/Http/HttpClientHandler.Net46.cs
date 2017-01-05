@@ -1065,7 +1065,7 @@ namespace System.Net.Http
                 }
                 catch (WebException wex)
                 {
-                    throw new IOException(SR.net_http_read_error, wex);
+                    throw new IOException(SR.net_http_io_read, wex);
                 }
             }
 
@@ -1077,7 +1077,7 @@ namespace System.Net.Http
                 }
                 catch (WebException wex)
                 {
-                    throw new IOException(SR.net_http_read_error, wex);
+                    throw new IOException(SR.net_http_io_read, wex);
                 }
             }
 
@@ -1089,7 +1089,7 @@ namespace System.Net.Http
                 }
                 catch (WebException wex)
                 {
-                    throw new IOException(SR.net_http_read_error, wex);
+                    throw new IOException(SR.net_http_io_read, wex);
                 }
             }
 #if !NET_4
@@ -1102,7 +1102,7 @@ namespace System.Net.Http
                 }
                 catch (WebException wex)
                 {
-                    throw new IOException(SR.net_http_read_error, wex);
+                    throw new IOException(SR.net_http_io_read, wex);
                 }
             }
 #endif
@@ -1114,7 +1114,7 @@ namespace System.Net.Http
                 }
                 catch (WebException wex)
                 {
-                    throw new IOException(SR.net_http_read_error, wex);
+                    throw new IOException(SR.net_http_io_read, wex);
                 }
             }
         }
