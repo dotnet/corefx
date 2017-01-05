@@ -67,6 +67,7 @@ namespace System
     {
         public T1 Item1;
         public T2 Item2;
+        public T3 Item3;
         public ValueTuple(T1 item1, T2 item2, T3 item3) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(ValueTuple<T1, T2, T3> other) { throw null; }
