@@ -4,7 +4,7 @@
   <ItemGroup>
     <Project Include="System.Memory.Tests.csproj">
       <OSGroup>Windows_NT</OSGroup>
-      <TestTFMs>netcore50;netcoreapp1.0;net46</TestTFMs>
+      <TestTFMs>netcore50;netcoreapp1.0;net46;netcoreapp1.1</TestTFMs>
     </Project>
     <Project Include="System.Memory.Tests.csproj">
       <TargetGroup>netcoreapp1.1</TargetGroup>
