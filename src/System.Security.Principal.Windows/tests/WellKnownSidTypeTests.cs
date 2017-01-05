@@ -111,4 +111,13 @@ public class WellKnownSidTypeTests
 
         Assert.True(wellKnownSidInstance.IsWellKnown(sidType));
     }
+
+    [Theory]
+    [InlineData((WellKnownSidType)-1)]
+    [InlineData((WellKnownSidType)((int)WellKnownSidType.WinCapabilityRemovableStorageSid + 1))]
+    public void CreatingSecurityIdentifierOutsideWellKnownSidTypeDefinedRangeThrowsException(WellKnownSidType sidType)
+    {
+        var currentDomainSid = WindowsIdentity.GetCurrent().Owner.AccountDomainSid;
+        Assert.Throws<ArgumentException>(() => new SecurityIdentifier(sidType, currentDomainSid));
+    }
 }
