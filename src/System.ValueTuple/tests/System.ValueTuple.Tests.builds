@@ -9,11 +9,11 @@
       <TargetGroup>netstandard1.3</TargetGroup>
       <TestTFMs>netcore50;net46</TestTFMs>
     </Project>
-    <!--<Project Include="System.ValueTuple.Tests.csproj">
+    <Project Include="System.ValueTuple.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
       <OSGroup>Windows_NT</OSGroup>
       <TestTFMs>netcore50;net46</TestTFMs>
-    </Project>-->
+    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
