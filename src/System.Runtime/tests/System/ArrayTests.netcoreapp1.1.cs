@@ -42,7 +42,8 @@ namespace System.Tests
         {
             int count = source.Count();
             TResult repeatedValue = transform(seed);
-            IEnumerable<TResult> transformed = source.Select(transform);
+            // Force evaluation so neither `source` or `transform` are re-run if the sequence is enumerated more than once.
+            IEnumerable<TResult> transformed = source.Select(transform).ToList();
 
             yield return new object[] { transformed, repeatedValue, 0, count }; // Fill the entire array.
             yield return new object[] { transformed, repeatedValue, 0, count / 2 }; // Fill the beginning of the array.
