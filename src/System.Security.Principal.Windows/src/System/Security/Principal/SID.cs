@@ -599,7 +599,7 @@ nameof(binaryForm));
             // sidType should not exceed the max defined value
             //
 
-            if ((sidType < WellKnownSidType.NullSid) || (sidType > WellKnownSidType.MaxDefined))
+            if ((sidType < WellKnownSidType.NullSid) || (sidType > WellKnownSidType.WinCapabilityRemovableStorageSid))
             {
                 throw new ArgumentException(SR.Argument_InvalidValue, nameof(sidType));
             }
