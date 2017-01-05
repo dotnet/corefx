@@ -8,6 +8,7 @@
     <UseOpenKey Condition="'$(UseOpenKey)'==''">true</UseOpenKey>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == ''">true</IsPartialFacadeAssembly>
+    <RunApiCompat Condition="'$(TargetGroup)' == 'portable-net40+sl4+win8+wp8'">false</RunApiCompat> 
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
