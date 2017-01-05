@@ -120,4 +120,10 @@ public class WellKnownSidTypeTests
         var currentDomainSid = WindowsIdentity.GetCurrent().Owner.AccountDomainSid;
         Assert.Throws<ArgumentException>(() => new SecurityIdentifier(sidType, currentDomainSid));
     }
+
+    [Fact]
+    public void MaxDefinedHasLegacyValue()
+    {
+        Assert.Equal(WellKnownSidType.WinBuiltinTerminalServerLicenseServersSid, WellKnownSidType.MaxDefined);
+    }
 }
