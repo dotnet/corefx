@@ -332,9 +332,7 @@ namespace System.Net.Http
             SetServicePointOptions(webRequest, request);
             SetRequestHeaders(webRequest, request);
             SetContentHeaders(webRequest, request);
-#if !NET_4
-            request.SetRtcOptions(webRequest);
-#endif
+
             // For Extensibility
             InitializeWebRequest(request, webRequest);
 
@@ -869,9 +867,6 @@ namespace System.Net.Http
             {
                 state.webRequest.BeginGetResponse(getResponseCallback, state);
             }
-#if !NET_4
-            state.requestMessage.MarkRtcFlushComplete();
-#endif
         }
 
         private void GetResponseCallback(IAsyncResult ar)
@@ -980,9 +975,6 @@ namespace System.Net.Http
                 {
                     state.tcs.TrySetException(e);
                 }
-#if !NET_4
-            state.requestMessage.AbortRtcRequest();
-#endif
         }
 
         private static void OnCancel(object state)
