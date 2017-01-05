@@ -6,10 +6,10 @@
     <Project Include="System.IO.Compression.ZipFile.Tests.csproj">
       <OSGroup>Windows_NT</OSGroup>
       <TestTFMs>netcore50;net46</TestTFMs>
+      <TargetGroup>netstandard1.3</TargetGroup>
     </Project>
     <Project Include="System.IO.Compression.ZipFile.Tests.csproj">
-      <TargetGroup>netcoreapp1.1</TargetGroup>
-      <TestTFMs>netcoreapp1.1</TestTFMs>
+      <TargetGroup>netstandard1.3</TargetGroup>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
