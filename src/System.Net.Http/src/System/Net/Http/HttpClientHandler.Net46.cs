@@ -1,4 +1,8 @@
-﻿using System.Threading;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -20,30 +24,30 @@ namespace System.Net.Http
     {
         #region Fields
 
-        private static readonly Action<object> onCancel = OnCancel;
+        private static readonly Action<object> s_onCancel = OnCancel;
 
-        private readonly Action<object> startRequest;
-        private readonly AsyncCallback getRequestStreamCallback;
-        private readonly AsyncCallback getResponseCallback;
+        private readonly Action<object> _startRequest;
+        private readonly AsyncCallback _getRequestStreamCallback;
+        private readonly AsyncCallback _getResponseCallback;
 
-        private volatile bool operationStarted;
-        private volatile bool disposed;
+        private volatile bool _operationStarted;
+        private volatile bool _disposed;
 
-        private long maxRequestContentBufferSize;
-        private CookieContainer cookieContainer;
-        private bool useCookies;
-        private DecompressionMethods automaticDecompression;
-        private IWebProxy proxy;
-        private bool useProxy;
-        private bool preAuthenticate;
-        private bool useDefaultCredentials;
-        private ICredentials credentials;
-        private bool allowAutoRedirect;
-        private int maxAutomaticRedirections;
-        private string connectionGroupName;
-        private ClientCertificateOption clientCertOptions;
-        private X509Certificate2Collection clientCertificates;
-        private IDictionary<String, Object> properties; // Only create dictionary when required.
+        private long _maxRequestContentBufferSize;
+        private CookieContainer _cookieContainer;
+        private bool _useCookies;
+        private DecompressionMethods _automaticDecompression;
+        private IWebProxy _proxy;
+        private bool _useProxy;
+        private bool _preAuthenticate;
+        private bool _useDefaultCredentials;
+        private ICredentials _credentials;
+        private bool _allowAutoRedirect;
+        private int _maxAutomaticRedirections;
+        private string _connectionGroupName;
+        private ClientCertificateOption _clientCertOptions;
+        private X509Certificate2Collection _clientCertificates;
+        private IDictionary<String, Object> _properties; // Only create dictionary when required.
 
 #if DEBUG
         // The following delegate is only used for unit-testing: It allows tests to create a custom HttpWebRequest
@@ -56,34 +60,42 @@ namespace System.Net.Http
 
         #region Properties
 
-        public virtual bool SupportsAutomaticDecompression
+        public bool AllowAutoRedirect
         {
-            get { return true; }
-        }
+            get
+            {
+                return _allowAutoRedirect;
+            }
 
-        public virtual bool SupportsProxy
-        {
-            get { return true; }
-        }
-
-        public virtual bool SupportsRedirectConfiguration
-        {
-            get { return true; }
-        }
-
-        public bool UseCookies
-        {
-            get { return useCookies; }
             set
             {
                 CheckDisposedOrStarted();
-                useCookies = value;
+                _allowAutoRedirect = value;
+            }
+        }
+
+        public DecompressionMethods AutomaticDecompression
+        {
+            get
+            {
+                return _automaticDecompression;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _automaticDecompression = value;
             }
         }
 
         public bool CheckCertificateRevocationList
         {
-            get { return ServicePointManager.CheckCertificateRevocationList; }
+            // TODO: New property not in .NET Framework
+            get
+            {
+                return ServicePointManager.CheckCertificateRevocationList;
+            }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -92,9 +104,46 @@ namespace System.Net.Http
             }
         }
 
+        public ClientCertificateOption ClientCertificateOptions
+        {
+            get
+            {
+                return _clientCertOptions;
+            }
+
+            set
+            {
+                if (value != ClientCertificateOption.Manual
+                    && value != ClientCertificateOption.Automatic)
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
+                CheckDisposedOrStarted();
+                _clientCertOptions = value;
+            }
+        }
+
+        public X509CertificateCollection ClientCertificates
+        {
+            // TODO: New property not in .NET Framework
+            get
+            {
+                if (_clientCertificates == null)
+                {
+                    _clientCertificates = new X509Certificate2Collection();
+                }
+
+                return _clientCertificates;
+            }
+        }
+
         public CookieContainer CookieContainer
         {
-            get { return cookieContainer; }
+            get
+            {
+                return _cookieContainer;
+            }
+
             set
             {
                 if (value == null)
@@ -107,44 +156,32 @@ namespace System.Net.Http
                         SR.net_http_invalid_enable_first, "UseCookies", "true"));
                 }
                 CheckDisposedOrStarted();
-                cookieContainer = value;
+                _cookieContainer = value;
             }
         }
 
-        public ClientCertificateOption ClientCertificateOptions
-        {
-            get { return clientCertOptions; }
-            set
-            {
-                if (value != ClientCertificateOption.Manual
-                    && value != ClientCertificateOption.Automatic)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
-                CheckDisposedOrStarted();
-                clientCertOptions = value;
-            }
-        }
-
-        public X509CertificateCollection ClientCertificates
+        public ICredentials Credentials
         {
             get
             {
-                if (clientCertificates == null)
-                {
-                    clientCertificates = new X509Certificate2Collection();
-                }
+                return _credentials;
+            }
 
-                return clientCertificates;
+            set
+            {
+                CheckDisposedOrStarted();
+                _credentials = value;
             }
         }
 
         public ICredentials DefaultProxyCredentials
         {
+            // TODO: New property not in .NET Framework
             get
             {
                 return null;
             }
+
             set
             {
                 throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
@@ -152,86 +189,13 @@ namespace System.Net.Http
             }
         }
 
-        public DecompressionMethods AutomaticDecompression
-        {
-            get { return automaticDecompression; }
-            set
-            {
-                CheckDisposedOrStarted();
-                automaticDecompression = value;
-            }
-        }
-
-        public bool UseProxy
-        {
-            get { return useProxy; }
-            set
-            {
-                CheckDisposedOrStarted();
-                useProxy = value;
-            }
-        }
-
-        public IWebProxy Proxy
-        {
-            get { return proxy; }
-            [SecuritySafeCritical]
-            set
-            {
-                if (!UseProxy && value != null)
-                {
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
-                        SR.net_http_invalid_enable_first, "UseProxy", "true"));
-                }
-                CheckDisposedOrStarted();
-                ExceptionHelper.WebPermissionUnrestricted.Demand();
-                proxy = value;
-            }
-        }
-
-        public bool PreAuthenticate
-        {
-            get { return preAuthenticate; }
-            set
-            {
-                CheckDisposedOrStarted();
-                preAuthenticate = value;
-            }
-        }
-
-        public bool UseDefaultCredentials
-        {
-            get { return useDefaultCredentials; }
-            set
-            {
-                CheckDisposedOrStarted();
-                useDefaultCredentials = value;
-            }
-        }
-
-        public ICredentials Credentials
-        {
-            get { return credentials; }
-            set
-            {
-                CheckDisposedOrStarted();
-                credentials = value;
-            }
-        }
-
-        public bool AllowAutoRedirect
-        {
-            get { return allowAutoRedirect; }
-            set
-            {
-                CheckDisposedOrStarted();
-                allowAutoRedirect = value;
-            }
-        }
-
         public int MaxAutomaticRedirections
         {
-            get { return maxAutomaticRedirections; }
+            get
+            {
+                return _maxAutomaticRedirections;
+            }
+
             set
             {
                 if (value <= 0)
@@ -239,16 +203,18 @@ namespace System.Net.Http
                     throw new ArgumentOutOfRangeException("value");
                 }
                 CheckDisposedOrStarted();
-                maxAutomaticRedirections = value;
+                _maxAutomaticRedirections = value;
             }
         }
 
         public int MaxConnectionsPerServer
         {
+            // TODO: New property not in .NET Framework
             get
             {
                 return ServicePointManager.DefaultConnectionLimit;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -259,7 +225,11 @@ namespace System.Net.Http
 
         public long MaxRequestContentBufferSize
         {
-            get { return maxRequestContentBufferSize; }
+            get
+            {
+                return _maxRequestContentBufferSize;
+            }
+
             set
             {
                 // Setting the value to 0 is OK: It means the user doesn't want the handler to buffer content.
@@ -274,16 +244,18 @@ namespace System.Net.Http
                         HttpContent.MaxBufferSize));
                 }
                 CheckDisposedOrStarted();
-                maxRequestContentBufferSize = value;
+                _maxRequestContentBufferSize = value;
             }
         }
 
         public int MaxResponseHeadersLength
         {
+            // TODO: New property not in .NET Framework
             get
             {
                 return 0;
             }
+
             set
             {
                 throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
@@ -291,25 +263,63 @@ namespace System.Net.Http
             }
         }
 
-        public IDictionary<String, Object> Properties
+        public bool PreAuthenticate
         {
             get
             {
-                if (properties == null)
+                return _preAuthenticate;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _preAuthenticate = value;
+            }
+        }
+
+        public IDictionary<String, Object> Properties
+        {
+            // TODO: New property not in .NET Framework
+            get
+            {
+                if (_properties == null)
                 {
-                    properties = new Dictionary<String, object>();
+                    _properties = new Dictionary<String, object>();
                 }
 
-                return properties;
+                return _properties;
+            }
+        }
+
+        public IWebProxy Proxy
+        {
+            get
+            {
+                return _proxy;
+            }
+
+            [SecuritySafeCritical]
+            set
+            {
+                if (!UseProxy && value != null)
+                {
+                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
+                        SR.net_http_invalid_enable_first, "UseProxy", "true"));
+                }
+                CheckDisposedOrStarted();
+                ExceptionHelper.WebPermissionUnrestricted.Demand();
+                _proxy = value;
             }
         }
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
+            // TODO: New property not in .NET Framework
             get
             {
                 return null;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -323,10 +333,12 @@ namespace System.Net.Http
 
         public SslProtocols SslProtocols
         {
+            // TODO: New property not in .NET Framework
             get
             {
                 return SslProtocols.None;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -338,42 +350,108 @@ namespace System.Net.Http
             }
         }
 
+        public virtual bool SupportsAutomaticDecompression
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public virtual bool SupportsProxy
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public virtual bool SupportsRedirectConfiguration
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public bool UseCookies
+        {
+            get
+            {
+                return _useCookies;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _useCookies = value;
+            }
+        }
+
+        public bool UseDefaultCredentials
+        {
+            get
+            {
+                return _useDefaultCredentials;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _useDefaultCredentials = value;
+            }
+        }
+
+        public bool UseProxy
+        {
+            get
+            {
+                return _useProxy;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _useProxy = value;
+            }
+        }
+
         #endregion Properties
 
         #region De/Constructors
 
         public HttpClientHandler()
         {
-            this.startRequest = StartRequest;
-            this.getRequestStreamCallback = GetRequestStreamCallback;
-            this.getResponseCallback = GetResponseCallback;
+            _startRequest = StartRequest;
+            _getRequestStreamCallback = GetRequestStreamCallback;
+            _getResponseCallback = GetResponseCallback;
 
-            this.connectionGroupName = RuntimeHelpers.GetHashCode(this).ToString(NumberFormatInfo.InvariantInfo);
+            _connectionGroupName = RuntimeHelpers.GetHashCode(this).ToString(NumberFormatInfo.InvariantInfo);
 
             // Set HWR default values
-            this.allowAutoRedirect = true;
-            this.maxRequestContentBufferSize = HttpContent.MaxBufferSize;
-            this.automaticDecompression = DecompressionMethods.None;
-            this.cookieContainer = new CookieContainer(); // default container used for dealing with auto-cookies.
-            this.credentials = null;
-            this.maxAutomaticRedirections = 50;
-            this.preAuthenticate = false;
-            this.proxy = null;
-            this.useProxy = true;
-            this.useCookies = true; // deal with cookies by default.
-            this.useDefaultCredentials = false;
-            this.clientCertOptions = ClientCertificateOption.Manual;
+            _allowAutoRedirect = true;
+            _maxRequestContentBufferSize = HttpContent.MaxBufferSize;
+            _automaticDecompression = DecompressionMethods.None;
+            _cookieContainer = new CookieContainer(); // default container used for dealing with auto-cookies.
+            _credentials = null;
+            _maxAutomaticRedirections = 50;
+            _preAuthenticate = false;
+            _proxy = null;
+            _useProxy = true;
+            _useCookies = true; // deal with cookies by default.
+            _useDefaultCredentials = false;
+            _clientCertOptions = ClientCertificateOption.Manual;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !disposed)
+            if (disposing && !_disposed)
             {
-                disposed = true;
+                _disposed = true;
                 // Close all connection groups created by the current handler instance. Since every instance uses a
                 // unique connection group name, disposing a handler will remove all these unique connection groups to
                 // save resources.
-                ServicePointManager.CloseConnectionGroups(connectionGroupName);
+                ServicePointManager.CloseConnectionGroups(_connectionGroupName);
             }
             base.Dispose(disposing);
         }
@@ -395,11 +473,11 @@ namespace System.Net.Http
             // added ('123456S>' or '123456U>').
             if (request.Content != null)
             {
-                webRequest = new HttpWebRequest(request.RequestUri, true, connectionGroupName, request.Content.CopyTo);
+                webRequest = new HttpWebRequest(request.RequestUri, true, _connectionGroupName, request.Content.CopyTo);
             }
             else
             {
-                webRequest = new HttpWebRequest(request.RequestUri, true, connectionGroupName, null);
+                webRequest = new HttpWebRequest(request.RequestUri, true, _connectionGroupName, null);
             }
 
 #if DEBUG
@@ -407,7 +485,7 @@ namespace System.Net.Http
             // HttpWebRequest. Tests can derive from HttpWebRequest and implement their own behavior.
             if (WebRequestCreator != null)
             {
-                webRequest = WebRequestCreator(request, connectionGroupName);
+                webRequest = WebRequestCreator(request, _connectionGroupName);
                 Contract.Assert(webRequest != null);
             }
 #endif
@@ -438,31 +516,31 @@ namespace System.Net.Http
         {
             webRequest.Timeout = Timeout.Infinite; // Timeouts are handled by HttpClient.
 
-            webRequest.AllowAutoRedirect = allowAutoRedirect;
-            webRequest.AutomaticDecompression = automaticDecompression;
-            webRequest.PreAuthenticate = preAuthenticate;
+            webRequest.AllowAutoRedirect = _allowAutoRedirect;
+            webRequest.AutomaticDecompression = _automaticDecompression;
+            webRequest.PreAuthenticate = _preAuthenticate;
 
-            if (useDefaultCredentials)
+            if (_useDefaultCredentials)
             {
                 webRequest.UseDefaultCredentials = true;
             }
             else
             {
-                webRequest.Credentials = credentials;
+                webRequest.Credentials = _credentials;
             }
 
-            if (allowAutoRedirect)
+            if (_allowAutoRedirect)
             {
-                webRequest.MaximumAutomaticRedirections = maxAutomaticRedirections;
+                webRequest.MaximumAutomaticRedirections = _maxAutomaticRedirections;
             }
 
-            if (useProxy)
+            if (_useProxy)
             {
                 // If 'UseProxy' is true and 'Proxy' is null (default), let HWR figure out the proxy to use. Otherwise
                 // set the custom proxy.
-                if (proxy != null)
+                if (_proxy != null)
                 {
-                    webRequest.Proxy = proxy;
+                    webRequest.Proxy = _proxy;
                 }
             }
             else
@@ -472,12 +550,12 @@ namespace System.Net.Http
                 webRequest.Proxy = null;
             }
 
-            if (useCookies)
+            if (_useCookies)
             {
-                webRequest.CookieContainer = cookieContainer;
+                webRequest.CookieContainer = _cookieContainer;
             }
 
-            if (clientCertOptions == ClientCertificateOption.Automatic && ComNetOS.IsWin7orLater)
+            if (_clientCertOptions == ClientCertificateOption.Automatic && ComNetOS.IsWin7orLater)
             {
                 X509CertificateCollection automaticClientCerts
                     = UnsafeNclNativeMethods.NativePKI.FindClientCertificates();
@@ -672,16 +750,16 @@ namespace System.Net.Http
                 // callback, the token will invoke the callback immediately. I.e. HWR gets aborted before we use it.
                 HttpWebRequest webRequest = CreateAndPrepareWebRequest(request);
                 state.webRequest = webRequest;
-                cancellationToken.Register(onCancel, webRequest);
+                cancellationToken.Register(s_onCancel, webRequest);
 
                 // Preserve context for authentication
                 if (ExecutionContext.IsFlowSuppressed()) 
                 {
                     // Check for proxy auth
                     IWebProxy currentProxy = null;
-                    if (useProxy)
+                    if (_useProxy)
                     {
-                        currentProxy = proxy ?? WebRequest.DefaultWebProxy;
+                        currentProxy = _proxy ?? WebRequest.DefaultWebProxy;
                     }
 
                     if ((UseDefaultCredentials || Credentials != null
@@ -695,7 +773,7 @@ namespace System.Net.Http
                 // (proxy, dns, connection pooling, etc).  Run these on a separate thread.
                 // Do not provide a cancellation token; if this helper task could be canceled before starting then 
                 // nobody would complete the tcs.
-                Task.Factory.StartNew(startRequest, state);
+                Task.Factory.StartNew(_startRequest, state);
             }
             catch (Exception e)
             {
@@ -754,14 +832,14 @@ namespace System.Net.Http
                     {
                         // If we don't have a content length and we don't use chunked, then we must buffer the content.
                         // If the user specified a zero buffer size, we throw.
-                        if (maxRequestContentBufferSize == 0)
+                        if (_maxRequestContentBufferSize == 0)
                         {
                             throw new HttpRequestException(SR.net_http_handler_nocontentlength);
                         }
 
                         // HttpContent couldn't calculate the content length. Chunked is not specified. Buffer the 
                         // content to get the content length.
-                        requestContent.LoadIntoBufferAsync(maxRequestContentBufferSize).ContinueWithStandard(task =>
+                        requestContent.LoadIntoBufferAsync(_maxRequestContentBufferSize).ContinueWithStandard(task =>
                         {
                             if (task.IsFaulted)
                             {
@@ -797,12 +875,12 @@ namespace System.Net.Http
             {
                 using (state.identity.Impersonate())
                 {
-                    state.webRequest.BeginGetRequestStream(getRequestStreamCallback, state);
+                    state.webRequest.BeginGetRequestStream(_getRequestStreamCallback, state);
                 }
             }
             else
             {
-                state.webRequest.BeginGetRequestStream(getRequestStreamCallback, state);
+                state.webRequest.BeginGetRequestStream(_getRequestStreamCallback, state);
             }
         }
 
@@ -855,12 +933,12 @@ namespace System.Net.Http
             {
                 using (state.identity.Impersonate())
                 {
-                    state.webRequest.BeginGetResponse(getResponseCallback, state);
+                    state.webRequest.BeginGetResponse(_getResponseCallback, state);
                 }
             }
             else
             {
-                state.webRequest.BeginGetResponse(getResponseCallback, state);
+                state.webRequest.BeginGetResponse(_getResponseCallback, state);
             }
         }
 
@@ -963,15 +1041,15 @@ namespace System.Net.Http
 
         private void SetOperationStarted()
         {
-            if (!operationStarted)
+            if (!_operationStarted)
             {
-                operationStarted = true;
+                _operationStarted = true;
             }
         }
 
         private void CheckDisposed()
         {
-            if (disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
@@ -980,7 +1058,7 @@ namespace System.Net.Http
         internal void CheckDisposedOrStarted()
         {
             CheckDisposed();
-            if (operationStarted)
+            if (_operationStarted)
             {
                 throw new InvalidOperationException(SR.net_http_operation_started);
             }
