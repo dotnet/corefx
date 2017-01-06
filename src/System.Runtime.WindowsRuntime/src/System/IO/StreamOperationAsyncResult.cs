@@ -155,7 +155,7 @@ namespace System.IO
                 _asyncStreamOperation?.Cancel();
             }
             catch { }
-
+            _asyncStreamOperation = null;
             return true;
         }
 
