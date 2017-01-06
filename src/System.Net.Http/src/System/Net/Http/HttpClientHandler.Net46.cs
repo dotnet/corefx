@@ -2,21 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Security;
-using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Security.Permissions;
-using System.Security;
-using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
@@ -48,13 +48,6 @@ namespace System.Net.Http
         private ClientCertificateOption _clientCertOptions;
         private X509Certificate2Collection _clientCertificates;
         private IDictionary<String, Object> _properties; // Only create dictionary when required.
-
-#if DEBUG
-        // The following delegate is only used for unit-testing: It allows tests to create a custom HttpWebRequest
-        // instance.
-        internal delegate HttpWebRequest WebRequestCreatorDelegate(HttpRequestMessage request, string connectionGroupName);
-        internal WebRequestCreatorDelegate WebRequestCreator = null;
-#endif
 
         #endregion Fields
 
@@ -479,16 +472,6 @@ namespace System.Net.Http
             {
                 webRequest = new HttpWebRequest(request.RequestUri, true, _connectionGroupName, null);
             }
-
-#if DEBUG
-            // For testing purposes only: If the delegate is assigned, it is used to create an instance of 
-            // HttpWebRequest. Tests can derive from HttpWebRequest and implement their own behavior.
-            if (WebRequestCreator != null)
-            {
-                webRequest = WebRequestCreator(request, _connectionGroupName);
-                Contract.Assert(webRequest != null);
-            }
-#endif
 
             if (Logging.On) Logging.Associate(Logging.Http, request, webRequest);
 
