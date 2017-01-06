@@ -103,6 +103,15 @@ namespace System.Data.Common
             StateChange?.Invoke(this, stateChange);
         }
 
+        protected bool StateChangeHasSubscribers
+        {
+            get
+            {
+                var stateChange = StateChange;
+                return stateChange != null && stateChange.GetInvocationList().Length > 0;
+            }
+        }
+
         internal bool ForceNewConnection { get; set; }
 
         public abstract void Open();
