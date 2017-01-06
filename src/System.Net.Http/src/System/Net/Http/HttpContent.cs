@@ -311,6 +311,14 @@ namespace System.Net.Http
             return CopyToAsync(stream, null);
         }
 
+#if NET46
+        // Workaround for HttpWebRequest synchronous resubmit
+        internal void CopyTo(Stream stream)
+        {
+            CopyToAsync(stream).Wait();
+        }
+#endif
+
         public Task LoadIntoBufferAsync()
         {
             return LoadIntoBufferAsync(MaxBufferSize);
