@@ -17,7 +17,6 @@ namespace System.Tests
         public void Test()
         {
             // Subset of the Tuple tests related to ITuple
-            // from $/DevDiv/FX/Feature/NetFXDev1/QA/CLR/testsrc/CoreMangLib/System/Tuple/TupleTest.cs
             OneTuples();
             TwoTuples();
             ThreeTuples();

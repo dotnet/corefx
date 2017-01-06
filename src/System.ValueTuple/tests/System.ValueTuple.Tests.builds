@@ -7,7 +7,7 @@
     </Project>
     <Project Include="System.ValueTuple.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
-      <TestTFMs>netcore50;net46</TestTFMs>
+      <TestTFMs>netcoreapp1.0</TestTFMs>
     </Project>
     <Project Include="System.ValueTuple.Tests.csproj">
       <TargetGroup>netstandard1.3</TargetGroup>
