@@ -239,7 +239,6 @@ namespace System.Security.Principal
         [System.ObsoleteAttribute("This member has been depcreated and is only maintained for backwards compatability. WellKnownSidType values greater than MaxDefined may be defined in future releases.")]
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         MaxDefined = WinBuiltinTerminalServerLicenseServersSid,
-        #if NETSTANDARD20
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
         WinBuiltinDCOMUsersSid = 61,
         /// <summary>Indicates a SID that matches the Internet built-in user group.</summary>
@@ -308,7 +307,6 @@ namespace System.Security.Principal
         WinCapabilityEnterpriseAuthenticationSid = 93,
         /// <summary>Indicates a SID for removable storage capability for app containers.</summary>
         WinCapabilityRemovableStorageSid = 94
-        #endif // NETSTANDARD20
     }
     public enum WindowsBuiltInRole
     {
