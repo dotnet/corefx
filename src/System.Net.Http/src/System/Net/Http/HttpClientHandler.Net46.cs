@@ -13,11 +13,6 @@ using System.Security.Principal;
 using System.Security.Permissions;
 using System.Security;
 using System.Diagnostics.CodeAnalysis;
-#if NET_4
-using System.Reflection;
-using System.Text;
-using System.Linq;
-#endif
 
 namespace System.Net.Http
 {
@@ -49,9 +44,6 @@ namespace System.Net.Http
         private ClientCertificateOption clientCertOptions;
         private X509Certificate2Collection clientCertificates;
         private IDictionary<String, Object> properties; // Only create dictionary when required.
-#if NET_4
-        private Uri lastUsedRequestUri;
-#endif
 
 #if DEBUG
         // The following delegate is only used for unit-testing: It allows tests to create a custom HttpWebRequest
@@ -378,22 +370,10 @@ namespace System.Net.Http
             if (disposing && !disposed)
             {
                 disposed = true;
-#if NET_4
-                // Our best effort to close the connection group based on the last-used request uri
-                if (this.lastUsedRequestUri != null)
-                {
-                    ServicePoint servicePoint = ServicePointManager.FindServicePoint(this.lastUsedRequestUri);
-                    if (servicePoint != null)
-                    {
-                        servicePoint.CloseConnectionGroup(connectionGroupName);
-                    }
-                }
-#else
                 // Close all connection groups created by the current handler instance. Since every instance uses a
                 // unique connection group name, disposing a handler will remove all these unique connection groups to
                 // save resources.
                 ServicePointManager.CloseConnectionGroups(connectionGroupName);
-#endif
             }
             base.Dispose(disposing);
         }
@@ -404,10 +384,6 @@ namespace System.Net.Http
 
         private HttpWebRequest CreateAndPrepareWebRequest(HttpRequestMessage request)
         {
-#if NET_4
-            HttpWebRequest webRequest = WebRequest.CreateDefault(request.RequestUri) as HttpWebRequest;
-            webRequest.ConnectionGroupName = connectionGroupName;
-#else
             HttpWebRequest webRequest = null;
 
             // If we have a request-content, make sure to provide HWR with a delegate to CopyTo(). This allows HWR
@@ -425,7 +401,6 @@ namespace System.Net.Http
             {
                 webRequest = new HttpWebRequest(request.RequestUri, true, connectionGroupName, null);
             }
-#endif
 
 #if DEBUG
             // For testing purposes only: If the delegate is assigned, it is used to create an instance of 
@@ -502,7 +477,6 @@ namespace System.Net.Http
                 webRequest.CookieContainer = cookieContainer;
             }
 
-#if !NET_4
             if (clientCertOptions == ClientCertificateOption.Automatic && ComNetOS.IsWin7orLater)
             {
                 X509CertificateCollection automaticClientCerts
@@ -512,7 +486,6 @@ namespace System.Net.Http
                     webRequest.ClientCertificates = automaticClientCerts;
                 }
             }
-#endif
         }
 
         private static void SetConnectionOptions(HttpWebRequest webRequest, HttpRequestMessage request)
@@ -572,43 +545,7 @@ namespace System.Net.Http
             bool isExpectSet = headers.Contains(HttpKnownHeaderNames.Expect);
             bool isTransferEncodingSet = headers.Contains(HttpKnownHeaderNames.TransferEncoding);
             bool isConnectionSet = headers.Contains(HttpKnownHeaderNames.Connection);
-#if NET_4
-            bool isAcceptSet = headers.Contains(HttpKnownHeaderNames.Accept);
-            bool isRangeSet = headers.Contains(HttpKnownHeaderNames.Range);
-            bool isRefererSet = headers.Contains(HttpKnownHeaderNames.Referer);
-            bool isUserAgentSet = headers.Contains(HttpKnownHeaderNames.UserAgent);
 
-            if (isRangeSet)
-            {
-                RangeHeaderValue range = headers.Range;
-                if (range != null)
-                {
-                    foreach (var rangeItem in range.Ranges)
-                    {
-                        webRequest.AddRange((long)rangeItem.From, (long)rangeItem.To);
-                    }
-                }
-            }
-
-            if (isRefererSet)
-            {
-                Uri referer = headers.Referrer;
-                if (referer != null)
-                {
-                    webRequest.Referer = referer.OriginalString;
-                }
-            }
-
-            if (isAcceptSet && (headers.Accept.Count > 0))
-            {
-                webRequest.Accept = headers.Accept.ToString();
-            }
-
-            if (isUserAgentSet && headers.UserAgent.Count > 0)
-            {
-                webRequest.UserAgent = headers.UserAgent.ToString();
-            }
-#endif
             if (isHostSet)
             {
                 string host = headers.Host;
@@ -629,11 +566,7 @@ namespace System.Net.Http
                 // Was at least one non-special value set?
                 if (!String.IsNullOrEmpty(expectHeader) || !headers.Expect.IsSpecialValueSet)
                 {
-#if NET_4
-                    webRequest.Expect = expectHeader;
-#else
                     webRequestHeaders.AddInternal(HttpKnownHeaderNames.Expect, expectHeader);
-#endif
                 }
             }
 
@@ -643,38 +576,18 @@ namespace System.Net.Http
                 // Was at least one non-special value set?
                 if (!String.IsNullOrEmpty(transferEncodingHeader) || !headers.TransferEncoding.IsSpecialValueSet)
                 {
-#if NET_4
-                    // Setting SendChunked to true just to set the TransferEncoding header value
-                    // Actual value for SendChunked will be set later on.
-                    webRequest.SendChunked = true;
-                    webRequest.TransferEncoding = transferEncodingHeader;
-                    webRequest.SendChunked = false;
-#else
                     webRequestHeaders.AddInternal(HttpKnownHeaderNames.TransferEncoding, transferEncodingHeader);
-#endif
                 }
             }
 
             if (isConnectionSet)
             {
-#if NET_4
-                // Both Close and Keep-Alive are considered special values and cannot be set directly on Connection.
-                // Both values must be ignored and will be set later on.
-                string connectionHeader = string.Join(", ", headers.Connection.Where(
-                    item => string.Compare(item, HttpKnownHeaderNames.KeepAlive, StringComparison.OrdinalIgnoreCase) != 0 &&
-                            string.Compare(item, HeaderUtilities.ConnectionClose, StringComparison.OrdinalIgnoreCase) != 0)
-                    );
-#else
                 string connectionHeader = headers.Connection.GetHeaderStringWithoutSpecial();
-#endif
+
                 // Was at least one non-special value set?
                 if (!String.IsNullOrEmpty(connectionHeader) || !headers.Connection.IsSpecialValueSet)
                 {
-#if NET_4
-                    webRequest.Connection = connectionHeader;
-#else
                     webRequestHeaders.AddInternal(HttpKnownHeaderNames.Connection, connectionHeader);
-#endif
                 }
             }
 
@@ -685,23 +598,13 @@ namespace System.Net.Http
                 if ((isHostSet && AreEqual(HttpKnownHeaderNames.Host, headerName)) ||
                     (isExpectSet && AreEqual(HttpKnownHeaderNames.Expect, headerName)) ||
                     (isTransferEncodingSet && AreEqual(HttpKnownHeaderNames.TransferEncoding, headerName)) ||
-#if NET_4
- (isAcceptSet && AreEqual(HttpKnownHeaderNames.Accept, headerName)) ||
-                    (isRangeSet && AreEqual(HttpKnownHeaderNames.Range, headerName)) ||
-                    (isRefererSet && AreEqual(HttpKnownHeaderNames.Referer, headerName)) ||
-                    (isUserAgentSet && AreEqual(HttpKnownHeaderNames.UserAgent, headerName)) ||
-#endif
- (isConnectionSet && AreEqual(HttpKnownHeaderNames.Connection, headerName)))
+                    (isConnectionSet && AreEqual(HttpKnownHeaderNames.Connection, headerName)))
                 {
                     continue; // Header was already added.
                 }
 
-#if NET_4
-                webRequestHeaders.Add(header.Key, header.Value);
-#else
                 // Use AddInternal() to skip validation.
                 webRequestHeaders.AddInternal(header.Key, header.Value);
-#endif
             }
         }
 
@@ -724,12 +627,8 @@ namespace System.Net.Http
                     {
                         if (string.Compare(HttpKnownHeaderNames.ContentLength, header.Key, StringComparison.OrdinalIgnoreCase) != 0)
                         {
-#if NET_4
-                            SetContentHeader(webRequest, header);
-#else
                             // Use AddInternal() to skip validation.
                             webRequest.Headers.AddInternal(header.Key, string.Join(", ", header.Value));
-#endif
                         }
                     }
                 }
@@ -737,29 +636,12 @@ namespace System.Net.Http
                 {
                     foreach (var header in request.Content.Headers)
                     {
-#if NET_4
-                        SetContentHeader(webRequest, header);
-#else
                         // Use AddInternal() to skip validation.
                         webRequest.Headers.AddInternal(header.Key, string.Join(", ", header.Value));                        
-#endif
                     }
                 }
             }
         }
-#if NET_4
-        private static void SetContentHeader(HttpWebRequest webRequest, KeyValuePair<string, IEnumerable<string>> header)
-        {
-            if (string.Compare(HttpKnownHeaderNames.ContentType, header.Key, StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                webRequest.ContentType = string.Join(", ", header.Value);
-            }
-            else
-            {
-                webRequest.Headers.Add(header.Key, string.Join(", ", header.Value));
-            }
-        }
-#endif
 
         #endregion Message Setup
 
@@ -783,9 +665,7 @@ namespace System.Net.Http
             state.tcs = tcs;
             state.cancellationToken = cancellationToken;
             state.requestMessage = request;
-#if NET_4
-            this.lastUsedRequestUri = request.RequestUri;
-#endif
+
             try
             {
                 // Cancellation: Note that there is no race here: If the token gets canceled before we register the
@@ -1000,22 +880,6 @@ namespace System.Net.Http
             }
         }
 
-#if NET_4
-        private bool TryGetExceptionResponse(WebException webException, HttpRequestMessage requestMessage, out HttpResponseMessage httpResponseMessage)
-        {
-            if (webException != null && webException.Response != null)
-            {
-                HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if (webResponse != null)
-                {
-                    httpResponseMessage = CreateResponseMessage(webResponse, requestMessage);
-                    return true;
-                }
-            }
-            httpResponseMessage = null;
-            return false;
-        }
-#endif
         private HttpResponseMessage CreateResponseMessage(HttpWebResponse webResponse, HttpRequestMessage request)
         {
             HttpResponseMessage response = new HttpResponseMessage(webResponse.StatusCode);
@@ -1066,30 +930,23 @@ namespace System.Net.Http
             // Use 'SendAsync' as method name, since this method is only called by methods in the async code path. Using
             // 'SendAsync' as method name helps relate the exception to the operation in log files.
             if (Logging.On) Logging.Exception(Logging.Http, this, "SendAsync", e);
-#if NET_4
-            HttpResponseMessage responseMessage;
-            if (TryGetExceptionResponse(e as WebException, state.requestMessage, out responseMessage))
+
+            // If the WebException was due to the cancellation token being canceled, throw cancellation exception.
+            if (state.cancellationToken.IsCancellationRequested)
             {
-                state.tcs.TrySetResult(responseMessage);
+                state.tcs.TrySetCanceled();
+            }
+            // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during 
+            // execution. All other exception types, including ArgumentExceptions and ProtocolViolationExceptions
+            // are 'unexpected' or caused by user error and should not be wrapped.
+            else if (e is WebException || e is IOException)
+            {
+                state.tcs.TrySetException(new HttpRequestException(SR.net_http_client_execution_error, e));
             }
             else
-#endif
-                // If the WebException was due to the cancellation token being canceled, throw cancellation exception.
-                if (state.cancellationToken.IsCancellationRequested)
-                {
-                    state.tcs.TrySetCanceled();
-                }
-                // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during 
-                // execution. All other exception types, including ArgumentExceptions and ProtocolViolationExceptions
-                // are 'unexpected' or caused by user error and should not be wrapped.
-                else if (e is WebException || e is IOException)
-                {
-                    state.tcs.TrySetException(new HttpRequestException(SR.net_http_client_execution_error, e));
-                }
-                else
-                {
-                    state.tcs.TrySetException(e);
-                }
+            {
+                state.tcs.TrySetException(e);
+            }
         }
 
         private static void OnCancel(object state)
@@ -1199,7 +1056,7 @@ namespace System.Net.Http
                     throw new IOException(SR.net_http_io_read, wex);
                 }
             }
-#if !NET_4
+
             public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, 
                 CancellationToken cancellationToken)
             {
@@ -1212,7 +1069,7 @@ namespace System.Net.Http
                     throw new IOException(SR.net_http_io_read, wex);
                 }
             }
-#endif
+
             public override int ReadByte()
             {
                 try
