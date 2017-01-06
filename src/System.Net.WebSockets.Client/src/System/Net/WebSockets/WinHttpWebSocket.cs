@@ -19,6 +19,7 @@ namespace System.Net.WebSockets
         // TODO (#7893): This code needs to be shared with WinHttpClientHandler
         private const string HeaderNameCookie = "Cookie";
         private const string HeaderNameWebSocketProtocol = "Sec-WebSocket-Protocol";
+        private const string HeaderNameWebSocketExtensions = "Sec-WebSocket-Extensions";
         #endregion
 
         // TODO (Issue 2503): move System.Net.* strings to resources as appropriate.
@@ -27,6 +28,7 @@ namespace System.Net.WebSockets
         // It is critical that no handle gets closed while a WinHTTP function is running.
         private WebSocketCloseStatus? _closeStatus = null;
         private string _closeStatusDescription = null;
+        private string _extensions = null;
         private string _subProtocol = null;
         private bool _disposed = false;
 
@@ -58,6 +60,14 @@ namespace System.Net.WebSockets
             get
             {
                 return _operation.State;
+            }
+        }
+        
+        public override string Extensions
+        {
+            get
+            {
+                return _extensions;
             }
         }
 
@@ -605,6 +615,13 @@ namespace System.Net.WebSockets
             {
                 requestHeadersBuffer.AppendLine(string.Format("{0}: {1}", HeaderNameWebSocketProtocol,
                     string.Join(", ", subProtocols)));
+            }
+            
+            var extensions = options.RequestedExtensions;
+            if (extensions.Count > 0)
+            {
+                requestHeadersBuffer.AppendLine(string.Format("{0}: {1}", HeaderNameWebSocketExtensions,
+                    string.Join(", ", extensions)));
             }
             
             // Add request headers to WinHTTP request handle.
