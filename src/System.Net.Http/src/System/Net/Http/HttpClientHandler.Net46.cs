@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Security.Permissions;
@@ -45,6 +47,8 @@ namespace System.Net.Http
         private int maxAutomaticRedirections;
         private string connectionGroupName;
         private ClientCertificateOption clientCertOptions;
+        private X509Certificate2Collection clientCertificates;
+        private IDictionary<String, Object> properties; // Only create dictionary when required.
 #if NET_4
         private Uri lastUsedRequestUri;
 #endif
@@ -85,6 +89,17 @@ namespace System.Net.Http
             }
         }
 
+        public bool CheckCertificateRevocationList
+        {
+            get { return ServicePointManager.CheckCertificateRevocationList; }
+            set
+            {
+                CheckDisposedOrStarted();
+                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    SR.net_http_value_not_supported, value, nameof(CheckCertificateRevocationList)));
+            }
+        }
+
         public CookieContainer CookieContainer
         {
             get { return cookieContainer; }
@@ -116,6 +131,32 @@ namespace System.Net.Http
                 }
                 CheckDisposedOrStarted();
                 clientCertOptions = value;
+            }
+        }
+
+        public X509CertificateCollection ClientCertificates
+        {
+            get
+            {
+                if (clientCertificates == null)
+                {
+                    clientCertificates = new X509Certificate2Collection();
+                }
+
+                return clientCertificates;
+            }
+        }
+
+        public ICredentials DefaultProxyCredentials
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    SR.net_http_value_not_supported, value, nameof(DefaultProxyCredentials)));
             }
         }
 
@@ -210,6 +251,20 @@ namespace System.Net.Http
             }
         }
 
+        public int MaxConnectionsPerServer
+        {
+            get
+            {
+                return ServicePointManager.DefaultConnectionLimit;
+            }
+            set
+            {
+                CheckDisposedOrStarted();
+                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    SR.net_http_value_not_supported, value, nameof(MaxConnectionsPerServer)));
+            }
+        }
+
         public long MaxRequestContentBufferSize
         {
             get { return maxRequestContentBufferSize; }
@@ -228,6 +283,66 @@ namespace System.Net.Http
                 }
                 CheckDisposedOrStarted();
                 maxRequestContentBufferSize = value;
+            }
+        }
+
+        public int MaxResponseHeadersLength
+        {
+            get
+            {
+                return 0;
+            }
+            set
+            {
+                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    SR.net_http_value_not_supported, value, nameof(MaxResponseHeadersLength)));
+            }
+        }
+
+        public IDictionary<String, Object> Properties
+        {
+            get
+            {
+                if (properties == null)
+                {
+                    properties = new Dictionary<String, object>();
+                }
+
+                return properties;
+            }
+        }
+
+        public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                CheckDisposedOrStarted();
+                if (value != null)
+                {
+                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                        SR.net_http_value_not_supported, value, nameof(ServerCertificateCustomValidationCallback)));
+                }
+            }
+        }
+
+        public SslProtocols SslProtocols
+        {
+            get
+            {
+                return SslProtocols.None;
+            }
+            set
+            {
+                CheckDisposedOrStarted();
+                if (value != SslProtocols.None)
+                {
+                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                        SR.net_http_value_not_supported, value, nameof(SslProtocols)));
+                }
             }
         }
 
