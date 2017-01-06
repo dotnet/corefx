@@ -10,12 +10,12 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Security.Permissions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
@@ -34,11 +34,13 @@ namespace System.Net.Http
         private volatile bool _disposed;
 
         private long _maxRequestContentBufferSize;
+        private int _maxResponseHeadersLength;
         private CookieContainer _cookieContainer;
         private bool _useCookies;
         private DecompressionMethods _automaticDecompression;
         private IWebProxy _proxy;
         private bool _useProxy;
+        private ICredentials _defaultProxyCredentials;
         private bool _preAuthenticate;
         private bool _useDefaultCredentials;
         private ICredentials _credentials;
@@ -47,7 +49,14 @@ namespace System.Net.Http
         private string _connectionGroupName;
         private ClientCertificateOption _clientCertOptions;
         private X509Certificate2Collection _clientCertificates;
-        private IDictionary<String, Object> _properties; // Only create dictionary when required.
+        private IDictionary<String, Object> _properties;
+        private int _maxConnectionsPerServer;
+        private Func<
+            HttpRequestMessage,
+            X509Certificate2,
+            X509Chain,
+            SslPolicyErrors,
+            bool> _serverCertificateCustomValidationCallback;
 
         #endregion Fields
 
@@ -83,17 +92,16 @@ namespace System.Net.Http
 
         public bool CheckCertificateRevocationList
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return ServicePointManager.CheckCertificateRevocationList;
+                throw new PlatformNotSupportedException();
             }
 
             set
             {
                 CheckDisposedOrStarted();
-                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                    SR.net_http_value_not_supported, value, nameof(CheckCertificateRevocationList)));
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -111,6 +119,7 @@ namespace System.Net.Http
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
+
                 CheckDisposedOrStarted();
                 _clientCertOptions = value;
             }
@@ -118,7 +127,7 @@ namespace System.Net.Http
 
         public X509CertificateCollection ClientCertificates
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 if (_clientCertificates == null)
@@ -143,11 +152,13 @@ namespace System.Net.Http
                 {
                     throw new ArgumentNullException("value");
                 }
+
                 if (!UseCookies)
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_invalid_enable_first, "UseCookies", "true"));
                 }
+
                 CheckDisposedOrStarted();
                 _cookieContainer = value;
             }
@@ -169,16 +180,16 @@ namespace System.Net.Http
 
         public ICredentials DefaultProxyCredentials
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return null;
+                return _defaultProxyCredentials;
             }
 
             set
             {
-                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                    SR.net_http_value_not_supported, value, nameof(DefaultProxyCredentials)));
+                CheckDisposedOrStarted();
+                _defaultProxyCredentials = value;
             }
         }
 
@@ -195,6 +206,7 @@ namespace System.Net.Http
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
+
                 CheckDisposedOrStarted();
                 _maxAutomaticRedirections = value;
             }
@@ -202,17 +214,16 @@ namespace System.Net.Http
 
         public int MaxConnectionsPerServer
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return ServicePointManager.DefaultConnectionLimit;
+                return _maxConnectionsPerServer;
             }
 
             set
             {
                 CheckDisposedOrStarted();
-                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                    SR.net_http_value_not_supported, value, nameof(MaxConnectionsPerServer)));
+                _maxConnectionsPerServer = value;
             }
         }
 
@@ -230,12 +241,14 @@ namespace System.Net.Http
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
+
                 if (value > HttpContent.MaxBufferSize)
                 {
                     throw new ArgumentOutOfRangeException("value", value,
                         string.Format(CultureInfo.InvariantCulture, SR.net_http_content_buffersize_limit,
                         HttpContent.MaxBufferSize));
                 }
+
                 CheckDisposedOrStarted();
                 _maxRequestContentBufferSize = value;
             }
@@ -243,17 +256,22 @@ namespace System.Net.Http
 
         public int MaxResponseHeadersLength
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return 0;
+                return _maxResponseHeadersLength;
             }
 
             set
             {
-                throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                    SR.net_http_value_not_supported, value, nameof(MaxResponseHeadersLength)));
-            }
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
+
+                CheckDisposedOrStarted();
+                _maxResponseHeadersLength = value;
+            }            
         }
 
         public bool PreAuthenticate
@@ -272,7 +290,7 @@ namespace System.Net.Http
 
         public IDictionary<String, Object> Properties
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 if (_properties == null)
@@ -307,39 +325,31 @@ namespace System.Net.Http
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return null;
+                return _serverCertificateCustomValidationCallback;
             }
 
             set
             {
                 CheckDisposedOrStarted();
-                if (value != null)
-                {
-                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                        SR.net_http_value_not_supported, value, nameof(ServerCertificateCustomValidationCallback)));
-                }
+                _serverCertificateCustomValidationCallback = value;
             }
         }
 
         public SslProtocols SslProtocols
         {
-            // TODO: New property not in .NET Framework
+            // New property not in .NET Framework HttpClientHandler.
             get
             {
-                return SslProtocols.None;
+                throw new PlatformNotSupportedException();
             }
 
             set
             {
                 CheckDisposedOrStarted();
-                if (value != SslProtocols.None)
-                {
-                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
-                        SR.net_http_value_not_supported, value, nameof(SslProtocols)));
-                }
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -434,6 +444,14 @@ namespace System.Net.Http
             _useCookies = true; // deal with cookies by default.
             _useDefaultCredentials = false;
             _clientCertOptions = ClientCertificateOption.Manual;
+            
+            // New properties not in .NET Framework HttpClientHandler.
+            _maxResponseHeadersLength = HttpWebRequest.DefaultMaximumResponseHeadersLength;
+            _defaultProxyCredentials = null;
+            _clientCertificates = null; // only create collection when required.
+            _properties = null; // only create collection when required.
+            _maxConnectionsPerServer = ServicePointManager.DefaultConnectionLimit;
+            _serverCertificateCustomValidationCallback = null;
         }
 
         protected override void Dispose(bool disposing)
@@ -484,10 +502,44 @@ namespace System.Net.Http
             SetRequestHeaders(webRequest, request);
             SetContentHeaders(webRequest, request);
 
+            // New properties for this OOB HttpClientHandler.
+            webRequest.ServicePoint.ConnectionLimit = _maxConnectionsPerServer;
+            webRequest.MaximumResponseHeadersLength = _maxResponseHeadersLength;
+            if ((ClientCertificateOptions == ClientCertificateOption.Manual)
+                && (_clientCertificates != null) && (_clientCertificates.Count > 0))
+            {
+                webRequest.ClientCertificates = _clientCertificates;
+            }
+
+            if (_serverCertificateCustomValidationCallback != null)
+            {
+                webRequest.ServerCertificateValidationCallback = ServerCertificateValidationCallback;
+            }
+
+            if (_defaultProxyCredentials != null && webRequest.Proxy != null)
+            {
+                webRequest.Proxy.Credentials = _defaultProxyCredentials;
+            }
+
             // For Extensibility
             InitializeWebRequest(request, webRequest);
 
             return webRequest;
+        }
+
+        // Used to map the ServerCertificateCustomValidationCallback which uses Func<T> to the
+        // HttpWebRequest based RemoteCertificateValidationCallback delegate type.
+        private bool ServerCertificateValidationCallback(
+            object sender,
+            X509Certificate certificate,
+            X509Chain chain,
+            SslPolicyErrors sslPolicyErrors)
+        {
+            return _serverCertificateCustomValidationCallback(
+                null, // TODO: How to map sender (which is really an HttpWebRequest) to an HttpRequestMessage?
+                (X509Certificate2)certificate, // This cast will usually always be safe.
+                chain,
+                sslPolicyErrors);
         }
 
         // Needs to be internal so that WebRequestHandler can access it from a different assembly.
