@@ -89,7 +89,6 @@ public class WellKnownSidTypeTests
     [InlineData(WellKnownSidType.WinNewEnterpriseReadonlyControllersSid)]
     [InlineData(WellKnownSidType.WinBuiltinCertSvcDComAccessGroup)]
     [InlineData(WellKnownSidType.WinMediumPlusLabelSid)]
-    [InlineData(WellKnownSidType.WinLocalLogonSid)]
     [InlineData(WellKnownSidType.WinConsoleLogonSid)]
     [InlineData(WellKnownSidType.WinThisOrganizationCertificateSid)]
     [InlineData(WellKnownSidType.WinApplicationPackageAuthoritySid)]
