@@ -91,7 +91,6 @@ public class WellKnownSidTypeTests
     [InlineData(WellKnownSidType.WinMediumPlusLabelSid)]
     [InlineData(WellKnownSidType.WinConsoleLogonSid)]
     [InlineData(WellKnownSidType.WinThisOrganizationCertificateSid)]
-    [InlineData(WellKnownSidType.WinApplicationPackageAuthoritySid)]
     [InlineData(WellKnownSidType.WinBuiltinAnyPackageSid)]
     [InlineData(WellKnownSidType.WinCapabilityInternetClientSid)]
     [InlineData(WellKnownSidType.WinCapabilityInternetClientServerSid)]
