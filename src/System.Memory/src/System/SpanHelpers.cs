@@ -129,14 +129,20 @@ namespace System
             }
             else
             {
-                ulong byteLengthULong = (ulong)byteLength;
-                do
+                // PERF: Optimize for common case of length <= uint.MaxValue
+                ulong bytesRemaining = (ulong)byteLength;
+                uint bytesToClear = (uint)(bytesRemaining & uint.MaxValue);
+                Unsafe.InitBlockUnaligned(ptr, 0, bytesToClear);
+                bytesRemaining -= bytesToClear;
+                ptr += bytesToClear;
+                // Clear any bytes > uint.MaxValue
+                while (bytesRemaining > 0)
                 {
-                    uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
-                    Unsafe.InitBlockUnaligned(ptr, 0, byteLengthUInt);
-                    ptr += byteLengthUInt;
-                    byteLengthULong -= byteLengthUInt;
-                } while (byteLengthULong > 0);
+                    bytesToClear = (bytesRemaining >= uint.MaxValue) ? uint.MaxValue : (uint)bytesRemaining;
+                    Unsafe.InitBlockUnaligned(ptr, 0, bytesToClear);
+                    ptr += bytesToClear;
+                    bytesRemaining -= bytesToClear;
+                }
             }
         }
 
@@ -148,16 +154,21 @@ namespace System
             }
             else
             {
-                ulong byteLengthULong = (ulong)byteLength;
-                long byteOffset = 0;
-                do
+                // PERF: Optimize for common case of length <= uint.MaxValue
+                ulong bytesRemaining = (ulong)byteLength;
+                uint bytesToClear = (uint)(bytesRemaining & uint.MaxValue);
+                Unsafe.InitBlockUnaligned(ref b, 0, bytesToClear);
+                bytesRemaining -= bytesToClear;
+                long byteOffset = bytesToClear;
+                // Clear any bytes > uint.MaxValue
+                while (bytesRemaining > 0)
                 {
-                    uint byteLengthUInt = (uint)(byteLengthULong & uint.MaxValue);
+                    bytesToClear = (bytesRemaining >= uint.MaxValue) ? uint.MaxValue : (uint)bytesRemaining;
                     ref byte bOffset = ref Unsafe.Add(ref b, (IntPtr)byteOffset);
-                    Unsafe.InitBlockUnaligned(ref bOffset, 0, byteLengthUInt);
-                    byteOffset += byteLengthUInt;
-                    byteLengthULong -= byteLengthUInt;
-                } while (byteLengthULong > 0);
+                    Unsafe.InitBlockUnaligned(ref bOffset, 0, bytesToClear);
+                    byteOffset += bytesToClear;
+                    bytesRemaining -= bytesToClear;
+                }
             }
         }
 
