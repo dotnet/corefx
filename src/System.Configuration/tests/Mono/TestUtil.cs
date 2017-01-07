@@ -1,4 +1,6 @@
-﻿//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// See the LICENSE file in the project root for more information.
+//
 // TestUtil.cs
 //
 // Author:
@@ -23,9 +25,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-// Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
