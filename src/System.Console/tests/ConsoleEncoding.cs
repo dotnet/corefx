@@ -68,7 +68,7 @@ public class ConsoleEncoding
                 }
             }
 
-            Assert.True(inString.Equals(outString), $"Encdoing: {Console.InputEncoding}, codepage: {Console.InputEncoding.CodePage}, expected: {inString}, Actual: {outString} ");
+            Assert.True(inString.Equals(outString), $"Encoding: {Console.InputEncoding}, Codepage: {Console.InputEncoding.CodePage}, Expected: {inString}, Actual: {outString} ");
         }
         finally
         {
