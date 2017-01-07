@@ -113,7 +113,7 @@ public class WellKnownSidTypeTests
     }
 
     [Theory]
-    [InlineData((WellKnownSidType)-1)]
+    [InlineData((WellKnownSidType)(-1))]
     [InlineData((WellKnownSidType)((int)WellKnownSidType.WinCapabilityRemovableStorageSid + 1))]
     public void CreatingSecurityIdentifierOutsideWellKnownSidTypeDefinedRangeThrowsException(WellKnownSidType sidType)
     {
@@ -124,6 +124,8 @@ public class WellKnownSidTypeTests
     [Fact]
     public void MaxDefinedHasLegacyValue()
     {
+#pragma warning disable 0618
         Assert.Equal(WellKnownSidType.WinBuiltinTerminalServerLicenseServersSid, WellKnownSidType.MaxDefined);
+#pragma warning restore 0618
     }
 }
