@@ -174,15 +174,33 @@ function cross_build_corefx {
         #Apply the changes needed to build for the emulator rootfs
         (set +x; echo 'Applying cross build patch to suit Linux ARM emulator rootfs')
         git am < "$__ARMRootfsMountPath"/dotnet/setenv/corefx_cross.patch
+   else
+        sudo apt-get install binutils-arm-linux-gnueabihf
+        cd "$__ARMRootfsMountPath"/usr/lib/arm-linux-gnueabihf
+        sudo rm libdl.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libdl.so.2 libdl.so
+        sudo rm libuuid.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libuuid.so.1.3.0 libuuid.so
+        sudo rm libm.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libm.so.6 libm.so
+        sudo rm libcrypto.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libcrypto.so.1.0.0 libcrypto.so
+        sudo rm libssl.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libssl.so.1.0.0 libssl.so
+        sudo rm libz.so
+        sudo ln -s ../../../lib/arm-linux-gnueabihf/libz.so.1.2.8 libz.so
+        cd -
     fi
 
     #Cross building for emulator rootfs
     ROOTFS_DIR="$__ARMRootfsMountPath" CPLUS_INCLUDE_PATH=$LINUX_ARM_INCPATH CXXFLAGS=$LINUX_ARM_CXXFLAGS ./build-native.sh -buildArch=$__buildArch -$__buildConfig -- cross $__verboseFlag
     ROOTFS_DIR="$__ARMRootfsMountPath" CPLUS_INCLUDE_PATH=$LINUX_ARM_INCPATH CXXFLAGS=$LINUX_ARM_CXXFLAGS ./build-managed.sh -$__buildConfig -skipTests
 
-    #Reset the code to the upstream version
-    (set +x; echo 'Rewinding HEAD to master code')
-    git reset --hard HEAD^
+    if [ "$__buildArch" == "arm-softfp" ]; then
+        #Reset the code to the upstream version
+        (set +x; echo 'Rewinding HEAD to master code')
+        git reset --hard HEAD^
+    fi
 }
 
 #Define script variables
