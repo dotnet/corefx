@@ -54,6 +54,7 @@ namespace MonoTests.System.Configuration
         public void OpenExeConfiguration1_UserLevel_PerUserRoaming()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
+            Assert.False(string.IsNullOrEmpty(config.FilePath), "should have some file path");
             FileInfo fi = new FileInfo(config.FilePath);
             Assert.Equal("user.config", fi.Name);
         }
@@ -133,9 +134,13 @@ namespace MonoTests.System.Configuration
         [Fact]
         public void exePath_UserLevelPerRoaming()
         {
+            string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            Assert.False(string.IsNullOrEmpty(applicationData), "application data shouldn't be empty");
+            Assert.True(Directory.Exists(applicationData), "application data should exist");
+
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             string filePath = config.FilePath;
-            string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            Assert.False(string.IsNullOrEmpty(filePath), "should have some file path");
             Assert.True(filePath.StartsWith(applicationData), "#1:" + filePath);
             Assert.Equal("user.config", Path.GetFileName(filePath));
         }
