@@ -288,7 +288,7 @@ namespace System.Xml
 
             if (docTypeName == null || docTypeName.Length == 0)
             {
-                throw XmlConvert.CreateInvalidNameArgumentException(docTypeName, "docTypeName");
+                throw XmlConvert.CreateInvalidNameArgumentException(docTypeName, nameof(docTypeName));
             }
 
             // check doctype name
@@ -546,8 +546,8 @@ namespace System.Xml
             ParseSubset();
 
 #if DEBUG
-            Debug.Assert( readerAdapter.EntityStackLength == 0 ||
-                         ( freeFloatingDtd && readerAdapter.EntityStackLength == 1 ) );
+            Debug.Assert( _readerAdapter.EntityStackLength == 0 ||
+                         ( _freeFloatingDtd && _readerAdapter.EntityStackLength == 1 ) );
 #endif
         }
 
@@ -630,8 +630,8 @@ namespace System.Xml
                             }
 #if DEBUG
                             // check entity nesting
-                            Debug.Assert( readerAdapter.EntityStackLength == 0 || 
-                                          ( freeFloatingDtd && readerAdapter.EntityStackLength == 1 ) );
+                            Debug.Assert( _readerAdapter.EntityStackLength == 0 || 
+                                          ( _freeFloatingDtd && _readerAdapter.EntityStackLength == 1 ) );
 #endif
                         }
                         else

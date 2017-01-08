@@ -3,11 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Net;
-using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
 
@@ -154,7 +150,7 @@ namespace System.Xml.Tests
 
             try
             {
-                sc.Add(null, TestData._Root + "schema1.xdr");
+                sc.Add(null, Path.Combine(TestData._Root, "schema1.xdr"));
             }
             catch (XmlSchemaException)
             {
@@ -242,8 +238,8 @@ namespace System.Xml.Tests
         //[Variation(Desc = "435368 - schema validation error")]
         public void v13()
         {
-            string xsdPath = TestData._Root + @"bug435368.xsd";
-            string xmlPath = TestData._Root + @"bug435368.xml";
+            string xsdPath = Path.Combine(TestData._Root, @"bug435368.xsd");
+            string xmlPath = Path.Combine(TestData._Root, @"bug435368.xml");
 
             XmlSchemaSet xs = new XmlSchemaSet();
             xs.Add(null, xsdPath);

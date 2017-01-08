@@ -13,9 +13,6 @@ namespace System.Xml.Serialization
     using System.Xml;
     using System.Text;
     using System.ComponentModel;
-    using System.CodeDom;
-    using System.CodeDom.Compiler;
-    using System.Xml.Serialization.Advanced;
     using System.Globalization;
     using System.Security.Cryptography;
     using System.Diagnostics;
@@ -87,7 +84,6 @@ namespace System.Xml.Serialization
         private string _formatterName;
         private bool _isXsdType;
         private bool _isMixed;
-        private MappedTypeDesc _extendedType;
         private int _weight;
         private Exception _exception;
 
@@ -149,12 +145,7 @@ namespace System.Xml.Serialization
 
         internal bool IsMappedType
         {
-            get { return _extendedType != null; }
-        }
-
-        internal MappedTypeDesc ExtendedType
-        {
-            get { return _extendedType; }
+            get { return false; }
         }
 
         internal string Name
@@ -430,16 +421,6 @@ namespace System.Xml.Serialization
             return _arrayTypeDesc;
         }
 
-        internal TypeDesc CreateMappedTypeDesc(MappedTypeDesc extension)
-        {
-            TypeDesc newTypeDesc = new TypeDesc(extension.Name, extension.Name, null, _kind, _baseTypeDesc, _flags, null);
-            newTypeDesc._isXsdType = _isXsdType;
-            newTypeDesc._isMixed = _isMixed;
-            newTypeDesc._extendedType = extension;
-            newTypeDesc._dataType = _dataType;
-            return newTypeDesc;
-        }
-
         internal TypeDesc BaseTypeDesc
         {
             get { return _baseTypeDesc; }
@@ -568,7 +549,7 @@ namespace System.Xml.Serialization
 
             // Unsuppoted types that we map to string, if in the future we decide 
             // to add support for them we would need to create custom formatters for them
-            // normalizedString is the only one unsuported type that suppose to preserve whitesapce
+            // normalizedString is the only one unsupported type that suppose to preserve whitesapce
             AddPrimitive(typeof(string), "normalizedString", "String", TypeFlags.AmbiguousDataType | TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue | TypeFlags.Reference | TypeFlags.HasDefaultConstructor);
             for (int i = 0; i < s_unsupportedTypes.Length; i++)
             {
@@ -1385,7 +1366,7 @@ namespace System.Xml.Serialization
             return GetDefaultIndexer(type, memberInfo).PropertyType;
         }
 
-        static internal XmlQualifiedName ParseWsdlArrayType(string type, out string dims, XmlSchemaObject parent)
+        internal static XmlQualifiedName ParseWsdlArrayType(string type, out string dims, XmlSchemaObject parent)
         {
             string ns;
             string name;

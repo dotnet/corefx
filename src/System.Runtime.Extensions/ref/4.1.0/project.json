@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "System.Runtime.Extensions": "4.1.0"
+    "System.Runtime.Extensions": "4.3.0"
   },
   "frameworks": {
-    "netstandard1.5": { }
+    "netstandard1.5": {}
   }
 }

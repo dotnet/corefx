@@ -31,7 +31,7 @@ Project Docs
 - [Strong Name Signing](project-docs/strong-name-signing.md)
 - [Public Signing](project-docs/public-signing.md)
 - [Repo Organization](project-docs/repo-organization.md)
-- [Project NuGet Dependencies](project-docs/project-nuget-dependencies.md)
+- [Project NuGet Dependencies](https://github.com/dotnet/buildtools/blob/master/Documentation/project-nuget-dependencies.md)
 
 Coding Guidelines
 =================
@@ -45,6 +45,7 @@ Coding Guidelines
 - [Breaking Change Definitions](coding-guidelines/breaking-change-definitions.md)
 - [Breaking Change Rules](coding-guidelines/breaking-change-rules.md)
 - [Project Guidelines](coding-guidelines/project-guidelines.md)
+- [Adding APIs Guidelines](coding-guidelines/adding-api-guidelines.md)
 
 Building from Source
 ====================

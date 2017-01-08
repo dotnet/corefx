@@ -278,8 +278,15 @@ namespace System.Xml.Serialization
 
                 if (text.Mapping is SpecialMapping)
                 {
-                    // #10592: To Support text.Mapping being SpecialMapping
-                    throw new NotImplementedException("text.Mapping is SpecialMapping");
+                    SpecialMapping special = (SpecialMapping)text.Mapping;
+                    if (special.TypeDesc.Kind == TypeKind.Node)
+                    {
+                        o = Document.CreateTextNode(ReadString());
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
+                    }
                 }
                 else
                 {
@@ -666,7 +673,6 @@ namespace System.Xml.Serialization
             }
             else
             {
-                string methodName = $"To{mapping.TypeDesc.FormatterName}";
                 if (!mapping.TypeDesc.HasCustomFormatter)
                 {
                     string value = readFunc();
@@ -726,6 +732,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
+                    string methodName = "To" + mapping.TypeDesc.FormatterName;
                     MethodInfo method = typeof(XmlSerializationReader).GetMethod(methodName, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new Type[] { typeof(string) });
                     if (method == null)
                     {

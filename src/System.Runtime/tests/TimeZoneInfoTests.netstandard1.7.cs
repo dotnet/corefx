@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -140,13 +136,27 @@ namespace System.Tests
             // Kind and source types don't match
             VerifyConvertToUtcException<ArgumentException>(new DateTime(2007, 5, 3, 12, 8, 0, DateTimeKind.Local), london);
 
+            // Test the ambiguous date
+            DateTime utcAmbiguous = new DateTime(2016, 10, 30, 0, 14, 49, DateTimeKind.Utc);
+            DateTime convertedAmbiguous = TimeZoneInfo.ConvertTimeFromUtc(utcAmbiguous, london);
+            Assert.Equal(DateTimeKind.Unspecified, convertedAmbiguous.Kind);
+            Assert.True(london.IsAmbiguousTime(convertedAmbiguous), $"Expected to have {convertedAmbiguous} is ambiguous");
+
             // convert to London time and back
             DateTime utc = DateTime.UtcNow;
             Assert.Equal(DateTimeKind.Utc, utc.Kind);
             DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(utc, london);
-            Assert.Equal(converted.Kind, DateTimeKind.Unspecified);
+            Assert.Equal(DateTimeKind.Unspecified, converted.Kind);
             DateTime back = TimeZoneInfo.ConvertTimeToUtc(converted, london);
-            Assert.Equal(back.Kind, DateTimeKind.Utc);
+            Assert.Equal(DateTimeKind.Utc, back.Kind);
+
+            if (london.IsAmbiguousTime(converted))
+            {
+                // if the time is ambiguous this will not round trip the original value because this ambiguous time can be mapped into
+                // 2 UTC times. usually we return the value with the DST delta added to it.
+                back = back.AddTicks(- london.GetAdjustmentRules()[0].DaylightDelta.Ticks);
+            }
+
             Assert.Equal(utc, back);
         }
 
@@ -224,6 +234,44 @@ namespace System.Tests
             TimeZoneInfo utc = TimeZoneInfo.Utc;
             TimeZoneInfo custom = TimeZoneInfo.CreateCustomTimeZone("Custom", new TimeSpan(0), "Custom", "Custom");
             Assert.True(utc.HasSameRules(custom));
+        }
+
+        [Fact]
+        public static void ConvertTimeBySystemTimeZoneIdTests()
+        {
+            DateTime now = DateTime.Now;
+            DateTime utcNow = TimeZoneInfo.ConvertTimeToUtc(now);
+
+            Assert.Equal(now, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcNow, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(now, TimeZoneInfo.Utc.Id));
+
+            Assert.Equal(now, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcNow, TimeZoneInfo.Utc.Id, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(now, TimeZoneInfo.Local.Id, TimeZoneInfo.Utc.Id));
+
+            DateTimeOffset offsetNow = new DateTimeOffset(now);
+            DateTimeOffset utcOffsetNow = new DateTimeOffset(utcNow);
+
+            Assert.Equal(offsetNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcOffsetNow, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcOffsetNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(offsetNow, TimeZoneInfo.Utc.Id));
+        }
+
+        public static IEnumerable<object[]> SystemTimeZonesTestData()
+        {
+            foreach (TimeZoneInfo tz in TimeZoneInfo.GetSystemTimeZones())
+            {
+                yield return new object[] { tz };
+            }
+        }
+
+        [ActiveIssue(14797, TestPlatforms.AnyUnix)]
+        [Theory]
+        [MemberData(nameof(SystemTimeZonesTestData))]
+        public static void ToSerializedString_FromSerializedString_RoundTrips(TimeZoneInfo timeZone)
+        {
+            string serialized = timeZone.ToSerializedString();
+            TimeZoneInfo deserializedTimeZone = TimeZoneInfo.FromSerializedString(serialized);
+            Assert.Equal(timeZone, deserializedTimeZone);
+            Assert.Equal(serialized, deserializedTimeZone.ToSerializedString());
         }
 
         private static TimeZoneInfo CreateCustomLondonTimeZone()

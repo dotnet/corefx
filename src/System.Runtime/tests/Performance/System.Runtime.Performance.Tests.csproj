@@ -27,14 +27,10 @@
     <Compile Include="Perf.Int32.cs" />
     <Compile Include="Perf.IntPtr.cs" />
     <Compile Include="Perf.StringBuilder.cs" />
-    <Compile Include="..\System\String.SplitTests.cs" />
     <Compile Include="..\Helpers.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\pkg\System.Runtime.pkgproj">

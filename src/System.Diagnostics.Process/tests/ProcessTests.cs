@@ -13,7 +13,7 @@ using Xunit.NetCore.Extensions;
 
 namespace System.Diagnostics.Tests
 {
-    public class ProcessTests : ProcessTestBase
+    public partial class ProcessTests : ProcessTestBase
     {
         private class FinalizingProcess : Process
         {
@@ -548,6 +548,14 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void TestRootGetProcessById()
+        {
+            Process p = Process.GetProcessById(1);
+            Assert.Equal(1, p.Id);
+        }
+
+        [Fact]
         public void TestGetProcesses()
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -587,8 +595,13 @@ namespace System.Diagnostics.Tests
         {
             try
             {
-                int? value = (int?)Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance", "Disable Performance Counters", null);
-                return !value.HasValue || value.Value == 0;
+                using (Microsoft.Win32.RegistryKey perfKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\PerfProc\Performance"))
+                {
+                    if (perfKey == null)
+                        return false;
+                    int? value = (int?)perfKey.GetValue("Disable Performance Counters", null);
+                    return !value.HasValue || value.Value == 0;
+                }
             }
             catch (Exception)
             {

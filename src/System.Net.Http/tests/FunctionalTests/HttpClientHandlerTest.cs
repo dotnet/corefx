@@ -21,6 +21,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
     public class HttpClientHandlerTest
@@ -32,10 +34,10 @@ namespace System.Net.Http.Functional.Tests
 
         private readonly NetworkCredential _credential = new NetworkCredential(Username, Password);
 
-        public readonly static object[][] EchoServers = Configuration.Http.EchoServers;
-        public readonly static object[][] VerifyUploadServers = Configuration.Http.VerifyUploadServers;
-        public readonly static object[][] CompressedServers = Configuration.Http.CompressedServers;
-        public readonly static object[][] HeaderValueAndUris = {
+        public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
+        public static readonly object[][] VerifyUploadServers = Configuration.Http.VerifyUploadServers;
+        public static readonly object[][] CompressedServers = Configuration.Http.CompressedServers;
+        public static readonly object[][] HeaderValueAndUris = {
             new object[] { "X-CustomHeader", "x-value", Configuration.Http.RemoteEchoServer },
             new object[] { "X-Cust-Header-NoValue", "" , Configuration.Http.RemoteEchoServer },
             new object[] { "X-CustomHeader", "x-value", Configuration.Http.RedirectUriForDestinationUri(
@@ -49,10 +51,10 @@ namespace System.Net.Http.Functional.Tests
                 destinationUri:Configuration.Http.RemoteEchoServer,
                 hops:1) },
         };
-        public readonly static object[][] Http2Servers = Configuration.Http.Http2Servers;
-        public readonly static object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
+        public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
+        public static readonly object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
 
-        public readonly static object[][] RedirectStatusCodes = {
+        public static readonly object[][] RedirectStatusCodes = {
             new object[] { 300 },
             new object[] { 301 },
             new object[] { 302 },
@@ -62,11 +64,11 @@ namespace System.Net.Http.Functional.Tests
 
         // Standard HTTP methods defined in RFC7231: http://tools.ietf.org/html/rfc7231#section-4.3
         //     "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"
-        public readonly static IEnumerable<object[]> HttpMethods =
+        public static readonly IEnumerable<object[]> HttpMethods =
             GetMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "CUSTOM1");
-        public readonly static IEnumerable<object[]> HttpMethodsThatAllowContent =
+        public static readonly IEnumerable<object[]> HttpMethodsThatAllowContent =
             GetMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "CUSTOM1");
-        public readonly static IEnumerable<object[]> HttpMethodsThatDontAllowContent =
+        public static readonly IEnumerable<object[]> HttpMethodsThatDontAllowContent =
             GetMethods("HEAD", "TRACE");
 
         private static bool IsWindows10Version1607OrGreater => PlatformDetection.IsWindows10Version1607OrGreater;
@@ -156,24 +158,28 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void Properties_Get_CountIsZero()
         {
-            var handler = new HttpClientHandler();
-            IDictionary<String, object> dict = handler.Properties;
-            Assert.Same(dict, handler.Properties);
-            Assert.Equal(0, dict.Count);
+            using (var handler = new HttpClientHandler())
+            {
+                IDictionary<String, object> dict = handler.Properties;
+                Assert.Same(dict, handler.Properties);
+                Assert.Equal(0, dict.Count);
+            }
         }
 
         [Fact]
         public void Properties_AddItemToDictionary_ItemPresent()
         {
-            var handler = new HttpClientHandler();
-            IDictionary<String, object> dict = handler.Properties;
+            using (var handler = new HttpClientHandler())
+            {
+                IDictionary<String, object> dict = handler.Properties;
 
-            var item = new Object();
-            dict.Add("item", item);
+                var item = new Object();
+                dict.Add("item", item);
 
-            object value;
-            Assert.True(dict.TryGetValue("item", out value));
-            Assert.Equal(item, value);
+                object value;
+                Assert.True(dict.TryGetValue("item", out value));
+                Assert.Equal(item, value);
+            }
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -181,17 +187,15 @@ namespace System.Net.Http.Functional.Tests
         public async Task SendAsync_SimpleGet_Success(Uri remoteServer)
         {
             using (var client = new HttpClient())
+            using (HttpResponseMessage response = await client.GetAsync(remoteServer))
             {
-                using (HttpResponseMessage response = await client.GetAsync(remoteServer))
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);                    
-                    TestHelper.VerifyResponseBody(
-                        responseContent,
-                        response.Content.Headers.ContentMD5,
-                        false,
-                        null);                    
-                }
+                string responseContent = await response.Content.ReadAsStringAsync();
+                _output.WriteLine(responseContent);
+                TestHelper.VerifyResponseBody(
+                    responseContent,
+                    response.Content.Headers.ContentMD5,
+                    false,
+                    null);
             }
         }
 
@@ -229,34 +233,29 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                HttpResponseMessage response;
                 for (int i = 0; i < 3; i++)
                 {
-                    response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    response.Dispose();
+                    using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
                 }
             }
         }
-        
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ResponseContentAfterClientAndHandlerDispose_Success()
         {
-            HttpResponseMessage response = null;
-            using (var handler = new HttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (var client = new HttpClient())
+            using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer))
             {
-                response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer);
+                client.Dispose();
+                Assert.NotNull(response);
+                string responseContent = await response.Content.ReadAsStringAsync();
+                _output.WriteLine(responseContent);
+                TestHelper.VerifyResponseBody(responseContent, response.Content.Headers.ContentMD5, false, null);
             }
-            Assert.NotNull(response);
-            string responseContent = await response.Content.ReadAsStringAsync();
-            _output.WriteLine(responseContent);                    
-            TestHelper.VerifyResponseBody(
-                responseContent,
-                response.Content.Headers.ContentMD5,
-                false,
-                null);                    
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -980,6 +979,53 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(200)]
+        [InlineData(500)]
+        [InlineData(600)]
+        [InlineData(900)]
+        [InlineData(999)]
+        public async Task GetAsync_ExpectedStatusCode(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(statusCode, (int)response.StatusCode);
+                    }
+                }
+            });
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(99)]
+        [InlineData(1000)]
+        public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => getResponse);
+                }
+            });
+        }
+
         #region Post Methods Tests
 
         [OuterLoop] // TODO: Issue #11345
@@ -1697,6 +1743,7 @@ namespace System.Net.Http.Functional.Tests
         #endregion
         
         #region Proxy tests
+        [ActiveIssue(13188)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CredentialsForProxy))]
@@ -1725,15 +1772,18 @@ namespace System.Net.Http.Functional.Tests
                 Task<string> responseStringTask = responseTask.ContinueWith(t => t.Result.Content.ReadAsStringAsync(), TaskScheduler.Default).Unwrap();
                 Task.WaitAll(proxyTask, responseTask, responseStringTask);
 
-                TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
-                Assert.Equal(Encoding.ASCII.GetString(proxyTask.Result.ResponseContent), responseStringTask.Result);
+                using (responseTask.Result)
+                {
+                    TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
+                    Assert.Equal(Encoding.ASCII.GetString(proxyTask.Result.ResponseContent), responseStringTask.Result);
 
-                NetworkCredential nc = creds?.GetCredential(proxyUrl, BasicAuth);
-                string expectedAuth =
-                    nc == null || nc == CredentialCache.DefaultCredentials ? null :
-                    string.IsNullOrEmpty(nc.Domain) ? $"{nc.UserName}:{nc.Password}" :
-                    $"{nc.Domain}\\{nc.UserName}:{nc.Password}";
-                Assert.Equal(expectedAuth, proxyTask.Result.AuthenticationHeaderValue);
+                    NetworkCredential nc = creds?.GetCredential(proxyUrl, BasicAuth);
+                    string expectedAuth =
+                        nc == null || nc == CredentialCache.DefaultCredentials ? null :
+                        string.IsNullOrEmpty(nc.Domain) ? $"{nc.UserName}:{nc.Password}" :
+                        $"{nc.Domain}\\{nc.UserName}:{nc.Password}";
+                    Assert.Equal(expectedAuth, proxyTask.Result.AuthenticationHeaderValue);
+                }
             }
         }
 
@@ -1769,8 +1819,10 @@ namespace System.Net.Http.Functional.Tests
             {
                 Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
                 Task.WaitAll(proxyTask, responseTask);
-
-                Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
+                using (responseTask.Result)
+                {
+                    Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);
+                }
             }
         }        
 

@@ -19,7 +19,8 @@ namespace System.Net
     ///    <see cref='System.Net.WebResponse'/> class.
     /// </para>
     /// </devdoc>
-    public class HttpWebResponse : WebResponse,ISerializable
+    [Serializable]
+    public class HttpWebResponse : WebResponse, ISerializable
     {
         private HttpResponseMessage _httpResponseMessage;
         private Uri _requestUri;
@@ -30,32 +31,21 @@ namespace System.Net
 
         public HttpWebResponse() { }
 
+        [ObsoleteAttribute("Serialization is obsoleted for this type.  http://go.microsoft.com/fwlink/?linkid=14202")]
         protected HttpWebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
-            _webHeaderCollection = (WebHeaderCollection)serializationInfo.GetValue("_HttpResponseHeaders", typeof(WebHeaderCollection));
-            _requestUri = (Uri)serializationInfo.GetValue("_Uri", typeof(Uri));
-            Version version = (Version)serializationInfo.GetValue("_Version", typeof(Version));
-            _isVersionHttp11 = version.Equals(HttpVersion.Version11);            
-            ContentLength = serializationInfo.GetInt64("_ContentLength");                        
+            throw new PlatformNotSupportedException();
         }
      
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {           
-            serializationInfo.AddValue("_HttpResponseHeaders", _webHeaderCollection, typeof(WebHeaderCollection));
-            serializationInfo.AddValue("_Uri", _requestUri, typeof(Uri));
-            serializationInfo.AddValue("_Version", ProtocolVersion, typeof(Version));
-            serializationInfo.AddValue("_StatusCode", StatusCode);
-            serializationInfo.AddValue("_ContentLength", ContentLength);
-            serializationInfo.AddValue("_Verb", Method);
-            serializationInfo.AddValue("_StatusDescription", StatusDescription);            
-            base.GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
-
 
         internal HttpWebResponse(HttpResponseMessage _message, Uri requestUri, CookieContainer cookieContainer)
         {
@@ -142,6 +132,12 @@ namespace System.Net
             {
                 CheckDisposed();
                 return _cookies;
+            }
+
+            set
+            {
+                CheckDisposed();
+                _cookies = value;
             }
         }
       
@@ -351,6 +347,11 @@ namespace System.Net
             CheckDisposed();
             string headerValue = Headers[headerName];
             return ((headerValue == null) ? String.Empty : headerValue);
+        }
+
+        public override void Close()
+        {
+            Dispose(true);
         }
 
         protected override void Dispose(bool disposing)

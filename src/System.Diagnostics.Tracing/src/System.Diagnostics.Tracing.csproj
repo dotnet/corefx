@@ -6,12 +6,13 @@
     <ProjectGuid>{EB880FDC-326D-42B3-A3FD-0CD3BA29A7F4}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <GenFacadesArgs Condition="'$(TargetGroup)'=='net461'">$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)'!='netcore50aot'">
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)'=='netcore50aot'">
-    <DefineConstants>$(DefineConstants);PROJECTN</DefineConstants>
+    <DefineConstants>$(DefineConstants);PROJECTN;FEATURE_SERIALIZATION</DefineConstants>
     <!-- Need to remove reference to System.Reflection.TypeExtensions
     which is included transitively via System.Reflection -->
     <OmitTransitiveCompileReferences>true</OmitTransitiveCompileReferences>
@@ -21,9 +22,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="FxCopBaseline.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='' OR '$(TargetGroup)'=='netcore50aot'">
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <Compile Include="System\Diagnostics\Tracing\EventCounter.cs" />
   </ItemGroup>
@@ -71,38 +75,38 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.Errors.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\mincore\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetCurrentProcessId.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs">
       <Link>Common\Interop\Interop.GetCurrentProcessId.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetCurrentThreadId.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentThreadId.cs">
       <Link>Common\Interop\Interop.GetCurrentThreadId.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventRegister.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.EventRegister.cs">
       <Link>Common\Interop\Interop.EventRegister.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventUnregister.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.EventUnregister.cs">
       <Link>Common\Interop\Interop.EventUnregister.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventWrite.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.EventWrite.cs">
       <Link>Common\Interop\Interop.EventWrite.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Interop.FormatMessage.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventSetInformation.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.EventSetInformation.cs">
       <Link>Common\Interop\Interop.EventSetInformation.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventWriteTransfer.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.EventWriteTransfer.cs">
       <Link>Common\Interop\Interop.EventWriteTransfer.cs</Link>
     </Compile>
     <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)'=='true'">
-    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net463'" />
-    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net463'" />
+    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net461'" />
+    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net461'" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

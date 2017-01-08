@@ -49,13 +49,12 @@
     <TargetingPackReference Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\pkg\System.Globalization.Extensions.pkgproj">
       <Project>{2b96aa10-84c0-4927-8611-8d2474b990e8}</Project>
       <Name>System.Globalization.Extensions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\pkg\System.Runtime.Extensions.pkgproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

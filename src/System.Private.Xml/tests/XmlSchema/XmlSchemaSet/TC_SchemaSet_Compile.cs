@@ -4,9 +4,7 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 
 namespace System.Xml.Tests
@@ -76,7 +74,7 @@ namespace System.Xml.Tests
 
             try
             {
-                sc.Add(null, TestData._Root + "schema1.xdr");
+                sc.Add(null, Path.Combine(TestData._Root, "schema1.xdr"));
             }
             catch (XmlSchemaException)
             {

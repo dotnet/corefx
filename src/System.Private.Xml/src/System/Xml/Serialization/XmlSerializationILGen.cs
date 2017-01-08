@@ -67,7 +67,7 @@ namespace System.Xml.Serialization
         internal TypeAttributes TypeAttributes { get { return _typeAttributes; } }
 
         private static Dictionary<string, Regex> s_regexs = new Dictionary<string, Regex>();
-        static internal Regex NewRegex(string pattern)
+        internal static Regex NewRegex(string pattern)
         {
             Regex regex;
             lock (s_regexs)
@@ -529,7 +529,7 @@ namespace System.Xml.Serialization
             ilg.New(ctor);
             ilg.EndMethod();
 
-            FieldBuilder readMethodsField = GeneratePublicMethods("readMethods", "ReadMethods", readMethods, xmlMappings, serializerContractTypeBuilder);
+            FieldBuilder readMethodsField = GeneratePublicMethods(nameof(readMethods), "ReadMethods", readMethods, xmlMappings, serializerContractTypeBuilder);
             FieldBuilder writeMethodsField = GeneratePublicMethods("writeMethods", "WriteMethods", writerMethods, xmlMappings, serializerContractTypeBuilder);
             FieldBuilder typedSerializersField = GenerateTypedSerializers(serializers, serializerContractTypeBuilder);
             GenerateSupportedTypes(types, serializerContractTypeBuilder);

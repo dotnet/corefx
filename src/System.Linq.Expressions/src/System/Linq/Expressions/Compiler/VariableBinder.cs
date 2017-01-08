@@ -34,7 +34,7 @@ namespace System.Linq.Expressions.Compiler
 
         public override Expression Visit(Expression node)
         {
-            // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
+            // When compiling deep trees, we run the risk of triggering a terminating StackOverflowException,
             // so we use the StackGuard utility here to probe for sufficient stack and continue the work on
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
@@ -156,7 +156,7 @@ namespace System.Linq.Expressions.Compiler
                 body = ((BlockExpression)node).Expressions;
             }
 
-            var currentScope = _scopes.Peek();
+            CompilerScope currentScope = _scopes.Peek();
 
             // A block body is mergeable if the body only contains one single block node containing variables,
             // and the child block has the same type as the parent block.
@@ -168,7 +168,7 @@ namespace System.Linq.Expressions.Compiler
                 {
                     // Make sure none of the variables are shadowed. If any
                     // are, we can't merge it.
-                    foreach (var v in block.Variables)
+                    foreach (ParameterExpression v in block.Variables)
                     {
                         if (currentScope.Definitions.ContainsKey(v))
                         {
@@ -182,12 +182,11 @@ namespace System.Linq.Expressions.Compiler
                         currentScope.MergedScopes = new HashSet<BlockExpression>(ReferenceEqualityComparer<object>.Instance);
                     }
                     currentScope.MergedScopes.Add(block);
-                    foreach (var v in block.Variables)
+                    foreach (ParameterExpression v in block.Variables)
                     {
                         currentScope.Definitions.Add(v, VariableStorageKind.Local);
                     }
                 }
-                node = block;
                 body = block.Expressions;
             }
             return body;
@@ -232,7 +231,7 @@ namespace System.Linq.Expressions.Compiler
 
         protected internal override Expression VisitRuntimeVariables(RuntimeVariablesExpression node)
         {
-            foreach (var v in node.Variables)
+            foreach (ParameterExpression v in node.Variables)
             {
                 // Force hoisting of these variables
                 Reference(v, VariableStorageKind.Hoisted);
@@ -274,7 +273,7 @@ namespace System.Linq.Expressions.Compiler
         {
             get
             {
-                foreach (var scope in _scopes)
+                foreach (CompilerScope scope in _scopes)
                 {
                     var lambda = scope.Node as LambdaExpression;
                     if (lambda != null)

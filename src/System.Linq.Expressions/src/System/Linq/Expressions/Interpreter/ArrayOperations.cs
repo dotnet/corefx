@@ -27,7 +27,7 @@ namespace System.Linq.Expressions.Interpreter
                 array.SetValue(frame.Pop(), i);
             }
             frame.Push(array);
-            return +1;
+            return 1;
         }
     }
 
@@ -53,7 +53,7 @@ namespace System.Linq.Expressions.Interpreter
                 throw new OverflowException();
             }
             frame.Push(Array.CreateInstance(_elementType, length));
-            return +1;
+            return 1;
         }
     }
 
@@ -77,7 +77,7 @@ namespace System.Linq.Expressions.Interpreter
             var lengths = new int[_rank];
             for (int i = _rank - 1; i >= 0; i--)
             {
-                var length = ConvertHelper.ToInt32NoNull(frame.Pop());
+                int length = ConvertHelper.ToInt32NoNull(frame.Pop());
 
                 if (length < 0)
                 {
@@ -87,17 +87,17 @@ namespace System.Linq.Expressions.Interpreter
 
                 lengths[i] = length;
             }
-            var array = Array.CreateInstance(_elementType, lengths);
+            Array array = Array.CreateInstance(_elementType, lengths);
             frame.Push(array);
-            return +1;
+            return 1;
         }
     }
 
     internal sealed class GetArrayItemInstruction : Instruction
     {
-        internal static readonly GetArrayItemInstruction Instruction = new GetArrayItemInstruction();
+        internal static readonly GetArrayItemInstruction Instance = new GetArrayItemInstruction();
 
-        internal GetArrayItemInstruction() { }
+        private GetArrayItemInstruction() { }
 
         public override int ConsumedStack => 2;
         public override int ProducedStack => 1;
@@ -108,15 +108,15 @@ namespace System.Linq.Expressions.Interpreter
             int index = ConvertHelper.ToInt32NoNull(frame.Pop());
             Array array = (Array)frame.Pop();
             frame.Push(array.GetValue(index));
-            return +1;
+            return 1;
         }
     }
 
     internal sealed class SetArrayItemInstruction : Instruction
     {
-        internal static readonly SetArrayItemInstruction Instruction = new SetArrayItemInstruction();
+        internal static readonly SetArrayItemInstruction Instance = new SetArrayItemInstruction();
 
-        internal SetArrayItemInstruction() { }
+        private SetArrayItemInstruction() { }
 
         public override int ConsumedStack => 3;
         public override int ProducedStack => 0;
@@ -128,7 +128,7 @@ namespace System.Linq.Expressions.Interpreter
             int index = ConvertHelper.ToInt32NoNull(frame.Pop());
             Array array = (Array)frame.Pop();
             array.SetValue(value, index);
-            return +1;
+            return 1;
         }
     }
 
@@ -146,7 +146,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             object obj = frame.Pop();
             frame.Push(((Array)obj).Length);
-            return +1;
+            return 1;
         }
     }
 

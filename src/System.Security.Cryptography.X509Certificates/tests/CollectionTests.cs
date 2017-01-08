@@ -4,6 +4,7 @@
 
 using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -452,10 +453,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 il.Add(c2);
 
                 Assert.Throws<ArgumentNullException>(() => il[0] = null);
+            }
+        }
+
+        [Fact]
+        // On Desktop, list is untyped so it allows arbitrary types in it
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void X509CertificateCollectionAsIListBogusEntry()
+        {
+            using (X509Certificate2 c = new X509Certificate2())
+            {
+                IList il = new X509CertificateCollection();
+                il.Add(c);
 
                 string bogus = "Bogus";
+
                 Assert.Throws<ArgumentException>(() => il[0] = bogus);
                 Assert.Throws<ArgumentException>(() => il.Add(bogus));
+                Assert.Throws<ArgumentException>(() => il.Remove(bogus));
                 Assert.Throws<ArgumentException>(() => il.Insert(0, bogus));
             }
         }
@@ -499,7 +514,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void ImportStoreSavedAsSerializedCerData_Windows()
         {
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 using (ImportedCollection ic = Cert.Import(TestData.StoreSavedAsSerializedCerData))
                 {
@@ -528,12 +543,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(0, cc2.Count);
         }
 
-        [Fact]
+        [Theory]
+        [MemberData(nameof(StorageFlags))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public static void ImportStoreSavedAsSerializedStoreData_Windows()
+        public static void ImportStoreSavedAsSerializedStoreData_Windows(X509KeyStorageFlags keyStorageFlags)
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, keyStorageFlags))
             using (ImportedCollection ic = Cert.Import(TestData.StoreSavedAsSerializedStoreData))
             {
 
@@ -566,7 +582,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void ImportStoreSavedAsPfxData()
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             using (ImportedCollection ic = Cert.Import(TestData.StoreSavedAsPfxData))
             {
                 X509Certificate2Collection cc2 = ic.Collection;
@@ -591,12 +607,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.ThrowsAny<CryptographicException>(() => cc2.Import(new byte[] { 0, 1, 1, 2, 3, 5, 8, 13, 21 }));
         }
 
-        [Fact]
-        public static void ImportFromFileTests()
+        [Theory]
+        [MemberData(nameof(StorageFlags))]
+        public static void ImportFromFileTests(X509KeyStorageFlags storageFlags)
         {
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, storageFlags))
             {
-                using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "My.pfx"), TestData.PfxDataPassword, X509KeyStorageFlags.DefaultKeySet))
+                using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "My.pfx"), TestData.PfxDataPassword, storageFlags))
                 {
                     X509Certificate2Collection cc2 = ic.Collection;
                     int count = cc2.Count;
@@ -636,6 +653,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             TestExportSingleCert(X509ContentType.Cert);
         }
+
+#if netcoreapp11
+        [Fact]
+        public static void ExportCert_SecureString()
+        {
+            TestExportSingleCert_SecureStringPassword(X509ContentType.Cert);
+        }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -761,8 +786,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             var collection = new X509Certificate2Collection();
             try
             {
-                collection.Import(Path.Combine("TestData", "DummyTcpServer.pfx"), null, default(X509KeyStorageFlags));
-                collection.Import(TestData.PfxData, TestData.PfxDataPassword, default(X509KeyStorageFlags));
+                collection.Import(Path.Combine("TestData", "DummyTcpServer.pfx"), (string)null, Cert.EphemeralIfPossible);
+                collection.Import(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible);
                 Assert.Equal(3, collection.Count);
             }
             finally
@@ -782,8 +807,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             try
             {
-                collection.Import(Path.Combine("TestData", "DummyTcpServer.pfx"), null, X509KeyStorageFlags.Exportable);
-                collection.Import(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable);
+                collection.Import(Path.Combine("TestData", "DummyTcpServer.pfx"), (string)null, X509KeyStorageFlags.Exportable | Cert.EphemeralIfPossible);
+                collection.Import(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable | Cert.EphemeralIfPossible);
 
                 // Pre-condition, we have multiple private keys
                 int originalPrivateKeyCount = collection.OfType<X509Certificate2>().Count(c => c.HasPrivateKey);
@@ -884,7 +909,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void X509ExtensionCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
         {
-            using (X509Certificate2 cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 ICollection collection = cert.Extensions;
                 Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
@@ -896,7 +921,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void X509CertificateCollectionIndexOf()
         {
             using (X509Certificate2 c1 = new X509Certificate2())
-            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 X509CertificateCollection cc = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
                 Assert.Equal(0, cc.IndexOf(c1));
@@ -912,7 +937,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void X509CertificateCollectionRemove()
         {
             using (X509Certificate2 c1 = new X509Certificate2())
-            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 X509CertificateCollection cc = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
 
@@ -1376,10 +1401,27 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+#if netcoreapp11
+        private static void TestExportSingleCert_SecureStringPassword(X509ContentType ct)
+        {
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.CreatePfxDataPasswordSecureString(), Cert.EphemeralIfPossible))
+            {
+                TestExportSingleCert(ct, pfxCer);
+            }
+        }
+#endif
+
         private static void TestExportSingleCert(X509ContentType ct)
         {
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
+            {
+                TestExportSingleCert(ct, pfxCer);
+            }
+        }
+
+        private static void TestExportSingleCert(X509ContentType ct, X509Certificate2 pfxCer)
+        {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
             {
                 X509Certificate2Collection cc = new X509Certificate2Collection(new X509Certificate2[] { msCer, pfxCer });
 
@@ -1407,7 +1449,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         private static void TestExportStore(X509ContentType ct)
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
-            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 X509Certificate2Collection cc = new X509Certificate2Collection(new X509Certificate2[] { msCer, pfxCer });
 
@@ -1435,6 +1477,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         Assert.Equal(pfxCer, second);
                     }
                 }
+            }
+        }
+
+        public static IEnumerable<object[]> StorageFlags
+        {
+            get
+            {
+                yield return new object[] { X509KeyStorageFlags.DefaultKeySet };
+
+#if netcoreapp11
+                yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
+#endif
             }
         }
 

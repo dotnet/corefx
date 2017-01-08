@@ -138,11 +138,20 @@
   <data name="Arg_CryptographyException" xml:space="preserve">
     <value>Error occurred during a cryptographic operation.</value>
   </data>
+  <data name="Cryptography_Config_EncodedOIDError" xml:space="preserve">
+    <value>Encoded OID length is too large (greater than 0x7f bytes).</value>
+  </data>
   <data name="Cryptography_CSP_NoPrivateKey" xml:space="preserve">
     <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
   </data>
+  <data name="Cryptography_ECXmlSerializationFormatRequired" xml:space="preserve">
+    <value>XML serialization of an elliptic curve key requires using an overload which specifies the XML format to be used.</value>
+  </data>
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
+  </data>
+  <data name="Cryptography_InvalidOID" xml:space="preserve">
+    <value>Object identifier (OID) is unknown.</value>
   </data>
   <data name="Cryptography_CurveNotSupported" xml:space="preserve">
     <value>The specified curve '{0}' or its parameters are not valid for this platform.</value>
@@ -249,6 +258,12 @@
   <data name="Cryptography_RC2_EKSKS" xml:space="preserve">
     <value>KeySize value must be at least as large as the EffectiveKeySize value.</value>
   </data>
+  <data name="Cryptography_RC2_EKSKS2" xml:space="preserve">
+    <value>EffectiveKeySize must be the same as KeySize in this implementation.</value>
+  </data>
+  <data name="Cryptography_Rijndael_BlockSize" xml:space="preserve">
+    <value>BlockSize must be 128 in this implementation.</value>
+  </data>
   <data name="Cryptography_TransformBeyondEndOfBuffer" xml:space="preserve">
     <value>Attempt to transform beyond end of buffer.</value>
   </data>
@@ -270,6 +285,9 @@
   <data name="Cryptography_UnsupportedPaddingMode" xml:space="preserve">
     <value>The specified PaddingMode is not supported.</value>
   </data>
+  <data name="NotSupported_Method" xml:space="preserve">
+    <value>Method not supported.</value>
+  </data>  
   <data name="NotSupported_SubclassOverride" xml:space="preserve">
     <value>Method not supported. Derived class must override.</value>
   </data>

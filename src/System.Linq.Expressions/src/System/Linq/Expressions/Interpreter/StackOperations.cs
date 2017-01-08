@@ -22,7 +22,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[frame.StackIndex++] = _value;
-            return +1;
+            return 1;
         }
 
         public override string ToString() => "LoadObject(" + (_value ?? "null") + ")";
@@ -43,12 +43,12 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             frame.Data[frame.StackIndex++] = frame.Interpreter._objects[_index];
-            return +1;
+            return 1;
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
-            return String.Format(CultureInfo.InvariantCulture, "LoadCached({0}: {1})", _index, objects[(int)_index]);
+            return string.Format(CultureInfo.InvariantCulture, "LoadCached({0}: {1})", _index, objects[(int)_index]);
         }
 
         public override string ToString() => "LoadCached(" + _index + ")";
@@ -62,11 +62,11 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int ConsumedStack => 1;
         public override string InstructionName =>"Pop";
-        
+
         public override int Run(InterpretedFrame frame)
         {
             frame.Pop();
-            return +1;
+            return 1;
         }
 
         public override string ToString() => "Pop()";
@@ -74,19 +74,18 @@ namespace System.Linq.Expressions.Interpreter
 
     internal sealed class DupInstruction : Instruction
     {
-        internal readonly static DupInstruction Instance = new DupInstruction();
+        internal static readonly DupInstruction Instance = new DupInstruction();
 
         private DupInstruction() { }
 
         public override int ConsumedStack => 0;
         public override int ProducedStack => 1;
         public override string InstructionName => "Dup";
-        
+
         public override int Run(InterpretedFrame frame)
         {
-            var value = frame.Peek();
-            frame.Data[frame.StackIndex++] = value;
-            return +1;
+            frame.Dup();
+            return 1;
         }
 
         public override string ToString() => "Dup()";

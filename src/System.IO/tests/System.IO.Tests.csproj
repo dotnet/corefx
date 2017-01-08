@@ -14,25 +14,34 @@
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)'==''" >
+    <Compile Include="IndentedTextWriter.cs"/>
+    <Compile Include="BinaryReader\BinaryReaderTests.cs" />
+    <Compile Include="MemoryStream\MemoryStream.GetBufferTests.cs" />
+    <Compile Include="Stream\Stream.netstandard17.cs" />
+    <Compile Include="StreamReader\StreamReader.netstandard17.cs" />
+    <Compile Include="StreamReader\StreamReader.StringCtorTests.cs" />
+    <Compile Include="StreamWriter\StreamWriter.netstandard17.cs" />
+    <Compile Include="StreamWriter\StreamWriter.StringCtorTests.cs" />
+    <Compile Include="Stream\Stream.APMMethodsTests.cs" />
+    <Compile Include="BufferedStream\BufferedStreamTests.netstandard1.7.cs" />
+  </ItemGroup>
   <ItemGroup>
-    <Compile Include="IndentedTextWriter.cs" Condition="'$(TargetGroup)'==''" />
-    <Compile Include="BinaryReader\BinaryReaderTests.cs" Condition="'$(TargetGroup)'==''" />
     <Compile Include="BinaryWriter\BinaryWriter.WriteByteCharTests.cs" />
     <Compile Include="BinaryWriter\BinaryWriter.WriteTests.cs" />
     <Compile Include="BinaryWriter\BinaryWriterTests.cs" />
+    <Compile Include="BufferedStream\BufferedStream.FlushTests.cs" />
     <Compile Include="BufferedStream\BufferedStream.InvalidParameters.cs" />
     <Compile Include="BufferedStream\BufferedStreamTests.cs" />
+    <Compile Include="BufferedStream\BufferedStreamTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="InvalidDataException\InvalidDataExceptionTests.cs" />
     <Compile Include="MemoryStream\MemoryStream.ConstructorTests.cs" />
-    <Compile Include="MemoryStream\MemoryStream.GetBufferTests.cs" Condition="'$(TargetGroup)'==''" />
     <Compile Include="MemoryStream\MemoryStream.TryGetBufferTests.cs" />
     <Compile Include="MemoryStream\MemoryStreamTests.cs" />
     <Compile Include="StreamReader\StreamReader.CtorTests.cs" />
-    <Compile Include="StreamReader\StreamReader.StringCtorTests.cs" Condition="'$(TargetGroup)'==''" />
     <Compile Include="StreamReader\StreamReaderTests.cs" />
     <Compile Include="StreamWriter\StreamWriter.BaseStream.cs" />
     <Compile Include="StreamWriter\StreamWriter.CloseTests.cs" />
-    <Compile Include="StreamWriter\StreamWriter.StringCtorTests.cs" Condition="'$(TargetGroup)'==''" />
     <Compile Include="StreamWriter\StreamWriter.CtorTests.cs" />
     <Compile Include="StreamWriter\StreamWriter.FlushTests.cs" />
     <Compile Include="StreamWriter\StreamWriter.WriteTests.cs" />
@@ -57,9 +66,6 @@
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.IO.pkgproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\pkg\System.Diagnostics.Debug.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

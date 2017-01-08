@@ -29,28 +29,23 @@ namespace System.Runtime.Serialization.Json
 
     internal sealed class JsonFormatReaderGenerator
     {
-        [SecurityCritical]
         private CriticalHelper _helper;
 
-        [SecurityCritical]
         public JsonFormatReaderGenerator()
         {
             _helper = new CriticalHelper();
         }
 
-        [SecurityCritical]
         public JsonFormatClassReaderDelegate GenerateClassReader(ClassDataContract classContract)
         {
             return _helper.GenerateClassReader(classContract);
         }
 
-        [SecurityCritical]
         public JsonFormatCollectionReaderDelegate GenerateCollectionReader(CollectionDataContract collectionContract)
         {
             return _helper.GenerateCollectionReader(collectionContract);
         }
 
-        [SecurityCritical]
         public JsonFormatGetOnlyCollectionReaderDelegate GenerateGetOnlyCollectionReader(CollectionDataContract collectionContract)
         {
             return _helper.GenerateGetOnlyCollectionReader(collectionContract);
@@ -94,6 +89,12 @@ namespace System.Runtime.Serialization.Json
                     ReadISerializable(classContract);
                 else
                     ReadClass(classContract);
+
+                if (Globals.TypeOfIDeserializationCallback.IsAssignableFrom(classContract.UnderlyingType))
+                {
+                    _ilg.Call(_objectLocal, JsonFormatGeneratorStatics.OnDeserializationMethod, null);
+                }
+
                 InvokeOnDeserialized(classContract);
                 if (!InvokeFactoryMethod(classContract))
                 {
@@ -262,7 +263,26 @@ namespace System.Runtime.Serialization.Json
 
             private void ReadClass(ClassDataContract classContract)
             {
-                ReadMembers(classContract, null /*extensionDataLocal*/);
+                if (classContract.HasExtensionData)
+                {
+                    LocalBuilder extensionDataLocal = _ilg.DeclareLocal(Globals.TypeOfExtensionDataObject, "extensionData");
+                    _ilg.New(JsonFormatGeneratorStatics.ExtensionDataObjectCtor);
+                    _ilg.Store(extensionDataLocal);
+                    ReadMembers(classContract, extensionDataLocal);
+
+                    ClassDataContract currentContract = classContract;
+                    while (currentContract != null)
+                    {
+                        MethodInfo extensionDataSetMethod = currentContract.ExtensionDataSetMethod;
+                        if (extensionDataSetMethod != null)
+                            _ilg.Call(_objectLocal, extensionDataSetMethod, extensionDataLocal);
+                        currentContract = currentContract.BaseContract;
+                    }
+                }
+                else
+                {
+                    ReadMembers(classContract, null /*extensionDataLocal*/);
+                }
             }
 
             private void ReadMembers(ClassDataContract classContract, LocalBuilder extensionDataLocal)
@@ -406,7 +426,15 @@ namespace System.Runtime.Serialization.Json
 
             private void ReadISerializable(ClassDataContract classContract)
             {
-                // ISerializable is not supported
+                ConstructorInfo ctor = classContract.UnderlyingType.GetConstructor(Globals.ScanAllMembers, null, JsonFormatGeneratorStatics.SerInfoCtorArgs, null);
+                if (ctor == null)
+                    throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.SerializationInfo_ConstructorNotFound, DataContract.GetClrTypeFullName(classContract.UnderlyingType))));
+                _ilg.LoadAddress(_objectLocal);
+                _ilg.ConvertAddress(_objectLocal.LocalType, _objectType);
+                _ilg.Call(_contextArg, XmlFormatGeneratorStatics.ReadSerializationInfoMethod, _xmlReaderArg, classContract.UnderlyingType);
+                _ilg.Load(_contextArg);
+                _ilg.LoadMember(XmlFormatGeneratorStatics.GetStreamingContextMethod);
+                _ilg.Call(ctor);
             }
 
             private LocalBuilder ReadValue(Type type, string name)

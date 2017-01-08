@@ -11,7 +11,7 @@ using Microsoft.Win32;
 namespace System.Net.Sockets
 {
     // ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginConnect call.
-    internal partial class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
+    internal sealed partial class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
         // This method is called by base.CompletionPortCallback base.OverlappedCallback as part of IO completion
         internal override object PostCompletion(int numBytes)
@@ -32,7 +32,7 @@ namespace System.Net.Sockets
                         0);
                     if (errorCode == SocketError.SocketError)
                     {
-                        errorCode = (SocketError)Marshal.GetLastWin32Error();
+                        errorCode = SocketPal.GetLastSocketError();
                     }
                 }
                 catch (ObjectDisposedException)

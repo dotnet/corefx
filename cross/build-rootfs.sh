@@ -3,9 +3,8 @@
 usage()
 {
     echo "Usage: $0 [BuildArch] [UbuntuCodeName]"
-    echo "BuildArch can be: arm, arm-softfp, arm64"
-    echo "UbuntuCodeName - optional, Code name for Ubuntu, can be: trusty(default), vivid, wily. If BuildArch is arm-softfp, UbuntuCodeName is ignored."
-
+    echo "BuildArch can be: arm, armel, arm64, x86"
+    echo "UbuntuCodeName - optional, Code name for Ubuntu, can be: trusty(default), vivid, wily, xenial. If BuildArch is armel, jessie(default) or tizen."
     exit 1
 }
 
@@ -31,6 +30,8 @@ __UbuntuPackages+=" zlib1g-dev"
 if [ -z "$LLVM_ARM_HOME" ]; then
     __LLDB_Package="lldb-3.6-dev"
 fi
+ 
+
 
 __BuildArch=arm
 __UbuntuArch=armhf
@@ -49,7 +50,6 @@ for i in "$@" ; do
         arm)
             __BuildArch=arm
             __UbuntuArch=armhf
-            __UbuntuPackages+=" ${__LLDB_Package:-}"
             __MachineTriple=arm-linux-gnueabihf
             ;;
         arm64)
@@ -57,11 +57,15 @@ for i in "$@" ; do
             __UbuntuArch=arm64
             __MachineTriple=aarch64-linux-gnu
             ;;
-        arm-softfp)
-            __BuildArch=arm-softfp
+        x86)
+            __BuildArch=x86
+            __UbuntuArch=i386
+            __UbuntuRepo="http://archive.ubuntu.com/ubuntu"
+            ;;
+        armel)
+            __BuildArch=armel
             __UbuntuArch=armel
             __UbuntuRepo="http://ftp.debian.org/debian/"
-            __UbuntuPackages+=" ${__LLDB_Package:-}"
             __MachineTriple=arm-linux-gnueabi
             __UbuntuCodeName=jessie
             ;;
@@ -75,11 +79,39 @@ for i in "$@" ; do
                 __UbuntuCodeName=wily
             fi
             ;;
+        xenial)
+            if [ "$__UbuntuCodeName" != "jessie" ]; then
+                __UbuntuCodeName=xenial
+            fi
+            ;;
+        jessie)
+            __UbuntuCodeName=jessie
+            __UbuntuRepo="http://ftp.debian.org/debian/"
+            ;;
+        tizen)
+            if [ "$__BuildArch" != "armel" ]; then
+                echo "Tizen is available only for armel"
+                usage;
+                exit 1;
+            fi
+            __UbuntuCodeName=
+            __UbuntuRepo=
+            __Tizen=tizen
+            ;;
         *)
             __UnprocessedBuildArgs="$__UnprocessedBuildArgs $i"
             ;;
     esac
 done
+
+if [[ "$__BuildArch" == "arm" ]]; then
+    __UbuntuPackages+=" ${__LLDB_Package:-}"
+fi
+
+if [ "$__BuildArch" == "armel" ]; then  
+    __LLDB_Package="lldb-3.5-dev"
+    __UbuntuPackages+=" ${__LLDB_Package:-}"
+fi 
 
 __RootfsDir="$__CrossDir/rootfs/$__BuildArch"
 
@@ -89,9 +121,19 @@ fi
 
 umount $__RootfsDir/*
 rm -rf $__RootfsDir
-qemu-debootstrap --arch $__UbuntuArch $__UbuntuCodeName $__RootfsDir $__UbuntuRepo
-cp $__CrossDir/$__BuildArch/sources.list.$__UbuntuCodeName $__RootfsDir/etc/apt/sources.list
-chroot $__RootfsDir apt-get update
-chroot $__RootfsDir apt-get -y install $__UbuntuPackages
-chroot $__RootfsDir symlinks -cr /usr
-umount $__RootfsDir/*
+
+if [[ -n $__UbuntuCodeName ]]; then
+    qemu-debootstrap --arch $__UbuntuArch $__UbuntuCodeName $__RootfsDir $__UbuntuRepo
+    cp $__CrossDir/$__BuildArch/sources.list.$__UbuntuCodeName $__RootfsDir/etc/apt/sources.list
+    chroot $__RootfsDir apt-get update
+    chroot $__RootfsDir apt-get -f -y install
+    chroot $__RootfsDir apt-get -y install $__UbuntuPackages
+    chroot $__RootfsDir symlinks -cr /usr
+    umount $__RootfsDir/*
+elif [ "$__Tizen" == "tizen" ]; then
+    ROOTFS_DIR=$__RootfsDir $__CrossDir/$__BuildArch/tizen-build-rootfs.sh
+else
+    echo "Unsupported target platform."
+    usage;
+    exit 1
+fi

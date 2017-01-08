@@ -24,6 +24,8 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed partial class CertificatePal : IDisposable, ICertificatePal
     {
+        private SafeCertContextHandle _certContext;
+
         public static ICertificatePal FromHandle(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
@@ -40,20 +42,14 @@ namespace Internal.Cryptography.Pal
         }
 
         /// <summary>
-        /// Returns the SafeCertContextHandle. Use this instead of FromHandle property when
+        /// Returns the SafeCertContextHandle. Use this instead of FromHandle() when
         /// creating another X509Certificate object based on this one to ensure the underlying
         /// cert context is not released at the wrong time.
         /// </summary>
-        /// <param name="cert"></param>
-        /// <returns></returns>
-        public static ICertificatePal FromOtherCert(X509Certificate cert)
+        public static ICertificatePal FromOtherCert(X509Certificate copyFrom)
         {
-            CertificatePal newCert = (CertificatePal)FromHandle(cert.Handle);
-            newCert._certContextCloned = true;
-
-            ((CertificatePal)cert.Pal)._certContextCloned = true;
-
-            return newCert;
+            CertificatePal pal = new CertificatePal((CertificatePal)copyFrom.Pal);
+            return pal;
         }
 
         public IntPtr Handle
@@ -409,7 +405,6 @@ namespace Internal.Cryptography.Pal
 
         public void AppendPrivateKeyInfo(StringBuilder sb)
         {
-#if NETNATIVE
             if (HasPrivateKey)
             {
                 // Similar to the Unix implementation, in UWP merely acknowledge that there -is- a private key.
@@ -417,23 +412,26 @@ namespace Internal.Cryptography.Pal
                 sb.AppendLine();
                 sb.AppendLine("[Private Key]");
             }
+
+#if NETNATIVE
+            // Similar to the Unix implementation, in UWP merely acknowledge that there -is- a private key.
 #else
             CspKeyContainerInfo cspKeyContainerInfo = null;
             try
             {
                 if (HasPrivateKey)
                 {
-                    CspParameters parameters = GetPrivateKey();
+                    CspParameters parameters = GetPrivateKeyCsp();
                     cspKeyContainerInfo = new CspKeyContainerInfo(parameters);
                 }
             }
             // We could not access the key container. Just return.
             catch (CryptographicException) { }
 
+            // Ephemeral keys will not have container information.
             if (cspKeyContainerInfo == null)
                 return;
 
-            sb.Append(Environment.NewLine + Environment.NewLine + "[Private Key]");
             sb.Append(Environment.NewLine + "  Key Store: ");
             sb.Append(cspKeyContainerInfo.MachineKeyStore ? "Machine" : "User");
             sb.Append(Environment.NewLine + "  Provider Name: ");
@@ -488,10 +486,7 @@ namespace Internal.Cryptography.Pal
             _certContext = null;
             if (certContext != null && !certContext.IsInvalid)
             {
-                if (!_certContextCloned)
-                {
-                    certContext.Dispose();
-                }
+                certContext.Dispose();
             }
         }
 
@@ -547,6 +542,13 @@ namespace Internal.Cryptography.Pal
             return sb.ToString();
         }
 
+        private CertificatePal(CertificatePal copyFrom)
+        {
+            // Use _certContext (instead of CertContext) to keep the original context handle from being
+            // finalized until all cert copies are no longer referenced.
+            _certContext = new SafeCertContextHandle(copyFrom._certContext);
+        }
+
         private CertificatePal(SafeCertContextHandle certContext, bool deleteKeyContainer)
         {
             if (deleteKeyContainer)
@@ -559,8 +561,5 @@ namespace Internal.Cryptography.Pal
             }
             _certContext = certContext;
         }
-
-        private SafeCertContextHandle _certContext;
-        private bool _certContextCloned;
     }
 }

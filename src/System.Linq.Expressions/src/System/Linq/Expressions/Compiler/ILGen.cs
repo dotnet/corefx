@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
@@ -49,7 +48,7 @@ namespace System.Linq.Expressions.Compiler
                     il.Emit(OpCodes.Ldarg_3);
                     break;
                 default:
-                    if (index <= Byte.MaxValue)
+                    if (index <= byte.MaxValue)
                     {
                         il.Emit(OpCodes.Ldarg_S, (byte)index);
                     }
@@ -65,7 +64,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(index >= 0);
 
-            if (index <= Byte.MaxValue)
+            if (index <= byte.MaxValue)
             {
                 il.Emit(OpCodes.Ldarga_S, (byte)index);
             }
@@ -79,7 +78,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(index >= 0);
 
-            if (index <= Byte.MaxValue)
+            if (index <= byte.MaxValue)
             {
                 il.Emit(OpCodes.Starg_S, (byte)index);
             }
@@ -348,11 +347,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitNew(this ILGenerator il, ConstructorInfo ci)
         {
             Debug.Assert(ci != null);
-
-            if (ci.DeclaringType.GetTypeInfo().ContainsGenericParameters)
-            {
-                throw Error.IllegalNewGenericParams(ci.DeclaringType, nameof(ci));
-            }
+            Debug.Assert(!ci.DeclaringType.GetTypeInfo().ContainsGenericParameters);
 
             il.Emit(OpCodes.Newobj, ci);
         }
@@ -720,11 +715,11 @@ namespace System.Linq.Expressions.Compiler
                 throw ContractUtils.Unreachable;
             }
 
-            bool isTypeFromNullable = TypeUtils.IsNullableType(typeFrom);
-            bool isTypeToNullable = TypeUtils.IsNullableType(typeTo);
+            bool isTypeFromNullable = typeFrom.IsNullableType();
+            bool isTypeToNullable = typeTo.IsNullableType();
 
-            Type nnExprType = TypeUtils.GetNonNullableType(typeFrom);
-            Type nnType = TypeUtils.GetNonNullableType(typeTo);
+            Type nnExprType = typeFrom.GetNonNullableType();
+            Type nnType = typeTo.GetNonNullableType();
 
             if (typeFrom.GetTypeInfo().IsInterface || // interface cast
                typeTo.GetTypeInfo().IsInterface ||
@@ -740,7 +735,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 il.EmitNullableConversion(typeFrom, typeTo, isChecked);
             }
-            else if (!(TypeUtils.IsConvertible(typeFrom) && TypeUtils.IsConvertible(typeTo)) // primitive runtime conversion
+            else if (!(typeFrom.IsConvertible() && typeTo.IsConvertible()) // primitive runtime conversion
                      &&
                      (nnExprType.IsAssignableFrom(nnType) || // down cast
                      nnType.IsAssignableFrom(nnExprType))) // up cast
@@ -787,21 +782,21 @@ namespace System.Linq.Expressions.Compiler
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private static void EmitNumericConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            bool isFromUnsigned = TypeUtils.IsUnsigned(typeFrom);
-            bool isFromFloatingPoint = TypeUtils.IsFloatingPoint(typeFrom);
-            if (typeTo == typeof(Single))
+            bool isFromUnsigned = typeFrom.IsUnsigned();
+            bool isFromFloatingPoint = typeFrom.IsFloatingPoint();
+            if (typeTo == typeof(float))
             {
                 if (isFromUnsigned)
                     il.Emit(OpCodes.Conv_R_Un);
                 il.Emit(OpCodes.Conv_R4);
             }
-            else if (typeTo == typeof(Double))
+            else if (typeTo == typeof(double))
             {
                 if (isFromUnsigned)
                     il.Emit(OpCodes.Conv_R_Un);
                 il.Emit(OpCodes.Conv_R8);
             }
-            else if (typeTo == typeof(Decimal))
+            else if (typeTo == typeof(decimal))
             {
                 // NB: TypeUtils.IsImplicitNumericConversion makes the promise that implicit conversions
                 //     from various integral types and char to decimal are possible. Coalesce allows the
@@ -813,7 +808,7 @@ namespace System.Linq.Expressions.Compiler
 
                 TypeCode tc = typeFrom.GetTypeCode();
 
-                MethodInfo method = null;
+                MethodInfo method;
 
                 switch (tc)
                 {
@@ -948,6 +943,10 @@ namespace System.Linq.Expressions.Compiler
                                 il.Emit(OpCodes.Conv_I8);
                             }
                             break;
+                        case TypeCode.Boolean:
+                            il.Emit(OpCodes.Ldc_I4_0);
+                            il.Emit(OpCodes.Cgt_Un);
+                            break;
                         default:
                             throw Error.UnhandledConvert(typeTo);
                     }
@@ -957,15 +956,13 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            Debug.Assert(TypeUtils.IsNullableType(typeFrom));
-            Debug.Assert(TypeUtils.IsNullableType(typeTo));
-            Label labIfNull = default(Label);
-            Label labEnd = default(Label);
-            LocalBuilder locFrom = null;
-            LocalBuilder locTo = null;
-            locFrom = il.DeclareLocal(typeFrom);
+            Debug.Assert(typeFrom.IsNullableType());
+            Debug.Assert(typeTo.IsNullableType());
+            Label labIfNull;
+            Label labEnd;
+            LocalBuilder locFrom = il.DeclareLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
-            locTo = il.DeclareLocal(typeTo);
+            LocalBuilder locTo = il.DeclareLocal(typeTo);
             // test for null
             il.Emit(OpCodes.Ldloca, locFrom);
             il.EmitHasValue(typeFrom);
@@ -973,8 +970,8 @@ namespace System.Linq.Expressions.Compiler
             il.Emit(OpCodes.Brfalse_S, labIfNull);
             il.Emit(OpCodes.Ldloca, locFrom);
             il.EmitGetValueOrDefault(typeFrom);
-            Type nnTypeFrom = TypeUtils.GetNonNullableType(typeFrom);
-            Type nnTypeTo = TypeUtils.GetNonNullableType(typeTo);
+            Type nnTypeFrom = typeFrom.GetNonNullableType();
+            Type nnTypeTo = typeTo.GetNonNullableType();
             il.EmitConvertToType(nnTypeFrom, nnTypeTo, isChecked);
             // construct result type
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
@@ -993,11 +990,10 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitNonNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            Debug.Assert(!TypeUtils.IsNullableType(typeFrom));
-            Debug.Assert(TypeUtils.IsNullableType(typeTo));
-            LocalBuilder locTo = null;
-            locTo = il.DeclareLocal(typeTo);
-            Type nnTypeTo = TypeUtils.GetNonNullableType(typeTo);
+            Debug.Assert(!typeFrom.IsNullableType());
+            Debug.Assert(typeTo.IsNullableType());
+            LocalBuilder locTo = il.DeclareLocal(typeTo);
+            Type nnTypeTo = typeTo.GetNonNullableType();
             il.EmitConvertToType(typeFrom, nnTypeTo, isChecked);
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
             il.Emit(OpCodes.Newobj, ci);
@@ -1008,8 +1004,8 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitNullableToNonNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            Debug.Assert(TypeUtils.IsNullableType(typeFrom));
-            Debug.Assert(!TypeUtils.IsNullableType(typeTo));
+            Debug.Assert(typeFrom.IsNullableType());
+            Debug.Assert(!typeTo.IsNullableType());
             if (typeTo.GetTypeInfo().IsValueType)
                 il.EmitNullableToNonNullableStructConversion(typeFrom, typeTo, isChecked);
             else
@@ -1019,32 +1015,31 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitNullableToNonNullableStructConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            Debug.Assert(TypeUtils.IsNullableType(typeFrom));
-            Debug.Assert(!TypeUtils.IsNullableType(typeTo));
+            Debug.Assert(typeFrom.IsNullableType());
+            Debug.Assert(!typeTo.IsNullableType());
             Debug.Assert(typeTo.GetTypeInfo().IsValueType);
-            LocalBuilder locFrom = null;
-            locFrom = il.DeclareLocal(typeFrom);
+            LocalBuilder locFrom = il.DeclareLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
             il.Emit(OpCodes.Ldloca, locFrom);
             il.EmitGetValue(typeFrom);
-            Type nnTypeFrom = TypeUtils.GetNonNullableType(typeFrom);
+            Type nnTypeFrom = typeFrom.GetNonNullableType();
             il.EmitConvertToType(nnTypeFrom, typeTo, isChecked);
         }
 
 
         private static void EmitNullableToReferenceConversion(this ILGenerator il, Type typeFrom)
         {
-            Debug.Assert(TypeUtils.IsNullableType(typeFrom));
+            Debug.Assert(typeFrom.IsNullableType());
             // We've got a conversion from nullable to Object, ValueType, Enum, etc.  Just box it so that
-            // we get the nullable semantics.  
+            // we get the nullable semantics.
             il.Emit(OpCodes.Box, typeFrom);
         }
 
 
         private static void EmitNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
         {
-            bool isTypeFromNullable = TypeUtils.IsNullableType(typeFrom);
-            bool isTypeToNullable = TypeUtils.IsNullableType(typeTo);
+            bool isTypeFromNullable = typeFrom.IsNullableType();
+            bool isTypeToNullable = typeTo.IsNullableType();
             Debug.Assert(isTypeFromNullable || isTypeToNullable);
             if (isTypeFromNullable && isTypeToNullable)
                 il.EmitNullableToNullableConversion(typeFrom, typeTo, isChecked);
@@ -1116,7 +1111,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Emits an array construction code.  
+        /// Emits an array construction code.
         /// The code assumes that bounds for all dimensions
         /// are already emitted.
         /// </summary>
@@ -1148,17 +1143,17 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitDecimal(this ILGenerator il, decimal value)
         {
-            if (Decimal.Truncate(value) == value)
+            if (decimal.Truncate(value) == value)
             {
-                if (Int32.MinValue <= value && value <= Int32.MaxValue)
+                if (int.MinValue <= value && value <= int.MaxValue)
                 {
-                    int intValue = Decimal.ToInt32(value);
+                    int intValue = decimal.ToInt32(value);
                     il.EmitInt(intValue);
                     il.EmitNew(Decimal_Ctor_Int32);
                 }
-                else if (Int64.MinValue <= value && value <= Int64.MaxValue)
+                else if (long.MinValue <= value && value <= long.MaxValue)
                 {
-                    long longValue = Decimal.ToInt64(value);
+                    long longValue = decimal.ToInt64(value);
                     il.EmitLong(longValue);
                     il.EmitNew(Decimal_Ctor_Int64);
                 }
@@ -1175,7 +1170,7 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitDecimalBits(this ILGenerator il, decimal value)
         {
-            int[] bits = Decimal.GetBits(value);
+            int[] bits = decimal.GetBits(value);
             il.EmitInt(bits[0]);
             il.EmitInt(bits[1]);
             il.EmitInt(bits[2]);
@@ -1237,11 +1232,11 @@ namespace System.Linq.Expressions.Compiler
                     break;
 
                 case TypeCode.Single:
-                    il.Emit(OpCodes.Ldc_R4, default(Single));
+                    il.Emit(OpCodes.Ldc_R4, default(float));
                     break;
 
                 case TypeCode.Double:
-                    il.Emit(OpCodes.Ldc_R8, default(Double));
+                    il.Emit(OpCodes.Ldc_R8, default(double));
                     break;
 
                 case TypeCode.Decimal:

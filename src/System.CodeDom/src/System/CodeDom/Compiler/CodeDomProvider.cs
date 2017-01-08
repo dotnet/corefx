@@ -13,9 +13,9 @@ namespace System.CodeDom.Compiler
 {
     public abstract class CodeDomProvider // TODO: Inherit Component
     {
-        private readonly static Dictionary<string, CompilerInfo> s_compilerLanguages = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-        private readonly static Dictionary<string, CompilerInfo> s_compilerExtensions = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-        private readonly static List<CompilerInfo> s_allCompilerInfo = new List<CompilerInfo>();
+        private static readonly Dictionary<string, CompilerInfo> s_compilerLanguages = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, CompilerInfo> s_compilerExtensions = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
+        private static readonly List<CompilerInfo> s_allCompilerInfo = new List<CompilerInfo>();
 
         static CodeDomProvider()
         {
@@ -93,7 +93,9 @@ namespace System.CodeDom.Compiler
                 throw new ArgumentNullException(nameof(language));
             }
 
-            return s_compilerLanguages[language.Trim()];
+            CompilerInfo value;
+            s_compilerLanguages.TryGetValue(language.Trim(), out value);
+            return value;
         }
 
         private static CompilerInfo GetCompilerInfoForExtensionNoThrow(string extension)
@@ -103,7 +105,9 @@ namespace System.CodeDom.Compiler
                 throw new ArgumentNullException(nameof(extension));
             }
 
-            return s_compilerExtensions[extension.Trim()];
+            CompilerInfo value;
+            s_compilerExtensions.TryGetValue(extension.Trim(), out value);
+            return value;
         }
 
         public static CompilerInfo[] GetAllCompilerInfo() => s_allCompilerInfo.ToArray();
@@ -207,11 +211,6 @@ namespace System.CodeDom.Compiler
             return parser;
         }
 #pragma warning restore 618
-
-        internal static bool TryGetProbableCoreAssemblyFilePath(CompilerParameters parameters, out string coreAssemblyFilePath)
-        {
-            throw new PlatformNotSupportedException();
-        }
 
         private sealed class ConfigurationErrorsException : SystemException
         {

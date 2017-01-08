@@ -52,8 +52,6 @@ namespace System.ComponentModel.Design
         /// </summary>
         public static readonly HelpKeywordAttribute Default = new HelpKeywordAttribute();
 
-        private string _contextKeyword;
-
         /// <summary>
         /// Default constructor, which creates an attribute with a null HelpKeyword.
         /// </summary>
@@ -68,9 +66,9 @@ namespace System.ComponentModel.Design
         {
             if (keyword == null)
             {
-                throw new ArgumentNullException("keyword");
+                throw new ArgumentNullException(nameof(keyword));
             }
-            _contextKeyword = keyword;
+            HelpKeyword = keyword;
         }
 
         /// <summary>
@@ -80,21 +78,15 @@ namespace System.ComponentModel.Design
         {
             if (t == null)
             {
-                throw new ArgumentNullException("t");
+                throw new ArgumentNullException(nameof(t));
             }
-            _contextKeyword = t.FullName;
+            HelpKeyword = t.FullName;
         }
 
         /// <summary>
         /// Retrieves the HelpKeyword this attribute supplies.
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return _contextKeyword;
-            }
-        }
+        public string HelpKeyword { get; }
 
 
         /// <summary>

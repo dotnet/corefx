@@ -225,6 +225,11 @@ namespace System.Net.Http.Headers
 
         public override string ToString()
         {
+            if (_headerStore == null || _headerStore.Count == 0)
+            {
+                return string.Empty;
+            }
+
             // Return all headers as string similar to: 
             // HeaderName1: Value1, Value2
             // HeaderName2: Value1
@@ -308,11 +313,13 @@ namespace System.Net.Http.Headers
 
         public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator()
         {
-            if (_headerStore == null)
-            {
-                yield break;
-            }
+            return _headerStore != null && _headerStore.Count > 0 ?
+                GetEnumeratorCore() :
+                ((IEnumerable<KeyValuePair<string, IEnumerable<string>>>)Array.Empty<KeyValuePair<string, IEnumerable<string>>>()).GetEnumerator();
+        }
 
+        private IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumeratorCore()
+        {
             List<string> invalidHeaders = null;
 
             foreach (var header in _headerStore)
@@ -814,7 +821,7 @@ namespace System.Net.Http.Headers
                 {
                     if (!TryParseAndAddRawHeaderValue(name, info, rawValue, true))
                     {
-                        if (HttpEventSource.Log.IsEnabled()) HttpEventSource.Log.HeadersInvalidValue(name, rawValue);
+                        if (NetEventSource.IsEnabled) NetEventSource.Log.HeadersInvalidValue(name, rawValue);
                     }
                 }
             }
@@ -836,7 +843,7 @@ namespace System.Net.Http.Headers
             {
                 if (!TryParseAndAddRawHeaderValue(name, info, rawValue, true))
                 {
-                    if (HttpEventSource.Log.IsEnabled()) HttpEventSource.Log.HeadersInvalidValue(name, rawValue);
+                    if (NetEventSource.IsEnabled) NetEventSource.Log.HeadersInvalidValue(name, rawValue);
                 }
             }
         }
@@ -1170,7 +1177,7 @@ namespace System.Net.Http.Headers
         {
             if (HttpRuleParser.ContainsInvalidNewLine(value))
             {
-                if (NetEventSource.Log.IsEnabled()) NetEventSource.PrintError(NetEventSource.ComponentType.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_no_newlines, name, value));
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, SR.Format(SR.net_http_log_headers_no_newlines, name, value));
                 return true;
             }
             return false;

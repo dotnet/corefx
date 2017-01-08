@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Dynamic.Utils;
 using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
@@ -25,7 +27,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             int first = frame.StackIndex - _argumentCount;
 
-            var args = GetArgs(frame, first);
+            object[] args = GetArgs(frame, first);
 
             object ret;
             try
@@ -34,14 +36,14 @@ namespace System.Linq.Expressions.Interpreter
             }
             catch (TargetInvocationException e)
             {
-                ExceptionHelpers.UpdateForRethrow(e.InnerException);
-                throw e.InnerException;
+                ExceptionHelpers.UnwrapAndRethrow(e);
+                throw ContractUtils.Unreachable;
             }
 
             frame.Data[first] = ret;
             frame.StackIndex = first + 1;
 
-            return +1;
+            return 1;
         }
 
         protected object[] GetArgs(InterpretedFrame frame, int first)
@@ -82,7 +84,8 @@ namespace System.Linq.Expressions.Interpreter
         {
             int first = frame.StackIndex - _argumentCount;
 
-            var args = GetArgs(frame, first);
+            object[] args = GetArgs(frame, first);
+            Debug.Assert(args != null);
 
             try
             {
@@ -93,7 +96,8 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 catch (TargetInvocationException e)
                 {
-                    throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
+                    ExceptionHelpers.UnwrapAndRethrow(e);
+                    throw ContractUtils.Unreachable;
                 }
 
                 frame.Data[first] = ret;
@@ -101,12 +105,9 @@ namespace System.Linq.Expressions.Interpreter
             }
             finally
             {
-                if (args != null)
+                foreach (ByRefUpdater arg in _byrefArgs)
                 {
-                    foreach (var arg in _byrefArgs)
-                    {
-                        arg.Update(frame, args[arg.ArgumentIndex]);
-                    }
+                    arg.Update(frame, args[arg.ArgumentIndex]);
                 }
             }
 

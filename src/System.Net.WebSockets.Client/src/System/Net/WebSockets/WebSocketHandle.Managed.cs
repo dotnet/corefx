@@ -73,7 +73,7 @@ namespace System.Net.WebSockets
 
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
-            // TODO: Not currently implemented, or explicitly ignored:
+            // TODO #14480 : Not currently implemented, or explicitly ignored:
             // - ClientWebSocketOptions.UseDefaultCredentials
             // - ClientWebSocketOptions.Credentials
             // - ClientWebSocketOptions.Proxy
@@ -259,6 +259,7 @@ namespace System.Net.WebSockets
         /// the associated response we expect to receive as the Sec-WebSocket-Accept header value.
         /// </summary>
         /// <returns>A key-value pair of the request header security key and expected response header value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "Required by RFC6455")]
         private static KeyValuePair<string, string> CreateSecKeyAndSecWebSocketAccept()
         {
             string secKey = Convert.ToBase64String(Guid.NewGuid().ToByteArray());

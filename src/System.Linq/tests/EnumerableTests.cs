@@ -268,5 +268,46 @@ namespace System.Linq.Tests
             public IEnumerator<T> GetEnumerator() => GetEnumeratorWorker();
             IEnumerator IEnumerable.GetEnumerator() => NonGenericGetEnumeratorWorker();
         }
+
+        protected static List<Func<IEnumerable<T>, IEnumerable<T>>> IdentityTransforms<T>()
+        {
+            // All of these transforms should take an enumerable and produce
+            // another enumerable with the same contents.
+            return new List<Func<IEnumerable<T>, IEnumerable<T>>>
+            {
+                e => e,
+                e => e.ToArray(),
+                e => e.ToList(),
+                e => e.Select(i => i),
+                e => e.Concat(Array.Empty<T>()),
+                e => ForceNotCollection(e),
+                e => e.Concat(ForceNotCollection(Array.Empty<T>())),
+                e => e.Where(i => true)
+            };
+        }
+
+        protected class DelegateBasedEnumerator<T> : IEnumerator<T>
+        {
+            public Func<bool> MoveNextWorker { get; set; }
+            public Func<T> CurrentWorker { get; set; }
+            public Action DisposeWorker { get; set; }
+            public Func<object> NonGenericCurrentWorker { get; set; }
+            public Action ResetWorker { get; set; }
+
+            public T Current => CurrentWorker();
+            public bool MoveNext() => MoveNextWorker();
+            public void Dispose() => DisposeWorker();
+            void IEnumerator.Reset() => ResetWorker();
+            object IEnumerator.Current => NonGenericCurrentWorker();
+        }
+
+        protected class DelegateBasedEnumerable<T> : IEnumerable<T>
+        {
+            public Func<IEnumerator<T>> GetEnumeratorWorker { get; set; }
+            public Func<IEnumerator> NonGenericGetEnumeratorWorker { get; set; }
+
+            public IEnumerator<T> GetEnumerator() => GetEnumeratorWorker();
+            IEnumerator IEnumerable.GetEnumerator() => NonGenericGetEnumeratorWorker();
+        }
     }
 }

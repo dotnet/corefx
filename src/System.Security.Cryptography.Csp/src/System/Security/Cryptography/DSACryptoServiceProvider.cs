@@ -59,6 +59,7 @@ namespace System.Security.Cryptography
         /// </summary>
         /// <param name="dwKeySize">The size of the key for the cryptographic algorithm in bits.</param>
         /// <param name="parameters">The parameters for the CSP.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by the FIPS 186-2 DSA spec.")]
         public DSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
         {
             if (dwKeySize < 0)
@@ -261,6 +262,9 @@ namespace System.Security.Cryptography
             }
         }
 
+        public override string KeyExchangeAlgorithm => null;
+        public override string SignatureAlgorithm => "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -312,14 +316,14 @@ namespace System.Security.Cryptography
             if (IsPublic(keyBlob))
             {
                 SafeProvHandle safeProvHandleTemp = AcquireSafeProviderHandle();
-                CapiHelper.ImportKeyBlob(safeProvHandleTemp, (CspProviderFlags)0, keyBlob, out safeKeyHandle);
+                CapiHelper.ImportKeyBlob(safeProvHandleTemp, (CspProviderFlags)0, false, keyBlob, out safeKeyHandle);
 
                 // The property set will take care of releasing any already-existing resources.
                 SafeProvHandle = safeProvHandleTemp;
             }
             else
             {
-                CapiHelper.ImportKeyBlob(SafeProvHandle, _parameters.Flags, keyBlob, out safeKeyHandle);
+                CapiHelper.ImportKeyBlob(SafeProvHandle, _parameters.Flags, false, keyBlob, out safeKeyHandle);
             }
 
             // The property set will take care of releasing any already-existing resources.
@@ -437,7 +441,7 @@ namespace System.Security.Cryptography
             if (PublicOnly)
                 throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
 
-            int calgHash = CapiHelper.NameOrOidToHashAlgId(str);
+            int calgHash = CapiHelper.NameOrOidToHashAlgId(str, OidGroup.HashAlgorithm);
 
             if (rgbHash.Length != _sha1.HashSize / 8)
                 throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", _sha1.HashSize / 8));
@@ -465,7 +469,7 @@ namespace System.Security.Cryptography
             if (rgbSignature == null)
                 throw new ArgumentNullException(nameof(rgbSignature));
 
-            int calgHash = CapiHelper.NameOrOidToHashAlgId(str);
+            int calgHash = CapiHelper.NameOrOidToHashAlgId(str, OidGroup.HashAlgorithm);
 
             return CapiHelper.VerifySign(
                 SafeProvHandle,

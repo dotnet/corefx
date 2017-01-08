@@ -20,7 +20,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegSetValueEx.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.RegSetValueEx.cs">
       <Link>Common\Interop\Windows\Interop.RegSetValueEx.cs</Link>
     </Compile>
     <Compile Include="Helpers.cs" />
@@ -61,9 +61,6 @@
     <Compile Include="RegistryTestsBase.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\Microsoft.Win32.Registry.pkgproj">

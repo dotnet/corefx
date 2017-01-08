@@ -11,6 +11,7 @@ namespace System.Security.Cryptography
 {
     public class Rfc2898DeriveBytes : DeriveBytes
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
         public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations)
         {
             if (salt == null)
@@ -45,6 +46,7 @@ namespace System.Security.Cryptography
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
         public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
         {
             if (saltSize < 0)
@@ -158,6 +160,17 @@ namespace System.Security.Cryptography
                 }
             }
             return password;
+        }
+
+        public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
+        {
+            // If this were to be implemented here, CAPI would need to be used (not CNG) because of
+            // unfortunate differences between the two. Using CNG would break compatibility. Since this
+            // assembly currently doesn't use CAPI it would require non-trivial additions.
+            // In addition, if implemented here, only Windows would be supported as it is intended as
+            // a thin wrapper over the corresponding native API.
+            // Note that this method is implemented in PasswordDeriveBytes (in the Csp assembly) using CAPI.
+            throw new PlatformNotSupportedException();
         }
 
         public override void Reset()

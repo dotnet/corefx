@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "Microsoft.NETCore.Platforms": "1.1.0",
+    "System.Runtime": "4.3.0"
+  },
+  "frameworks": {
+    "netstandard1.0": {}
+  }
+}

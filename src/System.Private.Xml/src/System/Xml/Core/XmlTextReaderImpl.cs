@@ -2,18 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
 using System.Text;
-using System.Security;
-using System.Threading;
 using System.Xml.Schema;
-using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
 
 namespace System.Xml
 {
@@ -568,7 +563,7 @@ namespace System.Xml
             }
             if (url.Length == 0)
             {
-                throw new ArgumentException(SR.Xml_EmptyUrl, "url");
+                throw new ArgumentException(SR.Xml_EmptyUrl, nameof(url));
             }
             _namespaceManager = new XmlNamespaceManager(nt);
 
@@ -2579,7 +2574,7 @@ namespace System.Xml
         {
             get
             {
-                return _xmlResolver == null || (LocalAppContextSwitches.ProhibitDefaultUrlResolver && !_xmlResolverIsSet);
+                return _xmlResolver == null || !_xmlResolverIsSet;
             }
         }
 
@@ -4987,9 +4982,9 @@ namespace System.Xml
                 if (tmpch3 == quoteChar)
                 {
 #if DEBUG
-                    if (normalize)
+                    if (_normalize)
                     {
-                        string val = new string(chars, ps.charPos, pos - ps.charPos);
+                        string val = new string(chars, _ps.charPos, pos - _ps.charPos);
                         Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!"); 
                     }
 #endif
@@ -8250,19 +8245,19 @@ namespace System.Xml
         {
             if (array == null)
             {
-                throw new ArgumentNullException((_incReadDecoder is IncrementalReadCharsDecoder) ? "buffer" : "array");
+                throw new ArgumentNullException((_incReadDecoder is IncrementalReadCharsDecoder) ? "buffer" : nameof(array));
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? "count" : "len");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? "index" : "offset");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(index): "offset");
             }
             if (array.Length - index < count)
             {
-                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? "count" : "len");
+                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
             }
 
             if (count == 0)
@@ -9650,7 +9645,7 @@ namespace System.Xml
         }
 
         [System.Security.SecuritySafeCritical]
-        static internal unsafe void AdjustLineInfo(char[] chars, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
+        internal static unsafe void AdjustLineInfo(char[] chars, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
         {
             Debug.Assert(startPos >= 0);
             Debug.Assert(endPos < chars.Length);
@@ -9663,7 +9658,7 @@ namespace System.Xml
         }
 
         [System.Security.SecuritySafeCritical]
-        static internal unsafe void AdjustLineInfo(string str, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
+        internal static unsafe void AdjustLineInfo(string str, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
         {
             Debug.Assert(startPos >= 0);
             Debug.Assert(endPos < str.Length);
@@ -9676,7 +9671,7 @@ namespace System.Xml
         }
 
         [System.Security.SecurityCritical]
-        static internal unsafe void AdjustLineInfo(char* pChars, int length, bool isNormalized, ref LineInfo lineInfo)
+        internal static unsafe void AdjustLineInfo(char* pChars, int length, bool isNormalized, ref LineInfo lineInfo)
         {
             int lastNewLinePos = -1;
             for (int i = 0; i < length; i++)

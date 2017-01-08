@@ -7,6 +7,8 @@ using System.IO;
 
 namespace System.CodeDom.Compiler
 {
+    // Explicitly not [Serializable], so as to avoid accidentally deleting
+    // files specified in a serialized payload.
     public class TempFileCollection : ICollection, IDisposable
     {
         private string _basePath;
@@ -112,7 +114,6 @@ namespace System.CodeDom.Compiler
                     _basePath = Path.Combine(
                         string.IsNullOrEmpty(TempDir) ? Path.GetTempPath() : TempDir,
                         Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
-                    string full = Path.GetFullPath(_basePath);
                     tempFileName = _basePath + ".tmp";
 
                     try
@@ -120,9 +121,13 @@ namespace System.CodeDom.Compiler
                         new FileStream(tempFileName, FileMode.CreateNew, FileAccess.Write).Dispose();
                         uniqueFile = true;
                     }
-                    catch (IOException)
+                    catch (IOException ex)
                     {
                         retryCount--;
+                        if (retryCount == 0 || ex is DirectoryNotFoundException)
+                        {
+                            throw;
+                        }
                         uniqueFile = false;
                     }
                 } while (!uniqueFile);

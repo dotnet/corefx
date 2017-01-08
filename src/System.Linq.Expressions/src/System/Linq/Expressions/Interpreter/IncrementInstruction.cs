@@ -10,7 +10,7 @@ namespace System.Linq.Expressions.Interpreter
 {
     internal abstract class IncrementInstruction : Instruction
     {
-        private static Instruction s_int16, s_int32, s_int64, s_UInt16, s_UInt32, s_UInt64, s_single, s_double;
+        private static Instruction s_Int16, s_Int32, s_Int64, s_UInt16, s_UInt32, s_UInt64, s_Single, s_Double;
 
         public override int ConsumedStack => 1;
         public override int ProducedStack => 1;
@@ -18,7 +18,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private IncrementInstruction() { }
 
-        internal sealed class IncrementInt32 : IncrementInstruction
+        private sealed class IncrementInt16 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -29,13 +29,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(ScriptingRuntimeHelpers.Int32ToObject(unchecked(1 + (Int32)obj)));
+                    frame.Push(unchecked((short)(1 + (short)obj)));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementInt16 : IncrementInstruction
+        private sealed class IncrementInt32 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -46,13 +46,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((Int16)(1 + (Int16)obj)));
+                    frame.Push(unchecked(1 + (int)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementInt64 : IncrementInstruction
+        private sealed class IncrementInt64 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -63,13 +63,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((Int64)(1 + (Int64)obj)));
+                    frame.Push(unchecked(1 + (long)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementUInt16 : IncrementInstruction
+        private sealed class IncrementUInt16 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -80,13 +80,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((UInt16)(1 + (UInt16)obj)));
+                    frame.Push(unchecked((ushort)(1 + (ushort)obj)));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementUInt32 : IncrementInstruction
+        private sealed class IncrementUInt32 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -97,13 +97,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((UInt32)(1 + (UInt32)obj)));
+                    frame.Push(unchecked(1 + (uint)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementUInt64 : IncrementInstruction
+        private sealed class IncrementUInt64 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -114,13 +114,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((UInt64)(1 + (UInt64)obj)));
+                    frame.Push(unchecked(1 + (ulong)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementSingle : IncrementInstruction
+        private sealed class IncrementSingle : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -131,13 +131,13 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((Single)(1 + (Single)obj)));
+                    frame.Push(unchecked(1 + (float)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
-        internal sealed class IncrementDouble : IncrementInstruction
+        private sealed class IncrementDouble : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
             {
@@ -148,26 +148,25 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked((Double)(1 + (Double)obj)));
+                    frame.Push(unchecked(1 + (double)obj));
                 }
-                return +1;
+                return 1;
             }
         }
 
         public static Instruction Create(Type type)
         {
             Debug.Assert(!type.GetTypeInfo().IsEnum);
-            switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(TypeUtils.GetNonNullableType(type)))
+            switch (type.GetNonNullableType().GetTypeCode())
             {
-                case TypeCode.Int16: return s_int16 ?? (s_int16 = new IncrementInt16());
-                case TypeCode.Int32: return s_int32 ?? (s_int32 = new IncrementInt32());
-                case TypeCode.Int64: return s_int64 ?? (s_int64 = new IncrementInt64());
+                case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new IncrementInt16());
+                case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new IncrementInt32());
+                case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new IncrementInt64());
                 case TypeCode.UInt16: return s_UInt16 ?? (s_UInt16 = new IncrementUInt16());
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new IncrementUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new IncrementUInt64());
-                case TypeCode.Single: return s_single ?? (s_single = new IncrementSingle());
-                case TypeCode.Double: return s_double ?? (s_double = new IncrementDouble());
-
+                case TypeCode.Single: return s_Single ?? (s_Single = new IncrementSingle());
+                case TypeCode.Double: return s_Double ?? (s_Double = new IncrementDouble());
                 default:
                     throw Error.ExpressionNotSupportedForType("Increment", type);
             }

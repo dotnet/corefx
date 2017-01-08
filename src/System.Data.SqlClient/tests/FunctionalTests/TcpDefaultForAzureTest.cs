@@ -1,8 +1,13 @@
-﻿using System.Diagnostics;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Data.SqlClient.Tests
 {
+    [OuterLoop("Takes minutes on some networks")]
     public static class TcpDefaultForAzureTest
     {
         private const string NP = "Named Pipes Provider";
@@ -64,6 +69,7 @@ namespace System.Data.SqlClient.Tests
 
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AzureNoProtocolConnectionTest()
         {
             foreach (string extension in AzureExtensions)

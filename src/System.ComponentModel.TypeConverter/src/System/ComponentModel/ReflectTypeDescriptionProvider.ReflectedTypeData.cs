@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -22,11 +23,9 @@ namespace System.ComponentModel
             private EventDescriptorCollection _events;
             private PropertyDescriptorCollection _properties;
             private TypeConverter _converter;
-#if FEATURE_EDITORATTRIBUTE
             private object[] _editors;
             private Type[] _editorTypes;
             private int _editorCount;
-#endif
 
             internal ReflectedTypeData(Type type)
             {
@@ -37,13 +36,7 @@ namespace System.ComponentModel
             ///     This method returns true if the data cache in this reflection 
             ///     type descriptor has data in it.
             /// </summary>
-            internal bool IsPopulated
-            {
-                get
-                {
-                    return (_attributes != null) | (_events != null) | (_properties != null);
-                }
-            }
+            internal bool IsPopulated => (_attributes != null) | (_events != null) | (_properties != null);
 
             /// <summary>
             ///     Retrieves custom attributes.
@@ -174,23 +167,11 @@ namespace System.ComponentModel
             internal string GetComponentName(object instance)
             {
                 IComponent comp = instance as IComponent;
-                if (comp != null)
+                ISite site = comp?.Site;
+                if (site != null)
                 {
-                    ISite site = comp.Site;
-                    if (site != null)
-                    {
-#if FEATURE_NESTED_SITE
-                        INestedSite nestedSite = site as INestedSite;
-                        if (nestedSite != null)
-                        {
-                            return nestedSite.FullName;
-                        }
-                        else
-#endif
-                        {
-                            return site.Name;
-                        }
-                    }
+                    INestedSite nestedSite = site as INestedSite;
+                    return (nestedSite?.FullName) ?? site.Name;
                 }
 
                 return null;
@@ -321,7 +302,6 @@ namespace System.ComponentModel
                 return null;
             }
 
-#if FEATURE_EDITORATTRIBUTE
             /// <summary>
             ///     Retrieves the editor for the given base type.
             /// </summary>
@@ -391,7 +371,7 @@ namespace System.ComponentModel
                     //
                     if (editor != null && !editorBaseType.GetTypeInfo().IsInstanceOfType(editor))
                     {
-                        Debug.Fail("Editor " + editor.GetType().FullName + " is not an instance of " + editorBaseType.FullName + " but it is in that base types table.");
+                        Debug.Fail($"Editor {editor.GetType().FullName} is not an instance of {editorBaseType.FullName} but it is in that base types table.");
                         editor = null;
                     }
                 }
@@ -446,7 +426,6 @@ namespace System.ComponentModel
 
                 return null;
             }
-#endif
 
             /// <summary>
             ///     Retrieves the events for this type.
@@ -577,11 +556,9 @@ namespace System.ComponentModel
                 _events = null;
                 _properties = null;
                 _converter = null;
-#if FEATURE_EDITORATTRIBUTE
                 _editors = null;
                 _editorTypes = null;
                 _editorCount = 0;
-#endif
 
             }
         }
