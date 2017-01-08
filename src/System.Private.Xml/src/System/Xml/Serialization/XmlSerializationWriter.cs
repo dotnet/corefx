@@ -1830,11 +1830,12 @@ namespace System.Xml.Serialization
 
                 for (int i = 0; i < mapping.Members.Length; i++)
                 {
+                    var iStr = i.ToString(CultureInfo.InvariantCulture);
                     MemberMapping member = mapping.Members[i];
 
                     if (member.Attribute != null && !member.Ignore)
                     {
-                        string source = "p[" + i.ToString(CultureInfo.InvariantCulture) + "]";
+                        string source = "p[" + iStr + "]";
 
                         string specifiedSource = null;
                         int specifiedPosition = 0;
@@ -1853,7 +1854,7 @@ namespace System.Xml.Serialization
                         }
 
                         Writer.Write("if (pLength > ");
-                        Writer.Write(i.ToString(CultureInfo.InvariantCulture));
+                        Writer.Write(iStr);
                         Writer.WriteLine(") {");
                         Writer.Indent++;
 
@@ -1883,6 +1884,7 @@ namespace System.Xml.Serialization
 
             for (int i = 0; i < mapping.Members.Length; i++)
             {
+                var iStr = i.ToString(CultureInfo.InvariantCulture);
                 MemberMapping member = mapping.Members[i];
                 if (member.Xmlns != null)
                     continue;
@@ -1907,7 +1909,7 @@ namespace System.Xml.Serialization
                 }
 
                 Writer.Write("if (pLength > ");
-                Writer.Write(i.ToString(CultureInfo.InvariantCulture));
+                Writer.Write(iStr);
                 Writer.WriteLine(") {");
                 Writer.Indent++;
 
@@ -1921,7 +1923,7 @@ namespace System.Xml.Serialization
                     Writer.Indent++;
                 }
 
-                string source = "p[" + i.ToString(CultureInfo.InvariantCulture) + "]";
+                string source = "p[" + iStr + "]";
                 string enumSource = null;
                 if (member.ChoiceIdentifier != null)
                 {
