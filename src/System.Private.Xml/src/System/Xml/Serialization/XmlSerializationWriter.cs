@@ -1830,12 +1830,12 @@ namespace System.Xml.Serialization
 
                 for (int i = 0; i < mapping.Members.Length; i++)
                 {
-                    var iStr = i.ToString(CultureInfo.InvariantCulture);
                     MemberMapping member = mapping.Members[i];
 
                     if (member.Attribute != null && !member.Ignore)
                     {
-                        string source = "p[" + iStr + "]";
+                        var index = i.ToString(CultureInfo.InvariantCulture);
+                        string source = "p[" + index + "]";
 
                         string specifiedSource = null;
                         int specifiedPosition = 0;
@@ -1854,7 +1854,7 @@ namespace System.Xml.Serialization
                         }
 
                         Writer.Write("if (pLength > ");
-                        Writer.Write(iStr);
+                        Writer.Write(index);
                         Writer.WriteLine(") {");
                         Writer.Indent++;
 
@@ -1884,7 +1884,6 @@ namespace System.Xml.Serialization
 
             for (int i = 0; i < mapping.Members.Length; i++)
             {
-                var iStr = i.ToString(CultureInfo.InvariantCulture);
                 MemberMapping member = mapping.Members[i];
                 if (member.Xmlns != null)
                     continue;
@@ -1908,8 +1907,9 @@ namespace System.Xml.Serialization
                     }
                 }
 
+                var index = i.ToString(CultureInfo.InvariantCulture);
                 Writer.Write("if (pLength > ");
-                Writer.Write(iStr);
+                Writer.Write(index);
                 Writer.WriteLine(") {");
                 Writer.Indent++;
 
@@ -1923,7 +1923,7 @@ namespace System.Xml.Serialization
                     Writer.Indent++;
                 }
 
-                string source = "p[" + iStr + "]";
+                string source = "p[" + index + "]";
                 string enumSource = null;
                 if (member.ChoiceIdentifier != null)
                 {
