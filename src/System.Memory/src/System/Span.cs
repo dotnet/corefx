@@ -239,7 +239,7 @@ namespace System
         {
             if (_length == 0) { return; }
 
-            var byteLength = (UIntPtr)(_length * Unsafe.SizeOf<T>());
+            var byteLength = (UIntPtr)((uint)_length * Unsafe.SizeOf<T>());
 
             if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
             {
@@ -295,11 +295,8 @@ namespace System
                 }
                 else
                 {
-                    // TODO: Replace with ref version of InitBlockUnaligned
-                    fixed (byte* p = &Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset)))
-                    {
-                        Unsafe.InitBlockUnaligned(p, fill, (uint)length);
-                    }
+                    ref byte r = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+                    Unsafe.InitBlockUnaligned(ref r, fill, (uint)length);
                 }
             }
             else

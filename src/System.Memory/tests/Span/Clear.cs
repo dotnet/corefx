@@ -191,5 +191,53 @@ namespace System.SpanTests
             span.Clear();
             Assert.Equal<TestValueTypeWithReference>(expected, actual);
         }
+
+        //<configuration>
+        //  <runtime>
+        //    <gcAllowVeryLargeObjects enabled = "true" />
+        //  </runtime>
+        //</configuration>
+        // Using this element in your application configuration file enables arrays that are larger than 2 GB in size, 
+        // but does not change other limits on object size or array size:
+        // The maximum index in any single dimension is 2,147,483,591 (0x7FFFFFC7) for byte arrays and arrays of single-byte structures, 
+        // and 2,146,435,071 (0X7FEFFFFF) for other types.
+        // TODO: Add test for managed array longer than uint.MaxValue bytes
+
+        [OuterLoop]
+        [Fact]
+        public unsafe static void ClearNativeLongerThanUintMaxValueBytes()
+        {
+            if (sizeof(IntPtr) == sizeof(long))
+            {
+                // Arrange
+                IntPtr bytes = (IntPtr)(((long)int.MaxValue) * sizeof(int));
+                int length = (int)(((long)bytes) / sizeof(int));
+
+                var ptr = (int*)Runtime.InteropServices.Marshal.AllocHGlobal(bytes);
+
+                int initial = 5;
+                for (int i = 0; i < length; i++)
+                {
+                    *(ptr + i) = initial;
+                }
+
+                var span = new Span<int>(ptr, length);
+
+                // Act
+                span.Clear();
+
+                // Assert using custom code for perf and to avoid allocating extra memory
+                for (int i = 0; i < length; i++)
+                {
+                    var actual = *(ptr + i);
+                    if (actual != 0)
+                    {
+                        Runtime.InteropServices.Marshal.FreeHGlobal(new IntPtr(ptr));
+                        Assert.Equal(0, actual);
+                    }
+                }
+                Runtime.InteropServices.Marshal.FreeHGlobal(new IntPtr(ptr));
+            }
+        }
     }
 }
