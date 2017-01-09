@@ -311,23 +311,15 @@ namespace System.IO.Tests
             // This doesn't make sense, but it is permitted.
             watcher.NotifyFilter = 0;
             Assert.Equal((NotifyFilters)0, watcher.NotifyFilter);
-        }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "These throw InvalidEnumException on desktop, but ArgumentException on Core")]
-        public void FileSystemWatcher_NotifyFilter_InvalidEnum()
-        {
-            FileSystemWatcher watcher = new FileSystemWatcher();
-            var notifyFilters = Enum.GetValues(typeof(NotifyFilters)).Cast<NotifyFilters>();
-            var allFilters = notifyFilters.Aggregate((mask, flag) => mask | flag);
-
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)(-1));
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MinValue);
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MaxValue);
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = allFilters + 1);
+            // These throw InvalidEnumException on desktop, but ArgumentException on K
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)(-1));
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MinValue);
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MaxValue);
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = allFilters + 1);
 
             // Simulate a bit added to the flags
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = allFilters | (NotifyFilters)((int)notifyFilters.Max() << 1));
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = allFilters | (NotifyFilters)((int)notifyFilters.Max() << 1));
         }
 
         [Fact]
