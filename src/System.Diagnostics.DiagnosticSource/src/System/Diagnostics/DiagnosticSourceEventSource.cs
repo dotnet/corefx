@@ -25,21 +25,21 @@ namespace System.Diagnostics
     ///   
     ///   This EventSource defines a EventSource argument called 'FilterAndPayloadSpecs' that defines
     ///   what DiagnsoticSources to enable and what parts of the payload to serialize into the key-value
-    ///   list that will be forwarded to the EventSource.    If it is empty, values of propertyies of the 
-    ///   diagnostic source payload are dumped as strings (using ToString() and forwarded to the EventSource.  
-    ///   For what people think of as serialiable object strings, primitives this gives you want you want. 
-    ///   (the value of the property in string form).   For what people think of as non-serialiable objects 
-    ///   HttpContext, etc, the ToString() method is typically not defined, so you get the Object.ToString() 
+    ///   list that will be forwarded to the EventSource.    If it is empty, values of properties of the 
+    ///   diagnostic source payload are dumped as strings (using ToString()) and forwarded to the EventSource.  
+    ///   For what people think of as serializable object strings, primitives this gives you want you want. 
+    ///   (the value of the property in string form) for what people think of as non-serialiable objects 
+    ///   (e.g. HttpContext) the ToString() method is typically not defined, so you get the Object.ToString() 
     ///   implemenation that prints the type name.  This is useful since this is the information you need 
-    ///   (the type of the property) to discover the field names so you can create a transform specficiation
+    ///   (the type of the property) to discover the field names so you can create a transform specification
     ///   that will pick off the properties you desire.  
     ///   
-    ///   Once you have the particular values you desire, the implicit payload elements are typially not needed
-    ///   anymore you can prefix the Transform specification with a '-' which supresses the implicit 
-    ///   transform (you only get the values of the properties you specificially ask for.  
+    ///   Once you have the particular values you desire, the implicit payload elements are typically not needed
+    ///   anymore and you can prefix the Transform specification with a '-' which supresses the implicit 
+    ///   transform (you only get the values of the properties you specifically ask for.  
     /// 
     ///   Logically a transform specification is simply a fetching specification X.Y.Z along with a name to give
-    ///   it in the output (which defaults to the last name in the fetch specification.  
+    ///   it in the output (which defaults to the last name in the fetch specification).  
     /// 
     ///   The FilterAndPayloadSpecs is one long string with the following structures
     ///   
