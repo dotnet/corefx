@@ -118,7 +118,7 @@ namespace System.Configuration
 
         private static byte[] PrepareDataBlob(string s)
         {
-            return (s != null) ? Encoding.Unicode.GetBytes(s) : new byte[0];
+            return (s != null) ? Encoding.Unicode.GetBytes(s) : Array.Empty<byte>();
         }
 
         private static bool GetBooleanValue(NameValueCollection configurationValues, string valueName, bool defaultValue)
