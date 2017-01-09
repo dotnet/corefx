@@ -9,6 +9,26 @@ using Xunit;
 
 namespace System.Collections.Concurrent.Tests
 {
+    public enum TestEnum
+    {
+        Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine
+    }
+
+    public class ConcurrentDictionary_Generic_Tests_enum_int : ConcurrentDictionary_Generic_Tests<TestEnum, int>
+    {
+        protected override bool DefaultValueAllowed => true;
+
+        protected override KeyValuePair<TestEnum, int> CreateT(int seed)
+        {
+            Random rand = new Random(seed);
+            return new KeyValuePair<TestEnum, int>((TestEnum)(rand.Next() % 10), rand.Next());
+        }
+
+        protected override TestEnum CreateTKey(int seed) => (TestEnum)(new Random(seed).Next() % 10);
+
+        protected override int CreateTValue(int seed) => new Random(seed).Next();
+    }
+
     public class ConcurrentDictionary_Generic_Tests_string_string : ConcurrentDictionary_Generic_Tests<string, string>
     {
         protected override KeyValuePair<string, string> CreateT(int seed)
