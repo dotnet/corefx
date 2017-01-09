@@ -92,7 +92,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileSystemWatcher_ctor_InvalidStrings()
+        public void FileSystemWatcher_ctor_NullStrings()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
@@ -102,7 +102,15 @@ namespace System.IO.Tests
                 // Null path
                 Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null));
                 Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, "*"));
+            }
+        }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On Desktop, these exceptions don't have a parameter")]
+        public void FileSystemWatcher_ctor_InvalidStrings()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
                 // Empty path
                 Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty));
                 Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty, "*"));
@@ -303,8 +311,16 @@ namespace System.IO.Tests
             // This doesn't make sense, but it is permitted.
             watcher.NotifyFilter = 0;
             Assert.Equal((NotifyFilters)0, watcher.NotifyFilter);
+        }
 
-            // These throw InvalidEnumException on desktop, but ArgumentException on K
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "These throw InvalidEnumException on desktop, but ArgumentException on Core")]
+        public void FileSystemWatcher_NotifyFilter_InvalidEnum()
+        {
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            var notifyFilters = Enum.GetValues(typeof(NotifyFilters)).Cast<NotifyFilters>();
+            var allFilters = notifyFilters.Aggregate((mask, flag) => mask | flag);
+
             Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)(-1));
             Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MinValue);
             Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MaxValue);
@@ -584,32 +600,27 @@ namespace System.IO.Tests
             // a FSW event callback and make sure we don't Thread.Join to deadlock
             using (var dir = new TempDirectory(GetTestFilePath()))
             {
-                FileSystemWatcher watcher = new FileSystemWatcher();
-                AutoResetEvent are = new AutoResetEvent(false);
-
+                FileSystemWatcher watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*");
                 FileSystemEventHandler callback = (sender, arg) =>
                 {
                     watcher.Dispose();
-                    are.Set();
                 };
 
                 // Attach the FSW to the existing structure
-                watcher.Path = Path.GetFullPath(dir.Path);
-                watcher.Filter = "*";
                 watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
                 watcher.Changed += callback;
 
                 using (var file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
                 {
-                    watcher.EnableRaisingEvents = true;
-
-                    // Change the nested file and verify we get the changed event
-                    byte[] bt = new byte[4096];
-                    file.Write(bt, 0, bt.Length);
-                    file.Flush();
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, () =>
+                    {
+                        // Change the nested file and verify we get the changed event
+                        byte[] bt = new byte[4096];
+                        file.Write(bt, 0, bt.Length);
+                        file.Flush();
+                    }, null, (string)null, attempts: 3, timeout: 3000);
                 }
-
-                ExpectEvent(are, "deleted");
+                Assert.Throws<ObjectDisposedException>(() => watcher.EnableRaisingEvents = true);
             }
         }
 
