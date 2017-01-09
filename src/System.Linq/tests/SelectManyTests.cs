@@ -409,31 +409,19 @@ namespace System.Linq.Tests
             bool sourceDisposed = false;
             bool[] subCollectionDisposed = new bool[sourceLength];
 
-            var sourceEnumerator = new DelegateBasedEnumerator<int>
-            {
-                MoveNextWorker = () => ++sourceState <= sourceLength,
-                CurrentWorker = () => 0,
-                DisposeWorker = () => sourceDisposed = true
-            };
+            DelegateIterator<int> source = null;
+            source = new DelegateIterator<int>(
+                getEnumerator: () => source,
+                moveNext: () => ++sourceState <= sourceLength,
+                current: () => 0,
+                dispose: () => sourceDisposed = true);
 
-            var source = new DelegateBasedEnumerable<int>
-            {
-                GetEnumeratorWorker = () => sourceEnumerator
-            };
-            
-            var subEnumerator = new DelegateBasedEnumerator<int>
-            {
-                // MoveNext: Return true subLength times.
-                // Dispose: Record that Dispose was called & move to the next index.
-                MoveNextWorker = () => ++subState[subIndex] <= subLength,
-                CurrentWorker = () => subState[subIndex],
-                DisposeWorker = () => subCollectionDisposed[subIndex++] = true
-            };
-
-            var subCollection = new DelegateBasedEnumerable<int>
-            {
-                GetEnumeratorWorker = () => subEnumerator
-            };
+            DelegateIterator<int> subCollection = null;
+            subCollection = new DelegateIterator<int>(
+                getEnumerator: () => subCollection,
+                moveNext: () => ++subState[subIndex] <= subLength, // Return true `subLength` times.
+                current: () => subState[subIndex],
+                dispose: () => subCollectionDisposed[subIndex++] = true); // Record that Dispose was called, and move on to the next index.
 
             var iterator = source.SelectMany(_ => subCollection);
 
