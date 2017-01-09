@@ -1834,7 +1834,7 @@ namespace System.Xml.Serialization
 
                     if (member.Attribute != null && !member.Ignore)
                     {
-                        var index = i.ToString(CultureInfo.InvariantCulture);
+                        string index = i.ToString(CultureInfo.InvariantCulture);
                         string source = "p[" + index + "]";
 
                         string specifiedSource = null;
@@ -1907,7 +1907,7 @@ namespace System.Xml.Serialization
                     }
                 }
 
-                var index = i.ToString(CultureInfo.InvariantCulture);
+                string index = i.ToString(CultureInfo.InvariantCulture);
                 Writer.Write("if (pLength > ");
                 Writer.Write(index);
                 Writer.WriteLine(") {");
