@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
+#if NET46
+using System.Security;
+#endif
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -714,6 +717,9 @@ namespace System.Net.Http
             }
         }
 
+#if NET46
+        [SecuritySafeCritical]
+#endif
         internal sealed class LimitArrayPoolWriteStream : Stream
         {
             private const int MaxByteArrayLength = 0x7FFFFFC7;
@@ -740,6 +746,9 @@ namespace System.Net.Http
                 _buffer = ArrayPool<byte>.Shared.Rent((int)capacity);
             }
 
+#if NET46
+            [SecuritySafeCritical]
+#endif
             protected override void Dispose(bool disposing)
             {
                 Debug.Assert(_buffer != null);
