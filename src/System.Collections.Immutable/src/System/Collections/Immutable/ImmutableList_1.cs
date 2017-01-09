@@ -3160,6 +3160,9 @@ namespace System.Collections.Immutable
             /// right nodes, but assumes left and right nodes are individually balanced.
             /// </summary>
             /// <returns>A balanced tree.</returns>
+            /// <remarks>
+            /// If this tree is already balanced, this method does nothing.
+            /// </remarks>
             private Node BalanceMany()
             {
                 Node tree = this;
@@ -3167,12 +3170,12 @@ namespace System.Collections.Immutable
                 {
                     if (tree.IsRightHeavy)
                     {
-                        tree = tree._right.BalanceFactor < 0 ? tree.DoubleLeft() : tree.RotateLeft();
+                        tree = tree.BalanceRight();
                         tree.MutateLeft(tree._left.BalanceMany());
                     }
                     else
                     {
-                        tree = tree._left.BalanceFactor > 0 ? tree.DoubleRight() : tree.RotateRight();
+                        tree = tree.BalanceLeft();
                         tree.MutateRight(tree._right.BalanceMany());
                     }
                 }
