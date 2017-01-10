@@ -199,7 +199,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             string expectedString = isRunningOnDesktop ? "35edc437e31d0b70000000000000" : "35edc437e31d0b70";
             byte[] expectedGarbage = expectedString.HexToByteArray();
             byte[] garbage = ecms.Encode();
-            AssertEncryptedContentEqual(expectedGarbage, garbage, isRunningOnDesktop);
+            Assert.Equal(expectedGarbage, garbage);
         }
 
         [Fact]
@@ -234,7 +234,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(Oids.Pkcs7Data, contentInfo.ContentType.Value);
             string expectedString = isRunningOnDesktop ? "35edc437e31d0b70000000000000" : "35edc437e31d0b70";
             byte[] expectedGarbage = expectedString.HexToByteArray();
-            AssertEncryptedContentEqual(expectedGarbage, contentInfo.Content, isRunningOnDesktop);
+            Assert.Equal(expectedGarbage, contentInfo.Content);
         }
 
         [Fact]
@@ -370,14 +370,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 // after a successful Decrypt() throws a CryptographicException saying "Already decrypted."
                 Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(r[1], extraStore));
             }
-        }
-
-        private static void AssertEncryptedContentEqual(byte[] expected, byte[] actual, bool runOnDesktop)
-        {
-            if (expected.SequenceEqual(actual))
-                return;
-
-            Assert.Equal<byte>(expected, actual);
         }
     }
 }
