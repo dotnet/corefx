@@ -76,6 +76,12 @@
     <Compile Include="$(CommonTestPath)\System\RuntimeDetection.cs" >
       <Link>Common\System\RuntimeDetection.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.Generic.Tests.netcoreapp1.1.cs" Condition="'$(TargetGroup)'=='netcoreapp1.1'" >
+      <Link>Common\System\Collections\IDictionary.Generic.Tests.netcoreapp1.1.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\IDictionary.NonGeneric.Tests.netcoreapp1.1.cs" Condition="'$(TargetGroup)'=='netcoreapp1.1'" >
+      <Link>Common\System\Collections\IDictionary.NonGeneric.Tests.netcoreapp1.1.cs</Link>
+    </Compile>
     <!-- Generic tests -->
     <Compile Include="StructuralComparisonsTests.cs" />
     <Compile Include="BitArray\BitArray_CtorTests.cs" />
