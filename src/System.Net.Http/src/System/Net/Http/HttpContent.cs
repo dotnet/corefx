@@ -7,9 +7,6 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
-#if NET46
-using System.Security;
-#endif
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -315,7 +312,8 @@ namespace System.Net.Http
         }
 
 #if NET46
-        // Workaround for HttpWebRequest synchronous resubmit
+        // Workaround for HttpWebRequest synchronous resubmit. This code is required because the underlying
+        // .NET Framework HttpWebRequest implementation cannot use CopyToAsync and only uses sync based CopyTo.
         internal void CopyTo(Stream stream)
         {
             CopyToAsync(stream).Wait();
@@ -717,9 +715,7 @@ namespace System.Net.Http
             }
         }
 
-#if NET46
-        [SecuritySafeCritical]
-#endif
+#if !NET46
         internal sealed class LimitArrayPoolWriteStream : Stream
         {
             private const int MaxByteArrayLength = 0x7FFFFFC7;
@@ -746,9 +742,6 @@ namespace System.Net.Http
                 _buffer = ArrayPool<byte>.Shared.Rent((int)capacity);
             }
 
-#if NET46
-            [SecuritySafeCritical]
-#endif
             protected override void Dispose(bool disposing)
             {
                 Debug.Assert(_buffer != null);
@@ -848,5 +841,6 @@ namespace System.Net.Http
             public override long Seek(long offset, SeekOrigin origin) { throw new NotSupportedException(); }
             public override void SetLength(long value) { throw new NotSupportedException(); }
         }
+#endif        
     }
 }

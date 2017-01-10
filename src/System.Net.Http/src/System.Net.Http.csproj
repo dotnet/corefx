@@ -167,9 +167,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="System\Net\Http\HttpClientHandler.net46.cs" />
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'net46' ">
+    <Compile Include="AssemblyInfo.Net46.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.Net46.cs" />
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />

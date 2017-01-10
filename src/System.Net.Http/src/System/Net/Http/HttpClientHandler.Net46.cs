@@ -92,7 +92,7 @@ namespace System.Net.Http
 
         public bool CheckCertificateRevocationList
         {
-            // New property not in .NET Framework HttpClientHandler.
+            // TODO: Issue #11100.
             get
             {
                 throw new PlatformNotSupportedException();
@@ -127,7 +127,6 @@ namespace System.Net.Http
 
         public X509CertificateCollection ClientCertificates
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 if (_clientCertificates == null)
@@ -180,7 +179,6 @@ namespace System.Net.Http
 
         public ICredentials DefaultProxyCredentials
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 return _defaultProxyCredentials;
@@ -214,7 +212,6 @@ namespace System.Net.Http
 
         public int MaxConnectionsPerServer
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 return _maxConnectionsPerServer;
@@ -256,7 +253,6 @@ namespace System.Net.Http
 
         public int MaxResponseHeadersLength
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 return _maxResponseHeadersLength;
@@ -290,7 +286,6 @@ namespace System.Net.Http
 
         public IDictionary<String, Object> Properties
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 if (_properties == null)
@@ -325,7 +320,6 @@ namespace System.Net.Http
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
-            // New property not in .NET Framework HttpClientHandler.
             get
             {
                 return _serverCertificateCustomValidationCallback;
@@ -340,7 +334,7 @@ namespace System.Net.Http
 
         public SslProtocols SslProtocols
         {
-            // New property not in .NET Framework HttpClientHandler.
+            // TODO: Issue #11100.
             get
             {
                 throw new PlatformNotSupportedException();
@@ -536,7 +530,7 @@ namespace System.Net.Http
             SslPolicyErrors sslPolicyErrors)
         {
             return _serverCertificateCustomValidationCallback(
-                null, // TODO: How to map sender (which is really an HttpWebRequest) to an HttpRequestMessage?
+                null, // TODO Issue #11100: How to map sender (which is an HttpWebRequest) to an HttpRequestMessage?
                 (X509Certificate2)certificate, // This cast will usually always be safe.
                 chain,
                 sslPolicyErrors);
