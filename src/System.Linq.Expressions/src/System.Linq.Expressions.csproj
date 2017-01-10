@@ -143,10 +143,7 @@
     <Compile Include="System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Linq" />
     <Reference Include="System.ObjectModel" />
