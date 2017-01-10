@@ -520,9 +520,7 @@ namespace System.Linq.Tests
         {
             int state = 0;
 
-            DelegateIterator<int> source = null;
-            source = new DelegateIterator<int>(
-                getEnumerator: () => source,
+            var source = new DelegateIterator<int>(
                 moveNext: () => ++state <= sourceCount,
                 current: () => 0,
                 dispose: () => state = -1);

@@ -409,16 +409,12 @@ namespace System.Linq.Tests
             bool sourceDisposed = false;
             bool[] subCollectionDisposed = new bool[sourceLength];
 
-            DelegateIterator<int> source = null;
-            source = new DelegateIterator<int>(
-                getEnumerator: () => source,
+            var source = new DelegateIterator<int>(
                 moveNext: () => ++sourceState <= sourceLength,
                 current: () => 0,
                 dispose: () => sourceDisposed = true);
 
-            DelegateIterator<int> subCollection = null;
-            subCollection = new DelegateIterator<int>(
-                getEnumerator: () => subCollection,
+            var subCollection = new DelegateIterator<int>(
                 moveNext: () => ++subState[subIndex] <= subLength, // Return true `subLength` times.
                 current: () => subState[subIndex],
                 dispose: () => subCollectionDisposed[subIndex++] = true); // Record that Dispose was called, and move on to the next index.

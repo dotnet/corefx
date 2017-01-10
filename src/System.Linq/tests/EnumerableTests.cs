@@ -305,7 +305,7 @@ namespace System.Linq.Tests
                 Action reset = null,
                 Action dispose = null)
             {
-                _getEnumerator = getEnumerator ?? (() => { throw new NotImplementedException(); });
+                _getEnumerator = getEnumerator ?? (() => this);
                 _moveNext = moveNext ?? (() => { throw new NotImplementedException(); });
                 _current = current ?? (() => { throw new NotImplementedException(); });
                 _explicitGetEnumerator = explicitGetEnumerator ?? (() => { throw new NotImplementedException(); });
