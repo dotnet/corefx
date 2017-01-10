@@ -10,6 +10,7 @@ namespace System.Globalization.Tests
     public class CultureInfoAsync
     {        
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TestCurrentCulturesAsync()
         {
             CultureInfo currentCulture = CultureInfo.CurrentCulture;
@@ -39,6 +40,7 @@ namespace System.Globalization.Tests
         }
         
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TestCurrentCulturesWithAwait()
         {
             CultureInfo currentCulture = CultureInfo.CurrentCulture;
