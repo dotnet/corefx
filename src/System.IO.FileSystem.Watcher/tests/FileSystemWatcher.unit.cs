@@ -591,26 +591,26 @@ namespace System.IO.Tests
             // Check the case where Stop or Dispose (they do the same thing) is called from 
             // a FSW event callback and make sure we don't Thread.Join to deadlock
             using (var dir = new TempDirectory(GetTestFilePath()))
+            using (FileStream file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
             {
                 FileSystemWatcher watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*");
-                FileSystemEventHandler callback = (sender, arg) =>
-                {
-                    watcher.Dispose();
-                };
+                FileSystemEventHandler callback = (sender, arg) => watcher.Dispose();
 
                 // Attach the FSW to the existing structure
                 watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
                 watcher.Changed += callback;
-
-                using (var file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
+                Action action = () =>
                 {
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, () =>
-                    {
-                        // Change the nested file and verify we get the changed event
-                        byte[] bt = new byte[4096];
-                        file.Write(bt, 0, bt.Length);
-                        file.Flush();
-                    }, null, (string)null, attempts: 3, timeout: 3000);
+                    byte[] bt = new byte[4096];
+                    file.Write(bt, 0, bt.Length);
+                    file.Flush();
+                };
+                for (int attemptsCompleted = 0; attemptsCompleted <= 3; attemptsCompleted++)
+                {
+                    if (attemptsCompleted > 1)
+                        Thread.Sleep(500);
+                    if (ExecuteAndVerifyEvents(watcher, WatcherChangeTypes.Changed, action, attemptsCompleted == 3, null, timeout: 3000))
+                        break;
                 }
                 Assert.Throws<ObjectDisposedException>(() => watcher.EnableRaisingEvents = true);
             }

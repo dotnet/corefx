@@ -196,7 +196,7 @@ namespace System.IO.Tests
         /// <param name="assertExpected">True if results should be asserted. Used if there is no retry.</param>
         /// <param name="expectedPath"> Adds path verification to all expected events.</param>
         /// <returns>True if the events raised correctly; else, false.</returns>
-        private static bool ExecuteAndVerifyEvents(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, bool assertExpected, string[] expectedPaths, int timeout)
+        public static bool ExecuteAndVerifyEvents(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, bool assertExpected, string[] expectedPaths, int timeout)
         {
             bool result = true, verifyChanged = true, verifyCreated = true, verifyDeleted = true, verifyRenamed = true;
             AutoResetEvent changed = null, created = null, deleted = null, renamed = null;
