@@ -10,6 +10,7 @@ namespace System.Globalization.Tests
     public class CultureInfoAsync
     {        
         [Fact]
+        // async current cultures feature is supported on 4.6.1 and up on Windows desktop framework
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TestCurrentCulturesAsync()
         {
@@ -40,6 +41,7 @@ namespace System.Globalization.Tests
         }
         
         [Fact]
+        // async current cultures feature is supported on 4.6.1 and up on Windows desktop framework
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void TestCurrentCulturesWithAwait()
         {

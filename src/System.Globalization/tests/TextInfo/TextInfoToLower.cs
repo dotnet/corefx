@@ -11,6 +11,7 @@ namespace System.Globalization.Tests
     {
         private static readonly string [] s_cultureNames = new string[] { "", "en-US", "fr", "fr-FR" };
         
+        // ToLower_TestData_net46 has the data which is specific to the full framework 
         public static IEnumerable<object[]> ToLower_TestData_net46()
         {
             foreach (string cultureName in s_cultureNames)
@@ -27,6 +28,7 @@ namespace System.Globalization.Tests
             }
         }
 
+        // ToLower_TestData_netcore has the data which is specific to netcore framework 
         public static IEnumerable<object[]> ToLower_TestData_netcore()
         {
             foreach (string cultureName in s_cultureNames)
