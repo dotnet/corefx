@@ -493,12 +493,6 @@
     "PB_RuntimeOS": {
       "value": "win10"
     },
-    "PB_Performance": {
-      "value": "false"
-    },
-    "PB_FuncTestsDisabled": {
-      "value": "false"
-    },
     "PB_CleanAgent": {
       "value": "true"
     }
