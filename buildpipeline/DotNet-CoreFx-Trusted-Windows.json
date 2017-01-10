@@ -166,6 +166,24 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Run $(Build.SourcesDirectory)\\corefx\\build-tests.cmd",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(Build.SourcesDirectory)\\corefx\\build-tests.cmd",
+        "arguments": "-buildArch=$(PB_Platform) -$(PB_ConfigurationGroup) -SkipTests -OuterLoop -- /p:RuntimeOS=$(PB_RuntimeOS) /p:ArchiveTests=true /p:Performance=$(PB_Performance) /p:FuncTestsDisabled=$(PB_FuncTestsDisabled) /p:XunitTraitOptions=\\\"-notrait category=requireselevation\\\"",
+        "workingFolder": "corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Push packages to Azure",
       "timeoutInMinutes": 0,
       "task": {
@@ -177,6 +195,24 @@
         "filename": "$(Build.SourcesDirectory)\\corefx\\publish-packages.cmd",
         "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=true",
         "workingFolder": "corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Push to Helix",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(Build.SourcesDirectory)\\corefx\\tools\\msbuild.cmd",
+        "arguments": "src\\post.builds /t:CloudBuild /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:OfficialBuildId=$(OfficialBuildId) /p:ArchiveTests=true /p:EnableCloudTest=true /p:BuildMoniker=$(OfficialBuildId) /p:TargetQueue=$(PB_TargetQueue) /p:TestProduct=corefx /p:Branch=$(PB_HelixBranch) /p:CloudDropAccountName=$(PB_OutputCloudDropAccountName) /p:CloudResultsAccountName=$(PB_OutputCloudResultsAccountName) /p:CloudDropAccessToken=$(OutputCloudDropAccessToken) /p:CloudResultsAccessToken=$(OutputCloudResultsAccessToken) /p:Outerloop=true /p:TimeoutInSeconds=1200 /p:TargetOS=$(PB_TargetOS) /p:HelixApiAccessKey=$(HelixApiAccessKey) /p:Creator=$(PB_Creator) /p:CloudTestContainerSuffix=$(PB_TestContainerSuffix)-2 /p:OverwriteOnUpload=true /flp:LogFile=pushtohelix-diag.log;Verbosity=diagnostic /p:HelixApiEndpoint=$(PB_HelixApiEndpoint)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -346,6 +382,33 @@
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Build solution corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "solution": "corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
+        "platform": "",
+        "configuration": "",
+        "msbuildArguments": "/p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
+        "clean": "false",
+        "maximumCpuCount": "false",
+        "restoreNugetPackages": "false",
+        "logProjectEvents": "false",
+        "createLogFile": "false",
+        "msbuildLocationMethod": "version",
+        "msbuildVersion": "14.0",
+        "msbuildArchitecture": "x86",
+        "msbuildLocation": ""
+      }
     }
   ],
   "options": [
@@ -447,6 +510,24 @@
     },
     "PB_RuntimeOS": {
       "value": "win10"
+    },
+    "PB_Performance": {
+      "value": "false"
+    },
+    "PB_FuncTestsDisabled": {
+      "value": "false"
+    },
+    "PB_HelixBranch": {
+      "value": "master"
+    },
+    "PB_Creator": {
+      "value": "corbvt"
+    },
+    "PB_TestContainerSuffix": {
+      "value": "windows10"
+    },
+    "PB_CleanAgent": {
+      "value": "true"
     }
   },
   "demands": [
