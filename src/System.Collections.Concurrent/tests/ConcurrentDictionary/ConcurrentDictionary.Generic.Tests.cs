@@ -9,24 +9,20 @@ using Xunit;
 
 namespace System.Collections.Concurrent.Tests
 {
-    public enum TestEnum
+    public class ConcurrentDictionary_Generic_Tests_enum_enum : ConcurrentDictionary_Generic_Tests<TestEnum, TestEnum>
     {
-        Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine
-    }
+        protected override bool SupportsSerialization => false;
 
-    public class ConcurrentDictionary_Generic_Tests_enum_int : ConcurrentDictionary_Generic_Tests<TestEnum, int>
-    {
         protected override bool DefaultValueAllowed => true;
 
-        protected override KeyValuePair<TestEnum, int> CreateT(int seed)
+        protected override KeyValuePair<TestEnum, TestEnum> CreateT(int seed)
         {
-            Random rand = new Random(seed);
-            return new KeyValuePair<TestEnum, int>((TestEnum)(rand.Next() % 10), rand.Next());
+            return new KeyValuePair<TestEnum, TestEnum>(CreateTKey(seed), CreateTValue(seed));
         }
 
-        protected override TestEnum CreateTKey(int seed) => (TestEnum)(new Random(seed).Next() % 10);
+        protected override TestEnum CreateTKey(int seed) => (TestEnum)new Random(seed).Next();
 
-        protected override int CreateTValue(int seed) => new Random(seed).Next();
+        protected override TestEnum CreateTValue(int seed) => CreateTKey(seed);
     }
 
     public class ConcurrentDictionary_Generic_Tests_string_string : ConcurrentDictionary_Generic_Tests<string, string>
@@ -78,7 +74,7 @@ namespace System.Collections.Concurrent.Tests
         protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
 
         protected override bool IDictionary_Generic_Keys_Values_Enumeration_ThrowsInvalidOperation_WhenParentModified => false;
-        
+
         protected override bool IDictionary_Generic_Keys_Values_ModifyingTheDictionaryUpdatesTheCollection => false;
 
         protected override bool ResetImplemented => false;
@@ -120,7 +116,7 @@ namespace System.Collections.Concurrent.Tests
         }
 
         #endregion
-        
+
         #region IReadOnlyDictionary<TKey, TValue>.Keys
 
         [Theory]
