@@ -2,34 +2,87 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace System.Linq
 {
-    internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>, IPartition<TElement>
+    internal abstract class OrderedEnumerable<TElement> : Enumerable.Iterator<TElement>, IOrderedEnumerable<TElement>, IPartition<TElement>
     {
+        private const int ArrayPoolUseThreshold = 32;
         internal IEnumerable<TElement> _source;
+        private Buffer<TElement> _buffer;
+        private int _index;
+        private int _maxIdx = int.MaxValue;
+        private int[] _map;
 
-        private int[] SortedMap(Buffer<TElement> buffer)
+        private int[] SortedMap(Buffer<TElement> buffer, bool rent)
         {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count);
+            return GetEnumerableSorter().Sort(buffer._items, buffer._count, rent);
         }
 
-        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx)
+        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx, bool rent)
         {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx);
+            return GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx, rent);
         }
 
-        public IEnumerator<TElement> GetEnumerator()
+        public override bool MoveNext()
         {
-            Buffer<TElement> buffer = new Buffer<TElement>(_source);
-            if (buffer._count > 0)
+            switch (_state)
             {
-                int[] map = SortedMap(buffer);
-                for (int i = 0; i < buffer._count; i++)
+                case 1:
+                    Buffer<TElement> buffer = new Buffer<TElement>(_source);
+                    if (buffer._count > 0)
+                    {
+                        if (_index != 0 || _maxIdx != int.MaxValue)
+                        {
+                            _map = SortedMap(buffer, _index, _maxIdx, buffer._count >= ArrayPoolUseThreshold);
+                        }
+                        else
+                        {
+                            _map = SortedMap(buffer, buffer._count >= ArrayPoolUseThreshold);
+                        }
+
+                        _maxIdx = Math.Min(_maxIdx, buffer._count - 1);                        
+                        _buffer = buffer;
+                        _state = 2;
+                        goto case 2;
+                    }
+
+                    break;
+                case 2:
+                    if (_index <= _maxIdx)
+                    {
+                        _current = _buffer._items[_map[_index]];
+                        ++_index;
+                        return true;
+                    }
+                    break;
+            }
+
+            Dispose();
+            return false;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            if (_map != null)
+            {
+                _buffer = default(Buffer<TElement>);
+                if (_map.Length >= ArrayPoolUseThreshold)
                 {
-                    yield return buffer._items[map[i]];
+                    int[] rented = Interlocked.Exchange(ref _map, null);
+                    if (rented != null)
+                    {
+                        ArrayPool<int>.Shared.Return(rented);
+                    }
+                }
+                else
+                {
+                    _map = null;
                 }
             }
         }
@@ -45,12 +98,13 @@ namespace System.Linq
             }
 
             TElement[] array = new TElement[count];
-            int[] map = SortedMap(buffer);
+            int[] map = SortedMap(buffer, true);
             for (int i = 0; i != array.Length; i++)
             {
                 array[i] = buffer._items[map[i]];
             }
 
+            ArrayPool<int>.Shared.Return(map);
             return array;
         }
 
@@ -61,11 +115,13 @@ namespace System.Linq
             List<TElement> list = new List<TElement>(count);
             if (count > 0)
             {
-                int[] map = SortedMap(buffer);
+                int[] map = SortedMap(buffer, true);
                 for (int i = 0; i != count; i++)
                 {
                     list.Add(buffer._items[map[i]]);
                 }
+
+                ArrayPool<int>.Shared.Return(map);
             }
 
             return list;
@@ -84,29 +140,11 @@ namespace System.Linq
 
         internal IEnumerator<TElement> GetEnumerator(int minIdx, int maxIdx)
         {
-            Buffer<TElement> buffer = new Buffer<TElement>(_source);
-            int count = buffer._count;
-            if (count > minIdx)
-            {
-                if (count <= maxIdx)
-                {
-                    maxIdx = count - 1;
-                }
-
-                if (minIdx == maxIdx)
-                {
-                    yield return GetEnumerableSorter().ElementAt(buffer._items, count, minIdx);
-                }
-                else
-                {
-                    int[] map = SortedMap(buffer, minIdx, maxIdx);
-                    while (minIdx <= maxIdx)
-                    {
-                        yield return buffer._items[map[minIdx]];
-                        ++minIdx;
-                    }
-                }
-            }
+            OrderedEnumerable<TElement> enumerator = _state == 0 && _threadId == Environment.CurrentManagedThreadId ? this : (OrderedEnumerable<TElement>)Clone();
+            enumerator._state = 1;
+            enumerator._index = minIdx;
+            enumerator._maxIdx = maxIdx;
+            return enumerator;
         }
 
         internal TElement[] ToArray(int minIdx, int maxIdx)
@@ -128,7 +166,7 @@ namespace System.Linq
                 return new TElement[] { GetEnumerableSorter().ElementAt(buffer._items, count, minIdx) };
             }
 
-            int[] map = SortedMap(buffer, minIdx, maxIdx);
+            int[] map = SortedMap(buffer, minIdx, maxIdx, true);
             TElement[] array = new TElement[maxIdx - minIdx + 1];
             int idx = 0;
             while (minIdx <= maxIdx)
@@ -138,6 +176,7 @@ namespace System.Linq
                 ++minIdx;
             }
 
+            ArrayPool<int>.Shared.Return(map);
             return array;
         }
 
@@ -160,7 +199,7 @@ namespace System.Linq
                 return new List<TElement>(1) { GetEnumerableSorter().ElementAt(buffer._items, count, minIdx) };
             }
 
-            int[] map = SortedMap(buffer, minIdx, maxIdx);
+            int[] map = SortedMap(buffer, minIdx, maxIdx, true);
             List<TElement> list = new List<TElement>(maxIdx - minIdx + 1);
             while (minIdx <= maxIdx)
             {
@@ -168,6 +207,7 @@ namespace System.Linq
                 ++minIdx;
             }
 
+            ArrayPool<int>.Shared.Return(map);
             return list;
         }
 
@@ -423,6 +463,11 @@ namespace System.Linq
             _descending = descending;
         }
 
+        public override Enumerable.Iterator<TElement> Clone()
+        {
+            return new OrderedEnumerable<TElement, TKey>(_source, _keySelector, _comparer, _descending, _parent);
+        }
+
         internal override EnumerableSorter<TElement> GetEnumerableSorter(EnumerableSorter<TElement> next)
         {
             EnumerableSorter<TElement> sorter = new EnumerableSorter<TElement, TKey>(_keySelector, _comparer, _descending, next);
@@ -526,10 +571,10 @@ namespace System.Linq
 
         internal abstract int CompareAnyKeys(int index1, int index2);
 
-        private int[] ComputeMap(TElement[] elements, int count)
+        private int[] ComputeMap(TElement[] elements, int count, bool rent)
         {
             ComputeKeys(elements, count);
-            int[] map = new int[count];
+            int[] map = rent ? ArrayPool<int>.Shared.Rent(count) : new int[count];
             for (int i = 0; i < count; i++)
             {
                 map[i] = i;
@@ -538,23 +583,26 @@ namespace System.Linq
             return map;
         }
 
-        internal int[] Sort(TElement[] elements, int count)
+        internal int[] Sort(TElement[] elements, int count, bool rent)
         {
-            int[] map = ComputeMap(elements, count);
+            int[] map = ComputeMap(elements, count, rent);
             QuickSort(map, 0, count - 1);
             return map;
         }
 
-        internal int[] Sort(TElement[] elements, int count, int minIdx, int maxIdx)
+        internal int[] Sort(TElement[] elements, int count, int minIdx, int maxIdx, bool rent)
         {
-            int[] map = ComputeMap(elements, count);
+            int[] map = ComputeMap(elements, count, rent);
             PartialQuickSort(map, 0, count - 1, minIdx, maxIdx);
             return map;
         }
 
         internal TElement ElementAt(TElement[] elements, int count, int idx)
         {
-            return elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
+            int[] map = ComputeMap(elements, count, true);
+            var index = QuickSelect(map, count - 1, idx);
+            ArrayPool<int>.Shared.Return(map);
+            return elements[index];
         }
 
         private int CompareKeys(int index1, int index2)

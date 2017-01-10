@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "System.Buffers": "4.0.0-rc3-24117-00"
+  },
   "frameworks": {
     "netstandard1.6": {
       "dependencies": {

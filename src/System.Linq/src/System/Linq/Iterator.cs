@@ -31,7 +31,7 @@ namespace System.Linq
         /// </remarks>
         internal abstract class Iterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            private readonly int _threadId;
+            protected readonly int _threadId;
             internal int _state;
             internal TSource _current;
 
