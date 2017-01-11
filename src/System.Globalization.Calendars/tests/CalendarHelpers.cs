@@ -96,13 +96,13 @@ namespace System.Globalization.Tests
             }
         }
 
-        public static IEnumerable<object[]> Year_Month_Day_Era_TestData(DataType type, bool isDesktopRun)
+        public static IEnumerable<object[]> Year_Month_Day_Era_TestData(DataType type, bool ignoreJapaneseLunisolarCalendar)
         {
             int month = 1;
             int day = 1;
             foreach (Calendar calendar in s_calendars)
             {
-                if (isDesktopRun && calendar is JapaneseLunisolarCalendar)
+                if (ignoreJapaneseLunisolarCalendar && calendar is JapaneseLunisolarCalendar)
                 {
                     // desktop has a bug in JapaneseLunisolarCalendar which is fixed in .Net Core.
                     // in case of a new era starts in the middle of a month which means part of the month will belong to one
