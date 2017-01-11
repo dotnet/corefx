@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 
-#if !Feature_Serialization
+#if !FEATURE_SERIALIZATION
 namespace System.CodeDom
 #else
 namespace System.Runtime.Serialization
@@ -14,14 +14,22 @@ namespace System.Runtime.Serialization
 {
     [Serializable]
     [Flags]
+#if !FEATURE_SERIALIZATION
     public enum CodeTypeReferenceOptions
+#else
+    internal enum CodeTypeReferenceOptions
+#endif
     {
         GlobalReference = 0x00000001,
         GenericTypeParameter = 0x00000002
     }
 
     [Serializable]
+#if !FEATURE_SERIALIZATION
     public class CodeTypeReference : CodeObject
+#else
+    internal class CodeTypeReference : CodeObject
+#endif
     {
         private string _baseType;
         private readonly bool _isInterface;
@@ -276,7 +284,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if !Feature_Serialization
+#if !FEATURE_SERIALIZATION
         public CodeTypeReference(CodeTypeParameter typeParameter) :
             this(typeParameter?.Name)
         {

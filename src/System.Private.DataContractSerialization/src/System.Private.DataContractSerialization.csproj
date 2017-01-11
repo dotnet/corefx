@@ -10,7 +10,7 @@
     <FileAlignment>512</FileAlignment>
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>$(DefineConstants);Feature_Serialization</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='uap101aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
     <!-- We do not want to block reflection for this assembly -->
     <BlockReflectionAttribute Condition="'$(TargetGroup)'=='uap101aot'">false</BlockReflectionAttribute>
