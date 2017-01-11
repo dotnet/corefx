@@ -31,9 +31,10 @@ namespace System
                     return -1;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
-                index = IndexOf(ref searchSpace, valueHead, index, remainingSearchSpaceLength);
-                if (index == -1)
+                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
+                if (relativeIndex == -1)
                     return -1;
+                index += relativeIndex;
 
                 // Found the first element of "value". See if the tail matches.
                 if (SequenceEqual(ref Unsafe.Add(ref searchSpace, index + 1), ref valueTail, valueTailLength))
@@ -43,13 +44,12 @@ namespace System
             }
         }
 
-        public static int IndexOf<T>(ref T searchSpace, T value, int start, int length)
+        public static int IndexOf<T>(ref T searchSpace, T value, int length)
             where T : struct, IEquatable<T>
         {
             Debug.Assert(length >= 0);
-            Debug.Assert(start >= 0);
 
-            int index = start - 1;
+            int index = -1;
             int remainingLength = length;
             while (remainingLength >= 8)
             {

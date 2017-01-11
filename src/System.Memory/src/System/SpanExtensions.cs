@@ -123,7 +123,7 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, T value)
             where T:struct, IEquatable<T>
         {
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, 0, span.Length);
+            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
         /// <summary>
