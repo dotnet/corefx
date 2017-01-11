@@ -163,7 +163,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Throws<ArgumentNullException>("authenticationType", () => cc.Add("host", 500, null, new NetworkCredential())); //Null authenticationType
 
             var exception = Record.Exception(() => cc.Add("", 500, "authenticationType", new NetworkCredential())); 
-            // on desktop we get exception.ParamName as null while it is "host" on netcore
+            // On full framework we get exception.ParamName as null while it is "host" on netcore
             Assert.NotNull(exception);
             Assert.True(exception is ArgumentException);
             ArgumentException ae = exception as ArgumentException;
@@ -251,7 +251,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Throws<ArgumentNullException>("authenticationType", () => cc.GetCredential("host", 500, null)); //Null authenticationType
 
             var exception = Record.Exception(() => cc.GetCredential("", 500, "authenticationType")); //Empty host
-            // on desktop we get exception.ParamName as null while it is "host" on netcore
+            // On full framework we get exception.ParamName as null while it is "host" on netcore
             Assert.NotNull(exception);
             Assert.True(exception is ArgumentException);
             ArgumentException ae = exception as ArgumentException;
@@ -400,8 +400,8 @@ namespace System.Net.Primitives.Functional.Tests
             NetworkCredential nc = CredentialCache.DefaultNetworkCredentials as NetworkCredential;
             CredentialCache cc = new CredentialCache();
 
-            // full framework throw System.ArgumentException with the message
-            // Default credentials cannot be supplied for the authenticationType1 authentication scheme.
+            // The full framework throw System.ArgumentException with the message
+            // 'Default credentials cannot be supplied for the authenticationType1 authentication scheme.'
             Assert.Throws<ArgumentException>("authType", () => cc.Add(uriPrefix1, authenticationType1, nc));
         }
 

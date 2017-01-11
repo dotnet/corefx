@@ -241,12 +241,21 @@ namespace System.Net.Primitives.Functional.Tests
         }
         
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.NetcoreUwp)]
+        public static void Value_PassNullToCtor_GetReturnsEmptyString_net46()
+        {
+            var cookie = new Cookie("SomeName", null);
+            // Cookie.Value returns null on full framework.
+            Assert.Null(cookie.Value);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Value_PassNullToCtor_GetReturnsEmptyString()
         {
             var cookie = new Cookie("SomeName", null);
-            // cookie.Value will return empty string on netcore and null on full framework.
-            // The behavior this tests was only recently added in #8206.
-            Assert.True(string.IsNullOrEmpty(cookie.Value));
+            // Cookie.Value returns empty string on netcore.
+            Assert.Equal(string.Empty, cookie.Value);
         }
 
         [Fact]
