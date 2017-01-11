@@ -219,9 +219,13 @@ namespace System.IO.Tests
             Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
         }
 
-        [Fact]
+        [ConditionalFact("AreAllLongPathsAvailable")]
+        [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         public void SearchPatternLongPath()
         {
+            if (!PathFeatures.AreAllLongPathsAvailable())
+                return;
+
             // Create a destination path longer than the traditional Windows limit of 256 characters
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
