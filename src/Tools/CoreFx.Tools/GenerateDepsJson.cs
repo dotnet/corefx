@@ -31,8 +31,10 @@ namespace Microsoft.DotNet.Build.Tasks
             foreach (string file in filesInDir)
             {
                 AssemblyName result;
-                if (!IsManagedAssembly(file, out result)) continue;
-                assemblyNames.Add(result);
+                if (TryGetManagedAssemblyName(file, out result))
+                {
+                    assemblyNames.Add(result);
+                }
             }
 
             JObject newDepsJson = new JObject();

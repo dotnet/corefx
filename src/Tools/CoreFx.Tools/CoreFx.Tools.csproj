@@ -22,7 +22,7 @@
     <Compile Include="GenerateConfigurationProps.cs" />
     <Compile Include="FindBestConfiguration.cs" />
     <Compile Include="GenerateDepsJson.cs" />
-    <Compile Include="IsManagedAssembly.cs" />
+    <Compile Include="TryGetManagedAssemblyName.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
     <Compile Include="BuildTask.net45.cs" />

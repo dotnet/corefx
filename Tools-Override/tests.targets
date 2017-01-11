@@ -29,12 +29,12 @@
   <PropertyGroup>
     <NewSharedFxVersion>9.9.9</NewSharedFxVersion>
     <OldSharedFxVersion>1.0.0</OldSharedFxVersion>
-    <TestDotNetCli>$(ToolsDir)testdotnetcli</TestDotNetCli>
-    <TestDotNetCliPath>$(TestDotNetCli)\shared\Microsoft.NETCore.App\$(NewSharedFxVersion)</TestDotNetCliPath>
-    <TestDotNetCliPathHostFxr>$(TestDotNetCli)\host\fxr\9.9.9</TestDotNetCliPathHostFxr>
+    <TestSharedFxDir>$(ToolsDir)testdotnetcli</TestSharedFxDir>
+    <TestSharedFxPath>$(TestSharedFxDir)\shared\Microsoft.NETCore.App\$(NewSharedFxVersion)</TestSharedFxPath>
+    <TestSharedFxPathHostFxr>$(TestSharedFxDir)\host\fxr\9.9.9</TestSharedFxPathHostFxr>
     <OldDotNetCliPath>$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\$(OldSharedFxVersion)</OldDotNetCliPath>
     <XunitRuntimeConfig>$(ToolsDir)\xunit.console.netcore.runtimeconfig.json</XunitRuntimeConfig>
-    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestDotNetCli)\dotnet.exe</TestHostExecutablePath>
+    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestSharedFxDir)\dotnet</TestHostExecutablePath>
     <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestPath)\xunit.console.netcore.exe</XunitExecutable>
   </PropertyGroup>
 
@@ -77,11 +77,11 @@
       <HostFxrFile Include="$(RuntimePath)hostfxr.dll" />
       <HostFxrFile Include="$(RuntimePath)libhostfxr.so" />
       <HostFxrFile Include="$(RuntimePath)libhostfxr.dylib" />
-      <DotnetExe Include="$(RuntimePath)dotnet.exe" />
+      <DotnetExe Include="$(RuntimePath)dotnet" />
     </ItemGroup>
-    <MakeDir Directories="$(TestDotNetCliPathHostFxr)" />
+    <MakeDir Directories="$(TestSharedFxPathHostFxr)" />
     <Copy SourceFiles="@(HostFxrFile)" 
-          DestinationFolder="$(TestDotNetCliPathHostFxr)" 
+          DestinationFolder="$(TestSharedFxPathHostFxr)" 
           Condition="Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(DotnetExe)" 
           DestinationFolder="$(TestDotNetCli)" 
@@ -90,7 +90,7 @@
       <LiveDotNetCliComponents Include="$(RuntimePath)\*.*" Exclude="$(RuntimePath)\xunit.console.netcore.exe" />
     </ItemGroup>
     <Copy SourceFiles="@(LiveDotNetCliComponents)" 
-          DestinationFiles="@(LiveDotNetCliComponents -> '$(TestDotNetCliPath)\%(Filename)%(Extension)')" 
+          DestinationFiles="@(LiveDotNetCliComponents -> '$(TestSharedFxPath)\%(Filename)%(Extension)')" 
           UseHardlinksIfPossible="true" />
     <ItemGroup>
       <OriginalDepsJsonPathItemGroup Include="$(OldDotNetCliPath)\Microsoft.NETCore.App.deps.json" />
@@ -108,7 +108,7 @@
     <GenerateDepsJson DepsJsonPath="$(OriginalDepsJsonPath)" 
                       RuntimeDirectory="$(RuntimePath)"
                       DepsExceptions="@(ExceptionForDepsJson)"
-                      OutputPath="$(TestDotNetCliPath)\Microsoft.NETCore.App.deps.json"/>
+                      OutputPath="$(TestSharedFxPath)\Microsoft.NETCore.App.deps.json"/>
   </Target>
   
   <Target Name="AddRuntimeConfig" >
