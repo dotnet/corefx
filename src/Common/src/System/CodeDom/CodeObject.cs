@@ -5,7 +5,11 @@
 using System.Collections;
 using System.Collections.Specialized;
 
+#if !Feature_Serialization
 namespace System.CodeDom
+#else
+namespace System.Runtime.Serialization
+#endif
 {
     [Serializable]
     public class CodeObject

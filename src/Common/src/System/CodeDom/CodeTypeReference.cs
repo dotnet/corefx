@@ -6,7 +6,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 
+#if !Feature_Serialization
 namespace System.CodeDom
+#else
+namespace System.Runtime.Serialization
+#endif
 {
     [Serializable]
     [Flags]
@@ -272,11 +276,13 @@ namespace System.CodeDom
             }
         }
 
+#if !Feature_Serialization
         public CodeTypeReference(CodeTypeParameter typeParameter) :
             this(typeParameter?.Name)
         {
             Options = CodeTypeReferenceOptions.GenericTypeParameter;
         }
+#endif
 
         public CodeTypeReference(string baseType, int rank)
         {

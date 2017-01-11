@@ -4,7 +4,11 @@
 
 using System.Collections;
 
+#if !Feature_Serialization
 namespace System.CodeDom
+#else
+namespace System.Runtime.Serialization
+#endif
 {
     [Serializable]
     public class CodeTypeReferenceCollection : CollectionBase
