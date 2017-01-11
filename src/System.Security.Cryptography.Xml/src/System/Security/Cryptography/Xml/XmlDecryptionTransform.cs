@@ -86,7 +86,7 @@ namespace System.Security.Cryptography.Xml
         public void AddExceptUri(string uri)
         {
             if (uri == null)
-                throw new ArgumentNullException("uri");
+                throw new ArgumentNullException(nameof(uri));
             ExceptUris.Add(uri);
         }
 
@@ -156,7 +156,7 @@ namespace System.Security.Cryptography.Xml
         private void LoadXmlDocumentInput(XmlDocument document)
         {
             if (document == null)
-                throw new ArgumentNullException("document");
+                throw new ArgumentNullException(nameof(document));
             _containingDocument = document;
             _nsm = new XmlNamespaceManager(document.NameTable);
             _nsm.AddNamespace("enc", EncryptedXml.XmlEncNamespaceUrl);
@@ -265,7 +265,7 @@ namespace System.Security.Cryptography.Xml
             if (type == typeof(XmlDocument))
                 return (XmlDocument)GetOutput();
             else
-                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, nameof(type));
         }
     }
 }

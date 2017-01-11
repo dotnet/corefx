@@ -187,7 +187,7 @@ namespace System.Security.Cryptography.Xml
         public override object GetOutput(Type type)
         {
             if (type != typeof(XmlNodeList) && !type.IsSubclassOf(typeof(XmlNodeList)))
-                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, nameof(type));
             return (XmlNodeList)GetOutput();
         }
     }

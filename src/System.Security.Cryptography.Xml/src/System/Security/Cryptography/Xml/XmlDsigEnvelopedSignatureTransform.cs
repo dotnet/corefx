@@ -97,7 +97,7 @@ namespace System.Security.Cryptography.Xml
         {
             // Empty node list is not acceptable
             if (nodeList == null)
-                throw new ArgumentNullException("nodeList");
+                throw new ArgumentNullException(nameof(nodeList));
             _containingDocument = Utils.GetOwnerDocument(nodeList);
             if (_containingDocument == null)
                 throw new CryptographicException(SR.Cryptography_Xml_EnvelopedSignatureRequiresContext);
@@ -110,7 +110,7 @@ namespace System.Security.Cryptography.Xml
         private void LoadXmlDocumentInput(XmlDocument doc)
         {
             if (doc == null)
-                throw new ArgumentNullException("doc");
+                throw new ArgumentNullException(nameof(doc));
             _containingDocument = doc;
             _nsm = new XmlNamespaceManager(_containingDocument.NameTable);
             _nsm.AddNamespace("dsig", SignedXml.XmlDsigNamespaceUrl);
@@ -186,12 +186,12 @@ namespace System.Security.Cryptography.Xml
             }
             else if (type == typeof(XmlDocument) || type.IsSubclassOf(typeof(XmlDocument)))
             {
-                if (_inputNodeList != null) throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
+                if (_inputNodeList != null) throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, nameof(type));
                 return (XmlDocument)GetOutput();
             }
             else
             {
-                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, "type");
+                throw new ArgumentException(SR.Cryptography_Xml_TransformIncorrectInputType, nameof(type));
             }
         }
     }

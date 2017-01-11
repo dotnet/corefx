@@ -139,7 +139,7 @@ namespace System.Security.Cryptography.Xml
         {
             // Make sure we don't get passed null
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             // Signature
             XmlElement signatureElement = value;

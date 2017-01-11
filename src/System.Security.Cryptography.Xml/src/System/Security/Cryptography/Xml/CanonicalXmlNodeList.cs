@@ -60,7 +60,7 @@ namespace System.Security.Cryptography.Xml
         public void Insert(int index, object value)
         {
             if (!(value is XmlNode))
-                throw new ArgumentException(SR.Cryptography_Xml_IncorrectObjectType, "value");
+                throw new ArgumentException(SR.Cryptography_Xml_IncorrectObjectType, nameof(value));
             _nodeArray.Insert(index, value);
         }
 
@@ -90,7 +90,7 @@ namespace System.Security.Cryptography.Xml
             set
             {
                 if (!(value is XmlNode))
-                    throw new ArgumentException(SR.Cryptography_Xml_IncorrectObjectType, "value");
+                    throw new ArgumentException(SR.Cryptography_Xml_IncorrectObjectType, nameof(value));
                 _nodeArray[index] = value;
             }
         }
