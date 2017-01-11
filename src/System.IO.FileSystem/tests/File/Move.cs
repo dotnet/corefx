@@ -186,17 +186,17 @@ namespace System.IO.Tests
 
             Assert.All(IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath()), (path) =>
             {
-                Assert.Throws<PathTooLongException>(() => Move(testFileSource, path));
+                Assert.Throws<IOException>(() => Move(testFileSource, path));
                 File.Delete(testFileSource);
-                Assert.Throws<PathTooLongException>(() => Move(path, testFileSource));
+                Assert.Throws<IOException>(() => Move(path, testFileSource));
             });
         }
 
-        #endregion
+#endregion
 
-        #region PlatformSpecific
+#region PlatformSpecific
 
-        [Fact]
+[Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsPathWithIllegalColons()
         {

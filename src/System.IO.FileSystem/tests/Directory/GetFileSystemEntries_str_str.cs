@@ -216,7 +216,7 @@ namespace System.IO.Tests
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string longName = new string('k', 257);
 
-            Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
+            Assert.Throws<IOException>(() => GetEntries(testDir.FullName, longName));
         }
 
         [Fact]

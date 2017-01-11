@@ -212,7 +212,7 @@ namespace System.IO.Tests
             // While paths themselves can be up to 260 characters including trailing null, file systems
             // limit each components of the path to a total of 255 characters.
             var paths = IOInputs.GetPathsWithComponentLongerThanMaxComponent();
-
+ 
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
@@ -268,7 +268,6 @@ namespace System.IO.Tests
                 Assert.Throws<PathTooLongException>(() => Create(path));
             });
         }
-
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]

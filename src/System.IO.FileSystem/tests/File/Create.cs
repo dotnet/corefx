@@ -154,19 +154,13 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<PathTooLongException>(() => Create(Path.Combine(testDir.FullName, new string('a', 300))));
-
-            //TODO #645: File creation does not yet have long path support on Unix or Windows
-            //using (Create(Path.Combine(testDir.FullName, new string('k', 257))))
-            //{
-            //    Assert.True(File.Exists(Path.Combine(testDir.FullName, new string('k', 257))));
-            //}
         }
 
-        #endregion
+    #endregion
 
-        #region PlatformSpecific
+    #region PlatformSpecific
 
-        [Fact]
+    [Fact]
         [PlatformSpecific(CaseSensitivePlatforms)]
         public void CaseSensitive()
         {

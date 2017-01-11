@@ -49,7 +49,6 @@ namespace System.IO
         /// <param name="checkInvalidCharacters">True to check for invalid characters</param>
         /// <param name="expandShortPaths">Attempt to expand short paths if true</param>
         /// <exception cref="ArgumentException">Thrown if the path is an illegal UNC (does not contain a full server/share) or contains illegal characters.</exception>
-        /// <exception cref="PathTooLongException">Thrown if the path or a path segment exceeds the filesystem limits.</exception>
         /// <exception cref="FileNotFoundException">Thrown if Windows returns ERROR_FILE_NOT_FOUND. (See Win32Marshal.GetExceptionForWin32Error)</exception>
         /// <exception cref="DirectoryNotFoundException">Thrown if Windows returns ERROR_PATH_NOT_FOUND. (See Win32Marshal.GetExceptionForWin32Error)</exception>
         /// <exception cref="UnauthorizedAccessException">Thrown if Windows returns ERROR_ACCESS_DENIED. (See Win32Marshal.GetExceptionForWin32Error)</exception>
@@ -65,12 +64,6 @@ namespace System.IO
 
                 // Trim whitespace off the end of the string. Win32 normalization trims only U+0020.
                 fullPath.TrimEnd(s_trimEndChars);
-
-                if (fullPath.Length >= PathInternal.MaxLongPath)
-                {
-                    // Fullpath is genuinely too long
-                    throw new PathTooLongException(SR.IO_PathTooLong);
-                }
 
                 // Checking path validity used to happen before getting the full path name. To avoid additional input allocation
                 // (to trim trailing whitespace) we now do it after the Win32 call. This will allow legitimate paths through that
@@ -125,8 +118,6 @@ namespace System.IO
                                 break;
                             case '\\':
                                 segmentLength = index - lastSeparator - 1;
-                                if (segmentLength > (uint)PathInternal.MaxComponentLength)
-                                    throw new PathTooLongException(SR.IO_PathTooLong + fullPath.ToString());
                                 lastSeparator = index;
 
                                 if (foundTilde)
@@ -165,8 +156,6 @@ namespace System.IO
                     throw new ArgumentException(SR.Arg_PathIllegalUNC);
 
                 segmentLength = fullPath.Length - lastSeparator - 1;
-                if (segmentLength > (uint)PathInternal.MaxComponentLength)
-                    throw new PathTooLongException(SR.IO_PathTooLong);
 
                 if (foundTilde && segmentLength <= MaxShortName)
                     possibleShortPath = true;
