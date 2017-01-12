@@ -9,28 +9,28 @@ namespace System.SpanTests
     public static partial class SpanTests
     {
         [Fact]
-        public static void ZeroLengthIndexOf()
+        public static void ZeroLengthIndexOf_Byte()
         {
-            Span<int> sp = new Span<int>(Array.Empty<int>());
+            Span<byte> sp = new Span<byte>(Array.Empty<byte>());
             int idx = sp.IndexOf(0);
             Assert.Equal(-1, idx);
         }
 
         [Fact]
-        public static void TestMatch()
+        public static void TestMatch_Byte()
         {
             for (int length = 0; length < 32; length++)
             {
-                int[] a = new int[length];
+                byte[] a = new byte[length];
                 for (int i = 0; i < length; i++)
                 {
-                    a[i] = 10 * (i + 1);
+                    a[i] = (byte)(i + 1);
                 }
-                Span<int> span = new Span<int>(a);
+                Span<byte> span = new Span<byte>(a);
                 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
-                    int target = a[targetIndex];
+                    byte target = a[targetIndex];
                     int idx = span.IndexOf(target);
                     Assert.Equal(targetIndex, idx);
                 }
@@ -38,82 +38,36 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void TestMultipleMatch()
+        public static void TestMultipleMatch_Byte()
         {
             for (int length = 2; length < 32; length++)
             {
-                int[] a = new int[length];
+                byte[] a = new byte[length];
                 for (int i = 0; i < length; i++)
                 {
-                    a[i] = 10 * (i + 1);
+                    a[i] = (byte)(i + 1);
                 }
 
-                a[length - 1] = 5555;
-                a[length - 2] = 5555;
+                a[length - 1] = 200;
+                a[length - 2] = 200;
 
-                Span<int> span = new Span<int>(a);
-                int idx = span.IndexOf(5555);
+                Span<byte> span = new Span<byte>(a);
+                int idx = span.IndexOf(200);
                 Assert.Equal(length - 2, idx);
             }
         }
 
         [Fact]
-        public static void OnNoMatchMakeSureEveryElementIsCompared()
+        public static void MakeSureNoChecksGoOutOfRange_Byte()
         {
             for (int length = 0; length < 100; length++)
             {
-                TIntLog log = new TIntLog();
-
-                TInt[] a = new TInt[length];
-                for (int i = 0; i < length; i++)
-                {
-                    a[i] = new TInt(10 * (i + 1), log);
-                }
-                Span<TInt> span = new Span<TInt>(a);
-                int idx = span.IndexOf(new TInt(9999, log));
-                Assert.Equal(-1, idx);
-
-                // Since we asked for a non-existent value, make sure each element of the array was compared once.
-                // (Strictly speaking, it would not be illegal for IndexOf to compare an element more than once but
-                // that would be a non-optimal implementation and a red flag. So we'll stick with the stricter test.)
-                Assert.Equal(a.Length, log.Count);
-                foreach (TInt elem in a)
-                {
-                    int numCompares = log.CountCompares(elem.Value, 9999);
-                    Assert.True(numCompares == 1);
-                }
-            }
-        }
-
-        [Fact]
-        public static void MakeSureNoChecksGoOutOfRange()
-        {
-            const int GuardValue = 77777;
-            const int GuardLength = 50;
-
-            Action<int, int> checkForOutOfRangeAccess =
-                delegate (int x, int y)
-                {
-                    if (x == GuardValue || y == GuardValue)
-                        throw new Exception("Detected out of range access in IndexOf()");
-                };
-
-            for (int length = 0; length < 100; length++)
-            {
-                TInt[] a = new TInt[GuardLength + length + GuardLength];
-                for (int i = 0; i < a.Length; i++)
-                {
-                    a[i] = new TInt(GuardValue, checkForOutOfRangeAccess);
-                }
-
-                for (int i = 0; i < length; i++)
-                {
-                    a[GuardLength + i] = new TInt(10 * (i + 1), checkForOutOfRangeAccess);
-                }
-
-                Span<TInt> span = new Span<TInt>(a, GuardLength, length);
-                int idx = span.IndexOf(new TInt(9999, checkForOutOfRangeAccess));
-                Assert.Equal(-1, idx);
+                byte[] a = new byte[length + 2];
+                a[0] = 99;
+                a[length + 1] = 99;
+                Span<byte> span = new Span<byte>(a, 1, length);
+                int index = span.IndexOf(99);
+                Assert.Equal(-1, index);
             }
         }
     }

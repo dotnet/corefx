@@ -9,113 +9,113 @@ namespace System.SpanTests
     public static partial class SpanTests
     {
         [Fact]
-        public static void IndexOfSequenceMatchAtStart()
+        public static void IndexOfSequenceMatchAtStart_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 5, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 5, 1, 77 });
+            Span<byte> span = new Span<byte>(new byte[] { 5, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            Span<byte> value = new Span<byte>(new byte[] { 5, 1, 77 });
             int index = span.IndexOf(value);
             Assert.Equal(0, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceMultipleMatch()
+        public static void IndexOfSequenceMultipleMatch_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 });
-            Span<int> value = new Span<int>(new int[] { 2, 3 });
+            Span<byte> span = new Span<byte>(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 });
+            Span<byte> value = new Span<byte>(new byte[] { 2, 3 });
             int index = span.IndexOf(value);
             Assert.Equal(1, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceRestart()
+        public static void IndexOfSequenceRestart_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 77, 77, 88 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            Span<byte> value = new Span<byte>(new byte[] { 77, 77, 88 });
             int index = span.IndexOf(value);
             Assert.Equal(10, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceNoMatch()
+        public static void IndexOfSequenceNoMatch_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 77, 77, 88, 99 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            Span<byte> value = new Span<byte>(new byte[] { 77, 77, 88, 99 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceNotEvenAHeadMatch()
+        public static void IndexOfSequenceNotEvenAHeadMatch_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 100, 77, 88, 99 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            Span<byte> value = new Span<byte>(new byte[] { 100, 77, 88, 99 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceMatchAtVeryEnd()
+        public static void IndexOfSequenceMatchAtVeryEnd_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 3, 4, 5 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 2, 3, 4, 5 });
+            Span<byte> value = new Span<byte>(new byte[] { 3, 4, 5 });
             int index = span.IndexOf(value);
             Assert.Equal(3, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceJustPastVeryEnd()
+        public static void IndexOfSequenceJustPastVeryEnd_Byte()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
-            Span<int> value = new Span<int>(new int[] { 3, 4, 5 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
+            Span<byte> value = new Span<byte>(new byte[] { 3, 4, 5 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceZeroLengthValue()
+        public static void IndexOfSequenceZeroLengthValue_Byte()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(Array.Empty<int>());
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            Span<byte> value = new Span<byte>(Array.Empty<byte>());
             int index = span.IndexOf(value);
             Assert.Equal(0, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceZeroLengthSpan()
+        public static void IndexOfSequenceZeroLengthSpan_Byte()
         {
-            Span<int> span = new Span<int>(Array.Empty<int>());
-            Span<int> value = new Span<int>(new int[] { 1, 2, 3 });
+            Span<byte> span = new Span<byte>(Array.Empty<byte>());
+            Span<byte> value = new Span<byte>(new byte[] { 1, 2, 3 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceLengthOneValue()
+        public static void IndexOfSequenceLengthOneValue_Byte()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 2 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 2, 3, 4, 5 });
+            Span<byte> value = new Span<byte>(new byte[] { 2 });
             int index = span.IndexOf(value);
             Assert.Equal(2, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceLengthOneValueAtVeryEnd()
+        public static void IndexOfSequenceLengthOneValueAtVeryEnd_Byte()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 5 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 2, 3, 4, 5 });
+            Span<byte> value = new Span<byte>(new byte[] { 5 });
             int index = span.IndexOf(value);
             Assert.Equal(5, index);
         }
 
         [Fact]
-        public static void IndexOfSequenceLengthOneValueJustPasttVeryEnd()
+        public static void IndexOfSequenceLengthOneValueJustPasttVeryEnd_Byte()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
-            Span<int> value = new Span<int>(new int[] { 5 });
+            Span<byte> span = new Span<byte>(new byte[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
+            Span<byte> value = new Span<byte>(new byte[] { 5 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }

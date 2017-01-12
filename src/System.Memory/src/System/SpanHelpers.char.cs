@@ -9,8 +9,7 @@ namespace System
 {
     internal static partial class SpanHelpers
     {
-        public static int IndexOf<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
-            where T : struct, IEquatable<T>
+        public static int IndexOf(ref char searchSpace, int searchSpaceLength, ref char value, int valueLength)
         {
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
@@ -18,8 +17,8 @@ namespace System
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            T valueHead = value;
-            ref T valueTail = ref Unsafe.Add(ref value, 1);
+            char valueHead = value;
+            ref char valueTail = ref Unsafe.Add(ref value, 1);
             int valueTailLength = valueLength - 1;
 
             int index = 0;
@@ -44,8 +43,7 @@ namespace System
             }
         }
 
-        public static int IndexOf<T>(ref T searchSpace, T value, int length)
-            where T : struct, IEquatable<T>
+        public static int IndexOf(ref char searchSpace, char value, int length)
         {
             Debug.Assert(length >= 0);
 
@@ -53,21 +51,21 @@ namespace System
             int remainingLength = length;
             while (remainingLength >= 8)
             {
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
 
                 remainingLength -= 8;
@@ -75,13 +73,13 @@ namespace System
 
             while (remainingLength >= 4)
             {
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
 
                 remainingLength -= 4;
@@ -89,7 +87,7 @@ namespace System
 
             while (remainingLength > 0)
             {
-                if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
+                if (value == Unsafe.Add(ref searchSpace, ++index))
                     return index;
 
                 remainingLength--;
@@ -97,8 +95,7 @@ namespace System
             return -1;
         }
 
-        public static bool SequenceEqual<T>(ref T first, ref T second, int length)
-            where T : struct, IEquatable<T>
+        public static bool SequenceEqual(ref char first, ref char second, int length)
         {
             Debug.Assert(length >= 0);
 
@@ -108,56 +105,57 @@ namespace System
             int index = 0;
             while (length >= 8)
             {
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
+
 
                 length -= 8;
             }
 
             while (length >= 4)
             {
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
 
@@ -166,7 +164,7 @@ namespace System
 
             while (length > 0)
             {
-                if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
+                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
                     return false;
                 index++;
                 length--;
