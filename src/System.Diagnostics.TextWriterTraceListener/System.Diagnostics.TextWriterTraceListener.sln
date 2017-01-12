@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -14,19 +14,32 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWrit
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{315929D9-D76E-47E9-BE82-C787FB3A7876}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{315929D9-D76E-47E9-BE82-C787FB3A7876}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{315929D9-D76E-47E9-BE82-C787FB3A7876}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{315929D9-D76E-47E9-BE82-C787FB3A7876}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
+		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
+		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
+		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener", "src\System.Diagnostics.TextWriterTraceListener.csproj", "{315929D9-D76E-47E9-BE82-C787FB3A7876}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TextWriterTraceListener.Tests", "tests\System.Diagnostics.TextWriterTraceListener.Tests.csproj", "{92A9467A-9F7E-4294-A7D5-7B59F2E54ABE}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

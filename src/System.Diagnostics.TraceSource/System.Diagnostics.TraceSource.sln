@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -14,29 +14,40 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSou
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Unix_Debug|Any CPU = Unix_Debug|Any CPU
-		Unix_Release|Any CPU = Unix_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{5380420C-EB1D-4C53-9CFC-916578C18334}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B32D24D-969A-4F7F-8461-B43E15E5D553}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard-Unix_Debug|AnyCPU = netstandard-Unix_Debug|AnyCPU
+		netstandard-Unix_Release|AnyCPU = netstandard-Unix_Release|AnyCPU
+		      netstandard-Windows_NT_Debug|AnyCPU =       netstandard-Windows_NT_Debug|AnyCPU
+		      netstandard-Windows_NT_Release|AnyCPU =       netstandard-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.netstandard-Unix_Debug|AnyCPU.ActiveCfg = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.netstandard-Unix_Debug|AnyCPU.Build.0 = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.netstandard-Unix_Release|AnyCPU.ActiveCfg = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.netstandard-Unix_Release|AnyCPU.Build.0 = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource", "src\System.Diagnostics.TraceSource.csproj", "{5380420C-EB1D-4C53-9CFC-916578C18334}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.netstandard-Unix_Debug|AnyCPU.ActiveCfg = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.netstandard-Unix_Debug|AnyCPU.Build.0 = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.netstandard-Unix_Release|AnyCPU.ActiveCfg = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.netstandard-Unix_Release|AnyCPU.Build.0 = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.TraceSource.Tests", "tests\System.Diagnostics.TraceSource.Tests.csproj", "{7B32D24D-969A-4F7F-8461-B43E15E5D553}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

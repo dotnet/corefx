@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -7,11 +7,18 @@
     <DefineConstants Condition="'$(TargetGroup)'=='netstandard'">$(DefineConstants);netstandard17</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netstandard17;netcoreapp11</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <ItemGroup>
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.6-Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.6-Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netcoreapp-Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netcoreapp-Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.6-Windows_NT_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.6-Windows_NT_Release|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT_Release|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard-Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard-Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT_Debug|AnyCPU'" />
+  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT_Release|AnyCPU'" />
     <Compile Include="Cert.cs" />
     <Compile Include="CertTests.cs" />
     <Compile Include="ChainHolder.cs" />

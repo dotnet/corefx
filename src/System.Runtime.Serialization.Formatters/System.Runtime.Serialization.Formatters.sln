@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -9,19 +9,38 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serializatio
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C70BB15-870B-4946-8098-625DACD645A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C70BB15-870B-4946-8098-625DACD645A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C70BB15-870B-4946-8098-625DACD645A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C70BB15-870B-4946-8098-625DACD645A6}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard_Debug|AnyCPU = netstandard_Debug|AnyCPU
+		netstandard_Release|AnyCPU = netstandard_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters", "src\System.Runtime.Serialization.Formatters.csproj", "{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Formatters.Tests", "tests\System.Runtime.Serialization.Formatters.Tests.csproj", "{7C70BB15-870B-4946-8098-625DACD645A6}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

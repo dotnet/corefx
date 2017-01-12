@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
@@ -19,59 +19,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AD3CFC4E-B3A
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		net46_Debug|Any CPU = net46_Debug|Any CPU
-		net46_Release|Any CPU = net46_Release|Any CPU
-		Release|Any CPU = Release|Any CPU
-		Unix_Debug|Any CPU = Unix_Debug|Any CPU
-		Unix_Release|Any CPU = Unix_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_netcore50_Debug|Any CPU = Windows_netcore50_Debug|Any CPU
-		Windows_netcore50_Release|Any CPU = Windows_netcore50_Release|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Unix_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Unix_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Unix_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Unix_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_netcore50_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_netcore50_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_netcore50_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{879C23DC-D828-4DFB-8E92-ABBC11B71035}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.net46_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.net46_Release|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Unix_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Unix_Release|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_netcore50_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_netcore50_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_netcore50_Release|Any CPU.Build.0 = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F7F1E21-0277-436B-85B8-E8FFA902FA66}.Windows_Release|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
+		<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+EndGlobalSection
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "src\System.DirectoryServices.Protocols.csproj", "{879C23DC-D828-4DFB-8E92-ABBC11B71035}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "src\System.DirectoryServices.Protocols.csproj", "{879C23DC-D828-4DFB-8E92-ABBC11B71035}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "src\System.DirectoryServices.Protocols.csproj", "{879C23DC-D828-4DFB-8E92-ABBC11B71035}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "src\System.DirectoryServices.Protocols.csproj", "{879C23DC-D828-4DFB-8E92-ABBC11B71035}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{E37A8E5B-B822-436D-84FD-99EE46C0733F}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{E37A8E5B-B822-436D-84FD-99EE46C0733F}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{E37A8E5B-B822-436D-84FD-99EE46C0733F}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{E37A8E5B-B822-436D-84FD-99EE46C0733F}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "ref\System.DirectoryServices.Protocols.csproj", "{2F7F1E21-0277-436B-85B8-E8FFA902FA66}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "ref\System.DirectoryServices.Protocols.csproj", "{2F7F1E21-0277-436B-85B8-E8FFA902FA66}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "ref\System.DirectoryServices.Protocols.csproj", "{2F7F1E21-0277-436B-85B8-E8FFA902FA66}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.DirectoryServices.Protocols", "ref\System.DirectoryServices.Protocols.csproj", "{2F7F1E21-0277-436B-85B8-E8FFA902FA66}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AD3CFC4E-B3AE-4931-B631-C39216ABD115}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AD3CFC4E-B3AE-4931-B631-C39216ABD115}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AD3CFC4E-B3AE-4931-B631-C39216ABD115}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.ActiveCfg = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AD3CFC4E-B3AE-4931-B631-C39216ABD115}"}.<!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU.Build.0 = <!-- Empty build configurations as this project is not currently building for any vertical -->    	_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
