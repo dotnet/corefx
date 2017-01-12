@@ -38,9 +38,6 @@
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
       <TargetGroup>netcoreapp1.2corert</TargetGroup>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj">
-      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap101aot'">
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
