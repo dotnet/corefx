@@ -6,15 +6,15 @@ using Xunit;
 
 namespace System.SpanTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlySpanTests
     {
         [Fact]
         public static void ZeroLengthSequenceEqual_Char()
         {
             char[] a = new char[3];
 
-            Span<char> first = new Span<char>(a, 1, 0);
-            Span<char> second = new Span<char>(a, 2, 0);
+            ReadOnlySpan<char> first = new ReadOnlySpan<char>(a, 1, 0);
+            ReadOnlySpan<char> second = new ReadOnlySpan<char>(a, 2, 0);
             bool b = first.SequenceEqual(second);
             Assert.True(b);
         }
@@ -23,7 +23,7 @@ namespace System.SpanTests
         public static void SameSpanSequenceEqual_Char()
         {
             char[] a = { '4', '5', '6' };
-            Span<char> span = new Span<char>(a);
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
             bool b = span.SequenceEqual(span);
             Assert.True(b);
         }
@@ -32,8 +32,8 @@ namespace System.SpanTests
         public static void LengthMismatchSequenceEqual_Char()
         {
             char[] a = { '4', '5', '6' };
-            Span<char> first = new Span<char>(a, 0, 3);
-            Span<char> second = new Span<char>(a, 0, 2);
+            ReadOnlySpan<char> first = new ReadOnlySpan<char>(a, 0, 3);
+            ReadOnlySpan<char> second = new ReadOnlySpan<char>(a, 0, 2);
             bool b = first.SequenceEqual(second);
             Assert.False(b);
         }
@@ -54,7 +54,7 @@ namespace System.SpanTests
 
                     second[mismatchIndex] = (char)(second[mismatchIndex] + 1);
 
-                    Span<char> firstSpan = new Span<char>(first);
+                    ReadOnlySpan<char> firstSpan = new ReadOnlySpan<char>(first);
                     ReadOnlySpan<char> secondSpan = new ReadOnlySpan<char>(second);
                     bool b = firstSpan.SequenceEqual(secondSpan);
                     Assert.False(b);
@@ -73,7 +73,7 @@ namespace System.SpanTests
                 char[] second = new char[length + 2];
                 second[0] = 'a';
                 second[length + 1] = 'a';
-                Span<char> span1 = new Span<char>(first, 1, length);
+                ReadOnlySpan<char> span1 = new ReadOnlySpan<char>(first, 1, length);
                 ReadOnlySpan<char> span2 = new ReadOnlySpan<char>(second, 1, length);
                 bool b = span1.SequenceEqual(span2);
                 Assert.True(b);

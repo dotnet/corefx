@@ -6,12 +6,12 @@ using Xunit;
 
 namespace System.SpanTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlySpanTests
     {
         [Fact]
         public static void ZeroLengthIndexOf()
         {
-            Span<int> sp = new Span<int>(Array.Empty<int>());
+            ReadOnlySpan<int> sp = new ReadOnlySpan<int>(Array.Empty<int>());
             int idx = sp.IndexOf(0);
             Assert.Equal(-1, idx);
         }
@@ -26,7 +26,7 @@ namespace System.SpanTests
                 {
                     a[i] = 10 * (i + 1);
                 }
-                Span<int> span = new Span<int>(a);
+                ReadOnlySpan<int> span = new ReadOnlySpan<int>(a);
                 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
@@ -51,7 +51,7 @@ namespace System.SpanTests
                 a[length - 1] = 5555;
                 a[length - 2] = 5555;
 
-                Span<int> span = new Span<int>(a);
+                ReadOnlySpan<int> span = new ReadOnlySpan<int>(a);
                 int idx = span.IndexOf(5555);
                 Assert.Equal(length - 2, idx);
             }
@@ -69,7 +69,7 @@ namespace System.SpanTests
                 {
                     a[i] = new TInt(10 * (i + 1), log);
                 }
-                Span<TInt> span = new Span<TInt>(a);
+                ReadOnlySpan<TInt> span = new ReadOnlySpan<TInt>(a);
                 int idx = span.IndexOf(new TInt(9999, log));
                 Assert.Equal(-1, idx);
 
@@ -111,7 +111,7 @@ namespace System.SpanTests
                     a[GuardLength + i] = new TInt(10 * (i + 1), checkForOutOfRangeAccess);
                 }
 
-                Span<TInt> span = new Span<TInt>(a, GuardLength, length);
+                ReadOnlySpan<TInt> span = new ReadOnlySpan<TInt>(a, GuardLength, length);
                 int idx = span.IndexOf(new TInt(9999, checkForOutOfRangeAccess));
                 Assert.Equal(-1, idx);
             }

@@ -6,13 +6,13 @@ using Xunit;
 
 namespace System.SpanTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlySpanTests
     {
         [Fact]
         public static void IndexOfSequenceMatchAtStart()
         {
-            Span<int> span = new Span<int>(new int[] { 5, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 5, 1, 77 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 5, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 5, 1, 77 });
             int index = span.IndexOf(value);
             Assert.Equal(0, index);
         }
@@ -20,8 +20,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceMultipleMatch()
         {
-            Span<int> span = new Span<int>(new int[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 });
-            Span<int> value = new Span<int>(new int[] { 2, 3 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 2, 3 });
             int index = span.IndexOf(value);
             Assert.Equal(1, index);
         }
@@ -29,8 +29,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceRestart()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 77, 77, 88 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 77, 77, 88 });
             int index = span.IndexOf(value);
             Assert.Equal(10, index);
         }
@@ -38,8 +38,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceNoMatch()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 77, 77, 88, 99 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 77, 77, 88, 99 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -47,8 +47,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceNotEvenAHeadMatch()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(new int[] { 100, 77, 88, 99 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 100, 77, 88, 99 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -56,8 +56,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceMatchAtVeryEnd()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 3, 4, 5 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 3, 4, 5 });
             int index = span.IndexOf(value);
             Assert.Equal(3, index);
         }
@@ -65,8 +65,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceJustPastVeryEnd()
         {
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
-            Span<int> value = new Span<int>(new int[] { 3, 4, 5 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 3, 4, 5 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -75,8 +75,8 @@ namespace System.SpanTests
         public static void IndexOfSequenceZeroLengthValue()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
-            Span<int> value = new Span<int>(Array.Empty<int>());
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 77, 2, 3, 77, 77, 4, 5, 77, 77, 77, 88, 6, 6, 77, 77, 88, 9 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(Array.Empty<int>());
             int index = span.IndexOf(value);
             Assert.Equal(0, index);
         }
@@ -84,8 +84,8 @@ namespace System.SpanTests
         [Fact]
         public static void IndexOfSequenceZeroLengthSpan()
         {
-            Span<int> span = new Span<int>(Array.Empty<int>());
-            Span<int> value = new Span<int>(new int[] { 1, 2, 3 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(Array.Empty<int>());
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 1, 2, 3 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -94,8 +94,8 @@ namespace System.SpanTests
         public static void IndexOfSequenceLengthOneValue()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 2 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 2 });
             int index = span.IndexOf(value);
             Assert.Equal(2, index);
         }
@@ -104,8 +104,8 @@ namespace System.SpanTests
         public static void IndexOfSequenceLengthOneValueAtVeryEnd()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-            Span<int> value = new Span<int>(new int[] { 5 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 5 });
             int index = span.IndexOf(value);
             Assert.Equal(5, index);
         }
@@ -114,8 +114,8 @@ namespace System.SpanTests
         public static void IndexOfSequenceLengthOneValueJustPasttVeryEnd()
         {
             // A zero-length value is always "found" at the start of the span.
-            Span<int> span = new Span<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
-            Span<int> value = new Span<int>(new int[] { 5 });
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[] { 0, 1, 2, 3, 4, 5 }, 0, 5);
+            ReadOnlySpan<int> value = new ReadOnlySpan<int>(new int[] { 5 });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }

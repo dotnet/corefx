@@ -6,15 +6,15 @@ using Xunit;
 
 namespace System.SpanTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlySpanTests
     {
         [Fact]
         public static void ZeroLengthSequenceEqual()
         {
             int[] a = new int[3];
 
-            Span<int> first = new Span<int>(a, 1, 0);
-            Span<int> second = new Span<int>(a, 2, 0);
+            ReadOnlySpan<int> first = new ReadOnlySpan<int>(a, 1, 0);
+            ReadOnlySpan<int> second = new ReadOnlySpan<int>(a, 2, 0);
             bool b = first.SequenceEqual(second);
             Assert.True(b);
         }
@@ -23,7 +23,7 @@ namespace System.SpanTests
         public static void SameSpanSequenceEqual()
         {
             int[] a = { 4, 5, 6 };
-            Span<int> span = new Span<int>(a);
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(a);
             bool b = span.SequenceEqual(span);
             Assert.True(b);
         }
@@ -32,8 +32,8 @@ namespace System.SpanTests
         public static void LengthMismatchSequenceEqual()
         {
             int[] a = { 4, 5, 6 };
-            Span<int> first = new Span<int>(a, 0, 3);
-            Span<int> second = new Span<int>(a, 0, 2);
+            ReadOnlySpan<int> first = new ReadOnlySpan<int>(a, 0, 3);
+            ReadOnlySpan<int> second = new ReadOnlySpan<int>(a, 0, 2);
             bool b = first.SequenceEqual(second);
             Assert.False(b);
         }
@@ -52,7 +52,7 @@ namespace System.SpanTests
                     first[i] = second[i] = new TInt(10 * (i + 1), log);
                 }
 
-                Span<TInt> firstSpan = new Span<TInt>(first);
+                ReadOnlySpan<TInt> firstSpan = new ReadOnlySpan<TInt>(first);
                 ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second);
                 bool b = firstSpan.SequenceEqual(secondSpan);
                 Assert.True(b);
@@ -87,7 +87,7 @@ namespace System.SpanTests
 
                     second[mismatchIndex] = new TInt(second[mismatchIndex].Value + 1, log);
 
-                    Span<TInt> firstSpan = new Span<TInt>(first);
+                    ReadOnlySpan<TInt> firstSpan = new ReadOnlySpan<TInt>(first);
                     ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second);
                     bool b = firstSpan.SequenceEqual(secondSpan);
                     Assert.False(b);
@@ -124,8 +124,8 @@ namespace System.SpanTests
                     first[GuardLength + i] = second[GuardLength + i] = new TInt(10 * (i + 1), checkForOutOfRangeAccess);
                 }
 
-                Span<TInt> firstSpan = new Span<TInt>(first, GuardLength, length);
-                Span<TInt> secondSpan = new Span<TInt>(second, GuardLength, length);
+                ReadOnlySpan<TInt> firstSpan = new ReadOnlySpan<TInt>(first, GuardLength, length);
+                ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second, GuardLength, length);
                 bool b = firstSpan.SequenceEqual(secondSpan);
                 Assert.True(b);
             }

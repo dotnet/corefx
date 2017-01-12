@@ -6,12 +6,12 @@ using Xunit;
 
 namespace System.SpanTests
 {
-    public static partial class SpanTests
+    public static partial class ReadOnlySpanTests
     {
         [Fact]
         public static void ZeroLengthIndexOf_Byte()
         {
-            Span<byte> sp = new Span<byte>(Array.Empty<byte>());
+            ReadOnlySpan<byte> sp = new ReadOnlySpan<byte>(Array.Empty<byte>());
             int idx = sp.IndexOf(0);
             Assert.Equal(-1, idx);
         }
@@ -26,7 +26,7 @@ namespace System.SpanTests
                 {
                     a[i] = (byte)(i + 1);
                 }
-                Span<byte> span = new Span<byte>(a);
+                ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
                 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
@@ -51,7 +51,7 @@ namespace System.SpanTests
                 a[length - 1] = 200;
                 a[length - 2] = 200;
 
-                Span<byte> span = new Span<byte>(a);
+                ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
                 int idx = span.IndexOf(200);
                 Assert.Equal(length - 2, idx);
             }
@@ -65,7 +65,7 @@ namespace System.SpanTests
                 byte[] a = new byte[length + 2];
                 a[0] = 99;
                 a[length + 1] = 99;
-                Span<byte> span = new Span<byte>(a, 1, length);
+                ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a, 1, length);
                 int index = span.IndexOf(99);
                 Assert.Equal(-1, index);
             }
