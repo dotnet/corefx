@@ -21,9 +21,10 @@
           Condition="!Exists('$(ConstructSharedFxSem)') OR '$(ReconstructSharedFx)' == 'true'" >
           
     <ItemGroup>
+      <!-- This will only copy over the related file -->
       <HostFxrFile Condition="'$(OS)'=='Windows_NT'" Include="$(RuntimePath)hostfxr.dll" />
-      <HostFxrFile Condition="'$(OS)'=='Linux'" Include="$(RuntimePath)libhostfxr.so" />
-      <HostFxrFile Condition="'$(OS)'=='OSX'" Include="$(RuntimePath)libhostfxr.dylib" />
+      <HostFxrFile Condition="'$(OS)'=='Unix'" Include="$(RuntimePath)libhostfxr.so" />
+      <HostFxrFile Condition="'$(OS)'=='Unix'" Include="$(RuntimePath)libhostfxr.dylib" />
       <DotnetExe Condition="'$(OS)'=='Windows_NT'" Include="$(RuntimePath)dotnet.exe" />
       <DotnetExe Condition="'$(OS)'!='Windows_NT'" Include="$(RuntimePath)dotnet" />
     </ItemGroup>
