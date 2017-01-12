@@ -17,27 +17,47 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\Syst
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10D52320-17B7-476E-BBD2-A1064DD38CBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10D52320-17B7-476E-BBD2-A1064DD38CBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10D52320-17B7-476E-BBD2-A1064DD38CBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10D52320-17B7-476E-BBD2-A1064DD38CBF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{17CB2E3C-2904-4241-94DB-3894D24F35DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{17CB2E3C-2904-4241-94DB-3894D24F35DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{17CB2E3C-2904-4241-94DB-3894D24F35DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{17CB2E3C-2904-4241-94DB-3894D24F35DA}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		net463-Windows_NT_Debug|AnyCPU = net463-Windows_NT_Debug|AnyCPU
+		net463-Windows_NT_Release|AnyCPU = net463-Windows_NT_Release|AnyCPU
+		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
+		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
+EndGlobalSection
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument", "src\System.Xml.XPath.XDocument.csproj", "{DAA1EA56-C318-4D2E-AB8D-1AB87D9F98F5}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XDocument.Tests", "tests\System.Xml.XPath.XDocument.Tests.csproj", "{10D52320-17B7-476E-BBD2-A1064DD38CBF}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath.XmlDocument", "..\System.Xml.XPath.XmlDocument\src\System.Xml.XPath.XmlDocument.csproj", "{17CB2E3C-2904-4241-94DB-3894D24F35DA}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XPath", "..\System.Xml.XPath\src\System.Xml.XPath.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

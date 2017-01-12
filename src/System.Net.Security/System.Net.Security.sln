@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
@@ -23,81 +23,90 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Te
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Linux_Debug|Any CPU = Linux_Debug|Any CPU
-		Linux_Release|Any CPU = Linux_Release|Any CPU
-		OSX_Debug|Any CPU = OSX_Debug|Any CPU
-		OSX_Release|Any CPU = OSX_Release|Any CPU
-		Release|Any CPU = Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Linux_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Linux_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Linux_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Linux_Release|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.OSX_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.OSX_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.OSX_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.OSX_Release|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Windows_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}.Windows_Release|Any CPU.Build.0 = Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Linux_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Linux_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Linux_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Linux_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.OSX_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.OSX_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.OSX_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.OSX_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{89F37791-6254-4D60-AB96-ACD3CCA0E771}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Linux_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Linux_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Linux_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Linux_Release|Any CPU.Build.0 = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.OSX_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.OSX_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.OSX_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.OSX_Release|Any CPU.Build.0 = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D174EA9-9E61-4519-8D31-7BD2331A1982}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard-Unix_Debug|AnyCPU = netstandard-Unix_Debug|AnyCPU
+		netstandard-Unix_Release|AnyCPU = netstandard-Unix_Release|AnyCPU
+		      netstandard-Windows_NT_Debug|AnyCPU =       netstandard-Windows_NT_Debug|AnyCPU
+		      netstandard-Windows_NT_Release|AnyCPU =       netstandard-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
+
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{1B8F56A7-863B-4E11-A882-D83EEA79C997}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67450222-8C09-4F6E-AB24-63DFBE696A84}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{146555EC-BB30-4833-B1B3-C4F727E9DF77}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "ref\System.Net.Security.csproj", "{0F78E13E-74EE-40F0-8E0B-A026C7794CCB}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security", "src\System.Net.Security.csproj", "{89F37791-6254-4D60-AB96-ACD3CCA0E771}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Unit.Tests", "tests\UnitTests\System.Net.Security.Unit.Tests.csproj", "{0D174EA9-9E61-4519-8D31-7BD2331A1982}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

@@ -8,35 +8,56 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watche
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Linux_Debug|Any CPU = Linux_Debug|Any CPU
-		Linux_Release|Any CPU = Linux_Release|Any CPU
-		OSX_Debug|Any CPU = OSX_Debug|Any CPU
-		OSX_Release|Any CPU = OSX_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Linux_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Linux_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.OSX_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.OSX_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Windows_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{20411A66-C7A4-4941-8FA2-66308365FD22}.Windows_Release|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
+		netstandard1.3-Linux_Debug|AnyCPU = netstandard1.3-Linux_Debug|AnyCPU
+		netstandard1.3-Linux_Release|AnyCPU = netstandard1.3-Linux_Release|AnyCPU
+		      netstandard1.3-OSX_Debug|AnyCPU =       netstandard1.3-OSX_Debug|AnyCPU
+		      netstandard1.3-OSX_Release|AnyCPU =       netstandard1.3-OSX_Release|AnyCPU
+		      netstandard1.3-Windows_NT_Debug|AnyCPU =       netstandard1.3-Windows_NT_Debug|AnyCPU
+		      netstandard1.3-Windows_NT_Release|AnyCPU =       netstandard1.3-Windows_NT_Release|AnyCPU
+		      netstandard-Linux_Debug|AnyCPU =       netstandard-Linux_Debug|AnyCPU
+		      netstandard-Linux_Release|AnyCPU =       netstandard-Linux_Release|AnyCPU
+		      netstandard-OSX_Debug|AnyCPU =       netstandard-OSX_Debug|AnyCPU
+		      netstandard-OSX_Release|AnyCPU =       netstandard-OSX_Release|AnyCPU
+		      netstandard-Windows_NT_Debug|AnyCPU =       netstandard-Windows_NT_Debug|AnyCPU
+		      netstandard-Windows_NT_Release|AnyCPU =       netstandard-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.netstandard-Linux_Debug|AnyCPU.ActiveCfg = netstandard-Linux_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.netstandard-Linux_Debug|AnyCPU.Build.0 = netstandard-Linux_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.netstandard-Linux_Release|AnyCPU.ActiveCfg = netstandard-Linux_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.netstandard-Linux_Release|AnyCPU.Build.0 = netstandard-Linux_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-OSX_Debug|AnyCPU.ActiveCfg =       netstandard-OSX_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-OSX_Debug|AnyCPU.Build.0 =       netstandard-OSX_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-OSX_Release|AnyCPU.ActiveCfg =       netstandard-OSX_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-OSX_Release|AnyCPU.Build.0 =       netstandard-OSX_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher", "src\System.IO.FileSystem.Watcher.csproj", "{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.netstandard-Linux_Debug|AnyCPU.ActiveCfg = netstandard-Linux_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.netstandard-Linux_Debug|AnyCPU.Build.0 = netstandard-Linux_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.netstandard-Linux_Release|AnyCPU.ActiveCfg = netstandard-Linux_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.netstandard-Linux_Release|AnyCPU.Build.0 = netstandard-Linux_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-OSX_Debug|AnyCPU.ActiveCfg =       netstandard-OSX_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-OSX_Debug|AnyCPU.Build.0 =       netstandard-OSX_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-OSX_Release|AnyCPU.ActiveCfg =       netstandard-OSX_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-OSX_Release|AnyCPU.Build.0 =       netstandard-OSX_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.Watcher.Tests", "tests\System.IO.FileSystem.Watcher.Tests.csproj", "{20411A66-C7A4-4941-8FA2-66308365FD22}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

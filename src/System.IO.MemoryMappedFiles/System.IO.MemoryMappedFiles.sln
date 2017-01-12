@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
@@ -11,65 +11,52 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-		Unix_Debug|Any CPU = Unix_Debug|Any CPU
-		Unix_Release|Any CPU = Unix_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_netcore50_Debug|Any CPU = Windows_netcore50_Debug|Any CPU
-		Windows_netcore50_Release|Any CPU = Windows_netcore50_Release|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.ActiveCfg = net46_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.Build.0 = net46_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.ActiveCfg = net46_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.Build.0 = net46_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Windows_netcore50_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_netcore50_Debug|Any CPU.Build.0 = Windows_netcore50_Debug|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_netcore50_Release|Any CPU.ActiveCfg = Windows_netcore50_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_netcore50_Release|Any CPU.Build.0 = Windows_netcore50_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_netcore50_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_netcore50_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_netcore50_Release|Any CPU.Build.0 = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_netcore50_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_netcore50_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_netcore50_Release|Any CPU.Build.0 = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{456D98B4-19FD-4251-8002-5FA3CAE4752F}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard1.3-Unix_Debug|AnyCPU = netstandard1.3-Unix_Debug|AnyCPU
+		netstandard1.3-Unix_Release|AnyCPU = netstandard1.3-Unix_Release|AnyCPU
+		      netstandard1.3-Windows_NT_Debug|AnyCPU =       netstandard1.3-Windows_NT_Debug|AnyCPU
+		      netstandard1.3-Windows_NT_Release|AnyCPU =       netstandard1.3-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard-Unix_Debug|AnyCPU.ActiveCfg = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard-Unix_Debug|AnyCPU.Build.0 = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard-Unix_Release|AnyCPU.ActiveCfg = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard-Unix_Release|AnyCPU.Build.0 = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles", "src\System.IO.MemoryMappedFiles.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.netstandard-Unix_Debug|AnyCPU.ActiveCfg = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.netstandard-Unix_Debug|AnyCPU.Build.0 = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.netstandard-Unix_Release|AnyCPU.ActiveCfg = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.netstandard-Unix_Release|AnyCPU.Build.0 = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Tests", "tests\System.IO.MemoryMappedFiles.Tests.csproj", "{9D6F6254-B5A3-40FF-8925-68AA8D1CE933}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.netstandard-Unix_Debug|AnyCPU.ActiveCfg = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.netstandard-Unix_Debug|AnyCPU.Build.0 = netstandard-Unix_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.netstandard-Unix_Release|AnyCPU.ActiveCfg = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.netstandard-Unix_Release|AnyCPU.Build.0 = netstandard-Unix_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      netstandard-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      netstandard-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      netstandard-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      netstandard-Windows_NT_Release|AnyCPU.Build.0 =       netstandard-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      net463-Windows_NT_Debug|AnyCPU.ActiveCfg =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      net463-Windows_NT_Debug|AnyCPU.Build.0 =       net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      net463-Windows_NT_Release|AnyCPU.ActiveCfg =       net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.MemoryMappedFiles.Performance.Tests", "tests\Performance\System.IO.MemoryMappedFiles.Performance.Tests.csproj", "{456D98B4-19FD-4251-8002-5FA3CAE4752F}"}.      net463-Windows_NT_Release|AnyCPU.Build.0 =       net463-Windows_NT_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

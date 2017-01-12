@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
@@ -17,51 +17,88 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceMa
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		net46_Debug|Any CPU = net46_Debug|Any CPU
-		net46_Release|Any CPU = net46_Release|Any CPU
-		Release|Any CPU = Release|Any CPU
-		uap101aot_Debug|Any CPU = uap101aot_Debug|Any CPU
-		uap101aot_Release|Any CPU = uap101aot_Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.net46_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.net46_Release|Any CPU.Build.0 = Release|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.uap101aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.uap101aot_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.uap101aot_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01F82B23-B433-4926-9E58-F87A25287EE9}.uap101aot_Release|Any CPU.Build.0 = Release|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.net46_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.net46_Release|Any CPU.Build.0 = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.uap101aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.uap101aot_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.uap101aot_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5D665D5-443B-45DC-8C36-74932FAB3848}.uap101aot_Release|Any CPU.Build.0 = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.net46_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.net46_Release|Any CPU.Build.0 = Release|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.uap101aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.uap101aot_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.uap101aot_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}.uap101aot_Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
+		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
+		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
+		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
+		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "src\System.Resources.ResourceManager.csproj", "{01F82B23-B433-4926-9E58-F87A25287EE9}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F3DE59A-0027-42D7-A8BB-0EB480587564}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{9D6DC1B1-5C9D-49F6-83EC-9CD434677E96}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager", "ref\System.Resources.ResourceManager.csproj", "{E5D665D5-443B-45DC-8C36-74932FAB3848}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C677611B-73CA-4C6D-B7AA-32CE96B4EA25}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.ResourceManager.Tests", "tests\System.Resources.ResourceManager.Tests.csproj", "{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
