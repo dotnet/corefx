@@ -31,7 +31,7 @@
     <OldSharedFxVersion>1.0.0</OldSharedFxVersion>
     <TestSharedFxDir>$(ToolsDir)testdotnetcli</TestSharedFxDir>
     <TestSharedFxPath>$(TestSharedFxDir)\shared\Microsoft.NETCore.App\$(NewSharedFxVersion)</TestSharedFxPath>
-    <TestSharedFxPathHostFxr>$(TestSharedFxDir)\host\fxr\9.9.9</TestSharedFxPathHostFxr>
+    <TestSharedFxPathHostFxr>$(TestSharedFxDir)\host\fxr\$(NewSharedFxVersion)</TestSharedFxPathHostFxr>
     <OldDotNetCliPath>$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\$(OldSharedFxVersion)</OldDotNetCliPath>
     <XunitRuntimeConfig>$(ToolsDir)\xunit.console.netcore.runtimeconfig.json</XunitRuntimeConfig>
     <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestSharedFxDir)\dotnet.exe</TestHostExecutablePath>
@@ -134,7 +134,7 @@
            directory.
        2.  Runs the tests. -->
   <Target Name="GenerateTestExecutionScripts"
-          DependsOnTargets="DiscoverTestInputs;CheckTestCategories;AddRuntimeConfig">
+          DependsOnTargets="DiscoverTestInputs;CheckTestCategories">
     <PropertyGroup>
       <TargetOSTrait Condition="'$(TargetOS)'=='Windows_NT'">nonwindowstests</TargetOSTrait>
       <TargetOSTrait Condition="'$(TargetOS)'=='Linux'">nonlinuxtests</TargetOSTrait>

@@ -116,7 +116,7 @@ namespace System.Runtime.Loader.Tests
             File.Copy(targetRenamedPath, targetPath); 
         }
 
-        [Fact(Skip = "Need to resolve path issues for running against dotnetcli")]
+        [Fact(Skip = "https://github.com/dotnet/corefx/issues/15101")]
         public static void LoadInDefaultContext()
         {
             Init();

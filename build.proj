@@ -22,16 +22,10 @@
   <ItemGroup>
     <Project Include="external\dir.proj" />
     <Project Include="src\dirs.proj" />
-    <!--
-    <Project Include="src\tests.builds" Condition="$(BuildTests)=='true'">
-      <InputOSGroup>$(InputOSGroup)</InputOSGroup>
-    </Project>
-    <!- signing must happen before packaging -!>
+    <!-- signing must happen before packaging -->
     <Project Include="src\sign.builds" />
-    -->
-    <Project Include="src\packages.builds" Condition="'$(BuildPackages)'=='true'">
-      <InputOSGroup>$(InputOSGroup)</InputOSGroup>
-    </Project>
+    <Project Include="src\packages.builds" Condition="'$(BuildPackages)'=='true'" />
+
     <!--
     <Project Include="src\post.builds">
       <!- For the root traversal default filter the OSGroup to the OSEnvironment which is the OS we are running on -!>
@@ -65,7 +59,7 @@
     <MSBuild Projects="@(BuildToolsProject)"
              ContinueOnError="ErrorAndContinue"
              Condition="'%(Identity)' != ''"
-             Properties="TargetGroup=%(BuildToolsProject.TargetGroup)" />
+             Properties="Configuration=%(BuildToolsProject.TargetGroup);TargetGroup=%(BuildToolsProject.TargetGroup)" />
   </Target>
 
   <Target Name="Sync" DependsOnTargets="BuildCoreFxTools">
@@ -87,14 +81,9 @@
       <TestDependencyListFile Include="$(BinDir)/TestDependencies/*.dependencylist.txt" />
     </ItemGroup>
 
-    <PropertyGroup>
-      <TestArchiveDir>$(TestWorkingDir)$(OSPlatformConfig)/archive/tests/</TestArchiveDir>
-      <TestArchiveDir Condition="'$(TestTFM)' != ''">$(TestArchiveDir)$(TestTFM)/</TestArchiveDir>
-    </PropertyGroup>
-
     <ZipFileCreateFromDependencyLists
       DependencyListFiles="@(TestDependencyListFile)"
-      DestinationArchive="$(TestArchiveDir)\Packages.zip"
+      DestinationArchive="$(TestWorkingDir)$(OSPlatformConfig)/archive/Packages.zip"
       RelativePathBaseDirectory="$(PackagesDir)"
       OverwriteDestination="true" />
   </Target>
@@ -102,6 +91,8 @@
   <!-- Override CleanAllProjects from dir.traversal.targets and just remove the full BinDir -->
   <Target Name="CleanAllProjects">
     <RemoveDir Directories="$(BinDir)" />
+    <!-- Temporarily outside BinDir -->
+    <RemoveDir Directories="$(PackageInstallPath)" />
   </Target>
 
   <!-- Hook that can be used to insert custom build tasks to the build process such as setup and/or cleanup tasks -->
