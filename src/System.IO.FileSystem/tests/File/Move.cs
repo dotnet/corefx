@@ -43,7 +43,7 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => Move(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
         }
 
-        [Theory MemberData("PathsWithInvalidCharacters")]
+        [Theory MemberData(nameof(PathsWithInvalidCharacters))]
         public void PathWithIllegalCharacters(string invalidPath)
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
@@ -147,7 +147,7 @@ namespace System.IO.Tests
             Assert.False(File.Exists(testFileSource));
         }
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void OverMaxPathWorks_Windows()
@@ -199,7 +199,7 @@ namespace System.IO.Tests
 
         // This is updated to be correct, need to update CoreCLR path code so this will pass on all platforms
         [ActiveIssue(15098)]
-        [Theory MemberData("PathsWithInvalidColons")]
+        [Theory MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsPathWithIllegalColons(string invalidPath)
         {

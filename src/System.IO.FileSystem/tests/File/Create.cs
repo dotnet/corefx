@@ -56,7 +56,7 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "dos device path support added in 4.6.2")]
         public void ValidCreation_ExtendedSyntax()
@@ -72,7 +72,7 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         public void ValidCreation_LongPathExtendedSyntax()

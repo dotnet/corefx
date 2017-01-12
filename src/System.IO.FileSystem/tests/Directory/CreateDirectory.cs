@@ -32,7 +32,7 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Create(string.Empty));
         }
 
-        [Theory MemberData("PathsWithInvalidCharacters")]
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         public void PathWithInvalidCharactersAsPath_ThrowsArgumentException(string invalidPath)
         {
             if (invalidPath.Equals(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
@@ -126,7 +126,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ValidExtendedPathWithTrailingSlash()
@@ -222,14 +222,14 @@ namespace System.IO.Tests
 
         // This is updated to be correct, need to update CoreCLR path code so this will pass on all platforms
         [ActiveIssue(15098)]
-        [Theory MemberData("PathsWithInvalidColons")]
+        [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void PathWithInvalidColons_ThrowsArgumentException(string invalidPath)
         {
             Assert.Throws<ArgumentException>(() => Create(invalidPath));
         }
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryLongerThanMaxPath_Succeeds()
@@ -254,7 +254,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("LongPathsAreNotBlocked", "UsingNewNormalization")]
+        [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
@@ -266,7 +266,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("LongPathsAreNotBlocked", "UsingNewNormalization")]
+        [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ExtendedDirectoryLongerThanLegacyMaxPath_Succeeds()
@@ -278,7 +278,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryLongerThanMaxDirectoryAsPath_Succeeds()
@@ -355,7 +355,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsExtendedSyntaxWhiteSpace()
@@ -412,7 +412,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)] // device name prefixes
         public void PathWithReservedDeviceNameAsExtendedPath()

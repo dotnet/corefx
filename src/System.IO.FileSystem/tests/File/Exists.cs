@@ -52,7 +52,7 @@ namespace System.IO.Tests
             });
         }
 
-        [Theory MemberData("PathsWithInvalidCharacters")]
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters

@@ -9,11 +9,18 @@ namespace System.IO
 {
     public static class PathFeatures
     {
+        private enum State
+        {
+            Uninitialized,
+            True,
+            False
+        }
+
         // Note that this class is using APIs that allow it to run on all platforms (including Core 5.0)
         // That is why we have .GetTypeInfo(), don't use the Registry, etc...
 
-        private static bool? s_osEnabled;
-        private static bool? s_onCore;
+        private static State s_osEnabled;
+        private static State s_onCore;
 
         /// <summary>
         /// Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\).
@@ -21,7 +28,7 @@ namespace System.IO
         public static bool AreAllLongPathsAvailable()
         {
             // We have support built-in for all platforms in Core
-            if (RunningOnCore)
+            if (RunningOnCoreLib)
                 return true;
 
             // Otherwise we're running on Windows, see if we've got the capability in .NET, and that the feature is enabled in the OS
@@ -46,7 +53,7 @@ namespace System.IO
         private static bool HasLegacyIoBehavior(string propertyName)
         {
             // Core doesn't have legacy behaviors
-            if (RunningOnCore)
+            if (RunningOnCoreLib)
                 return false;
 
             Type t = typeof(object).GetTypeInfo().Assembly.GetType("System.AppContextSwitches");
@@ -56,37 +63,37 @@ namespace System.IO
             return (bool)(p?.GetValue(null) ?? true);
         }
 
-        private static bool RunningOnCore
+        private static bool RunningOnCoreLib
         {
             get
             {
                 // Not particularly elegant
-                if (!s_onCore.HasValue)
-                    s_onCore = typeof(object).GetTypeInfo().Assembly.GetName().Name == "System.Private.CoreLib";
+                if (s_onCore == State.Uninitialized)
+                    s_onCore = typeof(object).GetTypeInfo().Assembly.GetName().Name == "System.Private.CoreLib" ? State.True : State.False;
 
-                return s_onCore.Value;
+                return s_onCore == State.True;
             }
         }
 
         private static bool AreOsLongPathsEnabled()
         {
-            if (!s_osEnabled.HasValue)
+            if (s_osEnabled == State.Uninitialized)
             {
                 // No official way to check yet this is good enough for tests
                 try
                 {
-                    s_osEnabled = RtlAreLongPathsEnabled();
+                    s_osEnabled = RtlAreLongPathsEnabled() ? State.True : State.False;
                 }
                 catch
                 {
-                    s_osEnabled = false;
+                    s_osEnabled = State.False;
                 }
             }
 
-            return s_osEnabled.Value;
+            return s_osEnabled == State.True;
         }
 
         [DllImport("ntdll", ExactSpelling = true)]
-        static extern bool RtlAreLongPathsEnabled();
+        private static extern bool RtlAreLongPathsEnabled();
     }
 }

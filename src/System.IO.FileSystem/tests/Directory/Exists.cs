@@ -53,7 +53,7 @@ namespace System.IO.Tests
             });
         }
 
-        [Theory MemberData("PathsWithInvalidCharacters")]
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
@@ -176,7 +176,7 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ValidExtendedPathExists_ReturnsTrue()
@@ -189,7 +189,7 @@ namespace System.IO.Tests
             });
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ExtendedPathAlreadyExistsAsFile()
@@ -202,7 +202,7 @@ namespace System.IO.Tests
             Assert.False(Exists(IOServices.RemoveTrailingSlash(IOServices.AddTrailingSlashIfNeeded(path))));
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ExtendedPathAlreadyExistsAsDirectory()
@@ -215,7 +215,7 @@ namespace System.IO.Tests
             Assert.True(Exists(IOServices.RemoveTrailingSlash(IOServices.AddTrailingSlashIfNeeded(path))));
         }
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
@@ -257,7 +257,7 @@ namespace System.IO.Tests
             Assert.False(Exists(testDir.FullName.ToLowerInvariant()));
         }
 
-        [ConditionalFact("UsingNewNormalization")]
+        [ConditionalFact(nameof(UsingNewNormalization))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
         public void TrailingWhitespaceExistence()

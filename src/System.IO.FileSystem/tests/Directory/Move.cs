@@ -143,7 +143,7 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [ConditionalFact("AreAllLongPathsAvailable")]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [SkipOnTargetFramework(Tfm.BelowNet462 | Tfm.Core50, "long path support added in 4.6.2")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Path_With_Longer_Than_MaxDirectory_Succeeds()
