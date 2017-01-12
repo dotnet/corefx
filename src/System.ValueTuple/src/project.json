@@ -12,6 +12,11 @@
       "dependencies": {
         "Microsoft.TargetingPack.Portable.v4.0.Profile36": "1.0.0"
       }
+    },
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24911-02"
+      }
     }
   }
 }
