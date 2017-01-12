@@ -89,7 +89,7 @@ namespace System.Runtime.Loader.Tests
                 () => loadContext.LoadFromAssemblyName(asmName));
         }
 
-        [Fact]
+        [Fact(Skip = "Need to resolve path issues for running against dotnetcli")]
         public static void LoadFromAssemblyName_ValidTrustedPlatformAssembly()
         {
             string originalDir = Environment.CurrentDirectory;
