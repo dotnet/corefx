@@ -14,8 +14,7 @@ namespace Microsoft.DotNet.Build.Tasks
             result = null;
             try
             {
-                var stream = File.ReadAllBytes(file).ToImmutableArray();
-                using (var peReader = new PEReader(stream))
+                using (var peReader = new PEReader(File.OpenRead(file)))
                 {
                         if (peReader.HasMetadata)
                         {

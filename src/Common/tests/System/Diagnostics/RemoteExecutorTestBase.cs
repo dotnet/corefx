@@ -132,18 +132,10 @@ namespace System.Diagnostics
 
             // If we need the host (if it exists), use it, otherwise target the console app directly.
             string testConsoleAppArgs = "\"" + a.FullName + "\" " + t.FullName + " " + method.Name + " " + string.Join(" ", args);
-            if (File.Exists(HostRunner))
-            {
-                psi.FileName = HostRunner;
-                psi.Arguments = TestConsoleApp + " " + testConsoleAppArgs;
-            }
-            else
-            {
-                //Desktop activation
-                psi.FileName = TestConsoleApp;
-                psi.Arguments = testConsoleAppArgs;
-            }
-
+            
+            psi.FileName = HostRunner;
+            psi.Arguments = TestConsoleApp + " " + testConsoleAppArgs;
+            
             // Return the handle to the process, which may or not be started
             return new RemoteInvokeHandle(options.Start ?
                 Process.Start(psi) :

@@ -278,6 +278,7 @@ namespace System.Runtime.Loader.Tests
             
             // Load the assembly in custom load context
             OverrideDefaultLoadContext olc = new OverrideDefaultLoadContext();
+            Console.WriteLine("KARTHIKDEBUG "+s_loadFromPath);
             var asmTargetAsm = olc.LoadFromAssemblyPath(Path.Combine(s_loadFromPath, assemblyNameStr));
             var loadedContext = AssemblyLoadContext.GetLoadContext(asmTargetAsm);
 

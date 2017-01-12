@@ -34,7 +34,7 @@
     <TestSharedFxPathHostFxr>$(TestSharedFxDir)\host\fxr\9.9.9</TestSharedFxPathHostFxr>
     <OldDotNetCliPath>$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\$(OldSharedFxVersion)</OldDotNetCliPath>
     <XunitRuntimeConfig>$(ToolsDir)\xunit.console.netcore.runtimeconfig.json</XunitRuntimeConfig>
-    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestSharedFxDir)\dotnet</TestHostExecutablePath>
+    <TestHostExecutablePath Condition="'$(TestHostExecutablePath)' == ''">$(TestSharedFxDir)\dotnet.exe</TestHostExecutablePath>
     <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(TestPath)\xunit.console.netcore.exe</XunitExecutable>
   </PropertyGroup>
 
@@ -72,19 +72,19 @@
        To debug any issues set COREHOST_TRACE=1 and rerun dotnet
   -->
   <UsingTask TaskName="GenerateDepsJson" AssemblyFile="$(BuildToolsTaskDir)CoreFx.Tools.dll"/>  
-  <Target Name="ConstructTestingHost" Condition="!Exists('$(TestDotNetCli)')" >
+  <Target Name="ConstructTestingHost" Condition="!Exists('$(TestSharedFxDir)')" >
     <ItemGroup>
       <HostFxrFile Include="$(RuntimePath)hostfxr.dll" />
       <HostFxrFile Include="$(RuntimePath)libhostfxr.so" />
       <HostFxrFile Include="$(RuntimePath)libhostfxr.dylib" />
-      <DotnetExe Include="$(RuntimePath)dotnet" />
+      <DotnetExe Include="$(RuntimePath)dotnet.exe" />
     </ItemGroup>
     <MakeDir Directories="$(TestSharedFxPathHostFxr)" />
     <Copy SourceFiles="@(HostFxrFile)" 
           DestinationFolder="$(TestSharedFxPathHostFxr)" 
           Condition="Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(DotnetExe)" 
-          DestinationFolder="$(TestDotNetCli)" 
+          DestinationFolder="$(TestSharedFxDir)" 
           Condition="Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')" />
     <ItemGroup>
       <LiveDotNetCliComponents Include="$(RuntimePath)\*.*" Exclude="$(RuntimePath)\xunit.console.netcore.exe" />

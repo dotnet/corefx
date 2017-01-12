@@ -61,16 +61,7 @@
       <PackageIds Include="$(Id)" />
     </ItemGroup>
   </Target>
-
-  <Target Name="GenerateRuntimeConfig" BeforeTargets="Build" Condition="$(OutputType) == 'Exe' ">
-    <ItemGroup>
-      <RuntimeConfigTemplate Include="$(ToolsDir)\xunit.console.netcore.runtimeconfig.json"/>
-      <OutputRuntimeConfig Include="$(MSBuildProjectName).runtimeconfig.json"/>
-    </ItemGroup>
-    <Copy SourceFiles="@(RuntimeConfigTemplate)" 
-          DestinationFiles="@(OutputRuntimeConfig -> '$(ObjDir)\runtimeconfigs\%(Identity)')" />
-  </Target>
-
+  
   <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="AssignProjectConfiguration"
            Condition="'$(BuildConfigurations)' != ''" >

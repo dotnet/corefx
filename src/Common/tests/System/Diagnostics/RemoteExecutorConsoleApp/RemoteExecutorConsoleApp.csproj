@@ -26,7 +26,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(ObjDir)\runtimeconfigs\$(AssemblyName).runtimeconfig.json">
+    <Content Include="RemoteExecutorConsoleApp.runtimeconfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
