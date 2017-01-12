@@ -61,7 +61,7 @@
       <PackageIds Include="$(Id)" />
     </ItemGroup>
   </Target>
-  
+
   <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="AssignProjectConfiguration"
            Condition="'$(BuildConfigurations)' != ''" >

@@ -270,7 +270,7 @@ namespace System.Runtime.Loader.Tests
 
             Assert.Equal(typeof(FileNotFoundException), ex.GetType());
         }
-        
+
         public static void DefaultContextOverrideTPA()
         {
             var assemblyNameStr = "System.Runtime.Loader.Noop.Assembly.dll";
