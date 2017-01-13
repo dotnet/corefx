@@ -10,43 +10,41 @@ namespace System.Linq
     {
         public static TSource Last<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            TSource last = source.TryGetLast(out found);
-            
-            if (!found)
+            TSource result;
+            if (TryLast(source, out result))
             {
-                throw Error.NoElements();
+                return result;
             }
 
-            return last;
+            throw Error.NoElements();
         }
 
         public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            TSource last = source.TryGetLast(predicate, out found);
-
-            if (!found)
+            TSource result;
+            if (TryLast(source, predicate, out result))
             {
-                throw Error.NoMatch();
+                return result;
             }
 
-            return last;
+            throw Error.NoMatch();
         }
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            return source.TryGetLast(out found);
+            TSource result;
+            TryLast(source, out result);
+            return result;
         }
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            return source.TryGetLast(predicate, out found);
+            TSource result;
+            TryLast(source, predicate, out result);
+            return result;
         }
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
+        public static bool TryLast<TSource>(this IEnumerable<TSource> source, out TSource element)
         {
             if (source == null)
             {
@@ -56,17 +54,19 @@ namespace System.Linq
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)
             {
-                return partition.TryGetLast(out found);
+                bool found;
+                element = partition.TryGetLast(out found);
+                return found;
             }
-            
+
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
                 int count = list.Count;
                 if (count > 0)
                 {
-                    found = true;
-                    return list[count - 1];
+                    element = list[count - 1];
+                    return true;
                 }
             }
             else
@@ -82,17 +82,17 @@ namespace System.Linq
                         }
                         while (e.MoveNext());
 
-                        found = true;
-                        return result;
+                        element = result;
+                        return true;
                     }
                 }
             }
-            
-            found = false;
-            return default(TSource);
+
+            element = default(TSource);
+            return false;
         }
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        public static bool TryLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
         {
             if (source == null)
             {
@@ -107,7 +107,9 @@ namespace System.Linq
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)
             {
-                return ordered.TryGetLast(predicate, out found);
+                bool found;
+                element = ordered.TryGetLast(predicate, out found);
+                return found;
             }
 
             IList<TSource> list = source as IList<TSource>;
@@ -115,41 +117,34 @@ namespace System.Linq
             {
                 for (int i = list.Count - 1; i >= 0; --i)
                 {
-                    TSource result = list[i];
-                    if (predicate(result))
+                    TSource item = list[i];
+                    if (predicate(item))
                     {
-                        found = true;
-                        return result;
+                        element = item;
+                        return true;
                     }
                 }
             }
             else
             {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    while (e.MoveNext())
-                    {
-                        TSource result = e.Current;
-                        if (predicate(result))
-                        {
-                            while (e.MoveNext())
-                            {
-                                TSource element = e.Current;
-                                if (predicate(element))
-                                {
-                                    result = element;
-                                }
-                            }
+                TSource result = default(TSource);
+                bool found = false;
 
-                            found = true;
-                            return result;
-                        }
+                foreach (TSource item in source)
+                {
+                    if (predicate(item))
+                    {
+                        result = item;
+                        found = true;
                     }
                 }
+
+                element = result;
+                return found;
             }
 
-            found = false;
-            return default(TSource);
+            element = default(TSource);
+            return false;
         }
     }
 }

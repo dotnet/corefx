@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -840,6 +841,31 @@ namespace System.Linq
                     CachedReflectionInfo.SingleOrDefault_TSource_2(typeof(TSource)),
                     source.Expression, Expression.Quote(predicate)
                     ));
+        }
+
+        public static bool TrySingle<TSource>(this IQueryable<TSource> source, out TSource element)
+        {
+            if (source == null)
+                throw Error.ArgumentNull(nameof(source));
+
+            Tuple<bool, TSource> result = source.Provider.Execute<Tuple<bool, TSource>>(
+                Expression.Call(
+                    null,
+                    CachedReflectionInfo.TrySingle_TSource_1(typeof(TSource)), source.Expression));
+
+            element = result.Item2;
+            return result.Item1;
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Tuple<bool, TSource> TrySingle<TSource>(IQueryable<TSource> source)
+        {
+            if (source == null)
+                throw Error.ArgumentNull(nameof(source));
+            return source.Provider.Execute<Tuple<bool, TSource>>(
+                Expression.Call(
+                    null,
+                    CachedReflectionInfo.TrySingle_TSource_1(typeof(TSource)), source.Expression));
         }
 
         public static TSource ElementAt<TSource>(this IQueryable<TSource> source, int index)

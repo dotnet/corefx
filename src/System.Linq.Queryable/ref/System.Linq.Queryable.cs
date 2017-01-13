@@ -155,6 +155,15 @@ namespace System.Linq
         public static System.Linq.IOrderedQueryable<TSource> ThenBy<TSource, TKey>(this System.Linq.IOrderedQueryable<TSource> source, System.Linq.Expressions.Expression<System.Func<TSource, TKey>> keySelector, System.Collections.Generic.IComparer<TKey> comparer) { throw null; }
         public static System.Linq.IOrderedQueryable<TSource> ThenByDescending<TSource, TKey>(this System.Linq.IOrderedQueryable<TSource> source, System.Linq.Expressions.Expression<System.Func<TSource, TKey>> keySelector) { throw null; }
         public static System.Linq.IOrderedQueryable<TSource> ThenByDescending<TSource, TKey>(this System.Linq.IOrderedQueryable<TSource> source, System.Linq.Expressions.Expression<System.Func<TSource, TKey>> keySelector, System.Collections.Generic.IComparer<TKey> comparer) { throw null; }
+#if netcoreapp11
+//        public static bool TryElementAt<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, int index, out TSource element) { throw null; }
+//        public static bool TryFirst<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, out TSource element) { throw null; }
+//        public static bool TryFirst<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, System.Func<TSource, bool> predicate, out TSource element) { throw null; }
+//        public static bool TryLast<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, out TSource element) { throw null; }
+//        public static bool TryLast<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, System.Func<TSource, bool> predicate, out TSource element) { throw null; }
+        public static bool TrySingle<TSource>(this System.Linq.IOrderedQueryable<TSource> source, out TSource element) { throw null; }
+//        public static bool TrySingle<TSource>(this System.Collections.Generic.IEnumerable<TSource> source, System.Func<TSource, bool> predicate, out TSource element) { throw null; }
+#endif
         public static System.Linq.IQueryable<TSource> Union<TSource>(this System.Linq.IQueryable<TSource> source1, System.Collections.Generic.IEnumerable<TSource> source2) { throw null; }
         public static System.Linq.IQueryable<TSource> Union<TSource>(this System.Linq.IQueryable<TSource> source1, System.Collections.Generic.IEnumerable<TSource> source2, System.Collections.Generic.IEqualityComparer<TSource> comparer) { throw null; }
         public static System.Linq.IQueryable<TSource> Where<TSource>(this System.Linq.IQueryable<TSource> source, System.Linq.Expressions.Expression<System.Func<TSource, bool>> predicate) { throw null; }

@@ -10,43 +10,41 @@ namespace System.Linq
     {
         public static TSource First<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            TSource first = source.TryGetFirst(out found);
-            
-            if (!found)
+            TSource result;
+            if (TryFirst(source, out result))
             {
-                throw Error.NoElements();
+                return result;
             }
 
-            return first;
+            throw Error.NoElements();
         }
 
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            TSource first = source.TryGetFirst(predicate, out found);
-
-            if (!found)
+            TSource result;
+            if (TryFirst(source, predicate, out result))
             {
-                throw Error.NoMatch();
+                return result;
             }
 
-            return first;
+            throw Error.NoMatch();
         }
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            return source.TryGetFirst(out found);
+            TSource result;
+            TryFirst(source, out result);
+            return result;
         }
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            return source.TryGetFirst(predicate, out found);
+            TSource result;
+            TryFirst(source, predicate, out result);
+            return result;
         }
 
-        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, out bool found)
+        public static bool TryFirst<TSource>(this IEnumerable<TSource> source, out TSource element)
         {
             if (source == null)
             {
@@ -56,35 +54,34 @@ namespace System.Linq
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)
             {
-                return partition.TryGetFirst(out found);
+                bool found;
+                element = partition.TryGetFirst(out found);
+                return found;
             }
-            
+
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
                 if (list.Count > 0)
                 {
-                    found = true;
-                    return list[0];
+                    element = list[0];
+                    return true;
                 }
             }
             else
             {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+                foreach (TSource item in source)
                 {
-                    if (e.MoveNext())
-                    {
-                        found = true;
-                        return e.Current;
-                    }
+                    element = item;
+                    return true;
                 }
             }
 
-            found = false;
-            return default(TSource);
+            element = default(TSource);
+            return false;
         }
 
-        internal static TSource TryGetFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        public static bool TryFirst<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource element)
         {
             if (source == null)
             {
@@ -99,20 +96,22 @@ namespace System.Linq
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)
             {
-                return ordered.TryGetFirst(predicate, out found);
+                bool found;
+                element = ordered.TryGetFirst(predicate, out found);
+                return found;
             }
 
-            foreach (TSource element in source)
+            foreach (TSource item in source)
             {
-                if (predicate(element))
+                if (predicate(item))
                 {
-                    found = true;
-                    return element;
+                    element = item;
+                    return true;
                 }
             }
 
-            found = false;
-            return default(TSource);
+            element = default(TSource);
+            return false;
         }
     }
 }

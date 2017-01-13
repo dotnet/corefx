@@ -10,50 +10,23 @@ namespace System.Linq
     {
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
         {
-            if (source == null)
+            TSource result;
+            if (TryElementAt(source, index, out result))
             {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
-            {
-                bool found;
-                TSource element = partition.TryGetElementAt(index, out found);
-                if (found)
-                {
-                    return element;
-                }
-            }
-            else
-            {
-                IList<TSource> list = source as IList<TSource>;
-                if (list != null)
-                {
-                    return list[index];
-                }
-
-                if (index >= 0)
-                {
-                    using (IEnumerator<TSource> e = source.GetEnumerator())
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (index == 0)
-                            {
-                                return e.Current;
-                            }
-
-                            index--;
-                        }
-                    }
-                }
+                return result;
             }
 
             throw Error.ArgumentOutOfRange(nameof(index));
         }
 
         public static TSource ElementAtOrDefault<TSource>(this IEnumerable<TSource> source, int index)
+        {
+            TSource result;
+            TryElementAt(source, index, out result);
+            return result;
+        }
+
+        public static bool TryElementAt<TSource>(this IEnumerable<TSource> source, int index, out TSource element)
         {
             if (source == null)
             {
@@ -64,7 +37,8 @@ namespace System.Linq
             if (partition != null)
             {
                 bool found;
-                return partition.TryGetElementAt(index, out found);
+                element = partition.TryGetElementAt(index, out found);
+                return found;
             }
 
             if (index >= 0)
@@ -74,7 +48,8 @@ namespace System.Linq
                 {
                     if (index < list.Count)
                     {
-                        return list[index];
+                        element = list[index];
+                        return true;
                     }
                 }
                 else
@@ -85,7 +60,8 @@ namespace System.Linq
                         {
                             if (index == 0)
                             {
-                                return e.Current;
+                                element = e.Current;
+                                return true;
                             }
 
                             index--;
@@ -94,7 +70,8 @@ namespace System.Linq
                 }
             }
 
-            return default(TSource);
+            element = default(TSource);
+            return false;
         }
     }
 }
