@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -14,22 +14,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A595FB
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard_Debug|AnyCPU = netstandard_Debug|AnyCPU
-		netstandard_Release|AnyCPU = netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp", "src\Microsoft.CSharp.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp", "src\Microsoft.CSharp.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp", "src\Microsoft.CSharp.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp", "src\Microsoft.CSharp.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp.Tests", "tests\Microsoft.CSharp.Tests.csproj", "{82B54697-0251-47A1-8546-FC507D0F3B08}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp.Tests", "tests\Microsoft.CSharp.Tests.csproj", "{82B54697-0251-47A1-8546-FC507D0F3B08}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp.Tests", "tests\Microsoft.CSharp.Tests.csproj", "{82B54697-0251-47A1-8546-FC507D0F3B08}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CSharp.Tests", "tests\Microsoft.CSharp.Tests.csproj", "{82B54697-0251-47A1-8546-FC507D0F3B08}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96AA2060-C846-4E56-9509-E8CB9C114C8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96AA2060-C846-4E56-9509-E8CB9C114C8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96AA2060-C846-4E56-9509-E8CB9C114C8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96AA2060-C846-4E56-9509-E8CB9C114C8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B54697-0251-47A1-8546-FC507D0F3B08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B54697-0251-47A1-8546-FC507D0F3B08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B54697-0251-47A1-8546-FC507D0F3B08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B54697-0251-47A1-8546-FC507D0F3B08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

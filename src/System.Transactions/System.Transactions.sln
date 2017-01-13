@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
@@ -14,22 +14,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions.Tests",
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard_Debug|AnyCPU = netstandard_Debug|AnyCPU
-		netstandard_Release|AnyCPU = netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions", "src\System.Transactions.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions", "src\System.Transactions.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions", "src\System.Transactions.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions", "src\System.Transactions.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions.Tests", "tests\System.Transactions.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions.Tests", "tests\System.Transactions.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions.Tests", "tests\System.Transactions.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Transactions.Tests", "tests\System.Transactions.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

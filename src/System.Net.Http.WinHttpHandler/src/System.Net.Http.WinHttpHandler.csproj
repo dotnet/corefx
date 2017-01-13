@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,12 +10,8 @@
     <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.3-Windows_NT_Debug|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.3-Windows_NT_Release|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.3-Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard1.3-Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'net46-Windows_NT_Debug|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'net46-Windows_NT_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <Import Project="System.Net.Http.WinHttpHandler.msbuild" Condition="'$(TargetsWindows)' == 'true'" />
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
     <!-- Need to compile it here since the NET46 target here is building against System.Runtime whereas the

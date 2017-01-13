@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -14,24 +14,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer.Tes
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
-		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
-		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
-		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer", "src\System.Resources.Writer.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer", "src\System.Resources.Writer.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer", "src\System.Resources.Writer.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer", "src\System.Resources.Writer.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer.Tests", "tests\System.Resources.Writer.Tests.csproj", "{8D7202E8-084A-4C20-AB93-3BF70D2E0651}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer.Tests", "tests\System.Resources.Writer.Tests.csproj", "{8D7202E8-084A-4C20-AB93-3BF70D2E0651}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer.Tests", "tests\System.Resources.Writer.Tests.csproj", "{8D7202E8-084A-4C20-AB93-3BF70D2E0651}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.Writer.Tests", "tests\System.Resources.Writer.Tests.csproj", "{8D7202E8-084A-4C20-AB93-3BF70D2E0651}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D7202E8-084A-4C20-AB93-3BF70D2E0651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D7202E8-084A-4C20-AB93-3BF70D2E0651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D7202E8-084A-4C20-AB93-3BF70D2E0651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D7202E8-084A-4C20-AB93-3BF70D2E0651}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

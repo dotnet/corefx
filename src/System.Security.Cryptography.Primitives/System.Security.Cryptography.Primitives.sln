@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
@@ -9,35 +9,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptograph
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3-Windows_NT_Debug|AnyCPU = netstandard1.3-Windows_NT_Debug|AnyCPU
-		netstandard1.3-Windows_NT_Release|AnyCPU = netstandard1.3-Windows_NT_Release|AnyCPU
-		      netcoreapp_Debug|AnyCPU =       netcoreapp_Debug|AnyCPU
-		      netcoreapp_Release|AnyCPU =       netcoreapp_Release|AnyCPU
-		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
-		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives", "src\System.Security.Cryptography.Primitives.csproj", "{DF73E985-E143-4BF5-9FA4-E199E7D36235}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Primitives.Tests", "tests\System.Security.Cryptography.Primitives.Tests.csproj", "{101EB757-55A4-4F48-841C-C088640B8F57}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF73E985-E143-4BF5-9FA4-E199E7D36235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF73E985-E143-4BF5-9FA4-E199E7D36235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF73E985-E143-4BF5-9FA4-E199E7D36235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF73E985-E143-4BF5-9FA4-E199E7D36235}.Release|Any CPU.Build.0 = Release|Any CPU
+		{101EB757-55A4-4F48-841C-C088640B8F57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{101EB757-55A4-4F48-841C-C088640B8F57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{101EB757-55A4-4F48-841C-C088640B8F57}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{101EB757-55A4-4F48-841C-C088640B8F57}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

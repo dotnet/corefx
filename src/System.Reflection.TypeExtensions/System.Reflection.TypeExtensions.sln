@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
@@ -17,86 +17,51 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExten
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.5_Debug|AnyCPU = netstandard1.5_Debug|AnyCPU
-		netstandard1.5_Release|AnyCPU = netstandard1.5_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{330DBA8F-8363-4C47-AD9A-1203D264293D}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633-107D-4368-8648-0BA8ABC18F77}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.net462-Windows_NT_Debug|AnyCPU.ActiveCfg = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.net462-Windows_NT_Debug|AnyCPU.Build.0 = net462-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.net462-Windows_NT_Release|AnyCPU.ActiveCfg = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.net462-Windows_NT_Release|AnyCPU.Build.0 = net462-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      uap101aot-Windows_NT_Debug|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      uap101aot-Windows_NT_Debug|AnyCPU.Build.0 =       uap101aot-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      uap101aot-Windows_NT_Release|AnyCPU.ActiveCfg =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      uap101aot-Windows_NT_Release|AnyCPU.Build.0 =       uap101aot-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      netstandard1.5_Debug|AnyCPU.ActiveCfg =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      netstandard1.5_Debug|AnyCPU.Build.0 =       netstandard1.5_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      netstandard1.5_Release|AnyCPU.ActiveCfg =       netstandard1.5_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"}.      netstandard1.5_Release|AnyCPU.Build.0 =       netstandard1.5_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		net46_Debug|Any CPU = net46_Debug|Any CPU
+		net46_Release|Any CPU = net46_Release|Any CPU
+		netcore50aot_Debug|Any CPU = netcore50aot_Debug|Any CPU
+		netcore50aot_Release|Any CPU = netcore50aot_Release|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Debug|Any CPU.ActiveCfg = net46_Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Debug|Any CPU.Build.0 = net46_Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Release|Any CPU.ActiveCfg = net46_Release|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Release|Any CPU.Build.0 = net46_Release|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Debug|Any CPU.ActiveCfg = netcore50aot_Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Debug|Any CPU.Build.0 = netcore50aot_Debug|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Release|Any CPU.ActiveCfg = netcore50aot_Release|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Release|Any CPU.Build.0 = netcore50aot_Release|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E689C1B-690C-4799-BDE9-6E7990585894}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Release|Any CPU.Build.0 = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Release|Any CPU.Build.0 = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Release|Any CPU.Build.0 = Release|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Release|Any CPU.Build.0 = Release|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

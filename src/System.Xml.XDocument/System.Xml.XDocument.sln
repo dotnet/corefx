@@ -43,152 +43,75 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		net463-Windows_NT_Debug|AnyCPU = net463-Windows_NT_Debug|AnyCPU
-		net463-Windows_NT_Release|AnyCPU = net463-Windows_NT_Release|AnyCPU
-		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
-		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument", "src\System.Xml.XDocument.csproj", "{442C5A88-29C2-4B00-B1DF-730D646D3861}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Axes.Tests", "tests\axes\System.Xml.XDocument.Axes.Tests.csproj", "{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Common", "tests\XDocument.Common\XDocument.Common.csproj", "{52666206-B6C9-49FA-A1D7-D0A0C68807B0}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Events.Tests", "tests\events\System.Xml.XDocument.Events.Tests.csproj", "{C560E194-5B14-4112-ABC6-3208491E53E6}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XDocument.Test.ModuleCore", "tests\XDocument.Test.ModuleCore\XDocument.Test.ModuleCore.csproj", "{979510CE-9042-4F8D-9C74-EE03B89194CC}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Misc.Tests", "tests\misc\System.Xml.XDocument.Misc.Tests.csproj", "{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Properties.Tests", "tests\Properties\System.Xml.XDocument.Properties.Tests.csproj", "{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.SDMSample.Tests", "tests\SDMSample\System.Xml.XDocument.SDMSample.Tests.csproj", "{F6C73170-9333-4B52-B3FA-A536C5EA6A48}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.Streaming.Tests", "tests\Streaming\System.Xml.XDocument.Streaming.Tests.csproj", "{CB11B315-2567-4574-977D-89E3135243C4}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.TreeManipulation.Tests", "tests\TreeManipulation\System.Xml.XDocument.TreeManipulation.Tests.csproj", "{10EFE488-FAB4-43DA-847D-FF057BFF52AC}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeReader.Tests", "tests\xNodeReader\System.Xml.XDocument.xNodeReader.Tests.csproj", "{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "..\Common\tests\System\Xml\XmlDiff\XmlDiff.csproj", "{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlCoreTest", "..\Common\tests\System\Xml\XmlCoreTest\XmlCoreTest.csproj", "{89701565-F68B-46D9-BD78-95B0F052C50B}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleCore", "..\Common\tests\System\Xml\ModuleCore\ModuleCore.csproj", "{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XDocument.xNodeBuilder.Tests", "tests\xNodeBuilder\System.Xml.XDocument.xNodeBuilder.Tests.csproj", "{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2B620568-877B-4A96-919B-F24B0B3E761D}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.netstandard_Debug|AnyCPU.ActiveCfg = netstandard_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.netstandard_Debug|AnyCPU.Build.0 = netstandard_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.netstandard_Release|AnyCPU.ActiveCfg = netstandard_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.netstandard_Release|AnyCPU.Build.0 = netstandard_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.      netcoreapp_Debug|AnyCPU.ActiveCfg =       netcoreapp_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.      netcoreapp_Debug|AnyCPU.Build.0 =       netcoreapp_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.      netcoreapp_Release|AnyCPU.ActiveCfg =       netcoreapp_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{613870EF-97E7-4D29-9EF2-ABB7E81CE232}"}.      netcoreapp_Release|AnyCPU.Build.0 =       netcoreapp_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{442C5A88-29C2-4B00-B1DF-730D646D3861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{442C5A88-29C2-4B00-B1DF-730D646D3861}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{442C5A88-29C2-4B00-B1DF-730D646D3861}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{442C5A88-29C2-4B00-B1DF-730D646D3861}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE8ED8C1-C314-4C4E-A929-64C9C8B3552A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D9B0285-5E8A-4C20-9C53-9E2084EF64C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52666206-B6C9-49FA-A1D7-D0A0C68807B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52666206-B6C9-49FA-A1D7-D0A0C68807B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52666206-B6C9-49FA-A1D7-D0A0C68807B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52666206-B6C9-49FA-A1D7-D0A0C68807B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C560E194-5B14-4112-ABC6-3208491E53E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C560E194-5B14-4112-ABC6-3208491E53E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C560E194-5B14-4112-ABC6-3208491E53E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C560E194-5B14-4112-ABC6-3208491E53E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{979510CE-9042-4F8D-9C74-EE03B89194CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{979510CE-9042-4F8D-9C74-EE03B89194CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{979510CE-9042-4F8D-9C74-EE03B89194CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{979510CE-9042-4F8D-9C74-EE03B89194CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D24E2563-7A46-4368-94D4-B3A39E9EF1B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6C73170-9333-4B52-B3FA-A536C5EA6A48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C73170-9333-4B52-B3FA-A536C5EA6A48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C73170-9333-4B52-B3FA-A536C5EA6A48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C73170-9333-4B52-B3FA-A536C5EA6A48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB11B315-2567-4574-977D-89E3135243C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB11B315-2567-4574-977D-89E3135243C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB11B315-2567-4574-977D-89E3135243C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB11B315-2567-4574-977D-89E3135243C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10EFE488-FAB4-43DA-847D-FF057BFF52AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10EFE488-FAB4-43DA-847D-FF057BFF52AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10EFE488-FAB4-43DA-847D-FF057BFF52AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10EFE488-FAB4-43DA-847D-FF057BFF52AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E1C5358-7F04-4791-8B5F-6A5A4E42ABF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{466D87DF-BDEC-4E6C-BACD-317D79B8EDBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89701565-F68B-46D9-BD78-95B0F052C50B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89701565-F68B-46D9-BD78-95B0F052C50B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89701565-F68B-46D9-BD78-95B0F052C50B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89701565-F68B-46D9-BD78-95B0F052C50B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CF0CC76-4CE0-460A-BA37-657CFED39AB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
