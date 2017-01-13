@@ -1,8 +1,13 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1E689C1B-690C-4799-BDE9-6E7990585894} = {1E689C1B-690C-4799-BDE9-6E7990585894}
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "src\System.Reflection.TypeExtensions.csproj", "{1E689C1B-690C-4799-BDE9-6E7990585894}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{650D5B76-F9F7-4629-9237-3942E852F56E}"
@@ -13,55 +18,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A13C6633
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions", "ref\System.Reflection.TypeExtensions.csproj", "{5A7989CC-C142-40AC-821C-C4C9DD3193A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.TypeExtensions.Tests", "tests\System.Reflection.TypeExtensions.Tests.csproj", "{089444FE-8FF5-4D8F-A51B-32D026425F6B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		net46_Debug|Any CPU = net46_Debug|Any CPU
-		net46_Release|Any CPU = net46_Release|Any CPU
-		netcore50aot_Debug|Any CPU = netcore50aot_Debug|Any CPU
-		netcore50aot_Release|Any CPU = netcore50aot_Release|Any CPU
-		Release|Any CPU = Release|Any CPU
+		DebugNETCoreAppnet462-Windows_NT-netstandard1.5 = DebugNETCoreAppnet462-Windows_NT-netstandard1.5
+		ReleaseNETCoreAppnet462-Windows_NT-netstandard1.5 = ReleaseNETCoreAppnet462-Windows_NT-netstandard1.5
+		DebugNETCoreAppuap101aot-Windows_NT-netstandard1.5 = DebugNETCoreAppuap101aot-Windows_NT-netstandard1.5
+		ReleaseNETCoreAppuap101aot-Windows_NT-netstandard1.5 = ReleaseNETCoreAppuap101aot-Windows_NT-netstandard1.5
+		DebugNETCoreAppnetstandard1.5-netstandard1.5 = DebugNETCoreAppnetstandard1.5-netstandard1.5
+		ReleaseNETCoreAppnetstandard1.5-netstandard1.5 = ReleaseNETCoreAppnetstandard1.5-netstandard1.5
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Debug|Any CPU.ActiveCfg = net46_Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Debug|Any CPU.Build.0 = net46_Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Release|Any CPU.ActiveCfg = net46_Release|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.net46_Release|Any CPU.Build.0 = net46_Release|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Debug|Any CPU.ActiveCfg = netcore50aot_Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Debug|Any CPU.Build.0 = netcore50aot_Debug|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Release|Any CPU.ActiveCfg = netcore50aot_Release|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.netcore50aot_Release|Any CPU.Build.0 = netcore50aot_Release|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E689C1B-690C-4799-BDE9-6E7990585894}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.net46_Release|Any CPU.Build.0 = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.netcore50aot_Release|Any CPU.Build.0 = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A7989CC-C142-40AC-821C-C4C9DD3193A2}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.net46_Release|Any CPU.Build.0 = Release|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.netcore50aot_Release|Any CPU.Build.0 = Release|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.Release|Any CPU.Build.0 = Release|Any CPU
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.DebugNETCoreAppnetstandard1.5-netstandard1.5.ActiveCfg = netstandard1.5-Debug|AnyCPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.DebugNETCoreAppnetstandard1.5-netstandard1.5.Build.0 = netstandard1.5-Debug|AnyCPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.ReleaseNETCoreAppnetstandard1.5-netstandard1.5.ActiveCfg = netstandard1.5-Release|AnyCPU
+		{089444FE-8FF5-4D8F-A51B-32D026425F6B}.ReleaseNETCoreAppnetstandard1.5-netstandard1.5.Build.0 = netstandard1.5-Release|AnyCPU
 	EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

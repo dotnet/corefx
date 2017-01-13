@@ -1,37 +1,34 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.DriveInfo", "src\System.IO.FileSystem.DriveInfo.csproj", "{29C14AD7-DC03-45DC-897D-8DACC762707E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.DriveInfo.Tests", "tests\System.IO.FileSystem.DriveInfo.Tests.csproj", "{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}"
+	ProjectSection(ProjectDependencies) = postProject
+		{29C14AD7-DC03-45DC-897D-8DACC762707E} = {29C14AD7-DC03-45DC-897D-8DACC762707E}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IO.FileSystem.DriveInfo", "src\System.IO.FileSystem.DriveInfo.csproj", "{29C14AD7-DC03-45DC-897D-8DACC762707E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Unix_Debug|Any CPU = Unix_Debug|Any CPU
-		Unix_Release|Any CPU = Unix_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
+		DebugNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT = DebugNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT = ReleaseNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT
+		DebugNETCoreAppnetstandard-Unix-netstandard = DebugNETCoreAppnetstandard-Unix-netstandard
+		ReleaseNETCoreAppnetstandard-Unix-netstandard = ReleaseNETCoreAppnetstandard-Unix-netstandard
+		DebugNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT = DebugNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT = ReleaseNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT
+		DebugNETCoreAppnetstandard-Windows_NT-netstandard = DebugNETCoreAppnetstandard-Windows_NT-netstandard
+		ReleaseNETCoreAppnetstandard-Windows_NT-netstandard = ReleaseNETCoreAppnetstandard-Windows_NT-netstandard
+		DebugNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT = DebugNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT = ReleaseNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT
+		DebugNETCoreAppnet463-Windows_NT-netstandard = DebugNETCoreAppnet463-Windows_NT-netstandard
+		ReleaseNETCoreAppnet463-Windows_NT-netstandard = ReleaseNETCoreAppnet463-Windows_NT-netstandard
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{29C14AD7-DC03-45DC-897D-8DACC762707E}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
 	EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

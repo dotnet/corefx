@@ -1,11 +1,14 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Text.RegularExpressions", "src\System.Text.RegularExpressions.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Text.RegularExpressions.Tests", "tests\System.Text.RegularExpressions.Tests.csproj", "{94B106C2-D574-4392-80AB-3EE308A078DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD} = {BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Text.RegularExpressions", "src\System.Text.RegularExpressions.csproj", "{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C5A39CF5-01CB-4CD8-96A6-7D6E95EA5CCC}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,19 +17,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C5A39C
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.7_Debug|Any CPU = netstandard1.7_Debug|Any CPU
-		netstandard1.7_Release|Any CPU = netstandard1.7_Release|Any CPU
+		DebugNETCoreAppnet461-Windows_NT-netstandard1.6 = DebugNETCoreAppnet461-Windows_NT-netstandard1.6
+		ReleaseNETCoreAppnet461-Windows_NT-netstandard1.6 = ReleaseNETCoreAppnet461-Windows_NT-netstandard1.6
+		DebugNETCoreAppnet461-Windows_NT-netcoreapp = DebugNETCoreAppnet461-Windows_NT-netcoreapp
+		ReleaseNETCoreAppnet461-Windows_NT-netcoreapp = ReleaseNETCoreAppnet461-Windows_NT-netcoreapp
+		DebugNETCoreAppnet461-Windows_NT-netstandard = DebugNETCoreAppnet461-Windows_NT-netstandard
+		ReleaseNETCoreAppnet461-Windows_NT-netstandard = ReleaseNETCoreAppnet461-Windows_NT-netstandard
+		DebugNETCoreAppnetstandard-netstandard1.6 = DebugNETCoreAppnetstandard-netstandard1.6
+		ReleaseNETCoreAppnetstandard-netstandard1.6 = ReleaseNETCoreAppnetstandard-netstandard1.6
+		DebugNETCoreAppnetstandard-netcoreapp = DebugNETCoreAppnetstandard-netcoreapp
+		ReleaseNETCoreAppnetstandard-netcoreapp = ReleaseNETCoreAppnetstandard-netcoreapp
+		DebugNETCoreAppnetstandard-netstandard = DebugNETCoreAppnetstandard-netstandard
+		ReleaseNETCoreAppnetstandard-netstandard = ReleaseNETCoreAppnetstandard-netstandard
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}.netstandard1.7_Debug|Any CPU.ActiveCfg = netstandard1.7_Debug|Any CPU
-		{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}.netstandard1.7_Debug|Any CPU.Build.0 = netstandard1.7_Debug|Any CPU
-		{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}.netstandard1.7_Release|Any CPU.ActiveCfg = netstandard1.7_Release|Any CPU
-		{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}.netstandard1.7_Release|Any CPU.Build.0 = netstandard1.7_Release|Any CPU
-		{94B106C2-D574-4392-80AB-3EE308A078DF}.netstandard1.7_Debug|Any CPU.ActiveCfg = netstandard1.7_Debug|Any CPU
-		{94B106C2-D574-4392-80AB-3EE308A078DF}.netstandard1.7_Debug|Any CPU.Build.0 = netstandard1.7_Debug|Any CPU
-		{94B106C2-D574-4392-80AB-3EE308A078DF}.netstandard1.7_Release|Any CPU.ActiveCfg = netstandard1.7_Release|Any CPU
-		{94B106C2-D574-4392-80AB-3EE308A078DF}.netstandard1.7_Release|Any CPU.Build.0 = netstandard1.7_Release|Any CPU
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{94B106C2-D574-4392-80AB-3EE308A078DF}.DebugNETCoreAppnetstandard-netstandard1.6.ActiveCfg = netstandard1.6-Debug|AnyCPU
+		{94B106C2-D574-4392-80AB-3EE308A078DF}.DebugNETCoreAppnetstandard-netstandard1.6.Build.0 = netstandard1.6-Debug|AnyCPU
+		{94B106C2-D574-4392-80AB-3EE308A078DF}.ReleaseNETCoreAppnetstandard-netstandard1.6.ActiveCfg = netstandard1.6-Release|AnyCPU
+		{94B106C2-D574-4392-80AB-3EE308A078DF}.ReleaseNETCoreAppnetstandard-netstandard1.6.Build.0 = netstandard1.6-Release|AnyCPU
 	EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

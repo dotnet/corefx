@@ -1,8 +1,168 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{} = {}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55} = {8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55} = {8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55} = {8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55} = {8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{6E4D87E9-CECA-43AD-9163-D4E858FB146C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B342EF77-EDB6-4FD7-B9E6-9E1FCA93CF77}"
@@ -21,149 +181,40 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests", "Perform
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{CD8A1EFB-B95A-4283-9548-00534A70617E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Functional.Tests", "tests\FunctionalTests\System.Net.Primitives.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Pal.Tests", "tests\PalTests\System.Net.Primitives.Pal.Tests.csproj", "{7860A11A-1841-4416-8A30-28EEEB42C6BB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.Performance.Tests", "tests\PerformanceTests\System.Net.Primitives.Performance.Tests.csproj", "{86256B36-4C78-4A71-A80A-CCA35C4AE758}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives.UnitTests.Tests", "tests\UnitTests\System.Net.Primitives.UnitTests.Tests.csproj", "{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		net46_Debug|Any CPU = net46_Debug|Any CPU
-		net46_Release|Any CPU = net46_Release|Any CPU
-		Release|Any CPU = Release|Any CPU
-		Unix_Debug|Any CPU = Unix_Debug|Any CPU
-		Unix_Release|Any CPU = Unix_Release|Any CPU
-		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
-		Windows_uap101_Debug|Any CPU = Windows_uap101_Debug|Any CPU
-		Windows_uap101_Release|Any CPU = Windows_uap101_Release|Any CPU
+		DebugNETCoreAppuap101-Windows_NT-netstandard-Windows_NT = DebugNETCoreAppuap101-Windows_NT-netstandard-Windows_NT
+		ReleaseNETCoreAppuap101-Windows_NT-netstandard-Windows_NT = ReleaseNETCoreAppuap101-Windows_NT-netstandard-Windows_NT
+		DebugNETCoreAppuap101-Windows_NT-netstandard-Unix = DebugNETCoreAppuap101-Windows_NT-netstandard-Unix
+		ReleaseNETCoreAppuap101-Windows_NT-netstandard-Unix = ReleaseNETCoreAppuap101-Windows_NT-netstandard-Unix
+		DebugNETCoreAppuap101-Windows_NT-netstandard1.3-Windows_NT = DebugNETCoreAppuap101-Windows_NT-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppuap101-Windows_NT-netstandard1.3-Windows_NT = ReleaseNETCoreAppuap101-Windows_NT-netstandard1.3-Windows_NT
+		DebugNETCoreAppnetstandard-Unix-netstandard-Windows_NT = DebugNETCoreAppnetstandard-Unix-netstandard-Windows_NT
+		ReleaseNETCoreAppnetstandard-Unix-netstandard-Windows_NT = ReleaseNETCoreAppnetstandard-Unix-netstandard-Windows_NT
+		DebugNETCoreAppnetstandard-Unix-netstandard-Unix = DebugNETCoreAppnetstandard-Unix-netstandard-Unix
+		ReleaseNETCoreAppnetstandard-Unix-netstandard-Unix = ReleaseNETCoreAppnetstandard-Unix-netstandard-Unix
+		DebugNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT = DebugNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT = ReleaseNETCoreAppnetstandard-Unix-netstandard1.3-Windows_NT
+		DebugNETCoreAppnetstandard-Windows_NT-netstandard-Windows_NT = DebugNETCoreAppnetstandard-Windows_NT-netstandard-Windows_NT
+		ReleaseNETCoreAppnetstandard-Windows_NT-netstandard-Windows_NT = ReleaseNETCoreAppnetstandard-Windows_NT-netstandard-Windows_NT
+		DebugNETCoreAppnetstandard-Windows_NT-netstandard-Unix = DebugNETCoreAppnetstandard-Windows_NT-netstandard-Unix
+		ReleaseNETCoreAppnetstandard-Windows_NT-netstandard-Unix = ReleaseNETCoreAppnetstandard-Windows_NT-netstandard-Unix
+		DebugNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT = DebugNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT = ReleaseNETCoreAppnetstandard-Windows_NT-netstandard1.3-Windows_NT
+		DebugNETCoreAppnet463-Windows_NT-netstandard-Windows_NT = DebugNETCoreAppnet463-Windows_NT-netstandard-Windows_NT
+		ReleaseNETCoreAppnet463-Windows_NT-netstandard-Windows_NT = ReleaseNETCoreAppnet463-Windows_NT-netstandard-Windows_NT
+		DebugNETCoreAppnet463-Windows_NT-netstandard-Unix = DebugNETCoreAppnet463-Windows_NT-netstandard-Unix
+		ReleaseNETCoreAppnet463-Windows_NT-netstandard-Unix = ReleaseNETCoreAppnet463-Windows_NT-netstandard-Unix
+		DebugNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT = DebugNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT
+		ReleaseNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT = ReleaseNETCoreAppnet463-Windows_NT-netstandard1.3-Windows_NT
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.net46_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.net46_Release|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Unix_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Unix_Release|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_Release|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_uap101_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_uap101_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_uap101_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{048A8C3E-BD42-46A5-9A6E-07624A1D3AE8}.Windows_uap101_Release|Any CPU.Build.0 = Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_uap101_Debug|Any CPU.ActiveCfg = Windows_uap101_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_uap101_Debug|Any CPU.Build.0 = Windows_uap101_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_uap101_Release|Any CPU.ActiveCfg = Windows_uap101_Release|Any CPU
-		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_uap101_Release|Any CPU.Build.0 = Windows_uap101_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_uap101_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_uap101_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_uap101_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_uap101_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_uap101_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_uap101_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_uap101_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{7860A11A-1841-4416-8A30-28EEEB42C6BB}.Windows_uap101_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_uap101_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_uap101_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_uap101_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{86256B36-4C78-4A71-A80A-CCA35C4AE758}.Windows_uap101_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.net46_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.net46_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.net46_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.net46_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_uap101_Debug|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_uap101_Debug|Any CPU.Build.0 = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_uap101_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}.Windows_uap101_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+
+
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
 	EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
