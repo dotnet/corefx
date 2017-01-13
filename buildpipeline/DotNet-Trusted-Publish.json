@@ -410,6 +410,9 @@
     },
     "PB_ToolPackageSource": {
       "value": "https://www.myget.org/F/dagood-test-buildtools/api/v3/index.json"
+    },
+    "ConfigurationGroup": {
+      "value": "$(PB_ConfigurationGroup)"
     }
   },
   "retentionRules": [
@@ -449,7 +452,6 @@
     "checkoutSubmodules": false
   },
   "quality": "definition",
-  "defaultBranch": "refs/heads/master",
   "queue": {
     "pool": {
       "id": 39,
