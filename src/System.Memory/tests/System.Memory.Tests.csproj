@@ -4,7 +4,6 @@
   <PropertyGroup>
     <AssemblyName>System.Memory.Tests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ProjectGuid>{15DC55FA-E644-4B87-A62A-DCF849031633}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />

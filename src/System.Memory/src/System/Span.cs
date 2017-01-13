@@ -237,9 +237,9 @@ namespace System
         /// </summary>
         public unsafe void Clear()
         {
-            var length = _length;
+            int length = _length;
 
-            if (_length == 0)
+            if (length == 0)
                 return;
 
             var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
@@ -269,7 +269,7 @@ namespace System
                 }
                 else
                 {
-                    UIntPtr pointerSizedLength = (UIntPtr)((_length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
+                    UIntPtr pointerSizedLength = (UIntPtr)((length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
 
                     ref IntPtr ip = ref Unsafe.As<T, IntPtr>(ref DangerousGetPinnableReference());
 
@@ -283,9 +283,9 @@ namespace System
         /// </summary>
         public unsafe void Fill(T value)
         {
-            var length = _length;
+            int length = _length;
 
-            if (_length == 0)
+            if (length == 0)
                 return;
 
             if (Unsafe.SizeOf<T>() == 1)
