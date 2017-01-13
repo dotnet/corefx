@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22609.0
@@ -14,32 +14,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Speciali
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
-		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
-		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
-		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized", "src\System.Collections.Specialized.csproj", "{63634289-90D7-4947-8BF3-DBBE98D76C85}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Specialized.Tests", "tests\System.Collections.Specialized.Tests.csproj", "{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63634289-90D7-4947-8BF3-DBBE98D76C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63634289-90D7-4947-8BF3-DBBE98D76C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63634289-90D7-4947-8BF3-DBBE98D76C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63634289-90D7-4947-8BF3-DBBE98D76C85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F5F5134-00FE-4DE8-B20C-3DA8BA2EBA68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

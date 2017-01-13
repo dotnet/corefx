@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
@@ -14,30 +14,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{47919F
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
-		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync", "src\System.ComponentModel.EventBasedAsync.csproj", "{551A6340-8EEF-445E-A2A2-639CC23DBD36}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.EventBasedAsync.Tests", "tests\System.ComponentModel.EventBasedAsync.Tests.csproj", "{59E9B218-81D0-4A80-A4B7-66C716136D82}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{551A6340-8EEF-445E-A2A2-639CC23DBD36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{551A6340-8EEF-445E-A2A2-639CC23DBD36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{551A6340-8EEF-445E-A2A2-639CC23DBD36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{551A6340-8EEF-445E-A2A2-639CC23DBD36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59E9B218-81D0-4A80-A4B7-66C716136D82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59E9B218-81D0-4A80-A4B7-66C716136D82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59E9B218-81D0-4A80-A4B7-66C716136D82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59E9B218-81D0-4A80-A4B7-66C716136D82}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

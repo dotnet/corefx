@@ -15,39 +15,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Perf
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		net463-Windows_NT_Debug|AnyCPU = net463-Windows_NT_Debug|AnyCPU
-		net463-Windows_NT_Release|AnyCPU = net463-Windows_NT_Release|AnyCPU
-		      netstandard_Debug|AnyCPU =       netstandard_Debug|AnyCPU
-		      netstandard_Release|AnyCPU =       netstandard_Release|AnyCPU
-EndGlobalSection
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument", "src\System.Xml.XmlDocument.csproj", "{16EE5522-F387-4C9E-9EF2-B5134B043F37}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Tests", "tests\System.Xml.XmlDocument.Tests.csproj", "{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.net463-Windows_NT_Debug|AnyCPU.ActiveCfg = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.net463-Windows_NT_Debug|AnyCPU.Build.0 = net463-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.net463-Windows_NT_Release|AnyCPU.ActiveCfg = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.net463-Windows_NT_Release|AnyCPU.Build.0 = net463-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.      netstandard_Debug|AnyCPU.ActiveCfg =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.      netstandard_Debug|AnyCPU.Build.0 =       netstandard_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.      netstandard_Release|AnyCPU.ActiveCfg =       netstandard_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xml.XmlDocument.Performance.Tests", "tests\Performance\System.Xml.XmlDocument.Performance.Tests.csproj", "{9E9ACCB5-2723-490C-BD10-04391057A4C8}"}.      netstandard_Release|AnyCPU.Build.0 =       netstandard_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16EE5522-F387-4C9E-9EF2-B5134B043F37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EAFC2D8-48D2-4A56-A9C6-6BADF2053499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E9ACCB5-2723-490C-BD10-04391057A4C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E9ACCB5-2723-490C-BD10-04391057A4C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E9ACCB5-2723-490C-BD10-04391057A4C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E9ACCB5-2723-490C-BD10-04391057A4C8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

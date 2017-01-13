@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
@@ -19,38 +19,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3A3E1C
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3_Debug|AnyCPU = netstandard1.3_Debug|AnyCPU
-		netstandard1.3_Release|AnyCPU = netstandard1.3_Release|AnyCPU
-EndGlobalSection
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.netstandard1.0_Debug|AnyCPU.ActiveCfg = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.netstandard1.0_Debug|AnyCPU.Build.0 = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.netstandard1.0_Release|AnyCPU.ActiveCfg = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.netstandard1.0_Release|AnyCPU.Build.0 = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.      netstandard1.1_Debug|AnyCPU.ActiveCfg =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.      netstandard1.1_Debug|AnyCPU.Build.0 =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.      netstandard1.1_Release|AnyCPU.ActiveCfg =       netstandard1.1_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow", "src\System.Threading.Tasks.Dataflow.csproj", "{1DD0FF15-6234-4BD6-850A-317F05479554}"}.      netstandard1.1_Release|AnyCPU.Build.0 =       netstandard1.1_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.netstandard1.0_Debug|AnyCPU.ActiveCfg = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.netstandard1.0_Debug|AnyCPU.Build.0 = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.netstandard1.0_Release|AnyCPU.ActiveCfg = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.netstandard1.0_Release|AnyCPU.Build.0 = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.      netstandard1.1_Debug|AnyCPU.ActiveCfg =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.      netstandard1.1_Debug|AnyCPU.Build.0 =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.      netstandard1.1_Release|AnyCPU.ActiveCfg =       netstandard1.1_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.WP8", "src\System.Threading.Tasks.Dataflow.WP8.csproj", "{0C10C503-FD37-4990-BD0F-B79FE22203DD}"}.      netstandard1.1_Release|AnyCPU.Build.0 =       netstandard1.1_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.netstandard1.0_Debug|AnyCPU.ActiveCfg = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.netstandard1.0_Debug|AnyCPU.Build.0 = netstandard1.0_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.netstandard1.0_Release|AnyCPU.ActiveCfg = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.netstandard1.0_Release|AnyCPU.Build.0 = netstandard1.0_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.      netstandard1.1_Debug|AnyCPU.ActiveCfg =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.      netstandard1.1_Debug|AnyCPU.Build.0 =       netstandard1.1_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.      netstandard1.1_Release|AnyCPU.ActiveCfg =       netstandard1.1_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Tasks.Dataflow.Tests", "tests\System.Threading.Tasks.Dataflow.Tests.csproj", "{72E21903-0FBA-444E-9855-3B4F05DFC1F9}"}.      netstandard1.1_Release|AnyCPU.Build.0 =       netstandard1.1_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DD0FF15-6234-4BD6-850A-317F05479554}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C10C503-FD37-4990-BD0F-B79FE22203DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C10C503-FD37-4990-BD0F-B79FE22203DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C10C503-FD37-4990-BD0F-B79FE22203DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C10C503-FD37-4990-BD0F-B79FE22203DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E21903-0FBA-444E-9855-3B4F05DFC1F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E21903-0FBA-444E-9855-3B4F05DFC1F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E21903-0FBA-444E-9855-3B4F05DFC1F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E21903-0FBA-444E-9855-3B4F05DFC1F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

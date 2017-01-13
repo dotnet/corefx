@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
@@ -27,194 +27,75 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.U
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		netstandard1.3-Windows_NT_Debug|AnyCPU = netstandard1.3-Windows_NT_Debug|AnyCPU
-		netstandard1.3-Windows_NT_Release|AnyCPU = netstandard1.3-Windows_NT_Release|AnyCPU
-		      netstandard1.3-Unix_Debug|AnyCPU =       netstandard1.3-Unix_Debug|AnyCPU
-		      netstandard1.3-Unix_Release|AnyCPU =       netstandard1.3-Unix_Release|AnyCPU
-EndGlobalSection
-
-
-
-
-	GlobalSection(SolutionConfigurationPlatforms) = postSolution
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{EC3CAC27-AC09-4A62-BBE3-87FB0AFF5EF2}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "ref\System.Net.NameResolution.csproj", "{2AF3C59B-0005-4374-8B43-31BD967E5A3C}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BB465544-FDF2-4858-94A9-CF2E964AD7BE}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1FBB81D4-E5E8-4F31-8F23-02DFDFC6339F}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{9828545B-B1F9-4321-AC18-5A223661C0AA}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PalTests", "PalTests", "{B4ECAB65-25BE-429A-AC6C-924174138F0B}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Functional.Tests", "tests\FunctionalTests\System.Net.NameResolution.Functional.Tests.csproj", "{4FE5ECEE-ACC5-4558-A946-573426599B73}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Pal.Tests", "tests\PalTests\System.Net.NameResolution.Pal.Tests.csproj", "{F6D1C093-081D-46DE-B5A8-516533375FDD}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{65B0E1EC-54D4-4D2B-AC86-99E7E5DFC8F9}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.netcore50-Windows_NT_Debug|AnyCPU.ActiveCfg = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.netcore50-Windows_NT_Debug|AnyCPU.Build.0 = netcore50-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.netcore50-Windows_NT_Release|AnyCPU.ActiveCfg = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.netcore50-Windows_NT_Release|AnyCPU.Build.0 = netcore50-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Windows_NT_Debug|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.ActiveCfg =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Windows_NT_Release|AnyCPU.Build.0 =       netstandard1.3-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Unix_Debug|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Unix_Debug|AnyCPU.Build.0 =       netstandard1.3-Unix_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Unix_Release|AnyCPU.ActiveCfg =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      netstandard1.3-Unix_Release|AnyCPU.Build.0 =       netstandard1.3-Unix_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      net46-Windows_NT_Debug|AnyCPU.ActiveCfg =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      net46-Windows_NT_Debug|AnyCPU.Build.0 =       net46-Windows_NT_Debug|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      net46-Windows_NT_Release|AnyCPU.ActiveCfg =       net46-Windows_NT_Release|AnyCPU
-		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution.Unit.Tests", "tests\UnitTests\System.Net.NameResolution.Unit.Tests.csproj", "{239347DB-D566-48C9-9551-28AB3AD12EC3}"}.      net46-Windows_NT_Release|AnyCPU.Build.0 =       net46-Windows_NT_Release|AnyCPU
-EndGlobalSection
-
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Unix_Debug|Any CPU = Unix_Debug|Any CPU
+		Unix_Release|Any CPU = Unix_Release|Any CPU
+		Windows_Debug|Any CPU = Windows_Debug|Any CPU
+		Windows_Release|Any CPU = Windows_Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Unix_Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Unix_Release|Any CPU.Build.0 = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Windows_Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF3C59B-0005-4374-8B43-31BD967E5A3C}.Windows_Release|Any CPU.Build.0 = Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FE5ECEE-ACC5-4558-A946-573426599B73}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{F6D1C093-081D-46DE-B5A8-516533375FDD}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{239347DB-D566-48C9-9551-28AB3AD12EC3}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,10 +10,11 @@
     <PackageAsRefAndLib Condition="'$(TargetGroup)' == 'net461'">true</PackageAsRefAndLib>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'net461-Windows_NT_Debug|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'net461-Windows_NT_Release|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard_Debug|AnyCPU'" />
-  <PropertyGroup Condition = "'$(Configuration)|$(Platform)' == 'netstandard_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="System\Net\NetworkInformation\NetworkInformationAccess.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermission.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermissionAttribute.cs" />
