@@ -71,14 +71,8 @@
              ContinueOnError="ErrorAndContinue" />
   </Target>
   
- <PropertyGroup>
-  <TraversalBuildDependsOn>
-    ValidateVSConfigurations;
-    $(TraversalBuildDependsOn)
-  </TraversalBuildDependsOn>
- </PropertyGroup>
  <UsingTask TaskName="ValidateVSConfigurations" AssemblyFile="$(CoreFxToolsTaskDir)CoreFx.Tools.dll"/>
- <Target Name="ValidateVSConfigurations">
+ <Target Name="ValidateVSConfigurations" DependsOnTargets="BuildCoreFxTools" Condition="'$(CheckProjectConfigurations)'=='true'">
     <Message Importance="High" Text="Validating configurations for projects ..." />
     <ItemGroup>
       <ProjectsToCheckHeaders Include="$(MSBuildThisFileDirectory)src/**/*.*proj" Exclude="@(ProjectExclusions)" />

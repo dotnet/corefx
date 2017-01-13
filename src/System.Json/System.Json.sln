@@ -8,19 +8,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json.Tests", "tests\
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.Release|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
+		netcoreapp1.0_Debug|AnyCPU = netcoreapp1.0_Debug|AnyCPU
+		netcoreapp1.0_Release|AnyCPU = netcoreapp1.0_Release|AnyCPU
+EndGlobalSection
+
+
+	GlobalSection(SolutionConfigurationPlatforms) = postSolution
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json", "src\System.Json.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard1.0_Debug|AnyCPU.ActiveCfg = netstandard1.0_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json", "src\System.Json.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard1.0_Debug|AnyCPU.Build.0 = netstandard1.0_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json", "src\System.Json.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard1.0_Release|AnyCPU.ActiveCfg = netstandard1.0_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json", "src\System.Json.csproj", "{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}"}.netstandard1.0_Release|AnyCPU.Build.0 = netstandard1.0_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json.Tests", "tests\System.Json.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard1.0_Debug|AnyCPU.ActiveCfg = netstandard1.0_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json.Tests", "tests\System.Json.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard1.0_Debug|AnyCPU.Build.0 = netstandard1.0_Debug|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json.Tests", "tests\System.Json.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard1.0_Release|AnyCPU.ActiveCfg = netstandard1.0_Release|AnyCPU
+		{Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json.Tests", "tests\System.Json.Tests.csproj", "{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}"}.netstandard1.0_Release|AnyCPU.Build.0 = netstandard1.0_Release|AnyCPU
+EndGlobalSection
+
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
