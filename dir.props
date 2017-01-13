@@ -149,7 +149,7 @@
     <ArchGroup Condition="'$(ArchGroup)' == ''">x64</ArchGroup>
 
     <!-- For VS support if Configuration is set we default BuildConfiguration based on that property -->
-    <!-- <BuildConfiguration Condition="'$(BuildConfiguration)' == '' and '$(Configuration)' != ''">$(Configuration)-$(ArchGroup)</BuildConfiguration> -->
+    <BuildConfiguration Condition="'$(BuildConfiguration)' == '' and '$(Configuration)' != ''">$(Configuration)-$(ArchGroup)</BuildConfiguration>
 
     <!-- Initialize BuildConfiguration from the individual properties if it wasn't already explicitly set -->
     <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">$(TargetGroup)-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</BuildConfiguration>
