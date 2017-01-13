@@ -237,9 +237,12 @@ namespace System
         /// </summary>
         public unsafe void Clear()
         {
-            if (_length == 0) { return; }
+            var length = _length;
 
-            var byteLength = (UIntPtr)((uint)_length * Unsafe.SizeOf<T>());
+            if (_length == 0)
+                return;
+
+            var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
 
             if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
             {
@@ -275,16 +278,15 @@ namespace System
             }
         }
 
-
-
         /// <summary>
         /// Fills the contents of this span with the given value.
         /// </summary>
         public unsafe void Fill(T value)
         {
-            if (_length == 0) { return; }
+            var length = _length;
 
-            int length = _length;
+            if (_length == 0)
+                return;
 
             if (Unsafe.SizeOf<T>() == 1)
             {

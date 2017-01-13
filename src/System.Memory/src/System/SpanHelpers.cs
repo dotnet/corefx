@@ -106,21 +106,6 @@ namespace System
             return true;
         }
 
-        [StructLayout(LayoutKind.Sequential, Size = 64)]
-        struct Reg64 { }
-        [StructLayout(LayoutKind.Sequential, Size = 32)]
-        struct Reg32 { }
-        [StructLayout(LayoutKind.Sequential, Size = 16)]
-        struct Reg16 { }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static bool LessThanEqual(this IntPtr index, UIntPtr length)
-        {
-            return (sizeof(UIntPtr) == sizeof(uint))
-                ? (int)index <= (int)length
-                : (long)index <= (long)length;
-        }
-
         public unsafe static void ClearLessThanPointerSized(byte* ptr, UIntPtr byteLength)
         {
             if (sizeof(UIntPtr) == sizeof(uint))
@@ -245,6 +230,21 @@ namespace System
                 Unsafe.Add<IntPtr>(ref ip, i) = default(IntPtr);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe static bool LessThanEqual(this IntPtr index, UIntPtr length)
+        {
+            return (sizeof(UIntPtr) == sizeof(uint))
+                ? (int)index <= (int)length
+                : (long)index <= (long)length;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Size = 64)]
+        private struct Reg64 { }
+        [StructLayout(LayoutKind.Sequential, Size = 32)]
+        private struct Reg32 { }
+        [StructLayout(LayoutKind.Sequential, Size = 16)]
+        private struct Reg16 { }
 
         public static class PerTypeValues<T>
         {
