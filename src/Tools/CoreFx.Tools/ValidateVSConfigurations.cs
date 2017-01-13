@@ -41,8 +41,8 @@ namespace Microsoft.DotNet.Build.Tasks
                     {
                         string str = config + "_Debug|AnyCPU";
                         string str1 = config + "_Release|AnyCPU";
-                        vsConfigs.Add(str);
-                        vsConfigs.Add(str1);
+                        vsConfigs.Add(str.Trim());
+                        vsConfigs.Add(str1.Trim());
                     }
 
                     foreach (Match match in matchCollection)
