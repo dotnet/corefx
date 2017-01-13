@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Runtime.Loader.Tests</RootNamespace>
+    <AssemblyName>System.Runtime.Loader.Test.Assembly2</AssemblyName>
+    <ProjectGuid>{FBF73A8E-7889-4C7D-AFC3-509B821D0FC6}</ProjectGuid>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.0</NuGetTargetMoniker>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\System.Runtime.Loader.Test.Assembly\TestClass.cs">
+      <Link>TestClass.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

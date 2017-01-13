@@ -19,6 +19,11 @@ namespace System.Runtime.Loader
     public abstract partial class AssemblyLoadContext
     {
         protected AssemblyLoadContext() { }
+#if FEATURE_COLLECTIBLE_ALC
+        protected AssemblyLoadContext(bool isCollectible) { }
+        public bool IsCollectible { get { throw null; } }
+        public void Unload(){ throw null; }
+#endif
         public static System.Runtime.Loader.AssemblyLoadContext Default { get { throw null; } }
         public static System.Reflection.AssemblyName GetAssemblyName(string assemblyPath) { throw null; }
         public static System.Runtime.Loader.AssemblyLoadContext GetLoadContext(System.Reflection.Assembly assembly) { throw null; }
