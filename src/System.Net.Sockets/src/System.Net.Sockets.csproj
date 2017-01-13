@@ -97,9 +97,6 @@
       <Link>Common\System\Net\DebugSafeHandleMinusOneIsInvalid.cs</Link>
     </Compile>
     <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.cs">
-      <Link>Common\System\Net\ContextAwareResult.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
       <Link>Common\System\Net\LazyAsyncResult.cs</Link>
     </Compile>
@@ -290,16 +287,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalFree.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.LocalFree.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Windows.cs">
-      <Link>Common\System\Net\ContextAwareResult.Windows.cs</Link>
-    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
-    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Uap.cs">
-      <Link>Common\System\Net\ContextAwareResult.Uap.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\Sockets\AcceptOverlappedAsyncResult.Unix.cs" />
     <Compile Include="System\Net\Sockets\BaseOverlappedAsyncResult.Unix.cs" />
@@ -314,9 +303,6 @@
     <Compile Include="System\Net\Sockets\SocketPal.Unix.cs" />
     <Compile Include="System\Net\Sockets\TCPClient.Unix.cs" />
     <Compile Condition="'$(TargetGroup)' != 'netcore50'" Include="System\Net\Sockets\TCPClient.Unix.netstandard17.cs" />
-    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Unix.cs">
-      <Link>Common\System\Net\ContextAwareResult.Unix.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\InteropIPAddressExtensions.Unix.cs">
       <Link>Common\System\Net\InteropIPAddressExtensions.Unix.cs</Link>
     </Compile>

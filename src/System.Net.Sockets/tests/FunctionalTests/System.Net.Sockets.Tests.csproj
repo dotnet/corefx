@@ -12,6 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="ContextFlowTest.cs" />
     <Compile Include="AcceptAsync.cs" />
     <Compile Include="AgnosticListenerTest.cs" />
     <Compile Include="ArgumentValidationTests.cs" />
