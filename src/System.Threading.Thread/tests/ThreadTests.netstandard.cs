@@ -674,7 +674,7 @@ namespace System.Threading.Threads.Tests
             // not allowing it in finally blocks, so this behavior has changed in .NET Core.
             var continueThread = new AutoResetEvent(false);
             Action waitForThread;
-            var t =
+            Thread t =
                 ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
                 {
                     try
