@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <AssemblyName>System.Memory.Tests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -49,17 +48,21 @@
     <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
+    <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
+    <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
+    <Compile Include="ReadOnlySpan\IndexOf.char.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\NonPortableCast.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
+    <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
+    <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
+    <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
     <Compile Include="ReadOnlySpan\Slice.cs" />
     <Compile Include="ReadOnlySpan\StringSlice.cs" />
     <Compile Include="ReadOnlySpan\TestHelpers.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Memory.pkgproj">
-      <Name>Memory</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
