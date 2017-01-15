@@ -71,11 +71,6 @@ namespace System.Collections.Tests
         protected virtual bool Enumerator_ModifiedDuringEnumeration_ThrowsInvalidOperationException => true;
 
         /// <summary>
-        /// Whether the collection can be serialized.
-        /// </summary>
-        protected virtual bool SupportsSerialization => true;
-
-        /// <summary>
         /// Specifies whether this IEnumerable follows some sort of ordering pattern.
         /// </summary>
         protected virtual EnumerableOrder Order => EnumerableOrder.Sequential;

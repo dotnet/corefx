@@ -366,10 +366,5 @@ namespace System.Collections.Tests
         public bool Equals(ValueDelegateEquatable other) => EqualsWorker(other);
     }
 
-    public enum TestEnum
-    {
-        Test
-    }
-
     #endregion
 }

@@ -9,20 +9,18 @@ using Xunit;
 
 namespace System.Collections.Concurrent.Tests
 {
-    public class ConcurrentDictionary_Generic_Tests_enum_enum : ConcurrentDictionary_Generic_Tests<TestEnum, TestEnum>
+    public class ConcurrentDictionary_Generic_Tests_enum_enum : ConcurrentDictionary_Generic_Tests<SimpleEnum, SimpleEnum>
     {
-        protected override bool SupportsSerialization => false;
-
         protected override bool DefaultValueAllowed => true;
 
-        protected override KeyValuePair<TestEnum, TestEnum> CreateT(int seed)
+        protected override KeyValuePair<SimpleEnum, SimpleEnum> CreateT(int seed)
         {
-            return new KeyValuePair<TestEnum, TestEnum>(CreateTKey(seed), CreateTValue(seed));
+            return new KeyValuePair<SimpleEnum, SimpleEnum>(CreateTKey(seed), CreateTValue(seed));
         }
 
-        protected override TestEnum CreateTKey(int seed) => (TestEnum)new Random(seed).Next();
+        protected override SimpleEnum CreateTKey(int seed) => (SimpleEnum)new Random(seed).Next();
 
-        protected override TestEnum CreateTValue(int seed) => CreateTKey(seed);
+        protected override SimpleEnum CreateTValue(int seed) => CreateTKey(seed);
     }
 
     public class ConcurrentDictionary_Generic_Tests_string_string : ConcurrentDictionary_Generic_Tests<string, string>
