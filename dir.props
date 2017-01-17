@@ -82,7 +82,7 @@
   <PropertyGroup>
     <ValidatePackageVersions>true</ValidatePackageVersions>
     <ProhibitFloatingDependencies>true</ProhibitFloatingDependencies>
-    <CoreFxExpectedPrerelease>servicing-24916-01</CoreFxExpectedPrerelease>
+    <CoreFxExpectedPrerelease>servicing-24917-01</CoreFxExpectedPrerelease>
     <CoreClrExpectedPrerelease>servicing-24916-02</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>rc3-24211-00</ExternalExpectedPrerelease>
     <CoreFxVersionsIdentityRegex>^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore\.Targets)|(Microsoft\.NETCore\.Platforms)|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?&lt;!TestData)$</CoreFxVersionsIdentityRegex>
