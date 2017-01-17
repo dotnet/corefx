@@ -116,11 +116,16 @@
       <NuGetTargetMoniker>WindowsPhoneApp,Version=v8.1</NuGetTargetMoniker>
     </TargetGroups>
     <TargetGroups Include="uap101aot">
+      <TargetingPackNugetPackageId>Microsoft.TargetingPack.Private.NetNative</TargetingPackNugetPackageId>
       <PackageTargetRuntime>aot</PackageTargetRuntime>
       <NuGetTargetMoniker>UAP,Version=v10.1</NuGetTargetMoniker>
+      <Imports>uap101</Imports>
     </TargetGroups>
     <TargetGroups Include="uap101">
+      <TargetingPackNugetPackageId>Microsoft.TargetingPack.Private.NetNative</TargetingPackNugetPackageId>
       <NuGetTargetMoniker>UAP,Version=v10.1</NuGetTargetMoniker>
+      <Imports>netcore50</Imports>
+      <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="portable_net45+win8+sl5">
       <NuGetTargetMoniker>.NETPortable,Version=v0.0,Profile=Profile47</NuGetTargetMoniker>
