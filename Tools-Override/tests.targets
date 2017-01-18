@@ -28,13 +28,15 @@
 
   <PropertyGroup>
     <XunitRuntimeConfig>$(ToolsDir)\xunit.console.netcore.runtimeconfig.json</XunitRuntimeConfig>
-    <TestRuntimeEnvVar Condition="'$(OS)' == 'Windows_NT'">%RUNTIME_PATH%\</TestRuntimeEnvVar>
+    <TestRuntimeEnvVar Condition="'$(OS)' == 'Windows_NT' and '$(RUNTIME_PATH)' != ''">%RUNTIME_PATH%\</TestRuntimeEnvVar>
     <TestRuntimeEnvVar Condition="'$(OS)' != 'Windows_NT'">$RUNTIME_PATH/</TestRuntimeEnvVar>
+    <TestRuntimeEnvVar Condition="'$(TestRuntimeEnvVar)' == ''">$(TestSharedFxDir)\</TestRuntimeEnvVar>
     <TestHostExecutablePath Condition="'$(OS)'=='Windows_NT' AND '$(TestHostExecutablePath)' == ''">$(TestRuntimeEnvVar)dotnet.exe</TestHostExecutablePath>
     <TestHostExecutablePath Condition="'$(OS)'!='Windows_NT' AND '$(TestHostExecutablePath)' == ''">$(TestRuntimeEnvVar)dotnet</TestHostExecutablePath>
 
-    <ExecutionDirEnvVar Condition="'$(OS)' == 'Windows_NT'">%EXECUTION_DIR%\</ExecutionDirEnvVar>
+    <ExecutionDirEnvVar Condition="'$(OS)' == 'Windows_NT' and '$(EXECUTION_DIR)' != ''">%EXECUTION_DIR%\</ExecutionDirEnvVar>
     <ExecutionDirEnvVar Condition="'$(OS)' != 'Windows_NT'">$EXECUTION_DIR/</ExecutionDirEnvVar>
+    <ExecutionDirEnvVar Condition="'$(ExecutionDirEnvVar)' == ''">$(TestPath)\</ExecutionDirEnvVar>
     <XunitExecutable Condition="'$(XunitExecutable)' == ''">$(ExecutionDirEnvVar)xunit.console.netcore.exe</XunitExecutable>
 
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
