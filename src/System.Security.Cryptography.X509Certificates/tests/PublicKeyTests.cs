@@ -189,7 +189,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
             {
                 RSA rsa = cert.GetRSAPublicKey();
-                RSAParameters rsaParameters = rsa.ExportParameters(false);
 
                 VerifyKey_RSA(cert, rsa);
             }
