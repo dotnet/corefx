@@ -31,12 +31,9 @@
   </Target>
 
   <Target Name="GetTargetingPackDir">
-    <ItemGroup Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp')) Or $(NuGetTargetMoniker.Contains('NETStandard'))">
+    <ItemGroup Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('NETCoreApp')) Or $(NuGetTargetMoniker.Contains('NETStandard')) Or $(NuGetTargetMoniker.Contains('UAP'))">
       <TargetingPackDir Include="$(RefPath)" />
       <TargetingPackDir Condition="'$(IsNETCoreAppRef)' == 'true'" Include="$(BinDir)netcoreapp\pkg\ref" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(NuGetTargetMoniker)' == '' Or $(NuGetTargetMoniker.Contains('UAP'))">
-      <TargetingPackDir Include="$(RefRootPath)uap/" />
     </ItemGroup>
     <Error Condition="'@(TargetingPackDir)' == ''" Text="No targeting pack directory could be determined for NuGetTargetMoniker:$(NuGetTargetMoniker)" />
     <Message Text="Got TargetingPackDir:@(TargetingPackDir) from NuGetTargetMoniker:$(NuGetTargetMoniker)" Importance="Low" />
