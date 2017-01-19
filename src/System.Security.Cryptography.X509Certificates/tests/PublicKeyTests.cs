@@ -210,6 +210,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             byte[] expectedExponent = new byte[] { 0x01, 0x00, 0x01 };
 
+            byte[] originalModulus = rsaParameters.Modulus;
+            byte[] originalExponent = rsaParameters.Exponent;
+
             if (!expectedModulus.SequenceEqual(rsaParameters.Modulus) ||
                 !expectedExponent.SequenceEqual(rsaParameters.Exponent))
             {
@@ -234,10 +237,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         Console.WriteLine("New key handle ExportParameters was not successful either");
                     }    
                 }
-
-                Assert.Equal(expectedModulus, rsaParameters.Modulus);
-                Assert.Equal(expectedExponent, rsaParameters.Exponent);
             }
+
+            Assert.Equal(expectedModulus, originalModulus);
+            Assert.Equal(expectedExponent, originalExponent);
         }
 
         [Fact]
