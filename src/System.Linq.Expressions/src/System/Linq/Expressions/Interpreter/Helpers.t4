@@ -1,0 +1,125 @@
+﻿<#@ assembly name="System.Core" #>
+<#
+HashSet<Type> hasBoxCache = new HashSet<Type> { typeof(int) };
+
+Func<Type, string> toCSharp = null;
+toCSharp = type =>
+{
+    if (type == typeof(int)) return "int";
+    else if (type == typeof(uint)) return "uint";
+    else if (type == typeof(short)) return "short";
+    else if (type == typeof(ushort)) return "ushort";
+    else if (type == typeof(byte)) return "byte";
+    else if (type == typeof(sbyte)) return "sbyte";
+    else if (type == typeof(long)) return "long";
+    else if (type == typeof(ulong)) return "ulong";
+    else if (type == typeof(float)) return "float";
+    else if (type == typeof(double)) return "double";
+    else if (type == typeof(decimal)) return "decimal";
+    else if (type == typeof(bool)) return "bool";
+    else if (type == typeof(char)) return "char";
+    else if (type == typeof(string)) return "string";
+    else if (type == typeof(object)) return "object";
+
+    if (type.IsArray)
+    {
+        return toCSharp(type.GetElementType()) + "[]";
+    }
+
+    if (type.IsGenericType)
+    {
+        if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            return toCSharp(type.GetGenericArguments()[0]) + "[]";
+        }
+    }
+
+    return type.Name;
+};
+
+Func<Type, string> toBcl = type => type.Name;
+
+Dictionary<Tuple<Type, Type>, Type> arithmeticOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(uint)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(long)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(ulong)), typeof(ulong) },
+    { Tuple.Create(typeof(float), typeof(float)), typeof(float) },
+    { Tuple.Create(typeof(double), typeof(double)), typeof(double) },
+};
+
+Dictionary<Tuple<Type, Type>, Type> shiftOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(int)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(int)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
+};
+
+Dictionary<Tuple<Type, Type>, Type> bitwiseOperations = new Dictionary<Tuple<Type, Type>, Type>
+{
+    { Tuple.Create(typeof(int), typeof(int)), typeof(int) },
+    { Tuple.Create(typeof(uint), typeof(int)), typeof(uint) },
+    { Tuple.Create(typeof(long), typeof(int)), typeof(long) },
+    { Tuple.Create(typeof(ulong), typeof(int)), typeof(ulong) },
+};
+
+Dictionary<Type, Type> unaryOpTypes = new Dictionary<Type, Type>
+{
+    { typeof(bool), typeof(bool) }, // used by Not
+    { typeof(int), typeof(int) },
+    { typeof(long), typeof(long) },
+    { typeof(uint), typeof(uint) },
+    { typeof(ulong), typeof(ulong) },
+    { typeof(float), typeof(float) },
+    { typeof(double), typeof(double) },
+};
+
+Dictionary<string, Dictionary<Tuple<Type, Type>, Type>> binOps = new Dictionary<string, Dictionary<Tuple<Type, Type>, Type>>
+{
+    { "+", arithmeticOperations },
+    { "-", arithmeticOperations },
+    { "*", arithmeticOperations },
+    { "/", arithmeticOperations },
+    { "%", arithmeticOperations },
+    { "<<", shiftOperations },
+    { ">>", shiftOperations },
+    { "&", bitwiseOperations },
+    { "|", bitwiseOperations },
+    { "^", bitwiseOperations },
+};
+
+Dictionary<string, Dictionary<Type, Type>> unOps = new Dictionary<string, Dictionary<Type, Type>>
+{
+    { "Negate", unaryOpTypes },
+    { "Not", unaryOpTypes },
+    { "OnesComplement", unaryOpTypes },
+    { "Increment", unaryOpTypes },
+    { "Decrement", unaryOpTypes },
+};
+
+Func<string, Type, Type> getUnaryResultType = (op, o) =>
+{
+    Dictionary<Type, Type> table;
+    Type res;
+    if (unOps.TryGetValue(op, out table) && table.TryGetValue(o, out res))
+    {
+        return res;
+    }
+
+    return null;
+};
+
+Func<string, Type, Type, Type> getBinaryResultType = (op, l, r) =>
+{
+    Dictionary<Tuple<Type, Type>, Type> table;
+    Type res;
+    if (binOps.TryGetValue(op, out table) && table.TryGetValue(Tuple.Create(l, r), out res))
+    {
+        return res;
+    }
+
+    return null;
+};
+#>

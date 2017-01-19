@@ -1,0 +1,8 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+string instruction = "RightShift";
+string infix = ">>";
+Type[] operands = new[] { typeof(sbyte), typeof(short), typeof(int), typeof(long), typeof(byte), typeof(ushort), typeof(uint), typeof(ulong) };
+#>
+<#@ include file="BinaryShiftInstruction.t4" #>
