@@ -11,7 +11,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.0-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.0-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' And '$(TargetGroup)' != 'uap'">
     <Compile Include="System.ValueTuple.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'portable-net40+sl4+win8+wp8'">
@@ -19,7 +19,7 @@
     <Compile Include="System.Security.AllowPartiallyTrustedCallersAttribute.cs" />
     <Compile Include="System.Runtime.CompilerServices.ReferenceAssemblyAttribute.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">
     <Compile Include="System.ValueTuple.TypeForwards.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'portable-net40+sl4+win8+wp8'">
