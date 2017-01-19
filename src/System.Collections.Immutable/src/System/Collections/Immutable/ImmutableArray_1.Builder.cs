@@ -245,6 +245,12 @@ namespace System.Collections.Immutable
                 if (items.TryGetCount(out count))
                 {
                     this.EnsureCapacity(this.Count + count);
+
+                    if (items.TryCopyTo(_elements, 0))
+                    {
+                        _count += count;
+                        return;
+                    }
                 }
 
                 foreach (var item in items)
