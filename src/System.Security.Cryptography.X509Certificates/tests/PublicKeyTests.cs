@@ -213,24 +213,30 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             if (!expectedModulus.SequenceEqual(rsaParameters.Modulus) ||
                 !expectedExponent.SequenceEqual(rsaParameters.Exponent))
             {
+                Console.WriteLine("Modulus or Exponent not equal");
+
                 rsaParameters = rsa.ExportParameters(false);
 
                 if (!expectedModulus.SequenceEqual(rsaParameters.Modulus) ||
                     !expectedExponent.SequenceEqual(rsaParameters.Exponent))
                 {
-                    Assert.False(true, "Second call to ExportParameters produced valid data, but the first did not");
+                    Console.WriteLine("Second call to ExportParameters did not produce valid data either");
                 }
 
-                rsa = cert.GetRSAPublicKey();
-                rsaParameters = rsa.ExportParameters(false);
-
-                if (!expectedModulus.SequenceEqual(rsaParameters.Modulus) ||
-                    !expectedExponent.SequenceEqual(rsaParameters.Exponent))
+                if (cert != null)
                 {
-                    Assert.False(true, "New key handle ExportParameters was successful, original key handle was not");
-                }    
+                    rsa = cert.GetRSAPublicKey();
+                    rsaParameters = rsa.ExportParameters(false);
 
-                Assert.False(true, "Key's busted");
+                    if (!expectedModulus.SequenceEqual(rsaParameters.Modulus) ||
+                        !expectedExponent.SequenceEqual(rsaParameters.Exponent))
+                    {
+                        Console.WriteLine("New key handle ExportParameters was not successful either");
+                    }    
+                }
+
+                Assert.Equal(expectedModulus, rsaParameters.Modulus);
+                Assert.Equal(expectedExponent, rsaParameters.Exponent);
             }
         }
 
