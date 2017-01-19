@@ -37,21 +37,30 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
         }
 
+        public interface IContainer { }
+
+        public class Container : IContainer { }
+
         public interface IRepository<T> { }
 
-        public class EFRepository<T> : IRepository<T> { }
-
+        public class EFRepository<T> : IRepository<T>
+        {
+            public EFRepository(IContainer container) { }
+        }
 
         [Fact]
         public void ConventionBuilderExportsOpenGenerics()
         {
             var rb = new ConventionBuilder();
 
+            rb.ForTypesDerivedFrom<IContainer>()
+                .Export<IContainer>();
+
             rb.ForTypesDerivedFrom(typeof(IRepository<>))
                 .Export(eb => eb.AsContractType(typeof(IRepository<>)));
 
             var c = new ContainerConfiguration()
-                .WithPart(typeof(EFRepository<>), rb)
+                .WithParts(new Type[] { typeof(EFRepository<>), typeof(Container) }, rb)
                 .CreateContainer();
 
             var r = c.GetExport<IRepository<string>>();
