@@ -1484,7 +1484,7 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
-        [InlineData(-1, Skip = "#14961")]
+        [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
         public void SetItemDefaultInvalid(int index)
