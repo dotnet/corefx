@@ -449,13 +449,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             object from = frame.Pop();
             Debug.Assert(from != null);
-            Type underlying = Enum.GetUnderlyingType(_t);
 
             // If from is neither a T nor a type assignable to T (viz. an T-backed enum)
             // this will cause an InvalidCastException, which is what this operation should
             // throw in this case.
 
-            switch (underlying.GetTypeCode())
+            switch (_t.GetTypeCode())
             {
                 case TypeCode.Int32:
                     frame.Push(Enum.ToObject(_t, (int)from));
@@ -488,7 +487,7 @@ namespace System.Linq.Expressions.Interpreter
                 default:
                     // Only remaining possible type.
                     // Disallowed in C#, but allowed in CIL
-                    Debug.Assert(underlying == typeof(bool));
+                    Debug.Assert(_t.GetTypeCode() == TypeCode.Boolean);
                     frame.Push(Enum.ToObject(_t, (bool)from));
                     break;
             }
@@ -613,7 +612,7 @@ namespace System.Linq.Expressions.Interpreter
                 var boxes = new List<IStrongBox>();
                 var vars = new List<ParameterExpression>();
                 var indexes = new int[count];
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < indexes.Length; i++)
                 {
                     IStrongBox box = GetBox(node.Variables[i]);
                     if (box == null)

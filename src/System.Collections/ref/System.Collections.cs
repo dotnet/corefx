@@ -31,6 +31,8 @@ namespace System.Collections
         public void SetAll(bool value) { }
         public void CopyTo(System.Array array, int index) { }
         public System.Collections.BitArray Xor(System.Collections.BitArray value) { throw null; }
+        public System.Collections.BitArray RightShift(int count) { throw null; }
+        public System.Collections.BitArray LeftShift(int count) { throw null; }
     }
     public static partial class StructuralComparisons
     {
@@ -53,6 +55,8 @@ namespace System.Collections.Generic
         public Dictionary() { }
         public Dictionary(System.Collections.Generic.IDictionary<TKey, TValue> dictionary) { }
         public Dictionary(System.Collections.Generic.IDictionary<TKey, TValue> dictionary, System.Collections.Generic.IEqualityComparer<TKey> comparer) { }
+        public Dictionary(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> collection) { }
+        public Dictionary(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> collection, System.Collections.Generic.IEqualityComparer<TKey> comparer) { }
         public Dictionary(System.Collections.Generic.IEqualityComparer<TKey> comparer) { }
         protected Dictionary(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public Dictionary(int capacity) { }
@@ -171,10 +175,8 @@ namespace System.Collections.Generic
     public partial class HashSet<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.ISet<T>, System.Collections.IEnumerable, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
     {
         public HashSet() { }
-#if netcoreapp11
         public HashSet(int capacity) { }
         public HashSet(int capacity, System.Collections.Generic.IEqualityComparer<T> comparer) { }
-#endif
         public HashSet(System.Collections.Generic.IEnumerable<T> collection) { }
         public HashSet(System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         public HashSet(System.Collections.Generic.IEqualityComparer<T> comparer) { }
@@ -371,10 +373,8 @@ namespace System.Collections.Generic
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public T[] ToArray() { throw null; }
         public void TrimExcess() { }
-#if netcoreapp11
         public bool TryDequeue(out T result) { result = default(T); return default(bool); }
         public bool TryPeek(out T result) { result = default(T); return default(bool); }
-#endif
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable
         {
@@ -617,10 +617,8 @@ namespace System.Collections.Generic
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public T[] ToArray() { throw null; }
         public void TrimExcess() { }
-#if netcoreapp11
         public bool TryPeek(out T result) { result = default(T); return default(bool); }
         public bool TryPop(out T result) { result = default(T); return default(bool); }
-#endif
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable
         {

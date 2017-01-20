@@ -20,12 +20,43 @@ usage()
     exit 1
 }
 
+initHostDistroRid()
+{
+    if [ "$__HostOS" == "Linux" ]; then
+        if [ ! -e /etc/os-release ]; then
+            echo "WARNING: Can not determine runtime id for current distro."
+            __HostDistroRid=""
+        else
+            source /etc/os-release
+            __HostDistroRid="$ID.$VERSION_ID-$__HostArch"
+        fi
+    fi
+}
+
+initTargetDistroRid()
+{
+    if [ $__CrossBuild == 1 ]; then
+        if [ "$__BuildOS" == "Linux" ]; then
+            if [ ! -e $ROOTFS_DIR/etc/os-release ]; then
+                echo "WARNING: Can not determine runtime id for current distro."
+                export __DistroRid=""
+            else
+                source $ROOTFS_DIR/etc/os-release
+                export __DistroRid="$ID.$VERSION_ID-$__BuildArch"
+            fi
+        fi
+    else
+        export __DistroRid="$__HostDistroRid"
+    fi
+}
+
 setup_dirs()
 {
     echo Setting up directories for build
 
     mkdir -p "$__BinDir"
     mkdir -p "$__IntermediatesDir"
+    mkdir -p "$__RuntimePath"
 }
 
 # Check the system to ensure the right pre-reqs are in place
@@ -93,6 +124,12 @@ build_native()
     fi
 }
 
+copy_to_vertical_runtime()
+{
+    echo "Copying native shims to vertical runtime folder."
+    cp $__BinDir/* "$__RuntimePath"
+}
+
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
 __rootRepo="$__scriptpath/../.."
@@ -106,6 +143,7 @@ __BuildArch=x64
 __BuildType=Debug
 __CMakeArgs=DEBUG
 __BuildOS=Linux
+__TargetGroup=netcoreapp
 __NumProc=1
 __UnprocessedBuildArgs=
 __CrossBuild=0
@@ -146,8 +184,8 @@ while :; do
         arm)
             __BuildArch=arm
             ;;
-        arm-softfp)
-            __BuildArch=arm-softfp
+        armel)
+            __BuildArch=armel
             ;;
         arm64)
             __BuildArch=arm64
@@ -170,6 +208,10 @@ while :; do
             ;;
         osx)
             __BuildOS=OSX
+            ;;
+        --targetgroup)
+            shift
+            __TargetGroup=$1
             ;;
         --numproc)
             shift
@@ -258,8 +300,9 @@ case $CPUName in
 esac
 
 # Set the remaining variables based upon the determined build configuration
-__IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/Native"
-__BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/Native"
+__IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/native"
+__BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/native"
+__RuntimePath="$__rootbinpath/runtime/$__TargetGroup-$__BuildOS-$__BuildType-$__BuildArch"
 
 # Make the directories necessary for build if they don't exist
 setup_dirs
@@ -272,6 +315,12 @@ if [ "$__CrossBuild" == 1 ]; then
     fi
 fi
 
+# init the host distro name
+initHostDistroRid
+
+# init the target distro name
+initTargetDistroRid
+
     # Check prereqs.
 
     check_native_prereqs
@@ -283,3 +332,7 @@ fi
     # Build the corefx native components.
 
     build_native
+
+    # Copy files to vertical runtime folder
+
+    copy_to_vertical_runtime

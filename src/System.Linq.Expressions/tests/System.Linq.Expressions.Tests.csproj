@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -6,23 +6,22 @@
     <FeatureInterpret>true</FeatureInterpret>
   </PropertyGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4B4AA59B-89F9-4A34-B3C3-C97EF531EE00}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
-    <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
-    <IsInterpreting Condition="'$(PackageTargetFramework)' == 'netcore50'">true</IsInterpreting>
+    <IsInterpreting Condition="'$(TargetGroup)' == 'netcore50'">true</IsInterpreting>
     <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
-    <KeepAllProjectReferences>true</KeepAllProjectReferences>
-    <NugetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
+  <ItemGroup>
+    <TargetingPackExclusions Include="System.Linq.Expressions" />
+    <ReferenceFromRuntime Include="System.Linq.Expressions" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Remove this when TypeBuilder extends TypeInfo. See https://github.com/dotnet/corefx/issues/14334 -->
+    <Compile Include="$(CommonTestPath)\System\TypeBuilderExtensions.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
     <Compile Include="DebugViewTests.cs" />
@@ -94,6 +93,7 @@
     <Compile Include="DelegateType\DelegateCreationTests.cs" />
     <Compile Include="DelegateType\FuncTypeTests.cs" />
     <Compile Include="DelegateType\GetDelegateTypeTests.cs" />
+    <Compile Include="DynamicExpression\DynamicExpressionTests.cs" />
     <Compile Include="Dynamic\BinaryOperationTests.cs" />
     <Compile Include="Dynamic\BindingRestrictionsProxyTests.cs" />
     <Compile Include="Dynamic\BindingRestrictionsTests.cs" />
@@ -111,7 +111,7 @@
     <Compile Include="Dynamic\InvokeMemberBindingTests.cs" />
     <Compile Include="Dynamic\SetIndexBinderTests.cs" />
     <Compile Include="Dynamic\SetMemberBinderTests.cs" />
-    <Compile Include="Dynamic\UnaryOperationTests.cs .cs" />
+    <Compile Include="Dynamic\UnaryOperationTests.cs" />
     <Compile Include="ExceptionHandling\ExceptionHandlingExpressions.cs" />
     <Compile Include="ExpressionTests.cs" />
     <Compile Include="Goto\Break.cs" />
@@ -250,12 +250,6 @@
     <Compile Include="ILReader\PrivateReflectionHelpers.cs" />
     <Compile Include="ILReader\LocalsSignatureParser.cs" />
     <Compile Include="ILReader\SigParser.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\src\System.Linq.Expressions.csproj">
-      <Project>{aef718e9-d4fc-418f-a7ae-ed6b2c7b3787}</Project>
-      <Name>System.Linq.Expressions</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

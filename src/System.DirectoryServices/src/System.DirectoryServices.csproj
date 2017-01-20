@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'=='' AND '$(TargetGroup)' == ''">Windows_Debug</Configuration>
@@ -8,13 +8,10 @@
     <ProjectGuid>{879C23DC-D828-4DFB-8E92-ABBC11B71035}</ProjectGuid>
     <AssemblyName>System.DirectoryServices</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
     <NoWarn>$(NoWarn);0649</NoWarn>
     <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\DirectoryServices\externdll.cs" />
     <Compile Include="System\DirectoryServices\PrivilegedConfigurationManager.cs" />
@@ -23,16 +20,10 @@
     <Compile Include="System\DirectoryServices\AuthenticationTypes.cs" />
     <Compile Include="System\DirectoryServices\BinaryCompatibility.cs" />
     <Compile Include="System\DirectoryServices\DerefAlias.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryDescriptionAttribute.cs" />
     <Compile Include="System\DirectoryServices\DirectoryEntries.cs" />
     <Compile Include="System\DirectoryServices\DirectoryEntry.cs" />
     <Compile Include="System\DirectoryServices\DirectoryEntryConfiguration.cs" />
     <Compile Include="System\DirectoryServices\DirectorySearcher.cs" />
-<!--     <Compile Include="System\DirectoryServices\DirectoryServicesPermission.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionAccess.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionAttribute.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionEntry.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryServicesPermissionEntryCollection.cs" /> -->
     <Compile Include="System\DirectoryServices\DirectorySynchronization.cs" />
     <Compile Include="System\DirectoryServices\DirectorySynchronizationFlags.cs" />
     <Compile Include="System\DirectoryServices\DirectoryVirtualListView.cs" />

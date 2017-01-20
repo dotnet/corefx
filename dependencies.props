@@ -17,18 +17,19 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>c395eec8bf152b479be9893f311eee3c7dbd4313</CoreFxCurrentRef>
-    <CoreClrCurrentRef>c395eec8bf152b479be9893f311eee3c7dbd4313</CoreClrCurrentRef>
+    <CoreFxCurrentRef>672d0a712539e1903a903424edad85fd649b456c</CoreFxCurrentRef>
+    <CoreClrCurrentRef>672d0a712539e1903a903424edad85fd649b456c</CoreClrCurrentRef>
     <ExternalCurrentRef>4e2952b5114bfa90cc45eef908204006a771a62b</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>c395eec8bf152b479be9893f311eee3c7dbd4313</ProjectNTfsCurrentRef>
+    <ProjectNTfsCurrentRef>3ae2fce20a0a2c098ad787baf1353034d1d0e393</ProjectNTfsCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>beta-24814-01</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>beta-24814-02</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>beta-24917-02</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>beta-24917-03</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-24727-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-24814-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsExpectedPrerelease>beta-24917-00</ProjectNTfsExpectedPrerelease>
+    <StandardExpectedPrerelease>beta-24919-01</StandardExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
@@ -110,7 +111,7 @@
     <StaticDependency Include="@(XUnitDependency)">
       <Version>2.2.0-beta2-build3300</Version>
     </StaticDependency>
-   
+
     <StaticDependency Include="Microsoft.xunit.netcore.extensions;Microsoft.DotNet.BuildTools.TestSuite">
       <Version>1.0.1-prerelease-01001-04</Version>
     </StaticDependency>
@@ -133,6 +134,10 @@
       <PackageId>microsoft.xunit.runner.uwp</PackageId>
       <Version>$(AppXRunnerVersion)</Version>
     </DependencyBuildInfo>
+
+    <!-- project.json files to update -->
+    <ProjectJsonFiles Include="external\**\project.json" />
+    <ProjectJsonFiles Include="external\**\project.json.template" />
 
   </ItemGroup>
 </Project>
