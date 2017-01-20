@@ -2670,7 +2670,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
     }
 
-    [ActiveIssue(15290)]
     [Fact]
     public static void SoapEncodedSerializationTest_Enum()
     {
@@ -2686,7 +2685,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value, actual);
     }
 
-    [ActiveIssue(15290)]
     [Fact]
     public static void SoapEncodedSerializationTest_Enum_With_SoapEnumOverrides()
     {

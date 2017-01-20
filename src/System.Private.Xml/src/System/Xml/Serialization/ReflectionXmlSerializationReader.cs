@@ -613,7 +613,7 @@ namespace System.Xml.Serialization
             }
             else if (mapping is EnumMapping)
             {
-                throw new NotImplementedException();
+                return () => WriteEnumMethodSoap((EnumMapping)mapping);
             }
             else if (mapping is NullableMapping)
             {
@@ -832,15 +832,19 @@ namespace System.Xml.Serialization
 
         private object WriteEnumMethod(EnumMapping mapping, Func<string> readFunc)
         {
-            if (mapping.IsSoap)
-            {
-                // #10676: As all SOAP relates APIs are not in CoreCLR yet, the reflection based method
-                // currently throws PlatformNotSupportedException when types require SOAP serialization.
-                throw new PlatformNotSupportedException();
-            }
-
+            Debug.Assert(!mapping.IsSoap, "mapping.IsSoap was true. Use WriteEnumMethodSoap for reading SOAP encoded enum value.");
             string source = readFunc();
+            return WriteEnumMethod(mapping, source);
+        }
 
+        private object WriteEnumMethodSoap(EnumMapping mapping)
+        {
+            string source = Reader.ReadElementString();
+            return WriteEnumMethod(mapping, source);
+        }
+
+        private object WriteEnumMethod(EnumMapping mapping, string source)
+        {
             if (mapping.IsFlags)
             {
                 Hashtable table = WriteHashtable(mapping, mapping.TypeDesc.Name);
@@ -848,7 +852,15 @@ namespace System.Xml.Serialization
             }
             else
             {
-                return Enum.Parse(mapping.TypeDesc.Type, source);
+                foreach (var c in mapping.Constants)
+                {
+                    if (string.Equals(c.XmlName, source))
+                    {
+                        return Enum.Parse(mapping.TypeDesc.Type, c.Name);
+                    }
+                }
+
+                throw CreateUnknownConstantException(source, mapping.TypeDesc.Type);
             }
         }
 
@@ -1056,7 +1068,7 @@ namespace System.Xml.Serialization
                 {
                     if (structMapping.TypeDesc.IsRoot)
                     {
-                        return ReadTypedPrimitive(new XmlQualifiedName(Soap.UrType, XmlSchemaConstants.Namespace));
+                        return ReadTypedPrimitive(new XmlQualifiedName(Soap.UrType, XmlReservedNs.NsXs));
                     }
                 }
                 else if (WriteDerivedTypes(out o, structMapping, xsiType, defaultNamespace, checkType, isNullable))

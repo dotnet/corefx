@@ -258,7 +258,6 @@ namespace System.Xml.Serialization
                 if (text.Mapping is EnumMapping)
                 {
                     stringValue = WriteEnumMethod((EnumMapping)mapping, o);
-
                 }
                 else
                 {
@@ -351,7 +350,9 @@ namespace System.Xml.Serialization
             {
                 if (element.Mapping.IsSoap)
                 {
-                    throw new PlatformNotSupportedException();
+                    Writer.WriteStartElement(name, ns);
+                    WriteEnumMethod((EnumMapping)element.Mapping, o);
+                    WriteEndElement();
                 }
                 else
                 {
@@ -676,28 +677,62 @@ namespace System.Xml.Serialization
 
         private string WriteEnumMethod(EnumMapping mapping, object v)
         {
-            if (mapping != null && mapping.IsSoap)
+            string returnString = null;
+            if (mapping != null)
             {
-                throw new PlatformNotSupportedException();
-            }
-
-            if (mapping != null && mapping.IsFlags)
-            {
-                Type type = mapping.TypeDesc.Type;
-
-                List<string> valueStrings = new List<string>();
-                List<long> valueIds = new List<long>();
-                foreach (var value in Enum.GetValues(type))
+                ConstantMapping[] constants = mapping.Constants;
+                if (constants.Length > 0)
                 {
-                    valueStrings.Add(value.ToString());
-                    valueIds.Add(Convert.ToInt64(value));
-                }
+                    bool foundValue = false;
+                    var enumValue = Convert.ToInt64(v);
+                    for (int i = 0; i < constants.Length; i++)
+                    {
+                        ConstantMapping c = constants[i];
+                        if (enumValue == c.Value)
+                        {
+                            returnString = c.XmlName;
+                            foundValue = true;
+                            break;
+                        }
+                    }
 
-                return FromEnum(Convert.ToInt64(v), valueStrings.ToArray(), valueIds.ToArray());
+                    if (!foundValue)
+                    {
+                        if (mapping.IsFlags)
+                        {
+                            string[] xmlNames = new string[constants.Length];
+                            long[] valueIds = new long[constants.Length];
+
+                            for (int i = 0; i < constants.Length; i++)
+                            {
+                                xmlNames[i] = constants[i].XmlName;
+                                valueIds[i] = constants[i].Value;
+                            }
+
+                            returnString = FromEnum(enumValue, xmlNames, valueIds);
+
+                        }
+                        else
+                        {
+                            throw CreateInvalidEnumValueException(v, mapping.TypeDesc.FullName);
+                        }
+                    }
+                }
             }
             else
             {
-                return v.ToString();
+                returnString = v.ToString();
+            }
+
+            if (mapping.IsSoap)
+            {
+                WriteXsiType(mapping.TypeName, mapping.Namespace);
+                Writer.WriteString(returnString);
+                return null;
+            }
+            else
+            {
+                return returnString;
             }
         }
 
