@@ -53,7 +53,9 @@
 
     <XunitOptions Condition="'$(UseDotNetNativeToolchain)'=='true'">$(XunitOptions) -redirectoutput</XunitOptions>
 
-    <XunitOptions>$(XunitOptions) -notrait category=non$(_bc_TargetGroup)tests</XunitOptions>
+    <!-- Temporary till we fix the whole filtering with  TargetGroup -->
+    <XunitOptions Condition="'$(_bc_TargetGroup)' != 'netfx'">$(XunitOptions) -notrait category=nonnetcoreapp1.1tests</XunitOptions>
+
     <XunitOptions Condition="'$(XunitMaxThreads)'!=''">$(XunitOptions) -maxthreads $(XunitMaxThreads)</XunitOptions>
     <XunitTestAssembly Condition="'$(XunitTestAssembly)' == ''">$(TargetFileName)</XunitTestAssembly>
     <XunitArguments>$(XunitTestAssembly) $(XunitOptions)</XunitArguments>
