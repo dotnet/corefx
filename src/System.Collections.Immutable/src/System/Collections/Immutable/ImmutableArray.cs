@@ -112,7 +112,7 @@ namespace System.Collections.Immutable
                     throw new InvalidOperationException(SR.InvalidOperationOnDefaultArray);
                 }
 
-                // immutableArray.Array must not be null at this point, and we know it's an
+                // `array` must not be null at this point, and we know it's an
                 // ImmutableArray<T> or ImmutableArray<SomethingDerivedFromT> as they are
                 // the only types that could be both IEnumerable<T> and IImmutableArray.
                 // As such, we know that items is either an ImmutableArray<T> or

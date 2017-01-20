@@ -108,9 +108,9 @@ namespace System.Collections.Immutable
         {
             Debug.Assert(sequence != null);
             Debug.Assert(array != null);
-            Debug.Assert(arrayIndex >= 0 && arrayIndex < array.Length);
+            Debug.Assert(arrayIndex >= 0 && arrayIndex <= array.Length);
 
-            // IList is the GCD of what the following 2 types implement.
+            // IList is the GCD of what the following types implement.
             var listInterface = sequence as IList<T>;
             if (listInterface != null)
             {
