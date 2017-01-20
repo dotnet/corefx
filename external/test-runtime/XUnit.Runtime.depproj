@@ -21,8 +21,12 @@
     <PackageToInclude Include="Microsoft.xunit.netcore.extensions"/>
     <PackageToInclude Include="Microsoft.DotNet.xunit.performance.run.core"/>
     <PackageToInclude Include="Newtonsoft.Json"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <PackageToInclude Include="xunit.console.netcore"/>
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <PackageToInclude Include="xunit.runner.console"/>
   </ItemGroup>
