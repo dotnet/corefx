@@ -31,10 +31,10 @@
 
   <Target Name="AddXunitConsoleRunner" BeforeTargets="ResolveReferences" Condition="'$(TargetGroup)' == 'netfx'">
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PackagesDir)xunit.runner.console\2.1.0\tools\*.*">
+      <ReferenceCopyLocalPaths Include="$(PackagesDir)xunit.runner.console\2.2.0-beta2-build3300\tools\*.*">
         <Private>false</Private>
         <NuGetPackageId>xunit.runner.console</NuGetPackageId>
-        <NuGetPackageVersion>2.1.0</NuGetPackageVersion>
+        <NuGetPackageVersion>2.2.0-beta2-build3300</NuGetPackageVersion>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
   </Target>
