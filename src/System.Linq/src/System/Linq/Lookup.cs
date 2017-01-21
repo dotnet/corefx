@@ -189,8 +189,7 @@ namespace System.Linq
                 do
                 {
                     g = g._next;
-                    g.Trim();
-                    array[index] = resultSelector(g._key, g._elements);
+                    array[index] = resultSelector(g._key, g);
                     ++index;
                 }
                 while (g != _lastGrouping);
@@ -225,8 +224,7 @@ namespace System.Linq
                 do
                 {
                     g = g._next;
-                    g.Trim();
-                    list.Add(resultSelector(g._key, g._elements));
+                    list.Add(resultSelector(g._key, g));
                 }
                 while (g != _lastGrouping);
             }
@@ -247,8 +245,7 @@ namespace System.Linq
                 do
                 {
                     g = g._next;
-                    g.Trim();
-                    yield return resultSelector(g._key, g._elements);
+                    yield return resultSelector(g._key, g);
                 }
                 while (g != _lastGrouping);
             }
