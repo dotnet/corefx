@@ -111,6 +111,15 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                List<TSource> list = _source.ToList();
+
+                list.Reverse();
+
+                return new HashSet<TSource>(list, comparer);
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 if (onlyIfCheap)

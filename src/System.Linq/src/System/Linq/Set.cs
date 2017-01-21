@@ -191,6 +191,27 @@ namespace System.Linq
         }
 
         /// <summary>
+        /// Creates a hashset from the items in this set.
+        /// </summary>
+        /// <returns>A list of the items in this set.</returns>
+        internal HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
+        {
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "Optimised ToHashSet cannot be called if Remove has been called.");
+#endif
+            int count = _count;
+
+            HashSet<TElement> hashSet = new HashSet<TElement>(count, comparer);
+
+            for (int i = 0; i != count; ++i)
+            {
+                hashSet.Add(_slots[i]._value);
+            }
+
+            return hashSet;
+        }
+
+        /// <summary>
         /// The number of items in this set.
         /// </summary>
         internal int Count => _count;

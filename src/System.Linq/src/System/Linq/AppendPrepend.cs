@@ -93,6 +93,8 @@ namespace System.Linq
 
             public abstract List<TSource> ToList();
 
+            public abstract HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer);
+
             public abstract int GetCount(bool onlyIfCheap);
         }
 
@@ -241,6 +243,30 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                int count = GetCount(onlyIfCheap: true);
+
+                HashSet<TSource> hashSet = count == -1 ? new HashSet<TSource>(comparer) : new HashSet<TSource>(count, comparer);
+
+                if (!_appending)
+                {
+                    hashSet.Add(_item);
+                }
+
+                foreach (var item in _source)
+                {
+                    hashSet.Add(item);
+                }
+
+                if (_appending)
+                {
+                    hashSet.Add(_item);
+                }
+
+                return hashSet;
             }
 
             public override int GetCount(bool onlyIfCheap)
@@ -522,6 +548,35 @@ namespace System.Linq
                 }
 
                 return !onlyIfCheap || _source is ICollection<TSource> ? _source.Count() + (_appended == null ? 0 : _appended.Count) + (_prepended == null ? 0 : _prepended.Count) : -1;
+            }
+
+            public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                int count = GetCount(onlyIfCheap: true);
+
+                HashSet<TSource> hashSet = count == -1 ? new HashSet<TSource>(comparer) : new HashSet<TSource>(count, comparer);
+
+                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                {
+                    hashSet.Add(node.Item);
+                }
+
+                foreach (var item in _source)
+                {
+                    hashSet.Add(item);
+                }
+
+                if (_appended != null)
+                {
+                    IEnumerator<TSource> e = _appended.GetEnumerator();
+
+                    while (e.MoveNext())
+                    {
+                        hashSet.Add(e.Current);
+                    }
+                }
+
+                return hashSet;
             }
         }
     }

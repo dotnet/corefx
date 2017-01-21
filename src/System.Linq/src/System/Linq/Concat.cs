@@ -521,6 +521,29 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                int count = GetCount(onlyIfCheap: true);
+                var hashSet = count != -1 ? new HashSet<TSource>(count, comparer) : new HashSet<TSource>(comparer);
+
+                for (int i = 0; ; i++)
+                {
+                    IEnumerable<TSource> source = GetEnumerable(i);
+
+                    if (source == null)
+                    {
+                        break;
+                    }
+
+                    foreach (var item in source)
+                    {
+                        hashSet.Add(item);
+                    }
+                }
+
+                return hashSet;
+            }
+
             public virtual int GetCount(bool onlyIfCheap)
             {
                 if (onlyIfCheap)

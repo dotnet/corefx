@@ -103,6 +103,20 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                List<TSource> list = _source.ToList();
+
+                if (list.Count == 0)
+                {
+                    list.Add(_default);
+                }
+
+                HashSet<TSource> hashSet = new HashSet<TSource>(list, comparer);
+
+                return hashSet;
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 int count;

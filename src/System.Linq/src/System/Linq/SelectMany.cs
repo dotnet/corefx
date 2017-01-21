@@ -270,6 +270,21 @@ namespace System.Linq
 
                 return list;
             }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                foreach (TSource element in _source)
+                {
+                    foreach (var item in _selector(element))
+                    {
+                        hashSet.Add(item);
+                    }
+                }
+
+                return hashSet;
+            }
         }
     }
 }

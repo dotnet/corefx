@@ -216,6 +216,43 @@ namespace System.Linq
             return list;
         }
 
+        HashSet<IGrouping<TKey, TElement>> IIListProvider<IGrouping<TKey, TElement>>.ToHashSet(IEqualityComparer<IGrouping<TKey, TElement>> comparer)
+        {
+            HashSet<IGrouping<TKey, TElement>> hashSet = new HashSet<IGrouping<TKey, TElement>>(_count, comparer);
+
+            Grouping<TKey, TElement> g = _lastGrouping;
+
+            if (g != null)
+            {
+                do
+                {
+                    g = g._next;
+                    hashSet.Add(g);
+                }
+                while (g != _lastGrouping);
+            }
+
+            return hashSet;
+        }
+
+        internal HashSet<TResult> ToHashSet<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TResult> comparer)
+        {
+            HashSet<TResult> hashSet = new HashSet<TResult>(_count, comparer);
+            Grouping<TKey, TElement> g = _lastGrouping;
+            if (g != null)
+            {
+                do
+                {
+                    g = g._next;
+                    g.Trim();
+                    hashSet.Add(resultSelector(g._key, g._elements));
+                }
+                while (g != _lastGrouping);
+            }
+
+            return hashSet;
+        }
+
         internal List<TResult> ToList<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
         {
             List<TResult> list = new List<TResult>(_count);

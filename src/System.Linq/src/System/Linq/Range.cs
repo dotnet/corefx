@@ -101,6 +101,18 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<int> ToHashSet(IEqualityComparer<int> comparer)
+            {
+                HashSet<int> hashSet = new HashSet<int>(_end - _start, comparer);
+
+                for (int cur = _start; cur != _end; cur++)
+                {
+                    hashSet.Add(cur);
+                }
+
+                return hashSet;
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 return _end - _start;
