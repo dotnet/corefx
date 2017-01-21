@@ -22,68 +22,127 @@ namespace System.Reflection.PortableExecutable
     {
         private readonly long _startOffset;
         private readonly long _maxOffset;
-        private readonly BinaryReader _reader;
+        private long _offset;
+        private readonly Stream _stream;
+        private byte[] _buffer;
 
         public PEBinaryReader(Stream stream, int size)
         {
             Debug.Assert(size >= 0 && size <= (stream.Length - stream.Position));
 
-            _startOffset = stream.Position;
+            _offset = _startOffset = stream.Position;
             _maxOffset = _startOffset + size;
-            _reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            _buffer = new byte[8];
+            _stream = stream;
+        }
+
+        private void FillBuffer(int numBytes)
+        {
+            int bytesRead = 0;
+            int n = 0;
+
+            do
+            {
+                n = _stream.Read(_buffer, bytesRead, numBytes - bytesRead);
+                if (n == 0)
+                {
+                    Throw.ImageTooSmall();
+                }
+                bytesRead += n;
+            } while (bytesRead < numBytes);
         }
 
         public int CurrentOffset
         {
-            get { return (int)(_reader.BaseStream.Position - _startOffset); }
+            get { return (int)(_stream.Position - _startOffset); }
         }
 
         public void Seek(int offset)
         {
             CheckBounds(_startOffset, offset);
-            _reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+            _stream.Seek(_startOffset + offset, SeekOrigin.Begin);
         }
 
         public byte[] ReadBytes(int count)
         {
-            CheckBounds(_reader.BaseStream.Position, count);
-            return _reader.ReadBytes(count);
+            CheckBounds(_stream.Position, count);
+
+            if (count < 0)
+            {
+                Throw.ImageTooSmallOrContainsInvalidOffsetOrCount();
+            }
+
+            if (count == 0)
+            {
+                return Array.Empty<byte>();
+            }
+
+            byte[] result = new byte[count];
+            int numRead = 0;
+            do
+            {
+                int n = _stream.Read(result, numRead, count);
+                if (n == 0)
+                {
+                    break;
+                }
+
+                numRead += n;
+                count -= n;
+            } while (count > 0);
+
+            if (numRead != result.Length)
+            {
+                Throw.ImageTooSmallOrContainsInvalidOffsetOrCount();
+            }
+
+            return result;
         }
 
         public Byte ReadByte()
         {
             CheckBounds(sizeof(Byte));
-            return _reader.ReadByte();
+            int b = _stream.ReadByte();
+            return checked((byte)b);
         }
 
         public Int16 ReadInt16()
         {
             CheckBounds(sizeof(Int16));
-            return _reader.ReadInt16();
+            FillBuffer(2);
+            return (short)(_buffer[0] | _buffer[1] << 8);
         }
 
         public ushort ReadUInt16()
         {
             CheckBounds(sizeof(ushort));
-            return _reader.ReadUInt16();
+            FillBuffer(2);
+            return (ushort)(_buffer[0] | _buffer[1] << 8);
         }
 
         public Int32 ReadInt32()
         {
             CheckBounds(sizeof(Int32));
-            return _reader.ReadInt32();
+            FillBuffer(4);
+            return (int)(_buffer[0] | _buffer[1] << 8 | _buffer[2] << 16 | _buffer[3] << 24);
         }
 
         public UInt32 ReadUInt32()
         {
             CheckBounds(sizeof(UInt32));
-            return _reader.ReadUInt32();
+            FillBuffer(4);
+            return (uint)(_buffer[0] | _buffer[1] << 8 | _buffer[2] << 16 | _buffer[3] << 24);
         }
 
         public ulong ReadUInt64()
         {
             CheckBounds(sizeof(UInt64));
-            return _reader.ReadUInt64();
+            FillBuffer(8);
+            uint lo = (uint)(_buffer[0] | _buffer[1] << 8 |
+                             _buffer[2] << 16 | _buffer[3] << 24);
+            uint hi = (uint)(_buffer[4] | _buffer[5] << 8 |
+                             _buffer[6] << 16 | _buffer[7] << 24);
+            return ((ulong)hi) << 32 | lo;
         }
 
         /// <summary>
@@ -112,10 +171,10 @@ namespace System.Reflection.PortableExecutable
         private void CheckBounds(uint count)
         {
             Debug.Assert(count <= sizeof(Int64));  // Error message assumes we're trying to read constant small number of bytes.
-            Debug.Assert(_reader.BaseStream.Position >= 0 && _maxOffset >= 0);
+            Debug.Assert(_stream.Position >= 0 && _maxOffset >= 0);
 
             // Add cannot overflow because the worst case is (ulong)long.MaxValue + uint.MaxValue < ulong.MaxValue.
-            if ((ulong)_reader.BaseStream.Position + count > (ulong)_maxOffset)
+            if ((ulong)_stream.Position + count > (ulong)_maxOffset)
             {
                 Throw.ImageTooSmall();
             }
