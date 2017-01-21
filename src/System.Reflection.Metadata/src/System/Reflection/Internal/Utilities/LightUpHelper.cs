@@ -38,7 +38,7 @@ namespace System.Reflection.Internal
         {
             try
             {
-                return type.GetRuntimeMethod(name, parameterTypes);
+                return type.GetMethod(name, parameterTypes);
             }
             catch (AmbiguousMatchException)
             {
