@@ -8,6 +8,7 @@
     -->
     <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
     <OutputPath>$(RuntimePath)</OutputPath>
+    <XUnitConsoleRunnerVersion>2.2.0-beta2-build3300</XUnitConsoleRunnerVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -34,11 +35,14 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
   <Target Name="AddXunitConsoleRunner" BeforeTargets="ResolveReferences" Condition="'$(TargetGroup)' == 'netfx'">
+    <Error Condition="!Exists('$(PackagesDir)xunit.runner.console\$(XUnitConsoleRunnerVersion)\tools\xunit.console.exe')"
+            Text="Error: looks the package $(PackagesDir)xunit.runner.console\$(XUnitConsoleRunnerVersion) not restored or missing xunit.console.exe."
+    />
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PackagesDir)xunit.runner.console\2.2.0-beta2-build3300\tools\*.*">
+      <ReferenceCopyLocalPaths Include="$(PackagesDir)xunit.runner.console\$(XUnitConsoleRunnerVersion)\tools\*.*">
         <Private>false</Private>
         <NuGetPackageId>xunit.runner.console</NuGetPackageId>
-        <NuGetPackageVersion>2.2.0-beta2-build3300</NuGetPackageVersion>
+        <NuGetPackageVersion>$(XUnitConsoleRunnerVersion)</NuGetPackageVersion>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
   </Target>
