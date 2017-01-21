@@ -5,7 +5,7 @@
   <Target Name="AddTestTargetingPackReferences" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup Condition="'$(IsTestProject)'=='true'">
       <TargetingPackExclusions Include="System.Private.CoreLib" />
-      <TargetingPackExclusions Include="System.Runtime.WindowsRuntime.UI.Xaml" Condition="'$(IsTestProject)'=='true'" /> <!-- Harmless, but causes PRI targets to run -->
+      <TargetingPackExclusions Include="System.Runtime.WindowsRuntime.UI.Xaml" /> <!-- Harmless, but causes PRI targets to run -->
 
       <!-- Whitelisted runtime assemblies that are OK to reference. -->
       <ReferenceFromRuntime Include="xunit.core" />
