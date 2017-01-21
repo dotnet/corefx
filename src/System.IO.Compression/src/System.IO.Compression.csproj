@@ -8,7 +8,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseECMAKey>true</UseECMAKey>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);FEATURE_ZLIB</DefineConstants>
-    <DefineConstants>$(DefineConstants);netcoreapp20</DefineConstants>
+    <DefineConstants>$(DefineConstants);netstandard20</DefineConstants>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
