@@ -1352,7 +1352,8 @@ namespace System.Collections.Immutable
                 Node tree = this;
                 while (!tree.IsBalanced)
                 {
-                    Debug.Assert(tree._left.IsBalanced && tree._right.IsBalanced);
+                    Debug.Assert(tree._left.IsEmpty || tree._left.IsBalanced);
+                    Debug.Assert(tree._right.IsEmpty || tree._right.IsBalanced);
 
                     if (tree.IsRightHeavy)
                     {
