@@ -76,7 +76,7 @@ namespace System.Collections.Immutable
         /// find an implementation of the <see cref="IComparable{T}"/> generic interface or
         /// the <see cref="IComparable"/> interface for type <typeparamref name="T"/>.
         /// </exception>
-        public int BinarySearch(T item) => this.BinarySearch(item, null);
+        public int BinarySearch(T item) => this.BinarySearch(item, comparer: null);
 
         /// <summary>
         ///  Searches the entire sorted <see cref="ImmutableList{T}"/> for an element
@@ -255,7 +255,7 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index <= this.Count, nameof(index));
             Requires.NotNull(items, nameof(items));
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
-            return WrapNewOrEmpty(_root.InsertRange(index, items));
+            return this.IsEmpty ? CreateRange(items) : WrapNew(_root.InsertRange(index, items));
         }
 
         /// <summary>
