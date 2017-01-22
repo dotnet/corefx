@@ -42,13 +42,15 @@ namespace System.IO
         [Fact]
         public void SetAccessControl_DirectoryInfo_DirectorySecurity_InvalidArguments()
         {
-            Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.SetAccessControl((DirectoryInfo)null, (DirectorySecurity)null));
+            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
+            Assert.Throws<ArgumentNullException>("directorySecurity", () => FileSystemAclExtensions.SetAccessControl(directoryInfo, (DirectorySecurity)null));
         }
 
         [Fact]
         public void SetAccessControl_FileInfo_FileSecurity_InvalidArguments()
         {
-            Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.SetAccessControl((FileInfo)null, (FileSecurity)null));
+            FileInfo fileInfo = new FileInfo("\\");
+            Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity)null));
         }
 
         [Fact]
