@@ -76,10 +76,7 @@ namespace System.Collections.Immutable
         /// find an implementation of the <see cref="IComparable{T}"/> generic interface or
         /// the <see cref="IComparable"/> interface for type <typeparamref name="T"/>.
         /// </exception>
-        public int BinarySearch(T item)
-        {
-            return this.BinarySearch(item, null);
-        }
+        public int BinarySearch(T item) => this.BinarySearch(item, null);
 
         /// <summary>
         ///  Searches the entire sorted <see cref="ImmutableList{T}"/> for an element
@@ -101,10 +98,7 @@ namespace System.Collections.Immutable
         /// cannot find an implementation of the <see cref="IComparable{T}"/> generic interface
         /// or the <see cref="IComparable"/> interface for type <typeparamref name="T"/>.
         /// </exception>
-        public int BinarySearch(T item, IComparer<T> comparer)
-        {
-            return this.BinarySearch(0, this.Count, item, comparer);
-        }
+        public int BinarySearch(T item, IComparer<T> comparer) => this.BinarySearch(0, this.Count, item, comparer);
 
         /// <summary>
         /// Searches a range of elements in the sorted <see cref="ImmutableList{T}"/>
@@ -135,10 +129,7 @@ namespace System.Collections.Immutable
         /// cannot find an implementation of the <see cref="IComparable{T}"/> generic interface
         /// or the <see cref="IComparable"/> interface for type <typeparamref name="T"/>.
         /// </exception>
-        public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
-        {
-            return _root.BinarySearch(index, count, item, comparer);
-        }
+        public int BinarySearch(int index, int count, T item, IComparer<T> comparer) => _root.BinarySearch(index, count, item, comparer);
 
         #region IImmutableList<T> Properties
 
@@ -146,35 +137,17 @@ namespace System.Collections.Immutable
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public bool IsEmpty
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<bool>() == (this.Count == 0));
-                return _root.IsEmpty;
-            }
-        }
+        public bool IsEmpty => _root.IsEmpty;
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
-        IImmutableList<T> IImmutableList<T>.Clear()
-        {
-            return this.Clear();
-        }
+        IImmutableList<T> IImmutableList<T>.Clear() => this.Clear();
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<int>() >= 0);
-                Contract.Ensures((Contract.Result<int>() == 0) == this.IsEmpty);
-                return _root.Count;
-            }
-        }
+        public int Count => _root.Count;
 
         #endregion
 
@@ -184,23 +157,14 @@ namespace System.Collections.Immutable
         /// See <see cref="ICollection"/>.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object ICollection.SyncRoot
-        {
-            get { return this; }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <summary>
         /// See the <see cref="ICollection"/> interface.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                // This is immutable, so it is always thread-safe.
-                return true;
-            }
-        }
+        // This is immutable, so it is always thread-safe.
+        bool ICollection.IsSynchronized => true;
 
         #endregion
 
@@ -212,13 +176,7 @@ namespace System.Collections.Immutable
         /// <param name="index">The 0-based index of the element in the set to return.</param>
         /// <returns>The element at the given position.</returns>
         /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
-        public T this[int index]
-        {
-            get
-            {
-                return _root[index];
-            }
-        }
+        public T this[int index] => _root[index];
 
         #endregion
 
@@ -227,13 +185,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Gets the element in the collection at a given index.
         /// </summary>
-        T IOrderedCollection<T>.this[int index]
-        {
-            get
-            {
-                return this[index];
-            }
-        }
+        T IOrderedCollection<T>.this[int index] => this[index];
 
         #endregion
 
@@ -265,8 +217,7 @@ namespace System.Collections.Immutable
         {
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count == this.Count + 1);
-            var result = _root.Add(value);
-            return this.Wrap(result);
+            return WrapNew(_root.Add(value));
         }
 
         /// <summary>
@@ -280,14 +231,7 @@ namespace System.Collections.Immutable
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count >= this.Count);
 
             // Some optimizations may apply if we're an empty list.
-            if (this.IsEmpty)
-            {
-                return CreateRange(items);
-            }
-
-            var result = _root.AddRange(items);
-
-            return this.Wrap(result);
+            return this.IsEmpty ? CreateRange(items) : WrapNew(_root.AddRange(items));
         }
 
         /// <summary>
@@ -299,7 +243,7 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index <= this.Count, nameof(index));
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count == this.Count + 1);
-            return this.Wrap(_root.Insert(index, item));
+            return WrapNew(_root.Insert(index, item));
         }
 
         /// <summary>
@@ -311,20 +255,14 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index <= this.Count, nameof(index));
             Requires.NotNull(items, nameof(items));
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
-
-            var result = _root.InsertRange(index, items);
-
-            return this.Wrap(result);
+            return WrapNewOrEmpty(_root.InsertRange(index, items));
         }
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [Pure]
-        public ImmutableList<T> Remove(T value)
-        {
-            return this.Remove(value, EqualityComparer<T>.Default);
-        }
+        public ImmutableList<T> Remove(T value) => this.Remove(value, equalityComparer: null);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
@@ -368,10 +306,7 @@ namespace System.Collections.Immutable
         /// A new list with the elements removed.
         /// </returns>
         [Pure]
-        public ImmutableList<T> RemoveRange(IEnumerable<T> items)
-        {
-            return this.RemoveRange(items, EqualityComparer<T>.Default);
-        }
+        public ImmutableList<T> RemoveRange(IEnumerable<T> items) => RemoveRange(items, equalityComparer: null);
 
         /// <summary>
         /// Removes the specified values from this list.
@@ -421,8 +356,7 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index < this.Count, nameof(index));
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count == this.Count - 1);
-            var result = _root.RemoveAt(index);
-            return this.Wrap(result);
+            return WrapNewOrEmpty(_root.RemoveAt(index));
         }
 
         /// <summary>
@@ -449,19 +383,13 @@ namespace System.Collections.Immutable
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [Pure]
-        public ImmutableList<T> SetItem(int index, T value)
-        {
-            return this.Wrap(_root.ReplaceAt(index, value));
-        }
+        public ImmutableList<T> SetItem(int index, T value) => WrapNew(_root.ReplaceAt(index, value));
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [Pure]
-        public ImmutableList<T> Replace(T oldValue, T newValue)
-        {
-            return this.Replace(oldValue, newValue, EqualityComparer<T>.Default);
-        }
+        public ImmutableList<T> Replace(T oldValue, T newValue) => Replace(oldValue, newValue, equalityComparer: null);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
@@ -486,11 +414,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <returns>The reversed list.</returns>
         [Pure]
-        public ImmutableList<T> Reverse()
-        {
-            Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
-            return this.Wrap(_root.Reverse());
-        }
+        public ImmutableList<T> Reverse() => this.Wrap(_root.Reverse());
 
         /// <summary>
         /// Reverses the order of the elements in the specified range.
@@ -499,21 +423,14 @@ namespace System.Collections.Immutable
         /// <param name="count">The number of elements in the range to reverse.</param> 
         /// <returns>The reversed list.</returns>
         [Pure]
-        public ImmutableList<T> Reverse(int index, int count)
-        {
-            return this.Wrap(_root.Reverse(index, count));
-        }
+        public ImmutableList<T> Reverse(int index, int count) => this.Wrap(_root.Reverse(index, count));
 
         /// <summary>
         /// Sorts the elements in the entire <see cref="ImmutableList{T}"/> using
         /// the default comparer.
         /// </summary>
         [Pure]
-        public ImmutableList<T> Sort()
-        {
-            Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
-            return this.Wrap(_root.Sort());
-        }
+        public ImmutableList<T> Sort() => this.Wrap(_root.Sort());
 
         /// <summary>
         /// Sorts the elements in the entire <see cref="ImmutableList{T}"/> using
@@ -542,11 +459,7 @@ namespace System.Collections.Immutable
         /// </param>
         /// <returns>The sorted list.</returns>
         [Pure]
-        public ImmutableList<T> Sort(IComparer<T> comparer)
-        {
-            Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
-            return this.Wrap(_root.Sort(comparer));
-        }
+        public ImmutableList<T> Sort(IComparer<T> comparer) => this.Wrap(_root.Sort(comparer));
 
         /// <summary>
         /// Sorts the elements in a range of elements in <see cref="ImmutableList{T}"/>
@@ -601,12 +514,7 @@ namespace System.Collections.Immutable
         /// copied from <see cref="ImmutableList{T}"/>. The <see cref="Array"/> must have
         /// zero-based indexing.
         /// </param>
-        public void CopyTo(T[] array)
-        {
-            Requires.NotNull(array, nameof(array));
-            Requires.Range(array.Length >= this.Count, nameof(array));
-            _root.CopyTo(array);
-        }
+        public void CopyTo(T[] array) => _root.CopyTo(array);
 
         /// <summary>
         /// Copies the entire <see cref="ImmutableList{T}"/> to a compatible one-dimensional
@@ -620,13 +528,7 @@ namespace System.Collections.Immutable
         /// <param name="arrayIndex">
         /// The zero-based index in array at which copying begins.
         /// </param>
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            Requires.NotNull(array, nameof(array));
-            Requires.Range(arrayIndex >= 0, nameof(arrayIndex));
-            Requires.Range(array.Length >= arrayIndex + this.Count, nameof(arrayIndex));
-            _root.CopyTo(array, arrayIndex);
-        }
+        public void CopyTo(T[] array, int arrayIndex) => _root.CopyTo(array, arrayIndex);
 
         /// <summary>
         /// Copies a range of elements from the <see cref="ImmutableList{T}"/> to
@@ -644,10 +546,7 @@ namespace System.Collections.Immutable
         /// </param>
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         /// <param name="count">The number of elements to copy.</param>
-        public void CopyTo(int index, T[] array, int arrayIndex, int count)
-        {
-            _root.CopyTo(index, array, arrayIndex, count);
-        }
+        public void CopyTo(int index, T[] array, int arrayIndex, int count) => _root.CopyTo(index, array, arrayIndex, count);
 
         /// <summary>
         /// Creates a shallow copy of a range of elements in the source <see cref="ImmutableList{T}"/>.
@@ -667,7 +566,7 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0, nameof(index));
             Requires.Range(count >= 0, nameof(count));
             Requires.Range(index + count <= this.Count, nameof(count));
-            return this.Wrap(Node.NodeTreeFromList(this, index, count));
+            return WrapNewOrEmpty(Node.NodeTreeFromList(this, index, count));
         }
 
         /// <summary>
@@ -688,7 +587,7 @@ namespace System.Collections.Immutable
         public ImmutableList<TOutput> ConvertAll<TOutput>(Func<T, TOutput> converter)
         {
             Requires.NotNull(converter, nameof(converter));
-            return ImmutableList<TOutput>.WrapNode(_root.ConvertAll(converter));
+            return ImmutableList<TOutput>.WrapNewOrEmpty(_root.ConvertAll(converter));
         }
 
         /// <summary>
@@ -704,11 +603,7 @@ namespace System.Collections.Immutable
         /// that match the conditions defined by the specified predicate; otherwise,
         /// false.
         /// </returns>
-        public bool Exists(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.Exists(match);
-        }
+        public bool Exists(Predicate<T> match) => _root.Exists(match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -722,11 +617,7 @@ namespace System.Collections.Immutable
         /// The first element that matches the conditions defined by the specified predicate,
         /// if found; otherwise, the default value for type <typeparamref name="T"/>.
         /// </returns>
-        public T Find(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.Find(match);
-        }
+        public T Find(Predicate<T> match) => _root.Find(match);
 
         /// <summary>
         /// Retrieves all the elements that match the conditions defined by the specified
@@ -741,11 +632,7 @@ namespace System.Collections.Immutable
         /// the conditions defined by the specified predicate, if found; otherwise, an
         /// empty <see cref="ImmutableList{T}"/>.
         /// </returns>
-        public ImmutableList<T> FindAll(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.FindAll(match);
-        }
+        public ImmutableList<T> FindAll(Predicate<T> match) => _root.FindAll(match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -760,11 +647,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the first occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindIndex(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.FindIndex(match);
-        }
+        public int FindIndex(Predicate<T> match) => _root.FindIndex(match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -778,13 +661,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the first occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindIndex(int startIndex, Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            Requires.Range(startIndex >= 0, nameof(startIndex));
-            Requires.Range(startIndex <= this.Count, nameof(startIndex));
-            return _root.FindIndex(startIndex, match);
-        }
+        public int FindIndex(int startIndex, Predicate<T> match) => _root.FindIndex(startIndex, match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -799,15 +676,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the first occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindIndex(int startIndex, int count, Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            Requires.Range(startIndex >= 0, nameof(startIndex));
-            Requires.Range(count >= 0, nameof(count));
-            Requires.Range(startIndex + count <= this.Count, nameof(count));
-
-            return _root.FindIndex(startIndex, count, match);
-        }
+        public int FindIndex(int startIndex, int count, Predicate<T> match) => _root.FindIndex(startIndex, count, match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -821,11 +690,7 @@ namespace System.Collections.Immutable
         /// The last element that matches the conditions defined by the specified predicate,
         /// if found; otherwise, the default value for type <typeparamref name="T"/>.
         /// </returns>
-        public T FindLast(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.FindLast(match);
-        }
+        public T FindLast(Predicate<T> match) => _root.FindLast(match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -840,11 +705,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the last occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindLastIndex(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.FindLastIndex(match);
-        }
+        public int FindLastIndex(Predicate<T> match) => _root.FindLastIndex(match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -859,13 +720,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the last occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindLastIndex(int startIndex, Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            Requires.Range(startIndex >= 0, nameof(startIndex));
-            Requires.Range(startIndex == 0 || startIndex < this.Count, nameof(startIndex));
-            return _root.FindLastIndex(startIndex, match);
-        }
+        public int FindLastIndex(int startIndex, Predicate<T> match) => _root.FindLastIndex(startIndex, match);
 
         /// <summary>
         /// Searches for an element that matches the conditions defined by the specified
@@ -883,15 +738,7 @@ namespace System.Collections.Immutable
         /// The zero-based index of the last occurrence of an element that matches the
         /// conditions defined by <paramref name="match"/>, if found; otherwise, -1.
         /// </returns>
-        public int FindLastIndex(int startIndex, int count, Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            Requires.Range(startIndex >= 0, nameof(startIndex));
-            Requires.Range(count <= this.Count, nameof(count));
-            Requires.Range(startIndex - count + 1 >= 0, nameof(startIndex));
-
-            return _root.FindLastIndex(startIndex, count, match);
-        }
+        public int FindLastIndex(int startIndex, int count, Predicate<T> match) => _root.FindLastIndex(startIndex, count, match);
 
         /// <summary>
         /// Searches for the specified object and returns the zero-based index of the
@@ -918,10 +765,7 @@ namespace System.Collections.Immutable
         /// contains <paramref name="count"/> number of elements, if found; otherwise, -1.
         /// </returns>
         [Pure]
-        public int IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer)
-        {
-            return _root.IndexOf(item, index, count, equalityComparer);
-        }
+        public int IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) => _root.IndexOf(item, index, count, equalityComparer);
 
         /// <summary>
         /// Searches for the specified object and returns the zero-based index of the
@@ -944,10 +788,7 @@ namespace System.Collections.Immutable
         /// and ends at <paramref name="index"/>, if found; otherwise, -1.
         /// </returns>
         [Pure]
-        public int LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer)
-        {
-            return _root.LastIndexOf(item, index, count, equalityComparer);
-        }
+        public int LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) => _root.LastIndexOf(item, index, count, equalityComparer);
 
         /// <summary>
         /// Determines whether every element in the <see cref="ImmutableList{T}"/>
@@ -962,11 +803,7 @@ namespace System.Collections.Immutable
         /// conditions defined by the specified predicate; otherwise, false. If the list
         /// has no elements, the return value is true.
         /// </returns>
-        public bool TrueForAll(Predicate<T> match)
-        {
-            Requires.NotNull(match, nameof(match));
-            return _root.TrueForAll(match);
-        }
+        public bool TrueForAll(Predicate<T> match) => _root.TrueForAll(match);
 
         #endregion
 
@@ -975,37 +812,24 @@ namespace System.Collections.Immutable
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
-        public bool Contains(T value)
-        {
-            Contract.Ensures(!this.IsEmpty || !Contract.Result<bool>());
-            return this.IndexOf(value) >= 0;
-        }
+        public bool Contains(T value) => this.IndexOf(value) >= 0;
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
-        public int IndexOf(T value)
-        {
-            return this.IndexOf(value, EqualityComparer<T>.Default);
-        }
+        public int IndexOf(T value) => this.IndexOf(value, equalityComparer: null);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.Add(T value)
-        {
-            return this.Add(value);
-        }
+        IImmutableList<T> IImmutableList<T>.Add(T value) => this.Add(value);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items)
-        {
-            return this.AddRange(items);
-        }
+        IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items) => this.AddRange(items);
 
         /// <summary>
         /// Inserts the specified value at the specified index.
@@ -1014,10 +838,7 @@ namespace System.Collections.Immutable
         /// <param name="item">The element to add.</param>
         /// <returns>The new immutable list.</returns>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.Insert(int index, T item)
-        {
-            return this.Insert(index, item);
-        }
+        IImmutableList<T> IImmutableList<T>.Insert(int index, T item) => this.Insert(index, item);
 
         /// <summary>
         /// Inserts the specified value at the specified index.
@@ -1026,46 +847,31 @@ namespace System.Collections.Immutable
         /// <param name="items">The elements to add.</param>
         /// <returns>The new immutable list.</returns>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.InsertRange(int index, IEnumerable<T> items)
-        {
-            return this.InsertRange(index, items);
-        }
+        IImmutableList<T> IImmutableList<T>.InsertRange(int index, IEnumerable<T> items) => this.InsertRange(index, items);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer)
-        {
-            return this.Remove(value, equalityComparer);
-        }
+        IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) => this.Remove(value, equalityComparer);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match)
-        {
-            return this.RemoveAll(match);
-        }
+        IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match) => this.RemoveAll(match);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer)
-        {
-            return this.RemoveRange(items, equalityComparer);
-        }
+        IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer) => this.RemoveRange(items, equalityComparer);
 
         /// <summary>
         /// See the <see cref="IImmutableList{T}"/> interface.
         /// </summary>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count)
-        {
-            return this.RemoveRange(index, count);
-        }
+        IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count) => this.RemoveRange(index, count);
 
         /// <summary>
         /// Removes the element at the specified index.
@@ -1073,10 +879,7 @@ namespace System.Collections.Immutable
         /// <param name="index">The index.</param>
         /// <returns>A new list with the elements removed.</returns>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.RemoveAt(int index)
-        {
-            return this.RemoveAt(index);
-        }
+        IImmutableList<T> IImmutableList<T>.RemoveAt(int index) => this.RemoveAt(index);
 
         /// <summary>
         /// Replaces an element in the list at a given position with the specified element.
@@ -1085,10 +888,7 @@ namespace System.Collections.Immutable
         /// <param name="value">The element to replace the old element with.</param>
         /// <returns>The new list.</returns>
         [ExcludeFromCodeCoverage]
-        IImmutableList<T> IImmutableList<T>.SetItem(int index, T value)
-        {
-            return this.SetItem(index, value);
-        }
+        IImmutableList<T> IImmutableList<T>.SetItem(int index, T value) => this.SetItem(index, value);
 
         /// <summary>
         /// Replaces an element in the list with the specified element.
@@ -1101,10 +901,7 @@ namespace System.Collections.Immutable
         /// </param>
         /// <returns>The new list.</returns>
         /// <exception cref="ArgumentException">Thrown when the old value does not exist in the list.</exception>
-        IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
-        {
-            return this.Replace(oldValue, newValue, equalityComparer);
-        }
+        IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer) => this.Replace(oldValue, newValue, equalityComparer);
 
         #endregion
 
@@ -1116,10 +913,7 @@ namespace System.Collections.Immutable
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
 
         #endregion
 
@@ -1131,10 +925,7 @@ namespace System.Collections.Immutable
         /// <returns>
         /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
         /// </returns>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         #endregion
 
@@ -1200,10 +991,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
         ///   </returns>
-        bool ICollection<T>.IsReadOnly
-        {
-            get { return true; }
-        }
+        bool ICollection<T>.IsReadOnly => true;
 
         /// <summary>
         /// Removes the specified item.
@@ -1223,10 +1011,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// See the <see cref="ICollection"/> interface.
         /// </summary>
-        void System.Collections.ICollection.CopyTo(Array array, int arrayIndex)
-        {
-            _root.CopyTo(array, arrayIndex);
-        }
+        void ICollection.CopyTo(Array array, int arrayIndex) => _root.CopyTo(array, arrayIndex);
 
         #endregion
 
@@ -1271,15 +1056,7 @@ namespace System.Collections.Immutable
         /// <returns>
         /// true if the <see cref="object"/> is found in the <see cref="IList"/>; otherwise, false.
         /// </returns>
-        bool IList.Contains(object value)
-        {
-            if (IsCompatibleObject(value))
-            {
-                return this.Contains((T)value);
-            }
-
-            return false;
-        }
+        bool IList.Contains(object value) => IsCompatibleObject(value) && this.Contains((T)value);
 
         /// <summary>
         /// Determines the index of a specific item in the <see cref="IList"/>.
@@ -1288,15 +1065,7 @@ namespace System.Collections.Immutable
         /// <returns>
         /// The index of <paramref name="value"/> if found in the list; otherwise, -1.
         /// </returns>
-        int IList.IndexOf(object value)
-        {
-            if (IsCompatibleObject(value))
-            {
-                return this.IndexOf((T)value);
-            }
-
-            return -1;
-        }
+        int IList.IndexOf(object value) => IsCompatibleObject(value) ? this.IndexOf((T)value) : -1;
 
         /// <summary>
         /// Inserts an item to the <see cref="IList"/> at the specified index.
@@ -1313,20 +1082,14 @@ namespace System.Collections.Immutable
         /// Gets a value indicating whether the <see cref="IList"/> has a fixed size.
         /// </summary>
         /// <returns>true if the <see cref="IList"/> has a fixed size; otherwise, false.</returns>
-        bool IList.IsFixedSize
-        {
-            get { return true; }
-        }
+        bool IList.IsFixedSize => true;
 
         /// <summary>
         /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.
         /// </summary>
         /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
         ///   </returns>
-        bool IList.IsReadOnly
-        {
-            get { return true; }
-        }
+        bool IList.IsReadOnly => true;
 
         /// <summary>
         /// Removes the first occurrence of a specific object from the <see cref="IList"/>.
@@ -1369,34 +1132,12 @@ namespace System.Collections.Immutable
         /// that a stack that has already been returned to the resource pool may still be in use by one of the enumerator copies, leading to data
         /// corruption and/or exceptions.
         /// </remarks>
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(_root);
-        }
+        public Enumerator GetEnumerator() => new Enumerator(_root);
 
         /// <summary>
         /// Returns the root <see cref="Node"/> of the list
         /// </summary>
-        internal Node Root
-        {
-            get
-            {
-                return _root;
-            }
-        }
-
-        /// <summary>
-        /// Creates a new sorted set wrapper for a node tree.
-        /// </summary>
-        /// <param name="root">The root of the collection.</param>
-        /// <returns>The immutable sorted set instance.</returns>
-        [Pure]
-        private static ImmutableList<T> WrapNode(Node root)
-        {
-            return root.IsEmpty
-                ? ImmutableList<T>.Empty
-                : new ImmutableList<T>(root);
-        }
+        internal Node Root => _root;
 
         /// <summary>
         /// Attempts to discover an <see cref="ImmutableList{T}"/> instance beneath some enumerable sequence
@@ -1439,29 +1180,41 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Creates a wrapping collection type around a root node.
+        /// Wraps a root node with a list.
         /// </summary>
         /// <param name="root">The root node to wrap.</param>
-        /// <returns>A wrapping collection type for the new tree.</returns>
+        /// <returns>A list that wraps the new tree.</returns>
         [Pure]
-        private ImmutableList<T> Wrap(Node root)
-        {
-            if (root != _root)
-            {
-                return root.IsEmpty ? this.Clear() : new ImmutableList<T>(root);
-            }
-            else
-            {
-                return this;
-            }
-        }
+        private ImmutableList<T> Wrap(Node root) => root == _root ? this : WrapNewOrEmpty(root);
 
         /// <summary>
-        /// Creates an immutable list with the contents from a sequence of elements.
+        /// Wraps a new or empty root node with a list.
+        /// </summary>
+        /// <param name="root">The root node to wrap.</param>
+        /// <returns>A list that wraps the new tree.</returns>
+        [Pure]
+        private static ImmutableList<T> WrapNewOrEmpty(Node root) => root.IsEmpty ? Empty : WrapNew(root);
+
+        /// <summary>
+        /// Wraps a new, non-empty root node with a list.
+        /// </summary>
+        /// <param name="root">The root node to wrap.</param>
+        /// <returns>A list that wraps the new tree.</returns>
+        private static ImmutableList<T> WrapNew(Node root) => new ImmutableList<T>(root);
+
+        /// <summary>
+        /// Creates an immutable list from a single element.
+        /// </summary>
+        /// <param name="item">The element from which to create the list.</param>
+        /// <returns>The immutable list.</returns>
+        internal static ImmutableList<T> Create(T item) => WrapNew(Node.CreateLeaf(item));
+
+        /// <summary>
+        /// Creates an immutable list from a sequence of elements.
         /// </summary>
         /// <param name="items">The sequence of elements from which to create the list.</param>
         /// <returns>The immutable list.</returns>
-        private static ImmutableList<T> CreateRange(IEnumerable<T> items)
+        internal static ImmutableList<T> CreateRange(IEnumerable<T> items)
         {
             // If the items being added actually come from an ImmutableList<T>
             // then there is no value in reconstructing it.
@@ -1478,14 +1231,20 @@ namespace System.Collections.Immutable
             // index into that sequence like a list, so the one possible piece of 
             // garbage produced is a temporary array to store the list while
             // we build the tree.
-            var list = items.AsOrderedCollection();
-            if (list.Count == 0)
-            {
-                return Empty;
-            }
+            return CreateRange(list: items.AsOrderedCollection());
+        }
 
-            Node root = Node.NodeTreeFromList(list, 0, list.Count);
-            return new ImmutableList<T>(root);
+        /// <summary>
+        /// Creates an immutable list from an ordered collection of elements.
+        /// </summary>
+        /// <param name="list">The collection of elements from which to create the list.</param>
+        /// <returns>The immutable list.</returns>
+        internal static ImmutableList<T> CreateRange(IOrderedCollection<T> list)
+        {
+            Debug.Assert(!(list is ImmutableList<T> || list is Builder));
+
+            int count = list.Count; // Cache one interface call.
+            return count == 0 ? Empty : WrapNew(Node.NodeTreeFromList(list, 0, count));
         }
 
         /// <summary>
@@ -1602,10 +1361,7 @@ namespace System.Collections.Immutable
             }
 
             /// <inheritdoc/>
-            int ISecurePooledObjectUser.PoolUserId
-            {
-                get { return _poolUserId; }
-            }
+            int ISecurePooledObjectUser.PoolUserId => _poolUserId;
 
             /// <summary>
             /// The current element.
@@ -1627,10 +1383,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The current element.
             /// </summary>
-            object System.Collections.IEnumerator.Current
-            {
-                get { return this.Current; }
-            }
+            object System.Collections.IEnumerator.Current => this.Current;
 
             /// <summary>
             /// Disposes of this enumerator and returns the stack reference to the resource pool.
@@ -1721,18 +1474,12 @@ namespace System.Collections.Immutable
             /// <summary>
             /// Obtains the right branch of the given node (or the left, if walking in reverse).
             /// </summary>
-            private Node NextBranch(Node node)
-            {
-                return _reversed ? node.Left : node.Right;
-            }
+            private Node NextBranch(Node node) => _reversed ? node.Left : node.Right;
 
             /// <summary>
             /// Obtains the left branch of the given node (or the right, if walking in reverse).
             /// </summary>
-            private Node PreviousBranch(Node node)
-            {
-                return _reversed ? node.Right : node.Left;
-            }
+            private Node PreviousBranch(Node node) => _reversed ? node.Right : node.Left;
 
             /// <summary>
             /// Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed.
@@ -1968,10 +1715,7 @@ namespace System.Collections.Immutable
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
-            public Enumerator GetEnumerator()
-            {
-                return new Enumerator(this);
-            }
+            public Enumerator GetEnumerator() => new Enumerator(this);
 
             /// <summary>
             /// Returns an enumerator that iterates through the collection.
@@ -1980,10 +1724,7 @@ namespace System.Collections.Immutable
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             [ExcludeFromCodeCoverage] // internal, never called, but here for interface implementation
-            IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
 
             /// <summary>
             /// Returns an enumerator that iterates through the collection.
@@ -1992,10 +1733,7 @@ namespace System.Collections.Immutable
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             [ExcludeFromCodeCoverage] // internal, never called, but here for interface implementation
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
             #endregion
 
@@ -2006,10 +1744,7 @@ namespace System.Collections.Immutable
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
-            internal Enumerator GetEnumerator(Builder builder)
-            {
-                return new Enumerator(this, builder);
-            }
+            internal Enumerator GetEnumerator(Builder builder) => new Enumerator(this, builder);
 
             /// <summary>
             /// Creates a node tree that contains the contents of a list.
@@ -2141,51 +1876,47 @@ namespace System.Collections.Immutable
             internal Node RemoveAt(int index)
             {
                 Requires.Range(index >= 0 && index < this.Count, nameof(index));
+                Debug.Assert(!this.IsEmpty);
 
-                Node result = this;
                 if (index == _left._count)
                 {
                     // We have a match. If this is a leaf, just remove it 
                     // by returning Empty.  If we have only one child,
                     // replace the node with the child.
-                    if (_right.IsEmpty && _left.IsEmpty)
+                    if (_right.IsEmpty)
                     {
-                        result = EmptyNode;
+                        return _left;
                     }
-                    else if (_right.IsEmpty && !_left.IsEmpty)
-                    {
-                        result = _left;
-                    }
-                    else if (!_right.IsEmpty && _left.IsEmpty)
-                    {
-                        result = _right;
-                    }
-                    else
-                    {
-                        // We have two children. Remove the next-highest node and replace
-                        // this node with it.
-                        var successor = _right;
-                        while (!successor._left.IsEmpty)
-                        {
-                            successor = successor._left;
-                        }
 
-                        var newRight = _right.RemoveAt(0);
-                        result = successor.MutateBoth(left: _left, right: newRight);
+                    if (_left.IsEmpty)
+                    {
+                        return _right;
                     }
+                    
+                    // We have two children. Find our in-order successor, replace our key
+                    // with its key, and remove it from our right subtree.
+                    Node successor = _right;
+                    while (!successor._left.IsEmpty)
+                    {
+                        successor = successor._left;
+                    }
+
+                    Node newRight = _right.RemoveAt(0);
+                    Node result = successor.MutateBoth(left: _left, right: newRight);
+                    return result.IsBalanced ? result : result.BalanceLeft();
                 }
                 else if (index < _left._count)
                 {
-                    var newLeft = _left.RemoveAt(index);
-                    result = this.MutateLeft(newLeft);
+                    Node newLeft = _left.RemoveAt(index);
+                    Node result = this.MutateLeft(newLeft);
+                    return result.IsBalanced ? result : result.BalanceRight();
                 }
                 else
                 {
-                    var newRight = _right.RemoveAt(index - _left._count - 1);
-                    result = this.MutateRight(newRight);
+                    Node newRight = _right.RemoveAt(index - _left._count - 1);
+                    Node result = this.MutateRight(newRight);
+                    return result.IsBalanced ? result : result.BalanceLeft();
                 }
-
-                return result.IsEmpty || result.IsBalanced ? result : result.Balance();
             }
 
             /// <summary>
@@ -2256,11 +1987,7 @@ namespace System.Collections.Immutable
             /// Reverses the order of the elements in the entire <see cref="ImmutableList{T}"/>.
             /// </summary>
             /// <returns>The reversed list.</returns>
-            internal Node Reverse()
-            {
-                Contract.Ensures(Contract.Result<Node>() != null);
-                return this.Reverse(0, this.Count);
-            }
+            internal Node Reverse() => this.Reverse(0, this.Count);
 
             /// <summary>
             /// Reverses the order of the elements in the specified range.
@@ -2295,11 +2022,7 @@ namespace System.Collections.Immutable
             /// Sorts the elements in the entire <see cref="ImmutableList{T}"/> using
             /// the default comparer.
             /// </summary>
-            internal Node Sort()
-            {
-                Contract.Ensures(Contract.Result<Node>() != null);
-                return this.Sort(Comparer<T>.Default);
-            }
+            internal Node Sort() => this.Sort(comparer: null);
 
             /// <summary>
             /// Sorts the elements in the entire <see cref="ImmutableList{T}"/> using
@@ -2330,11 +2053,7 @@ namespace System.Collections.Immutable
             /// elements, or null to use the default comparer <see cref="Comparer{T}.Default"/>.
             /// </param>
             /// <returns>The sorted list.</returns>
-            internal Node Sort(IComparer<T> comparer)
-            {
-                Contract.Ensures(Contract.Result<Node>() != null);
-                return this.Sort(0, this.Count, comparer);
-            }
+            internal Node Sort(IComparer<T> comparer) => this.Sort(0, this.Count, comparer);
 
             /// <summary>
             /// Sorts the elements in a range of elements in <see cref="ImmutableList{T}"/>
@@ -2461,10 +2180,7 @@ namespace System.Collections.Immutable
             /// <see cref="ImmutableList{T}"/>, if found; otherwise, -1.
             /// </returns>
             [Pure]
-            internal int IndexOf(T item, IEqualityComparer<T> equalityComparer)
-            {
-                return this.IndexOf(item, 0, this.Count, equalityComparer);
-            }
+            internal int IndexOf(T item, IEqualityComparer<T> equalityComparer) => this.IndexOf(item, 0, this.Count, equalityComparer);
 
             /// <summary>
             /// Searches for the specified object and returns the zero-based index of the
@@ -2570,7 +2286,7 @@ namespace System.Collections.Immutable
             internal void CopyTo(T[] array)
             {
                 Requires.NotNull(array, nameof(array));
-                Requires.Argument(array.Length >= this.Count);
+                Requires.Range(array.Length >= this.Count, nameof(array));
 
                 int index = 0;
                 foreach (var element in this)
@@ -2595,8 +2311,7 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(array, nameof(array));
                 Requires.Range(arrayIndex >= 0, nameof(arrayIndex));
-                Requires.Range(arrayIndex <= array.Length, nameof(arrayIndex));
-                Requires.Argument(arrayIndex + this.Count <= array.Length);
+                Requires.Range(array.Length >= arrayIndex + this.Count, nameof(arrayIndex));
 
                 foreach (var element in this)
                 {
@@ -2696,6 +2411,8 @@ namespace System.Collections.Immutable
             /// </returns>
             internal bool TrueForAll(Predicate<T> match)
             {
+                Requires.NotNull(match, nameof(match));
+
                 foreach (var item in this)
                 {
                     if (!match(item))
@@ -2839,9 +2556,8 @@ namespace System.Collections.Immutable
             /// </returns>
             internal int FindIndex(int startIndex, Predicate<T> match)
             {
-                Requires.Range(startIndex >= 0, nameof(startIndex));
-                Requires.Range(startIndex <= this.Count, nameof(startIndex));
                 Requires.NotNull(match, nameof(match));
+                Requires.Range(startIndex >= 0 && startIndex <= this.Count, nameof(startIndex));
 
                 return this.FindIndex(startIndex, this.Count - startIndex, match);
             }
@@ -2861,10 +2577,10 @@ namespace System.Collections.Immutable
             /// </returns>
             internal int FindIndex(int startIndex, int count, Predicate<T> match)
             {
+                Requires.NotNull(match, nameof(match));
                 Requires.Range(startIndex >= 0, nameof(startIndex));
                 Requires.Range(count >= 0, nameof(count));
-                Requires.Argument(startIndex + count <= this.Count);
-                Requires.NotNull(match, nameof(match));
+                Requires.Range(startIndex + count <= this.Count, nameof(count));
 
                 using (var enumerator = new Enumerator(this, startIndex: startIndex, count: count))
                 {
@@ -2931,12 +2647,7 @@ namespace System.Collections.Immutable
                 Requires.NotNull(match, nameof(match));
                 Contract.Ensures(Contract.Result<int>() >= -1);
 
-                if (this.IsEmpty)
-                {
-                    return -1;
-                }
-
-                return this.FindLastIndex(this.Count - 1, this.Count, match);
+                return this.IsEmpty ? -1 : this.FindLastIndex(this.Count - 1, this.Count, match);
             }
 
             /// <summary>
@@ -2958,12 +2669,7 @@ namespace System.Collections.Immutable
                 Requires.Range(startIndex >= 0, nameof(startIndex));
                 Requires.Range(startIndex == 0 || startIndex < this.Count, nameof(startIndex));
 
-                if (this.IsEmpty)
-                {
-                    return -1;
-                }
-
-                return this.FindLastIndex(startIndex, startIndex + 1, match);
+                return this.IsEmpty ? -1 : this.FindLastIndex(startIndex, startIndex + 1, match);
             }
 
             /// <summary>
@@ -2987,7 +2693,7 @@ namespace System.Collections.Immutable
                 Requires.NotNull(match, nameof(match));
                 Requires.Range(startIndex >= 0, nameof(startIndex));
                 Requires.Range(count <= this.Count, nameof(count));
-                Requires.Argument(startIndex - count + 1 >= 0);
+                Requires.Range(startIndex - count + 1 >= 0, nameof(startIndex));
 
                 using (var enumerator = new Enumerator(this, startIndex: startIndex, count: count, reversed: true))
                 {
@@ -3126,12 +2832,6 @@ namespace System.Collections.Immutable
             private bool IsBalanced => (uint)(this.BalanceFactor + 1) <= 2;
 
             /// <summary>
-            /// Balances this tree.
-            /// </summary>
-            /// <returns>A balanced tree.</returns>
-            private Node Balance() => this.IsLeftHeavy ? this.BalanceLeft() : this.BalanceRight();
-
-            /// <summary>
             /// Balances the left side of this tree by rotating this tree rightwards.
             /// </summary>
             /// <returns>A balanced tree.</returns>
@@ -3140,7 +2840,9 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(this.IsLeftHeavy);
 
-                return _left.BalanceFactor > 0 ? this.DoubleRight() : this.RotateRight();
+                Node result = _left.BalanceFactor > 0 ? this.DoubleRight() : this.RotateRight();
+                Debug.Assert(result.IsBalanced);
+                return result;
             }
 
             /// <summary>
@@ -3152,7 +2854,9 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(this.IsRightHeavy);
 
-                return _right.BalanceFactor < 0 ? this.DoubleLeft() : this.RotateLeft();
+                Node result = _right.BalanceFactor < 0 ? this.DoubleLeft() : this.RotateLeft();
+                Debug.Assert(result.IsBalanced);
+                return result;
             }
 
             /// <summary>
@@ -3168,6 +2872,8 @@ namespace System.Collections.Immutable
                 Node tree = this;
                 while (!tree.IsBalanced)
                 {
+                    Debug.Assert(tree._left.IsBalanced && tree._right.IsBalanced);
+
                     if (tree.IsRightHeavy)
                     {
                         tree = tree.BalanceRight();
@@ -3202,14 +2908,12 @@ namespace System.Collections.Immutable
                 {
                     return new Node(_key, left, right);
                 }
-                else
-                {
-                    _left = left;
-                    _right = right;
-                    _height = ParentHeight(left, right);
-                    _count = ParentCount(left, right);
-                    return this;
-                }
+
+                _left = left;
+                _right = right;
+                _height = ParentHeight(left, right);
+                _count = ParentCount(left, right);
+                return this;
             }
 
             /// <summary>
@@ -3227,13 +2931,11 @@ namespace System.Collections.Immutable
                 {
                     return new Node(_key, left, _right);
                 }
-                else
-                {
-                    _left = left;
-                    _height = ParentHeight(left, _right);
-                    _count = ParentCount(left, _right);
-                    return this;
-                }
+                
+                _left = left;
+                _height = ParentHeight(left, _right);
+                _count = ParentCount(left, _right);
+                return this;
             }
 
             /// <summary>
@@ -3251,13 +2953,11 @@ namespace System.Collections.Immutable
                 {
                     return new Node(_key, _left, right);
                 }
-                else
-                {
-                    _right = right;
-                    _height = ParentHeight(_left, right);
-                    _count = ParentCount(_left, right);
-                    return this;
-                }
+                
+                _right = right;
+                _height = ParentHeight(_left, right);
+                _count = ParentCount(_left, right);
+                return this;
             }
 
             /// <summary>
@@ -3291,11 +2991,9 @@ namespace System.Collections.Immutable
                 {
                     return new Node(key, _left, _right);
                 }
-                else
-                {
-                    _key = key;
-                    return this;
-                }
+                
+                _key = key;
+                return this;
             }
 
             /// <summary>
@@ -3320,7 +3018,7 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <param name="key">The leaf node's key.</param>
             /// <returns>The leaf node.</returns>
-            private static Node CreateLeaf(T key) => new Node(key, left: EmptyNode, right: EmptyNode);
+            internal static Node CreateLeaf(T key) => new Node(key, left: EmptyNode, right: EmptyNode);
         }
     }
 
