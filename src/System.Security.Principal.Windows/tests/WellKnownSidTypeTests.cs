@@ -89,6 +89,9 @@ public class WellKnownSidTypeTests
     [InlineData(WellKnownSidType.WinNewEnterpriseReadonlyControllersSid)]
     [InlineData(WellKnownSidType.WinBuiltinCertSvcDComAccessGroup)]
     [InlineData(WellKnownSidType.WinMediumPlusLabelSid)]
+    // Test case for WinLocalLogonSid commented out, because of special Authority SID
+    // Will require more specialized testing
+    // [InlineData(WellKnownSidType.WinLocalLogonSid)]
     [InlineData(WellKnownSidType.WinConsoleLogonSid)]
     [InlineData(WellKnownSidType.WinThisOrganizationCertificateSid)]
     [InlineData(WellKnownSidType.WinBuiltinAnyPackageSid)]
