@@ -94,6 +94,9 @@ public class WellKnownSidTypeTests
     // [InlineData(WellKnownSidType.WinLocalLogonSid)]
     [InlineData(WellKnownSidType.WinConsoleLogonSid)]
     [InlineData(WellKnownSidType.WinThisOrganizationCertificateSid)]
+    // Test case for WinApplicationPackageAuthoritySid commented out, because of special Authority SID
+    // Will require more specialized testing
+    // [InlineData(WellKnownSidType.WinApplicationPackageAuthoritySid)]
     [InlineData(WellKnownSidType.WinBuiltinAnyPackageSid)]
     [InlineData(WellKnownSidType.WinCapabilityInternetClientSid)]
     [InlineData(WellKnownSidType.WinCapabilityInternetClientServerSid)]
