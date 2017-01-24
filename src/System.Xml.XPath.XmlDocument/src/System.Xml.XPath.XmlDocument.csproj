@@ -23,12 +23,8 @@
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Xml.ReaderWriter" />
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+    <Reference Include="netstandard" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

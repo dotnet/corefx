@@ -32,13 +32,7 @@
     <Compile Include="System\Threading\ThreadingAclExtensions.net46.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Handles" />
-    <Reference Include="System.Security.AccessControl" />
-    <Reference Include="System.Security.Principal.Windows" />
-    <Reference Include="System.Threading" />
+    <Reference Include="netstandard" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

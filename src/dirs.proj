@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <Project Include="ref.builds" />
+    <Project Include="shims\shims.proj" /> <!-- Need to build the shims before src.builds to binplace them to the TargetingPack folder -->
     <Project Include="src.builds" />
-    <Project Include="shims\shims.proj" />
   </ItemGroup>
 
   <Import Project="..\dir.targets" />

@@ -213,18 +213,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Linq" />
-    <Reference Include="System.Linq.Expressions" />
-    <Reference Include="System.ObjectModel" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Threading" />
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+    <Reference Include="netstandard" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
