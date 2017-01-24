@@ -38,18 +38,25 @@ namespace System.Security.Claims
 
         [NonSerialized]
         private byte[] _userSerializationData;
+
         private ClaimsIdentity _actor;
         private string _authenticationType;
         private object _bootstrapContext;
+
         [NonSerialized]
         private List<List<Claim>> _externalClaims;
+
         private string _label;
+
         [NonSerialized]
         private List<Claim> _instanceClaims = new List<Claim>();
+
         [NonSerialized]
         private string _nameClaimType = DefaultNameClaimType;
+
         [NonSerialized]
         private string _roleClaimType = DefaultRoleClaimType;
+
         private string _serializedNameType;
         private string _serializedRoleType;
 

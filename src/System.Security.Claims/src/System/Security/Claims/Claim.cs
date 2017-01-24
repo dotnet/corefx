@@ -31,11 +31,14 @@ namespace System.Security.Claims
 
         [NonSerialized]
         private readonly byte[] _userSerializationData;
+
         private readonly string _issuer;
         private readonly string _originalIssuer;
         private Dictionary<string, string> _properties;
+
         [NonSerialized]
         private readonly ClaimsIdentity _subject;
+
         private readonly string _type;
         private readonly string _value;
         private readonly string _valueType;

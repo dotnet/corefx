@@ -25,6 +25,7 @@ namespace System.Security.Claims
 
         [NonSerialized]
         private readonly List<ClaimsIdentity> _identities = new List<ClaimsIdentity>();
+
         [NonSerialized]
         private readonly byte[] _userSerializationData;
 
