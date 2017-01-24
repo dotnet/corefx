@@ -30,5 +30,8 @@
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' Or '$(TargetGroup)'=='uap'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+    <Reference Include="netstandard" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

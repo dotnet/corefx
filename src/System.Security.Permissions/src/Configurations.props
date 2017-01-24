@@ -4,6 +4,8 @@
     <BuildConfigurations>
       net461-Windows_NT;
       netstandard;
+      netcoreapp;
+      uap;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

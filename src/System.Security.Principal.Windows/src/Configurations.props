@@ -4,6 +4,10 @@
     <BuildConfigurations>
       netstandard-Windows_NT;
       netstandard-Unix;
+      netcoreapp-Windows_NT;
+      netcoreapp-Unix;
+      uap-Windows_NT;
+      uap-Unix;
       net463-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
