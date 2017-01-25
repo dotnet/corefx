@@ -5,10 +5,7 @@
     <Compile Include="System.IO.Packaging.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Collections\ref\System.Collections.csproj" />
-    <ProjectReference Include="..\..\System.IO\ref\System.IO.csproj" />
-    <ProjectReference Include="..\..\System.IO.FileSystem.Primitives\ref\System.IO.FileSystem.Primitives.csproj" />
-    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <Reference Include="netstandard" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

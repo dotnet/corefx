@@ -7,10 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Project Include="ref.builds" />
     <Project Include="src.builds" />
-    <Project Include="shims\shims.proj" />
   </ItemGroup>
+
+  <Target Name="BuildRefAndShims" BeforeTargets="BuildAllProjects">
+    <ItemGroup>
+      <RefAndShimsProject Include="ref.builds" />
+      <RefAndShimsProject Include="shims\shims.proj" />
+    </ItemGroup>
+    <MSBuild Projects="@(RefAndShimsProject)"
+             ContinueOnError="ErrorAndContinue"
+             Condition="'%(Identity)' != ''"
+             Properties="Configuration=%(RefAndShimsProject.TargetGroup);TargetGroup=%(RefAndShimsProject.TargetGroup)" />
+  </Target>
 
   <Import Project="..\dir.targets" />
   <Import Project="..\dir.traversal.targets" />

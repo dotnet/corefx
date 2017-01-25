@@ -57,6 +57,7 @@
     <ItemGroup>
       <PackageOutputPaths Include="$(BinDir)$(TargetGroup)/pkg/ref" />
       <PackageOutputPaths Include="$(BinDir)$(TargetGroup)/pkg/lib" />
+      <PackageOutputPaths Include="$(RefPath)" />
       <ProducedFacades Include="$(GenFacadesOutputPath)*.dll" />
       <FileWrites Include="@(ProducedFacades)" />
     </ItemGroup>

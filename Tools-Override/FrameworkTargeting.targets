@@ -10,7 +10,7 @@
     <!-- TODO: This will begin depending on a target once we start computing RefPath -->
     <ContractOutputPath>$(RefPath)</ContractOutputPath>
     <FrameworkPathOverride>$(ContractOutputPath)</FrameworkPathOverride>
-    <AssemblySearchPaths>$(AssemblySearchPaths);$(ContractOutputPath);{RawFileName}</AssemblySearchPaths>
+    <AssemblySearchPaths>$(AssemblySearchPaths);$(RefRootPath)$(TargetGroup)/;{RawFileName}</AssemblySearchPaths>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFrameworkIdentifier)' == ''
