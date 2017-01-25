@@ -71,7 +71,7 @@ namespace System.Data.Odbc
         }
     }
 
-    sealed internal class OdbcStatementHandle : OdbcHandle
+    internal sealed class OdbcStatementHandle : OdbcHandle
     {
         internal OdbcStatementHandle(OdbcConnectionHandle connectionHandle) : base(ODBC32.SQL_HANDLE.STMT, connectionHandle)
         {

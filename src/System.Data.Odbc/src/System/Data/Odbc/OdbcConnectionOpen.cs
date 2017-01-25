@@ -11,7 +11,7 @@ using SysTx = System.Transactions;
 
 namespace System.Data.Odbc
 {
-    sealed internal class OdbcConnectionOpen : DbConnectionInternal
+    internal sealed class OdbcConnectionOpen : DbConnectionInternal
     {
         // Construct from a compiled connection string
         internal OdbcConnectionOpen(OdbcConnection outerConnection, OdbcConnectionString connectionOptions)

@@ -18,7 +18,7 @@ using System.Runtime.Versioning;
 
 namespace System.Data.Odbc
 {
-    sealed internal class OdbcEnvironmentHandle : OdbcHandle
+    internal sealed class OdbcEnvironmentHandle : OdbcHandle
     {
         // SxS: this method uses SQLSetEnvAttr to setup ODBC environment handle settings. Environment handle is safe in SxS.
         [ResourceExposure(ResourceScope.None)]

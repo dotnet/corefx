@@ -2826,7 +2826,7 @@ namespace System.Data.Odbc
             return;
         }
 
-        sealed internal class QualifiedTableName
+        internal sealed class QualifiedTableName
         {
             private string _catalogName;
             private string _schemaName;

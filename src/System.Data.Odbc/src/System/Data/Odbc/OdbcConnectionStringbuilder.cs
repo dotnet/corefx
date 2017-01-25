@@ -339,7 +339,7 @@ namespace System.Data.Odbc
             return base.TryGetValue(keyword, out value);
         }
 
-        sealed internal class OdbcConnectionStringBuilderConverter : ExpandableObjectConverter
+        internal sealed class OdbcConnectionStringBuilderConverter : ExpandableObjectConverter
         {
             // converter classes should have public ctor
             public OdbcConnectionStringBuilderConverter()

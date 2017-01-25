@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace System.Data.Odbc
 {
-    sealed internal class OdbcEnvironment
+    internal sealed class OdbcEnvironment
     {
         static private object s_globalEnvironmentHandle;
         static private object s_globalEnvironmentHandleLock = new object();

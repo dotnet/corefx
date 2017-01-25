@@ -8,7 +8,7 @@ namespace System.Data.Odbc
     using System.Data;
     using System.Data.ProviderBase;
 
-    sealed internal class OdbcConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo
+    internal sealed class OdbcConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo
     {
         private string _driverName;
         private string _driverVersion;

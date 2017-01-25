@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace System.Data.Odbc
 {
-    sealed internal class OdbcReferenceCollection : DbReferenceCollection
+    internal sealed class OdbcReferenceCollection : DbReferenceCollection
     {
         internal const int Closing = 0;
         internal const int Recover = 1;

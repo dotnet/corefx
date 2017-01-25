@@ -19,7 +19,7 @@ using System.Runtime.ConstrainedExecution;
 
 namespace System.Data.Odbc
 {
-    sealed internal class OdbcConnectionHandle : OdbcHandle
+    internal sealed class OdbcConnectionHandle : OdbcHandle
     {
         private HandleState _handleState;
 

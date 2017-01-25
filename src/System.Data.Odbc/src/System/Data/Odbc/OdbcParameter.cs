@@ -1157,7 +1157,7 @@ namespace System.Data.Odbc
         }
 
         // implemented as nested class to take advantage of the private/protected ShouldSerializeXXX methods
-        sealed internal class OdbcParameterConverter : ExpandableObjectConverter
+        internal sealed class OdbcParameterConverter : ExpandableObjectConverter
         {
             // converter classes should have public ctor
             public OdbcParameterConverter()

@@ -796,7 +796,7 @@ namespace System.Data.Odbc
         }
     }
 
-    sealed internal class TypeMap
+    internal sealed class TypeMap
     { // MDAC 68988
       //      private TypeMap                                           (OdbcType odbcType,         DbType dbType,                Type type,        ODBC32.SQL_TYPE sql_type,       ODBC32.SQL_C sql_c,          ODBC32.SQL_C param_sql_c,   int bsize, int csize, bool signType)
       //      ---------------                                            ------------------         --------------                ----------        -------------------------       -------------------          -------------------------   -----------------------

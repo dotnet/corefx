@@ -13,7 +13,7 @@ namespace System.Data.Odbc
     using System.IO;
     using System.Runtime.Versioning;
 
-    sealed internal class OdbcConnectionFactory : DbConnectionFactory
+    internal sealed class OdbcConnectionFactory : DbConnectionFactory
     {
         private OdbcConnectionFactory() : base() { }
         // At this time, the ODBC Provider doesn't have any connection pool counters

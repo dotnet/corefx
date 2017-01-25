@@ -11,7 +11,7 @@ using System.Text;
 
 namespace System.Data.Odbc
 {
-    sealed internal class CNativeBuffer : System.Data.ProviderBase.DbBuffer
+    internal sealed class CNativeBuffer : System.Data.ProviderBase.DbBuffer
     {
         internal CNativeBuffer(int initialSize) : base(initialSize)
         {
@@ -349,7 +349,7 @@ namespace System.Data.Odbc
     }
 
 
-    sealed internal class CStringTokenizer
+    internal sealed class CStringTokenizer
     {
         private readonly StringBuilder _token;
         private readonly string _sqlstatement;

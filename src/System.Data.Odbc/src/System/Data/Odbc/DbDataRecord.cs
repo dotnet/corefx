@@ -10,7 +10,7 @@ using System.Reflection;                //Missing
 
 namespace System.Data.Odbc
 {
-    sealed internal class DbSchemaInfo
+    internal sealed class DbSchemaInfo
     {
         internal DbSchemaInfo()
         {
@@ -51,7 +51,7 @@ namespace System.Data.Odbc
     //  We do not cache all columns, so reading out of order is still not
     //
     /////////////////////////////////////////////////////////////////////////////
-    sealed internal class DbCache
+    internal sealed class DbCache
     {
         //Data
 

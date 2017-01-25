@@ -232,7 +232,7 @@ namespace System.Data.Odbc
         }
     }
 
-    sealed internal class OdbcDescriptorHandle : OdbcHandle
+    internal sealed class OdbcDescriptorHandle : OdbcHandle
     {
         internal OdbcDescriptorHandle(OdbcStatementHandle statementHandle, ODBC32.SQL_ATTR attribute) : base(statementHandle, attribute)
         {

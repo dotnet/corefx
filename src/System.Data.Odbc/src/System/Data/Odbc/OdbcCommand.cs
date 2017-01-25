@@ -1018,7 +1018,7 @@ namespace System.Data.Odbc
             _cmdState = ConnectionState.Executing;
         }
     }
-    sealed internal class CMDWrapper
+    internal sealed class CMDWrapper
     {
         private OdbcStatementHandle _stmt;                  // hStmt
         private OdbcStatementHandle _keyinfostmt;           // hStmt for keyinfo
