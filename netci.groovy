@@ -309,8 +309,9 @@ def buildArchConfiguration = ['Debug': 'x86',
                 postBuildScripts {
                     steps {
                         // Run the tests
-                        batchFile("python arm64_post_build.py -repo_root %WORKSPACE% -arch arm64 -build_type ${configurationGroup.toLowerCase()} -scenario CoreFX -key_location C:\\tools\\key.txt"
-                    onlyIfBuildSucceeds(true)
+                        batchFile("python arm64_post_build.py -repo_root %WORKSPACE% -arch arm64 -build_type ${configurationGroup.toLowerCase()} -scenario CoreFX -key_location C:\\tools\\key.txt")
+                    }
+					onlyIfBuildSucceeds(true)
                     onlyIfBuildFails(false)
                 }
             }
