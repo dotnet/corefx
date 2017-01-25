@@ -87,12 +87,15 @@ namespace System.Net.WebSockets
                 Socket connectedSocket = await ConnectSocketAsync(uri.Host, uri.Port, cancellationToken).ConfigureAwait(false);
                 Stream stream = new AsyncEventArgsNetworkStream(connectedSocket);
 
+                // Honor Host header if set.
+                string hostHeader = options.RequestHeaders[HttpKnownHeaderNames.Host];
+
                 // Upgrade to SSL if needed
                 if (uri.Scheme == UriScheme.Wss)
                 {
                     var sslStream = new SslStream(stream);
                     await sslStream.AuthenticateAsClientAsync(
-                        uri.Host,
+                        ExtractHost(hostHeader) ?? uri.Host,
                         options.ClientCertificates,
                         SecurityProtocol.AllowedSecurityProtocols,
                         checkCertificateRevocation: false).ConfigureAwait(false);
@@ -101,7 +104,7 @@ namespace System.Net.WebSockets
 
                 // Create the security key and expected response, then build all of the request headers
                 KeyValuePair<string, string> secKeyAndSecWebSocketAccept = CreateSecKeyAndSecWebSocketAccept();
-                byte[] requestHeader = BuildRequestHeader(uri, options, secKeyAndSecWebSocketAccept.Key);
+                byte[] requestHeader = BuildRequestHeader(uri, hostHeader, options, secKeyAndSecWebSocketAccept.Key);
 
                 // Write out the header to the connection
                 await stream.WriteAsync(requestHeader, 0, requestHeader.Length, cancellationToken).ConfigureAwait(false);
@@ -195,10 +198,11 @@ namespace System.Net.WebSockets
 
         /// <summary>Creates a byte[] containing the headers to send to the server.</summary>
         /// <param name="uri">The Uri of the server.</param>
+        /// <param name="hostHeader">The host header value (if specified by user).</param>
         /// <param name="options">The options used to configure the websocket.</param>
         /// <param name="secKey">The generated security key to send in the Sec-WebSocket-Key header.</param>
         /// <returns>The byte[] containing the encoded headers ready to send to the network.</returns>
-        private static byte[] BuildRequestHeader(Uri uri, ClientWebSocketOptions options, string secKey)
+        private static byte[] BuildRequestHeader(Uri uri, string hostHeader, ClientWebSocketOptions options, string secKey)
         {
             StringBuilder builder = t_cachedStringBuilder ?? (t_cachedStringBuilder = new StringBuilder());
             Debug.Assert(builder.Length == 0, $"Expected builder to be empty, got one of length {builder.Length}");
@@ -207,7 +211,16 @@ namespace System.Net.WebSockets
                 builder.Append("GET ").Append(uri.PathAndQuery).Append(" HTTP/1.1\r\n");
 
                 // Add all of the required headers
-                builder.Append("Host: ").Append(uri.IdnHost).Append(":").Append(uri.Port).Append("\r\n");
+                builder.Append("Host: ");
+                if (string.IsNullOrEmpty(hostHeader))
+                {
+                    builder.Append(uri.IdnHost).Append(":").Append(uri.Port).Append("\r\n");
+                }
+                else
+                {
+                    builder.Append(hostHeader).Append("\r\n");
+                }
+
                 builder.Append("Connection: Upgrade\r\n");
                 builder.Append("Upgrade: websocket\r\n");
                 builder.Append("Sec-WebSocket-Version: 13\r\n");
@@ -216,6 +229,12 @@ namespace System.Net.WebSockets
                 // Add all of the additionally requested headers
                 foreach (string key in options.RequestHeaders.AllKeys)
                 {
+                    if (string.Equals(key, HttpKnownHeaderNames.Host, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Host header handled above
+                        continue;
+                    }
+
                     builder.Append(key).Append(": ").Append(options.RequestHeaders[key]).Append("\r\n");
                 }
 
@@ -269,6 +288,30 @@ namespace System.Net.WebSockets
                     secKey,
                     Convert.ToBase64String(sha.ComputeHash(Encoding.ASCII.GetBytes(secKey + WSServerGuid))));
             }
+        }
+
+        /// <summary>
+        /// Given a &quot;Host:Port&quot; string return only the &quot;Host&quot;
+        /// </summary>
+        /// <param name="hostAndPort">The host and optional port value (e.g. &quot;Host:Port&quot;).</param>
+        /// <returns>The the &quot;Host&quot; portion</returns>
+        private static string ExtractHost(string hostAndPort)
+        {
+            string host = hostAndPort;
+            if (!string.IsNullOrEmpty(hostAndPort))
+            {
+                int colonIndex = hostAndPort.IndexOf(':');
+                if (colonIndex == -1)
+                {
+                    host = hostAndPort;
+                }
+                else
+                {
+                    host = hostHeader.Substring(0, colonIndex);
+                }
+            }
+
+            return host;
         }
 
         /// <summary>Read and validate the connect response headers from the server.</summary>
