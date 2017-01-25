@@ -84,9 +84,10 @@
       <Output TaskParameter="RestoreRequired" PropertyName="RestoreRequired" />
     </IsRestoreRequired>
     
-    <Exec Command="$(DnuRestoreCommand) @(DnuRestoreDir->'&quot;%(Identity)&quot;', ' ')"
+    <!-- Temporarily using diagnostic verbosity until mystery 45-minute timeouts are understood -->
+    <Exec Command="$(DnuRestoreCommand) -v diag @(DnuRestoreDir->'&quot;%(Identity)&quot;', ' ')"
           Condition="'$(RestoreRequired)' == 'true'"
-          StandardOutputImportance="Low"
+          StandardOutputImportance="Normal"
           CustomErrorRegularExpression="(^Unable to locate .*)|(^Updating the invalid lock file with .*)"
           ContinueOnError="ErrorAndContinue" />
 
