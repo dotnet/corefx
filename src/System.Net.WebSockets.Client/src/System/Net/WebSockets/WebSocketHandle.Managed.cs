@@ -291,24 +291,19 @@ namespace System.Net.WebSockets
         }
 
         /// <summary>
-        /// Given a &quot;Host:Port&quot; string return only the &quot;Host&quot;
+        /// Given a "Host:Port" string return only the "Host"
         /// </summary>
-        /// <param name="hostAndPort">The host and optional port value (e.g. &quot;Host:Port&quot;).</param>
-        /// <returns>The the &quot;Host&quot; portion</returns>
+        /// <param name="hostAndPort">The host and optional port value (e.g. "Host:Port").</param>
+        /// <returns>The the "Host" portion</returns>
         private static string ExtractHost(string hostAndPort)
         {
             string host = hostAndPort;
             if (!string.IsNullOrEmpty(hostAndPort))
             {
                 int colonIndex = hostAndPort.IndexOf(':');
-                if (colonIndex == -1)
-                {
-                    host = hostAndPort;
-                }
-                else
-                {
-                    host = hostHeader.Substring(0, colonIndex);
-                }
+                host = colonIndex == -1 ? 
+                    hostAndPort :
+                    hostHeader.Substring(0, colonIndex);
             }
 
             return host;
