@@ -7,10 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Project Include="ref.builds" />
-    <Project Include="shims\shims.proj" /> <!-- Need to build the shims before src.builds to binplace them to the TargetingPack folder -->
     <Project Include="src.builds" />
   </ItemGroup>
+
+  <Target Name="BuildRefAndShims" BeforeTargets="BuildAllProjects">
+    <ItemGroup>
+      <RefAndShimsProject Include="ref.builds" />
+      <RefAndShimsProject Include="shims\shims.proj" />
+    </ItemGroup>
+    <MSBuild Projects="@(RefAndShimsProject)"
+             ContinueOnError="ErrorAndContinue"
+             Condition="'%(Identity)' != ''"
+             Properties="Configuration=%(RefAndShimsProject.TargetGroup);TargetGroup=%(RefAndShimsProject.TargetGroup)" />
+  </Target>
 
   <Import Project="..\dir.targets" />
   <Import Project="..\dir.traversal.targets" />
