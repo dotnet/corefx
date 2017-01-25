@@ -2734,14 +2734,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         uRes = u1 / u2;
                     }
-                    else if (u2 != 0)
-                    {
-                        uRes = (uint)((int)u1 / (int)u2);
-                    }
                     else
                     {
-                        uRes = (uint)-(int)u1;
-                        EnsureChecked(u1 != uSign);
+                        uRes = (uint)((int)u1 / (int)u2);
                     }
                     break;
 
@@ -2751,13 +2746,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         uRes = u1 % u2;
                     }
-                    else if (u2 != 0)
-                    {
-                        uRes = (uint)((int)u1 % (int)u2);
-                    }
                     else
                     {
-                        uRes = 0;
+                        uRes = (uint)((int)u1 % (int)u2);
                     }
                     break;
 
