@@ -4,8 +4,7 @@
     <BuildConfigurations>
       net46-Windows_NT;
       netstandard1.3;
-      netcoreapp;
-      uap;
+      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

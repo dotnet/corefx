@@ -63,6 +63,9 @@
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolDocumentWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Some of the P2P references this csproj has are building for netstandard, so need to add reference to
+    netstandard shim -->
+    <Reference Include="netstandard" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
