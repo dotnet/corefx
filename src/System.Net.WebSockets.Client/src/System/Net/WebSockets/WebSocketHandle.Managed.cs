@@ -303,7 +303,7 @@ namespace System.Net.WebSockets
                 int colonIndex = hostAndPort.IndexOf(':');
                 host = colonIndex == -1 ? 
                     hostAndPort :
-                    hostHeader.Substring(0, colonIndex);
+                    hostAndPort.Substring(0, colonIndex);
             }
 
             return host;
