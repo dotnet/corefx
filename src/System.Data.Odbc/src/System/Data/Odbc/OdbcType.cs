@@ -7,7 +7,8 @@ using System.Data;
 
 namespace System.Data.Odbc
 {
-    public enum OdbcType {
+    public enum OdbcType
+    {
         BigInt = 1,
         Binary = 2,
         Bit = 3,

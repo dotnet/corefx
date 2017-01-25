@@ -14,85 +14,100 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 
-namespace System.Data.Odbc {
-
+namespace System.Data.Odbc
+{
     [DefaultProperty("Driver")]
     [System.ComponentModel.TypeConverterAttribute(typeof(OdbcConnectionStringBuilder.OdbcConnectionStringBuilderConverter))]
-    public sealed class OdbcConnectionStringBuilder : DbConnectionStringBuilder {
-
-        private enum Keywords { // must maintain same ordering as _validKeywords array
-//            NamedConnection,
+    public sealed class OdbcConnectionStringBuilder : DbConnectionStringBuilder
+    {
+        private enum Keywords
+        { // must maintain same ordering as _validKeywords array
+          //            NamedConnection,
             Dsn,
 
             Driver,
         }
 
-        private static readonly string[] _validKeywords;
-        private static readonly Dictionary<string,Keywords> _keywords;
+        private static readonly string[] s_validKeywords;
+        private static readonly Dictionary<string, Keywords> s_keywords;
 
         private string[] _knownKeywords;
 
-        private string _dsn    = DbConnectionStringDefaults.Dsn;
-//        private string _namedConnection  = DbConnectionStringDefaults.NamedConnection;
+        private string _dsn = DbConnectionStringDefaults.Dsn;
+        //        private string _namedConnection  = DbConnectionStringDefaults.NamedConnection;
 
         private string _driver = DbConnectionStringDefaults.Driver;
 
-        static OdbcConnectionStringBuilder() {
+        static OdbcConnectionStringBuilder()
+        {
             string[] validKeywords = new string[2];
-            validKeywords[(int)Keywords.Driver]          = DbConnectionStringKeywords.Driver;
-            validKeywords[(int)Keywords.Dsn]             = DbConnectionStringKeywords.Dsn;
-//            validKeywords[(int)Keywords.NamedConnection] = DbConnectionStringKeywords.NamedConnection;
-            _validKeywords = validKeywords;
+            validKeywords[(int)Keywords.Driver] = DbConnectionStringKeywords.Driver;
+            validKeywords[(int)Keywords.Dsn] = DbConnectionStringKeywords.Dsn;
+            //            validKeywords[(int)Keywords.NamedConnection] = DbConnectionStringKeywords.NamedConnection;
+            s_validKeywords = validKeywords;
 
-            Dictionary<string,Keywords> hash = new Dictionary<string,Keywords>(2, StringComparer.OrdinalIgnoreCase);
-            hash.Add(DbConnectionStringKeywords.Driver,          Keywords.Driver);
-            hash.Add(DbConnectionStringKeywords.Dsn,             Keywords.Dsn);
-//            hash.Add(DbConnectionStringKeywords.NamedConnection, Keywords.NamedConnection);
+            Dictionary<string, Keywords> hash = new Dictionary<string, Keywords>(2, StringComparer.OrdinalIgnoreCase);
+            hash.Add(DbConnectionStringKeywords.Driver, Keywords.Driver);
+            hash.Add(DbConnectionStringKeywords.Dsn, Keywords.Dsn);
+            //            hash.Add(DbConnectionStringKeywords.NamedConnection, Keywords.NamedConnection);
             Debug.Assert(2 == hash.Count, "initial expected size is incorrect");
-            _keywords = hash;
+            s_keywords = hash;
         }
 
-        public OdbcConnectionStringBuilder() : this((string)null) {
+        public OdbcConnectionStringBuilder() : this((string)null)
+        {
         }
 
-        public OdbcConnectionStringBuilder(string connectionString) : base(true) {
-            if (!ADP.IsEmpty(connectionString)) {
+        public OdbcConnectionStringBuilder(string connectionString) : base(true)
+        {
+            if (!ADP.IsEmpty(connectionString))
+            {
                 ConnectionString = connectionString;
             }
         }
 
-        public override object this[string keyword] {
-            get {
+        public override object this[string keyword]
+        {
+            get
+            {
                 ADP.CheckArgumentNull(keyword, "keyword");
                 Keywords index;
-                if (_keywords.TryGetValue(keyword, out index)) {
+                if (s_keywords.TryGetValue(keyword, out index))
+                {
                     return GetAt(index);
                 }
-                else {
+                else
+                {
                     return base[keyword];
                 }
             }
-            set {
+            set
+            {
                 ADP.CheckArgumentNull(keyword, "keyword");
-                if (null != value) {
+                if (null != value)
+                {
                     Keywords index;
-                    if (_keywords.TryGetValue(keyword, out index)) {
-                        switch(index) {
-                        case Keywords.Driver:          Driver = ConvertToString(value); break;
-                        case Keywords.Dsn:             Dsn = ConvertToString(value); break;
-//                      case Keywords.NamedConnection: NamedConnection = ConvertToString(value); break;
-                        default:
-                            Debug.Assert(false, "unexpected keyword");
-                            throw ADP.KeywordNotSupported(keyword);
+                    if (s_keywords.TryGetValue(keyword, out index))
+                    {
+                        switch (index)
+                        {
+                            case Keywords.Driver: Driver = ConvertToString(value); break;
+                            case Keywords.Dsn: Dsn = ConvertToString(value); break;
+                            //                      case Keywords.NamedConnection: NamedConnection = ConvertToString(value); break;
+                            default:
+                                Debug.Assert(false, "unexpected keyword");
+                                throw ADP.KeywordNotSupported(keyword);
                         }
                     }
-                    else {
+                    else
+                    {
                         base[keyword] = value;
                         ClearPropertyDescriptors();
                         _knownKeywords = null;
                     }
                 }
-                else {
+                else
+                {
                     Remove(keyword);
                 }
             }
@@ -102,9 +117,11 @@ namespace System.Data.Odbc {
         [ResCategoryAttribute(Res.DataCategory_Source)]
         [ResDescriptionAttribute(Res.DbConnectionString_Driver)]
         [RefreshPropertiesAttribute(RefreshProperties.All)]
-        public string Driver {
+        public string Driver
+        {
             get { return _driver; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.Driver, value);
                 _driver = value;
             }
@@ -114,60 +131,74 @@ namespace System.Data.Odbc {
         [ResCategoryAttribute(Res.DataCategory_NamedConnectionString)]
         [ResDescriptionAttribute(Res.DbConnectionString_DSN)]
         [RefreshPropertiesAttribute(RefreshProperties.All)]
-        public string Dsn {
+        public string Dsn
+        {
             get { return _dsn; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.Dsn, value);
                 _dsn = value;
             }
         }
-/*
-        [DisplayName(DbConnectionStringKeywords.NamedConnection)]
-        [ResCategoryAttribute(Res.DataCategory_NamedConnectionString)]
-        [ResDescriptionAttribute(Res.DbConnectionString_NamedConnection)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
-        [TypeConverter(typeof(NamedConnectionStringConverter))]
-        public string NamedConnection {
-            get { return _namedConnection; }
-            set {
-                SetValue(DbConnectionStringKeywords.NamedConnection, value);
-                _namedConnection = value;
-            }
-        }
-*/
-        public override ICollection Keys {
-            get {
+        /*
+                [DisplayName(DbConnectionStringKeywords.NamedConnection)]
+                [ResCategoryAttribute(Res.DataCategory_NamedConnectionString)]
+                [ResDescriptionAttribute(Res.DbConnectionString_NamedConnection)]
+                [RefreshPropertiesAttribute(RefreshProperties.All)]
+                [TypeConverter(typeof(NamedConnectionStringConverter))]
+                public string NamedConnection {
+                    get { return _namedConnection; }
+                    set {
+                        SetValue(DbConnectionStringKeywords.NamedConnection, value);
+                        _namedConnection = value;
+                    }
+                }
+        */
+        public override ICollection Keys
+        {
+            get
+            {
                 string[] knownKeywords = _knownKeywords;
-                if (null == knownKeywords) {
-                    knownKeywords = _validKeywords;
+                if (null == knownKeywords)
+                {
+                    knownKeywords = s_validKeywords;
 
                     int count = 0;
-                    foreach(string keyword in base.Keys) {
+                    foreach (string keyword in base.Keys)
+                    {
                         bool flag = true;
-                        foreach(string s in knownKeywords) {
-                            if (s == keyword) {
+                        foreach (string s in knownKeywords)
+                        {
+                            if (s == keyword)
+                            {
                                 flag = false;
                                 break;
                             }
                         }
-                        if (flag) {
+                        if (flag)
+                        {
                             count++;
                         }
                     }
-                    if (0 < count) {
+                    if (0 < count)
+                    {
                         string[] tmp = new string[knownKeywords.Length + count];
                         knownKeywords.CopyTo(tmp, 0);
 
                         int index = knownKeywords.Length;
-                        foreach(string keyword in base.Keys) {
+                        foreach (string keyword in base.Keys)
+                        {
                             bool flag = true;
-                            foreach(string s in knownKeywords) {
-                                if (s == keyword) {
+                            foreach (string s in knownKeywords)
+                            {
+                                if (s == keyword)
+                                {
                                     flag = false;
                                     break;
                                 }
                             }
-                            if (flag) {
+                            if (flag)
+                            {
                                 tmp[index++] = keyword;
                             }
                         }
@@ -179,31 +210,37 @@ namespace System.Data.Odbc {
             }
         }
 
-        public override void Clear() {
+        public override void Clear()
+        {
             base.Clear();
-            for(int i = 0; i < _validKeywords.Length; ++i) {
+            for (int i = 0; i < s_validKeywords.Length; ++i)
+            {
                 Reset((Keywords)i);
             }
-            _knownKeywords = _validKeywords;
+            _knownKeywords = s_validKeywords;
         }
 
-        public override bool ContainsKey(string keyword) {
+        public override bool ContainsKey(string keyword)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
-            return _keywords.ContainsKey(keyword) || base.ContainsKey(keyword);
+            return s_keywords.ContainsKey(keyword) || base.ContainsKey(keyword);
         }
 
-        private static string ConvertToString(object value) {
+        private static string ConvertToString(object value)
+        {
             return DbConnectionStringBuilderUtil.ConvertToString(value);
         }
 
-        private object GetAt(Keywords index) {
-            switch(index) {
-            case Keywords.Driver:          return Driver;
-            case Keywords.Dsn:             return Dsn;
-//          case Keywords.NamedConnection: return NamedConnection;
-            default:
-            Debug.Assert(false, "unexpected keyword");
-            throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
+        private object GetAt(Keywords index)
+        {
+            switch (index)
+            {
+                case Keywords.Driver: return Driver;
+                case Keywords.Dsn: return Dsn;
+                //          case Keywords.NamedConnection: return NamedConnection;
+                default:
+                    Debug.Assert(false, "unexpected keyword");
+                    throw ADP.KeywordNotSupported(s_validKeywords[(int)index]);
             }
         }
 
@@ -246,14 +283,18 @@ namespace System.Data.Odbc {
         }
         */
 
-        public override bool Remove(string keyword) {
+        public override bool Remove(string keyword)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
-            if (base.Remove(keyword)) {
+            if (base.Remove(keyword))
+            {
                 Keywords index;
-                if (_keywords.TryGetValue(keyword, out index)) {
+                if (s_keywords.TryGetValue(keyword, out index))
+                {
                     Reset(index);
                 }
-                else {
+                else
+                {
                     ClearPropertyDescriptors();
                     _knownKeywords = null;
                 }
@@ -261,65 +302,78 @@ namespace System.Data.Odbc {
             }
             return false;
         }
-        private void Reset(Keywords index) {
-            switch(index) {
-            case Keywords.Driver:
-                _driver = DbConnectionStringDefaults.Driver;
-                break;
-            case Keywords.Dsn:
-                _dsn = DbConnectionStringDefaults.Dsn;
-                break;
-//            case Keywords.NamedConnection:
-//               _namedConnection = DbConnectionStringDefaults.NamedConnection;
-//                break;
-            default:
-            Debug.Assert(false, "unexpected keyword");
-            throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
+        private void Reset(Keywords index)
+        {
+            switch (index)
+            {
+                case Keywords.Driver:
+                    _driver = DbConnectionStringDefaults.Driver;
+                    break;
+                case Keywords.Dsn:
+                    _dsn = DbConnectionStringDefaults.Dsn;
+                    break;
+                //            case Keywords.NamedConnection:
+                //               _namedConnection = DbConnectionStringDefaults.NamedConnection;
+                //                break;
+                default:
+                    Debug.Assert(false, "unexpected keyword");
+                    throw ADP.KeywordNotSupported(s_validKeywords[(int)index]);
             }
         }
 
-        private void SetValue(string keyword, string value) {
+        private void SetValue(string keyword, string value)
+        {
             ADP.CheckArgumentNull(value, keyword);
             base[keyword] = value;
         }
 
-        public override bool TryGetValue(string keyword, out object value) {
+        public override bool TryGetValue(string keyword, out object value)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
             Keywords index;
-            if (_keywords.TryGetValue(keyword, out index)) {
+            if (s_keywords.TryGetValue(keyword, out index))
+            {
                 value = GetAt(index);
                 return true;
             }
             return base.TryGetValue(keyword, out value);
         }
 
-        sealed internal class OdbcConnectionStringBuilderConverter : ExpandableObjectConverter {
-
+        sealed internal class OdbcConnectionStringBuilderConverter : ExpandableObjectConverter
+        {
             // converter classes should have public ctor
-            public OdbcConnectionStringBuilderConverter() {
+            public OdbcConnectionStringBuilderConverter()
+            {
             }
 
-            override public bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType) {
+            override public bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType)
+                {
                     return true;
                 }
                 return base.CanConvertTo(context, destinationType);
             }
 
-            override public object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
-                if (destinationType == null) {
+            override public object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                if (destinationType == null)
+                {
                     throw ADP.ArgumentNull("destinationType");
                 }
-                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType) {
+                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType)
+                {
                     OdbcConnectionStringBuilder obj = (value as OdbcConnectionStringBuilder);
-                    if (null != obj) {
+                    if (null != obj)
+                    {
                         return ConvertToInstanceDescriptor(obj);
                     }
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
-            private System.ComponentModel.Design.Serialization.InstanceDescriptor ConvertToInstanceDescriptor(OdbcConnectionStringBuilder options) {
+            private System.ComponentModel.Design.Serialization.InstanceDescriptor ConvertToInstanceDescriptor(OdbcConnectionStringBuilder options)
+            {
                 Type[] ctorParams = new Type[] { typeof(string) };
                 object[] ctorValues = new object[] { options.ConnectionString };
                 System.Reflection.ConstructorInfo ctor = typeof(OdbcConnectionStringBuilder).GetConstructor(ctorParams);

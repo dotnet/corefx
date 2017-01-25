@@ -21,60 +21,69 @@ using System.Threading;
 
 
 
-namespace System.Data.Odbc {
-
+namespace System.Data.Odbc
+{
     [
     DefaultEvent("RecordsAffected"),
     ToolboxItem(true),
     Designer("Microsoft.VSDesigner.Data.VS.OdbcCommandDesigner, " + AssemblyRef.MicrosoftVSDesigner)
     ]
-    public sealed class OdbcCommand : DbCommand, ICloneable {
-        private static int          _objectTypeCount; // Bid counter
-        internal readonly int       ObjectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
+    public sealed class OdbcCommand : DbCommand, ICloneable
+    {
+        private static int s_objectTypeCount; // Bid counter
+        internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref s_objectTypeCount);
 
-        private string              _commandText;
-        private CommandType         _commandType;
-        private int                 _commandTimeout = ADP.DefaultCommandTimeout;
-        private UpdateRowSource     _updatedRowSource = UpdateRowSource.Both;
-        private bool                _designTimeInvisible;
-        private bool                _isPrepared;                        // true if the command is prepared
+        private string _commandText;
+        private CommandType _commandType;
+        private int _commandTimeout = ADP.DefaultCommandTimeout;
+        private UpdateRowSource _updatedRowSource = UpdateRowSource.Both;
+        private bool _designTimeInvisible;
+        private bool _isPrepared;                        // true if the command is prepared
 
-        private OdbcConnection      _connection;
-        private OdbcTransaction     _transaction;
+        private OdbcConnection _connection;
+        private OdbcTransaction _transaction;
 
-        private WeakReference       weakDataReaderReference;
+        private WeakReference _weakDataReaderReference;
 
-        private CMDWrapper          _cmdWrapper;
+        private CMDWrapper _cmdWrapper;
 
-        private OdbcParameterCollection    _parameterCollection;   // Parameter collection
+        private OdbcParameterCollection _parameterCollection;   // Parameter collection
 
-        private ConnectionState     cmdState;
+        private ConnectionState _cmdState;
 
-        public OdbcCommand() : base() {
+        public OdbcCommand() : base()
+        {
             GC.SuppressFinalize(this);
         }
 
-        public OdbcCommand(string cmdText) : this() {
+        public OdbcCommand(string cmdText) : this()
+        {
             // note: arguments are assigned to properties so we do not have to trace them.
             // We still need to include them into the argument list of the definition!
             CommandText = cmdText;
         }
 
-        public OdbcCommand(string cmdText, OdbcConnection connection) : this() {
+        public OdbcCommand(string cmdText, OdbcConnection connection) : this()
+        {
             CommandText = cmdText;
-            Connection  = connection;
+            Connection = connection;
         }
 
-        public OdbcCommand(string cmdText, OdbcConnection connection, OdbcTransaction transaction) : this() {
+        public OdbcCommand(string cmdText, OdbcConnection connection, OdbcTransaction transaction) : this()
+        {
             CommandText = cmdText;
             Connection = connection;
             Transaction = transaction;
         }
 
-        private void DisposeDeadDataReader() {
-            if (ConnectionState.Fetching == cmdState) {
-                if (null != this.weakDataReaderReference && !this.weakDataReaderReference.IsAlive) {
-                    if (_cmdWrapper != null) {
+        private void DisposeDeadDataReader()
+        {
+            if (ConnectionState.Fetching == _cmdState)
+            {
+                if (null != _weakDataReaderReference && !_weakDataReaderReference.IsAlive)
+                {
+                    if (_cmdWrapper != null)
+                    {
                         _cmdWrapper.FreeKeyInfoStatementHandle(ODBC32.STMT.CLOSE);
                         _cmdWrapper.FreeStatementHandle(ODBC32.STMT.CLOSE);
                     }
@@ -83,52 +92,63 @@ namespace System.Data.Odbc {
             }
         }
 
-        private void DisposeDataReader() {
-            if (null != this.weakDataReaderReference) {
-                IDisposable reader = (IDisposable) this.weakDataReaderReference.Target;
-                if ((null != reader) && this.weakDataReaderReference.IsAlive) {
-                    ((IDisposable) reader).Dispose();
+        private void DisposeDataReader()
+        {
+            if (null != _weakDataReaderReference)
+            {
+                IDisposable reader = (IDisposable)_weakDataReaderReference.Target;
+                if ((null != reader) && _weakDataReaderReference.IsAlive)
+                {
+                    ((IDisposable)reader).Dispose();
                 }
                 CloseFromDataReader();
             }
         }
 
-        internal void DisconnectFromDataReaderAndConnection () {
+        internal void DisconnectFromDataReaderAndConnection()
+        {
             // get a reference to the datareader if it is alive
             OdbcDataReader liveReader = null;
-            if (this.weakDataReaderReference != null){
+            if (_weakDataReaderReference != null)
+            {
                 OdbcDataReader reader;
-                reader = (OdbcDataReader)this.weakDataReaderReference.Target;
-                if (this.weakDataReaderReference.IsAlive) {
+                reader = (OdbcDataReader)_weakDataReaderReference.Target;
+                if (_weakDataReaderReference.IsAlive)
+                {
                     liveReader = reader;
                 }
             }
 
             // remove reference to this from the live datareader
-            if (liveReader != null) {
+            if (liveReader != null)
+            {
                 liveReader.Command = null;
             }
 
             _transaction = null;
 
-            if (null != _connection) {
+            if (null != _connection)
+            {
                 _connection.RemoveWeakReference(this);
                 _connection = null;
             }
 
             // if the reader is dead we have to dismiss the statement
-            if (liveReader == null){
+            if (liveReader == null)
+            {
                 CloseCommandWrapper();
             }
             // else DataReader now has exclusive ownership
             _cmdWrapper = null;
         }
 
-        override protected void Dispose(bool disposing) { // MDAC 65459
-            if (disposing) {
+        override protected void Dispose(bool disposing)
+        { // MDAC 65459
+            if (disposing)
+            {
                 // release mananged objects
                 // in V1.0, V1.1 the Connection,Parameters,CommandText,Transaction where reset
-                this.DisconnectFromDataReaderAndConnection ();
+                this.DisconnectFromDataReaderAndConnection();
                 _parameterCollection = null;
                 CommandText = null;
             }
@@ -138,8 +158,10 @@ namespace System.Data.Odbc {
             base.Dispose(disposing);    // notify base classes
         }
 
-        internal bool Canceling {
-            get {
+        internal bool Canceling
+        {
+            get
+            {
                 return _cmdWrapper.Canceling;
             }
         }
@@ -151,18 +173,23 @@ namespace System.Data.Odbc {
         ResDescriptionAttribute(Res.DbCommand_CommandText),
         Editor("Microsoft.VSDesigner.Data.Odbc.Design.OdbcCommandTextEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing)
         ]
-        override public string CommandText {
-            get {
+        override public string CommandText
+        {
+            get
+            {
                 string value = _commandText;
                 return ((null != value) ? value : ADP.StrEmpty);
             }
-            set {
-                if (Bid.TraceOn) {
+            set
+            {
+                if (Bid.TraceOn)
+                {
                     Bid.Trace("<odbc.OdbcCommand.set_CommandText|API> %d#, '", ObjectID);
                     Bid.PutStr(value); // Use PutStr to write out entire string
                     Bid.Trace("'\n");
                 }
-                if (0 != ADP.SrcCompare(_commandText, value)) {
+                if (0 != ADP.SrcCompare(_commandText, value))
+                {
                     PropertyChanging();
                     _commandText = value;
                 }
@@ -173,30 +200,38 @@ namespace System.Data.Odbc {
         ResCategoryAttribute(Res.DataCategory_Data),
         ResDescriptionAttribute(Res.DbCommand_CommandTimeout),
         ]
-        override public int CommandTimeout { // V1.2.3300, XXXCommand V1.0.5000
-            get {
+        override public int CommandTimeout
+        { // V1.2.3300, XXXCommand V1.0.5000
+            get
+            {
                 return _commandTimeout;
             }
-            set {
+            set
+            {
                 Bid.Trace("<odbc.OdbcCommand.set_CommandTimeout|API> %d#, %d\n", ObjectID, value);
-                if (value < 0) {
+                if (value < 0)
+                {
                     throw ADP.InvalidCommandTimeout(value);
                 }
-                if (value != _commandTimeout) {
+                if (value != _commandTimeout)
+                {
                     PropertyChanging();
                     _commandTimeout = value;
                 }
             }
         }
 
-        public void ResetCommandTimeout() { // V1.2.3300
-            if (ADP.DefaultCommandTimeout != _commandTimeout) {
+        public void ResetCommandTimeout()
+        { // V1.2.3300
+            if (ADP.DefaultCommandTimeout != _commandTimeout)
+            {
                 PropertyChanging();
                 _commandTimeout = ADP.DefaultCommandTimeout;
             }
         }
 
-        private bool ShouldSerializeCommandTimeout() { // V1.2.3300
+        private bool ShouldSerializeCommandTimeout()
+        { // V1.2.3300
             return (ADP.DefaultCommandTimeout != _commandTimeout);
         }
 
@@ -206,22 +241,26 @@ namespace System.Data.Odbc {
         ResCategoryAttribute(Res.DataCategory_Data),
         ResDescriptionAttribute(Res.DbCommand_CommandType),
         ]
-        override public CommandType CommandType {
-            get {
+        override public CommandType CommandType
+        {
+            get
+            {
                 CommandType cmdType = _commandType;
                 return ((0 != cmdType) ? cmdType : CommandType.Text);
             }
-            set  {
-                switch(value) { // @perfnote: Enum.IsDefined
-                case CommandType.Text:
-                case CommandType.StoredProcedure:
-                    PropertyChanging();
-                    _commandType = value;
-                    break;
-                case CommandType.TableDirect:
-                    throw ODBC.NotSupportedCommandType(value);
-                default:
-                    throw ADP.InvalidCommandType(value);
+            set
+            {
+                switch (value)
+                { // @perfnote: Enum.IsDefined
+                    case CommandType.Text:
+                    case CommandType.StoredProcedure:
+                        PropertyChanging();
+                        _commandType = value;
+                        break;
+                    case CommandType.TableDirect:
+                        throw ODBC.NotSupportedCommandType(value);
+                    default:
+                        throw ADP.InvalidCommandType(value);
                 }
             }
         }
@@ -233,12 +272,16 @@ namespace System.Data.Odbc {
         ResDescriptionAttribute(Res.DbCommand_Connection),
         Editor("Microsoft.VSDesigner.Data.Design.DbConnectionEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing),
         ]
-        new public OdbcConnection Connection {
-            get {
+        new public OdbcConnection Connection
+        {
+            get
+            {
                 return _connection;
             }
-            set {
-                if (value != _connection) {
+            set
+            {
+                if (value != _connection)
+                {
                     PropertyChanging();
                     this.DisconnectFromDataReaderAndConnection();
                     Debug.Assert(null == _cmdWrapper, "has CMDWrapper when setting connection");
@@ -248,26 +291,34 @@ namespace System.Data.Odbc {
             }
         }
 
-        override protected DbConnection DbConnection { // V1.2.3300
-            get {
+        override protected DbConnection DbConnection
+        { // V1.2.3300
+            get
+            {
                 return Connection;
             }
-            set {
+            set
+            {
                 Connection = (OdbcConnection)value;
             }
         }
 
-        override protected DbParameterCollection DbParameterCollection { // V1.2.3300
-            get {
+        override protected DbParameterCollection DbParameterCollection
+        { // V1.2.3300
+            get
+            {
                 return Parameters;
             }
         }
 
-        override protected DbTransaction DbTransaction { // V1.2.3300
-            get {
+        override protected DbTransaction DbTransaction
+        { // V1.2.3300
+            get
+            {
                 return Transaction;
             }
-            set {
+            set
+            {
                 Transaction = (OdbcTransaction)value;
             }
         }
@@ -282,18 +333,23 @@ namespace System.Data.Odbc {
         Browsable(false),
         EditorBrowsableAttribute(EditorBrowsableState.Never),
         ]
-        public override bool DesignTimeVisible { // V1.2.3300, XXXCommand V1.0.5000
-            get {
+        public override bool DesignTimeVisible
+        { // V1.2.3300, XXXCommand V1.0.5000
+            get
+            {
                 return !_designTimeInvisible;
             }
-            set {
+            set
+            {
                 _designTimeInvisible = !value;
                 TypeDescriptor.Refresh(this); // VS7 208845
             }
         }
 
-        internal bool HasParameters {
-            get {
+        internal bool HasParameters
+        {
+            get
+            {
                 return (null != _parameterCollection);
             }
         }
@@ -303,9 +359,12 @@ namespace System.Data.Odbc {
         ResCategoryAttribute(Res.DataCategory_Data),
         ResDescriptionAttribute(Res.DbCommand_Parameters),
         ]
-        new public OdbcParameterCollection Parameters {
-            get {
-                if (null == _parameterCollection) {
+        new public OdbcParameterCollection Parameters
+        {
+            get
+            {
+                if (null == _parameterCollection)
+                {
                     _parameterCollection = new OdbcParameterCollection();
                 }
                 return _parameterCollection;
@@ -317,15 +376,20 @@ namespace System.Data.Odbc {
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
         ResDescriptionAttribute(Res.DbCommand_Transaction),
         ]
-        new public OdbcTransaction Transaction {
-            get {
-                if ((null != _transaction) && (null == _transaction.Connection)) {
+        new public OdbcTransaction Transaction
+        {
+            get
+            {
+                if ((null != _transaction) && (null == _transaction.Connection))
+                {
                     _transaction = null;       // Dawn of the Dead
                 }
                 return _transaction;
             }
-            set {
-                if (_transaction != value) {
+            set
+            {
+                if (_transaction != value)
+                {
                     PropertyChanging(); // fire event before value is validated
                     _transaction = value;
                 }
@@ -337,25 +401,30 @@ namespace System.Data.Odbc {
         ResCategoryAttribute(Res.DataCategory_Update),
         ResDescriptionAttribute(Res.DbCommand_UpdatedRowSource),
         ]
-        override public UpdateRowSource UpdatedRowSource { // V1.2.3300, XXXCommand V1.0.5000
-            get {
+        override public UpdateRowSource UpdatedRowSource
+        { // V1.2.3300, XXXCommand V1.0.5000
+            get
+            {
                 return _updatedRowSource;
             }
-            set {
-                switch(value) { // @perfnote: Enum.IsDefined
-                case UpdateRowSource.None:
-                case UpdateRowSource.OutputParameters:
-                case UpdateRowSource.FirstReturnedRecord:
-                case UpdateRowSource.Both:
-                    _updatedRowSource = value;
-                    break;
-                default:
-                    throw ADP.InvalidUpdateRowSource(value);
+            set
+            {
+                switch (value)
+                { // @perfnote: Enum.IsDefined
+                    case UpdateRowSource.None:
+                    case UpdateRowSource.OutputParameters:
+                    case UpdateRowSource.FirstReturnedRecord:
+                    case UpdateRowSource.Both:
+                        _updatedRowSource = value;
+                        break;
+                    default:
+                        throw ADP.InvalidUpdateRowSource(value);
                 }
             }
         }
 
-        internal OdbcDescriptorHandle GetDescriptorHandle(ODBC32.SQL_ATTR attribute) {
+        internal OdbcDescriptorHandle GetDescriptorHandle(ODBC32.SQL_ATTR attribute)
+        {
             return _cmdWrapper.GetDescriptorHandle(attribute);
         }
 
@@ -368,28 +437,33 @@ namespace System.Data.Odbc {
         // If no handle is available a handle will be allocated.
         // Bindings will be unbound if a handle is cached and the bindings are invalid.
         //
-        internal CMDWrapper GetStatementHandle () {
+        internal CMDWrapper GetStatementHandle()
+        {
             // update the command wrapper object, allocate buffer
             // create reader object
             //
-            if (_cmdWrapper==null) {
+            if (_cmdWrapper == null)
+            {
                 _cmdWrapper = new CMDWrapper(_connection);
 
                 Debug.Assert(null != _connection, "GetStatementHandle without connection?");
                 _connection.AddWeakReference(this, OdbcReferenceCollection.CommandTag);
             }
 
-            if (_cmdWrapper._dataReaderBuf == null) {
+            if (_cmdWrapper._dataReaderBuf == null)
+            {
                 _cmdWrapper._dataReaderBuf = new CNativeBuffer(4096);
             }
 
             // if there is already a statement handle we need to do some cleanup
             //
-            if (null == _cmdWrapper.StatementHandle) {
+            if (null == _cmdWrapper.StatementHandle)
+            {
                 _isPrepared = false;
                 _cmdWrapper.CreateStatementHandle();
             }
-            else if ((null != _parameterCollection) && _parameterCollection.RebindCollection) {
+            else if ((null != _parameterCollection) && _parameterCollection.RebindCollection)
+            {
                 _cmdWrapper.FreeStatementHandle(ODBC32.STMT.RESET_PARAMS);
             }
             return _cmdWrapper;
@@ -401,24 +475,29 @@ namespace System.Data.Odbc {
         // (ODBC Programmer's Reference ...)
         //
 
-        override public void Cancel() {
+        override public void Cancel()
+        {
             CMDWrapper wrapper = _cmdWrapper;
-            if (null != wrapper) {
+            if (null != wrapper)
+            {
                 wrapper.Canceling = true;
                 OdbcStatementHandle stmt = wrapper.StatementHandle;
-                if (null != stmt) {
-                    lock (stmt) {
+                if (null != stmt)
+                {
+                    lock (stmt)
+                    {
                         // Cancel the statement
                         ODBC32.RetCode retcode = stmt.Cancel();
 
                         // copy of StatementErrorHandler, because stmt may become null
-                        switch(retcode) {
-                        case ODBC32.RetCode.SUCCESS:
-                        case ODBC32.RetCode.SUCCESS_WITH_INFO:
-                            // don't fire info message events on cancel
-                            break;
-                        default:
-                            throw wrapper.Connection.HandleErrorNoThrow(stmt, retcode);
+                        switch (retcode)
+                        {
+                            case ODBC32.RetCode.SUCCESS:
+                            case ODBC32.RetCode.SUCCESS_WITH_INFO:
+                                // don't fire info message events on cancel
+                                break;
+                            default:
+                                throw wrapper.Connection.HandleErrorNoThrow(stmt, retcode);
                         }
                     }
                 }
@@ -426,7 +505,8 @@ namespace System.Data.Odbc {
         }
 
 
-        object ICloneable.Clone() {
+        object ICloneable.Clone()
+        {
             OdbcCommand clone = new OdbcCommand();
             Bid.Trace("<odbc.OdbcCommand.Clone|API> %d#, clone=%d#\n", ObjectID, clone.ObjectID);
             clone.CommandText = CommandText;
@@ -436,38 +516,48 @@ namespace System.Data.Odbc {
             clone.Transaction = this.Transaction;
             clone.UpdatedRowSource = UpdatedRowSource;
 
-            if ((null != _parameterCollection) && (0 < Parameters.Count)) {
+            if ((null != _parameterCollection) && (0 < Parameters.Count))
+            {
                 OdbcParameterCollection parameters = clone.Parameters;
-                foreach(ICloneable parameter in Parameters) {
+                foreach (ICloneable parameter in Parameters)
+                {
                     parameters.Add(parameter.Clone());
                 }
             }
             return clone;
         }
 
-        internal bool RecoverFromConnection() {
+        internal bool RecoverFromConnection()
+        {
             DisposeDeadDataReader();
-            return (ConnectionState.Closed == cmdState);
+            return (ConnectionState.Closed == _cmdState);
         }
 
-        private void CloseCommandWrapper() {
+        private void CloseCommandWrapper()
+        {
             CMDWrapper wrapper = _cmdWrapper;
-            if (null != wrapper) {
-                try {
+            if (null != wrapper)
+            {
+                try
+                {
                     wrapper.Dispose();
 
-                    if (null != _connection) {
+                    if (null != _connection)
+                    {
                         _connection.RemoveWeakReference(this);
                     }
                 }
-                finally {
+                finally
+                {
                     _cmdWrapper = null;
                 }
             }
         }
 
-        internal void CloseFromConnection () {
-            if (null != _parameterCollection) {
+        internal void CloseFromConnection()
+        {
+            if (null != _parameterCollection)
+            {
                 _parameterCollection.RebindCollection = true;
             }
             DisposeDataReader();
@@ -476,69 +566,79 @@ namespace System.Data.Odbc {
             _transaction = null;
         }
 
-        internal void CloseFromDataReader() {
-            this.weakDataReaderReference = null;
-            this.cmdState = ConnectionState.Closed;
+        internal void CloseFromDataReader()
+        {
+            _weakDataReaderReference = null;
+            _cmdState = ConnectionState.Closed;
         }
 
-        new public OdbcParameter CreateParameter() {
+        new public OdbcParameter CreateParameter()
+        {
             return new OdbcParameter();
-            }
+        }
 
-        override protected DbParameter CreateDbParameter() {
+        override protected DbParameter CreateDbParameter()
+        {
             return CreateParameter();
         }
 
-        override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior) {
+        override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        {
             return ExecuteReader(behavior);
         }
 
-        override public int ExecuteNonQuery() {
+        override public int ExecuteNonQuery()
+        {
             OdbcConnection.ExecutePermission.Demand();
-            using (OdbcDataReader reader = ExecuteReaderObject(0, ADP.ExecuteNonQuery, false)) {
+            using (OdbcDataReader reader = ExecuteReaderObject(0, ADP.ExecuteNonQuery, false))
+            {
                 reader.Close();
                 return reader.RecordsAffected;
             }
         }
 
-        new public OdbcDataReader ExecuteReader() {
+        new public OdbcDataReader ExecuteReader()
+        {
             return ExecuteReader(0/*CommandBehavior*/);
         }
 
 
-        new public OdbcDataReader ExecuteReader(CommandBehavior behavior) {
+        new public OdbcDataReader ExecuteReader(CommandBehavior behavior)
+        {
             OdbcConnection.ExecutePermission.Demand();
             return ExecuteReaderObject(behavior, ADP.ExecuteReader, true);
         }
 
-        internal  OdbcDataReader ExecuteReaderFromSQLMethod(object[] methodArguments,
-                                                            ODBC32.SQL_API method){
-
-            return ExecuteReaderObject(CommandBehavior.Default,method.ToString(),true,methodArguments,method);
-
+        internal OdbcDataReader ExecuteReaderFromSQLMethod(object[] methodArguments,
+                                                            ODBC32.SQL_API method)
+        {
+            return ExecuteReaderObject(CommandBehavior.Default, method.ToString(), true, methodArguments, method);
         }
 
-        private OdbcDataReader ExecuteReaderObject(CommandBehavior behavior, string method, bool needReader) { // MDAC 68324
-
-            if ((CommandText == null) || (CommandText.Length == 0)) {
+        private OdbcDataReader ExecuteReaderObject(CommandBehavior behavior, string method, bool needReader)
+        { // MDAC 68324
+            if ((CommandText == null) || (CommandText.Length == 0))
+            {
                 throw (ADP.CommandTextRequired(method));
             }
             // using all functions to tell ExecuteReaderObject that
-            return ExecuteReaderObject(behavior,method,needReader,null,ODBC32.SQL_API.SQLEXECDIRECT);
+            return ExecuteReaderObject(behavior, method, needReader, null, ODBC32.SQL_API.SQLEXECDIRECT);
         }
 
         private OdbcDataReader ExecuteReaderObject(CommandBehavior behavior,
                                                    string method,
                                                    bool needReader,
                                                    object[] methodArguments,
-                                                   ODBC32.SQL_API odbcApiMethod) { // MDAC 68324
-
+                                                   ODBC32.SQL_API odbcApiMethod)
+        { // MDAC 68324
             OdbcDataReader localReader = null;
-            try {
+            try
+            {
                 DisposeDeadDataReader();    // this is a no-op if cmdState is not Fetching
                 ValidateConnectionAndTransaction(method);  // cmdState will change to Executing
 
-                if(0 != (CommandBehavior.SingleRow & behavior)) {
+                if (0 != (CommandBehavior.SingleRow & behavior))
+                {
                     // CommandBehavior.SingleRow implies CommandBehavior.SingleResult
                     behavior |= CommandBehavior.SingleResult;
                 }
@@ -548,11 +648,15 @@ namespace System.Data.Odbc {
                 OdbcStatementHandle stmt = GetStatementHandle().StatementHandle;
                 _cmdWrapper.Canceling = false;
 
-                if(null != weakDataReaderReference) {
-                    if(weakDataReaderReference.IsAlive) {
-                        object target = weakDataReaderReference.Target;
-                        if(null != target && weakDataReaderReference.IsAlive) {
-                            if(!((OdbcDataReader)target).IsClosed) {
+                if (null != _weakDataReaderReference)
+                {
+                    if (_weakDataReaderReference.IsAlive)
+                    {
+                        object target = _weakDataReaderReference.Target;
+                        if (null != target && _weakDataReaderReference.IsAlive)
+                        {
+                            if (!((OdbcDataReader)target).IsClosed)
+                            {
                                 throw ADP.OpenReaderExists(); // MDAC 66411
                             }
                         }
@@ -562,7 +666,8 @@ namespace System.Data.Odbc {
 
                 //Set command properties
                 //Not all drivers support timeout. So fail silently if error
-                if(!Connection.ProviderInfo.NoQueryTimeout) {
+                if (!Connection.ProviderInfo.NoQueryTimeout)
+                {
                     TrySetStatementAttribute(stmt,
                         ODBC32.SQL_ATTR.QUERY_TIMEOUT,
                         (IntPtr)this.CommandTimeout);
@@ -570,24 +675,31 @@ namespace System.Data.Odbc {
 
                 // todo: If we remember the state we can omit a lot of SQLSetStmtAttrW calls ...
                 // if we do not create a reader we do not even need to do that
-                if(needReader) {
-                    if(Connection.IsV3Driver) {
-                        if(!Connection.ProviderInfo.NoSqlSoptSSNoBrowseTable && !Connection.ProviderInfo.NoSqlSoptSSHiddenColumns) {
+                if (needReader)
+                {
+                    if (Connection.IsV3Driver)
+                    {
+                        if (!Connection.ProviderInfo.NoSqlSoptSSNoBrowseTable && !Connection.ProviderInfo.NoSqlSoptSSHiddenColumns)
+                        {
                             // Need to get the metadata information
 
                             //SQLServer actually requires browse info turned on ahead of time...
                             //Note: We ignore any failures, since this is SQLServer specific
                             //We won't specialcase for SQL Server but at least for non-V3 drivers
-                            if(localReader.IsBehavior(CommandBehavior.KeyInfo)) {
-                                if(!_cmdWrapper._ssKeyInfoModeOn) {
+                            if (localReader.IsBehavior(CommandBehavior.KeyInfo))
+                            {
+                                if (!_cmdWrapper._ssKeyInfoModeOn)
+                                {
                                     TrySetStatementAttribute(stmt, (ODBC32.SQL_ATTR)ODBC32.SQL_SOPT_SS.NOBROWSETABLE, (IntPtr)ODBC32.SQL_NB.ON);
                                     TrySetStatementAttribute(stmt, (ODBC32.SQL_ATTR)ODBC32.SQL_SOPT_SS.HIDDEN_COLUMNS, (IntPtr)ODBC32.SQL_HC.ON);
                                     _cmdWrapper._ssKeyInfoModeOff = false;
                                     _cmdWrapper._ssKeyInfoModeOn = true;
                                 }
                             }
-                            else {
-                                if(!_cmdWrapper._ssKeyInfoModeOff) {
+                            else
+                            {
+                                if (!_cmdWrapper._ssKeyInfoModeOff)
+                                {
                                     TrySetStatementAttribute(stmt, (ODBC32.SQL_ATTR)ODBC32.SQL_SOPT_SS.NOBROWSETABLE, (IntPtr)ODBC32.SQL_NB.OFF);
                                     TrySetStatementAttribute(stmt, (ODBC32.SQL_ATTR)ODBC32.SQL_SOPT_SS.HIDDEN_COLUMNS, (IntPtr)ODBC32.SQL_HC.OFF);
                                     _cmdWrapper._ssKeyInfoModeOff = true;
@@ -598,12 +710,13 @@ namespace System.Data.Odbc {
                     }
                 }
 
-                if(localReader.IsBehavior(CommandBehavior.KeyInfo) ||
-                    localReader.IsBehavior(CommandBehavior.SchemaOnly)) {
-
+                if (localReader.IsBehavior(CommandBehavior.KeyInfo) ||
+                    localReader.IsBehavior(CommandBehavior.SchemaOnly))
+                {
                     retcode = stmt.Prepare(CommandText);
 
-                    if(ODBC32.RetCode.SUCCESS != retcode) {
+                    if (ODBC32.RetCode.SUCCESS != retcode)
+                    {
                         _connection.HandleError(stmt, retcode);
                     }
                 }
@@ -612,21 +725,26 @@ namespace System.Data.Odbc {
                 CNativeBuffer parameterBuffer = _cmdWrapper._nativeParameterBuffer;
 
                 RuntimeHelpers.PrepareConstrainedRegions();
-                try {
+                try
+                {
                     //Handle Parameters
                     //Note: We use the internal variable as to not instante a new object collection,
                     //for the the common case of using no parameters.
-                    if((null != _parameterCollection) && (0 < _parameterCollection.Count)) {
+                    if ((null != _parameterCollection) && (0 < _parameterCollection.Count))
+                    {
                         int parameterBufferSize = _parameterCollection.CalcParameterBufferSize(this);
 
-                        if(null == parameterBuffer || parameterBuffer.Length < parameterBufferSize) {
-                            if (null != parameterBuffer) {
+                        if (null == parameterBuffer || parameterBuffer.Length < parameterBufferSize)
+                        {
+                            if (null != parameterBuffer)
+                            {
                                 parameterBuffer.Dispose();
                             }
                             parameterBuffer = new CNativeBuffer(parameterBufferSize);
                             _cmdWrapper._nativeParameterBuffer = parameterBuffer;
                         }
-                        else {
+                        else
+                        {
                             parameterBuffer.ZeroMemory();
                         }
 
@@ -635,38 +753,46 @@ namespace System.Data.Odbc {
                         _parameterCollection.Bind(this, _cmdWrapper, parameterBuffer);
                     }
 
-                    if(!localReader.IsBehavior(CommandBehavior.SchemaOnly)) {
-
+                    if (!localReader.IsBehavior(CommandBehavior.SchemaOnly))
+                    {
                         // Can't get the KeyInfo after command execution (SQL Server only since it does not support multiple
                         // results on the same connection). Stored procedures (SP) do not return metadata before actual execution
                         // Need to check the column count since the command type may not be set to SP for a SP.
-                        if((localReader.IsBehavior(CommandBehavior.KeyInfo) || localReader.IsBehavior(CommandBehavior.SchemaOnly))
-                            && (CommandType != CommandType.StoredProcedure)) {
+                        if ((localReader.IsBehavior(CommandBehavior.KeyInfo) || localReader.IsBehavior(CommandBehavior.SchemaOnly))
+                            && (CommandType != CommandType.StoredProcedure))
+                        {
                             Int16 cColsAffected;
                             retcode = stmt.NumberOfResultColumns(out cColsAffected);
-                            if(retcode == ODBC32.RetCode.SUCCESS || retcode == ODBC32.RetCode.SUCCESS_WITH_INFO) {
-                                if(cColsAffected > 0) {
+                            if (retcode == ODBC32.RetCode.SUCCESS || retcode == ODBC32.RetCode.SUCCESS_WITH_INFO)
+                            {
+                                if (cColsAffected > 0)
+                                {
                                     localReader.GetSchemaTable();
                                 }
                             }
-                            else if(retcode == ODBC32.RetCode.NO_DATA) {
+                            else if (retcode == ODBC32.RetCode.NO_DATA)
+                            {
                                 // do nothing
                             }
-                            else {
+                            else
+                            {
                                 // any other returncode indicates an error
                                 _connection.HandleError(stmt, retcode);
                             }
                         }
 
-                        switch(odbcApiMethod) {
+                        switch (odbcApiMethod)
+                        {
                             case ODBC32.SQL_API.SQLEXECDIRECT:
-                                if(localReader.IsBehavior(CommandBehavior.KeyInfo) || _isPrepared) {
+                                if (localReader.IsBehavior(CommandBehavior.KeyInfo) || _isPrepared)
+                                {
                                     //Already prepared, so use SQLExecute
                                     retcode = stmt.Execute();
                                     // Build metadata here
                                     // localReader.GetSchemaTable();
                                 }
-                                else {
+                                else
+                                {
 #if DEBUG
                                     //if (AdapterSwitches.OleDbTrace.TraceInfo) {
                                     //    ADP.DebugWriteLine("SQLExecDirectW: " + CommandText);
@@ -723,50 +849,62 @@ namespace System.Data.Odbc {
                         }
 
                         //Note: Execute will return NO_DATA for Update/Delete non-row returning queries
-                        if((ODBC32.RetCode.SUCCESS != retcode) && (ODBC32.RetCode.NO_DATA != retcode)) {
+                        if ((ODBC32.RetCode.SUCCESS != retcode) && (ODBC32.RetCode.NO_DATA != retcode))
+                        {
                             _connection.HandleError(stmt, retcode);
                         }
                     } // end SchemaOnly
                 }
-                finally {
-                    if(mustRelease) {
+                finally
+                {
+                    if (mustRelease)
+                    {
                         parameterBuffer.DangerousRelease();
                     }
                 }
 
-                this.weakDataReaderReference = new WeakReference(localReader);
+                _weakDataReaderReference = new WeakReference(localReader);
 
                 // XXXCommand.Execute should position reader on first row returning result
                 // any exceptions in the initial non-row returning results should be thrown
                 // from from ExecuteXXX not the DataReader
-                if(!localReader.IsBehavior(CommandBehavior.SchemaOnly)) {
+                if (!localReader.IsBehavior(CommandBehavior.SchemaOnly))
+                {
                     localReader.FirstResult();
                 }
-                cmdState = ConnectionState.Fetching;
+                _cmdState = ConnectionState.Fetching;
             }
-            finally {
-                if(ConnectionState.Fetching != cmdState) {
-                    if(null != localReader) {
+            finally
+            {
+                if (ConnectionState.Fetching != _cmdState)
+                {
+                    if (null != localReader)
+                    {
                         // clear bindings so we don't grab output parameters on a failed execute
-                        if(null != _parameterCollection) {
+                        if (null != _parameterCollection)
+                        {
                             _parameterCollection.ClearBindings();
                         }
                         ((IDisposable)localReader).Dispose();
                     }
-                    if(ConnectionState.Closed != cmdState) {
-                        cmdState = ConnectionState.Closed;
+                    if (ConnectionState.Closed != _cmdState)
+                    {
+                        _cmdState = ConnectionState.Closed;
                     }
                 }
             }
             return localReader;
         }
 
-        override public object ExecuteScalar() {
+        override public object ExecuteScalar()
+        {
             OdbcConnection.ExecutePermission.Demand();
 
             object value = null;
-            using(IDataReader reader = ExecuteReaderObject(0, ADP.ExecuteScalar, false)) {
-                if (reader.Read() && (0 < reader.FieldCount)) {
+            using (IDataReader reader = ExecuteReaderObject(0, ADP.ExecuteScalar, false))
+            {
+                if (reader.Read() && (0 < reader.FieldCount))
+                {
                     value = reader.GetValue(0);
                 }
                 reader.Close();
@@ -774,11 +912,13 @@ namespace System.Data.Odbc {
             return value;
         }
 
-        internal string GetDiagSqlState() {
+        internal string GetDiagSqlState()
+        {
             return _cmdWrapper.GetDiagSqlState();
         }
 
-        private void PropertyChanging() {
+        private void PropertyChanging()
+        {
             _isPrepared = false;
         }
 
@@ -792,17 +932,20 @@ namespace System.Data.Odbc {
         // if the connection is not set
         // if the connection is not open
         //
-        override public void Prepare() {
+        override public void Prepare()
+        {
             OdbcConnection.ExecutePermission.Demand();
             ODBC32.RetCode retcode;
 
             ValidateOpenConnection(ADP.Prepare);
 
-            if (0 != (ConnectionState.Fetching & _connection.InternalState)) {
+            if (0 != (ConnectionState.Fetching & _connection.InternalState))
+            {
                 throw ADP.OpenReaderExists();
             }
 
-            if (CommandType == CommandType.TableDirect) {
+            if (CommandType == CommandType.TableDirect)
+            {
                 return; // do nothing
             }
 
@@ -814,7 +957,8 @@ namespace System.Data.Odbc {
             retcode = stmt.Prepare(CommandText);
 
 
-            if (ODBC32.RetCode.SUCCESS != retcode) {
+            if (ODBC32.RetCode.SUCCESS != retcode)
+            {
                 _connection.HandleError(stmt, retcode);
             }
             _isPrepared = true;
@@ -822,120 +966,141 @@ namespace System.Data.Odbc {
 
 
 
-        void TrySetStatementAttribute (OdbcStatementHandle stmt, ODBC32.SQL_ATTR stmtAttribute, IntPtr value) {
-
+        private void TrySetStatementAttribute(OdbcStatementHandle stmt, ODBC32.SQL_ATTR stmtAttribute, IntPtr value)
+        {
             ODBC32.RetCode retcode = stmt.SetStatementAttribute(
                 stmtAttribute,
                 value,
                 ODBC32.SQL_IS.UINTEGER);
 
-            if (retcode == ODBC32.RetCode.ERROR) {
-
+            if (retcode == ODBC32.RetCode.ERROR)
+            {
                 string sqlState;
                 stmt.GetDiagnosticField(out sqlState);
 
-                if ((sqlState == "HYC00") || (sqlState == "HY092")) {
+                if ((sqlState == "HYC00") || (sqlState == "HY092"))
+                {
                     Connection.FlagUnsupportedStmtAttr(stmtAttribute);
                 }
-                else {
+                else
+                {
                     // now what? Should we throw?
                 }
             }
         }
 
-        private void ValidateOpenConnection(string methodName) {
+        private void ValidateOpenConnection(string methodName)
+        {
             // see if we have a connection
             OdbcConnection connection = Connection;
 
-            if (null == connection) {
+            if (null == connection)
+            {
                 throw ADP.ConnectionRequired(methodName);
             }
 
             // must have an open and available connection
             ConnectionState state = connection.State;
 
-            if (ConnectionState.Open != state) {
+            if (ConnectionState.Open != state)
+            {
                 throw ADP.OpenConnectionRequired(methodName, state);
             }
         }
 
-        private void ValidateConnectionAndTransaction(string method) {
-            if (null == _connection) {
+        private void ValidateConnectionAndTransaction(string method)
+        {
+            if (null == _connection)
+            {
                 throw ADP.ConnectionRequired(method);
             }
             _transaction = _connection.SetStateExecuting(method, Transaction);
-            cmdState = ConnectionState.Executing;
+            _cmdState = ConnectionState.Executing;
         }
-
     }
-    sealed internal class CMDWrapper {
-
+    sealed internal class CMDWrapper
+    {
         private OdbcStatementHandle _stmt;                  // hStmt
         private OdbcStatementHandle _keyinfostmt;           // hStmt for keyinfo
 
-        internal OdbcDescriptorHandle  _hdesc;              // hDesc
+        internal OdbcDescriptorHandle _hdesc;              // hDesc
 
         internal CNativeBuffer _nativeParameterBuffer;      // Native memory for internal memory management
         // (Performance optimization)
 
-        internal CNativeBuffer      _dataReaderBuf;         // Reusable DataReader buffer
+        internal CNativeBuffer _dataReaderBuf;         // Reusable DataReader buffer
 
         private readonly OdbcConnection _connection;        // Connection
-        private bool                _canceling;             // true if the command is canceling
-        internal bool               _hasBoundColumns;
-        internal bool               _ssKeyInfoModeOn;       // tells us if the SqlServer specific options are on
-        internal bool               _ssKeyInfoModeOff;      // a tri-state value would be much better ...
+        private bool _canceling;             // true if the command is canceling
+        internal bool _hasBoundColumns;
+        internal bool _ssKeyInfoModeOn;       // tells us if the SqlServer specific options are on
+        internal bool _ssKeyInfoModeOff;      // a tri-state value would be much better ...
 
-        internal CMDWrapper (OdbcConnection connection) {
+        internal CMDWrapper(OdbcConnection connection)
+        {
             _connection = connection;
         }
 
-        internal bool Canceling {
-            get {
+        internal bool Canceling
+        {
+            get
+            {
                 return _canceling;
             }
-            set {
+            set
+            {
                 _canceling = value;
             }
         }
 
-        internal OdbcConnection Connection {
-            get {
+        internal OdbcConnection Connection
+        {
+            get
+            {
                 return _connection;
             }
         }
 
-        internal bool HasBoundColumns {
-//            get {
-//                return _hasBoundColumns;
-//            }
-            set {
+        internal bool HasBoundColumns
+        {
+            //            get {
+            //                return _hasBoundColumns;
+            //            }
+            set
+            {
                 _hasBoundColumns = value;
             }
         }
 
-        internal OdbcStatementHandle StatementHandle {
+        internal OdbcStatementHandle StatementHandle
+        {
             get { return _stmt; }
         }
 
-        internal OdbcStatementHandle KeyInfoStatement {
-            get {
+        internal OdbcStatementHandle KeyInfoStatement
+        {
+            get
+            {
                 return _keyinfostmt;
             }
         }
 
-        internal void CreateKeyInfoStatementHandle() {
+        internal void CreateKeyInfoStatementHandle()
+        {
             DisposeKeyInfoStatementHandle();
-            _keyinfostmt =  _connection.CreateStatementHandle();
+            _keyinfostmt = _connection.CreateStatementHandle();
         }
 
-        internal void CreateStatementHandle() {
+        internal void CreateStatementHandle()
+        {
             DisposeStatementHandle();
-            _stmt =  _connection.CreateStatementHandle();
+            _stmt = _connection.CreateStatementHandle();
         }
 
-        internal void Dispose() {
-            if (null != _dataReaderBuf) {
+        internal void Dispose()
+        {
+            if (null != _dataReaderBuf)
+            {
                 _dataReaderBuf.Dispose();
                 _dataReaderBuf = null;
             }
@@ -943,52 +1108,64 @@ namespace System.Data.Odbc {
 
             CNativeBuffer buffer = _nativeParameterBuffer;
             _nativeParameterBuffer = null;
-            if (null != buffer) {
+            if (null != buffer)
+            {
                 buffer.Dispose();
             }
             _ssKeyInfoModeOn = false;
             _ssKeyInfoModeOff = false;
         }
 
-        private void DisposeDescriptorHandle() {
+        private void DisposeDescriptorHandle()
+        {
             OdbcDescriptorHandle handle = _hdesc;
-            if (null != handle) {
+            if (null != handle)
+            {
                 _hdesc = null;
                 handle.Dispose();
             }
         }
-        internal void DisposeStatementHandle() {
+        internal void DisposeStatementHandle()
+        {
             DisposeKeyInfoStatementHandle();
             DisposeDescriptorHandle();
 
             OdbcStatementHandle handle = _stmt;
-            if (null != handle) {
+            if (null != handle)
+            {
                 _stmt = null;
                 handle.Dispose();
             }
         }
 
-        internal void DisposeKeyInfoStatementHandle() {
+        internal void DisposeKeyInfoStatementHandle()
+        {
             OdbcStatementHandle handle = _keyinfostmt;
-            if (null != handle) {
+            if (null != handle)
+            {
                 _keyinfostmt = null;
                 handle.Dispose();
             }
         }
 
-        internal void FreeStatementHandle(ODBC32.STMT stmt) {
+        internal void FreeStatementHandle(ODBC32.STMT stmt)
+        {
             DisposeDescriptorHandle();
 
             OdbcStatementHandle handle = _stmt;
-            if (null != handle) {
-                try {
+            if (null != handle)
+            {
+                try
+                {
                     ODBC32.RetCode retcode;
                     retcode = handle.FreeStatement(stmt);
                     StatementErrorHandler(retcode);
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     // 
-                    if (ADP.IsCatchableExceptionType(e)) {
+                    if (ADP.IsCatchableExceptionType(e))
+                    {
                         _stmt = null;
                         handle.Dispose();
                     }
@@ -998,15 +1175,20 @@ namespace System.Data.Odbc {
             }
         }
 
-        internal void FreeKeyInfoStatementHandle(ODBC32.STMT stmt) {
+        internal void FreeKeyInfoStatementHandle(ODBC32.STMT stmt)
+        {
             OdbcStatementHandle handle = _keyinfostmt;
-            if (null != handle) {
-                try {
+            if (null != handle)
+            {
+                try
+                {
                     handle.FreeStatement(stmt);
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     // 
-                    if (ADP.IsCatchableExceptionType(e)) {
+                    if (ADP.IsCatchableExceptionType(e))
+                    {
                         _keyinfostmt = null;
                         handle.Dispose();
                     }
@@ -1018,33 +1200,40 @@ namespace System.Data.Odbc {
 
         // Get the Descriptor Handle for the current statement
         //
-        internal OdbcDescriptorHandle GetDescriptorHandle(ODBC32.SQL_ATTR attribute) {
+        internal OdbcDescriptorHandle GetDescriptorHandle(ODBC32.SQL_ATTR attribute)
+        {
             OdbcDescriptorHandle hdesc = _hdesc;
-            if (null == _hdesc) {
+            if (null == _hdesc)
+            {
                 _hdesc = hdesc = new OdbcDescriptorHandle(_stmt, attribute);
             }
             return hdesc;
         }
 
-        internal string GetDiagSqlState () {
+        internal string GetDiagSqlState()
+        {
             string sqlstate;
             _stmt.GetDiagnosticField(out sqlstate);
             return sqlstate;
         }
 
-        internal void StatementErrorHandler(ODBC32.RetCode retcode) {
-            switch(retcode) {
-            case ODBC32.RetCode.SUCCESS:
-            case ODBC32.RetCode.SUCCESS_WITH_INFO:
-                _connection.HandleErrorNoThrow(_stmt, retcode);
-                break;
-            default:
-                throw _connection.HandleErrorNoThrow(_stmt, retcode);
+        internal void StatementErrorHandler(ODBC32.RetCode retcode)
+        {
+            switch (retcode)
+            {
+                case ODBC32.RetCode.SUCCESS:
+                case ODBC32.RetCode.SUCCESS_WITH_INFO:
+                    _connection.HandleErrorNoThrow(_stmt, retcode);
+                    break;
+                default:
+                    throw _connection.HandleErrorNoThrow(_stmt, retcode);
             }
         }
 
-        internal void UnbindStmtColumns() {
-            if (_hasBoundColumns) {
+        internal void UnbindStmtColumns()
+        {
+            if (_hasBoundColumns)
+            {
                 FreeStatementHandle(ODBC32.STMT.UNBIND);
                 _hasBoundColumns = false;
             }

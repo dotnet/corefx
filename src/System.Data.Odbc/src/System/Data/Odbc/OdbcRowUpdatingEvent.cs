@@ -26,15 +26,19 @@ namespace System.Data.Odbc
         public OdbcRowUpdatingEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
         : base(row, command, statementType, tableMapping)
         {
-            }
-
-        new public OdbcCommand Command {
-            get { return (base.Command as OdbcCommand); }
-            set {
-                base.Command = value; }
         }
 
-        override protected IDbCommand BaseCommand {
+        new public OdbcCommand Command
+        {
+            get { return (base.Command as OdbcCommand); }
+            set
+            {
+                base.Command = value;
+            }
+        }
+
+        override protected IDbCommand BaseCommand
+        {
             get { return base.BaseCommand; }
             set { base.BaseCommand = (value as OdbcCommand); }
         }
@@ -51,8 +55,9 @@ namespace System.Data.Odbc
         {
         }
 
-        new public OdbcCommand Command {
-            get {   return(OdbcCommand) base.Command;   }
+        new public OdbcCommand Command
+        {
+            get { return (OdbcCommand)base.Command; }
         }
     }
 }

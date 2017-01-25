@@ -16,15 +16,17 @@ using System.Globalization;
 using System.Text;
 
 
-namespace System.Data.Odbc {
-
-    public sealed class OdbcCommandBuilder : DbCommandBuilder {
-
-        public OdbcCommandBuilder() : base() {
+namespace System.Data.Odbc
+{
+    public sealed class OdbcCommandBuilder : DbCommandBuilder
+    {
+        public OdbcCommandBuilder() : base()
+        {
             GC.SuppressFinalize(this);
         }
 
-        public OdbcCommandBuilder(OdbcDataAdapter adapter) : this() {
+        public OdbcCommandBuilder(OdbcDataAdapter adapter) : this()
+        {
             DataAdapter = adapter;
         }
 
@@ -33,77 +35,96 @@ namespace System.Data.Odbc {
         ResCategoryAttribute(Res.DataCategory_Update),
         ResDescriptionAttribute(Res.OdbcCommandBuilder_DataAdapter), // MDAC 60524
         ]
-        new public OdbcDataAdapter DataAdapter {
-            get {
+        new public OdbcDataAdapter DataAdapter
+        {
+            get
+            {
                 return (base.DataAdapter as OdbcDataAdapter);
             }
-            set {
+            set
+            {
                 base.DataAdapter = value;
             }
         }
 
-        private void OdbcRowUpdatingHandler(object sender, OdbcRowUpdatingEventArgs ruevent) {
+        private void OdbcRowUpdatingHandler(object sender, OdbcRowUpdatingEventArgs ruevent)
+        {
             RowUpdatingHandler(ruevent);
         }
 
-        new public OdbcCommand GetInsertCommand() {
-            return (OdbcCommand) base.GetInsertCommand();
+        new public OdbcCommand GetInsertCommand()
+        {
+            return (OdbcCommand)base.GetInsertCommand();
         }
-        new public OdbcCommand GetInsertCommand(bool useColumnsForParameterNames) {
-            return (OdbcCommand) base.GetInsertCommand(useColumnsForParameterNames);
-        }
-
-        new public OdbcCommand GetUpdateCommand() {
-            return (OdbcCommand) base.GetUpdateCommand();
-        }
-        new public OdbcCommand GetUpdateCommand(bool useColumnsForParameterNames) {
-            return (OdbcCommand) base.GetUpdateCommand(useColumnsForParameterNames);
+        new public OdbcCommand GetInsertCommand(bool useColumnsForParameterNames)
+        {
+            return (OdbcCommand)base.GetInsertCommand(useColumnsForParameterNames);
         }
 
-        new public OdbcCommand GetDeleteCommand() {
-            return (OdbcCommand) base.GetDeleteCommand();
+        new public OdbcCommand GetUpdateCommand()
+        {
+            return (OdbcCommand)base.GetUpdateCommand();
         }
-        new public OdbcCommand GetDeleteCommand(bool useColumnsForParameterNames) {
-            return (OdbcCommand) base.GetDeleteCommand(useColumnsForParameterNames);
+        new public OdbcCommand GetUpdateCommand(bool useColumnsForParameterNames)
+        {
+            return (OdbcCommand)base.GetUpdateCommand(useColumnsForParameterNames);
         }
 
-        override protected string GetParameterName(int parameterOrdinal) {
+        new public OdbcCommand GetDeleteCommand()
+        {
+            return (OdbcCommand)base.GetDeleteCommand();
+        }
+        new public OdbcCommand GetDeleteCommand(bool useColumnsForParameterNames)
+        {
+            return (OdbcCommand)base.GetDeleteCommand(useColumnsForParameterNames);
+        }
+
+        override protected string GetParameterName(int parameterOrdinal)
+        {
             return "p" + parameterOrdinal.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
-        override protected string GetParameterName(string parameterName) {
+        override protected string GetParameterName(string parameterName)
+        {
             return parameterName;
         }
 
-        override protected string GetParameterPlaceholder(int parameterOrdinal) {
+        override protected string GetParameterPlaceholder(int parameterOrdinal)
+        {
             return "?";
         }
 
-        override protected void ApplyParameterInfo(DbParameter parameter, DataRow datarow, StatementType statementType, bool whereClause) {
-            OdbcParameter p = (OdbcParameter) parameter;
+        override protected void ApplyParameterInfo(DbParameter parameter, DataRow datarow, StatementType statementType, bool whereClause)
+        {
+            OdbcParameter p = (OdbcParameter)parameter;
             object valueType = datarow[SchemaTableColumn.ProviderType];
-            p.OdbcType = (OdbcType) valueType;
+            p.OdbcType = (OdbcType)valueType;
 
             object bvalue = datarow[SchemaTableColumn.NumericPrecision];
-            if (DBNull.Value != bvalue) {
+            if (DBNull.Value != bvalue)
+            {
                 byte bval = (byte)(short)bvalue;
                 p.PrecisionInternal = ((0xff != bval) ? bval : (byte)0);
             }
 
             bvalue = datarow[SchemaTableColumn.NumericScale];
-            if (DBNull.Value != bvalue) {
+            if (DBNull.Value != bvalue)
+            {
                 byte bval = (byte)(short)bvalue;
                 p.ScaleInternal = ((0xff != bval) ? bval : (byte)0);
             }
         }
 
-        static public void DeriveParameters(OdbcCommand command) {
+        static public void DeriveParameters(OdbcCommand command)
+        {
             // MDAC 65927
             OdbcConnection.ExecutePermission.Demand();
 
-            if (null == command) {
+            if (null == command)
+            {
                 throw ADP.ArgumentNull("command");
             }
-            switch (command.CommandType) {
+            switch (command.CommandType)
+            {
                 case System.Data.CommandType.Text:
                     throw ADP.DeriveParametersNotSupported(command);
                 case System.Data.CommandType.StoredProcedure:
@@ -114,19 +135,22 @@ namespace System.Data.Odbc {
                 default:
                     throw ADP.InvalidCommandType(command.CommandType);
             }
-            if (ADP.IsEmpty(command.CommandText)) {
+            if (ADP.IsEmpty(command.CommandText))
+            {
                 throw ADP.CommandTextRequired(ADP.DeriveParameters);
             }
 
             OdbcConnection connection = command.Connection;
 
-            if (null == connection) {
+            if (null == connection)
+            {
                 throw ADP.ConnectionRequired(ADP.DeriveParameters);
             }
 
             ConnectionState state = connection.State;
 
-            if (ConnectionState.Open != state) {
+            if (ConnectionState.Open != state)
+            {
                 throw ADP.OpenConnectionRequired(ADP.DeriveParameters, state);
             }
 
@@ -136,12 +160,14 @@ namespace System.Data.Odbc {
             parameters.Clear();
 
             int count = list.Length;
-            if (0 < count) {
-                for(int i = 0; i < list.Length; ++i) {
+            if (0 < count)
+            {
+                for (int i = 0; i < list.Length; ++i)
+                {
                     parameters.Add(list[i]);
                 }
             }
-            }
+        }
 
 
         // DeriveParametersFromStoredProcedure (
@@ -151,7 +177,8 @@ namespace System.Data.Odbc {
         // Uses SQLProcedureColumns to create an array of OdbcParameters
         //
 
-        static private OdbcParameter[] DeriveParametersFromStoredProcedure(OdbcConnection connection, OdbcCommand command) {
+        static private OdbcParameter[] DeriveParametersFromStoredProcedure(OdbcConnection connection, OdbcCommand command)
+        {
             List<OdbcParameter> rParams = new List<OdbcParameter>();
 
             // following call ensures that the command has a statement handle allocated
@@ -166,8 +193,9 @@ namespace System.Data.Odbc {
             // parts[3] = ProcedureName
             //
             string quote = connection.QuoteChar(ADP.DeriveParameters);
-            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quote, quote, '.', 4, true, Res.ODBC_ODBCCommandText, false);          
-            if (null == parts[3]) { // match everett behavior, if the commandtext is nothing but whitespace set the command text to the whitespace
+            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quote, quote, '.', 4, true, Res.ODBC_ODBCCommandText, false);
+            if (null == parts[3])
+            { // match everett behavior, if the commandtext is nothing but whitespace set the command text to the whitespace
                 parts[3] = command.CommandText;
             }
             // note: native odbc appears to ignore all but the procedure name
@@ -176,17 +204,20 @@ namespace System.Data.Odbc {
             // Note: the driver does not return an error if the given stored procedure does not exist
             // therefore we cannot handle that case and just return not parameters.
 
-            if (ODBC32.RetCode.SUCCESS != retcode) {
+            if (ODBC32.RetCode.SUCCESS != retcode)
+            {
                 connection.HandleError(hstmt, retcode);
             }
 
-            using (OdbcDataReader reader = new OdbcDataReader(command, cmdWrapper, CommandBehavior.Default)) {
+            using (OdbcDataReader reader = new OdbcDataReader(command, cmdWrapper, CommandBehavior.Default))
+            {
                 reader.FirstResult();
                 cColsAffected = reader.FieldCount;
 
                 // go through the returned rows and filter out relevant parameter data
                 //
-                while (reader.Read()) {
+                while (reader.Read())
+                {
                     // devnote: column types are specified in the ODBC Programmer's Reference
                     // COLUMN_TYPE      Smallint    16bit
                     // COLUMN_SIZE      Integer     32bit
@@ -195,8 +226,9 @@ namespace System.Data.Odbc {
 
                     OdbcParameter parameter = new OdbcParameter();
 
-                    parameter.ParameterName = reader.GetString(ODBC32.COLUMN_NAME-1);
-                    switch ((ODBC32.SQL_PARAM)reader.GetInt16(ODBC32.COLUMN_TYPE-1)){
+                    parameter.ParameterName = reader.GetString(ODBC32.COLUMN_NAME - 1);
+                    switch ((ODBC32.SQL_PARAM)reader.GetInt16(ODBC32.COLUMN_TYPE - 1))
+                    {
                         case ODBC32.SQL_PARAM.INPUT:
                             parameter.Direction = ParameterDirection.Input;
                             break;
@@ -214,39 +246,44 @@ namespace System.Data.Odbc {
                             Debug.Assert(false, "Unexpected Parametertype while DeriveParamters");
                             break;
                     }
-                    parameter.OdbcType = TypeMap.FromSqlType((ODBC32.SQL_TYPE)reader.GetInt16(ODBC32.DATA_TYPE-1))._odbcType;
-                    parameter.Size = (int)reader.GetInt32(ODBC32.COLUMN_SIZE-1);
-                    switch(parameter.OdbcType){
+                    parameter.OdbcType = TypeMap.FromSqlType((ODBC32.SQL_TYPE)reader.GetInt16(ODBC32.DATA_TYPE - 1))._odbcType;
+                    parameter.Size = (int)reader.GetInt32(ODBC32.COLUMN_SIZE - 1);
+                    switch (parameter.OdbcType)
+                    {
                         case OdbcType.Decimal:
                         case OdbcType.Numeric:
-                            parameter.ScaleInternal = (Byte)reader.GetInt16(ODBC32.DECIMAL_DIGITS-1);
-                            parameter.PrecisionInternal = (Byte)reader.GetInt16(ODBC32.NUM_PREC_RADIX-1);
-                        break;
+                            parameter.ScaleInternal = (Byte)reader.GetInt16(ODBC32.DECIMAL_DIGITS - 1);
+                            parameter.PrecisionInternal = (Byte)reader.GetInt16(ODBC32.NUM_PREC_RADIX - 1);
+                            break;
                     }
-                    rParams.Add (parameter);
+                    rParams.Add(parameter);
                 }
             }
             retcode = hstmt.CloseCursor();
-            return rParams.ToArray();;
+            return rParams.ToArray(); ;
         }
 
-        public override string QuoteIdentifier(string unquotedIdentifier){
+        public override string QuoteIdentifier(string unquotedIdentifier)
+        {
             return QuoteIdentifier(unquotedIdentifier, null /* use DataAdapter.SelectCommand.Connection if available */);
         }
-        public string QuoteIdentifier( string unquotedIdentifier, OdbcConnection connection){
-
+        public string QuoteIdentifier(string unquotedIdentifier, OdbcConnection connection)
+        {
             ADP.CheckArgumentNull(unquotedIdentifier, "unquotedIdentifier");
 
             // if the user has specificed a prefix use the user specified  prefix and suffix
             // otherwise get them from the provider
             string quotePrefix = QuotePrefix;
             string quoteSuffix = QuoteSuffix;
-            if (ADP.IsEmpty(quotePrefix) == true) {
-                if (connection == null) {
+            if (ADP.IsEmpty(quotePrefix) == true)
+            {
+                if (connection == null)
+                {
                     // VSTFDEVDIV 479567: use the adapter's connection if QuoteIdentifier was called from 
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
                     connection = base.GetConnection() as OdbcConnection;
-                    if (connection == null) {
+                    if (connection == null)
+                    {
                         throw ADP.QuotePrefixNotSet(ADP.QuoteIdentifier);
                     }
                 }
@@ -257,32 +294,38 @@ namespace System.Data.Odbc {
             // by the ODBC spec "If the data source does not support quoted identifiers, a blank is returned."
             // So if a blank is returned the string is returned unchanged. Otherwise the returned string is used
             // to quote the string
-            if ((ADP.IsEmpty(quotePrefix) == false) && (quotePrefix != " ")) {
-                return ADP.BuildQuotedString(quotePrefix,quoteSuffix,unquotedIdentifier);
+            if ((ADP.IsEmpty(quotePrefix) == false) && (quotePrefix != " "))
+            {
+                return ADP.BuildQuotedString(quotePrefix, quoteSuffix, unquotedIdentifier);
             }
-            else {
+            else
+            {
                 return unquotedIdentifier;
             }
         }
 
 
 
-        override protected void SetRowUpdatingHandler(DbDataAdapter adapter) {
+        override protected void SetRowUpdatingHandler(DbDataAdapter adapter)
+        {
             Debug.Assert(adapter is OdbcDataAdapter, "!OdbcDataAdapter");
-            if (adapter == base.DataAdapter) { // removal case
+            if (adapter == base.DataAdapter)
+            { // removal case
                 ((OdbcDataAdapter)adapter).RowUpdating -= OdbcRowUpdatingHandler;
             }
-            else { // adding case
+            else
+            { // adding case
                 ((OdbcDataAdapter)adapter).RowUpdating += OdbcRowUpdatingHandler;
             }
         }
 
-        public override string UnquoteIdentifier( string quotedIdentifier){
+        public override string UnquoteIdentifier(string quotedIdentifier)
+        {
             return UnquoteIdentifier(quotedIdentifier, null /* use DataAdapter.SelectCommand.Connection if available */);
         }
 
-        public string UnquoteIdentifier(string quotedIdentifier, OdbcConnection connection){
-
+        public string UnquoteIdentifier(string quotedIdentifier, OdbcConnection connection)
+        {
             ADP.CheckArgumentNull(quotedIdentifier, "quotedIdentifier");
 
 
@@ -290,12 +333,15 @@ namespace System.Data.Odbc {
             // otherwise get them from the provider
             string quotePrefix = QuotePrefix;
             string quoteSuffix = QuoteSuffix;
-            if (ADP.IsEmpty(quotePrefix) == true) {
-                if (connection == null) {
+            if (ADP.IsEmpty(quotePrefix) == true)
+            {
+                if (connection == null)
+                {
                     // VSTFDEVDIV 479567: use the adapter's connection if UnquoteIdentifier was called from 
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
                     connection = base.GetConnection() as OdbcConnection;
-                    if (connection == null) {
+                    if (connection == null)
+                    {
                         throw ADP.QuotePrefixNotSet(ADP.UnquoteIdentifier);
                     }
                 }
@@ -307,17 +353,17 @@ namespace System.Data.Odbc {
             // by the ODBC spec "If the data source does not support quoted identifiers, a blank is returned."
             // So if a blank is returned the string is returned unchanged. Otherwise the returned string is used
             // to unquote the string
-            if ((ADP.IsEmpty(quotePrefix) == false) || (quotePrefix != " ")) {
+            if ((ADP.IsEmpty(quotePrefix) == false) || (quotePrefix != " "))
+            {
                 // ignoring the return value because it is acceptable for the quotedString to not be quoted in this
                 // context.
                 ADP.RemoveStringQuotes(quotePrefix, quoteSuffix, quotedIdentifier, out unquotedIdentifier);
             }
-            else {
+            else
+            {
                 unquotedIdentifier = quotedIdentifier;
             }
             return unquotedIdentifier;
-
         }
-
     }
 }

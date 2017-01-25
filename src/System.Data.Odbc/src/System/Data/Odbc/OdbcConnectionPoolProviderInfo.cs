@@ -8,187 +8,237 @@ namespace System.Data.Odbc
     using System.Data;
     using System.Data.ProviderBase;
 
-    sealed internal class OdbcConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo {
-        private string  _driverName;
-        private string  _driverVersion;
-        private string  _quoteChar;
-        
-        private char    _escapeChar;
-        private bool    _hasQuoteChar;
-        private bool    _hasEscapeChar;
+    sealed internal class OdbcConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo
+    {
+        private string _driverName;
+        private string _driverVersion;
+        private string _quoteChar;
 
-        private bool    _isV3Driver;
-        private int     _supportedSQLTypes;
-        private int     _testedSQLTypes;
-        private int     _restrictedSQLBindTypes;   // These, otherwise supported types, are not available for binding
+        private char _escapeChar;
+        private bool _hasQuoteChar;
+        private bool _hasEscapeChar;
+
+        private bool _isV3Driver;
+        private int _supportedSQLTypes;
+        private int _testedSQLTypes;
+        private int _restrictedSQLBindTypes;   // These, otherwise supported types, are not available for binding
 
         // flags for unsupported Attributes
-        private bool    _noCurrentCatalog;
-        private bool    _noConnectionDead;
+        private bool _noCurrentCatalog;
+        private bool _noConnectionDead;
 
-        private bool    _noQueryTimeout;
-        private bool    _noSqlSoptSSNoBrowseTable;
-        private bool    _noSqlSoptSSHiddenColumns;
+        private bool _noQueryTimeout;
+        private bool _noSqlSoptSSNoBrowseTable;
+        private bool _noSqlSoptSSHiddenColumns;
 
         // SSS_WARNINGS_OFF
-        private bool    _noSqlCASSColumnKey;
+        private bool _noSqlCASSColumnKey;
         // SSS_WARNINGS_ON
-        
-        // flags for unsupported Functions
-        private bool   _noSqlPrimaryKeys;
 
-        internal string DriverName {
-            get {
+        // flags for unsupported Functions
+        private bool _noSqlPrimaryKeys;
+
+        internal string DriverName
+        {
+            get
+            {
                 return _driverName;
             }
-            set {
+            set
+            {
                 _driverName = value;
             }
         }
 
-        internal string DriverVersion {
-            get {
+        internal string DriverVersion
+        {
+            get
+            {
                 return _driverVersion;
             }
-            set {
+            set
+            {
                 _driverVersion = value;
             }
         }
 
-        internal bool HasQuoteChar {
+        internal bool HasQuoteChar
+        {
             // the value is set together with the QuoteChar (see set_QuoteChar);
-            get {
+            get
+            {
                 return _hasQuoteChar;
             }
         }
 
-        internal bool HasEscapeChar {
+        internal bool HasEscapeChar
+        {
             // the value is set together with the EscapeChar (see set_EscapeChar);
-            get {
+            get
+            {
                 return _hasEscapeChar;
             }
         }
 
 
-        internal string QuoteChar {
-            get {
+        internal string QuoteChar
+        {
+            get
+            {
                 return _quoteChar;
             }
-            set {
+            set
+            {
                 _quoteChar = value;
                 _hasQuoteChar = true;
             }
         }
 
-        internal char EscapeChar {
-            get {
+        internal char EscapeChar
+        {
+            get
+            {
                 return _escapeChar;
             }
-            set {
+            set
+            {
                 _escapeChar = value;
                 _hasEscapeChar = true;
             }
         }
 
-        internal bool IsV3Driver {
-            get {
+        internal bool IsV3Driver
+        {
+            get
+            {
                 return _isV3Driver;
             }
-            set {
+            set
+            {
                 _isV3Driver = value;
             }
         }
 
-        internal int SupportedSQLTypes {
-            get {
+        internal int SupportedSQLTypes
+        {
+            get
+            {
                 return _supportedSQLTypes;
             }
-            set {
+            set
+            {
                 _supportedSQLTypes = value;
             }
         }
 
-        internal int TestedSQLTypes {
-            get {
+        internal int TestedSQLTypes
+        {
+            get
+            {
                 return _testedSQLTypes;
             }
-            set {
+            set
+            {
                 _testedSQLTypes = value;
             }
         }
 
-        internal int RestrictedSQLBindTypes {
-            get {
+        internal int RestrictedSQLBindTypes
+        {
+            get
+            {
                 return _restrictedSQLBindTypes;
             }
-            set {
+            set
+            {
                 _restrictedSQLBindTypes = value;
             }
         }
 
 
-        internal bool NoCurrentCatalog {
-            get {
+        internal bool NoCurrentCatalog
+        {
+            get
+            {
                 return _noCurrentCatalog;
             }
-            set {
+            set
+            {
                 _noCurrentCatalog = value;
             }
         }
 
-        internal bool NoConnectionDead {
-            get {
+        internal bool NoConnectionDead
+        {
+            get
+            {
                 return _noConnectionDead;
             }
-            set {
+            set
+            {
                 _noConnectionDead = value;
             }
         }
 
 
-        internal bool NoQueryTimeout {
-            get {
+        internal bool NoQueryTimeout
+        {
+            get
+            {
                 return _noQueryTimeout;
             }
-            set {
+            set
+            {
                 _noQueryTimeout = value;
             }
         }
 
-        internal bool NoSqlSoptSSNoBrowseTable {
-            get {
+        internal bool NoSqlSoptSSNoBrowseTable
+        {
+            get
+            {
                 return _noSqlSoptSSNoBrowseTable;
             }
-            set {
+            set
+            {
                 _noSqlSoptSSNoBrowseTable = value;
             }
         }
 
-        internal bool NoSqlSoptSSHiddenColumns {
-            get {
+        internal bool NoSqlSoptSSHiddenColumns
+        {
+            get
+            {
                 return _noSqlSoptSSHiddenColumns;
             }
-            set {
+            set
+            {
                 _noSqlSoptSSHiddenColumns = value;
             }
         }
 
         // SSS_WARNINGS_OFF
-        internal bool NoSqlCASSColumnKey {
-            get {
+        internal bool NoSqlCASSColumnKey
+        {
+            get
+            {
                 return _noSqlCASSColumnKey;
             }
-            set {
+            set
+            {
                 _noSqlCASSColumnKey = value;
             }
         }
         // SSS_WARNINGS_ON
 
-        internal bool NoSqlPrimaryKeys {
-            get {
+        internal bool NoSqlPrimaryKeys
+        {
+            get
+            {
                 return _noSqlPrimaryKeys;
             }
-            set {
+            set
+            {
                 _noSqlPrimaryKeys = value;
             }
         }
