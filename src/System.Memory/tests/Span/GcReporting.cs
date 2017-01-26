@@ -8,12 +8,22 @@ namespace System.SpanTests
 {
     public static class SpanGcReportingTests
     {
+        /// <summary>
+        /// This is a simple sanity test to check that GC reporting for Span is not completely broken, it is not meant to be
+        /// comprehensive.
+        /// </summary>
         [Fact]
+        [OuterLoop]
         public static void DelegateTest()
         {
             DelegateTest(100000, 10000);
         }
 
+        /// <summary>
+        /// Intended entry point for stress tests, with counts appropriate for GCStress=3. The counts in
+        /// <see cref="DelegateTest"/> are too high for running that test in a reasonable amount of time. This one runs in a
+        /// reasonable amount of time for a long-duration stress run.
+        /// </summary>
         public static void DelegateTest_Stress()
         {
             DelegateTest(100, 100);
@@ -30,25 +40,26 @@ namespace System.SpanTests
             for (int i = 0; i < iterationCount; i++)
             {
                 DelegateTest_CreateSomeObjects(objects, rng);
-
-                var spanContainer = new SpanContainer();
-                spanContainer._span = new Span<int>(new int[] { 1, 2, 3 });
-                delegateTestCore(spanContainer, objects, rng);
+                delegateTestCore(new Span<int>(new int[] { 1, 2, 3 }), objects, rng);
             }
         }
 
-        private delegate void DelegateTestCoreDelegate(SpanContainer spanContainer, object[] objects, Random rng);
+        private delegate void DelegateTestCoreDelegate(Span<int> span, object[] objects, Random rng);
 
-        private static void DelegateTest_Core(SpanContainer spanContainer, object[] objects, Random rng)
+        private static void DelegateTest_Core(Span<int> span, object[] objects, Random rng)
         {
+            ReadOnlySpan<int> initialSpan = span;
+
             DelegateTest_CreateSomeObjects(objects, rng);
 
             int sum = 0;
-            for (int i = 0; i < spanContainer._span.Length; ++i)
+            for (int i = 0; i < span.Length; ++i)
             {
-                sum += spanContainer._span[i];
+                sum += span[i];
             }
             Assert.Equal(1 + 2 + 3, sum);
+
+            Assert.True(span == initialSpan);
         }
 
         private static void DelegateTest_CreateSomeObjects(object[] objects, Random rng)
@@ -57,11 +68,6 @@ namespace System.SpanTests
             {
                 objects[rng.Next(objects.Length)] = new object();
             }
-        }
-
-        private struct SpanContainer
-        {
-            public Span<int> _span;
         }
     }
 }
