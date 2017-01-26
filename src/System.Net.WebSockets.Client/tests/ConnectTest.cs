@@ -84,6 +84,50 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoHeadersServers))]
+        public async Task ConnectAsync_AddHostHeader_Success(Uri server)
+        {
+            // Resolve the logical address to an IP address
+            IPAddress[] ipAddresses = await Dns.GetHostAddressesAsync(server.Host);
+            Assert.True(ipAddresses.Length > 0, $"{server.Host} must resolve to one or more IPAddresses");
+            IPAddress ipAddress = ipAddresses[0];
+            Uri serverWithIP = new UriBuilder(server) { Host = ipAddress.ToString() }.Uri;
+
+            using (var cws = new ClientWebSocket())
+            {
+                // Set the Host header to the logical address
+                cws.Options.SetRequestHeader("Host", server.Host);
+                using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
+                {
+                    // Connect using the physical address
+                    Task taskConnect = cws.ConnectAsync(serverWithIP, cts.Token);
+                    Assert.True(
+                        (cws.State == WebSocketState.None) ||
+                        (cws.State == WebSocketState.Connecting) ||
+                        (cws.State == WebSocketState.Open),
+                        "State immediately after ConnectAsync incorrect: " + cws.State);
+                    await taskConnect;
+                }
+
+                Assert.Equal(WebSocketState.Open, cws.State);
+
+                byte[] buffer = new byte[65536];
+                var segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                WebSocketReceiveResult recvResult;
+                using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
+                {
+                    recvResult = await cws.ReceiveAsync(segment, cts.Token);
+                }
+
+                Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
+                string headers = WebSocketData.GetTextFromBuffer(segment);
+                Assert.Contains($"Host:{server.Host}", headers, StringComparison.Ordinal);
+
+                await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoHeadersServers))]
         public async Task ConnectAsync_CookieHeaders_Success(Uri server)

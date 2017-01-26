@@ -214,7 +214,7 @@ namespace System.Net.WebSockets
                 builder.Append("Host: ");
                 if (string.IsNullOrEmpty(hostHeader))
                 {
-                    builder.Append(uri.IdnHost).Append(":").Append(uri.Port).Append("\r\n");
+                    builder.Append(uri.IdnHost).Append(':').Append(uri.Port).Append("\r\n");
                 }
                 else
                 {
@@ -294,7 +294,7 @@ namespace System.Net.WebSockets
         /// Given a "Host:Port" string return only the "Host"
         /// </summary>
         /// <param name="hostAndPort">The host and optional port value (e.g. "Host:Port").</param>
-        /// <returns>The the "Host" portion</returns>
+        /// <returns>The "Host" portion</returns>
         private static string ExtractHost(string hostAndPort)
         {
             string host = hostAndPort;
