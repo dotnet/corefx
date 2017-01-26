@@ -40,6 +40,14 @@
     <Compile Include="System\Collections\Immutable\ImmutableArray_1.Builder.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray_1.Enumerator.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray_1.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.CollectionInterfaces.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.IImmutableList.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.IndexOf.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.Insert.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.OfType.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.Remove.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.Replace.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray_1.Sort.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.Builder.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.Comparers.cs" />
@@ -50,6 +58,7 @@
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.MutationResult.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableExtensions.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableExtensions.Minimal.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableHashSet.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableHashSet_1.Builder.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableHashSet_1.DebuggerProxy.cs" />
