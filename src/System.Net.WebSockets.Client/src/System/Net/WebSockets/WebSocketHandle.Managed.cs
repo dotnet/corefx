@@ -87,15 +87,12 @@ namespace System.Net.WebSockets
                 Socket connectedSocket = await ConnectSocketAsync(uri.Host, uri.Port, cancellationToken).ConfigureAwait(false);
                 Stream stream = new AsyncEventArgsNetworkStream(connectedSocket);
 
-                // Honor Host header if set.
-                string hostHeader = options.RequestHeaders[HttpKnownHeaderNames.Host];
-
                 // Upgrade to SSL if needed
                 if (uri.Scheme == UriScheme.Wss)
                 {
                     var sslStream = new SslStream(stream);
                     await sslStream.AuthenticateAsClientAsync(
-                        ExtractHost(hostHeader) ?? uri.Host,
+                        uri.Host,
                         options.ClientCertificates,
                         SecurityProtocol.AllowedSecurityProtocols,
                         checkCertificateRevocation: false).ConfigureAwait(false);
@@ -104,7 +101,7 @@ namespace System.Net.WebSockets
 
                 // Create the security key and expected response, then build all of the request headers
                 KeyValuePair<string, string> secKeyAndSecWebSocketAccept = CreateSecKeyAndSecWebSocketAccept();
-                byte[] requestHeader = BuildRequestHeader(uri, hostHeader, options, secKeyAndSecWebSocketAccept.Key);
+                byte[] requestHeader = BuildRequestHeader(uri, options, secKeyAndSecWebSocketAccept.Key);
 
                 // Write out the header to the connection
                 await stream.WriteAsync(requestHeader, 0, requestHeader.Length, cancellationToken).ConfigureAwait(false);
@@ -198,11 +195,10 @@ namespace System.Net.WebSockets
 
         /// <summary>Creates a byte[] containing the headers to send to the server.</summary>
         /// <param name="uri">The Uri of the server.</param>
-        /// <param name="hostHeader">The host header value (if specified by user).</param>
         /// <param name="options">The options used to configure the websocket.</param>
         /// <param name="secKey">The generated security key to send in the Sec-WebSocket-Key header.</param>
         /// <returns>The byte[] containing the encoded headers ready to send to the network.</returns>
-        private static byte[] BuildRequestHeader(Uri uri, string hostHeader, ClientWebSocketOptions options, string secKey)
+        private static byte[] BuildRequestHeader(Uri uri, ClientWebSocketOptions options, string secKey)
         {
             StringBuilder builder = t_cachedStringBuilder ?? (t_cachedStringBuilder = new StringBuilder());
             Debug.Assert(builder.Length == 0, $"Expected builder to be empty, got one of length {builder.Length}");
@@ -210,7 +206,8 @@ namespace System.Net.WebSockets
             {
                 builder.Append("GET ").Append(uri.PathAndQuery).Append(" HTTP/1.1\r\n");
 
-                // Add all of the required headers
+                // Add all of the required headers, honoring Host header if set.
+                string hostHeader = options.RequestHeaders[HttpKnownHeaderNames.Host];
                 builder.Append("Host: ");
                 if (string.IsNullOrEmpty(hostHeader))
                 {
@@ -288,25 +285,6 @@ namespace System.Net.WebSockets
                     secKey,
                     Convert.ToBase64String(sha.ComputeHash(Encoding.ASCII.GetBytes(secKey + WSServerGuid))));
             }
-        }
-
-        /// <summary>
-        /// Given a "Host:Port" string return only the "Host"
-        /// </summary>
-        /// <param name="hostAndPort">The host and optional port value (e.g. "Host:Port").</param>
-        /// <returns>The "Host" portion</returns>
-        private static string ExtractHost(string hostAndPort)
-        {
-            string host = hostAndPort;
-            if (!string.IsNullOrEmpty(hostAndPort))
-            {
-                int colonIndex = hostAndPort.IndexOf(':');
-                host = colonIndex == -1 ? 
-                    hostAndPort :
-                    hostAndPort.Substring(0, colonIndex);
-            }
-
-            return host;
         }
 
         /// <summary>Read and validate the connect response headers from the server.</summary>
