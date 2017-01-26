@@ -22,6 +22,7 @@
     <Compile Include="GenerateConfigurationProps.cs" />
     <Compile Include="FindBestConfiguration.cs" />
     <Compile Include="GenerateDepsJson.cs" />
+    <Compile Include="GenerateSlnFile.cs" />
     <Compile Include="TryGetManagedAssemblyName.cs" />
     <Compile Include="ValidateVSConfigurations.cs" />
   </ItemGroup>
@@ -36,6 +37,7 @@
     <TargetingPackReference Include="System.Runtime" />
     <TargetingPackReference Include="System.Collections" />
     <TargetingPackReference Include="System.IO" />
+    <TargetingPackReference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
