@@ -5,8 +5,8 @@
 using System;
 using System.ComponentModel;            //Component
 using System.Data;
-using System.Runtime.InteropServices;   //Marshal
 using System.Reflection;                //Missing
+using System.Runtime.InteropServices;   //Marshal
 
 namespace System.Data.Odbc
 {
