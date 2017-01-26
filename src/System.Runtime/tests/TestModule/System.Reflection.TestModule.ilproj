@@ -8,4 +8,7 @@
     <Compile Include="System.Reflection.TestModule.il" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{FC0FF09E-CBB7-465D-9F44-A1905D19E315}</ProjectGuid>
+  </PropertyGroup>
 </Project>

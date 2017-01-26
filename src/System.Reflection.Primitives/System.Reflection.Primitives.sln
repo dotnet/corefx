@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Primitives", "src\System.Reflection.Primitives.csproj", "{F9C09245-630D-4E43-B759-20F1B5CCDE18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		DebugNETCoreAppnet463-Windows_NT|AnyCPU = DebugNETCoreAppnet463-Windows_NT|AnyCPU
+		DebugNETCoreAppnetcoreapp|AnyCPU = DebugNETCoreAppnetcoreapp|AnyCPU
+		DebugNETCoreAppnetcoreapp1.2corert|AnyCPU = DebugNETCoreAppnetcoreapp1.2corert|AnyCPU
+		DebugNETCoreAppuap101aot-Windows_NT|AnyCPU = DebugNETCoreAppuap101aot-Windows_NT|AnyCPU
+		ReleaseNETCoreAppnet463-Windows_NT|AnyCPU = ReleaseNETCoreAppnet463-Windows_NT|AnyCPU
+		ReleaseNETCoreAppnetcoreapp|AnyCPU = ReleaseNETCoreAppnetcoreapp|AnyCPU
+		ReleaseNETCoreAppnetcoreapp1.2corert|AnyCPU = ReleaseNETCoreAppnetcoreapp1.2corert|AnyCPU
+		ReleaseNETCoreAppuap101aot-Windows_NT|AnyCPU = ReleaseNETCoreAppuap101aot-Windows_NT|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnet463-Windows_NT|AnyCPU.ActiveCfg = net463-Windows_NT-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnet463-Windows_NT|AnyCPU.Build.0 = net463-Windows_NT-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnetcoreapp|AnyCPU.Build.0 = netcoreapp-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnetcoreapp1.2corert|AnyCPU.ActiveCfg = netcoreapp1.2corert-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppnetcoreapp1.2corert|AnyCPU.Build.0 = netcoreapp1.2corert-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppuap101aot-Windows_NT|AnyCPU.ActiveCfg = uap101aot-Windows_NT-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.DebugNETCoreAppuap101aot-Windows_NT|AnyCPU.Build.0 = uap101aot-Windows_NT-Debug|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnet463-Windows_NT|AnyCPU.ActiveCfg = net463-Windows_NT-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnet463-Windows_NT|AnyCPU.Build.0 = net463-Windows_NT-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnetcoreapp|AnyCPU.Build.0 = netcoreapp-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnetcoreapp1.2corert|AnyCPU.ActiveCfg = netcoreapp1.2corert-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppnetcoreapp1.2corert|AnyCPU.Build.0 = netcoreapp1.2corert-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppuap101aot-Windows_NT|AnyCPU.ActiveCfg = uap101aot-Windows_NT-Release|Any CPU
+		{F9C09245-630D-4E43-B759-20F1B5CCDE18}.ReleaseNETCoreAppuap101aot-Windows_NT|AnyCPU.Build.0 = uap101aot-Windows_NT-Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

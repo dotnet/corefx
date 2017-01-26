@@ -27,4 +27,7 @@
     </SupplementalTestData>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{F430E756-E819-4710-9805-C4C5F1D35721}</ProjectGuid>
+  </PropertyGroup>
 </Project>

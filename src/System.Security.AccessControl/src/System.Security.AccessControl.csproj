@@ -128,4 +128,7 @@
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{0886EEFE-E3A3-42A0-B77D-F66E9EB26752}</ProjectGuid>
+  </PropertyGroup>
 </Project>

@@ -354,17 +354,17 @@ namespace Microsoft.DotNet.Build.Tasks
             using (TextReader reader = new StreamReader(File.OpenRead(projFile)))
             {
                 xmldoc.Load(reader);
-                XmlNamespaceManager mgr = new XmlNamespaceManager(xmldoc.NameTable);
-                mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
-                try
-                {
-                    value = xmldoc.SelectSingleNode("//x:ProjectGuid", mgr).InnerText;
-                    value = value.Substring(1, value.Length - 2);
-                }
-                catch (System.NullReferenceException)
-                {
-                    value = AddProjectGuid(projFile, xmldoc);
-                }
+            }
+            XmlNamespaceManager mgr = new XmlNamespaceManager(xmldoc.NameTable);
+            mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
+            try
+            {
+                value = xmldoc.SelectSingleNode("//x:ProjectGuid", mgr).InnerText;
+                value = value.Substring(1, value.Length - 2);
+            }
+            catch (System.NullReferenceException)
+            {
+                value = AddProjectGuid(projFile, xmldoc);
             }
             return value;
         }

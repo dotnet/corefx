@@ -10,4 +10,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{57DC6FD3-1724-47DF-AE2A-29B3A85D0E0D}</ProjectGuid>
+  </PropertyGroup>
 </Project>
