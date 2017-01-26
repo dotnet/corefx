@@ -88,20 +88,19 @@ namespace System.Net.WebSockets.Client.Tests
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoHeadersServers))]
         public async Task ConnectAsync_AddHostHeader_Success(Uri server)
         {
-            // Resolve the logical address to an IP address
-            IPAddress[] ipAddresses = await Dns.GetHostAddressesAsync(server.Host);
-            Assert.True(ipAddresses.Length > 0, $"{server.Host} must resolve to one or more IPAddresses");
-            IPAddress ipAddress = ipAddresses[0];
-            Uri serverWithIP = new UriBuilder(server) { Host = ipAddress.ToString() }.Uri;
+            // Send via the physical address such as "corefx-net.cloudapp.net"
+            // Set the Host header to logical address like "subdomain.corefx-net.cloudapp.net"
+            // Verify the scenario works and the remote server received "Host: subdomain.corefx-net.cloudapp.net"
+            string logicalHost = "subdomain." + server.Host;
 
             using (var cws = new ClientWebSocket())
             {
                 // Set the Host header to the logical address
-                cws.Options.SetRequestHeader("Host", server.Host);
+                cws.Options.SetRequestHeader("Host", logicalHost);
                 using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
                 {
                     // Connect using the physical address
-                    Task taskConnect = cws.ConnectAsync(serverWithIP, cts.Token);
+                    Task taskConnect = cws.ConnectAsync(server, cts.Token);
                     Assert.True(
                         (cws.State == WebSocketState.None) ||
                         (cws.State == WebSocketState.Connecting) ||
@@ -122,7 +121,7 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
                 string headers = WebSocketData.GetTextFromBuffer(segment);
-                Assert.Contains($"Host:{server.Host}", headers, StringComparison.Ordinal);
+                Assert.Contains($"Host:{logicalHost}", headers, StringComparison.Ordinal);
 
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
             }
