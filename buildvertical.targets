@@ -27,10 +27,18 @@
     </MSBuild>
 
     <ItemGroup>
-      <!-- transform back to project -->
-      <ProjectWithConfiguration Include="@(_ProjectBestConfigurations->'%(OriginalItemSpec)')">
-        <AdditionalProperties>Configuration=%(Identity);%(_ProjectBestConfigurations.AdditionalProperties)</AdditionalProperties>
+      <!-- transform back to project keeping the original item order. -->
+      <_ProjectBestConfigurations>
+        <Configuration>%(Identity)</Configuration>
+      </_ProjectBestConfigurations>
+      <ProjectWithConfiguration Include="@(_ProjectBestConfigurations->'%(OriginalItemSpec)')" />
+      <ProjectWithConfiguration>
+        <AdditionalProperties>Configuration=%(Configuration);%(ProjectWithConfiguration.AdditionalProperties)</AdditionalProperties>
       </ProjectWithConfiguration>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectWithConfiguration RemoveMetadata="Configuration" />
     </ItemGroup>
 
     <ItemGroup>

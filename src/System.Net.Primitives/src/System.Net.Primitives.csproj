@@ -215,9 +215,8 @@
     <TargetingPackReference Include="System" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap101'">
-    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
-    <!-- ToDo: remove once we have new packages https://github.com/dotnet/corefx/issues/12838 -->
-    <ProjectReference Include="..\..\System.Security.Principal\ref\System.Security.Principal.csproj" />
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />

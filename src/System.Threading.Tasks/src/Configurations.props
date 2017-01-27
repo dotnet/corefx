@@ -6,6 +6,8 @@
       net463-Windows_NT;
       netcoreapp-Windows_NT;
       netcoreapp-Unix;
+      uap-Windows_NT;
+      uap-Unix;
       netcoreapp1.2corert;
     </BuildConfigurations>
   </PropertyGroup>

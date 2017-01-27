@@ -117,9 +117,31 @@
     <TargetingPackReference Include="System" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcore50'">
-    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Runtime.Handles" />
+    <Reference Include="System.Net.WebSockets" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Net.WebHeaderCollection" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Globalization" />
+    <Reference Include="System.Text.Encoding" />
+    <Reference Include="System.Runtime.WindowsRuntime" />
+    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.NonGeneric" />
@@ -141,7 +163,7 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' And '$(TargetGroup)'=='netcoreapp'">
     <Reference Include="System.Net.NameResolution" />
     <Reference Include="System.Net.Security" />
     <Reference Include="System.Net.Sockets" />

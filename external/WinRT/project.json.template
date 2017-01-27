@@ -1,0 +1,12 @@
+﻿{
+  "frameworks": {
+    "{TFM}": {
+      "dependencies": {
+        "Microsoft.TargetingPack.Private.WinRT": "1.0.3"
+      }
+    }
+  },
+  "runtimes": {
+    "{RID}": {}
+  }
+}
