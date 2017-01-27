@@ -16,6 +16,7 @@ namespace System.Collections.Immutable
     /// </summary>
     internal static partial class ImmutableExtensions
     {
+
 #if EqualsStructurally
 
         /// <summary>

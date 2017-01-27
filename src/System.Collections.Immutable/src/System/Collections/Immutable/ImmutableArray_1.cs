@@ -422,18 +422,5 @@ namespace System.Collections.Immutable
                 throw new InvalidOperationException(SR.InvalidOperationOnDefaultArray);
             }
         }
-
-        void IImmutableArray.ThrowInvalidOperationIfNotInitialized()
-        {
-            this.ThrowInvalidOperationIfNotInitialized();
-        }
-
-        /// <summary>
-        /// Throws a <see cref="NullReferenceException"/> if the specified array is uninitialized.
-        /// </summary>
-        private static void ThrowNullRefIfNotInitialized(ImmutableArray<T> array)
-        {
-            array.ThrowNullRefIfNotInitialized();
-        }
     }
 }

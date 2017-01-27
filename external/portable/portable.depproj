@@ -2,9 +2,10 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <OutputPath>$(RuntimePath)</OutputPath>
-     <!-- WORKAROUND: Force external packages to be restored for x64 until arm packages are fully broughtup-->
-    <NugetRuntimeIdentifier Condition="'$(ArchGroup)' == 'arm'">$(RuntimeOS)-x64</NugetRuntimeIdentifier>
+    <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
+    <NugetRuntimeIdentifier>None</NugetRuntimeIdentifier>
+    <OutputPath>$(RefRootPath)/$(TargetGroup)</OutputPath>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Target Name="FilterTargetingPackResolvedNugetPackages" />
 </Project>
