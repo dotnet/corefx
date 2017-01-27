@@ -31,7 +31,7 @@
     <ExternalExpectedPrerelease>beta-24727-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-24927-00</ProjectNTfsExpectedPrerelease>
     <StandardExpectedPrerelease>beta-24919-01</StandardExpectedPrerelease>
-    <SniExpectedPrerelease>beta-24926-02</SniExpectedPrerelease>
+    <SniPackageVersion>4.4.0-beta-24926-02</SniPackageVersion>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
@@ -92,6 +92,11 @@
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsExpectedPrerelease</ElementName>
       <BuildInfoName>ProjectNTfs</BuildInfoName>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="Sni">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>SniPackageVersion</ElementName>
+      <PackageId>runtime.win7-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
   </ItemGroup>
 
