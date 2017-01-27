@@ -31,6 +31,7 @@
     <ExternalExpectedPrerelease>beta-24727-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-24927-00</ProjectNTfsExpectedPrerelease>
     <StandardExpectedPrerelease>beta-24919-01</StandardExpectedPrerelease>
+    <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0-beta-24926-02</SniPackageVersion>
   </PropertyGroup>
 
@@ -96,6 +97,7 @@
     <XmlUpdateStep Include="Sni">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>SniPackageVersion</ElementName>
+      <!-- Pick any of the SNI runtime packages. All the runtime packages of sni will have the same version -->
       <PackageId>runtime.win7-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
   </ItemGroup>
