@@ -24,6 +24,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> SetItem(int index, T item)
         {
             var self = this;
+            self.ThrowNullRefIfNotInitialized();
             Requires.Range(index >= 0 && index < self.Length, nameof(index));
 
             T[] tmp = new T[self.Length];
@@ -60,7 +61,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
-            int index = self.IndexOf(oldValue, equalityComparer);
+            int index = self.IndexOf(oldValue, 0, self.Length, equalityComparer);
             if (index < 0)
             {
                 throw new ArgumentException(SR.CannotFindOldValue, nameof(oldValue));

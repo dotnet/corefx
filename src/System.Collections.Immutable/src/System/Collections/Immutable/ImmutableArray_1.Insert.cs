@@ -112,7 +112,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            ThrowNullRefIfNotInitialized(items);
+            items.ThrowNullRefIfNotInitialized();
             Requires.Range(index >= 0 && index <= self.Length, nameof(index));
 
             if (self.IsEmpty)

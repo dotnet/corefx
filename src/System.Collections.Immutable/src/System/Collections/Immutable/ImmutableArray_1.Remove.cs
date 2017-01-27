@@ -41,7 +41,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            int index = self.IndexOf(item, equalityComparer);
+            int index = self.IndexOf(item, 0, self.Length, equalityComparer);
             return index < 0
                 ? self
                 : self.RemoveAt(index);
@@ -68,6 +68,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> RemoveRange(int index, int length)
         {
             var self = this;
+            self.ThrowNullRefIfNotInitialized();
             Requires.Range(index >= 0 && index <= self.Length, nameof(index));
             Requires.Range(length >= 0 && index + length <= self.Length, nameof(length));
 
@@ -113,18 +114,18 @@ namespace System.Collections.Immutable
             self.ThrowNullRefIfNotInitialized();
             Requires.NotNull(items, nameof(items));
 
-            var indexesToRemove = new SortedSet<int>();
+            var indicesToRemove = new SortedSet<int>();
             foreach (var item in items)
             {
-                int index = self.IndexOf(item, equalityComparer);
-                while (index >= 0 && !indexesToRemove.Add(index) && index + 1 < self.Length)
+                int index = self.IndexOf(item, 0, self.Length, equalityComparer);
+                while (index >= 0 && !indicesToRemove.Add(index) && index + 1 < self.Length)
                 {
                     // This is a duplicate of one we've found. Try hard to find another instance in the list to remove.
                     index = self.IndexOf(item, index + 1, equalityComparer);
                 }
             }
 
-            return self.RemoveAtRange(indexesToRemove);
+            return self.RemoveAtRange(indicesToRemove);
         }
 
         /// <summary>
@@ -194,22 +195,22 @@ namespace System.Collections.Immutable
                 return self;
             }
 
-            List<int> removeIndexes = null;
+            List<int> removeIndices = null;
             for (int i = 0; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
                 {
-                    if (removeIndexes == null)
+                    if (removeIndices == null)
                     {
-                        removeIndexes = new List<int>();
+                        removeIndices = new List<int>();
                     }
 
-                    removeIndexes.Add(i);
+                    removeIndices.Add(i);
                 }
             }
 
-            return removeIndexes != null ?
-                self.RemoveAtRange(removeIndexes) :
+            return removeIndices != null ?
+                self.RemoveAtRange(removeIndices) :
                 self;
         }
 
@@ -221,28 +222,29 @@ namespace System.Collections.Immutable
         {
             return Empty;
         }
+
         /// <summary>
-        /// Returns an array with items at the specified indexes removed.
+        /// Returns an array with items at the specified indices removed.
         /// </summary>
-        /// <param name="indexesToRemove">A **sorted set** of indexes to elements that should be omitted from the returned array.</param>
+        /// <param name="indicesToRemove">A **sorted set** of indices to elements that should be omitted from the returned array.</param>
         /// <returns>The new array.</returns>
-        private ImmutableArray<T> RemoveAtRange(ICollection<int> indexesToRemove)
+        private ImmutableArray<T> RemoveAtRange(ICollection<int> indicesToRemove)
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.NotNull(indexesToRemove, nameof(indexesToRemove));
+            Requires.NotNull(indicesToRemove, nameof(indicesToRemove));
 
-            if (indexesToRemove.Count == 0)
+            if (indicesToRemove.Count == 0)
             {
                 // Be sure to return a !IsDefault instance.
                 return self;
             }
 
-            var newArray = new T[self.Length - indexesToRemove.Count];
+            var newArray = new T[self.Length - indicesToRemove.Count];
             int copied = 0;
             int removed = 0;
             int lastIndexRemoved = -1;
-            foreach (var indexToRemove in indexesToRemove)
+            foreach (var indexToRemove in indicesToRemove)
             {
                 int copyLength = lastIndexRemoved == -1 ? indexToRemove : (indexToRemove - lastIndexRemoved - 1);
                 Debug.Assert(indexToRemove > lastIndexRemoved); // We require that the input be a sorted set.

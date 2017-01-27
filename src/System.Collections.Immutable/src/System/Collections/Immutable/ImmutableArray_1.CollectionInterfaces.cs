@@ -328,7 +328,9 @@ namespace System.Collections.Immutable
                 var theirs = other as IImmutableArray;
                 if (theirs != null)
                 {
-                    if (self.array == null && theirs.Array == null)
+                    otherArray = theirs.Array;
+
+                    if (self.array == null && otherArray == null)
                     {
                         return true;
                     }
@@ -336,8 +338,6 @@ namespace System.Collections.Immutable
                     {
                         return false;
                     }
-
-                    otherArray = theirs.Array;
                 }
             }
 
@@ -379,16 +379,16 @@ namespace System.Collections.Immutable
                 var theirs = other as IImmutableArray;
                 if (theirs != null)
                 {
-                    if (self.array == null && theirs.Array == null)
+                    otherArray = theirs.Array;
+
+                    if (self.array == null && otherArray == null)
                     {
                         return 0;
                     }
-                    else if (self.array == null ^ theirs.Array == null)
+                    else if (self.array == null ^ otherArray == null)
                     {
                         throw new ArgumentException(SR.ArrayInitializedStateNotEqual, nameof(other));
                     }
-
-                    otherArray = theirs.Array;
                 }
             }
 
