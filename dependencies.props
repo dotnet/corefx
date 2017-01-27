@@ -21,6 +21,7 @@
     <CoreClrCurrentRef>4120995e04ae4696f3e9398fa78bf65f53a933a7</CoreClrCurrentRef>
     <ExternalCurrentRef>4e2952b5114bfa90cc45eef908204006a771a62b</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>8281edc1401dbea7074563526d760f2090abcc79</ProjectNTfsCurrentRef>
+    <SniCurrentRef>99a2e18954382a654e66aed649af70c1c61a47c3</SniCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
@@ -30,6 +31,7 @@
     <ExternalExpectedPrerelease>beta-24727-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>beta-24927-00</ProjectNTfsExpectedPrerelease>
     <StandardExpectedPrerelease>beta-24919-01</StandardExpectedPrerelease>
+    <SniExpectedPrerelease>beta-24926-02</SniExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
@@ -57,6 +59,10 @@
     <RemoteDependencyBuildInfo Include="External">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ExternalCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="Sni">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)sni/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(SniCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(DependencyBranch)</BuildInfoPath>
