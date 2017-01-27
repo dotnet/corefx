@@ -1,12 +1,13 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22609.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Emit.Tests", "tests\System.Reflection.Emit.Tests.csproj", "{1104A263-331A-4CA0-B541-759BD20F7B1D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{} = {}
+		{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177} = {D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Emit", "src\System.Reflection.Emit.csproj", "{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,6 +19,10 @@ Global
 		{1104A263-331A-4CA0-B541-759BD20F7B1D}.DebugNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.Build.0 = netstandard1.3-Debug|Any CPU
 		{1104A263-331A-4CA0-B541-759BD20F7B1D}.ReleaseNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.ActiveCfg = netstandard1.3-Release|Any CPU
 		{1104A263-331A-4CA0-B541-759BD20F7B1D}.ReleaseNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.Build.0 = netstandard1.3-Release|Any CPU
+		{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}.DebugNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.ActiveCfg = netstandard1.3-Debug|Any CPU
+		{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}.DebugNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.Build.0 = netstandard1.3-Debug|Any CPU
+		{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}.ReleaseNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.ActiveCfg = netstandard1.3-Release|Any CPU
+		{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}.ReleaseNETCoreAppnetstandard1.3netstandard1.3|AnyCPU.Build.0 = netstandard1.3-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

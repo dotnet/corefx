@@ -11,4 +11,7 @@
     <Compile Include="ResourceWriterUnitTest.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{E0B5E9B7-D7B0-4B4C-BBE7-2261CCEA789C}</ProjectGuid>
+  </PropertyGroup>
 </Project>

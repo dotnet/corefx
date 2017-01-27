@@ -68,4 +68,7 @@
     <Compile Include="ReadOnlySpan\ToArray.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{69D4647C-D327-4975-8462-31A3DDF21879}</ProjectGuid>
+  </PropertyGroup>
 </Project>

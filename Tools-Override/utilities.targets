@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(ToolsDir)Build.Common.props" Condition="Exists('$(ToolsDir)Build.Common.props')" />
+
+  <UsingTask TaskName="GenerateSlnFile" AssemblyFile="$(BuildToolsTaskDir)CoreFx.Tools.dll"/>
+  <PropertyGroup>
+    <TemplateSlnFile>$(ToolsDir)Template.sln</TemplateSlnFile>
+    <PathToGenerateSlnFiles>$(MSBuildThisFileDirectory)..\src</PathToGenerateSlnFiles>
+  </PropertyGroup>
+  <Target Name="GenerateSlnFiles" >
+    <Message Importance="High" Text="Generating sln files ... " />
+    <GenerateSlnFile PathToGenerate="$(PathToGenerateSlnFiles)"
+                     TemplateFile="$(TemplateSlnFile)" />
+    <Message Importance="High" Text="Generating sln files ... Done." />
+  </Target>
+</Project>

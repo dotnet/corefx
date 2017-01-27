@@ -1,38 +1,38 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json.Performance.Tests", "tests\Performance\System.Runtime.Serialization.Json.Performance.Tests.csproj", "{90B5085A-C3CE-45D9-ADE7-07410EEE664B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4EC040FB-CC0D-441F-9853-E966C32647E7} = {4EC040FB-CC0D-441F-9853-E966C32647E7}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json.Tests", "tests\System.Runtime.Serialization.Json.Tests.csproj", "{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}"
 	ProjectSection(ProjectDependencies) = postProject
-		{} = {}
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55} = {53635D52-B0FF-4D2D-A3AD-90FBF6697F55}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json", "src\System.Runtime.Serialization.Json.csproj", "{4EC040FB-CC0D-441F-9853-E966C32647E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json.ReflectionOnly.Tests", "tests\ReflectionOnly\System.Runtime.Serialization.Json.ReflectionOnly.Tests.csproj", "{C99A835E-46F3-4C05-AD34-7DD84FB7466B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55} = {53635D52-B0FF-4D2D-A3AD-90FBF6697F55}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json.Performance.Tests", "tests\Performance\System.Runtime.Serialization.Json.Performance.Tests.csproj", "{3EDB93A1-5B0B-44B5-9F27-03F623A89A0E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55} = {53635D52-B0FF-4D2D-A3AD-90FBF6697F55}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Json", "src\System.Runtime.Serialization.Json.csproj", "{53635D52-B0FF-4D2D-A3AD-90FBF6697F55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU = DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU
-		ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU = ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU
+		DebugNETCoreAppnetstandardnetcoreapp|AnyCPU = DebugNETCoreAppnetstandardnetcoreapp|AnyCPU
+		ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU = ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Debug|Any CPU
-		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Debug|Any CPU
-		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Release|Any CPU
-		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Release|Any CPU
-		{90B5085A-C3CE-45D9-ADE7-07410EEE664B}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Debug|Any CPU
-		{90B5085A-C3CE-45D9-ADE7-07410EEE664B}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Debug|Any CPU
-		{90B5085A-C3CE-45D9-ADE7-07410EEE664B}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Release|Any CPU
-		{90B5085A-C3CE-45D9-ADE7-07410EEE664B}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Release|Any CPU
-		{4EC040FB-CC0D-441F-9853-E966C32647E7}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Debug|Any CPU
-		{4EC040FB-CC0D-441F-9853-E966C32647E7}.DebugNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Debug|Any CPU
-		{4EC040FB-CC0D-441F-9853-E966C32647E7}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Release|Any CPU
-		{4EC040FB-CC0D-441F-9853-E966C32647E7}.ReleaseNETCoreAppnetcoreappnetcoreapp|AnyCPU.Build.0 = netcoreapp-Release|Any CPU
+		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.DebugNETCoreAppnetstandardnetcoreapp|AnyCPU.ActiveCfg = netstandard-Debug|Any CPU
+		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.DebugNETCoreAppnetstandardnetcoreapp|AnyCPU.Build.0 = netstandard-Debug|Any CPU
+		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU.ActiveCfg = netstandard-Release|Any CPU
+		{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}.ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU.Build.0 = netstandard-Release|Any CPU
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55}.DebugNETCoreAppnetstandardnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Debug|Any CPU
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55}.DebugNETCoreAppnetstandardnetcoreapp|AnyCPU.Build.0 = netcoreapp-Debug|Any CPU
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55}.ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU.ActiveCfg = netcoreapp-Release|Any CPU
+		{53635D52-B0FF-4D2D-A3AD-90FBF6697F55}.ReleaseNETCoreAppnetstandardnetcoreapp|AnyCPU.Build.0 = netcoreapp-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

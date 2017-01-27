@@ -11,18 +11,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Json", "src\System.J
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU = DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU
-		ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU = ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU
+		DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU = DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU
+		ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU = ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.ActiveCfg = netcoreapp1.0-Debug|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.Build.0 = netcoreapp1.0-Debug|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.ActiveCfg = netcoreapp1.0-Release|Any CPU
-		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.Build.0 = netcoreapp1.0-Release|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.ActiveCfg = netstandard1.0-Debug|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.DebugNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.Build.0 = netstandard1.0-Debug|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.ActiveCfg = netstandard1.0-Release|Any CPU
-		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.ReleaseNETCoreAppnetstandard1.0netcoreapp1.0|AnyCPU.Build.0 = netstandard1.0-Release|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.ActiveCfg = netcoreapp1.0-Debug|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.Build.0 = netcoreapp1.0-Debug|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.ActiveCfg = netcoreapp1.0-Release|Any CPU
+		{62E2AD5F-C8D0-45FB-B6A5-AED2C77F198C}.ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.Build.0 = netcoreapp1.0-Release|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.ActiveCfg = netstandard1.0-Debug|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.DebugNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.Build.0 = netstandard1.0-Debug|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.ActiveCfg = netstandard1.0-Release|Any CPU
+		{2ADDB484-6F57-4D71-A3FE-A57EC6329A2B}.ReleaseNETCoreAppnetcoreapp1.0netstandard1.0|AnyCPU.Build.0 = netstandard1.0-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

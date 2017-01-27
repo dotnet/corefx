@@ -34,4 +34,7 @@
     <Reference Include="System.Security.Principal.Windows" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{A3163306-C139-492D-B246-3D19510C0084}</ProjectGuid>
+  </PropertyGroup>
 </Project>

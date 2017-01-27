@@ -100,4 +100,7 @@
     <Reference Include="System.Xml.XPath" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{E09EF2B3-2C43-4814-82BA-C637AE915AE8}</ProjectGuid>
+  </PropertyGroup>
 </Project>

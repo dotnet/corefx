@@ -11,4 +11,7 @@
     <Compile Include="UnsafeTests.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{58E90080-EFBE-4F22-B1E6-44167CF16625}</ProjectGuid>
+  </PropertyGroup>
 </Project>

@@ -8,4 +8,7 @@
     <Compile Include="System.Runtime.CompilerServices.Unsafe.il" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{B5D170BE-49B6-4E3F-AC00-A7B33AD9747C}</ProjectGuid>
+  </PropertyGroup>
 </Project>

@@ -15,4 +15,7 @@
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{D7CC76AF-0D85-4AD8-9A41-1412A0AEE177}</ProjectGuid>
+  </PropertyGroup>
 </Project>

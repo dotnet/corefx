@@ -1,20 +1,24 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.25022.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.CompilerServices.Unsafe.Tests", "tests\System.Runtime.CompilerServices.Unsafe.Tests.csproj", "{76EF80B0-B3F5-493C-A78F-647D0DD26205}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.CompilerServices.Unsafe.Tests", "tests\System.Runtime.CompilerServices.Unsafe.Tests.csproj", "{58E90080-EFBE-4F22-B1E6-44167CF16625}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5D170BE-49B6-4E3F-AC00-A7B33AD9747C} = {B5D170BE-49B6-4E3F-AC00-A7B33AD9747C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.CompilerServices.Unsafe", "src\System.Runtime.CompilerServices.Unsafe.ilproj", "{B5D170BE-49B6-4E3F-AC00-A7B33AD9747C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		DebugNETCoreAppnetstandard1.3-Windows_NT|AnyCPU = DebugNETCoreAppnetstandard1.3-Windows_NT|AnyCPU
+		ReleaseNETCoreAppnetstandard1.3-Windows_NT|AnyCPU = ReleaseNETCoreAppnetstandard1.3-Windows_NT|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{76EF80B0-B3F5-493C-A78F-647D0DD26205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76EF80B0-B3F5-493C-A78F-647D0DD26205}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76EF80B0-B3F5-493C-A78F-647D0DD26205}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76EF80B0-B3F5-493C-A78F-647D0DD26205}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58E90080-EFBE-4F22-B1E6-44167CF16625}.DebugNETCoreAppnetstandard1.3-Windows_NT|AnyCPU.ActiveCfg = netstandard1.3-Windows_NT-Debug|Any CPU
+		{58E90080-EFBE-4F22-B1E6-44167CF16625}.DebugNETCoreAppnetstandard1.3-Windows_NT|AnyCPU.Build.0 = netstandard1.3-Windows_NT-Debug|Any CPU
+		{58E90080-EFBE-4F22-B1E6-44167CF16625}.ReleaseNETCoreAppnetstandard1.3-Windows_NT|AnyCPU.ActiveCfg = netstandard1.3-Windows_NT-Release|Any CPU
+		{58E90080-EFBE-4F22-B1E6-44167CF16625}.ReleaseNETCoreAppnetstandard1.3-Windows_NT|AnyCPU.Build.0 = netstandard1.3-Windows_NT-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
