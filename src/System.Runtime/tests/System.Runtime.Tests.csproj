@@ -147,7 +147,6 @@
     <Compile Include="EnumTests.netstandard.cs" />
     <Compile Include="GetTypeCodeTests.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
-    <Compile Include="System\ArgIteratorTests.cs" />
     <Compile Include="System\BadImageFormatExceptionTests.cs" />
     <Compile Include="System\CharTests.netstandard.cs" />
     <Compile Include="System\DateTimeOffsetTests.netstandard.cs" />
