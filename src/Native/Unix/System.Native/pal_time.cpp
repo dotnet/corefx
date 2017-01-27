@@ -109,3 +109,33 @@ extern "C" int32_t SystemNative_GetTimestamp(uint64_t* timestamp)
 
 #endif
 }
+
+extern "C" int32_t SystemNative_GetAbsoluteTime(uint64_t* timestamp)
+{
+    assert(timestamp);
+
+#if  HAVE_MACH_ABSOLUTE_TIME
+    *timestamp = mach_absolute_time();
+    return 1;
+
+#else
+    *timestamp = 0;
+    return 0;
+#endif
+}
+
+extern "C" int32_t SystemNative_GetTimebaseInfo(uint32_t* numer, uint32_t* denom)
+{
+    *numer = 1;
+    *denom = 1;
+
+#if  HAVE_MACH_TIMEBASE_INFO
+    mach_timebase_info_data_t timebase;
+    if (mach_timebase_info(&timebase) == KERN_SUCCESS)
+    {
+        *numer = timebase.numer;
+        *denom = timebase.denom;
+    }
+#endif
+    return 1;
+}
