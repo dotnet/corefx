@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Tests
@@ -35,35 +36,27 @@ namespace System.Text.Tests
         private const int c_SIZE_OF_ARRAY = 256;
         private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
-        // Call Convert to convert a arbitrary character array with ASCII encoder
-        [Fact]
-        public void EncoderASCIIConvertRandomCharArray()
+        public static IEnumerable<object[]> Encoders_RandomInput()
         {
-            char[] chars = new char[c_SIZE_OF_ARRAY];
-            byte[] bytes = new byte[c_SIZE_OF_ARRAY];
-            Encoder encoder = Encoding.ASCII.GetEncoder();
-
-            for (int i = 0; i < chars.Length; ++i)
-            {
-                chars[i] = _generator.GetChar(-55);
-            }
-
-            int charsUsed;
-            int bytesUsed;
-            bool completed;
-            encoder.Convert(chars, 0, chars.Length, bytes, 0, bytes.Length, false, out charsUsed, out bytesUsed, out completed);
-
-            // set flush to true and try again
-            encoder.Convert(chars, 0, chars.Length, bytes, 0, bytes.Length, true, out charsUsed, out bytesUsed, out completed);
+            yield return new object[] { Encoding.ASCII.GetEncoder() };
+            yield return new object[] { Encoding.UTF8.GetEncoder() };
+            yield return new object[] { Encoding.Unicode.GetEncoder() };
+        }
+              
+        public static IEnumerable<object[]> Encoders_Convert()
+        {
+            yield return new object[] { Encoding.ASCII.GetEncoder(), 1 };
+            yield return new object[] { Encoding.UTF8.GetEncoder(), 1 };
+            yield return new object[] { Encoding.Unicode.GetEncoder(), 2 };
         }
         
-        // Call Convert to convert a arbitrary character array with UTF8 encoder
-        [Fact]
-        public void EncoderUTF8ConvertRandomCharArray()
+        // Call Convert to convert a arbitrary character array encoders
+        [Theory]
+        [MemberData(nameof(Encoders_RandomInput))]
+        public void EncoderConvertRandomCharArray(Encoder encoder)
         {
             char[] chars = new char[c_SIZE_OF_ARRAY];
             byte[] bytes = new byte[c_SIZE_OF_ARRAY];
-            Encoder encoder = Encoding.UTF8.GetEncoder();
 
             for (int i = 0; i < chars.Length; ++i)
             {
@@ -79,38 +72,16 @@ namespace System.Text.Tests
             encoder.Convert(chars, 0, chars.Length, bytes, 0, bytes.Length, true, out charsUsed, out bytesUsed, out completed);
         }
 
-        // Call Convert to convert a arbitrary character array with Unicode encoder
-        [Fact]
-        public void EncoderUnicodeConvertRandomCharArray()
-        {
-            char[] chars = new char[c_SIZE_OF_ARRAY];
-            byte[] bytes = new byte[c_SIZE_OF_ARRAY];
-            Encoder encoder = Encoding.Unicode.GetEncoder();
-
-            for (int i = 0; i < chars.Length; ++i)
-            {
-                chars[i] = _generator.GetChar(-55);
-            }
-
-            int charsUsed;
-            int bytesUsed;
-            bool completed;
-            encoder.Convert(chars, 0, chars.Length, bytes, 0, bytes.Length, false, out charsUsed, out bytesUsed, out completed);
-
-            // set flush to true and try again
-            encoder.Convert(chars, 0, chars.Length, bytes, 0, bytes.Length, true, out charsUsed, out bytesUsed, out completed);
-        }
-
-        // Call Convert to convert a ASCII character array with UTF8 encoder
-        [Fact]
-        public void EncoderUTF8ConvertASCIICharArray()
+        // Call Convert to convert a ASCII character array encoders
+        [Theory]
+        [MemberData(nameof(Encoders_Convert))]
+        public void EncoderConvertASCIICharArray(Encoder encoder, int multiplier)
         {
             char[] chars = "TestLibrary.TestFramework.BeginScenario".ToCharArray();
-            byte[] bytes = new byte[chars.Length];
-            Encoder encoder = Encoding.UTF8.GetEncoder();
+            byte[] bytes = new byte[chars.Length * multiplier];
 
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, chars.Length, expectedCompleted: true);
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, chars.Length, expectedCompleted: true);
+            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, chars.Length * multiplier, expectedCompleted: true);
+            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, chars.Length * multiplier, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, 0, bytes, 0, 0, true, 0, 0, expectedCompleted: true);
         }
 
@@ -144,18 +115,6 @@ namespace System.Text.Tests
             // Verify maxBytes is large than character count
             VerificationHelper(encoder, chars, 0, chars.Length - 1, bytes, 0, bytes.Length, false, chars.Length - 1, chars.Length - 1, expectedCompleted: true);
             VerificationHelper(encoder, chars, 1, chars.Length - 1, bytes, 0, bytes.Length, true, chars.Length - 1, chars.Length - 1, expectedCompleted: true);
-        }
-
-        // Call Convert to convert a ASCII character array with Unicode encoder
-        [Fact]
-        public void EncoderUnicodeConvertASCIICharArray()
-        {
-            char[] chars = "TestLibrary.TestFramework.BeginScenario".ToCharArray();
-            byte[] bytes = new byte[chars.Length * 2];
-            Encoder encoder = Encoding.Unicode.GetEncoder();
-
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, bytes.Length, expectedCompleted: true);
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, bytes.Length, expectedCompleted: true);
         }
 
         // Call Convert to convert partial of a ASCII character array with Unicode encoder
@@ -206,19 +165,6 @@ namespace System.Text.Tests
 
             VerificationHelper(encoder, chars, 0, 1, bytes, 0, bytes.Length, false, 1, 2, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, 1, bytes, 0, bytes.Length, true, 1, 2, expectedCompleted: true);
-        }
-        
-        // Call Convert to convert a ASCII character array with ASCII encoder
-        [Fact]
-        public void EncoderASCIIConvertASCIICharArray()
-        {
-            char[] chars = "TestLibrary.TestFramework.BeginScenario".ToCharArray();
-            byte[] bytes = new byte[chars.Length];
-            Encoder encoder = Encoding.ASCII.GetEncoder();
-
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, chars.Length, expectedCompleted: true);
-            VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, chars.Length, expectedCompleted: true);
-            VerificationHelper(encoder, chars, 0, 0, bytes, 0, 0, true, 0, 0, expectedCompleted: true);
         }
         
         // Call Convert to convert partial of a ASCII character array with ASCII encoder
