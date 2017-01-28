@@ -20,10 +20,21 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void ConstructorTest()
         {
-            var t = new Thread(() => { });
-            t = new Thread(() => { }, 0);
-            t = new Thread(state => { });
-            t = new Thread(state => { }, 0);
+            Action<Thread> startThreadAndJoin =
+                t =>
+                {
+                    t.IsBackground = true;
+                    t.Start();
+                    t.Join();
+                };
+            startThreadAndJoin(new Thread(() => { }));
+            startThreadAndJoin(new Thread(() => { }, 0));
+            startThreadAndJoin(new Thread(() => { }, 1));
+            startThreadAndJoin(new Thread(() => { }, 16 << 20));
+            startThreadAndJoin(new Thread(state => { }));
+            startThreadAndJoin(new Thread(state => { }, 0));
+            startThreadAndJoin(new Thread(state => { }, 1));
+            startThreadAndJoin(new Thread(state => { }, 16 << 20));
 
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null));
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null, 0));
