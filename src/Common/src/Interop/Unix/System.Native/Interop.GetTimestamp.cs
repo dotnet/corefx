@@ -15,7 +15,7 @@ internal static partial class Interop
         internal static extern bool GetTimestamp(out long timestamp);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetAbsoluteTime")]
-        internal static extern bool GetAbsoluteTime(out long timestamp);
+        internal static extern bool GetAbsoluteTime(out ulong timestamp);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimebaseInfo")]
         internal static extern bool GetTimebaseInfo(out uint numer, out uint denom);

@@ -126,16 +126,21 @@ extern "C" int32_t SystemNative_GetAbsoluteTime(uint64_t* timestamp)
 
 extern "C" int32_t SystemNative_GetTimebaseInfo(uint32_t* numer, uint32_t* denom)
 {
-    *numer = 1;
-    *denom = 1;
-
 #if  HAVE_MACH_TIMEBASE_INFO
     mach_timebase_info_data_t timebase;
-    if (mach_timebase_info(&timebase) == KERN_SUCCESS)
+    kern_return_t ret = mach_timebase_info(&timebase);
+    assert(ret == KERN_SUCCESS);
+
+    if (ret == KERN_SUCCESS)
     {
         *numer = timebase.numer;
         *denom = timebase.denom;
     }
+    else
 #endif
+    {
+        *numer = 1;
+        *denom = 1;
+    }
     return 1;
 }
