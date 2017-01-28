@@ -132,7 +132,6 @@ namespace System
             switch (folder)
             {
                 case SpecialFolder.UserProfile:
-                case SpecialFolder.MyDocuments: // same value as Personal
                     return home;
                 case SpecialFolder.ApplicationData:
                     return GetXdgConfig(home);
@@ -146,6 +145,8 @@ namespace System
                     }
                     return data;
 
+                case SpecialFolder.MyDocuments: // same value as Personal
+                    return ReadXdgDirectory(home, "XDG_DOCUMENTS_DIR", "Documents");
                 case SpecialFolder.Desktop:
                 case SpecialFolder.DesktopDirectory:
                     return ReadXdgDirectory(home, "XDG_DESKTOP_DIR", "Desktop");

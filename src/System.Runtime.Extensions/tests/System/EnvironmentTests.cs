@@ -199,10 +199,8 @@ namespace System.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void GetFolderPath_Unix_PersonalIsHomeAndUserProfile()
+        public void GetFolderPath_Unix_UserProfileIsHome()
         {
-            Assert.Equal(Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-            Assert.Equal(Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             Assert.Equal(Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         }
 
