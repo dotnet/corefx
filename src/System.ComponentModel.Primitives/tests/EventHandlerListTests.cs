@@ -14,8 +14,8 @@ namespace System.ComponentModel.Primitives.Tests
             var list = new EventHandlerList();
 
             // Create two different delegate instances
-            Action a1 = () => Assert.True(false);
-            Action a2 = () => Assert.False(true);
+            Action a1 = () => { throw new ShouldNotBeInvokedException(); };
+            Action a2 = () => { throw new ShouldNotBeInvokedException(); };
             Assert.NotSame(a1, a2);
 
             // Neither entry in the list has a delegate
@@ -102,8 +102,8 @@ namespace System.ComponentModel.Primitives.Tests
             var list = new EventHandlerList();
 
             // Create two different delegate instances
-            Action a1 = () => Assert.True(false);
-            Action a2 = () => Assert.False(true);
+            Action a1 = () => { throw new ShouldNotBeInvokedException(); };
+            Action a2 = () => { throw new ShouldNotBeInvokedException(); };
             Assert.NotSame(a1, a2);
 
             // Neither entry in the list has a delegate

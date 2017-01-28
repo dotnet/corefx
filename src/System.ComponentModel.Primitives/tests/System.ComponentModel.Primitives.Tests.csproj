@@ -25,7 +25,10 @@
     <Compile Include="NotifyParentPropertyAttributeTests.cs" />
     <Compile Include="ParenthesizePropertyNameAttributeTests.cs" />
     <Compile Include="ReadOnlyAttributeTests.cs" />
-    <Compile Include="RefreshPropertiesAttributeTests.cs" />
+    <Compile Include="RefreshPropertiesAttributeTests.cs" /> 
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link> 
+    </Compile> 
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
     <Compile Include="EventHandlerListTests.cs" />
