@@ -79,7 +79,9 @@ namespace System.Linq
                 return listProv.GetCount(onlyIfCheap);
             }
 
-            return !onlyIfCheap || _source is ICollection<TElement> || _source is ICollection ? _source.Count() : -1;
+            return !onlyIfCheap || _source is ICollection<TElement> || _source is ICollection ?
+                _source.Count(Check.All & ~Check.IIListProvider) :
+                -1;
         }
 
         internal IEnumerator<TElement> GetEnumerator(int minIdx, int maxIdx)

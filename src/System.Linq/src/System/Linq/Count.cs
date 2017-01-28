@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -16,22 +17,39 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            ICollection<TSource> collectionoft = source as ICollection<TSource>;
-            if (collectionoft != null)
+            return Count(source, Check.All);
+        }
+
+        internal static int Count<TSource>(this IEnumerable<TSource> source, Check flags)
+        {
+            Debug.Assert(source != null);
+            Debug.Assert((flags & Check.All) == flags);
+
+            if ((flags & Check.ICollectionOfT) != 0)
             {
-                return collectionoft.Count;
+                ICollection<TSource> collectionoft = source as ICollection<TSource>;
+                if (collectionoft != null)
+                {
+                    return collectionoft.Count;
+                }
             }
 
-            IIListProvider<TSource> listProv = source as IIListProvider<TSource>;
-            if (listProv != null)
+            if ((flags & Check.IIListProvider) != 0)
             {
-                return listProv.GetCount(onlyIfCheap: false);
+                IIListProvider<TSource> listProv = source as IIListProvider<TSource>;
+                if (listProv != null)
+                {
+                    return listProv.GetCount(onlyIfCheap: false);
+                }
             }
 
-            ICollection collection = source as ICollection;
-            if (collection != null)
+            if ((flags & Check.ICollection) != 0)
             {
-                return collection.Count;
+                ICollection collection = source as ICollection;
+                if (collection != null)
+                {
+                    return collection.Count;
+                }
             }
 
             int count = 0;
