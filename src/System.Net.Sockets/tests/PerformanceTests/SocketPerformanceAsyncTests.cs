@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Net.Sockets.Tests;
 using System.Net.Test.Common;
 
@@ -14,10 +15,17 @@ namespace System.Net.Sockets.Performance.Tests
     public class SocketPerformanceAsyncTests
     {
         private readonly ITestOutputHelper _log;
+        private readonly int _iterations = 1;
 
         public SocketPerformanceAsyncTests(ITestOutputHelper output)
         {
             _log = TestLogging.GetInstance();
+
+            string env = Environment.GetEnvironmentVariable("SOCKETSTRESS_ITERATIONS");
+            if (env != null)
+            {
+                _iterations = int.Parse(env);
+            }
         }
 
         [ActiveIssue(13349, TestPlatforms.OSX)]
@@ -27,7 +35,7 @@ namespace System.Net.Sockets.Performance.Tests
         {
             SocketImplementationType serverType = SocketImplementationType.Async;
             SocketImplementationType clientType = SocketImplementationType.Async;
-            int iterations = 10000;
+            int iterations = 10000 * _iterations;
             int bufferSize = 256;
             int socket_instances = 1;
 
@@ -49,7 +57,7 @@ namespace System.Net.Sockets.Performance.Tests
         {
             SocketImplementationType serverType = SocketImplementationType.Async;
             SocketImplementationType clientType = SocketImplementationType.Async;
-            int iterations = 2000;
+            int iterations = 2000 * _iterations;
             int bufferSize = 256;
             int socket_instances = 500;
 
