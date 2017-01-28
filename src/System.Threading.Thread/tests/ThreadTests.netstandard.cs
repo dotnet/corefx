@@ -21,15 +21,34 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void ConstructorTest()
         {
+            Exception backgroundEx = null;
             Action<Thread> startThreadAndJoin =
                 t =>
                 {
+                    backgroundEx = null;
                     t.IsBackground = true;
                     t.Start();
-                    t.Join();
+                    Assert.True(t.Join(ThreadTestHelpers.UnexpectedTimeoutMilliseconds));
+                    if (backgroundEx != null)
+                    {
+                        throw new AggregateException(backgroundEx);
+                    }
                 };
-            ThreadStart verifyStackSize = RuntimeHelpers.EnsureSufficientExecutionStack;
+            ThreadStart verifyStackSize =
+                () =>
+                {
+                    try
+                    {
+                        Assert.Null(backgroundEx);
+                        RuntimeHelpers.EnsureSufficientExecutionStack();
+                    }
+                    catch (Exception ex)
+                    {
+                        backgroundEx = ex;
+                    }
+                };
             ParameterizedThreadStart parameterizedVerifyStackSize = state => verifyStackSize();
+
             startThreadAndJoin(new Thread(verifyStackSize));
             startThreadAndJoin(new Thread(verifyStackSize, 0));
             startThreadAndJoin(new Thread(verifyStackSize, 1));
