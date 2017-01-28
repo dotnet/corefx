@@ -234,7 +234,7 @@ namespace System.Text.RegularExpressions
 
             internal Enumerator(MatchCollection collection)
             {
-                Debug.Assert(collection != null, "collection cannot be null.");
+                Debug.Assert(collection != null);
 
                 _collection = collection;
                 _index = -1;
