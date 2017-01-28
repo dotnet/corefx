@@ -79,6 +79,7 @@
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
     <Compile Include="System\LazyTests.cs" />
+    <Compile Include="System\LazyTests.regression.cs" />
     <Compile Include="System\LazyOfTMetadataTests.cs" />
     <Compile Include="System\MethodAccessExceptionTests.cs" />
     <Compile Include="System\MissingFieldExceptionTests.cs" />
