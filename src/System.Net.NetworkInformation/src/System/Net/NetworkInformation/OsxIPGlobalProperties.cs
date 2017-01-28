@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
                 TcpState state = nativeInfo.State;
 
                 byte[] localBytes = new byte[nativeInfo.LocalEndPoint.NumAddressBytes];
-                fixed (byte* localBytesPtr = localBytes)
+                fixed (byte* localBytesPtr = &localBytes[0])
                 {
                     Buffer.MemoryCopy(nativeInfo.LocalEndPoint.AddressBytes, localBytesPtr, localBytes.Length, localBytes.Length);
                 }
@@ -41,7 +41,7 @@ namespace System.Net.NetworkInformation
                 else
                 {
                     byte[] remoteBytes = new byte[nativeInfo.RemoteEndPoint.NumAddressBytes];
-                    fixed (byte* remoteBytesPtr = remoteBytes)
+                    fixed (byte* remoteBytesPtr = &remoteBytes[0])
                     {
                         Buffer.MemoryCopy(nativeInfo.RemoteEndPoint.AddressBytes, remoteBytesPtr, remoteBytes.Length, remoteBytes.Length);
                     }
@@ -84,7 +84,7 @@ namespace System.Net.NetworkInformation
                 else
                 {
                     byte[] bytes = new byte[endPointInfo.NumAddressBytes];
-                    fixed (byte* bytesPtr = bytes)
+                    fixed (byte* bytesPtr = &bytes[0])
                     {
                         Buffer.MemoryCopy(endPointInfo.AddressBytes, bytesPtr, bytes.Length, bytes.Length);
                     }

@@ -1901,7 +1901,7 @@ namespace System.Net
                 httpResponse.ReasonLength = (ushort)byteReason.Length;
 
                 byte[] byteContentLength = Encoding.Default.GetBytes("0");
-                fixed (byte* pContentLength = byteContentLength)
+                fixed (byte* pContentLength = &byteContentLength[0])
                 {
                     (&httpResponse.Headers.KnownHeaders)[(int)HttpResponseHeader.ContentLength].pRawValue = (sbyte*)pContentLength;
                     (&httpResponse.Headers.KnownHeaders)[(int)HttpResponseHeader.ContentLength].RawValueLength = (ushort)byteContentLength.Length;
@@ -2017,7 +2017,7 @@ namespace System.Net
             do
             {
                 blob = new byte[size];
-                fixed (byte* blobPtr = blob)
+                fixed (byte* blobPtr = &blob[0])
                 {
                     // Http.sys team: ServiceName will always be null if 
                     // HTTP_RECEIVE_SECURE_CHANNEL_TOKEN flag is set.

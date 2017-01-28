@@ -9,7 +9,7 @@ namespace System.Text
 {
     internal class BinHexEncoding : Encoding
     {
-        private static byte[] s_char2val = new byte[128]
+        private static readonly byte[] s_char2val = new byte[128]
         {
             /*    0-15 */
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -29,7 +29,7 @@ namespace System.Text
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         };
 
-        private static string s_val2char = "0123456789ABCDEF";
+        private static readonly string s_val2char = "0123456789ABCDEF";
 
         public override int GetMaxByteCount(int charCount)
         {
@@ -68,7 +68,7 @@ namespace System.Text
                 throw new ArgumentException(SR.XmlArrayTooSmall, nameof(bytes));
             if (charCount > 0)
             {
-                fixed (byte* _char2val = s_char2val)
+                fixed (byte* _char2val = &s_char2val[0])
                 {
                     fixed (byte* _bytes = &bytes[byteIndex])
                     {

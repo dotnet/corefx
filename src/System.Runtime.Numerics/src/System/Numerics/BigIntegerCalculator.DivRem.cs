@@ -88,7 +88,7 @@ namespace System.Numerics
             uint[] localLeft = CreateCopy(left);
             uint[] bits = new uint[left.Length - right.Length + 1];
 
-            fixed (uint* l = localLeft, r = right, b = bits)
+            fixed (uint* l = &localLeft[0], r = &right[0], b = &bits[0])
             {
                 Divide(l, localLeft.Length,
                        r, right.Length,
@@ -114,7 +114,7 @@ namespace System.Numerics
             uint[] localLeft = CreateCopy(left);
             uint[] bits = new uint[left.Length - right.Length + 1];
 
-            fixed (uint* l = localLeft, r = right, b = bits)
+            fixed (uint* l = &localLeft[0], r = &right[0], b = &bits[0])
             {
                 Divide(l, localLeft.Length,
                        r, right.Length,
@@ -137,7 +137,7 @@ namespace System.Numerics
             // NOTE: left will get overwritten, we need a local copy
             uint[] localLeft = CreateCopy(left);
 
-            fixed (uint* l = localLeft, r = right)
+            fixed (uint* l = &localLeft[0], r = &right[0])
             {
                 Divide(l, localLeft.Length,
                        r, right.Length,

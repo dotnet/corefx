@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
         public static unsafe IPAddress GetIPAddressFromNativeInfo(Interop.Sys.IpAddressInfo* addressInfo)
         {
             byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes)
+            fixed (byte* ipArrayPtr = &ipBytes[0])
             {
                 Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
             }

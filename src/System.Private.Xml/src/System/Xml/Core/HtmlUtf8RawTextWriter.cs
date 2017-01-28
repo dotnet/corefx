@@ -711,7 +711,7 @@ namespace System.Xml
                             break;
                         default:
                             const string hexDigits = "0123456789ABCDEF";
-                            fixed (byte* pUriEscapingBuffer = _uriEscapingBuffer)
+                            fixed (byte* pUriEscapingBuffer = &_uriEscapingBuffer[0])
                             {
                                 byte* pByte = pUriEscapingBuffer;
                                 byte* pEnd = pByte;
