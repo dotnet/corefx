@@ -118,8 +118,8 @@ namespace System.Text.RegularExpressions.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => collection.CopyTo(new object[collection.Count], -1));
 
             // Invalid index + length
-            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => collection.CopyTo(new object[collection.Count], 1));
-            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => collection.CopyTo(new object[collection.Count + 1], 2));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collection.CopyTo(new object[collection.Count], 1));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collection.CopyTo(new object[collection.Count + 1], 2));
         }
 
         private static MatchCollection CreateCollection() => new Regex("t").Matches("dotnet");

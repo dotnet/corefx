@@ -1565,11 +1565,11 @@ namespace System.Collections.Immutable.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", "srcIndex", () => array.CopyTo(-1, new int[0], -1, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => array.CopyTo(0, new int[0], -1, 0));
 
-            AssertExtensions.Throws<ArgumentException>("sourceArray", "", () => array.CopyTo(array.Length, new int[1], 0, 1)); // Not enough room in the source.
+            AssertExtensions.Throws<ArgumentException>("sourceArray", string.Empty, () => array.CopyTo(array.Length, new int[1], 0, 1)); // Not enough room in the source.
 
             if (array.Length > 0)
             {
-                AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => array.CopyTo(array.Length - 1, new int[1], 1, 1)); // Not enough room in the destination.
+                AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => array.CopyTo(array.Length - 1, new int[1], 1, 1)); // Not enough room in the destination.
             }
         }
 
