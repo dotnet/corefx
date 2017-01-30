@@ -36,8 +36,8 @@ namespace System.Threading.Threads.Tests
                     unsafe
                     {
                         byte* buffer = stackalloc byte[bufferSizeBytes];
-                        buffer[0] = 0xff;
-                        buffer[bufferSizeBytes - 1] = 0xff;
+                        Volatile.Write(ref buffer[0], 0xff);
+                        Volatile.Write(ref buffer[bufferSizeBytes - 1], 0xff);
                     }
                 };
             startThreadAndJoin(new Thread(() => verifyStackSize(0)));
