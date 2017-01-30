@@ -32,7 +32,7 @@
     </Compile>
     <Compile Include="System\ComponentModel\Win32Exception.Windows.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' And ( '$(TargetGroup)' == 'netcoreapp'  Or '$(TargetGroup)' == 'uap' ) ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\ComponentModel\Win32Exception.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>

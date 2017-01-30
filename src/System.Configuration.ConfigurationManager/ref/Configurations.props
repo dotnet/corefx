@@ -3,7 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netcoreapp;
-      <!-- uap;  Disabling uap build due to issue: https://github.com/dotnet/corefx/issues/15515 -->
+      uap;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
