@@ -53,6 +53,12 @@
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcore50'">
+    <ProjectReference Include="../../System.Reflection.Metadata/src/System.Reflection.Metadata.csproj" />
+    <ProjectReference Include="../../System.Collections.Immutable/src/System.Collections.Immutable.csproj" />
+    <Reference Include="System.IO" />
+    <Reference Include="System.Runtime.Extensions" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Globalization" />

@@ -382,11 +382,21 @@
     <TargetingPackReference Include="System" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap101'">
-    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
-    <!-- ToDo: remove once we have new packages https://github.com/dotnet/corefx/issues/12838 -->
-    <ProjectReference Include="..\..\System.Security.Principal\ref\System.Security.Principal.csproj" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Contracts" />

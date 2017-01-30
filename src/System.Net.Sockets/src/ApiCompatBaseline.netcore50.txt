@@ -1,0 +1,22 @@
+Compat issues with assembly System.Net.Sockets:
+CannotMakeMemberNonVirtual : Member 'System.Net.Sockets.NetworkStream.BeginRead(System.Byte[], System.Int32, System.Int32, System.AsyncCallback, System.Object)' is non-virtual in the implementation but is virtual in the contract.
+CannotMakeMemberNonVirtual : Member 'System.Net.Sockets.NetworkStream.BeginWrite(System.Byte[], System.Int32, System.Int32, System.AsyncCallback, System.Object)' is non-virtual in the implementation but is virtual in the contract.
+CannotMakeMemberNonVirtual : Member 'System.Net.Sockets.NetworkStream.EndRead(System.IAsyncResult)' is non-virtual in the implementation but is virtual in the contract.
+CannotMakeMemberNonVirtual : Member 'System.Net.Sockets.NetworkStream.EndWrite(System.IAsyncResult)' is non-virtual in the implementation but is virtual in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient..ctor(System.Net.IPEndPoint)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient..ctor(System.String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient.Close()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient.Connect(System.Net.IPAddress, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient.Connect(System.Net.IPAddress[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient.Connect(System.Net.IPEndPoint)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.TcpClient.Connect(System.String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient..ctor(System.String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Close()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Connect(System.Net.IPAddress, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Connect(System.Net.IPEndPoint)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Connect(System.String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Receive(System.Net.IPEndPoint)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Send(System.Byte[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Send(System.Byte[], System.Int32, System.Net.IPEndPoint)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.Sockets.UdpClient.Send(System.Byte[], System.Int32, System.String, System.Int32)' does not exist in the implementation but it does exist in the contract.
+Total Issues: 20

@@ -13,7 +13,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Net\Http\RtcRequestFactory.cs" />
-    <None Include="project.json" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

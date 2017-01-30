@@ -17,6 +17,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='net461-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp1.2corert-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp1.2corert-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' == 'net461'">
@@ -24,7 +26,7 @@
       <TargetGroup>netcoreapp</TargetGroup>
     </ContractProject>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
     <Compile Include="System\Runtime\InteropServices\ComAwareEventInfo.cs" />
     <Compile Include="System\Runtime\InteropServices\HandleCollector.CoreCLR.cs" />
     <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttribute.cs" />

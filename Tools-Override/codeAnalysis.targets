@@ -19,8 +19,8 @@
     <UseWin32Apis Condition="'$(OSGroup)'=='Windows_NT'">true</UseWin32Apis>
     <ValidPinvokeMappings>$(MSBuildThisFileDirectory)PinvokeAnalyzer_OneCoreApis.txt</ValidPinvokeMappings>
     <ValidPinvokeMappings Condition="'$(UseWin32Apis)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32Apis.txt</ValidPinvokeMappings>
-    <ValidPinvokeMappings Condition="'$(TargetGroup)'=='netcore50' or '$(TargetGroup)'=='netcore50aot' or '$(SupportsUWP)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_UWPApis.txt</ValidPinvokeMappings>
-    <ValidPinvokeMappings Condition="('$(TargetGroup)'=='netcore50' or '$(TargetGroup)'=='netcore50aot' or '$(SupportsUWP)'=='true') and '$(UseWin32Apis)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
+    <ValidPinvokeMappings Condition="'$(TargetGroup)'=='netcore50' or '$(TargetGroup)'=='uap101' or '$(TargetGroup)'=='netcore50aot' or '$(SupportsUWP)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_UWPApis.txt</ValidPinvokeMappings>
+    <ValidPinvokeMappings Condition="('$(TargetGroup)'=='netcore50' or '$(TargetGroup)'=='uap101' or '$(TargetGroup)'=='netcore50aot' or '$(SupportsUWP)'=='true') and '$(UseWin32Apis)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
   </PropertyGroup>
 
   <PropertyGroup>

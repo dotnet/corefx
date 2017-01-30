@@ -10,9 +10,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcore50aot-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Release|AnyCPU'" />
   <ItemGroup>
     <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net46'" />
-    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'" />
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />

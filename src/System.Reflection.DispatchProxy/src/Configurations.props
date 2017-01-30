@@ -4,6 +4,8 @@
     <BuildConfigurations>
       netcore50aot-Windows_NT;
       netstandard1.3;
+      netstandard;
+      netstandard-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

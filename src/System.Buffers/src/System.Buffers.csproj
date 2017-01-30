@@ -6,13 +6,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <UseOpenKey Condition="'$(UseOpenKey)'==''">true</UseOpenKey>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netcoreapp'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.1-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.1-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
     <Compile Include="System\Buffers\ArrayPool.cs" />
     <Compile Include="System\Buffers\ArrayPoolEventSource.cs" />
@@ -20,7 +22,7 @@
     <Compile Include="System\Buffers\DefaultArrayPoolBucket.cs" />
     <Compile Include="System\Buffers\Utilities.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">
     <TargetingPackReference Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup>

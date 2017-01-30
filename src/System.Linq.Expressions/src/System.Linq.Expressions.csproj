@@ -20,6 +20,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='net461-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Release|AnyCPU'" />
   <!-- netcore50 project.json fork is shared for both netcore50 and netcore50aot. This redirects netcore50aot. -->
   <PropertyGroup Condition="'$(TargetGroup)' == 'netcore50aot'">
     <ProjectJson>netcore50/project.json</ProjectJson>
@@ -145,7 +147,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap'">
     <Compile Include="System\Linq\Expressions\DynamicExpressionVisitor.cs" />
     <Compile Include="System\Linq\Expressions\DynamicExpression.cs" />
     <Compile Include="System\Linq\Expressions\Expression.netstandard.cs" />

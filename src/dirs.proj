@@ -4,12 +4,13 @@
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
     <SerializeProjects>true</SerializeProjects>
+    <KeepProjectOrder>true</KeepProjectOrder>
   </PropertyGroup>
 
   <ItemGroup>
     <Project Include="ref.builds" />
-    <Project Include="src.builds" />
     <Project Include="shims\shims.proj" />
+    <Project Include="src.builds" />
   </ItemGroup>
 
   <Import Project="..\dir.targets" />
