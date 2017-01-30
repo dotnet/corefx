@@ -33,14 +33,11 @@ namespace System.Linq
                     return list[index];
                 }
 
-                if (index >= 0)
+                bool found;
+                TSource item = EnumerableHelpers.TryGetElementAt(index, out found, source: source);
+                if (found)
                 {
-                    bool found;
-                    TSource item = EnumerableHelpers.TryGetElementAt(index, out found, source: source);
-                    if (found)
-                    {
-                        return item;
-                    }
+                    return item;
                 }
             }
 

@@ -44,21 +44,23 @@ namespace System.Collections.Generic
         // TODO: Add XML docs for all of these.
         internal static T TryGetElementAt<T>(int index, out bool found, IEnumerable<T> source)
         {
-            Debug.Assert(index >= 0);
             Debug.Assert(source != null);
             Debug.Assert(!(source is IList<T>));
 
-            using (IEnumerator<T> e = source.GetEnumerator())
+            if (index >= 0)
             {
-                while (e.MoveNext())
+                using (IEnumerator<T> e = source.GetEnumerator())
                 {
-                    if (index == 0)
+                    while (e.MoveNext())
                     {
-                        found = true;
-                        return e.Current;
-                    }
+                        if (index == 0)
+                        {
+                            found = true;
+                            return e.Current;
+                        }
 
-                    index--;
+                        index--;
+                    }
                 }
             }
 

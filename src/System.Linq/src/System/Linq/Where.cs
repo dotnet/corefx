@@ -97,16 +97,7 @@ namespace System.Linq
 
             public abstract List<TSource> ToList();
 
-            public TSource TryGetElementAt(int index, out bool found)
-            {
-                if (index >= 0)
-                {
-                    return EnumerableHelpers.TryGetElementAt(index, out found, source: this);
-                }
-
-                found = false;
-                return default(TSource);
-            }
+            public TSource TryGetElementAt(int index, out bool found) => EnumerableHelpers.TryGetElementAt(index, out found, source: this);
 
             public abstract TSource TryGetFirst(out bool found);
 
