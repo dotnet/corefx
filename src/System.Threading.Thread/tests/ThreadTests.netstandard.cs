@@ -27,26 +27,27 @@ namespace System.Threading.Threads.Tests
                     t.Start();
                     Assert.True(t.Join(UnexpectedTimeoutMilliseconds));
                 };
-            Action verifyStackSize =
-                () =>
+            Action<int> verifyStackSize =
+                stackSizeBytes =>
                 {
-                    // Try to stack-allocate an array to verify that some stack space is available
-                    int byteCount = 16 << 10; // 16 KB
+                    // Try to stack-allocate an array to verify that close to the expected amount of stack space is actually
+                    // available
+                    int bufferSizeBytes = Math.Max(16 << 10, stackSizeBytes - (64 << 10));
                     unsafe
                     {
-                        byte* buffer = stackalloc byte[byteCount];
+                        byte* buffer = stackalloc byte[bufferSizeBytes];
                         buffer[0] = 0xff;
-                        buffer[byteCount - 1] = 0xff;
+                        buffer[bufferSizeBytes - 1] = 0xff;
                     }
                 };
-            startThreadAndJoin(new Thread(() => verifyStackSize()));
-            startThreadAndJoin(new Thread(() => verifyStackSize(), 0));
-            startThreadAndJoin(new Thread(() => verifyStackSize(), 64 << 10)); // 64 KB
-            startThreadAndJoin(new Thread(() => verifyStackSize(), 16 << 20)); // 16 MB
-            startThreadAndJoin(new Thread(state => verifyStackSize()));
-            startThreadAndJoin(new Thread(state => verifyStackSize(), 0));
-            startThreadAndJoin(new Thread(state => verifyStackSize(), 64 << 10)); // 64 KB
-            startThreadAndJoin(new Thread(state => verifyStackSize(), 16 << 20)); // 16 MB
+            startThreadAndJoin(new Thread(() => verifyStackSize(0)));
+            startThreadAndJoin(new Thread(() => verifyStackSize(0), 0));
+            startThreadAndJoin(new Thread(() => verifyStackSize(64 << 10), 64 << 10)); // 64 KB
+            startThreadAndJoin(new Thread(() => verifyStackSize(16 << 20), 16 << 20)); // 16 MB
+            startThreadAndJoin(new Thread(state => verifyStackSize(0)));
+            startThreadAndJoin(new Thread(state => verifyStackSize(0), 0));
+            startThreadAndJoin(new Thread(state => verifyStackSize(64 << 10), 64 << 10)); // 64 KB
+            startThreadAndJoin(new Thread(state => verifyStackSize(16 << 20), 16 << 20)); // 16 MB
 
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null));
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null, 0));
