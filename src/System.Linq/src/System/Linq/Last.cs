@@ -110,46 +110,25 @@ namespace System.Linq
                 return ordered.TryGetLast(predicate, out found);
             }
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            IList<TSource> ilist = source as IList<TSource>;
+            if (ilist != null)
             {
-                for (int i = list.Count - 1; i >= 0; --i)
+                var array = source as TSource[];
+                if (array != null)
                 {
-                    TSource result = list[i];
-                    if (predicate(result))
-                    {
-                        found = true;
-                        return result;
-                    }
+                    return EnumerableHelpers.TryGetLast(predicate, out found, array: array);
                 }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+
+                var list = source as List<TSource>;
+                if (list != null)
                 {
-                    while (e.MoveNext())
-                    {
-                        TSource result = e.Current;
-                        if (predicate(result))
-                        {
-                            while (e.MoveNext())
-                            {
-                                TSource element = e.Current;
-                                if (predicate(element))
-                                {
-                                    result = element;
-                                }
-                            }
-
-                            found = true;
-                            return result;
-                        }
-                    }
+                    return EnumerableHelpers.TryGetLast(predicate, out found, list: list);
                 }
-            }
 
-            found = false;
-            return default(TSource);
+                return EnumerableHelpers.TryGetLast(predicate, out found, ilist: ilist);
+            }
+            
+            return EnumerableHelpers.TryGetLast(predicate, out found, source: source);
         }
     }
 }
