@@ -4,12 +4,18 @@
 
 using System.Diagnostics.Tracing;
 using System.Globalization;
+#if NET46
+using System.Security;
+#endif
 
 namespace System.Net
 {
     // TODO: Issue #5144: This class should not change or it can introduce incompatibility issues.
     [EventSource(Name = "Microsoft-System-Net",
         Guid = "501a994a-eb63-5415-9af1-1b031260f16c")]
+#if NET46
+    [SecuritySafeCritical]
+#endif
     internal sealed class NetEventSource : EventSource
     {
         private const int FunctionStartId = 1;
