@@ -720,6 +720,12 @@ namespace System.Numerics.Tests
             return nfi;
         }
 
+        // We need to account for cultures like fr-FR and uk-UA that use the no-break space (NBSP, 0xA0)
+        // character as the group separator. Because NBSP cannot be (easily) entered by the end user we
+        // accept regular spaces (SP, 0x20) as group separators for those cultures which means that
+        // trailing SP characters will be interpreted as group separators rather than whitespace.
+        //
+        // See also System.Globalization.FormatProvider+Number.MatchChars(char*, char*)
         private static bool FailureNotExpectedForTrailingWhite(NumberStyles ns, bool spaceOnlyTrail)
         {
             if (spaceOnlyTrail && (ns & NumberStyles.AllowThousands) != 0)
