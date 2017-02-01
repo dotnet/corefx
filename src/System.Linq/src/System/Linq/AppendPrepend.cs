@@ -247,19 +247,14 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                int count = GetCount(onlyIfCheap: true);
-
-                HashSet<TSource> hashSet = count == -1 ? new HashSet<TSource>(comparer) : new HashSet<TSource>(count, comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 if (!_appending)
                 {
                     hashSet.Add(_item);
                 }
 
-                foreach (var item in _source)
-                {
-                    hashSet.Add(item);
-                }
+                hashSet.UnionWith(_source);
 
                 if (_appending)
                 {
@@ -552,19 +547,14 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                int count = GetCount(onlyIfCheap: true);
-
-                HashSet<TSource> hashSet = count == -1 ? new HashSet<TSource>(comparer) : new HashSet<TSource>(count, comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
                 {
                     hashSet.Add(node.Item);
                 }
 
-                foreach (var item in _source)
-                {
-                    hashSet.Add(item);
-                }
+                hashSet.UnionWith(_source);
 
                 if (_appended != null)
                 {

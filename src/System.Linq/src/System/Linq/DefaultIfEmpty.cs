@@ -105,14 +105,12 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                List<TSource> list = _source.ToList();
-
-                if (list.Count == 0)
+                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
+                
+                if (hashSet.Count == 0)
                 {
-                    list.Add(_default);
+                    hashSet.Add(_default);
                 }
-
-                HashSet<TSource> hashSet = new HashSet<TSource>(list, comparer);
 
                 return hashSet;
             }

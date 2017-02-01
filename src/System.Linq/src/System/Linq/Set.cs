@@ -191,9 +191,10 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Creates a hashset from the items in this set.
+        /// Converts this set to a <see cref="HashSet{T}"/>.
         /// </summary>
-        /// <returns>A list of the items in this set.</returns>
+        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{T}"/>.</param>
+        /// <returns>A <see cref="HashSet{T}"/> of the items in this set.</returns>
         internal HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
         {
 #if DEBUG
@@ -201,7 +202,17 @@ namespace System.Linq
 #endif
             int count = _count;
 
-            HashSet<TElement> hashSet = new HashSet<TElement>(count, comparer);
+            HashSet<TElement> hashSet;
+
+            // Pre-allocate only when default comparer is used
+            if (Utilities.AreEqualityComparersEqual(comparer, EqualityComparer<TElement>.Default))
+            {
+                hashSet = new HashSet<TElement>(count, comparer);
+            }
+            else
+            {
+                hashSet = new HashSet<TElement>(comparer);
+            }
 
             for (int i = 0; i != count; ++i)
             {

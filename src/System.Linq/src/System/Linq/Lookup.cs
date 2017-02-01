@@ -218,7 +218,7 @@ namespace System.Linq
 
         HashSet<IGrouping<TKey, TElement>> IIListProvider<IGrouping<TKey, TElement>>.ToHashSet(IEqualityComparer<IGrouping<TKey, TElement>> comparer)
         {
-            HashSet<IGrouping<TKey, TElement>> hashSet = new HashSet<IGrouping<TKey, TElement>>(_count, comparer);
+            HashSet<IGrouping<TKey, TElement>> hashSet = new HashSet<IGrouping<TKey, TElement>>(comparer);
 
             Grouping<TKey, TElement> g = _lastGrouping;
 

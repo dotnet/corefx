@@ -174,7 +174,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                var hashSet = new HashSet<TResult>(comparer);
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
 
                 foreach (TSource item in _source)
                 {
@@ -282,7 +282,7 @@ namespace System.Linq
             {
                 TSource[] source = _source;
 
-                var results = new HashSet<TResult>(source.Length, comparer);
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
 
                 for (int i = 0; i < source.Length; i++)
                 {
@@ -437,7 +437,7 @@ namespace System.Linq
             {
                 int count = _source.Count;
 
-                var results = new HashSet<TResult>(count, comparer);
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -609,7 +609,7 @@ namespace System.Linq
             {
                 int count = _source.Count;
 
-                var results = new HashSet<TResult>(count, comparer);
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -851,21 +851,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                int count = _source.GetCount(onlyIfCheap: true);
-
-                HashSet<TResult> hashSet;
-
-                switch (count)
-                {
-                    case -1:
-                        hashSet = new HashSet<TResult>(comparer);
-                        break;
-                    case 0:
-                        return new HashSet<TResult>(comparer);
-                    default:
-                        hashSet = new HashSet<TResult>(count, comparer);
-                        break;
-                }
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
 
                 foreach (TSource input in _source)
                 {
@@ -1046,12 +1032,12 @@ namespace System.Linq
             {
                 int count = Count;
 
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
                 if (count == 0)
                 {
-                    return new HashSet<TResult>();
+                    return hashSet;
                 }
-
-                HashSet<TResult> hashSet = new HashSet<TResult>(count, comparer);
 
                 int end = _minIndexInclusive + count;
 

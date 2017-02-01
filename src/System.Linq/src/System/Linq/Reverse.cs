@@ -113,11 +113,8 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                List<TSource> list = _source.ToList();
-
-                list.Reverse();
-
-                return new HashSet<TSource>(list, comparer);
+                // HashSet is not guaranteed to be ordered, ignoring reverse
+                return new HashSet<TSource>(_source, comparer);
             }
 
             public int GetCount(bool onlyIfCheap)

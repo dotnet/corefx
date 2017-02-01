@@ -118,6 +118,11 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
+                if (Utilities.AreEqualityComparersEqual(comparer, _comparer))
+                {
+                    return new HashSet<TSource>(_source, comparer);
+                }
+
                 return FillSet().ToHashSet(comparer);
             }
 

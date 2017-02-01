@@ -197,7 +197,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                var hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 foreach (TSource item in _source)
                 {
@@ -318,7 +318,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                var hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 foreach (TSource item in _source)
                 {
@@ -449,7 +449,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                var hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 for (int i = 0; i < _source.Count; i++)
                 {
@@ -580,7 +580,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                var hashSet = new HashSet<TResult>(comparer);
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
 
                 foreach (TSource item in _source)
                 {
@@ -714,7 +714,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                var hashSet = new HashSet<TResult>(comparer);
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
 
                 for (int i = 0; i < _source.Count; i++)
                 {
@@ -858,7 +858,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                var hashSet = new HashSet<TResult>(comparer);
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
 
                 foreach (TSource item in _source)
                 {

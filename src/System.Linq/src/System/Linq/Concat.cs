@@ -523,10 +523,9 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                int count = GetCount(onlyIfCheap: true);
-                var hashSet = count != -1 ? new HashSet<TSource>(count, comparer) : new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(GetEnumerable(0), comparer);
 
-                for (int i = 0; ; i++)
+                for (int i = 1; ; i++)
                 {
                     IEnumerable<TSource> source = GetEnumerable(i);
 
@@ -535,10 +534,7 @@ namespace System.Linq
                         break;
                     }
 
-                    foreach (var item in source)
-                    {
-                        hashSet.Add(item);
-                    }
+                    hashSet.UnionWith(source);
                 }
 
                 return hashSet;

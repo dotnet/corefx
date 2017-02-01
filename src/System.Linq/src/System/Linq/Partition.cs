@@ -29,6 +29,7 @@ namespace System.Linq
         /// <summary>
         /// Produce a <see cref="HashSet{TElement}"/> of the sequence through an optimized path.
         /// </summary>
+        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{T}"/>.</param>
         /// <returns>The <see cref="HashSet{TElement}"/>.</returns>
         HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer);
 
@@ -150,7 +151,7 @@ namespace System.Linq
 
         public List<TElement> ToList() => new List<TElement>();
 		
-        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>();
+        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>(comparer);
 
         public int GetCount(bool onlyIfCheap) => 0;
     }
@@ -228,7 +229,7 @@ namespace System.Linq
 
         public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
         {
-            return _source.ToHashSet(_minIndexInclusive, _maxIndexInclusive, comparer);
+            return _source.ToHashSet(comparer);
         }
 
         public int GetCount(bool onlyIfCheap)
@@ -386,13 +387,13 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
                 int count = Count;
+
                 if (count == 0)
                 {
-                    return new HashSet<TSource>(comparer);
+                    return hashSet;
                 }
-
-                HashSet<TSource> hashSet = new HashSet<TSource>(count, comparer);
 
                 int end = _minIndexInclusive + count;
 
@@ -711,7 +712,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                var hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
 
                 using (IEnumerator<TSource> en = _source.GetEnumerator())
                 {

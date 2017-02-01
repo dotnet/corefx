@@ -71,56 +71,7 @@ namespace System.Linq
             return list;
         }
 
-        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
-        {
-            Buffer<TElement> buffer = new Buffer<TElement>(_source);
-            int count = buffer._count;
-            HashSet<TElement> hashSet = new HashSet<TElement>(count, comparer);
-            if (count > 0)
-            {
-                int[] map = SortedMap(buffer);
-                for (int i = 0; i != count; i++)
-                {
-                    hashSet.Add(buffer._items[map[i]]);
-                }
-            }
-
-            return hashSet;
-        }
-
-        public HashSet<TElement> ToHashSet(int minIdx, int maxIdx, IEqualityComparer<TElement> comparer)
-        {
-            Buffer<TElement> buffer = new Buffer<TElement>(_source);
-
-            int count = buffer._count;
-
-            if (count <= minIdx)
-            {
-                return new HashSet<TElement>(comparer);
-            }
-
-            if (count <= maxIdx)
-            {
-                maxIdx = count - 1;
-            }
-
-            if (minIdx == maxIdx)
-            {
-                return new HashSet<TElement>(1, comparer) { GetEnumerableSorter().ElementAt(buffer._items, count, minIdx) };
-            }
-
-            int[] map = SortedMap(buffer, minIdx, maxIdx);
-
-            HashSet<TElement> list = new HashSet<TElement>(maxIdx - minIdx + 1, comparer);
-
-            while (minIdx <= maxIdx)
-            {
-                list.Add(buffer._items[map[minIdx]]);
-                ++minIdx;
-            }
-
-            return list;
-        }
+        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>(_source, comparer);
 
         public int GetCount(bool onlyIfCheap)
         {

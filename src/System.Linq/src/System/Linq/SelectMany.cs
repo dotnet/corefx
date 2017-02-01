@@ -277,10 +277,7 @@ namespace System.Linq
 
                 foreach (TSource element in _source)
                 {
-                    foreach (var item in _selector(element))
-                    {
-                        hashSet.Add(item);
-                    }
+                    hashSet.UnionWith(_selector(element));
                 }
 
                 return hashSet;
