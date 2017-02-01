@@ -7,7 +7,7 @@ Guidelines
 ----------
 1. Avoid StringBuilder
 2. Use `ExactSpelling` where possible
-3. Don't use `SetLastError` where not appropriate
+3. Only use `SetLastError` where appropriate
 4. Be careful of `BOOL` vs `BOOLEAN`
 5. Watch for buffer size for output strings (null/no null)
 
@@ -30,7 +30,7 @@ Attributes
 | [`PreserveSig`][2]   | keep default       | When this is explicitly set to false (the default is true), failed HRESULT return values will be turned into Exceptions (and the return value in the definition becomes null as a result).|
 | [`SetLastError`][3]  | as per API         | Set this to true (default is false) if the API uses GetLastError and use Marshal.GetLastWin32Error to get the value. If the API sets a condition that says it has an error, get the error before making other calls to avoid inadvertently having it overwritten.|
 | [`ExactSpelling`][4] | `true`             | Set this to true (deafult is false) and gain a slight perf benefit as the framework will avoid looking for an "A" or "W" version. (See NDirectMethodDesc::FindEntryPoint).|
-| [`CharSet`][5]       | `CharSet.Unicode` if strings present in signature | This specifies marshalling behavior of strings and what `ExactSpelling` does when `false`. Be explicit with this one as the documented default is `CharSet.Ansi`.|
+| [`CharSet`][5]       | Explicitly  use `CharSet.Unicode` or `CharSet.Ansi` when strings are present in the definition | This specifies marshalling behavior of strings and what `ExactSpelling` does when `false`. Be explicit with this one as the documented default is `CharSet.Ansi`. Note that `CharSet.Ansi` is actually UTF8 on Unix (`CharSet.Utf8` is coming). _Most_ of the time Windows uses Unicode while Unix uses UTF8. |
 
 [1]: https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.dllimportattribute.aspx "MSDN"
 [2]: https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.dllimportattribute.preservesig.aspx "MSDN"
@@ -41,8 +41,7 @@ Attributes
 Strings
 -------
 
-When the CharSet is Unicode or the argument is explicitly marked as `[MarshalAs(UnmanagedType.LPWSTR)]` _and_ the string is
-is passed by value (not `ref` or `out`) the string will be be pinned and used directly by native code (rather than copied).
+When the CharSet is Unicode or the argument is explicitly marked as `[MarshalAs(UnmanagedType.LPWSTR)]` _and_ the string is passed by value (not `ref` or `out`) the string will be be pinned and used directly by native code (rather than copied).
 
 Remember to mark the `[DllImport]` as `Charset.Unicode` unless you explicitly want ANSI treatment of your strings.
 
@@ -85,7 +84,7 @@ as `UnmanagedType.BSTR`.
 Booleans
 --------
 
-Booleans are easy to mess up. The default marshalling for P/Invoke is as the Windows type `BOOL`, where it is a 4 byte value. `BOOLEAN`, however, is a *single* byte. This can lead to hard to track down bugs as half the return value will be discarded, which will only *potentially* change the result. You need to use `[MarshalAs(UnmanagedType.U1)]` or `[MarshalAs(UnmanagedType.I1)]` either should work as `TRUE` is defined as `1` and `FALSE` is defined as `0`. `U1` is technically more correct as it is defined as an `unsigned char`.
+Booleans are easy to mess up. The default marshalling for P/Invoke is as the Windows type `BOOL`, where it is a 4 byte value. `BOOLEAN`, however, is a *single* byte. This can lead to hard to track down bugs as half the return value will be discarded, which will only *potentially* change the result. For `BOOLEAN` attributing `bool` with either `[MarshalAs(UnmanagedType.U1)]` or `[MarshalAs(UnmanagedType.I1)]` will work as `TRUE` is defined as `1` and `FALSE` is defined as `0`. `U1` is technically more correct as `BOOLEAN` is defined as an `unsigned char`.
 
 For COM (`VARIANT_BOOL`) the type is `2` bytes where true is `-1` and false is `0`. Marshalling uses this by default for bool in COM calls (`UnmanagedType.VariantBool`).
 
@@ -187,7 +186,7 @@ Keeping Managed Objects Alive
 -----------------------------
 `GC.KeepAlive()` will ensure an object stays in scope until the KeepAlive method is hit.
 
-[`HandleRef`][6] allows the marshaller to keep an object alive for the duration of a P/Invoke. It can be used instead of `IntPtr` in method signatures.
+[`HandleRef`][6] allows the marshaller to keep an object alive for the duration of a P/Invoke. It can be used instead of `IntPtr` in method signatures. `SafeHandle` effectively replaces this class and should be used instead.
 
 [6]: https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.handleref.aspx "MSDN"
 
