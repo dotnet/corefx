@@ -10,6 +10,8 @@ Guidelines
 3. Only use `SetLastError` where appropriate
 4. Be careful of `BOOL` vs `BOOLEAN`
 5. Watch for buffer size for output strings (null/no null)
+6. Do not create your own buffer cache, use `ArrayPool`
+7. Use blittable types in struct definitions where possible
 
 Attributes
 ----------
@@ -56,8 +58,7 @@ scenario of calling a Windows API that takes a string:
 3. `ToString()` allocates yet another managed array **{4}**
 
 That is *{4}* allocations to get a string out of native code. The best you can do to limit this is to reuse the `StringBuilder`
-in another call but this still only saves *1* allocation. It is much better to use and cache a native buffer- you can then
-get down to just the allocation for the `ToString()` on subsequent calls.
+in another call but this still only saves *1* allocation. It is much better to use and cache a character buffer from `ArrayPool`- you can then get down to just the allocation for the `ToString()` on subsequent calls. 
 
 The other issue with `StringBuilder` is that it always copies the return buffer back up to the first null. If the passed back string isn't terminated or is a double-null-terminated string your P/Invoke is incorrect at best.
 
@@ -86,14 +87,14 @@ Booleans
 
 Booleans are easy to mess up. The default marshalling for P/Invoke is as the Windows type `BOOL`, where it is a 4 byte value. `BOOLEAN`, however, is a *single* byte. This can lead to hard to track down bugs as half the return value will be discarded, which will only *potentially* change the result. For `BOOLEAN` attributing `bool` with either `[MarshalAs(UnmanagedType.U1)]` or `[MarshalAs(UnmanagedType.I1)]` will work as `TRUE` is defined as `1` and `FALSE` is defined as `0`. `U1` is technically more correct as `BOOLEAN` is defined as an `unsigned char`.
 
-For COM (`VARIANT_BOOL`) the type is `2` bytes where true is `-1` and false is `0`. Marshalling uses this by default for bool in COM calls (`UnmanagedType.VariantBool`).
+`bool` is not a blittable type (see blitting below). As such, when defining structs it is recommended to use `Interop.BOOL.cs` for `BOOL` to get the best performance.
 
 [Default Marshalling for Boolean Types](https://msdn.microsoft.com/en-us/library/t2t3725f.aspx "MSDN")  
 
 Guids
 -----
 
-Guids are usable directly in signatures. When passed by ref, however, they should *not* be marked as `out` or `ref`. Instead the parameter should get the `[MarshalAs(UnmanagedType.LPStruct)]` attribute.
+Guids are usable directly in signatures. When passed by ref they can either be passed by `ref` or with the `[MarshalAs(UnmanagedType.LPStruct)]` attribute.
 
 | Guid | By ref Guid |
 |------|-------------|
@@ -144,7 +145,7 @@ Common Windows Data Types
 
 Blittable Types
 ---------------
-Blittable types are types that have the same representation for native code. As such they do not need to be converted to another format to be marshalled to and from native code.
+Blittable types are types that have the same representation for native code. As such they do not need to be converted to another format to be marshalled to and from native code, and as this improves performance they should be preferred.
 
 **Blittable types:**
 
@@ -209,23 +210,21 @@ SomeNativeEnumerator(callbackDelegate, GCHandle.ToIntPtr(handle));
 // In the callback
 GCHandle handle = GCHandle.FromIntPtr(param);
 object managedObject = handle.Target;
+
+// After the last callback
+handle.Free();
 ```
+
+Don't forget that `GCHandle` needs to be explicitly freed to avoid memory leaks. 
 
 Structs
 -------
 
-Managed structs are created on the stack and aren't removed until the method returns. By definition then, they are "pinned" (it won't get moved by the GC). You can also simply take the address in unsafe code blocks if native code won't use the pointer past the end of the current method. 
+Managed structs are created on the stack and aren't removed until the method returns. By definition then, they are "pinned" (it won't get moved by the GC). You can also simply take the address in unsafe code blocks if native code won't use the pointer past the end of the current method.
 
-Class fields in structs are marshalled as pointers (`IntPtr`) _unless_ the class has explicit layout, in which case the class fields are embedded in the marshalling buffer. For example:
+Blittable structs are much more performant as they they can simply be used directly by the marshalling layer. Try to make structs blittable (for example, avoid `bool`). See the "Blittable Types" section above for more details.
 
-``` C#
-public struct MyStruct
-{
-    public class MyClass;
-}
-```
-
-`Marshal.SizeOf<MyStruct>()` will return `sizeof(IntPtr)` unless `MyClass` has explicit layout (via `[StructLayout]`). If `MyClass` has explicit layout `Marshal.SizeOf<MyStruct>()` will return `Marshal.SizeOf<MyClass>()` in this case (as `MyStruct` has no other fields).
+*If* the struct is blittable use `sizeof()` instead of `Marshal.SizeOf<MyStruct>()` for better performance. As mentioned above, you can validate that the type is blittable by attempting to create a pinned `GCHandle`. If the type is not a string or considered blittable `GCHandle.Alloc` will throw an `ArgumentException`.
 
 Pointers to structs in definitions must either be passed by `ref` or use `unsafe` and `*`.
 
