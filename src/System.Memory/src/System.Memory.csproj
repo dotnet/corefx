@@ -16,7 +16,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Pinnable.cs" />
-    <Compile Include="System\ReadOnlySpanExtensions.cs" />
     <Compile Include="System\SpanExtensions.cs" />
     <Compile Include="System\SpanHelpers.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
@@ -24,14 +23,10 @@
     <Compile Include="System\SpanHelpers.char.cs" />
     <Compile Include="System\SpanHelpers.Clear.cs" />
     <Compile Include="System\ThrowHelper.cs" />
-    <Compile Include="System\ReadOnlySpanExtensions.netcoreapp.cs" />
-    <Compile Include="System\SpanExtensions.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\ReadOnlySpan.cs" />
     <Compile Include="System\Span.cs" />
-    <Compile Include="System\ReadOnlySpanExtensions.netstandard.cs" />
-    <Compile Include="System\SpanExtensions.netstandard.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <ProjectReference Include="..\..\System.Runtime.CompilerServices.Unsafe\src\System.Runtime.CompilerServices.Unsafe.ilproj" />
