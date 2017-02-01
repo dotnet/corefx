@@ -177,7 +177,6 @@ namespace System.Linq
             return d;
         }
 
-#if netcoreapp11
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) => source.ToHashSet(null);
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
@@ -191,6 +190,5 @@ namespace System.Linq
             IIListProvider<TSource> listProvider = source as IIListProvider<TSource>;
             return listProvider != null ? listProvider.ToHashSet(comparer) : new HashSet<TSource>(source, comparer);
         }
-#endif
     }
 }
