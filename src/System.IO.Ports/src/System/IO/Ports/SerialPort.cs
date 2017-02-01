@@ -242,12 +242,10 @@ namespace System.IO.Ports
                     throw new ArgumentNullException(nameof(Encoding));
 
                 // Limit the encodings we support to some known ones.  The code pages < 50000 represent all of the single-byte
-                // and double-byte code pages.  Code page 54936 is GB18030.  Finally we check that the encoding's assembly
-                // is mscorlib, so we don't get any weird user encodings that happen to set a code page less than 50000. 
+                // and double-byte code pages.  Code page 54936 is GB18030.
                 if (!(value is ASCIIEncoding || value is UTF8Encoding || value is UnicodeEncoding || value is UTF32Encoding ||
-                      ((value.CodePage < 50000 || value.CodePage == 54936) && value.GetType().Assembly == typeof(String).Assembly)))
+                      value.CodePage < 50000 || value.CodePage == 54936))
                 {
-
                     throw new ArgumentException(string.Format(SR.NotSupportedEncoding, value.WebName), nameof(Encoding));
                 }
 
