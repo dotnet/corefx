@@ -8,7 +8,7 @@ this experience. Make sure to consult this document often.
 
 ## Install prerequisites
 
-1. Install .NET Core SDK 2.0.0-alpha
+1. Install the latest nightly .NET Core SDK 2.0
     - [Win 64-bit Latest](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.exe)
     - [macOS 64-bit Latest](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg)
     - [Others](https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries)
