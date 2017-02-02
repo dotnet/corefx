@@ -337,7 +337,7 @@
     <Compile Include="MockContent.cs" />
     <Compile Include="StreamToStreamCopyTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="..\..\src\Internal\ICloneable.cs">
       <Link>ProductionCode\Internal\ICloneable.cs</Link>
     </Compile>

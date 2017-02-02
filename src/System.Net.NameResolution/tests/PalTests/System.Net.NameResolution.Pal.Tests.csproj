@@ -65,7 +65,8 @@
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
     <!-- Common -->
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" Condition="'$(TargetGroup)' != 'netstandard'">
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" 
+                      Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <!-- System.Net.Internals -->
