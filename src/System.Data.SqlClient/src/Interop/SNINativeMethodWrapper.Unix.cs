@@ -20,6 +20,14 @@ namespace System.Data.SqlClient
             // max error code value
             MaxErrorValue = SNICommon.MaxErrorValue
         }
+
+        internal static int SniMaxComposedSpnLength
+        {
+            get
+            {
+                return 1290;
+            }
+        }
     }
 }
 
