@@ -18,18 +18,18 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>e04a8c7d7012055d5d8d2f06d1e1bd3cc5f0d98f</CoreFxCurrentRef>
-    <CoreClrCurrentRef>e579a68a11197468f88aedccc46df7bca97db0f3</CoreClrCurrentRef>
-    <ExternalCurrentRef>4e2952b5114bfa90cc45eef908204006a771a62b</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>e579a68a11197468f88aedccc46df7bca97db0f3</ProjectNTfsCurrentRef>
+    <CoreClrCurrentRef>e61a2eaecad04acea728883fa725375a1c0e8418</CoreClrCurrentRef>
+    <ExternalCurrentRef>e61a2eaecad04acea728883fa725375a1c0e8418</ExternalCurrentRef>
+    <ProjectNTfsCurrentRef>e61a2eaecad04acea728883fa725375a1c0e8418</ProjectNTfsCurrentRef>
     <SniCurrentRef>99a2e18954382a654e66aed649af70c1c61a47c3</SniCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <CoreFxExpectedPrerelease>beta-25001-02</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>beta-25002-01</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>beta-24727-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25001-00</ProjectNTfsExpectedPrerelease>
+    <CoreClrExpectedPrerelease>beta-25002-03</CoreClrExpectedPrerelease>
+    <ExternalExpectedPrerelease>beta-25002-00</ExternalExpectedPrerelease>
+    <ProjectNTfsExpectedPrerelease>beta-25002-00</ProjectNTfsExpectedPrerelease>
     <StandardExpectedPrerelease>beta-24928-01</StandardExpectedPrerelease>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0-beta-24926-02</SniPackageVersion>
