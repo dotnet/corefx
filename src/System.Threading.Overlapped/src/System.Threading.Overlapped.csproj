@@ -5,8 +5,7 @@
     <AssemblyName>System.Threading.Overlapped</AssemblyName>
     <ProjectGuid>{6A07CCB8-3E59-47e7-B3DD-DB1F6FC501D5}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetsWindows)' == 'true'">true</IsPartialFacadeAssembly>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Windows_NT-Debug|AnyCPU'" />
@@ -21,9 +20,6 @@
     <Compile Include="System\Threading\DeferredDisposableLifetime.cs" />
     <Compile Include="$(CommonPath)\System\HResults.cs">
       <Link>Common\System\HResults.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\NotImplemented.cs</Link>
     </Compile>
     <Compile Include="System\Threading\ClrThreadPoolBoundHandle.cs" />
     <Compile Include="System\Threading\ClrThreadPoolBoundHandleOverlapped.cs" />
