@@ -38,8 +38,8 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <ProjectReference Include="..\..\System.Runtime.CompilerServices.Unsafe\src\System.Runtime.CompilerServices.Unsafe.ilproj" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
-    <ReferenceFromRuntime Include="System.Runtime" />
-    <ReferenceFromRuntime Include="System.Diagnostics.Debug" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
