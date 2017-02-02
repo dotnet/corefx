@@ -3,16 +3,6 @@ P/Invokes
 
 This document extends the [Interop Guidelines](interop-guidelines.md) to provide more specific guidelines, notes, and resources for defining P/Invokes.
 
-Guidelines
-----------
-1. Avoid StringBuilder
-2. Use `ExactSpelling` where possible
-3. Only use `SetLastError` where appropriate
-4. Be careful of `BOOL` vs `BOOLEAN`
-5. Watch for buffer size for output strings (null/no null)
-6. Do not create your own buffer cache, use `ArrayPool`
-7. Use blittable types in struct definitions where possible
-
 Attributes
 ----------
 
@@ -102,8 +92,8 @@ Guids are usable directly in signatures. When passed by ref they can either be p
 
 `[MarshalAs(UnmanagedType.LPStruct)]` should _only_ be used for by ref Guids.
 
-Common Windows Data Types
--------------------------
+Common Data Types
+-----------------
 
 
 |Windows        | C                 | C#    | Alternative |
