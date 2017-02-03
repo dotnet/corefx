@@ -31,6 +31,13 @@ namespace System.Data.SqlClient.SNI
         private const string NonWindowsSspiPackage = "Kerberos";
         private const string SqlServerSpnHeader = "MSSQLSvc";
 
+        internal class SspiClientContextResult
+        {
+            internal const uint OK = 0;
+            internal const uint Failed = 1;
+            internal const uint KerberosTicketMissing = 2;
+        }
+
         public static readonly SNIProxy Singleton = new SNIProxy();
 
         /// <summary>
@@ -82,8 +89,6 @@ namespace System.Data.SqlClient.SNI
             handle.DisableSsl();
             return TdsEnums.SNI_SUCCESS;
         }
-
-        public enum SspiClientContextResult { OK, Failed, KerberosTicketMissing };
 
         /// <summary>
         /// Generate SSPI context
@@ -141,15 +146,15 @@ namespace System.Data.SqlClient.SNI
             tcpHandle.SecurityContext = securityContext;
             tcpHandle.ContextFlags = contextFlags;
 
-            uint result = (uint)SspiClientContextResult.OK;
+            uint result = SspiClientContextResult.OK;
             if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
                 statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException)) // when Kerberos ticket is missing
             {
-                result = (uint)SspiClientContextResult.KerberosTicketMissing;    
+                result = SspiClientContextResult.KerberosTicketMissing;    
             }
             else if (IsErrorStatus(statusCode.ErrorCode))
             {
-                result = (uint)SspiClientContextResult.Failed;
+                result = SspiClientContextResult.Failed;
             }
 
             return result;
