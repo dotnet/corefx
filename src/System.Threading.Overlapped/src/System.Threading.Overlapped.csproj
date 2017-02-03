@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetsWindows)' == 'true'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true'">true</GeneratePlatformNotSupportedAssembly>
-    <GenFacadesArgs Condition="'$(TargetGroup)'=='uapaot'">$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -38,6 +38,9 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Handles" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
