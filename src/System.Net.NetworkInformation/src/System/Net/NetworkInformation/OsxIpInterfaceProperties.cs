@@ -49,7 +49,7 @@ namespace System.Net.NetworkInformation
                 (gatewayAddressInfo) =>
                 {
                     byte[] ipBytes = new byte[gatewayAddressInfo->NumAddressBytes];
-                    fixed (byte* ipArrayPtr = &ipBytes[0])
+                    fixed (byte* ipArrayPtr = ipBytes)
                     {
                         Buffer.MemoryCopy(gatewayAddressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
                     }

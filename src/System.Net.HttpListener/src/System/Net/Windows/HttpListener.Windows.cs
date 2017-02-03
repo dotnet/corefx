@@ -2006,7 +2006,7 @@ namespace System.Net
             // is >128 we will get ERROR_MORE_DATA and call again
             int size = s_requestChannelBindStatusSize + 128;
 
-            Debug.Assert(size >= 0);
+            Debug.Assert(size > 0);
 
             byte[] blob = null;
             Interop.HttpApi.SafeLocalFreeChannelBinding token = null;

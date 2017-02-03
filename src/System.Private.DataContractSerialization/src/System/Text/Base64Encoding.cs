@@ -23,7 +23,8 @@ namespace System.Text
             /* 112-127 */   41,   42,   43,   44,   45,   46,   47,   48,   49,   50,   51, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         };
 
-        private static readonly string s_val2char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        private const string Val2Char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        
         private static readonly byte[] s_val2byte = new byte[]
         {
             (byte)'A',(byte)'B',(byte)'C',(byte)'D',(byte)'E',(byte)'F',(byte)'G',(byte)'H',(byte)'I',(byte)'J',(byte)'K',(byte)'L',(byte)'M',(byte)'N',(byte)'O',(byte)'P',
@@ -303,7 +304,7 @@ namespace System.Text
 
             if (byteCount > 0)
             {
-                fixed (char* _val2char = s_val2char)
+                fixed (char* _val2char = Val2Char)
                 {
                     fixed (byte* _bytes = &bytes[byteIndex])
                     {

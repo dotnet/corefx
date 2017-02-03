@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
                 TcpState state = nativeInfo.State;
 
                 byte[] localBytes = new byte[nativeInfo.LocalEndPoint.NumAddressBytes];
-                fixed (byte* localBytesPtr = &localBytes[0])
+                fixed (byte* localBytesPtr = localBytes)
                 {
                     Buffer.MemoryCopy(nativeInfo.LocalEndPoint.AddressBytes, localBytesPtr, localBytes.Length, localBytes.Length);
                 }

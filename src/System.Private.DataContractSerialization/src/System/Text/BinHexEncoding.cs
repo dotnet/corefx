@@ -29,7 +29,7 @@ namespace System.Text
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         };
 
-        private static readonly string s_val2char = "0123456789ABCDEF";
+        private const string Val2Char = "0123456789ABCDEF";
 
         public override int GetMaxByteCount(int charCount)
         {
@@ -138,7 +138,7 @@ namespace System.Text
                 throw new ArgumentException(SR.XmlArrayTooSmall, nameof(chars));
             if (byteCount > 0)
             {
-                fixed (char* _val2char = s_val2char)
+                fixed (char* _val2char = Val2Char)
                 {
                     fixed (byte* _bytes = &bytes[byteIndex])
                     {

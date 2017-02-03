@@ -134,8 +134,7 @@ namespace System.IO.Compression
 
         private unsafe ZErrorCode ReadDeflateOutput(byte[] outputBuffer, ZFlushCode flushCode, out int bytesRead)
         {
-            Debug.Assert(null != outputBuffer, "Can't pass in a null output buffer!");
-            Debug.Assert(outputBuffer.Length > 0, "Can't pass in an empty output buffer!");
+            Debug.Assert(outputBuffer?.Length > 0);
         
             lock (SyncLock)
             {

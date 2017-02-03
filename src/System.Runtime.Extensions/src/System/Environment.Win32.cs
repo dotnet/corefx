@@ -288,7 +288,7 @@ namespace System
                 // Allocate that much space
                 Debug.Assert(len > 0);
                 var buffer = new byte[len];
-                fixed (byte* bufferPtr = &buffer[0])
+                fixed (byte* bufferPtr = buffer)
                 {
                     // Call GetLogicalProcessorInformationEx with the allocated buffer
                     if (Interop.Kernel32.GetLogicalProcessorInformationEx(Interop.Kernel32.LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup, (IntPtr)bufferPtr, ref len))
