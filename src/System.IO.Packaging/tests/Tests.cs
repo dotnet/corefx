@@ -20,6 +20,8 @@ namespace System.IO.Packaging.Tests
         private const string Mime_MediaTypeNames_Image_Jpeg = "image/jpeg"; // System.Net.Mime.MediaTypeNames.Image.Jpeg
         private const string s_DocumentXml = @"<Hello>Test</Hello>";
         private const string s_ResourceXml = @"<Resource>Test</Resource>";
+        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly string s_LocalFile = s_IsWindowsSystem ? @"c:/resources/image1.jpg" : "/resources/image1.jpg";
 
         private static FileInfo GetFileSavedWithGuidName(string test, string name)
         {
@@ -2094,7 +2096,7 @@ namespace System.IO.Packaging.Tests
                                                TargetMode.Internal,
                                                packageRelationshipType);
 
-                    Uri uri = new Uri(@"c:/resources/image1.jpg", UriKind.Absolute);
+                    Uri uri = new Uri(s_LocalFile, UriKind.Absolute);
 
                     // Internal relationships cannot use absolute Uris
                     Assert.Throws<ArgumentException>(() => packagePartDocument.CreateRelationship(uri,
@@ -2267,7 +2269,7 @@ namespace System.IO.Packaging.Tests
 
                 // Add external relationship
                 packagePartDocument.CreateRelationship(
-                                        new Uri(@"c:/resources/image1.jpg",
+                                        new Uri(s_LocalFile,
                                         UriKind.Absolute),
                                         TargetMode.External,
                                         ResourceRelationshipType);
