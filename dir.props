@@ -257,6 +257,8 @@
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(BinDir)netcoreapp\pkg\ref</NETCoreAppPackageRefPath>
     <NETCoreAppPackageRuntimePath>$(BinDir)netcoreapp\pkg\lib</NETCoreAppPackageRuntimePath>
+    <UAPPackageRefPath>$(BinDir)uap\pkg\ref</UAPPackageRefPath>
+    <UAPPackageRuntimePath>$(BinDir)uap\pkg\lib</UAPPackageRuntimePath>
 
     <!-- Constructed shared fx path for testing -->
     <TestSharedFxDir>$(ToolsDir)testdotnetcli</TestSharedFxDir>

@@ -25,5 +25,11 @@
     <FileToExclude Include="System.EnterpriseServices.Thunk" />
     <FileToExclude Include="System.EnterpriseServices.Wrapper" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uap' or '$(TargetGroup)'=='uapaot'">
+    <TargetingPackReference Include="System.ComponentModel.DataAnnotations" />
+    <TargetingPackReference Include="System.Net" />
+    <TargetingPackReference Include="System.Windows" />
+    <TargetingPackReference Include="System.Xml.Serialization" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
