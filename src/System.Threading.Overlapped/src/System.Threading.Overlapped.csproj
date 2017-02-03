@@ -43,5 +43,8 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Handles" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
