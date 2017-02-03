@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace System.IO
 {
-    public static class Path
+    internal static class Path
     {
         internal static char[] GetInvalidFileNameChars() => new char[]
         {
