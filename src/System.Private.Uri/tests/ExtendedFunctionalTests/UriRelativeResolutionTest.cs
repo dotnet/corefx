@@ -140,8 +140,10 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Uri_Relative_BaseVsFileLikeUri_MissingRootSlash_ThrowsUriFormatException()
         {
+            // A Dos path must be rooted
             Assert.ThrowsAny<FormatException>(() =>
           {
               string partialPath = "g:a";
