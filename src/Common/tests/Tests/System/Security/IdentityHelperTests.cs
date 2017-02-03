@@ -36,11 +36,21 @@ namespace Tests.System.Security
         }
 
         [Fact]
-        public void GetNormalizedUrlHash()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetNormalizedUrlHash_Windows()
         {
             // Validating that we match the exact hash the desktop IsolatedStorage implementation would create.
             Uri uri = new Uri(@"file://C:/Users/jerem/Documents/Visual Studio 2015/Projects/LongPath/LongPath/bin/Debug/TestAssembly.EXE");
             Assert.Equal(@"qgeirsoc3cznuklvq5xlalurh1m0unxl", IdentityHelper.GetNormalizedUriHash(uri));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void GetNormalizedUrlHash_Unix()
+        {
+            // Validating that we match the exact hash the desktop IsolatedStorage implementation would create.
+            Uri uri = new Uri(@"file:///Users/jerem/Documents/Visual Studio 2015/Projects/LongPath/LongPath/bin/Debug/TestAssembly.EXE");
+            Assert.Equal(@"yevxadxqtoj3aempkxn2egd2syb3gsge", IdentityHelper.GetNormalizedUriHash(uri));
         }
 
         private static AssemblyName GetAssemblyNameWithFullKey()
