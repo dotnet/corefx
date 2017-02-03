@@ -1225,6 +1225,107 @@ namespace System.Tests
 #endif
         }
 
+#if netcoreapp11
+        [Fact]
+#endif
+        public static void ValueTupleSerialization()
+        {
+            VerifySerialization(new ValueTuple(),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTuple xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+
+            VerifySerialization(ValueTuple.Create(1),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+</ValueTupleOfInt32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+</ValueTupleOfInt32Int32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2, 3),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+</ValueTupleOfInt32Int32Int32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2, 3, 4),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+  <Item4>4</Item4>
+</ValueTupleOfInt32Int32Int32Int32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2, 3, 4, 5),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32Int32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+  <Item4>4</Item4>
+  <Item5>5</Item5>
+</ValueTupleOfInt32Int32Int32Int32Int32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2, 3, 4, 5, 6),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32Int32Int32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+  <Item4>4</Item4>
+  <Item5>5</Item5>
+  <Item6>6</Item6>
+</ValueTupleOfInt32Int32Int32Int32Int32Int32>");
+
+            VerifySerialization(ValueTuple.Create(1, 2, 3, 4, 5, 6, 7),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32Int32Int32Int32Int32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+  <Item4>4</Item4>
+  <Item5>5</Item5>
+  <Item6>6</Item6>
+  <Item7>7</Item7>
+</ValueTupleOfInt32Int32Int32Int32Int32Int32Int32>");
+
+            VerifySerialization(CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8)),
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ValueTupleOfInt32Int32Int32Int32Int32Int32Int32ValueTupleOfInt32 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Item1>1</Item1>
+  <Item2>2</Item2>
+  <Item3>3</Item3>
+  <Item4>4</Item4>
+  <Item5>5</Item5>
+  <Item6>6</Item6>
+  <Item7>7</Item7>
+  <Rest>
+    <Item1>8</Item1>
+  </Rest>
+</ValueTupleOfInt32Int32Int32Int32Int32Int32Int32ValueTupleOfInt32>");
+        }
+
+        public static void VerifySerialization<T>(T tuple, string expected)
+        {
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
+            var writer = new System.IO.StringWriter();
+            serializer.Serialize(writer, tuple);
+            string xml = writer.ToString();
+
+            Assert.Equal(expected, xml);
+
+            object output = serializer.Deserialize(new System.IO.StringReader(xml));
+            Assert.True(tuple.Equals(output));
+        }
+
         private class TestClass : IComparable
         {
             private readonly int _value;
