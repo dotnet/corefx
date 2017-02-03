@@ -6329,9 +6329,9 @@ namespace System.Data.SqlClient
             // we need to respond to the server's message with SSPI data
 #if MANAGED_SNI
             uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj.Handle, receivedBuff, ref sendBuff, _sniSpnBuffer);
-            if (clientContextResult != SNIProxy.SspiClientContextResult.OK)
+            if (clientContextResult != (uint)SNIProxy.SspiClientContextResult.OK)
             {
-                string errorMessage = clientContextResult == SNIProxy.SspiClientContextResult.KerberosTicketMissing ?
+                string errorMessage = clientContextResult == (uint)SNIProxy.SspiClientContextResult.KerberosTicketMissing ?
                                         SR.kerberos_ticket_missing : SQLMessage.SSPIGenerateError();
                 SSPIError(errorMessage, TdsEnums.GEN_CLIENT_CONTEXT);
             }

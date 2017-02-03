@@ -141,15 +141,15 @@ namespace System.Data.SqlClient.SNI
             tcpHandle.SecurityContext = securityContext;
             tcpHandle.ContextFlags = contextFlags;
 
-            uint result = SspiClientContextResult.OK;
+            uint result = (uint)SspiClientContextResult.OK;
             if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
                 statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException)) // when Kerberos ticket is missing
             {
-                result = SspiClientContextResult.KerberosTicketMissing;    
+                result = (uint)SspiClientContextResult.KerberosTicketMissing;    
             }
             else if (IsErrorStatus(statusCode.ErrorCode))
             {
-                result = SspiClientContextResult.Failed;
+                result = (uint)SspiClientContextResult.Failed;
             }
 
             return result;
@@ -416,7 +416,7 @@ namespace System.Data.SqlClient.SNI
                 try
                 {
                     fqdnHostName = GetFullyQualifiedDomainName(hostName);
-                    spnBuffer = GetMsSqlServerSPN(fqdnHostName, port);
+                    spnBuffer = MakeSqlServerSPN(fqdnHostName, port);
                 }
                 catch(Exception e)
                 {
