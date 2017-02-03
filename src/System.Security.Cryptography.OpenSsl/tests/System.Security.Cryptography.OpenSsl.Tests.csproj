@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{A05C2EF2-A986-448C-9C63-735CC17409AA}</ProjectGuid>
+    <ProjectGuid>{E1DAF7B9-BECB-4D25-AABB-C9E0BC73C690}</ProjectGuid>
     <UnsupportedPlatforms>Windows_NT</UnsupportedPlatforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
