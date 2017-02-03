@@ -29,6 +29,7 @@ namespace System.Data.SqlClient.SNI
         private const string DefaultHostName = "localhost";
         private const string DefaultSqlServerInstanceName = "MSSQLSERVER";
         private const string NonWindowsSspiPackage = "Kerberos";
+        private const string SqlServerSpnHeader = "MSSQLSvc";
 
         public static readonly SNIProxy Singleton = new SNIProxy();
 
@@ -81,6 +82,8 @@ namespace System.Data.SqlClient.SNI
             handle.DisableSsl();
             return TdsEnums.SNI_SUCCESS;
         }
+
+        public enum SspiClientContextResult { OK, Failed, KerberosTicketMissing };
 
         /// <summary>
         /// Generate SSPI context
@@ -139,15 +142,15 @@ namespace System.Data.SqlClient.SNI
             tcpHandle.SecurityContext = securityContext;
             tcpHandle.ContextFlags = contextFlags;
 
-            uint result = 0;
+            uint result = SspiClientContextResult.OK;
             if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
                 statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException)) // when Kerberos ticket is missing
             {
-                result = 2;    
+                result = SspiClientContextResult.KerberosTicketMissing;    
             }
             else if (IsErrorStatus(statusCode.ErrorCode))
             {
-                result = 1;
+                result = SspiClientContextResult.Failed;
             }
 
             return result;
@@ -322,9 +325,9 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        private byte[] GetMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
+        private byte[] MakeSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
         {
-            string serverSpn = "MSSQLSvc/" + fullyQualifiedDomainName + ":" + port;
+            string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + port;
             return Encoding.ASCII.GetBytes(serverSpn);
         }
 
@@ -348,73 +351,90 @@ namespace System.Data.SqlClient.SNI
             // tcp:<host name>\<instance name>
             // tcp:<host name>,<TCP/IP port number>
 
-            string fqdnHostName = null; ;
+            string hostName = null; ;
             int port = -1;
             Exception exception = null;
 
             if (string.IsNullOrWhiteSpace(fullServerName)) // when fullServerName is empty
             {
-                fqdnHostName = GetFullyQualifiedDomainName(DefaultHostName);
-                port = DefaultSqlServerPort;
-                spnBuffer = GetMsSqlServerSPN(fqdnHostName, port);
-                return new SNITCPHandle(fqdnHostName, port, timerExpire, callbackObject, parallel);
-            }
-
-            string[] serverNamePartsByComma = fullServerName.Split(CommaSeparator);
-            string[] serverNamePartsByBackSlash = fullServerName.Split(BackSlashSeparator);
-
-            // when no port or instance name provided
-            if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length < 2)
-            {
-                fqdnHostName = GetFullyQualifiedDomainName(fullServerName);
+                hostName = DefaultHostName;
                 port = DefaultSqlServerPort;
             }
-            // when port is provided, and no instance name
-            else if (serverNamePartsByComma.Length == 2 && serverNamePartsByBackSlash.Length < 2)
+            else
             {
-                fqdnHostName = GetFullyQualifiedDomainName(serverNamePartsByComma[0]);
-                string portString = serverNamePartsByComma[1];
+                string[] serverNamePartsByComma = fullServerName.Split(CommaSeparator);
+                string[] serverNamePartsByBackSlash = fullServerName.Split(BackSlashSeparator);
+
+                // when no port or instance name provided
+                if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length < 2)
+                {
+                    hostName = fullServerName;
+                    port = DefaultSqlServerPort;
+                }
+                // when port is provided, and no instance name
+                else if (serverNamePartsByComma.Length == 2 && serverNamePartsByBackSlash.Length < 2)
+                {
+                    hostName = serverNamePartsByComma[0];
+                    string portString = serverNamePartsByComma[1];
+                    try
+                    {
+                        port = ushort.Parse(portString);
+                    }
+                    catch (Exception e)
+                    {
+                        exception = e;
+                    }
+
+                }
+                // when instance name is provided, and no port
+                else if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length == 2)
+                {
+                    hostName = serverNamePartsByBackSlash[0];
+                    string instanceName = serverNamePartsByBackSlash[1];
+                    try
+                    {
+                        port = GetPortByInstanceName(hostName, instanceName);
+                    }
+                    catch (Exception e)
+                    {
+                        exception = e;
+                    }
+                }
+            }
+
+            if (hostName != null && port > 0 && exception == null && spnBuffer != null) // when Integrated Authentication is used
+            {
+                string fqdnHostName = null;
                 try
                 {
-                    port = ushort.Parse(portString);
+                    fqdnHostName = GetFullyQualifiedDomainName(hostName);
                 }
-                catch (Exception e)
+                catch
                 {
-                    exception = e;
+                    e = new Exception(SR.reverse_lookup_failed);
                 }
 
-            }
-            // when instance name is provided, and no port
-            else if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length == 2)
-            {
-                fqdnHostName = GetFullyQualifiedDomainName(serverNamePartsByBackSlash[0]);
-                string instanceName = serverNamePartsByBackSlash[1];
-                try
+                if (fqdnHostName != null)
                 {
-                    port = GetPortByInstanceName(fqdnHostName, instanceName);
-                }
-                catch (Exception e)
-                {
-                    exception = e;
+                    spnBuffer = GetMsSqlServerSPN(fqdnHostName, port);
                 }
             }
 
-
-            if (fqdnHostName != null && port > 0 && exception == null)
+            SNITCPHandle sniTcpHandle = null;
+            if (hostName != null && port > 0 && exception == null)
             {
-                spnBuffer = GetMsSqlServerSPN(fqdnHostName, port);
-                return new SNITCPHandle(fqdnHostName, port, timerExpire, callbackObject, parallel);
+                sniTcpHandle = new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
             }
             else if (exception != null)
             {
                 SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, exception);
-                return null;
             }
             else
             {
                 SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                return null;
             }
+
+            return sniTcpHandle;
         }
 
         /// <summary>

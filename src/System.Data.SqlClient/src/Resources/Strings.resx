@@ -1083,4 +1083,10 @@
   <data name="net_context_buffer_too_small" xml:space="preserve">
     <value>Insufficient buffer space. Required: {0} Actual: {1}.</value>
   </data>
+  <data name="kerberos_ticket_missing" xml:space="preserve">
+    <value>Kerberos Ticket is missing. Run 'kinit'.</value>
+  </data>
+  <data name="reverse_lookup_failed" xml:space="preserve">
+    <value>Reverse lookup has failed while generating SQL Server SPN.</value>
+  </data>
 </root>

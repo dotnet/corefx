@@ -6333,9 +6333,10 @@ namespace System.Data.SqlClient
 #if MANAGED_SNI
             uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj.Handle, receivedBuff, receivedLength, 
                 ref sendBuff, ref sendLength, _sniSpnBuffer, _sniSpnBuffer == null ? 0 : (uint)_sniSpnBuffer.Length);
-            if (clientContextResult != 0)
+            if (clientContextResult != SNIProxy.SspiClientContextResult.OK)
             {
-                string errorMessage = clientContextResult == 2 ? "Kerberos Ticket is missing. Run 'kinit'." : SQLMessage.SSPIGenerateError();
+                string errorMessage = clientContextResult == SNIProxy.SspiClientContextResult.KerberosTicketMissing ?
+                                        SR.kerberos_ticket_missing : SQLMessage.SSPIGenerateError();
                 SSPIError(errorMessage, TdsEnums.GEN_CLIENT_CONTEXT);
             }
 #else

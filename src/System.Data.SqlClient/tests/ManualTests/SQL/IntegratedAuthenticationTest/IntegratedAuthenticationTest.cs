@@ -32,7 +32,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                Console.WriteLine("Connection opened successfully..");
             }
         }
     }
