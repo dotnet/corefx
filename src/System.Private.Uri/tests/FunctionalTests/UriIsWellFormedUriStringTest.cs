@@ -130,6 +130,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ImplicitFileCommonBaseWithColon_AppendsDotSlash()
         {
             Uri baseUri = new Uri(@"c:/base/path/stuff");
@@ -147,6 +148,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ImplicitFileDifferentBaseWithColon_ReturnsSecondUri()
         {
             Uri baseUri = new Uri(@"c:/base/path/stuff");
@@ -159,6 +161,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitFileDifferentBaseWithColon_ReturnsSecondUri()
         {
             Uri baseUri = new Uri(@"file://c:/stuff");
@@ -176,6 +179,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitUncFileVsDosFile_ReturnsSecondPath()
         {
             Uri baseUri = new Uri(@"file:///u:/stuff");
@@ -190,6 +194,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitDosFileWithHost_ReturnsSecondPath()
         {
             Uri baseUri = new Uri(@"file://host/u:/stuff");
@@ -202,6 +207,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitDosFileSecondWithHost_ReturnsSecondPath()
         {
             Uri baseUri = new Uri(@"file://host/unc/stuff");
@@ -214,6 +220,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitDosFileVsUncFile_ReturnsSecondUri()
         {
             Uri baseUri = new Uri(@"file:///unc/stuff");
@@ -226,6 +233,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriMakeRelative_ExplicitDosFileContainingImplicitDosPath_AddsDotSlash()
         {
             Uri baseUri = new Uri(@"file:///u:/stuff/file");

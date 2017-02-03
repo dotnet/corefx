@@ -3,11 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.IO;
 
 namespace System.PrivateUri.Tests
 {
     public static class UriTests
     {
+        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+
         [Fact]
         public static void TestCtor_String()
         {
@@ -731,13 +734,16 @@ namespace System.PrivateUri.Tests
             b = uri.IsWellFormedOriginalString();
             Assert.False(b);
 
-            uri = new Uri(@"c:\\directory\filename");
-            b = uri.IsWellFormedOriginalString();
-            Assert.False(b);
+            if (s_IsWindowsSystem)
+            {
+                uri = new Uri(@"c:\\directory\filename");
+                b = uri.IsWellFormedOriginalString();
+                Assert.False(b);
 
-            uri = new Uri(@"file://c:/directory/filename");
-            b = uri.IsWellFormedOriginalString();
-            Assert.False(b);
+                uri = new Uri(@"file://c:/directory/filename");
+                b = uri.IsWellFormedOriginalString();
+                Assert.False(b);
+            }
 
             uri = new Uri(@"http:\\host/path/file");
             b = uri.IsWellFormedOriginalString();

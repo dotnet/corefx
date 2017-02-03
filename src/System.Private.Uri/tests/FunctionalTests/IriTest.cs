@@ -184,7 +184,7 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void Iri_ReservedCharacters()
         {
-            string input = "/?#??#%[]";
+            string input = "?/#??#%[]";
             VerifyUriNormalizationForEscapedCharacters(input);
         }
 

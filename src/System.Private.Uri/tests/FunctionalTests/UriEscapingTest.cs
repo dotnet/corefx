@@ -455,6 +455,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriFile_ExplicitDosFile_QueryAllowed()
         {
             string input = "file:///c:/path/path?query?#fragment?";
@@ -467,6 +468,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriFile_ImplicitDosFile_QueryNotAllowed()
         {
             string input = "c:/path/path?query";
@@ -479,6 +481,20 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void UriFile_ImplicitUnixFile_QueryNotAllowed()
+        {
+            string input = "/path/path?query";
+            Uri testUri = new Uri(input);
+            Assert.Equal("file:///path/path%3Fquery", testUri.AbsoluteUri);
+            Assert.Equal("/path/path%3Fquery", testUri.AbsolutePath);
+            Assert.Equal(@"/path/path?query", testUri.LocalPath);
+            Assert.Equal(String.Empty, testUri.Query);
+            Assert.Equal(String.Empty, testUri.Fragment);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriFile_ImplicitUncFile_QueryNotAllowed()
         {
             string input = @"\\Server\share\path?query";
@@ -491,6 +507,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriFile_ImplicitDosFile_FragmentNotAllowed()
         {
             string input = "c:/path/path#fragment#";
@@ -503,6 +520,20 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void UriFile_ImplicitUnixFile_FragmentNotAllowed()
+        {
+            string input = "/path/path#fragment#";
+            Uri testUri = new Uri(input);
+            Assert.Equal("file:///path/path%23fragment%23", testUri.AbsoluteUri);
+            Assert.Equal("/path/path%23fragment%23", testUri.AbsolutePath);
+            Assert.Equal("/path/path#fragment#", testUri.LocalPath);
+            Assert.Equal(String.Empty, testUri.Query);
+            Assert.Equal(String.Empty, testUri.Fragment);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UriFile_ImplicitUncFile_FragmentNotAllowed()
         {
             string input = @"\\Server\share\path#fragment#";
