@@ -318,19 +318,16 @@ namespace System.Data.SqlClient
             }
 
 
+            _sniSpnBuffer = null;
+#if !MANAGED_SNI
             if (integratedSecurity)
             {
-#if !MANAGED_SNI
                 LoadSSPILibrary();
-#endif
+
                 // now allocate proper length of buffer
                 _sniSpnBuffer = new byte[SNINativeMethodWrapper.SniMaxComposedSpnLength];
             }
-            else
-            {
-                _sniSpnBuffer = null;
-            }
-
+#endif
 
             byte[] instanceName = null;
 
@@ -342,7 +339,7 @@ namespace System.Data.SqlClient
 
 #if MANAGED_SNI
             _physicalStateObj.CreateConnectionHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire,
-                        out instanceName, ref _sniSpnBuffer, false, true, fParallel);
+                        out instanceName, ref _sniSpnBuffer, false, true, fParallel, integratedSecurity);
 #else
             _physicalStateObj.CreatePhysicalSNIHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire,
                         out instanceName, _sniSpnBuffer, false, true, fParallel);
@@ -407,7 +404,7 @@ namespace System.Data.SqlClient
                 _physicalStateObj.SniContext = SniContext.Snix_Connect;
 
 #if MANAGED_SNI
-                _physicalStateObj.CreateConnectionHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, ref _sniSpnBuffer, true, true, fParallel);
+                _physicalStateObj.CreateConnectionHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, ref _sniSpnBuffer, true, true, fParallel, integratedSecurity);
 #else
                 _physicalStateObj.CreatePhysicalSNIHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, _sniSpnBuffer, true, true, fParallel);
 #endif // MANAGED_SNI
@@ -6331,8 +6328,7 @@ namespace System.Data.SqlClient
 
             // we need to respond to the server's message with SSPI data
 #if MANAGED_SNI
-            uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj.Handle, receivedBuff, receivedLength, 
-                ref sendBuff, ref sendLength, _sniSpnBuffer, _sniSpnBuffer == null ? 0 : (uint)_sniSpnBuffer.Length);
+            uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj.Handle, receivedBuff, ref sendBuff, _sniSpnBuffer);
             if (clientContextResult != SNIProxy.SspiClientContextResult.OK)
             {
                 string errorMessage = clientContextResult == SNIProxy.SspiClientContextResult.KerberosTicketMissing ?

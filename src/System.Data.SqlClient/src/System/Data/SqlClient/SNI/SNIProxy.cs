@@ -92,11 +92,10 @@ namespace System.Data.SqlClient.SNI
         /// <param name="receivedBuff">Receive buffer</param>
         /// <param name="receivedLength">Received length</param>
         /// <param name="sendBuff">Send buffer</param>
-        /// <param name="sendLength">Send length</param>
         /// <param name="serverName">Service Principal Name buffer</param>
         /// <param name="serverNameLength">Length of Service Principal Name</param>
         /// <returns>SNI error code</returns>
-        public uint GenSspiClientContext(SNIHandle handle, byte[] receivedBuff, uint receivedLength, ref byte[] sendBuff, ref uint sendLength, byte[] serverName, uint serverNameLength)
+        public uint GenSspiClientContext(SNIHandle handle, byte[] receivedBuff, ref byte[] sendBuff, byte[] serverName)
         {
             SNITCPHandle tcpHandle = (SNITCPHandle)handle;
             SafeDeleteContext securityContext = tcpHandle.SecurityContext;
@@ -274,7 +273,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="async">Asynchronous connection</param>
         /// <param name="parallel">Attempt parallel connects</param>
         /// <returns>SNI handle</returns>
-        public SNIHandle CreateConnectionHandle(object callbackObject, string fullServerName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool parallel)
+        public SNIHandle CreateConnectionHandle(object callbackObject, string fullServerName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool parallel, bool isIntegratedSecurity)
         {
             instanceName = new byte[1];
             instanceName[0] = 0;
@@ -287,7 +286,7 @@ namespace System.Data.SqlClient.SNI
             if (serverNameParts.Length == 1 || serverNameParts.Length == 8)
             {
                 // Default to using tcp if no protocol is provided
-                return CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer);
+                return CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
             }
             // when protocol specified
             // serverNameParts.Length == 2 -> <protocol>:<hostname_or_ipv4> format
@@ -300,7 +299,7 @@ namespace System.Data.SqlClient.SNI
                 switch (serverNameParts[0])
                 {
                     case TdsEnums.TCP:
-                        return CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer);
+                        return CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
 
                     case TdsEnums.NP:
                         return CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
@@ -333,7 +332,16 @@ namespace System.Data.SqlClient.SNI
 
         private string GetFullyQualifiedDomainName(string hostNameOrAddress)
         {
-            IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
+            IPHostEntry hostEntry = null;
+            try
+            {
+                hostEntry = Dns.GetHostEntry(hostNameOrAddress);
+            }
+            catch
+            {
+                throw new Exception(SR.reverse_lookup_failed);
+            }
+            
             return hostEntry.HostName;
         }
 
@@ -345,7 +353,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
         /// <param name="parallel">Should MultiSubnetFailover be used</param>
         /// <returns>SNITCPHandle</returns>
-        private SNITCPHandle CreateTcpHandle(string fullServerName, long timerExpire, object callbackObject, bool parallel, ref byte[] spnBuffer)
+        private SNITCPHandle CreateTcpHandle(string fullServerName, long timerExpire, object callbackObject, bool parallel, ref byte[] spnBuffer, bool isIntegratedSecurity)
         {
             // TCP Format: 
             // tcp:<host name>\<instance name>
@@ -402,21 +410,17 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            if (hostName != null && port > 0 && exception == null && spnBuffer != null) // when Integrated Authentication is used
+            if (hostName != null && port > 0 && exception == null && isIntegratedSecurity) // when Integrated Authentication is used
             {
                 string fqdnHostName = null;
                 try
                 {
                     fqdnHostName = GetFullyQualifiedDomainName(hostName);
-                }
-                catch
-                {
-                    e = new Exception(SR.reverse_lookup_failed);
-                }
-
-                if (fqdnHostName != null)
-                {
                     spnBuffer = GetMsSqlServerSPN(fqdnHostName, port);
+                }
+                catch(Exception e)
+                {
+                    exception = e;
                 }
             }
 
