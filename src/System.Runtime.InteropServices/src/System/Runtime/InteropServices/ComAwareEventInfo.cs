@@ -101,6 +101,7 @@ namespace System.Runtime.InteropServices
             get { return _innerEventInfo.ReflectedType; }
         }
 
+#pragma warning disable 0618 // ComEventInterfaceAttribute is obsolete
         private static void GetDataForComInvocation(System.Reflection.EventInfo eventInfo, out Guid sourceIid, out int dispid)
         {
             object[] comEventInterfaces = eventInfo.DeclaringType.GetCustomAttributes(typeof(ComEventInterfaceAttribute), false);
@@ -131,5 +132,6 @@ namespace System.Runtime.InteropServices
             sourceIid = guid;
             dispid = ((DispIdAttribute)dispIdAttribute).Value;
         }
+#pragma warning restore 0618
     }
 }
