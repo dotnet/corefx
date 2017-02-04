@@ -30,6 +30,22 @@ namespace System.Linq.Expressions
                                        s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte ??
                                       (s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte = typeof(decimal).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte) }));
 
+        private static FieldInfo s_Decimal_One;
+        public static FieldInfo Decimal_One
+            => s_Decimal_One ?? (s_Decimal_One = typeof(decimal).GetField(nameof(decimal.One)));
+
+        private static FieldInfo s_Decimal_MinusOne;
+        public static FieldInfo Decimal_MinusOne
+            => s_Decimal_MinusOne ?? (s_Decimal_MinusOne = typeof(decimal).GetField(nameof(decimal.MinusOne)));
+
+        private static FieldInfo s_Decimal_MinValue;
+        public static FieldInfo Decimal_MinValue
+            => s_Decimal_MinValue ?? (s_Decimal_MinValue = typeof(decimal).GetField(nameof(decimal.MinValue)));
+
+        private static FieldInfo s_Decimal_MaxValue;
+        public static FieldInfo Decimal_MaxValue
+            => s_Decimal_MaxValue ?? (s_Decimal_MaxValue = typeof(decimal).GetField(nameof(decimal.MaxValue)));
+
         private static ConstructorInfo s_Closure_ObjectArray_ObjectArray;
         public  static ConstructorInfo   Closure_ObjectArray_ObjectArray =>
                                        s_Closure_ObjectArray_ObjectArray ??
