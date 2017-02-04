@@ -148,7 +148,7 @@ copy_test_overlay()
   # If we have a native image for mscorlib, copy it as well.
   if [ -f $MscorlibBins/mscorlib.ni.dll ]
   then
-      ln -f  $MscorlibBins/mscorlib.ni.dll $testDir/mscorlib.ni.dll
+      ln -f $MscorlibBins/mscorlib.ni.dll $testDir/mscorlib.ni.dll
   fi
 }
 
@@ -230,6 +230,24 @@ run_test()
   copy_test_overlay $dirName
 
   pushd $dirName > /dev/null
+
+  # Patch `RunTests.sh` to prevent unintended copy of dll native images
+
+  if [ ! -f RunTests.sh.save ]; then
+      mv -f RunTests.sh RunTests.sh.save
+  fi
+  cp RunTests.sh.save RunTests.sh
+
+  native_images=( $MscorlibBins/mscorlib.ni.dll $CoreClrBins/System.Private.CoreLib.ni.dll )
+
+  for file in ${native_images[@]} 
+  do
+      if [ ! -f $file ]
+      then
+          sed "/$(basename $file)/d" RunTests.sh > RunTests.out
+          mv -f RunTests.out RunTests.sh
+      fi
+  done
 
   chmod +x ./RunTests.sh
   chmod +x ./corerun
