@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{4259DCE9-3480-40BB-B08A-64A2D446264B}</ProjectGuid>
+    <TestCategories>InnerLoop;OuterLoop</TestCategories>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the options -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="Legacy\SerialPort\Close.cs" />
+    <Compile Include="Legacy\SerialPort\ctor.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_str.cs" />
+    <Compile Include="Legacy\Support\LocalMachineSerialInfo.cs" />
+    <Compile Include="Legacy\Support\PortHelper.cs" />
+    <Compile Include="Legacy\Support\SerialPortConnection.cs" />
+    <Compile Include="Legacy\Support\SerialPortProperties.cs" />
+    <Compile Include="Legacy\Support\TCSupport.cs" />
+    <Compile Include="Legacy\Support\TestDelegate.cs" />
+    <Compile Include="PortsTest.cs" />
+    <Compile Include="System\IO\Ports\SmokeTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

@@ -834,6 +834,15 @@ namespace System.Linq.Expressions
         {
             return NotAMemberOfType(p0, p1, GetParamName(paramName, index));
         }
+
+        /// <summary>
+        /// ArgumentException with message like "'{0}' is not a member of any type"
+        /// </summary>
+        internal static Exception NotAMemberOfAnyType(object p0, string paramName)
+        {
+            return new ArgumentException(Strings.NotAMemberOfAnyType(p0), paramName);
+        }
+
         /// <summary>
         /// PlatformNotSupportedException with message like "The instruction '{0}' is not supported for type '{1}'"
         /// </summary>
@@ -973,9 +982,9 @@ namespace System.Linq.Expressions
         /// <summary>
         /// ArgumentException with message like "Unhandled unary: {0}"
         /// </summary>
-        internal static Exception UnhandledUnary(object p0)
+        internal static Exception UnhandledUnary(object p0, string paramName)
         {
-            return new ArgumentException(Strings.UnhandledUnary(p0));
+            return new ArgumentException(Strings.UnhandledUnary(p0), paramName);
         }
         /// <summary>
         /// ArgumentException with message like "Unknown binding type"
