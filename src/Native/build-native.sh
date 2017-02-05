@@ -15,6 +15,7 @@ usage()
     echo "      - will use ROOTFS_DIR environment variable if set."
     echo "staticLibLink - Optional argument to statically link any native library."
     echo "portableLinux - Optional argument to build native libraries portable over GLIBC based Linux distros."
+    echo "stripSymbols - Optional argument to strip native symbols during the build."
     echo "generateversion - Pass this in to get a version on the build output."
     echo "cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
@@ -149,8 +150,8 @@ __UnprocessedBuildArgs=
 __CrossBuild=0
 __ServerGC=0
 __VerboseBuild=false
-__ClangMajorVersion=3
-__ClangMinorVersion=5
+__ClangMajorVersion=0
+__ClangMinorVersion=0
 __StaticLibLink=0
 __PortableLinux=0
 
@@ -196,7 +197,7 @@ while :; do
         release)
             __BuildType=Release
             __CMakeArgs=RELEASE 
-	    ;;
+            ;;
         freebsd)
             __BuildOS=FreeBSD
             ;;
@@ -208,6 +209,9 @@ while :; do
             ;;
         osx)
             __BuildOS=OSX
+            ;;
+        stripsymbols)
+            __CMakeExtraArgs="$__CMakeExtraArgs -DSTRIP_SYMBOLS=true"
             ;;
         --targetgroup)
             shift
@@ -298,6 +302,17 @@ case $CPUName in
         fi
         ;;
 esac
+
+# Set the default clang version if not already set
+if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
+    if [ $__CrossBuild == 1 ]; then
+        __ClangMajorVersion=3
+        __ClangMinorVersion=6
+    else
+        __ClangMajorVersion=3
+        __ClangMinorVersion=5
+    fi
+fi
 
 # Set the remaining variables based upon the determined build configuration
 __IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/native"
