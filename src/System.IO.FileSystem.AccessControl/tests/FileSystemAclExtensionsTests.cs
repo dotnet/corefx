@@ -16,7 +16,7 @@ namespace System.IO
         }
 
         [Fact]
-        public void GetAccessControl_DirectoryInfo()
+        public void GetAccessControl_DirectoryInfo_ReturnsValidObject()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo("\\");
 
@@ -32,7 +32,7 @@ namespace System.IO
         }
 
         [Fact]
-        public void GetAccessControl_DirectoryInfo_AccessControlSections()
+        public void GetAccessControl_DirectoryInfo_AccessControlSections_ReturnsValidObject()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo("\\");
             AccessControlSections accessControlSections = new AccessControlSections();
@@ -49,7 +49,7 @@ namespace System.IO
         }
 
         [Fact]
-        public void GetAccessControl_FileInfo()
+        public void GetAccessControl_FileInfo_ReturnsValidObject()
         {
             FileInfo fileInfo = new FileInfo("\\");
 
@@ -65,7 +65,7 @@ namespace System.IO
         }
 
         [Fact]
-        public void GetAccessControl_FileInfo_AccessControlSections()
+        public void GetAccessControl_FileInfo_AccessControlSections_ReturnsValidObject()
         {
             FileInfo fileInfo = new FileInfo("\\");
             AccessControlSections accessControlSections = new AccessControlSections();
@@ -89,28 +89,10 @@ namespace System.IO
         }
 
         [Fact]
-        public void SetAccessControl_DirectoryInfo_DirectorySecurity()
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
-            DirectorySecurity directorySecurity = new DirectorySecurity();
-
-            FileSystemAclExtensions.SetAccessControl(directoryInfo, directorySecurity);
-        }
-
-        [Fact]
         public void SetAccessControl_FileInfo_FileSecurity_InvalidArguments()
         {
             FileInfo fileInfo = new FileInfo("\\");
             Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity)null));
-        }
-
-        [Fact]
-        public void SetAccessControl_FileInfo_FileSecurity()
-        {
-            FileInfo fileInfo = new FileInfo("\\");
-            FileSecurity fileSecurity = new FileSecurity();
-
-            FileSystemAclExtensions.SetAccessControl(fileInfo, fileSecurity);
         }
 
         [Fact]
