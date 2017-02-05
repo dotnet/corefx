@@ -20,7 +20,7 @@ namespace System.Dynamic.Tests
 
         [Theory]
         [InlineData(-1, new string[0])]
-        [InlineData(-1, new string[] { "foo", "bar", "baz", "quux", "quuux" })]
+        [InlineData(2, new string[] { "foo", "bar", "baz", "quux", "quuux" })]
         public void Ctor_CountLessThanArgNamesCount_ThrowsArgumentException(int argCount, string[] argNames)
         {
             Assert.Throws<ArgumentException>(null, () => new CallInfo(argCount, argNames));
