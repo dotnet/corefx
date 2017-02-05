@@ -16,9 +16,30 @@ namespace System.IO
         }
 
         [Fact]
+        public void GetAccessControl_DirectoryInfo()
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
+
+            DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo);
+
+            Assert.NotNull(directorySecurity);
+        }
+
+        [Fact]
         public void GetAccessControl_DirectoryInfo_AccessControlSections_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((DirectoryInfo)null, new AccessControlSections()));
+        }
+
+        [Fact]
+        public void GetAccessControl_DirectoryInfo_AccessControlSections()
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
+            AccessControlSections accessControlSections = new AccessControlSections();
+
+            DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo, accessControlSections);
+
+            Assert.NotNull(directorySecurity);
         }
 
         [Fact]
@@ -28,9 +49,30 @@ namespace System.IO
         }
 
         [Fact]
+        public void GetAccessControl_FileInfo()
+        {
+            FileInfo fileInfo = new FileInfo("\\");
+
+            FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo);
+
+            Assert.NotNull(fileSecurity);
+        }
+
+        [Fact]
         public void GetAccessControl_FileInfo_AccessControlSections_InvalidArguments()
         {
             Assert.Throws<NullReferenceException>(() => FileSystemAclExtensions.GetAccessControl((FileInfo)null, new AccessControlSections()));
+        }
+
+        [Fact]
+        public void GetAccessControl_FileInfo_AccessControlSections()
+        {
+            FileInfo fileInfo = new FileInfo("\\");
+            AccessControlSections accessControlSections = new AccessControlSections();
+
+            FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo, accessControlSections);
+
+            Assert.NotNull(fileSecurity);
         }
 
         [Fact]
@@ -47,10 +89,28 @@ namespace System.IO
         }
 
         [Fact]
+        public void SetAccessControl_DirectoryInfo_DirectorySecurity()
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
+            DirectorySecurity directorySecurity = new DirectorySecurity();
+
+            FileSystemAclExtensions.SetAccessControl(directoryInfo, directorySecurity);
+        }
+
+        [Fact]
         public void SetAccessControl_FileInfo_FileSecurity_InvalidArguments()
         {
             FileInfo fileInfo = new FileInfo("\\");
             Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity)null));
+        }
+
+        [Fact]
+        public void SetAccessControl_FileInfo_FileSecurity()
+        {
+            FileInfo fileInfo = new FileInfo("\\");
+            FileSecurity fileSecurity = new FileSecurity();
+
+            FileSystemAclExtensions.SetAccessControl(fileInfo, fileSecurity);
         }
 
         [Fact]
