@@ -25,6 +25,11 @@ namespace System.Linq.Expressions
                                        s_Decimal_Ctor_Int64 ??
                                       (s_Decimal_Ctor_Int64 = typeof(decimal).GetConstructor(new[] { typeof(long) }));
 
+        private static ConstructorInfo s_Decimal_Ctor_UInt64;
+        public static ConstructorInfo Decimal_Ctor_UInt64 =>
+                                       s_Decimal_Ctor_UInt64 ??
+                                      (s_Decimal_Ctor_UInt64 = typeof(decimal).GetConstructor(new[] { typeof(ulong) }));
+
         private static ConstructorInfo s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte;
         public  static ConstructorInfo   Decimal_Ctor_Int32_Int32_Int32_Bool_Byte =>
                                        s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte ??

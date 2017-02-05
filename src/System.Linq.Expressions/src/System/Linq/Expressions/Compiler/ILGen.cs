@@ -1168,9 +1168,15 @@ namespace System.Linq.Expressions.Compiler
 
                 if (long.MinValue <= value && value <= long.MaxValue)
                 {
-                    long longValue = decimal.ToInt64(value);
-                    il.EmitLong(longValue);
+                    il.EmitLong(decimal.ToInt64(value));
                     il.EmitNew(Decimal_Ctor_Int64);
+                    return;
+                }
+
+                if (value > 0 && value <= ulong.MaxValue)
+                {
+                    il.EmitULong(decimal.ToUInt64(value));
+                    il.EmitNew(Decimal_Ctor_UInt64);
                     return;
                 }
 
