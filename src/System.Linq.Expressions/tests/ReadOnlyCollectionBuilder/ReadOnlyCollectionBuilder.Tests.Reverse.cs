@@ -1,23 +1,24 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Tests;
+using System.Runtime.CompilerServices;
 using Xunit;
 
-namespace System.Collections.Tests
+namespace System.Linq.Expressions.Tests
 {
     /// <summary>
     /// Contains tests that ensure the correctness of the List class.
     /// </summary>
-    public abstract partial class List_Generic_Tests<T> : IList_Generic_Tests<T>
+    public abstract partial class ReadOnlyCollectionBuilder_Generic_Tests<T> : IList_Generic_Tests<T>
     {
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void Reverse(int listLength)
         {
-            List<T> list = GenericListFactory(listLength);
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(listLength);
             List<T> listBefore = list.ToList();
 
             list.Reverse();
@@ -41,7 +42,7 @@ namespace System.Collections.Tests
         [InlineData(10, 8, 2)]
         public void Reverse_int_int(int listLength, int index, int count)
         {
-            List<T> list = GenericListFactory(listLength);
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(listLength);
             List<T> listBefore = list.ToList();
 
             list.Reverse(index, count);
@@ -76,7 +77,7 @@ namespace System.Collections.Tests
         [InlineData(10, 8, 2)]
         public void Reverse_RepeatedValues(int listLength, int index, int count)
         {
-            List<T> list = GenericListFactory(1);
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(1);
             for (int i = 1; i < listLength; i++)
                 list.Add(list[0]);
             List<T> listBefore = list.ToList();
@@ -107,7 +108,7 @@ namespace System.Collections.Tests
         {
             if (listLength % 2 != 0)
                 listLength++;
-            List<T> list = GenericListFactory(listLength);
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(listLength);
             Tuple<int, int>[] InvalidParameters = new Tuple<int, int>[]
             {
                 Tuple.Create(listLength, 1),
@@ -139,7 +140,7 @@ namespace System.Collections.Tests
         {
             if (listLength % 2 != 0)
                 listLength++;
-            List<T> list = GenericListFactory(listLength);
+            ReadOnlyCollectionBuilder<T> list = GenericListFactory(listLength);
             Tuple<int, int>[] InvalidParameters = new Tuple<int, int>[]
             {
                 Tuple.Create(-1,-1),

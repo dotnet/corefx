@@ -18,9 +18,9 @@ namespace System.Runtime.CompilerServices
     public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
     {
         private const int DefaultCapacity = 4;
+        private const int MaxCoreClrArrayLength = 0x7fefffff;
 
         private T[] _items;
-        private int _size;
         private int _version;
 
         /// <summary>
@@ -40,9 +40,18 @@ namespace System.Runtime.CompilerServices
         public ReadOnlyCollectionBuilder(int capacity)
         {
             if (capacity < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
 
-            _items = new T[capacity];
+            if (capacity == 0)
+            {
+                _items = Array.Empty<T>();
+            }
+            else
+            {
+                _items = new T[capacity];
+            }
         }
 
         /// <summary>
@@ -52,27 +61,35 @@ namespace System.Runtime.CompilerServices
         public ReadOnlyCollectionBuilder(IEnumerable<T> collection)
         {
             if (collection == null)
+            {
                 throw new ArgumentNullException(nameof(collection));
+            }
 
             ICollection<T> c = collection as ICollection<T>;
             if (c != null)
             {
                 int count = c.Count;
-                _items = new T[count];
-                c.CopyTo(_items, 0);
-                _size = count;
+                if (count == 0)
+                {
+                    _items = Array.Empty<T>();
+                }
+                else
+                {
+                    _items = new T[count];
+                    c.CopyTo(_items, 0);
+                    Count = count;
+                }
             }
             else
             {
-                _size = 0;
-                _items = new T[DefaultCapacity];
+                Count = 0;
+                _items = Array.Empty<T>();
+                // This enumerable could be empty.  Let Add allocate a new array, if needed.
+                // Note it will also go to _defaultCapacity first, not 1, then 2, etc.
 
-                using (IEnumerator<T> en = collection.GetEnumerator())
+                foreach (T item in collection)
                 {
-                    while (en.MoveNext())
-                    {
-                        Add(en.Current);
-                    }
+                    Add(item);
                 }
             }
         }
@@ -85,17 +102,19 @@ namespace System.Runtime.CompilerServices
             get { return _items.Length; }
             set
             {
-                if (value < _size)
+                if (value < Count)
+                {
                     throw new ArgumentOutOfRangeException(nameof(value));
+                }
 
                 if (value != _items.Length)
                 {
                     if (value > 0)
                     {
                         T[] newItems = new T[value];
-                        if (_size > 0)
+                        if (Count > 0)
                         {
-                            Array.Copy(_items, 0, newItems, 0, _size);
+                            Array.Copy(_items, 0, newItems, 0, Count);
                         }
                         _items = newItems;
                     }
@@ -110,7 +129,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>
         /// Returns number of elements in the <see cref="ReadOnlyCollectionBuilder{T}"/>.
         /// </summary>
-        public int Count => _size;
+        public int Count { get; private set; }
 
         #region IList<T> Members
 
@@ -121,7 +140,7 @@ namespace System.Runtime.CompilerServices
         /// <returns>The index of the first occurrence of an item.</returns>
         public int IndexOf(T item)
         {
-            return Array.IndexOf(_items, item, 0, _size);
+            return Array.IndexOf(_items, item, 0, Count);
         }
 
         /// <summary>
@@ -131,19 +150,22 @@ namespace System.Runtime.CompilerServices
         /// <param name="item">The object to insert into the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Insert(int index, T item)
         {
-            if (index > _size)
+            // Note that insertions at the end are legal.
+            if ((uint)index > (uint)Count)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index));
-
-            if (_size == _items.Length)
-            {
-                EnsureCapacity(_size + 1);
             }
-            if (index < _size)
+
+            if (Count == _items.Length)
             {
-                Array.Copy(_items, index, _items, index + 1, _size - index);
+                EnsureCapacity(Count + 1);
+            }
+            if (index < Count)
+            {
+                Array.Copy(_items, index, _items, index + 1, Count - index);
             }
             _items[index] = item;
-            _size++;
+            Count++;
             _version++;
         }
 
@@ -153,15 +175,18 @@ namespace System.Runtime.CompilerServices
         /// <param name="index">The zero-based index of the item to remove.</param>
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= _size)
-                throw new ArgumentOutOfRangeException(nameof(index));
-
-            _size--;
-            if (index < _size)
+            // Following trick can reduce the range check by one comparison
+            if ((uint)index >= (uint)Count)
             {
-                Array.Copy(_items, index + 1, _items, index, _size - index);
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
-            _items[_size] = default(T);
+
+            Count--;
+            if (index < Count)
+            {
+                Array.Copy(_items, index + 1, _items, index, Count - index);
+            }
+            _items[Count] = default(T);
             _version++;
         }
 
@@ -174,15 +199,21 @@ namespace System.Runtime.CompilerServices
         {
             get
             {
-                if (index >= _size)
+                // Following trick can reduce the range check by one comparison
+                if ((uint)index >= (uint)Count)
+                {
                     throw new ArgumentOutOfRangeException(nameof(index));
+                }
 
                 return _items[index];
             }
             set
             {
-                if (index >= _size)
+                // Following trick can reduce the range check by one comparison
+                if ((uint)index >= (uint)Count)
+                {
                     throw new ArgumentOutOfRangeException(nameof(index));
+                }
 
                 _items[index] = value;
                 _version++;
@@ -199,11 +230,11 @@ namespace System.Runtime.CompilerServices
         /// <param name="item">The object to add to the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Add(T item)
         {
-            if (_size == _items.Length)
+            if (Count == _items.Length)
             {
-                EnsureCapacity(_size + 1);
+                EnsureCapacity(Count + 1);
             }
-            _items[_size++] = item;
+            _items[Count++] = item;
             _version++;
         }
 
@@ -212,10 +243,10 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         public void Clear()
         {
-            if (_size > 0)
+            if (Count > 0)
             {
-                Array.Clear(_items, 0, _size);
-                _size = 0;
+                Array.Clear(_items, 0, Count); // Clear to release any references
+                Count = 0;
             }
             _version++;
         }
@@ -225,32 +256,7 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         /// <param name="item">the object to locate in the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         /// <returns>true if item is found in the <see cref="ReadOnlyCollectionBuilder{T}"/>; otherwise, false.</returns>
-        public bool Contains(T item)
-        {
-            if ((object)item == null)
-            {
-                for (int i = 0; i < _size; i++)
-                {
-                    if ((object)_items[i] == null)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else
-            {
-                EqualityComparer<T> c = EqualityComparer<T>.Default;
-                for (int i = 0; i < _size; i++)
-                {
-                    if (c.Equals(_items[i], item))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
+        public bool Contains(T item) => Count != 0 && IndexOf(item) != -1;
 
         /// <summary>
         /// Copies the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/> to an <see cref="Array"/>,
@@ -260,7 +266,8 @@ namespace System.Runtime.CompilerServices
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Array.Copy(_items, 0, array, arrayIndex, _size);
+            // Delegate rest of error checking to Array.Copy.
+            Array.Copy(_items, 0, array, arrayIndex, Count);
         }
 
         bool ICollection<T>.IsReadOnly => false;
@@ -389,11 +396,22 @@ namespace System.Runtime.CompilerServices
         void ICollection.CopyTo(Array array, int index)
         {
             if (array == null)
+            {
                 throw new ArgumentNullException(nameof(array));
+            }
             if (array.Rank != 1)
-                throw new ArgumentException(nameof(array));
+            {
+                throw new ArgumentException(SR.ArgumentMustBeSingleDimensionalArrayType, nameof(array));
+            }
 
-            Array.Copy(_items, 0, array, index, _size);
+            try
+            {
+                Array.Copy(_items, 0, array, index, Count);
+            }
+            catch (ArrayTypeMismatchException)
+            {
+                throw new ArgumentException(SR.ArgumentInvalidArrayType, nameof(array));
+            }
         }
 
         bool ICollection.IsSynchronized => false;
@@ -418,9 +436,17 @@ namespace System.Runtime.CompilerServices
         public void Reverse(int index, int count)
         {
             if (index < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index));
+            }
             if (count < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(count));
+            }
+            if (Count - index < count)
+            {
+                throw new ArgumentException(SR.ArgumentInvalidOffLen);
+            }
 
             Array.Reverse(_items, index, count);
             _version++;
@@ -432,8 +458,13 @@ namespace System.Runtime.CompilerServices
         /// <returns>An array containing copies of the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/>.</returns>
         public T[] ToArray()
         {
-            T[] array = new T[_size];
-            Array.Copy(_items, 0, array, 0, _size);
+            if (Count == 0)
+            {
+                return Array.Empty<T>();
+            }
+
+            T[] array = new T[Count];
+            Array.Copy(_items, 0, array, 0, Count);
             return array;
         }
 
@@ -447,7 +478,7 @@ namespace System.Runtime.CompilerServices
         {
             // Can we use the stored array?
             T[] items;
-            if (_size == _items.Length)
+            if (Count == _items.Length)
             {
                 items = _items;
             }
@@ -456,21 +487,29 @@ namespace System.Runtime.CompilerServices
                 items = ToArray();
             }
             _items = Array.Empty<T>();
-            _size = 0;
+            Count = 0;
             _version++;
 
             return new TrueReadOnlyCollection<T>(items);
         }
 
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the given minimum value.
+        /// </summary>
+        /// <param name = "min">The minimum value to have allocated.</param>
+        /// <remarks>
+        /// If the current capacity of the list is less than <paramref name = "min"/>,
+        /// the capacity is increased to the larger value of twice the current capacity
+        /// and <paramref name="min"/>.
+        /// </remarks>
         private void EnsureCapacity(int min)
         {
             if (_items.Length < min)
             {
-                int newCapacity = DefaultCapacity;
-                if (_items.Length > 0)
-                {
-                    newCapacity = _items.Length * 2;
-                }
+                int newCapacity = _items.Length > 0 ? _items.Length * 2 : DefaultCapacity;
+                // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
+                // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+                newCapacity = (int)Math.Min((uint)newCapacity, (uint)MaxCoreClrArrayLength);
                 if (newCapacity < min)
                 {
                     newCapacity = min;
@@ -534,7 +573,7 @@ namespace System.Runtime.CompilerServices
             {
                 get
                 {
-                    if (_index == 0 || _index > _builder._size)
+                    if (_index <= 0)
                     {
                         throw Error.EnumerationIsDone();
                     }
@@ -544,24 +583,27 @@ namespace System.Runtime.CompilerServices
 
             public bool MoveNext()
             {
-                if (_version == _builder._version)
+                ReadOnlyCollectionBuilder<T> localBuilder = _builder;
+
+                // Following trick can reduce the range check by one comparison
+                if (_version == localBuilder._version && ((uint)_index < (uint)localBuilder.Count))
                 {
-                    if (_index < _builder._size)
-                    {
-                        _current = _builder._items[_index++];
-                        return true;
-                    }
-                    else
-                    {
-                        _index = _builder._size + 1;
-                        _current = default(T);
-                        return false;
-                    }
+                    _current = localBuilder._items[_index++];
+                    return true;
                 }
-                else
+                return MoveNextRare();
+            }
+
+            private bool MoveNextRare()
+            {
+                if (_version != _builder._version)
                 {
                     throw Error.CollectionModifiedWhileEnumerating();
                 }
+
+                _index = -1;
+                _current = default(T);
+                return false;
             }
 
             #endregion
