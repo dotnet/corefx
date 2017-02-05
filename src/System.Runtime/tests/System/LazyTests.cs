@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
+using System.Reflection;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace System.Tests
@@ -103,17 +106,283 @@ namespace System.Tests
             Assert.Equal("1", lazy.ToString());
         }
 
+        private static void Value_Invalid_Impl<T>(ref Lazy<T> x, Lazy<T> lazy)
+        {
+            x = lazy;
+            Assert.Throws<InvalidOperationException>(() => { var dummy = lazy.Value; });
+        }
+
         [Fact]
         public static void Value_Invalid()
         {
-            string lazilyAllocatedValue = "abc";
+            Lazy<int> x = null;
+            Func<int> f = () => x.Value;
 
-            int x = 0;
-            Lazy<string> lazy = null;
-            lazy = new Lazy<string>(() =>  x++ < 5 ? lazy.Value : "Test", true);
+            Value_Invalid_Impl(ref x, new Lazy<int>(f));
+            Value_Invalid_Impl(ref x, new Lazy<int>(f, true));
+            Value_Invalid_Impl(ref x, new Lazy<int>(f, false));
+            Value_Invalid_Impl(ref x, new Lazy<int>(f, LazyThreadSafetyMode.ExecutionAndPublication));
+            Value_Invalid_Impl(ref x, new Lazy<int>(f, LazyThreadSafetyMode.None));
 
-            Assert.Throws<InvalidOperationException>(() => lazilyAllocatedValue = lazy.Value);
-            Assert.Equal("abc", lazilyAllocatedValue);
+            // When used with LazyThreadSafetyMode.PublicationOnly this causes a stack overflow
+            // Value_Invalid_Impl(ref x, new Lazy<int>(f, LazyThreadSafetyMode.PublicationOnly));
+        }
+        
+        class InitiallyExceptionThrowingCtor
+        {
+            public static int counter = 0;
+            public static int getValue()
+            {
+                if (++counter < 5)
+                    throw new Exception();
+                else
+                    return counter;
+            }
+
+            public int Value { get; }
+
+            public InitiallyExceptionThrowingCtor()
+            {
+                Value = getValue();
+            }
+        }
+
+        private static void Ctor_ExceptionRecovery_Impl(Lazy<InitiallyExceptionThrowingCtor> lazy, int? expected)
+        {
+            InitiallyExceptionThrowingCtor.counter = 0;
+            var result = default(InitiallyExceptionThrowingCtor);
+            for (var i = 0; i < 10; ++i)
+            {
+                try { result = lazy.Value; } catch (Exception) { }
+            }
+            if (expected == null)
+                Assert.Null(result);
+            else
+                Assert.Equal(result.Value, expected.Value);
+        }
+
+        [Fact]
+        public static void Ctor_ExceptionRecovery()
+        {
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(), 5);
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(true), 5);
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(false), 5);
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.ExecutionAndPublication), 5);
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.None), 5);
+            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.PublicationOnly), 5);
+        }
+
+        private static void Value_ExceptionRecovery_IntImpl(Lazy<int> lazy, ref int counter, int expected)
+        {
+            counter = 0;
+            var result = 0;
+            for (var i = 0; i < 10; ++i)
+            {
+                try { result = lazy.Value; } catch (Exception) { }
+            }
+            Assert.Equal(result, expected);
+        }
+
+        private static void Value_ExceptionRecovery_StringImpl(Lazy<string> lazy, ref int counter, string expected)
+        {
+            counter = 0;
+            var result = default(string);
+            for (var i = 0; i < 10; ++i)
+            {
+                try { result = lazy.Value; } catch (Exception) { }
+            }
+            if (expected == null)
+                Assert.Null(result);
+            else
+                Assert.Equal(result, expected);
+        }
+
+        [Fact]
+        public static void Value_ExceptionRecovery()
+        {
+            var counter = default(int); // set in test function
+
+            var fint = new Func<int>   (() => { if (++counter < 5) throw new Exception(); else return counter; });
+            var fobj = new Func<string>(() => { if (++counter < 5) throw new Exception(); else return counter.ToString(); });
+
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint), ref counter, 0);
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint, true), ref counter, 0);
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint, false), ref counter, 0);
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint, LazyThreadSafetyMode.ExecutionAndPublication), ref counter, 0);
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint, LazyThreadSafetyMode.None), ref counter, 0);
+            Value_ExceptionRecovery_IntImpl(new Lazy<int>(fint, LazyThreadSafetyMode.PublicationOnly), ref counter, 5);
+
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj), ref counter, null);
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj, true), ref counter, null);
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj, false), ref counter, null);
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj, LazyThreadSafetyMode.ExecutionAndPublication), ref counter, null);
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj, LazyThreadSafetyMode.None), ref counter, null);
+            Value_ExceptionRecovery_StringImpl(new Lazy<string>(fobj, LazyThreadSafetyMode.PublicationOnly), ref counter, 5.ToString());
+        }
+
+        class MyException
+            : Exception
+        {
+            public int Value { get; }
+
+            public MyException(int value)
+            {
+                Value = value;
+            }
+        }
+
+        public class ExceptionInCtor
+        {
+            public ExceptionInCtor() : this(99) { }
+
+            public ExceptionInCtor(int value)
+            {
+                throw new MyException(value);
+            }
+        }
+
+        private static void CheckException<T>(Type expected, Lazy<T> lazy)
+        {
+            Exception e = null;
+            try
+            {
+                var t = lazy.Value;
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+            Assert.NotNull(e);
+            Assert.Same(expected, e.GetType());
+        }
+
+        [Fact]
+        public static void CheckExceptions()
+        {
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }));
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, true));
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, false));
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication));
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None));
+            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly));
+
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>());
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(true));
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(false));
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication));
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None));
+            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly));
+
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)));
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true));
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false));
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication));
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None));
+            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly));
+        }
+
+        private static void SameException<T>(Lazy<T> x)
+        {
+            Exception first = null;
+            try
+            {
+                var _ = x.Value;
+            }
+            catch (Exception thrown1)
+            {
+                first = thrown1;
+            }
+            Assert.NotNull(first);
+
+            try
+            {
+                var _ = x.Value;
+            }
+            catch (MyException thrown2)
+            {
+                Assert.Same(first, thrown2);
+            }
+        }
+
+        private static void DifferentException<T>(Lazy<T> x)
+        {
+            Exception first = null;
+            try
+            {
+                var _ = x.Value;
+            }
+            catch (Exception thrown1)
+            {
+                first = thrown1;
+            }
+            Assert.NotNull(first);
+
+            Exception second = null;
+            try
+            {
+                var _ = x.Value;
+            }
+            catch (Exception thrown2)
+            {
+                second = thrown2;
+            }
+            Assert.NotNull(second);
+
+            Assert.NotEqual(first, second);
+        }
+
+        [Fact]
+        public static void SameOrDifferentException()
+        {
+            SameException(new Lazy<int>(() => { throw new MyException(99); }));
+            SameException(new Lazy<int>(() => { throw new MyException(99); }, true));
+            SameException(new Lazy<int>(() => { throw new MyException(99); }, false));
+            SameException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication));
+            SameException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None));
+
+            DifferentException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly));
+
+            DifferentException(new Lazy<ExceptionInCtor>());
+            DifferentException(new Lazy<ExceptionInCtor>(true));
+            DifferentException(new Lazy<ExceptionInCtor>(false));
+            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication));
+            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None));
+
+            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly));
+
+            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)));
+            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true));
+            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false));
+            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication));
+            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None));
+
+            DifferentException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly));
+        }
+
+        [Fact]
+        static void Serialization_ValueType()
+        {
+            var stream = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(stream, new Lazy<int>(() => 42));
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var fortytwo = (Lazy<int>)formatter.Deserialize(stream);
+            Assert.True(fortytwo.IsValueCreated);
+            Assert.Equal(fortytwo.Value, 42);
+        }
+
+        [Fact]
+        static void Serialization_RefType()
+        {
+            var stream = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(stream, new Lazy<string>(() => "42"));
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var fortytwo = (Lazy<string>)formatter.Deserialize(stream);
+            Assert.True(fortytwo.IsValueCreated);
+            Assert.Equal(fortytwo.Value, "42");
         }
 
         [Theory]
