@@ -370,6 +370,34 @@ check_prototype_definition(
 
 check_cxx_source_compiles(
     "
+    #include <stdlib.h>
+
+    int main()
+    {
+        char* path = strdup(\"abc\");
+        int ret = mkstemps(path, 3);
+    }
+    "
+    HAVE_MKSTEMPS)
+
+check_cxx_source_compiles(
+    "
+    #include <stdlib.h>
+
+    int main()
+    {
+        char* path = strdup(\"abc\");
+        int ret = mkstemp(path);
+    }
+    "
+    HAVE_MKSTEMP)
+
+if (NOT HAVE_MKSTEMPS AND NOT HAVE_MKSTEMP)
+    message(FATAL_ERROR "Cannot find mkstemp nor mkstemp on this platform.")
+endif()
+
+check_cxx_source_compiles(
+    "
     #include <sys/types.h>
     #include <sys/socketvar.h>
     #include <netinet/ip.h>

@@ -584,7 +584,15 @@ extern "C" int32_t SystemNative_Link(const char* source, const char* linkTarget)
 extern "C" intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength)
 {
     intptr_t result;
+#if HAVE_MKSTEMPS
     while (CheckInterrupted(result = mkstemps(pathTemplate, suffixLength)));
+#elif
+    // mkstemps is not available bionic/Android, but mkstemp is
+    (void)suffixLength; // To prevent the compiler from generating errors because suffixLength is unused
+    while (CheckInterrupted(result = mkstemp(pathTemplate)));
+#else
+#error "Cannot find mkstemps nor mkstemp on this platform"
+#endif
     return  result;
 }
 
