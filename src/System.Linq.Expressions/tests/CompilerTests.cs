@@ -254,13 +254,12 @@ namespace System.Linq.Expressions.Tests
                     IL_0001: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
                     IL_0006: ldc.i4.0
                     IL_0007: ldelem.ref
-                    IL_0008: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_000d: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0012: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0017: ldnull
-                    IL_0018: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_001d: castclass  class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0022: ret
+                    IL_0008: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
+                    IL_000d: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+                    IL_0012: ldnull
+                    IL_0013: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+                    IL_0018: castclass  class [System.Private.CoreLib]System.Func`1<int32>
+                    IL_001d: ret
                   }
 
                   // closure.Constants[0]
@@ -299,15 +298,14 @@ namespace System.Linq.Expressions.Tests
                     IL_0011: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
                     IL_0016: ldc.i4.0
                     IL_0017: ldelem.ref
-                    IL_0018: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_001d: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0022: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0027: ldnull
-                    IL_0028: ldloc.0
-                    IL_0029: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
-                    IL_002e: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_0033: castclass  class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0038: ret
+                    IL_0018: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
+                    IL_001d: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+                    IL_0022: ldnull
+                    IL_0023: ldloc.0
+                    IL_0024: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
+                    IL_0029: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+                    IL_002e: castclass  class [System.Private.CoreLib]System.Func`1<int32>
+                    IL_0033: ret
                   }
 
                   // closure.Constants[0]
@@ -324,9 +322,8 @@ namespace System.Linq.Expressions.Tests
                     IL_0007: ldloc.0
                     IL_0008: ldc.i4.0
                     IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
-                    IL_0014: ret
+                    IL_000a: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+                    IL_000f: ret
                   }",
                 appendInnerLambdas: true);
         }
@@ -356,15 +353,14 @@ namespace System.Linq.Expressions.Tests
                     IL_0011: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
                     IL_0016: ldc.i4.0
                     IL_0017: ldelem.ref
-                    IL_0018: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_001d: ldtoken    class [System.Private.CoreLib]System.Func`2<int32,int32>
-                    IL_0022: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0027: ldnull
-                    IL_0028: ldloc.0
-                    IL_0029: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
-                    IL_002e: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_0033: castclass  class [System.Private.CoreLib]System.Func`2<int32,int32>
-                    IL_0038: ret
+                    IL_0018: ldtoken    class [System.Private.CoreLib]System.Func`2<int32,int32>
+                    IL_001d: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+                    IL_0022: ldnull
+                    IL_0023: ldloc.0
+                    IL_0024: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
+                    IL_0029: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+                    IL_002e: castclass  class [System.Private.CoreLib]System.Func`2<int32,int32>
+                    IL_0033: ret
                   }
 
                   // closure.Constants[0]
@@ -381,11 +377,10 @@ namespace System.Linq.Expressions.Tests
                     IL_0007: ldloc.0
                     IL_0008: ldc.i4.0
                     IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
-                    IL_0014: ldarg.1
-                    IL_0015: add
-                    IL_0016: ret
+                    IL_000a: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+                    IL_000f: ldarg.1
+                    IL_0010: add
+                    IL_0011: ret
                   }",
                 appendInnerLambdas: true);
         }

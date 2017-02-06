@@ -132,7 +132,6 @@ namespace System.Linq.Expressions.Compiler
                 {
                     EmitExpression(node);
                     Debug.Assert(TypeUtils.AreReferenceAssignable(type, node.Type));
-                    _ilg.Emit(OpCodes.Castclass, type);
                 }
                 else
                 {

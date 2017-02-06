@@ -142,7 +142,6 @@ namespace System.Linq.Expressions.Compiler
                 _array.EmitLoad();
                 Compiler.IL.EmitInt(_index);
                 Compiler.IL.Emit(OpCodes.Ldelem_Ref);
-                Compiler.IL.Emit(OpCodes.Castclass, _boxType);
             }
         }
 

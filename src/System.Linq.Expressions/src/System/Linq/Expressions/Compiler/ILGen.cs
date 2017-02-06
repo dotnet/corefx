@@ -540,38 +540,26 @@ namespace System.Linq.Expressions.Compiler
 
             // Check for a few more types that we support emitting as constants
             Type t = value as Type;
-            if (t != null && ShouldLdtoken(t))
+            if (t != null)
             {
+                Debug.Assert(ShouldLdtoken(t));
                 il.EmitType(t);
-                if (type != typeof(Type))
-                {
-                    il.Emit(OpCodes.Castclass, type);
-                }
                 return;
             }
 
             MethodBase mb = value as MethodBase;
-            if (mb != null && ShouldLdtoken(mb))
+            Debug.Assert(mb != null && ShouldLdtoken(mb));
+            il.Emit(OpCodes.Ldtoken, mb);
+            Type dt = mb.DeclaringType;
+            if (dt != null && dt.GetTypeInfo().IsGenericType)
             {
-                il.Emit(OpCodes.Ldtoken, mb);
-                Type dt = mb.DeclaringType;
-                if (dt != null && dt.GetTypeInfo().IsGenericType)
-                {
-                    il.Emit(OpCodes.Ldtoken, dt);
-                    il.Emit(OpCodes.Call, MethodBase_GetMethodFromHandle_RuntimeMethodHandle_RuntimeTypeHandle);
-                }
-                else
-                {
-                    il.Emit(OpCodes.Call, MethodBase_GetMethodFromHandle_RuntimeMethodHandle);
-                }
-                if (type != typeof(MethodBase))
-                {
-                    il.Emit(OpCodes.Castclass, type);
-                }
-                return;
+                il.Emit(OpCodes.Ldtoken, dt);
+                il.Emit(OpCodes.Call, MethodBase_GetMethodFromHandle_RuntimeMethodHandle_RuntimeTypeHandle);
             }
-
-            throw ContractUtils.Unreachable;
+            else
+            {
+                il.Emit(OpCodes.Call, MethodBase_GetMethodFromHandle_RuntimeMethodHandle);
+            }
         }
 
         internal static bool ShouldLdtoken(Type t)

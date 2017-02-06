@@ -197,10 +197,6 @@ namespace System.Linq.Expressions.Compiler
             {
                 lc.IL.Emit(OpCodes.Unbox_Any, type);
             }
-            else if (type != typeof(object))
-            {
-                lc.IL.Emit(OpCodes.Castclass, type);
-            }
         }
     }
 }
