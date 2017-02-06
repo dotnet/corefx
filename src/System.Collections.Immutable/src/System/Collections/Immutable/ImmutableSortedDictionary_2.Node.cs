@@ -335,22 +335,6 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// Gets the value or default.
-            /// </summary>
-            /// <param name="key">The key.</param>
-            /// <param name="keyComparer">The key comparer.</param>
-            /// <returns>The value.</returns>
-            [Pure]
-            internal TValue GetValueOrDefault(TKey key, IComparer<TKey> keyComparer)
-            {
-                Requires.NotNullAllowStructs(key, nameof(key));
-                Requires.NotNull(keyComparer, nameof(keyComparer));
-
-                var match = this.Search(key, keyComparer);
-                return match.IsEmpty ? default(TValue) : match._value;
-            }
-
-            /// <summary>
             /// Tries to get the value.
             /// </summary>
             /// <param name="key">The key.</param>
