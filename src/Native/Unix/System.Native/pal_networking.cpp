@@ -934,21 +934,25 @@ extern "C" int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
     utsname  uts;
 
     // If uname returns an error, bail out.
-    if(uname(&uts) == -1) {
+    if (uname(&uts) == -1)
+    {
         return -1;
     }
 
     // If we don't have enough space to copy the name, bail out.
-    if(strlen(uts.domainname) >= namelen) {
+    if (strlen(uts.domainname) >= namelen)
+    {
         errno = EINVAL;
         return -1;
     }
 
     // Copy the domain name
-    strncpy(reinterpret_cast<char*>(name), uts.domainname, static_cast<size_t>(namelen));
+    SafeStringCopy(reinterpret_cast<char*>(name), nameLength, uts.domainname);
     return 0;
 #else
-#error "This system doesn't have getdomainname nor uname"
+    // GetDomainName is not supported on this platform.
+    errno = ENOTSUP;
+    return -1;
 #endif
 }
 
