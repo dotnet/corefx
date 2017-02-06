@@ -329,10 +329,6 @@ check_function_exists(
     futimens
     HAVE_FUTIMENS)
 
-if(NOT HAVE_FUTIMES AND NOT HAVE_FUTIMENS)
-    message(FATAL_ERROR "Cannot find futimes nor futimens on this platform.")
-endif()
-
 check_cxx_source_runs(
     "
     #include <sys/mman.h>
