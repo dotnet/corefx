@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
 
 namespace Legacy.Support
 {
@@ -47,50 +49,71 @@ namespace Legacy.Support
 
         private static void GenerateSerialInfo()
         {
-            string[] availablePortNames = PortHelper.GetPorts();
-            Debug.WriteLine("total ports : " + availablePortNames.Length);
+            string[] installedPortNames = PortHelper.GetPorts();
+            Debug.WriteLine("total ports : " + installedPortNames.Length);
             bool nullModemPresent = false;
 
             string portName1 = null, portName2 = null, loopbackPortName = null;
 
-            for (int i = 0; i < availablePortNames.Length; ++i)
+            Array.Sort(installedPortNames);
+
+            var openablePortNames = new List<string>();
+            foreach (string portName in installedPortNames)
             {
-                SerialPort com = new SerialPort(availablePortNames[i]);
+                SerialPort com = new SerialPort(portName);
 
                 try
                 {
                     com.Open();
                     com.Close();
 
-                    if (null == portName1)
-                    {
-                        portName1 = availablePortNames[i];
-                    }
-                    else if (null == portName2)
-                    {
-                        portName2 = availablePortNames[i];
-                        break;
-                    }
+                    openablePortNames.Add(portName);
                 }
-                catch (Exception) { }
-            }
-
-            if (null != portName1 && SerialPortConnection.VerifyLoopback(portName1))
-            {
-                loopbackPortName = portName1;
-            }
-
-            if (null != portName2)
-            {
-                if (null == loopbackPortName && SerialPortConnection.VerifyLoopback(portName2))
+                catch (Exception)
                 {
-                    loopbackPortName = portName2;
                 }
+            }
 
-                nullModemPresent = SerialPortConnection.VerifyConnection(portName1, portName2);
+            // Find the first port which is looped-back
+            foreach (var portName in openablePortNames)
+            {
+                if (SerialPortConnection.VerifyLoopback(portName))
+                {
+                    loopbackPortName = portName;
+                    break;
+                }
+            }
+
+            // Find any pair of ports which are null-modem connected
+            // If there is a pair like this, then they take precedence over any other way of identifying two available ports
+            for (var firstIndex = 0; firstIndex < openablePortNames.Count && !nullModemPresent; firstIndex++)
+            {
+                for (var secondIndex = firstIndex+1; secondIndex < openablePortNames.Count && !nullModemPresent; secondIndex++)
+                {
+                    var firstPortName = openablePortNames[firstIndex];
+                    var secondPortName = openablePortNames[secondIndex];
+
+                    if (SerialPortConnection.VerifyConnection(firstPortName, secondPortName))
+                    {
+                        // We have a null modem port
+                        portName1 = firstPortName;
+                        portName2 = secondPortName;
+                        nullModemPresent = true;
+
+                        Debug.Print("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
+                    }
+                }
+            }
+
+            if (!nullModemPresent)
+            {
+                // If we don't have a null-modem connection, we'll just use the first two ports
+                portName1 = openablePortNames.FirstOrDefault();
+                portName2 = openablePortNames.Skip(1).FirstOrDefault();
             }
 
             s_localMachineSerialInfo = new LocalMachineSerialInfo(portName1, portName2, loopbackPortName, nullModemPresent);
+
         }
 
         public static bool SufficientHardwareRequirements(SerialPortRequirements serialPortRequirements)
