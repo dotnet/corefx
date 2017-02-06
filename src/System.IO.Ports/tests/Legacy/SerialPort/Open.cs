@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using Legacy.Support;
 using System.IO.Ports;
 using System.IO.PortsTests;
@@ -22,7 +23,7 @@ public class Open : PortsTest
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            Console.WriteLine("BytesToWrite={0}", com.BytesToWrite);
+            Debug.Print("BytesToWrite={0}", com.BytesToWrite);
 
             serPortProp.VerifyPropertiesAndPrint(com);
         }
@@ -41,7 +42,7 @@ public class Open : PortsTest
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying after calling Open() twice");
+        Debug.Print("Verifying after calling Open() twice");
 
         com.Open();
         try
@@ -63,7 +64,7 @@ public class Open : PortsTest
         SerialPortProperties serPortProp1 = new SerialPortProperties();
         SerialPortProperties serPortProp2 = new SerialPortProperties();
 
-        Console.WriteLine("Verifying calling Open() on two instances of SerialPort");
+        Debug.Print("Verifying calling Open() on two instances of SerialPort");
         serPortProp1.SetAllPropertiesToOpenDefaults();
         serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
