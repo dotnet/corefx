@@ -4,96 +4,28 @@
 
 using System;
 using System.IO.Ports;
-using System.Collections;
+using System.IO.PortsTests;
 using System.Threading;
+using Legacy.Support;
+using Xunit;
 
-public class Open_exception
+public class Open_stress : PortsTest
 {
-    public static readonly String s_strActiveBugNums = "234598 23595";
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.Open()";
-    public static readonly String s_strTFName = "Open.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
-    //Determines how long the randomly generated PortName is
-    public static readonly int rndPortNameSize = 256;
-
-    private int _numErrors = 0;
-    private int _numTestcases = 0;
-    private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
+    [ConditionalFact(nameof(HasNullModem))]
+    public void OpenReceiveData()
     {
-        Open_exception objTest = new Open_exception();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
-
-    public bool RunTest()
-    {
-        bool retValue = true;
-        TCSupport tcSupport = new TCSupport();
-
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(OpenReceiveData), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(OpenReceiveDataAndRTS), TCSupport.SerialPortRequirements.NullModem);
-
-        _numErrors += tcSupport.NumErrors;
-        _numTestcases = tcSupport.NumTestcases;
-        _exitValue = tcSupport.ExitValue;
-
-        return retValue;
-    }
-
-    public bool OpenReceiveData()
-    {
-        Thread workerThread = new Thread(new ThreadStart(OpenReceiveData_WorkerThread));
+        Thread workerThread = new Thread(OpenReceiveData_WorkerThread);
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Open and Close port while the port is recieving data");
+        Console.WriteLine("Open and Close port while the port is receiving data");
 
         _continueLoop = true;
         workerThread.Start();
 
         try
         {
-            for (int i = 0; i < 1000; ++i)
+            // TODO - Verify number of iterations (original is 1000 which makes test very slow)
+            for (int i = 0; i < 10; ++i)
             {
                 com.RtsEnable = true;
                 com.Open();
@@ -109,13 +41,11 @@ public class Open_exception
         }
 
         workerThread.Join();
-
-        return true;
     }
 
-    private bool _continueLoop;
+    private volatile bool _continueLoop;
 
-    public void OpenReceiveData_WorkerThread()
+    private void OpenReceiveData_WorkerThread()
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
         byte[] xmitBytes = new byte[16];
@@ -138,9 +68,10 @@ public class Open_exception
         }
     }
 
-    public bool OpenReceiveDataAndRTS()
+    [ConditionalFact(nameof(HasNullModem))]
+    public void OpenReceiveDataAndRTS()
     {
-        Thread workerThread = new Thread(new ThreadStart(OpenReceiveDataAndRTS_WorkerThread));
+        Thread workerThread = new Thread(OpenReceiveDataAndRTS_WorkerThread);
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
         Console.WriteLine("Open and Close port while the port is recieving data and the RTS pin is changing states");
@@ -157,7 +88,8 @@ public class Open_exception
 
         try
         {
-            for (int i = 0; i < 1000; ++i)
+            // TODO - Verify number of iterations (original is 1000 which makes test very slow)
+            for (int i = 0; i < 10; ++i)
             {
                 com.Open();
                 com.Handshake = Handshake.RequestToSend;
@@ -167,7 +99,7 @@ public class Open_exception
         }
         catch (Exception e)
         {
-            Console.WriteLine("Thread1 through the following exception:\n{0}", e);
+            Console.WriteLine("Thread1 threw the following exception:\n{0}", e);
         }
         finally
         {
@@ -178,12 +110,10 @@ public class Open_exception
         }
 
         workerThread.Join();
-
-        return true;
     }
 
 
-    public void OpenReceiveDataAndRTS_WorkerThread()
+    void OpenReceiveDataAndRTS_WorkerThread()
     {
         try
         {
