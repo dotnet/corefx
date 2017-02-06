@@ -479,18 +479,13 @@ namespace System.Collections.Immutable
             /// <summary>
             /// Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes.
             /// </summary>
-            internal void Freeze(Action<KeyValuePair<TKey, TValue>> freezeAction = null)
+            internal void Freeze()
             {
                 // If this node is frozen, all its descendants must already be frozen.
                 if (!_frozen)
                 {
-                    if (freezeAction != null)
-                    {
-                        freezeAction(new KeyValuePair<TKey, TValue>(_key, _value));
-                    }
-
-                    _left.Freeze(freezeAction);
-                    _right.Freeze(freezeAction);
+                    _left.Freeze();
+                    _right.Freeze();
                     _frozen = true;
                 }
             }
