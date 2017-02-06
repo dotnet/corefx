@@ -17,15 +17,19 @@ public class Open : PortsTest
         SerialPortProperties serPortProp = new SerialPortProperties();
 
         com.Open();
-        serPortProp.SetAllPropertiesToOpenDefaults();
-        serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+        try
+        {
+            serPortProp.SetAllPropertiesToOpenDefaults();
+            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("BytesToWrite={0}", com.BytesToWrite);
+            Console.WriteLine("BytesToWrite={0}", com.BytesToWrite);
 
-        serPortProp.VerifyPropertiesAndPrint(com);
-
-        if (com.IsOpen)
+            serPortProp.VerifyPropertiesAndPrint(com);
+        }
+        finally
+        {
             com.Close();
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -40,12 +44,15 @@ public class Open : PortsTest
         Console.WriteLine("Verifying after calling Open() twice");
 
         com.Open();
-        Assert.Throws<InvalidOperationException>(() => com.Open());
-
-        serPortProp.VerifyPropertiesAndPrint(com);
-
-        if (com.IsOpen)
+        try
+        {
+            Assert.Throws<InvalidOperationException>(() => com.Open());
+            serPortProp.VerifyPropertiesAndPrint(com);
+        }
+        finally
+        {
             com.Close();
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -64,16 +71,19 @@ public class Open : PortsTest
         serPortProp2.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
         com1.Open();
+        try
+        {
+            Assert.Throws<UnauthorizedAccessException>(() => com2.Open());
 
-        Assert.Throws<UnauthorizedAccessException>(() => com2.Open());
-
-        serPortProp1.VerifyPropertiesAndPrint(com1);
-        serPortProp2.VerifyPropertiesAndPrint(com2);
-
-        if (com1.IsOpen)
+            serPortProp1.VerifyPropertiesAndPrint(com1);
+            serPortProp2.VerifyPropertiesAndPrint(com2);
+        }
+        finally
+        {
             com1.Close();
 
-        if (com2.IsOpen)
-            com2.Close();
+            if (com2.IsOpen)
+                com2.Close();
+        }
     }
 }
