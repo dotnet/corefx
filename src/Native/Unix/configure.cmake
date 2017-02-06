@@ -376,6 +376,7 @@ check_cxx_source_compiles(
     {
         char* path = strdup(\"abc\");
         int ret = mkstemps(path, 3);
+        return 0;
     }
     "
     HAVE_MKSTEMPS)
@@ -388,6 +389,7 @@ check_cxx_source_compiles(
     {
         char* path = strdup(\"abc\");
         int ret = mkstemp(path);
+        return 0;
     }
     "
     HAVE_MKSTEMP)
