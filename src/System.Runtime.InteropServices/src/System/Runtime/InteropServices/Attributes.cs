@@ -129,4 +129,53 @@ namespace System.Runtime.InteropServices
         {
         }
     }
+
+    [AttributeUsage(AttributeTargets.Interface, Inherited = false)]
+    public sealed class TypeLibImportClassAttribute : Attribute
+    {
+        internal String _importClassName;
+        public TypeLibImportClassAttribute(Type importClass)
+        {
+            _importClassName = importClass.ToString();
+        }
+        public String Value { get { return _importClassName; } }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public sealed class ProgIdAttribute : Attribute
+    {
+        internal String _val;
+        public ProgIdAttribute(String progId)
+        {
+            _val = progId;
+        }
+        public String Value { get { return _val; } }
+    }
+
+    [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+    public sealed class ImportedFromTypeLibAttribute : Attribute
+    {
+        internal String _val;
+        public ImportedFromTypeLibAttribute(String tlbFile)
+        {
+            _val = tlbFile;
+        }
+        public String Value { get { return _val; } }
+    }
+
+    [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+    public sealed class TypeLibVersionAttribute : Attribute
+    {
+        internal int _major;
+        internal int _minor;
+
+        public TypeLibVersionAttribute(int major, int minor)
+        {
+            _major = major;
+            _minor = minor;
+        }
+
+        public int MajorVersion { get { return _major; } }
+        public int MinorVersion { get { return _minor; } }
+    }
 }
