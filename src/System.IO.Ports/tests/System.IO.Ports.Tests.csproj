@@ -16,6 +16,7 @@
     <Compile Include="Legacy\SerialPort\Close.cs" />
     <Compile Include="Legacy\SerialPort\ctor.cs" />
     <Compile Include="Legacy\SerialPort\ctor_str.cs" />
+    <Compile Include="Legacy\SerialPort\Open.cs" />
     <Compile Include="Legacy\Support\LocalMachineSerialInfo.cs" />
     <Compile Include="Legacy\Support\PortHelper.cs" />
     <Compile Include="Legacy\Support\SerialPortConnection.cs" />

@@ -562,7 +562,6 @@ namespace Legacy.Support
         /// <param name="index">The index to start verifying the items at.</param>
         /// <param name="length">The number of item to verify</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
-        /// <summary>
         public static bool VerifyArray<T>(T[] expectedArray, T[] actualArray, int index, int length)
         {
             bool retValue = true;
