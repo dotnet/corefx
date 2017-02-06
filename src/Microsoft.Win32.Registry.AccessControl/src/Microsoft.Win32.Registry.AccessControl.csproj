@@ -18,11 +18,10 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="Microsoft.Win32.Registry.AccessControl.TypeForwards.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup>
     <Compile Include="Microsoft\Win32\RegistryAclExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
-    <Compile Include="Microsoft\Win32\RegistryAclExtensions.net46.cs" />
     <Reference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
