@@ -1089,12 +1089,28 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
     while (CheckInterrupted(ret = fstat_(inFd, &sourceStat)));
     if (ret == 0)
     {
+#if HAVE_FUTIMES
         struct timeval origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
         origTimes[0].tv_usec = 0;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
         origTimes[1].tv_usec = 0;
+#elif HAVE_FUTIMENS
+        // futimes is not a POSIX function, and not available on Android,
+        // but futimens is
+        struct timespec origTimes[2];
+        origTimes[0].tv_nsec = 0;
+        origTimes[1].tv_nsec= 0;
+#else
+#error "Must have at futimes no furtimens"
+#endif
+
+        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[1].tv_sec = sourceStat.st_mtime;
+
+#if HAVE_FUTIMES
         while (CheckInterrupted(ret = futimes(outFd, origTimes)));
+#else
+        while (CheckInterrupted(ret = futimens(outFd, origTimes)));
+#endif
     }
     if (ret != 0)
     {
