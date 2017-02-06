@@ -15,15 +15,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Release|AnyCPU'" />
-  <ItemGroup>
-    <Compile Include="Microsoft\Win32\RegistryAclExtensions.cs" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Security.AccessControl" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetsWindows)' == 'true'">
+    <Compile Include="Microsoft\Win32\RegistryAclExtensions.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
