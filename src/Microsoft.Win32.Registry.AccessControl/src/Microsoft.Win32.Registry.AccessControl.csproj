@@ -15,9 +15,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
-    <Compile Include="Microsoft.Win32.Registry.AccessControl.TypeForwards.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\Win32\RegistryAclExtensions.cs" />
   </ItemGroup>
@@ -25,6 +22,7 @@
     <Reference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+    <Compile Include="Microsoft.Win32.Registry.AccessControl.TypeForwards.cs" />
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
