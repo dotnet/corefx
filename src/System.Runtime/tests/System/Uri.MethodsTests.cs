@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -10,6 +11,8 @@ namespace System.Tests
 {
     public class UriMethodTests
     {
+        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+
         public static IEnumerable<object[]> MakeRelative_TestData()
         {
             // Path (forward x3)
@@ -65,8 +68,16 @@ namespace System.Tests
 
             // Only UNC or DOS uris are case insensitive
             yield return new object[] { new Uri("http://domain.com/PATH1/path2/PATH3"), new Uri("http://domain.com/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
-            yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
-            yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
+            if (s_IsWindowsSystem)
+            {
+                yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
+                yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
+            }
+            else
+            {
+                yield return new object[] { new Uri("file:///PATH1/path2/PATH3"), new Uri("file:///path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
+                yield return new object[] { new Uri("/PATH1/path2/PATH3"), new Uri("/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
+            }
 
             // Same path, but uri1 ended with a filename, but uri2 didn't
             yield return new object[] { new Uri("http://domain.com/path1/file"), new Uri("http://domain.com/path1/"), new Uri("./", UriKind.Relative) };
@@ -182,11 +193,14 @@ namespace System.Tests
             yield return new object[] { new Uri("http://host/path/path/file?query"), new Uri("path/path/file?query", UriKind.Relative), true }; // Uri2 is relative
             yield return new object[] { new Uri("http://host/path/path/file?query"), new Uri("path/path/file", UriKind.Relative), true }; // Uri2 is relative
 
-            // Uri1 is a file
-            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://C:/path/path/path"), true };
-            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://D:/path/path/path"), false };
-            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("http://host/path/path/file"), false };
-            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("path/path/file", UriKind.Relative), true };
+            if (s_IsWindowsSystem)
+            {
+                // Uri1 is a file
+                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://C:/path/path/path"), true };
+                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://D:/path/path/path"), false };
+                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("http://host/path/path/file"), false };
+                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("path/path/file", UriKind.Relative), true };
+            }
         }
 
         [Theory]
@@ -202,52 +216,72 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("uri", () => new Uri("http://domain.com").IsBaseOf(null)); // Uri is null
         }
 
+        public static IEnumerable<object[]> IsWellFormedOriginalString_TestData()
+        {
+            yield return new object[] { "http://www.domain.com/path?name", true  };
+            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", true  };
+            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", true  };
+            yield return new object[] { "http://[::1]/path1/page?query#fragment", true  };
+            yield return new object[] { "unknownscheme:", true  };
+            yield return new object[] { "http://www.domain.com/path???/file name", false  };
+            yield return new object[] { @"http:\\host/path/file", false  };
+            yield return new object[] { "file:////", true  };
+            yield return new object[] { @"http:\\host/path/file", false  };
+            yield return new object[] { "http://host/path\file", false  };
+            if (s_IsWindowsSystem)
+            {
+                yield return new object[] { @"c:\directory\filename", false  };
+                yield return new object[] { @"\\unchost", false  };
+                yield return new object[] { "file://C:/directory/filename", false  };
+                yield return new object[] { "file:///c|/dir", false  };
+                yield return new object[] { @"file:\\\c:\path", false  };
+            }
+            else
+            {
+                yield return new object[] { @"/directory/filename", false  };
+            }
+        }
+
         [Theory]
-        [InlineData("http://www.domain.com/path?name", true)]
-        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", true)]
-        [InlineData("http://[::1]:50/path1/page?query#fragment", true)]
-        [InlineData("http://[::1]/path1/page?query#fragment", true)]
-        [InlineData("unknownscheme:", true)]
-        [InlineData("http://www.domain.com/path???/file name", false)]
-        [InlineData(@"c:\directory\filename", false)]
-        [InlineData(@"\\unchost", false)]
-        [InlineData("file://C:/directory/filename", false)]
-        [InlineData(@"http:\\host/path/file", false)]
-        [InlineData("file:////", true)]
-        [InlineData("file:///c|/dir", false)]
-        [InlineData(@"file:\\\c:\path", false)]
-        [InlineData(@"http:\\host/path/file", false)]
-        [InlineData("http://host/path\file", false)]
+        [MemberData(nameof(IsWellFormedOriginalString_TestData))]
         public void IsWellFormedOriginalString(string uriString, bool expected)
         {
             Uri uri = new Uri(uriString);
             Assert.Equal(expected, uri.IsWellFormedOriginalString());
         }
 
+        public static IEnumerable<object[]> IsWellFormedOriginalUriString_TestData()
+        {
+            yield return new object[] { "http://www.domain.com/path?name", UriKind.Absolute, true };
+            yield return new object[] { "http://www.domain.com/path?name", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "http://www.domain.com/path?name", UriKind.Relative, false };
+            yield return new object[] { "/path1/path2", UriKind.Absolute, false };
+            yield return new object[] { "/path1/path2", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "/path1/path2", UriKind.Relative, true };
+            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.Absolute, true };
+            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.Relative, false };
+            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.Absolute, true };
+            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.Relative, false };
+            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.Absolute, true };
+            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.Relative, false };
+            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.Absolute, true };
+            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
+            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.Relative, false };
+            yield return new object[] { "http://www.domain.com/path???/file name", UriKind.RelativeOrAbsolute, false };
+            yield return new object[] { "http:\\host/path/file", UriKind.RelativeOrAbsolute, false };
+            yield return new object[] { null, UriKind.RelativeOrAbsolute, false };
+            if (s_IsWindowsSystem)
+            {
+                yield return new object[] { "c:\\directory\filename", UriKind.RelativeOrAbsolute, false };
+                yield return new object[] { "file://C:/directory/filename", UriKind.RelativeOrAbsolute, false };
+            }
+        }
+
         [Theory]
-        [InlineData("http://www.domain.com/path?name", UriKind.Absolute, true)]
-        [InlineData("http://www.domain.com/path?name", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("http://www.domain.com/path?name", UriKind.Relative, false)]
-        [InlineData("/path1/path2", UriKind.Absolute, false)]
-        [InlineData("/path1/path2", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("/path1/path2", UriKind.Relative, true)]
-        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.Absolute, true)]
-        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.Relative, false)]
-        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.Absolute, true)]
-        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.Relative, false)]
-        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.Absolute, true)]
-        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.Relative, false)]
-        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.Absolute, true)]
-        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
-        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.Relative, false)]
-        [InlineData("http://www.domain.com/path???/file name", UriKind.RelativeOrAbsolute, false)]
-        [InlineData("c:\\directory\filename", UriKind.RelativeOrAbsolute, false)]
-        [InlineData("file://C:/directory/filename", UriKind.RelativeOrAbsolute, false)]
-        [InlineData("http:\\host/path/file", UriKind.RelativeOrAbsolute, false)]
-        [InlineData(null, UriKind.RelativeOrAbsolute, false)]
+        [MemberData(nameof(IsWellFormedOriginalUriString_TestData))]
         public void IsWellFormedUriString(string uriString, UriKind uriKind, bool expected)
         {
             Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, uriKind));
@@ -313,22 +347,44 @@ namespace System.Tests
             yield return new object[] { new Uri("http://www.domain.com:100/path?name#fragment"), new Uri("http://www.domain.com:800/path?name#fragment"), false }; // Different port
             yield return new object[] { new Uri("http://www.domain.com:100/path?name#fragment"), new Uri("http://www.domain.com:80/path?name#fragment"), false }; // Different port
 
-            // File paths
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file"), true };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/Path2/File"), true };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://D:/path1/path2/file"), false };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path2/path2/file"), false };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path1/file"), false };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file!"), false };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("http://domain.com"), false };
-            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri(@"\\server\path1\path2\file"), false };
+            if (s_IsWindowsSystem)
+            {
+                // File paths
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file"), true };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/Path2/File"), true };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://D:/path1/path2/file"), false };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path2/path2/file"), false };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path1/file"), false };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file!"), false };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("http://domain.com"), false };
+                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri(@"\\server\path1\path2\file"), false };
 
-            // UNC share paths
-            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file"), true };
-            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server1\sharepath\path\file"), false };
-            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepata\path\file"), false };
-            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\pata\file"), false };
-            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file!"), false };
+                // UNC share paths
+                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file"), true };
+                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server1\sharepath\path\file"), false };
+                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepata\path\file"), false };
+                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\pata\file"), false };
+                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file!"), false };
+            }
+            else
+            {
+                // Implicit file
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file"), true };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/File"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepata/path/file"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/pata/file"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file!"), false };
+                yield return new object[] { new Uri(@"/shar\path/path/file"), new Uri("/shar/path/path/file"), false };
+
+                // Explicit file
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file"), true };
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/File"), false };
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepata/path/file"), false };
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/pata/file"), false };
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file!"), false };
+                yield return new object[] { new Uri("file://host1/sharepath/path/file"), new Uri("file://host2/sharepath/path/file"), false };
+                yield return new object[] { new Uri("file://host1/sharepath/path/file"), new Uri("file:///sharepath/path/file"), false };
+            }
 
             // Relative paths
             yield return new object[] { new Uri("/path1/path2/", UriKind.Relative), new Uri("/path1/path2/", UriKind.Relative), true };
@@ -506,12 +562,15 @@ namespace System.Tests
             // IPv6
             yield return new object[] { new Uri("http://[1111:2222:3333::431%16]"), UriComponents.SerializationInfoString, "http://[1111:2222:3333::431%16]/" }; // With scope id
 
-            // File
-            yield return new object[] { new Uri("file:///C|/path1/path2/file"), UriComponents.AbsoluteUri, "file:///C:/path1/path2/file" }; // Non canonical
+            if (s_IsWindowsSystem)
+            {
+                // File
+                yield return new object[] { new Uri("file:///C|/path1/path2/file"), UriComponents.AbsoluteUri, "file:///C:/path1/path2/file" }; // Non canonical
 
-            Uri uncUri = new Uri("\\\\\u1234\u2345");
-            yield return new object[] { uncUri, UriComponents.Host, "\u1234\u2345" };
-            yield return new object[] { uncUri, UriComponents.NormalizedHost, "\u1234\u2345" };
+                Uri uncUri = new Uri("\\\\\u1234\u2345");
+                yield return new object[] { uncUri, UriComponents.Host, "\u1234\u2345" };
+                yield return new object[] { uncUri, UriComponents.NormalizedHost, "\u1234\u2345" };
+            }
 
             // Unknown
             Uri unknownUri = new Uri("unknownscheme:");
