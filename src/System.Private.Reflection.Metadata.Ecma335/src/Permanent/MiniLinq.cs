@@ -1,11 +1,28 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Linq
 {
+}
+
+namespace System.Collections.Generic
+{
     public static class MiniLinq
     {
+        /// <summary>Converts an enumerable to an array.</summary>
+        /// <param name="source">The enumerable to convert.</param>
+        /// <returns>The resulting array.</returns>
+        internal static List<T> ToList<T>(this IEnumerable<T> source)
+        {
+            Debug.Assert(source != null);
+            return new List<T>(source);
+        }
+
         /// <summary>Converts an enumerable to an array.</summary>
         /// <param name="source">The enumerable to convert.</param>
         /// <returns>The resulting array.</returns>
