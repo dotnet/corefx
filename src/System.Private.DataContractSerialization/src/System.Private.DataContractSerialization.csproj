@@ -162,10 +162,23 @@
     <Compile Include="System\Xml\IFragmentCapableXmlDictionaryWriter.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
-    <ReferenceFromRuntime Include="System.Private.CoreLib.Augments" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
+    <ProjectReference Include="..\..\System.Private.Xml.Linq\src\System.Private.Xml.Linq.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Serialization.Formatters\src\System.Runtime.Serialization.Formatters.csproj" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Specialized\src\System.Collections.Specialized.csproj" />
+    <ProjectReference Include="..\..\System.Linq\src\System.Linq.csproj" />
+    <ProjectReference Include="..\..\System.Text.RegularExpressions\src\System.Text.RegularExpressions.csproj" />
+    <ProjectReference Include="..\..\System.Collections.NonGeneric\src\System.Collections.NonGeneric.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Serialization.Primitives\src\System.Runtime.Serialization.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
+    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj" />
     <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <Reference Include="System.CodeDom" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
