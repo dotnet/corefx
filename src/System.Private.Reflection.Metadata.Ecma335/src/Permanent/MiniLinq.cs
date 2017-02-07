@@ -8,11 +8,7 @@ using System.Diagnostics;
 
 namespace System.Linq
 {
-}
-
-namespace System.Collections.Generic
-{
-    public static class MiniLinq
+    internal static class MiniLinq
     {
         /// <summary>Converts an enumerable to an array.</summary>
         /// <param name="source">The enumerable to convert.</param>

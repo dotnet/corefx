@@ -16,11 +16,10 @@
     <SystemReflectionMetadataPath>..\..\System.Reflection.Metadata\src\</SystemReflectionMetadataPath>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <TargetingPackReference Include="System.Private.CoreLib" />
-    <TargetingPackReference Include="System.Private.Interop" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\ExceptionUtilities.cs" />
@@ -241,12 +240,11 @@
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Permanent\Environment.cs" />
+    <Compile Include="Permanent\Marshal.cs" />
     <Compile Include="Permanent\MiniLinq.cs" />
     <Compile Include="Permanent\StrongBox.cs" />
     <Compile Include="Temporary\BitConverter.cs" />
-    <Compile Include="Temporary\Dictionary.cs" />
-    <Compile Include="Temporary\EditorBrowsableAttribute.cs" />
-    <Compile Include="Temporary\HashHelpers.cs" />
     <Compile Include="Temporary\Path.cs" />
     <Compile Include="Temporary\ResourceManager.cs" />
     <Compile Include="..\..\Common\src\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
