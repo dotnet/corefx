@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
+using Xunit;
 
 namespace Legacy.Support
 {
@@ -248,7 +249,7 @@ namespace Legacy.Support
             return predicateValue;
         }
 
-        public static bool WaitForExpected<T>(ValueGenerator<T> actualValueGenerator, T expectedValue, int maxWait, string errorMessage)
+        public static void WaitForExpected<T>(ValueGenerator<T> actualValueGenerator, T expectedValue, int maxWait, string errorMessage)
         {
             Stopwatch stopWatch = new Stopwatch();
             bool result = false;
@@ -268,12 +269,10 @@ namespace Legacy.Support
 
             if (!result)
             {
-                Debug.WriteLine(errorMessage +
+                Assert.True(false, errorMessage +
                     " Expected:" + (null == expectedValue ? "<null>" : expectedValue.ToString()) +
                     " Actual:" + (null == actualValue ? "<null>" : actualValue.ToString()));
             }
-
-            return result;
         }
 
         private const int MIN_RANDOM_CHAR = 0;

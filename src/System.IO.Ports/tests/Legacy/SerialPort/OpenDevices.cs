@@ -5,7 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.PortsTests;
 using System.Text.RegularExpressions;
+using Xunit;
 
 public class OpenDevices : PortsTest
 {

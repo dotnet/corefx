@@ -238,9 +238,8 @@ public class DataBits_Property : PortsTest
     }
 
 
-    private bool VerifyExceptionAfterOpen(SerialPort com, int dataBits, Type expectedException)
+    private void  VerifyExceptionAfterOpen(SerialPort com, int dataBits, Type expectedException)
     {
-        bool retValue = true;
         SerialPortProperties serPortProp = new SerialPortProperties();
 
         com.Open();
@@ -253,7 +252,6 @@ public class DataBits_Property : PortsTest
             if (null != expectedException)
             {
                 Fail("ERROR!!! Expected setting the DataBits after Open() to throw {0} and nothing was thrown", expectedException);
-                retValue = false;
             }
         }
         catch (Exception e)
@@ -261,18 +259,14 @@ public class DataBits_Property : PortsTest
             if (null == expectedException)
             {
                 Fail("ERROR!!! Expected setting the DataBits after Open() NOT to throw an exception and {0} was thrown", e.GetType());
-                retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
                 Fail("ERROR!!! Expected setting the DataBits after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
-                retValue = false;
             }
         }
         serPortProp.VerifyPropertiesAndPrint(com);
-        return retValue;
     }
-
 
     private void VerifyDataBitsBeforeOpen(int dataBits, int numBytesToSend)
     {
@@ -320,7 +314,7 @@ public class DataBits_Property : PortsTest
         byte[] expectedBytes = new byte[numBytesToSend];
         byte[] rcvBytes = new byte[numBytesToSend];
         Random rndGen = new Random();
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        Stopwatch sw = new Stopwatch();
         using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
             double expectedTime, actualTime, percentageDifference;

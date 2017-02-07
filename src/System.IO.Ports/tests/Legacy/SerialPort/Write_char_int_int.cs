@@ -10,11 +10,11 @@ using Legacy.Support;
 
 public class Write_char_int_int : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/17 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.Write(char[], int, int)";
-    public static readonly String s_strTFName = "Write_char_int_int.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
+    
+    
+    
+    
+    
 
     //The string size used when veryifying encoding 
     public static readonly int ENCODING_BUFFER_SIZE = 4;
@@ -45,74 +45,39 @@ public class Write_char_int_int : PortsTest
     private int _numTestcases = 0;
     private int _exitValue = TCSupport.PassExitCode;
 
-    public static void Main(string[] args)
-    {
-        Write_char_int_int objTest = new Write_char_int_int();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    
 
     public bool RunTest()
     {
         bool retValue = true;
         TCSupport tcSupport = new TCSupport();
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Buffer_Null), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Buffer_Null), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Offset_NEG1), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Offset_NEGRND), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Offset_MinInt), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Offset_NEG1), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Offset_NEGRND), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Offset_MinInt), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_NEG1), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_NEGRND), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_MinInt), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Count_NEG1), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Count_NEGRND), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Count_MinInt), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(OffsetCount_EQ_Length_Plus_1), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(OffsetCount_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Offset_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(OffsetCount_EQ_Length_Plus_1), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(OffsetCount_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Offset_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(Count_GT_Length), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(OffsetCount_EQ_Length), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Offset_EQ_Length_Minus_1), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_EQ_Length), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Count_EQ_Zero), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(OffsetCount_EQ_Length), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Offset_EQ_Length_Minus_1), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Count_EQ_Length), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Count_EQ_Zero), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ASCIIEncoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ASCIIEncoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
         //		retValue &= tcSupport.BeginTestcase(new TestDelegate(UTF7Encoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(UTF8Encoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(UTF32Encoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(UnicodeEncoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(UTF8Encoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(UTF32Encoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(UnicodeEncoding), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(LargeBuffer), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
+        tcSupport.BeginTestcase(new TestDelegate(LargeBuffer), TCSupport.SerialPortRequirements.LoopbackOrNullModem);
 
         _numErrors += tcSupport.NumErrors;
         _numTestcases = tcSupport.NumTestcases;
@@ -124,25 +89,13 @@ public class Write_char_int_int : PortsTest
     #region Test Cases
     public bool Buffer_Null()
     {
-        if (!VerifyWriteException(null, 0, 1, typeof(System.ArgumentNullException)))
-        {
-            Debug.WriteLine("Err_001!!! Verifying write method throws exception with buffer equal to null FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(null, 0, 1, typeof(ArgumentNullException));
     }
 
 
     public bool Offset_NEG1()
     {
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], -1, DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_002!!! Verifying write method throws exception with offset equal to -1");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], -1, DEFAULT_CHAR_COUNT, typeof(ArgumentOutOfRangeException));
     }
 
 
@@ -150,37 +103,19 @@ public class Write_char_int_int : PortsTest
     {
         Random rndGen = new Random(-55);
 
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], rndGen.Next(Int32.MinValue, 0), DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_003!!! Verifying write method throws exception with offset equal to negative random number");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], rndGen.Next(Int32.MinValue, 0), DEFAULT_CHAR_COUNT, typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool Offset_MinInt()
     {
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], Int32.MinValue, DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_004!!! Verifying write method throws exception with count equal to MintInt");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], Int32.MinValue, DEFAULT_CHAR_COUNT, typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool Count_NEG1()
     {
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, -1, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_005!!! Verifying write method throws exception with count equal to -1");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, -1, typeof(ArgumentOutOfRangeException));
     }
 
 
@@ -188,25 +123,13 @@ public class Write_char_int_int : PortsTest
     {
         Random rndGen = new Random(-55);
 
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, rndGen.Next(Int32.MinValue, 0), typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_006!!! Verifying write method throws exception with count equal to negative random number");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, rndGen.Next(Int32.MinValue, 0), typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool Count_MinInt()
     {
-        if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, Int32.MinValue, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_007!!! Verifying write method throws exception with count equal to MintInt");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, Int32.MinValue, typeof(ArgumentOutOfRangeException));
     }
 
 
@@ -216,15 +139,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE_FOR_EXCEPTION);
         int offset = rndGen.Next(0, bufferLength);
         int count = bufferLength + 1 - offset;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
-        {
-            Debug.WriteLine("Err_009!!! Verifying write method throws exception with offset+count=buffer.length+1");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[bufferLength], offset, count, expectedException);
     }
 
 
@@ -234,15 +151,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE_FOR_EXCEPTION);
         int offset = rndGen.Next(0, bufferLength);
         int count = rndGen.Next(bufferLength + 1 - offset, Int32.MaxValue);
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
-        {
-            Debug.WriteLine("Err_010!!! Verifying write method throws exception with offset+count>buffer.length+1");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[bufferLength], offset, count, expectedException);
     }
 
 
@@ -252,15 +163,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE_FOR_EXCEPTION);
         int offset = rndGen.Next(bufferLength, Int32.MaxValue);
         int count = DEFAULT_CHAR_COUNT;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
-        {
-            Debug.WriteLine("Err_011!!! Verifying write method throws exception with offset>buffer.length");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[bufferLength], offset, count, expectedException);
     }
 
 
@@ -270,15 +175,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE_FOR_EXCEPTION);
         int offset = DEFAULT_CHAR_OFFSET;
         int count = rndGen.Next(bufferLength + 1, Int32.MaxValue);
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
-        {
-            Debug.WriteLine("Err_012!!! Verifying write method throws exception with count>buffer.length + 1");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(new char[bufferLength], offset, count, expectedException);
     }
 
 
@@ -288,15 +187,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE);
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = bufferLength - offset;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count))
-        {
-            Debug.WriteLine("Err_013!!! Verifying write method with offset + count=buffer.length");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count);
     }
 
 
@@ -306,15 +199,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE);
         int offset = bufferLength - 1;
         int count = 1;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count))
-        {
-            Debug.WriteLine("Err_014!!! Verifying write method with offset=buffer.length - 1");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count);
     }
 
 
@@ -324,15 +211,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = rndGen.Next(1, MAX_BUFFER_SIZE);
         int offset = 0;
         int count = bufferLength;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count))
-        {
-            Debug.WriteLine("Err_015!!! Verifying write method with count=buffer.length");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count);
     }
 
 
@@ -341,15 +222,9 @@ public class Write_char_int_int : PortsTest
         int bufferLength = 0;
         int offset = 0;
         int count = bufferLength;
-        Type expectedException = typeof(System.ArgumentException);
+        Type expectedException = typeof(ArgumentException);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count))
-        {
-            Debug.WriteLine("Err_082salkj!!! Verifying write method with count=0");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count);
     }
 
 
@@ -360,13 +235,7 @@ public class Write_char_int_int : PortsTest
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = rndGen.Next(1, bufferLength - offset);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.ASCIIEncoding()))
-        {
-            Debug.WriteLine("Err_016!!! Verifying write method with count=buffer.length and ASCIIEncoding");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, new System.Text.ASCIIEncoding());
     }
 
 
@@ -377,13 +246,7 @@ public class Write_char_int_int : PortsTest
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = rndGen.Next(1, bufferLength - offset);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF7Encoding()))
-        {
-            Debug.WriteLine("Err_017!!! Verifying write method with count=buffer.length and UTF7Encoding");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF7Encoding());
     }
 
 
@@ -394,13 +257,7 @@ public class Write_char_int_int : PortsTest
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = rndGen.Next(1, bufferLength - offset);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF8Encoding()))
-        {
-            Debug.WriteLine("Err_018!!! Verifying write method with count=buffer.length and UTF8Encoding");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF8Encoding());
     }
 
 
@@ -411,13 +268,7 @@ public class Write_char_int_int : PortsTest
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = rndGen.Next(1, bufferLength - offset);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF32Encoding()))
-        {
-            Debug.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UTF32Encoding");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF32Encoding());
     }
 
 
@@ -428,13 +279,7 @@ public class Write_char_int_int : PortsTest
         int offset = rndGen.Next(0, bufferLength - 1);
         int count = rndGen.Next(1, bufferLength - offset);
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UnicodeEncoding()))
-        {
-            Debug.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UnicodeEncoding");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, new System.Text.UnicodeEncoding());
     }
 
 
@@ -445,13 +290,7 @@ public class Write_char_int_int : PortsTest
         int offset = 0;
         int count = bufferLength;
 
-        if (!VerifyWrite(new char[bufferLength], offset, count, 1))
-        {
-            Debug.WriteLine("Err_016!!! Verifying write method with large input buffer");
-            return false;
-        }
-
-        return true;
+        VerifyWrite(new char[bufferLength], offset, count, 1);
     }
     #endregion
 
@@ -472,7 +311,7 @@ public class Write_char_int_int : PortsTest
             Debug.WriteLine("ERROR!!!: No Excpetion was thrown");
             retValue = false;
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (e.GetType() != expectedException)
             {

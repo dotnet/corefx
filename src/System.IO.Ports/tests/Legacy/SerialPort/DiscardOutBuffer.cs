@@ -6,6 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -14,38 +15,34 @@ public class DiscardOutBuffer : PortsTest
     //The string used with Write(str) to fill the input buffer
     public static readonly string DEFAULT_STRING = "Hello World";
 
-    //The buffer lenght used whe filling the ouput buffer
+    //The buffer length used whe filling the output buffer
     public static readonly int DEFAULT_BUFFER_LENGTH = 8;
-
-    //Delegate to start asynchronous write on the SerialPort com with byte[] of size bufferLength
-    public delegate void AsyncWriteDelegate(SerialPort com, int bufferLength);
 
     #region Test Cases
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OutBufferFilled_Discard_Once()
     {
-        IAsyncResult asyncResult;
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            AsyncWriteDelegate write = new AsyncWriteDelegate(WriteRndByteArray);
-
-
-            Debug.WriteLine("Verifying Discard method after input buffer has been filled");
+            Debug.WriteLine("Verifying Discard method after write buffer has been filled");
             com1.Open();
             com1.WriteTimeout = 500;
             com1.Handshake = Handshake.RequestToSend;
 
-            asyncResult = write.BeginInvoke(com1, DEFAULT_BUFFER_LENGTH, null, null);
+            Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
             while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
+            {
                 System.Threading.Thread.Sleep(50);
+            }
 
             VerifyDiscard(com1);
 
-        //Wait for write method to timeout
-        while (!asyncResult.IsCompleted)
-            System.Threading.Thread.Sleep(100);
+            //Wait for write method to timeout
+            // The write method is supposed to catch its own TimeoutException 
+            // So this should leave cleanly
+            task.Wait();
         }
 
     }
@@ -55,45 +52,42 @@ public class DiscardOutBuffer : PortsTest
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            AsyncWriteDelegate write = new AsyncWriteDelegate(WriteRndByteArray);
-            IAsyncResult asyncResult;
-
-            Debug.WriteLine("Verifying call Discard method several times after input buffer has been filled");
+            Debug.WriteLine("Verifying call Discard method several times after output buffer has been filled");
 
             com1.Open();
             com1.WriteTimeout = 500;
             com1.Handshake = Handshake.RequestToSend;
 
-            asyncResult = write.BeginInvoke(com1, DEFAULT_BUFFER_LENGTH, null, null);
+            Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
             while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
+            {
                 System.Threading.Thread.Sleep(50);
+                Debug.Print(".");
+            }
 
             VerifyDiscard(com1);
             VerifyDiscard(com1);
             VerifyDiscard(com1);
 
             //Wait for write method to timeout
-            while (!asyncResult.IsCompleted)
-                System.Threading.Thread.Sleep(100);
+            task.Wait();
         }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OutBufferFilled_Discard_Cycle()
     {
-        IAsyncResult asyncResult;
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            AsyncWriteDelegate write = new AsyncWriteDelegate(WriteRndByteArray);
-
-            Debug.WriteLine("Verifying call Discard method after input buffer has been filled discarded and filled again");
+            Debug.WriteLine(
+                "Verifying call Discard method after input buffer has been filled discarded and filled again");
 
             com1.Open();
             com1.WriteTimeout = 500;
             com1.Handshake = Handshake.RequestToSend;
 
-            asyncResult = write.BeginInvoke(com1, DEFAULT_BUFFER_LENGTH, null, null);
+            Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
             while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
                 System.Threading.Thread.Sleep(50);
@@ -101,20 +95,17 @@ public class DiscardOutBuffer : PortsTest
             VerifyDiscard(com1);
 
             //Wait for write method to timeout
-            while (!asyncResult.IsCompleted)
-                System.Threading.Thread.Sleep(100);
+            task.Wait();
 
-            asyncResult = write.BeginInvoke(com1, DEFAULT_BUFFER_LENGTH, null, null);
+            task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
             while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
                 System.Threading.Thread.Sleep(50);
 
             VerifyDiscard(com1);
 
-        //Wait for write method to timeout
-        while (!asyncResult.IsCompleted)
-            System.Threading.Thread.Sleep(100);
-
+            //Wait for write method to timeout
+            task.Wait();
         }
     }
 
@@ -124,8 +115,6 @@ public class DiscardOutBuffer : PortsTest
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
-            AsyncWriteDelegate write = new AsyncWriteDelegate(WriteRndByteArray);
-            IAsyncResult asyncResult;
             int origBytesToRead;
 
             Debug.WriteLine("Verifying Discard method after input buffer has been filled");
@@ -142,7 +131,7 @@ public class DiscardOutBuffer : PortsTest
                 System.Threading.Thread.Sleep(50);
             }
 
-            asyncResult = write.BeginInvoke(com1, DEFAULT_BUFFER_LENGTH, null, null);
+            Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
             origBytesToRead = com1.BytesToRead;
 
             while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
@@ -155,8 +144,7 @@ public class DiscardOutBuffer : PortsTest
             Assert.Equal(origBytesToRead,com1.BytesToRead);
 
             //Wait for write method to timeout
-            while (!asyncResult.IsCompleted)
-                System.Threading.Thread.Sleep(100);
+            task.Wait();
         }
     }
 
@@ -177,7 +165,15 @@ public class DiscardOutBuffer : PortsTest
         }
         catch (TimeoutException)
         {
+//            Debug.WriteLine("WriteRndByteArray: Caught timeout");
         }
+/*
+        catch (Exception ex)
+        {
+            Debug.Print("WriteRndByteArray: Caught {0}", ex.Message);
+            throw;
+        }
+*/
     }
     #endregion
 

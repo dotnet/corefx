@@ -28,14 +28,12 @@ public class BaudRate_Property : PortsTest
 
     #region Test Cases
     [ConditionalFact(nameof(HasNullModem))]
-    public bool BaudRate_Default()
+    public void BaudRate_Default()
     {
-        bool retValue;
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
             SerialPortProperties serPortProp = new SerialPortProperties();
-            retValue = true;
-
+            
             Debug.WriteLine("Verifying default BaudRate");
 
             serPortProp.SetAllPropertiesToOpenDefaults();
@@ -46,15 +44,8 @@ public class BaudRate_Property : PortsTest
             serPortProp.VerifyPropertiesAndPrint(com1);
             VerifyBaudRate(com1);
 
-            if (!retValue)
-            {
-                Debug.WriteLine("Err_001!!! Verifying default BaudRate FAILED");
-            }
-
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
-
-        return retValue;
     }
 
     [ConditionalFact(nameof(HasNullModem))]
@@ -271,7 +262,7 @@ public class BaudRate_Property : PortsTest
         byte[] xmitBytes = new byte[numBytesToSend];
         byte[] rcvBytes = new byte[numBytesToSend];
         Random rndGen = new Random();
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        Stopwatch sw = new Stopwatch();
         using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
             double expectedTime, actualTime, percentageDifference;

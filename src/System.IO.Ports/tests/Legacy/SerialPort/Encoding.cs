@@ -42,7 +42,6 @@ public class Encoding_Property : PortsTest
         }
     }
 
-
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_ASCIIEncoding_BeforeOpen()
     {
@@ -50,15 +49,13 @@ public class Encoding_Property : PortsTest
         VerifyEncodingBeforeOpen(new System.Text.ASCIIEncoding());
     }
 
-
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), Skip= "UTF7 Not supported even on netfx")]
     public void Encoding_UTF7Encoding_BeforeOpen()
     {
         Debug.WriteLine("Verifying UTF7Encoding Encoding before open");
         VerifyEncodingBeforeOpen(new System.Text.UTF7Encoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UTF8Encoding_BeforeOpen()
     {
@@ -66,63 +63,55 @@ public class Encoding_Property : PortsTest
         VerifyEncodingBeforeOpen(new System.Text.UTF8Encoding());
     }
 
-
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UTF32Encoding_BeforeOpen()
     {
         Debug.WriteLine("Verifying UTF32Encoding Encoding before open");
         VerifyEncodingBeforeOpen(new System.Text.UTF32Encoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UnicodeEncoding_BeforeOpen()
     {
         Debug.WriteLine("Verifying UnicodeEncoding Encoding before open");
         VerifyEncodingBeforeOpen(new System.Text.UnicodeEncoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_ASCIIEncoding_AfterOpen()
     {
         Debug.WriteLine("Verifying ASCIIEncoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.ASCIIEncoding());
     }
-
-
-    [ConditionalFact(nameof(HasNullModem))]
+    
+    [ConditionalFact(nameof(HasNullModem), Skip = "UTF7 Not supported even on netfx")]
     public void Encoding_UTF7Encoding_AfterOpen()
     {
         Debug.WriteLine("Verifying UTF7Encoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.UTF7Encoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UTF8Encoding_AfterOpen()
     {
         Debug.WriteLine("Verifying UTF8Encoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.UTF8Encoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UTF32Encoding_AfterOpen()
     {
         Debug.WriteLine("Verifying UTF32Encoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.UTF32Encoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UnicodeEncoding_AfterOpen()
     {
         Debug.WriteLine("Verifying UnicodeEncoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.UnicodeEncoding());
     }
-
-
+    
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void Encoding_ISCIIAssemese()
     {
@@ -226,7 +215,6 @@ public class Encoding_Property : PortsTest
         }
     }
 
-
     private void VerifyExceptionAtOpen(SerialPort com, System.Text.Encoding encoding, ThrowAt throwAt, Type expectedException)
     {
         System.Text.Encoding origEncoding = com.Encoding;
@@ -269,8 +257,7 @@ public class Encoding_Property : PortsTest
         serPortProp.VerifyPropertiesAndPrint(com);
         com.Encoding = origEncoding;
     }
-
-
+    
     private void VerifyExceptionAfterOpen(SerialPort com, System.Text.Encoding encoding, Type expectedException)
     {
         SerialPortProperties serPortProp = new SerialPortProperties();
@@ -322,8 +309,7 @@ public class Encoding_Property : PortsTest
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
     }
-
-
+    
     private void VerifyEncodingAfterOpen(System.Text.Encoding encoding)
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -342,7 +328,6 @@ public class Encoding_Property : PortsTest
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
     }
-
 
     private void VerifyEncoding(SerialPort com1)
     {

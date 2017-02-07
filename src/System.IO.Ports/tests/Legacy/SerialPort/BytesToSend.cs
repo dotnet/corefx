@@ -117,7 +117,7 @@ public class BytesToWrite_Property : PortsTest
         {
             com.Write(new byte[DEFAULT_WRITE_BYTE_ARRAY_SIZE], 0, DEFAULT_WRITE_BYTE_ARRAY_SIZE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
         return bufferSize;
@@ -132,7 +132,7 @@ public class BytesToWrite_Property : PortsTest
         {
             com.Write(charsToWrite, 0, charsToWrite.Length);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
         return com.Encoding.GetByteCount(charsToWrite);
@@ -145,7 +145,7 @@ public class BytesToWrite_Property : PortsTest
         {
             com.Write(DEFAULT_STRING_TO_WRITE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
         return com.Encoding.GetByteCount(DEFAULT_STRING_TO_WRITE.ToCharArray());
@@ -158,7 +158,7 @@ public class BytesToWrite_Property : PortsTest
         {
             com.WriteLine(DEFAULT_STRING_TO_WRITE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
         return com.Encoding.GetByteCount(DEFAULT_STRING_TO_WRITE.ToCharArray()) + com.Encoding.GetByteCount(com.NewLine.ToCharArray());

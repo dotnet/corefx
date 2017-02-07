@@ -10,11 +10,6 @@ using Legacy.Support;
 
 public class WriteTimeout_Property : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.WriteTimeout";
-    public static readonly String s_strTFName = "WriteTimeout.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
     //The default number of chars to write with when testing timeout with Write(char[], int, int)
     public static readonly int DEFAULT_WRITE_CHAR_ARRAY_SIZE = 8;
 
@@ -38,46 +33,6 @@ public class WriteTimeout_Property : PortsTest
 
     private enum ThrowAt { Set, Open };
 
-    private int _numErrors = 0;
-    private int _numTestcases = 0;
-    private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
-    {
-        WriteTimeout_Property objTest = new WriteTimeout_Property();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    
-
     public bool RunTest()
     {
         bool retValue = true;
@@ -85,27 +40,27 @@ public class WriteTimeout_Property : PortsTest
 
         //See individual read methods for further testing
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_byte_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_char_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_str), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_WriteLine), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_byte_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_char_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_str), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_WriteLine), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_byte_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_char_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_Write_str), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Default_WriteLine), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_byte_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_char_int_int), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_Write_str), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Infinite_WriteLine), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_byte_int_int_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_char_int_int_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_str_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_WriteLine_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_byte_int_int_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_char_int_int_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_str_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_WriteLine_BeforeOpen), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_byte_int_int_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_char_int_int_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_str_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_WriteLine_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_byte_int_int_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_char_int_int_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_Write_str_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_1_WriteLine_AfterOpen), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Int32MinValue), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_NEG2), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_Int32MinValue), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteTimeout_NEG2), TCSupport.SerialPortRequirements.OneSerialPort);
 
         _numErrors += tcSupport.NumErrors;
         _numTestcases = tcSupport.NumTestcases;
@@ -120,7 +75,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying default WriteTimeout with Write(byte[] buffer, int offset, int count)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_byte_int_int), false);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_byte_int_int), false);
 
         if (!retValue)
         {
@@ -136,7 +91,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying default WriteTimeout with Write(char[] buffer, int offset, int count)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_char_int_int), false);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_char_int_int), false);
 
         if (!retValue)
         {
@@ -152,7 +107,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying default WriteTimeout with Write(string)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_str), false);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_str), false);
         if (!retValue)
         {
             Debug.WriteLine("Err_003!!! Verifying default WriteTimeout with Write(string) FAILED");
@@ -167,7 +122,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying default WriteTimeout with WriteLine()");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(WriteLine), false);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(WriteLine), false);
 
         if (!retValue)
         {
@@ -183,7 +138,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying infinite WriteTimeout with Write(byte[] buffer, int offset, int count)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_byte_int_int), true);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_byte_int_int), true);
 
         if (!retValue)
         {
@@ -199,7 +154,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying infinite WriteTimeout with Write(char[] buffer, int offset, int count)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_char_int_int), true);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_char_int_int), true);
 
         if (!retValue)
         {
@@ -215,7 +170,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying infinite WriteTimeout with Write(string)");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(Write_str), true);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(Write_str), true);
 
         if (!retValue)
         {
@@ -231,7 +186,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying infinite WriteTimeout with WriteLine()");
-        retValue &= VerifyInfiniteTimeout(new WriteMethodDelegate(WriteLine), true);
+        VerifyInfiniteTimeout(new WriteMethodDelegate(WriteLine), true);
 
         if (!retValue)
         {
@@ -247,7 +202,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying setting WriteTimeout=1 before Open() with Write(byte[] buffer, int offset, int count)");
-        retValue &= Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_byte_int_int));
+        Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_byte_int_int));
 
         if (!retValue)
         {
@@ -263,7 +218,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying setting WriteTimeout=1 before Open() with Write(char[] buffer, int offset, int count)");
-        retValue &= Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_char_int_int));
+        Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_char_int_int));
 
         if (!retValue)
         {
@@ -279,7 +234,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying 1 WriteTimeout before Open with Write(string)");
-        retValue &= Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_str));
+        Verify1TimeoutBeforeOpen(new WriteMethodDelegate(Write_str));
 
         if (!retValue)
         {
@@ -295,7 +250,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying 1 WriteTimeout before Open with WriteLine()");
-        retValue &= Verify1TimeoutBeforeOpen(new WriteMethodDelegate(WriteLine));
+        Verify1TimeoutBeforeOpen(new WriteMethodDelegate(WriteLine));
 
         if (!retValue)
         {
@@ -311,7 +266,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying setting WriteTimeout=1 after Open() with Write(byte[] buffer, int offset, int count)");
-        retValue &= Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_byte_int_int));
+        Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_byte_int_int));
 
         if (!retValue)
         {
@@ -327,7 +282,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying setting WriteTimeout=1 after Open() with Write(char[] buffer, int offset, int count)");
-        retValue &= Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_char_int_int));
+        Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_char_int_int));
 
         if (!retValue)
         {
@@ -343,7 +298,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying 1 WriteTimeout after Open with Write(string)");
-        retValue &= Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_str));
+        Verify1TimeoutAfterOpen(new WriteMethodDelegate(Write_str));
 
         if (!retValue)
         {
@@ -359,7 +314,7 @@ public class WriteTimeout_Property : PortsTest
         bool retValue = true;
 
         Debug.WriteLine("Verifying 1 WriteTimeout after Open with WriteLine()");
-        retValue &= Verify1TimeoutAfterOpen(new WriteMethodDelegate(WriteLine));
+        Verify1TimeoutAfterOpen(new WriteMethodDelegate(WriteLine));
 
         if (!retValue)
         {
@@ -373,26 +328,14 @@ public class WriteTimeout_Property : PortsTest
     public bool WriteTimeout_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue WriteTimeout");
-        if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_018!!! Verifying Int32.MinValue WriteTimeout FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool WriteTimeout_NEG2()
     {
         Debug.WriteLine("Verifying -2 WriteTimeout");
-        if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_019!!! Verifying -2 WriteTimeout FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
     #endregion
 
@@ -442,7 +385,7 @@ public class WriteTimeout_Property : PortsTest
 
 
         com1.DiscardOutBuffer();
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
+        serPortProp.VerifyPropertiesAndPrint(com1);
 
         if (com1.IsOpen)
             com1.Close();
@@ -461,7 +404,7 @@ public class WriteTimeout_Property : PortsTest
         com.WriteTimeout = 1;
         com.Open();
 
-        retValue &= Verify1Timeout(com, readMethod);
+        Verify1Timeout(com, readMethod);
 
         return retValue;
     }
@@ -475,7 +418,7 @@ public class WriteTimeout_Property : PortsTest
         com.Open();
         com.WriteTimeout = 1;
 
-        retValue &= Verify1Timeout(com, readMethod);
+        Verify1Timeout(com, readMethod);
 
         return retValue;
     }
@@ -484,7 +427,7 @@ public class WriteTimeout_Property : PortsTest
     public bool Verify1Timeout(SerialPort com, WriteMethodDelegate readMethod)
     {
         SerialPortProperties serPortProp = new SerialPortProperties();
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        Stopwatch sw = new Stopwatch();
         bool retValue = true;
         int actualTime = 0;
 
@@ -529,7 +472,7 @@ public class WriteTimeout_Property : PortsTest
             retValue = false;
         }
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
 
         if (com.IsOpen)
             com.Close();
@@ -538,17 +481,17 @@ public class WriteTimeout_Property : PortsTest
     }
 
 
-    private bool VerifyException(int writeTimeout, ThrowAt throwAt, System.Type expectedException)
+    private bool VerifyException(int writeTimeout, ThrowAt throwAt, Type expectedException)
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         bool retValue = true;
 
-        retValue &= VerifyExceptionAtOpen(com, writeTimeout, throwAt, expectedException);
+        VerifyExceptionAtOpen(com, writeTimeout, throwAt, expectedException);
 
         if (com.IsOpen)
             com.Close();
 
-        retValue &= VerifyExceptionAfterOpen(com, writeTimeout, expectedException);
+        VerifyExceptionAfterOpen(com, writeTimeout, expectedException);
 
         if (com.IsOpen)
             com.Close();
@@ -557,7 +500,7 @@ public class WriteTimeout_Property : PortsTest
     }
 
 
-    private bool VerifyExceptionAtOpen(SerialPort com, int writeTimeout, ThrowAt throwAt, System.Type expectedException)
+    private bool VerifyExceptionAtOpen(SerialPort com, int writeTimeout, ThrowAt throwAt, Type expectedException)
     {
         int origWriteTimeout = com.WriteTimeout;
         bool retValue = true;
@@ -582,7 +525,7 @@ public class WriteTimeout_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedException)
             {
@@ -596,14 +539,14 @@ public class WriteTimeout_Property : PortsTest
             }
         }
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
         com.WriteTimeout = origWriteTimeout;
 
         return retValue;
     }
 
 
-    private bool VerifyExceptionAfterOpen(SerialPort com, int writeTimeout, System.Type expectedException)
+    private bool VerifyExceptionAfterOpen(SerialPort com, int writeTimeout, Type expectedException)
     {
         bool retValue = true;
         SerialPortProperties serPortProp = new SerialPortProperties();
@@ -622,7 +565,7 @@ public class WriteTimeout_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedException)
             {
@@ -635,7 +578,7 @@ public class WriteTimeout_Property : PortsTest
                 retValue = false;
             }
         }
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
         return retValue;
     }
 
@@ -646,7 +589,7 @@ public class WriteTimeout_Property : PortsTest
         {
             com.Write(new byte[DEFAULT_WRITE_BYTE_ARRAY_SIZE], 0, DEFAULT_WRITE_BYTE_ARRAY_SIZE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
     }
@@ -658,7 +601,7 @@ public class WriteTimeout_Property : PortsTest
         {
             com.Write(new char[DEFAULT_WRITE_CHAR_ARRAY_SIZE], 0, DEFAULT_WRITE_CHAR_ARRAY_SIZE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
     }
@@ -670,7 +613,7 @@ public class WriteTimeout_Property : PortsTest
         {
             com.Write(DEFAULT_STRING_TO_WRITE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
     }
@@ -682,7 +625,7 @@ public class WriteTimeout_Property : PortsTest
         {
             com.WriteLine(DEFAULT_STRING_TO_WRITE);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
     }

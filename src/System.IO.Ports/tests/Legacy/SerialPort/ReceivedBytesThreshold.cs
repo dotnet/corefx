@@ -10,12 +10,6 @@ using Legacy.Support;
 
 public class ReceivedBytesThreshold_Property : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.ReceivedBytesThreshold";
-    public static readonly String s_strTFName = "ReceivedBytesThreshold.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
     //Maximum random value to use for ReceivedBytesThreshold
     public static readonly int MAX_RND_THRESHOLD = 16;
 
@@ -29,59 +23,24 @@ public class ReceivedBytesThreshold_Property : PortsTest
     private int _numTestcases = 0;
     private int _exitValue = TCSupport.PassExitCode;
 
-    public static void Main(string[] args)
-    {
-        ReceivedBytesThreshold_Property objTest = new ReceivedBytesThreshold_Property();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    
 
     public bool RunTest()
     {
         bool retValue = true;
         TCSupport tcSupport = new TCSupport();
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Default), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Rnd_ExactWrite), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Rnd_MultipleWrite), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_Exact), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_Below), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_1), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Default), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Rnd_ExactWrite), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Rnd_MultipleWrite), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_Exact), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_Below), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Above_1), TCSupport.SerialPortRequirements.NullModem);
 
         //		retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Twice), TCSupport.SerialPortRequirements.NullModem); We can not guarantee that just becuase we write twice the 
         //threshold that the event gets called twice
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Int32MinValue), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Neg1), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_0), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Int32MinValue), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_Neg1), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(ReceivedBytesThreshold_0), TCSupport.SerialPortRequirements.NullModem);
 
         _numErrors += tcSupport.NumErrors;
         _numTestcases = tcSupport.NumTestcases;
@@ -118,8 +77,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, 1, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, 1, 0);
 
         if (!retValue)
         {
@@ -167,8 +126,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
 
         if (!retValue)
         {
@@ -206,8 +165,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         Debug.WriteLine("Verifying writing the number of bytes of ReceivedBytesThreshold after several write calls");
 
-        com2.Write(new byte[(int)System.Math.Floor(com1.ReceivedBytesThreshold / 2.0)], 0, (int)System.Math.Floor(com1.ReceivedBytesThreshold / 2.0));
-        com2.Write(new byte[(int)System.Math.Ceiling(com1.ReceivedBytesThreshold / 2.0)], 0, (int)System.Math.Ceiling(com1.ReceivedBytesThreshold / 2.0));
+        com2.Write(new byte[(int)Math.Floor(com1.ReceivedBytesThreshold / 2.0)], 0, (int)Math.Floor(com1.ReceivedBytesThreshold / 2.0));
+        com2.Write(new byte[(int)Math.Ceiling(com1.ReceivedBytesThreshold / 2.0)], 0, (int)Math.Ceiling(com1.ReceivedBytesThreshold / 2.0));
 
         if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
         {
@@ -217,8 +176,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
 
         if (!retValue)
         {
@@ -279,8 +238,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
 
         if (!retValue)
         {
@@ -341,8 +300,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
 
         if (!retValue)
         {
@@ -403,8 +362,8 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
 
         if (!retValue)
         {
@@ -452,9 +411,9 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
         com1.DiscardInBuffer();
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
-        retValue &= rcvEventHandler.Validate(SerialData.Chars, 2 * com1.ReceivedBytesThreshold, 1);
+        serPortProp.VerifyPropertiesAndPrint(com1);
+        rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold, 0);
+        rcvEventHandler.Validate(SerialData.Chars, 2 * com1.ReceivedBytesThreshold, 1);
 
         if (!retValue)
         {
@@ -474,54 +433,36 @@ public class ReceivedBytesThreshold_Property : PortsTest
     public bool ReceivedBytesThreshold_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue ReceivedBytesThreshold");
-        if (!VerifyException(Int32.MinValue, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_008!!! Verifying Int32.MinValue ReceivedBytesThreshold FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(Int32.MinValue, typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool ReceivedBytesThreshold_Neg1()
     {
         Debug.WriteLine("Verifying -1 ReceivedBytesThreshold");
-        if (!VerifyException(-1, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_009!!! Verifying -1 ReceivedBytesThreshold FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(-1, typeof(ArgumentOutOfRangeException));
     }
 
 
     public bool ReceivedBytesThreshold_0()
     {
         Debug.WriteLine("Verifying 0 ReceivedBytesThreshold");
-        if (!VerifyException(0, typeof(System.ArgumentOutOfRangeException)))
-        {
-            Debug.WriteLine("Err_010!!! Verifying 0 ReceivedBytesThreshold FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(0, typeof(ArgumentOutOfRangeException));
     }
     #endregion
 
     #region Verification for Test Cases
-    private bool VerifyException(int receivedBytesThreshold, System.Type expectedException)
+    private bool VerifyException(int receivedBytesThreshold, Type expectedException)
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         bool retValue = true;
 
-        retValue &= VerifyExceptionAtOpen(com, receivedBytesThreshold, expectedException);
+        VerifyExceptionAtOpen(com, receivedBytesThreshold, expectedException);
 
         if (com.IsOpen)
             com.Close();
 
-        retValue &= VerifyExceptionAfterOpen(com, receivedBytesThreshold, expectedException);
+        VerifyExceptionAfterOpen(com, receivedBytesThreshold, expectedException);
 
         if (com.IsOpen)
             com.Close();
@@ -530,7 +471,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
     }
 
 
-    private bool VerifyExceptionAtOpen(SerialPort com, int receivedBytesThreshold, System.Type expectedException)
+    private bool VerifyExceptionAtOpen(SerialPort com, int receivedBytesThreshold, Type expectedException)
     {
         int origReceivedBytesThreshold = com.ReceivedBytesThreshold;
         bool retValue = true;
@@ -549,7 +490,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedException)
             {
@@ -563,7 +504,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
             }
         }
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
 
         com.ReceivedBytesThreshold = origReceivedBytesThreshold;
 
@@ -571,7 +512,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
     }
 
 
-    private bool VerifyExceptionAfterOpen(SerialPort com, int receivedBytesThreshold, System.Type expectedException)
+    private bool VerifyExceptionAfterOpen(SerialPort com, int receivedBytesThreshold, Type expectedException)
     {
         bool retValue = true;
         SerialPortProperties serPortProp = new SerialPortProperties();
@@ -590,7 +531,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedException)
             {
@@ -603,7 +544,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
                 retValue = false;
             }
         }
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
         return retValue;
     }
 
@@ -641,7 +582,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
 
                     NumEventsHandled++;
                 }
-                catch (System.Exception exp)
+                catch (Exception exp)
                 {
                     Debug.WriteLine(exp);
                     Debug.WriteLine(exp.StackTrace);
@@ -699,7 +640,7 @@ public class ReceivedBytesThreshold_Property : PortsTest
                 if (EventExists(eventType, numEvents))
                     return true;
 
-                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                Stopwatch sw = new Stopwatch();
 
                 sw.Start();
                 do

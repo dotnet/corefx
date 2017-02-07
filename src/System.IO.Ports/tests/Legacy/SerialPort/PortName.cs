@@ -10,11 +10,11 @@ using Legacy.Support;
 
 public class PortName_Property : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.PortName";
-    public static readonly String s_strTFName = "PortName.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
+    
+    
+    
+    
+    
 
     //Determines how long the randomly generated PortName is
     public static readonly int rndPortNameSize = 255;
@@ -41,23 +41,23 @@ public class PortName_Property : PortsTest
         TCSupport tcSupport = new TCSupport();
 
         //Note Other test cases relevent to PortName are handled in Open_PortName.cs and ctor_str.cs
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_COM1_After_Open), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_COM2_After_Open), TCSupport.SerialPortRequirements.TwoSerialPorts);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_COM1_After_Open), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_COM2_After_Open), TCSupport.SerialPortRequirements.TwoSerialPorts);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_Empty), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_null), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlash), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlashSlash), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlashRND), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_FileName), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_COM257), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_LPT), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_LPT1), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_PHYSICALDRIVE0), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_A), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_C), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_SystemDrive), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(PortName_RND), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_Empty), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_null), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlash), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlashSlash), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_SlashSlashRND), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_FileName), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_COM257), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_LPT), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_LPT1), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_PHYSICALDRIVE0), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_A), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_C), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_SystemDrive), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(PortName_RND), TCSupport.SerialPortRequirements.OneSerialPort);
 
         _numErrors += tcSupport.NumErrors;
         _numTestcases = tcSupport.NumTestcases;
@@ -75,7 +75,7 @@ public class PortName_Property : PortsTest
 
         bool retValue = true;
 
-        retValue &= VerifyExceptionAfterOpen(com, TCSupport.LocalMachineSerialInfo.FirstAvailablePortName, typeof(System.InvalidOperationException));
+        VerifyExceptionAfterOpen(com, TCSupport.LocalMachineSerialInfo.FirstAvailablePortName, typeof(InvalidOperationException));
         if (!retValue)
         {
             Debug.WriteLine("Err_001!!! Verifying setting PortName=COM1 after open has been called FAILED");
@@ -96,7 +96,7 @@ public class PortName_Property : PortsTest
 
         bool retValue = true;
 
-        retValue = VerifyExceptionAfterOpen(com, TCSupport.LocalMachineSerialInfo.SecondAvailablePortName, typeof(System.InvalidOperationException));
+        retValue = VerifyExceptionAfterOpen(com, TCSupport.LocalMachineSerialInfo.SecondAvailablePortName, typeof(InvalidOperationException));
         if (!retValue)
         {
             Debug.WriteLine("Err_002!!! Verifying setting PortName=COM2 after open has been called FAILED");
@@ -112,26 +112,14 @@ public class PortName_Property : PortsTest
     public bool PortName_Empty()
     {
         Debug.WriteLine("Verifying setting PortName=\"\"");
-        if (!VerifyException("", ThrowAt.Set, typeof(ArgumentException), typeof(System.ArgumentException)))
-        {
-            Debug.WriteLine("Err_003!!! Verifying setting PortName=\"\" FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("", ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
     }
 
 
     public bool PortName_null()
     {
         Debug.WriteLine("Verifying setting PortName=null");
-        if (!VerifyException(null, ThrowAt.Set, typeof(System.ArgumentNullException), typeof(System.ArgumentNullException)))
-        {
-            Debug.WriteLine("Err_004!!! Verifying setting PortName=null FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(null, ThrowAt.Set, typeof(ArgumentNullException), typeof(ArgumentNullException));
     }
 
 
@@ -142,43 +130,25 @@ public class PortName_Property : PortsTest
 
         for (int i = 0; i < rndPortNameSize; i++)
         {
-            rndStrBuf.Append((char)rndGen.Next(0, System.UInt16.MaxValue));
+            rndStrBuf.Append((char)rndGen.Next(0, UInt16.MaxValue));
         }
 
         Debug.WriteLine("Verifying setting PortName to a random string");
-        if (!VerifyException(rndStrBuf.ToString(), ThrowAt.Open, typeof(System.ArgumentException), typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_005!!! Verifying setting PortName to a random string FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(rndStrBuf.ToString(), ThrowAt.Open, typeof(ArgumentException), typeof(InvalidOperationException));
     }
 
 
     private bool PortName_SlashSlash()
     {
         Debug.WriteLine("Verifying setting PortName=\\\\");
-        if (!VerifyException("\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(System.ArgumentException)))
-        {
-            Debug.WriteLine("Err_006!!! Verifying setting PortName=\\\\ FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
     }
 
 
     private bool PortName_SlashSlashSlash()
     {
         Debug.WriteLine("Verifying setting PortName=\\\\\\");
-        if (!VerifyException("\\\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(System.ArgumentException)))
-        {
-            Debug.WriteLine("Err_007!!! Verifying setting PortName=\\\\\\ FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("\\\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
     }
 
 
@@ -190,17 +160,11 @@ public class PortName_Property : PortsTest
         rndStrBuf.Append("\\\\");
         for (int i = 0; i < rndPortNameSize; i++)
         {
-            rndStrBuf.Append((char)rndGen.Next(0, System.UInt16.MaxValue));
+            rndStrBuf.Append((char)rndGen.Next(0, UInt16.MaxValue));
         }
 
         Debug.WriteLine("Verifying setting PortName=\\\\ + RND_STR");
-        if (!VerifyException(rndStrBuf.ToString(), ThrowAt.Set, typeof(ArgumentException), typeof(System.ArgumentException)))
-        {
-            Debug.WriteLine("Err_008!!! Verifying setting PortName=\\\\ + RND_STR FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException(rndStrBuf.ToString(), ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
     }
 
 
@@ -216,7 +180,7 @@ public class PortName_Property : PortsTest
         testFile.Close();
         Debug.WriteLine("Verifying setting PortName={0}", fileName);
 
-        if (!VerifyException(fileName, ThrowAt.Open, typeof(System.ArgumentException), typeof(System.InvalidOperationException)))
+        if (!VerifyException(fileName, ThrowAt.Open, typeof(ArgumentException), typeof(InvalidOperationException)))
         {
             Debug.WriteLine("Err_004!!! Verifying setting PortName to a file name FAILED");
             return false;
@@ -224,7 +188,7 @@ public class PortName_Property : PortsTest
 
         Debug.WriteLine("Verifying setting PortName={0}", Environment.CurrentDirectory + fileName);
 
-        if (!VerifyException(Environment.CurrentDirectory + fileName, ThrowAt.Open, typeof(System.ArgumentException), typeof(System.InvalidOperationException)))
+        if (!VerifyException(Environment.CurrentDirectory + fileName, ThrowAt.Open, typeof(ArgumentException), typeof(InvalidOperationException)))
         {
             Debug.WriteLine("Err_009!!! Verifying setting PortName to a file name FAILED");
             return false;
@@ -238,13 +202,7 @@ public class PortName_Property : PortsTest
     private bool PortName_COM257()
     {
         Debug.WriteLine("Verifying setting PortName=COM257");
-        if (!VerifyException("COM257", ThrowAt.Open, typeof(System.IO.IOException), typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_010!!! Verifying setting PortName=COM257 FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("COM257", ThrowAt.Open, typeof(System.IO.IOException), typeof(InvalidOperationException));
     }
 
 
@@ -254,24 +212,18 @@ public class PortName_Property : PortsTest
 
         if (IsWinXPOrHigher())
         {
-            expectedException = _dosDevices.CommonNameExists("LPT") ? typeof(ArgumentException) : typeof(System.ArgumentException);
+            expectedException = _dosDevices.CommonNameExists("LPT") ? typeof(ArgumentException) : typeof(ArgumentException);
         }
         else
         {
             //			This is not Reliable on Win2K so for now we will assume that the machine does NOT have this device
             //			expectedException = dosDevices.InternalNameExists(@"\DosDevices\LPT") ? typeof(ArgumentException) :  typeof(System.ArgumentException);
 
-            expectedException = typeof(System.ArgumentException);
+            expectedException = typeof(ArgumentException);
         }
 
         Debug.WriteLine("Verifying setting PortName=LPT");
-        if (!VerifyException("LPT", ThrowAt.Open, expectedException, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_0982sakhoe!!! Verifying setting PortName=LPT FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("LPT", ThrowAt.Open, expectedException, typeof(InvalidOperationException));
     }
 
 
@@ -281,7 +233,7 @@ public class PortName_Property : PortsTest
 
         if (IsWinXPOrHigher())
         {
-            expectedException = _dosDevices.CommonNameExists("LPT1") ? typeof(ArgumentException) : typeof(System.ArgumentException);
+            expectedException = _dosDevices.CommonNameExists("LPT1") ? typeof(ArgumentException) : typeof(ArgumentException);
         }
         else
         {
@@ -292,13 +244,7 @@ public class PortName_Property : PortsTest
         }
 
         Debug.WriteLine("Verifying setting PortName=LPT1");
-        if (!VerifyException("LPT1", ThrowAt.Open, expectedException, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_2072nsoah!!! Verifying setting PortName=LPT1 FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("LPT1", ThrowAt.Open, expectedException, typeof(InvalidOperationException));
     }
 
 
@@ -308,7 +254,7 @@ public class PortName_Property : PortsTest
 
         if (IsWinXPOrHigher())
         {
-            expectedException = _dosDevices.CommonNameExists("PHYSICALDRIVE0") ? typeof(ArgumentException) : typeof(System.ArgumentException);
+            expectedException = _dosDevices.CommonNameExists("PHYSICALDRIVE0") ? typeof(ArgumentException) : typeof(ArgumentException);
         }
         else
         {
@@ -318,13 +264,7 @@ public class PortName_Property : PortsTest
 
 
         Debug.WriteLine("Verifying setting PortName=PHYSICALDRIVE0");
-        if (!VerifyException("PHYSICALDRIVE0", ThrowAt.Open, expectedException, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_08723shz!!! Verifying setting PortName=PHYSICALDRIVE0 FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("PHYSICALDRIVE0", ThrowAt.Open, expectedException, typeof(InvalidOperationException));
     }
 
 
@@ -334,7 +274,7 @@ public class PortName_Property : PortsTest
 
         if (IsWinXPOrHigher())
         {
-            expectedException = _dosDevices.CommonNameExists("A:") ? typeof(ArgumentException) : typeof(System.ArgumentException);
+            expectedException = _dosDevices.CommonNameExists("A:") ? typeof(ArgumentException) : typeof(ArgumentException);
         }
         else
         {
@@ -344,13 +284,7 @@ public class PortName_Property : PortsTest
         }
 
         Debug.WriteLine("Verifying setting PortName=A:");
-        if (!VerifyException("A:", ThrowAt.Open, expectedException, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_0972ahios!!! Verifying setting PortName=A: FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("A:", ThrowAt.Open, expectedException, typeof(InvalidOperationException));
     }
 
 
@@ -358,13 +292,7 @@ public class PortName_Property : PortsTest
     {
         Debug.WriteLine("Verifying setting PortName=C:");
 
-        if (!VerifyException("C:", ThrowAt.Open, new Type[] { typeof(System.ArgumentException), typeof(ArgumentException) }, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_0702sklpa!!! Verifying setting PortName=C: FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyException("C:", ThrowAt.Open, new Type[] {typeof(ArgumentException), typeof(ArgumentException)}, typeof(InvalidOperationException));
     }
 
     private bool PortName_SystemDrive()
@@ -373,7 +301,7 @@ public class PortName_Property : PortsTest
         String portName = Environment.GetEnvironmentVariable("SystemDrive");
 
         if (!String.IsNullOrEmpty(portName) &&
-            !VerifyException(portName, ThrowAt.Open, new Type[] { typeof(System.ArgumentException) }, typeof(System.InvalidOperationException)))
+            !VerifyException(portName, ThrowAt.Open, new Type[] { typeof(ArgumentException) }, typeof(InvalidOperationException)))
         {
             Debug.WriteLine("Err_01548!!! Verifying setting PortName=C: FAILED");
             return false;
@@ -400,22 +328,22 @@ public class PortName_Property : PortsTest
         return false;
     }
 
-    private bool VerifyException(string portName, ThrowAt throwAt, System.Type expectedExceptionAtOpen, System.Type expectedExceptionAfterOpen)
+    private bool VerifyException(string portName, ThrowAt throwAt, Type expectedExceptionAtOpen, Type expectedExceptionAfterOpen)
     {
         return VerifyException(portName, throwAt, new Type[] { expectedExceptionAtOpen }, expectedExceptionAfterOpen);
     }
 
-    private bool VerifyException(string portName, ThrowAt throwAt, System.Type[] expectedExceptionAtOpen, System.Type expectedExceptionAfterOpen)
+    private bool VerifyException(string portName, ThrowAt throwAt, Type[] expectedExceptionAtOpen, Type expectedExceptionAfterOpen)
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         bool retValue = true;
 
-        retValue &= VerifyExceptionAtOpen(com, portName, throwAt, expectedExceptionAtOpen);
+        VerifyExceptionAtOpen(com, portName, throwAt, expectedExceptionAtOpen);
 
         if (com.IsOpen)
             com.Close();
 
-        retValue &= VerifyExceptionAfterOpen(com, portName, expectedExceptionAfterOpen);
+        VerifyExceptionAfterOpen(com, portName, expectedExceptionAfterOpen);
 
         if (com.IsOpen)
             com.Close();
@@ -424,12 +352,12 @@ public class PortName_Property : PortsTest
     }
 
 
-    private bool VerifyExceptionAtOpen(SerialPort com, string portName, ThrowAt throwAt, System.Type expectedException)
+    private bool VerifyExceptionAtOpen(SerialPort com, string portName, ThrowAt throwAt, Type expectedException)
     {
         return VerifyExceptionAtOpen(com, portName, throwAt, new Type[] { expectedException });
     }
 
-    private bool VerifyExceptionAtOpen(SerialPort com, string portName, ThrowAt throwAt, System.Type[] expectedExceptions)
+    private bool VerifyExceptionAtOpen(SerialPort com, string portName, ThrowAt throwAt, Type[] expectedExceptions)
     {
         string origPortName = com.PortName;
         bool retValue = true;
@@ -464,7 +392,7 @@ public class PortName_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedExceptions || 0 == expectedExceptions.Length)
             {
@@ -499,14 +427,14 @@ public class PortName_Property : PortsTest
             }
         }
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
         com.PortName = origPortName;
 
         return retValue;
     }
 
 
-    private bool VerifyExceptionAfterOpen(SerialPort com, string portName, System.Type expectedException)
+    private bool VerifyExceptionAfterOpen(SerialPort com, string portName, Type expectedException)
     {
         bool retValue = true;
         SerialPortProperties serPortProp = new SerialPortProperties();
@@ -524,7 +452,7 @@ public class PortName_Property : PortsTest
                 retValue = false;
             }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (null == expectedException)
             {
@@ -538,7 +466,7 @@ public class PortName_Property : PortsTest
             }
         }
 
-        retValue &= serPortProp.VerifyPropertiesAndPrint(com);
+        serPortProp.VerifyPropertiesAndPrint(com);
 
         return retValue;
     }

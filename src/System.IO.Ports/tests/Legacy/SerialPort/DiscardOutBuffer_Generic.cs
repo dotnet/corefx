@@ -32,14 +32,8 @@ public class DiscardOutBuffer_Generic : PortsTest
             Debug.WriteLine("Verifying read Discard throws exception with a failed call to Open()");
 
             //Since the PortName is set to a bad port name Open will thrown an exception
-            //however we don't care what it is since we are verfifying a read method
-            try
-            {
-                com.Open();
-            }
-            catch (Exception)
-            {
-            }
+            //however we don't care what it is since we are verifying a read method
+            Assert.ThrowsAny<Exception>(() => com.Open());
             VerifyDiscardException(com, typeof(InvalidOperationException));
         }
     }

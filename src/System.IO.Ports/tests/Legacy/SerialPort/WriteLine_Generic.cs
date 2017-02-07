@@ -8,14 +8,8 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using Legacy.Support;
 
-public class WriteLine : PortsTest
+public class WriteLine_Generic : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/20 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.WriteLine(string)";
-    public static readonly String s_strTFName = "WriteLine_Generic.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
     //Set bounds for random timeout values.
     //If the min is to low write will not timeout accurately and the testcase will fail
     public static int minRandomTimeout = 250;
@@ -43,63 +37,28 @@ public class WriteLine : PortsTest
     private int _numTestcases = 0;
     private int _exitValue = TCSupport.PassExitCode;
 
-    public static void Main(string[] args)
-    {
-        WriteLine objTest = new WriteLine();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thrown in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    
 
     public bool RunTest()
     {
         bool retValue = true;
         TCSupport tcSupport = new TCSupport();
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteWithoutOpen), TCSupport.SerialPortRequirements.None);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteAfterFailedOpen), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(WriteAfterClose), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteWithoutOpen), TCSupport.SerialPortRequirements.None);
+        tcSupport.BeginTestcase(new TestDelegate(WriteAfterFailedOpen), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(WriteAfterClose), TCSupport.SerialPortRequirements.OneSerialPort);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(SimpleTimeout), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(SuccessiveReadTimeout), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(SuccessiveReadTimeoutWithWriteSucceeding), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(SimpleTimeout), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(SuccessiveReadTimeout), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(SuccessiveReadTimeoutWithWriteSucceeding), TCSupport.SerialPortRequirements.NullModem);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(BytesToWrite), TCSupport.SerialPortRequirements.OneSerialPort);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(BytesToWriteSuccessive),
+        tcSupport.BeginTestcase(new TestDelegate(BytesToWrite), TCSupport.SerialPortRequirements.OneSerialPort);
+        tcSupport.BeginTestcase(new TestDelegate(BytesToWriteSuccessive),
             TCSupport.SerialPortRequirements.OneSerialPort, TCSupport.OperatingSystemRequirements.NotWin9X);
 
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Handshake_None), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Handshake_RequestToSend), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Handshake_XOnXOff), TCSupport.SerialPortRequirements.NullModem);
-        retValue &= tcSupport.BeginTestcase(new TestDelegate(Handshake_RequestToSendXOnXOff), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Handshake_None), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Handshake_RequestToSend), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Handshake_XOnXOff), TCSupport.SerialPortRequirements.NullModem);
+        tcSupport.BeginTestcase(new TestDelegate(Handshake_RequestToSendXOnXOff), TCSupport.SerialPortRequirements.NullModem);
 
         _numErrors += tcSupport.NumErrors;
         _numTestcases = tcSupport.NumTestcases;
@@ -115,13 +74,7 @@ public class WriteLine : PortsTest
 
         Debug.WriteLine("Case WriteWithoutOpen : Verifying write method throws System.InvalidOperationException without a call to Open()");
 
-        if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_001!!! Verifying write method throws exception without a call to Open() FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(com, typeof(InvalidOperationException));
     }
 
 
@@ -137,16 +90,10 @@ public class WriteLine : PortsTest
         {
             com.Open();
         }
-        catch (System.Exception)
+        catch (Exception)
         {
         }
-        if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_002!!! Verifying write method throws exception with a failed call to Open() FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(com, typeof(InvalidOperationException));
     }
 
 
@@ -158,13 +105,7 @@ public class WriteLine : PortsTest
         com.Open();
         com.Close();
 
-        if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
-        {
-            Debug.WriteLine("Err_003!!! Verifying write method throws exception after a call to Close() FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyWriteException(com, typeof(InvalidOperationException));
     }
 
 
@@ -189,13 +130,7 @@ public class WriteLine : PortsTest
         System.Threading.Thread.Sleep(250);
         com2.Close();
 
-        if (!VerifyTimeout(com1))
-        {
-            Debug.WriteLine("Err_004!!! Verifying timeout FAILED");
-            return false;
-        }
-
-        return true;
+        VerifyTimeout(com1);
     }
 
 
@@ -216,24 +151,18 @@ public class WriteLine : PortsTest
         {
             com.WriteLine(DEFAULT_STRING);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
             retValue = false;
         }
 
-        retValue &= VerifyTimeout(com);
+        VerifyTimeout(com);
 
-        if (!retValue)
-        {
-            Debug.WriteLine("Err_005!!! Verifying WriteTimeout with successive call to write method FAILED");
-            return false;
-        }
-
-        return true;
+        retValue;
     }
 
 
@@ -258,7 +187,8 @@ public class WriteLine : PortsTest
         t.Start();
         waitTime = 0;
         while (t.ThreadState == System.Threading.ThreadState.Unstarted && waitTime < 2000)
-        { //Wait for the thread to start
+        {
+            //Wait for the thread to start
             System.Threading.Thread.Sleep(50);
             waitTime += 50;
         }
@@ -267,10 +197,10 @@ public class WriteLine : PortsTest
         {
             com1.WriteLine(DEFAULT_STRING);
         }
-        catch (System.TimeoutException)
+        catch (TimeoutException)
         {
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
             retValue = false;
@@ -280,15 +210,9 @@ public class WriteLine : PortsTest
         while (t.IsAlive)
             System.Threading.Thread.Sleep(100);
 
-        retValue &= VerifyTimeout(com1);
+        VerifyTimeout(com1);
 
-        if (!retValue)
-        {
-            Debug.WriteLine("Err_006!!! Verifying WriteTimeout with  successive call to write method FAILED");
-            return false;
-        }
-
-        return true;
+        retValue;
     }
 
 
@@ -466,7 +390,7 @@ public class WriteLine : PortsTest
     {
         bool retValue = true;
         Debug.WriteLine("Case Handshake_RequestToSend : Verifying Handshake=RequestToSend");
-        retValue &= Verify_Handshake(Handshake.RequestToSend);
+        Verify_Handshake(Handshake.RequestToSend);
         if (!retValue)
             Debug.WriteLine("Err_010!!! Verifying Handshake=RequestToSend FAILED");
 
@@ -478,7 +402,7 @@ public class WriteLine : PortsTest
     {
         bool retValue = true;
         Debug.WriteLine("Case Handshake_XOnXOff : Verifying Handshake=XOnXOff");
-        retValue &= Verify_Handshake(Handshake.XOnXOff);
+        Verify_Handshake(Handshake.XOnXOff);
         if (!retValue)
             Debug.WriteLine("Err_011!!! Verifying Handshake=XOnXOff FAILED");
 
@@ -490,7 +414,7 @@ public class WriteLine : PortsTest
     {
         bool retValue = true;
         Debug.WriteLine("Case Handshake_RequestToSendXOnXOff : Verifying Handshake=RequestToSendXOnXOff");
-        retValue &= Verify_Handshake(Handshake.RequestToSendXOnXOff);
+        Verify_Handshake(Handshake.RequestToSendXOnXOff);
         if (!retValue)
             Debug.WriteLine("Err_012!!! Verifying Handshake=RequestToSendXOnXOff FAILED");
 
@@ -562,7 +486,7 @@ public class WriteLine : PortsTest
             {
                 _com.WriteLine(stringToWrite);
             }
-            catch (System.TimeoutException)
+            catch (TimeoutException)
             {
             }
         }
@@ -580,7 +504,7 @@ public class WriteLine : PortsTest
             Debug.WriteLine("ERROR!!!: No Exception was thrown");
             retValue = false;
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             if (e.GetType() != expectedException)
             {
@@ -597,7 +521,7 @@ public class WriteLine : PortsTest
 
     private bool VerifyTimeout(SerialPort com)
     {
-        System.Diagnostics.Stopwatch timer = new Stopwatch();
+        Stopwatch timer = new Stopwatch();
         int expectedTime = com.WriteTimeout;
         int actualTime = 0;
         double percentageDifference;
@@ -607,7 +531,7 @@ public class WriteLine : PortsTest
         {
             com.WriteLine(DEFAULT_STRING); //Warm up write method
         }
-        catch (System.TimeoutException) { }
+        catch (TimeoutException) { }
 
         System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
 
@@ -619,8 +543,8 @@ public class WriteLine : PortsTest
             {
                 com.WriteLine(DEFAULT_STRING);
             }
-            catch (System.TimeoutException) { }
-            catch (System.Exception e)
+            catch (TimeoutException) { }
+            catch (Exception e)
             {
                 Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
                 retValue = false;
@@ -633,7 +557,7 @@ public class WriteLine : PortsTest
 
         System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Normal;
         actualTime /= NUM_TRYS;
-        percentageDifference = System.Math.Abs((expectedTime - actualTime) / (double)expectedTime);
+        percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
         //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
         if (maxPercentageDifference < percentageDifference)

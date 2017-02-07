@@ -24,7 +24,7 @@ public class ErrorEvent : PortsTest
 		SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 		SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
 		ErrorEventHandler errEventHandler = new ErrorEventHandler(com1);
-		bool retValue = true;
+		
 		int elapsedTime;
 
 		Debug.WriteLine("Verifying TXFull event");
@@ -104,7 +104,7 @@ public class ErrorEvent : PortsTest
                 SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
                 SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
                 ErrorEventHandler errEventHandler = new ErrorEventHandler(com1);
-                bool retValue = true;
+                
                 int elapsedTime;
     
                 Debug.WriteLine("Verifying Overrun event");

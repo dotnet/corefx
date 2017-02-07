@@ -10,6 +10,7 @@ using System;
 using System.Threading;
 using System.IO.Ports;
 using System.Diagnostics;
+using Legacy.Support;
 
 internal class Test_CLRS
 {
@@ -18,7 +19,7 @@ internal class Test_CLRS
     public static void gc_food()
     {
         object[] bah = new object[100];
-        System.Random r = new System.Random(-55);
+        Random r = new Random(-55);
         while (!s_done)
         {
             int i = r.Next(100);
