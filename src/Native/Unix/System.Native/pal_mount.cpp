@@ -16,11 +16,11 @@
 #include <sys/statfs.h>
 #include <mntent.h>
 #define STRING_BUFFER_SIZE 8192
-#endif
 
 // Android does not define MNTOPT_RO
 #ifndef MNTOPT_RO
 #define MNTOPT_RO "r"
+#endif
 #endif
 
 static int32_t GetMountInfo(MountPointFound onFound)
