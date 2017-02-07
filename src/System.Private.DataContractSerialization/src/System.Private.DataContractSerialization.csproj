@@ -161,6 +161,9 @@
     <Compile Include="System\Runtime\Serialization\XsdDataContractExporter.cs" />
     <Compile Include="System\Xml\IFragmentCapableXmlDictionaryWriter.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System.CodeDom" />
     <Reference Include="System.Collections" />
