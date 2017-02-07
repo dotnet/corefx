@@ -371,6 +371,7 @@ check_prototype_definition(
 check_cxx_source_compiles(
     "
     #include <stdlib.h>
+    #include <string.h>
 
     int main()
     {
@@ -384,6 +385,7 @@ check_cxx_source_compiles(
 check_cxx_source_compiles(
     "
     #include <stdlib.h>
+    #include <string.h>
 
     int main()
     {
