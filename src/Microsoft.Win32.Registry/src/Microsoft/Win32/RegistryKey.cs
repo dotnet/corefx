@@ -450,17 +450,14 @@ namespace Microsoft.Win32
         [SecuritySafeCritical]
         public RegistrySecurity GetAccessControl(AccessControlSections includeSections)
         {
-            if (Handle == null)
-            {
-                throw new ObjectDisposedException(Name, SR.ObjectDisposed_RegKeyClosed);
-            }
-
+            EnsureNotDisposed();
             return new RegistrySecurity(Handle, Name, includeSections);
         }
 
         [SecuritySafeCritical]
         public void SetAccessControl(RegistrySecurity registrySecurity)
         {
+            EnsureWriteable();
             if (registrySecurity == null)
             {
                 throw new ArgumentNullException(nameof(registrySecurity));
