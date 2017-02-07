@@ -13,6 +13,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Legacy\SerialPort\BaseStream.cs" />
     <Compile Include="Legacy\SerialPort\BaudRate.cs" />
     <Compile Include="Legacy\SerialPort\BreakState.cs" />
