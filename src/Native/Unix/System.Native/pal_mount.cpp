@@ -18,6 +18,11 @@
 #define STRING_BUFFER_SIZE 8192
 #endif
 
+// Android does not define MNTOPT_RO
+#ifndef MNTOPT_RO
+#define MNTOPT_RO "r"
+#endif
+
 static int32_t GetMountInfo(MountPointFound onFound)
 {
 #if HAVE_MNTINFO
