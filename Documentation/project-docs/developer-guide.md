@@ -324,4 +324,4 @@ If you prefer, you can use a Debug build of System.Private.CoreLib, but if you d
 
 To collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
 
-`msbuild /t:rebuildandtest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib" /p:ConfigurationGroup=Release`
+`msbuild /t:rebuildandtest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"`
