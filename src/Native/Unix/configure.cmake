@@ -351,23 +351,6 @@ check_cxx_source_compiles(
 
 check_cxx_source_compiles(
     "
-    #include <sys/socket.h>
-
-    int main()
-    {
-        int fd;
-        sockaddr* addr;
-        int32_t addrLen;
-
-        int err = bind(fd, addr, addrLen);
-        return 0;
-    }
-    "
-    BIND_ADDRLEN_SIGNED
-)
-
-check_cxx_source_compiles(
-    "
     #include <netinet/in.h>
     #include <netinet/tcp.h>
 
@@ -380,22 +363,6 @@ check_cxx_source_compiles(
     }
     "
     IPV6MR_INTERFACE_UNSIGNED
-)
-
-check_cxx_source_compiles(
-    "
-    #include <netinet/in.h>
-    #include <netinet/tcp.h>
-
-    int main()
-    {
-        ipv6_mreq opt;
-        int index = 0;
-        opt.ipv6mr_interface = index;
-        return 0;
-    }
-    "
-    IPV6MR_INTERFACE_SIGNED
 )
 
 set (CMAKE_REQUIRED_FLAGS ${PREVIOUS_CMAKE_REQUIRED_FLAGS})
