@@ -7,66 +7,13 @@ using System.IO.Ports;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-public class Write_char_int_int
+public class Write_char_int_int : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/17 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.Write(char[], int, int)";
-    public static readonly String s_strTFName = "Write_char_int_int.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
     private const int RECEIVE_BUFFER_SIZE = 4096;
     private const int TRANSMIT_BUFFER_SIZE = 4096;
     private const int MAX_BUFFER_SIZE = 4096;
 
     private const int MAX_RUN_TIME = 1000 * 60 * 20;
-
-    private int _numErrors = 0;
-    private int _numTestcases = 0;
-    private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
-    {
-        Write_char_int_int objTest = new Write_char_int_int();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
 
     public bool RunTest()
     {
@@ -116,7 +63,7 @@ public class Write_char_int_int
                         int numberOfCharacters = random.Next(0, Math.Min(xmitCharBuffer.Length, maxNumberOfCharactes) + 1);
                         int expectedBytesToRead = com2.BytesToRead + 2 * numberOfCharacters;
 
-                        //						Console.WriteLine("Writing {0,5} characters BytesToRead={1,5}", numberOfCharacters, com2.BytesToRead);
+                        //						Debug.WriteLine("Writing {0,5} characters BytesToRead={1,5}", numberOfCharacters, com2.BytesToRead);
                         com1.Write(xmitCharBuffer, 0, numberOfCharacters);
                         buffer.Append(xmitCharBuffer, 0, numberOfCharacters);
 
@@ -132,7 +79,7 @@ public class Write_char_int_int
                         int actualNumberOfCharactersRead;
                         int expectedBytesToRead = com2.BytesToRead - (2 * numberOfCharacters);
 
-                        //						Console.WriteLine("Reading {0,5} characters BytesToRead={1,5}", numberOfCharacters, com2.BytesToRead);
+                        //						Debug.WriteLine("Reading {0,5} characters BytesToRead={1,5}", numberOfCharacters, com2.BytesToRead);
                         actualNumberOfCharactersRead = com2.Read(rcvCharBuffer, 0, numberOfCharacters);
 
                         if (actualNumberOfCharactersRead == numberOfCharacters)
@@ -141,13 +88,13 @@ public class Write_char_int_int
 
                             if (com2.BytesToRead != expectedBytesToRead)
                             {
-                                Console.WriteLine("Err_895879uhedbuz Expected to BytesToRead={0} actual={1}", expectedBytesToRead, com2.BytesToRead);
+                                Debug.WriteLine("Err_895879uhedbuz Expected to BytesToRead={0} actual={1}", expectedBytesToRead, com2.BytesToRead);
                                 retValue = false;
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Err_895879uhedbuz Expected to read {0} chars actual {1}", numberOfCharacters, actualNumberOfCharactersRead);
+                            Debug.WriteLine("Err_895879uhedbuz Expected to read {0} chars actual {1}", numberOfCharacters, actualNumberOfCharactersRead);
                             retValue = false;
                         }
                     }
@@ -208,7 +155,7 @@ public class Buffer<T>
         {
             if (!_comparer.Equals(enumerator.Current, data[index]))
             {
-                Console.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], enumerator.Current);
+                Debug.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], enumerator.Current);
                 result = false;
             }
 
@@ -217,7 +164,7 @@ public class Buffer<T>
 
         if (index != count)
         {
-            Console.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
+            Debug.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
             result = false;
         }
 
@@ -237,7 +184,7 @@ public class Buffer<T>
 
             if (!_comparer.Equals(currentItem, data[index]))
             {
-                Console.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], currentItem);
+                Debug.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], currentItem);
                 result = false;
             }
 
@@ -246,7 +193,7 @@ public class Buffer<T>
 
         if (index != count)
         {
-            Console.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
+            Debug.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
             result = false;
         }
 

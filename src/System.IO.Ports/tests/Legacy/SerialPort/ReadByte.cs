@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 
-public class ReadByte
+public class ReadByte : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadByte()";
@@ -35,7 +35,7 @@ public class ReadByte
         ReadByte objTest = new ReadByte();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -43,7 +43,7 @@ public class ReadByte
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -51,11 +51,11 @@ public class ReadByte
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -64,14 +64,7 @@ public class ReadByte
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
 
 
@@ -102,10 +95,10 @@ public class ReadByte
     #region Test Cases
     public bool ASCIIEncoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with ASCIIEncoding");
+        Debug.WriteLine("Verifying read with bytes encoded with ASCIIEncoding");
         if (!VerifyRead(new System.Text.ASCIIEncoding()))
         {
-            Console.WriteLine("Err_001!!! Verifying read with bytes encoded with ASCIIEncoding FAILED");
+            Debug.WriteLine("Err_001!!! Verifying read with bytes encoded with ASCIIEncoding FAILED");
             return false;
         }
 
@@ -115,10 +108,10 @@ public class ReadByte
 
     public bool UTF7Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF7Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF7Encoding");
         if (!VerifyRead(new System.Text.UTF7Encoding()))
         {
-            Console.WriteLine("Err_002!!! Verifying read with bytes encoded with UTF7Encoding FAILED");
+            Debug.WriteLine("Err_002!!! Verifying read with bytes encoded with UTF7Encoding FAILED");
             return false;
         }
 
@@ -128,10 +121,10 @@ public class ReadByte
 
     public bool UTF8Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF8Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF8Encoding");
         if (!VerifyRead(new System.Text.UTF8Encoding()))
         {
-            Console.WriteLine("Err_003!!! Verifying read with bytes encoded with UTF8Encoding FAILED");
+            Debug.WriteLine("Err_003!!! Verifying read with bytes encoded with UTF8Encoding FAILED");
             return false;
         }
 
@@ -141,10 +134,10 @@ public class ReadByte
 
     public bool UTF32Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF32Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF32Encoding");
         if (!VerifyRead(new System.Text.UTF32Encoding()))
         {
-            Console.WriteLine("Err_004!!! Verifying read with bytes encoded with UTF32Encoding FAILED");
+            Debug.WriteLine("Err_004!!! Verifying read with bytes encoded with UTF32Encoding FAILED");
             return false;
         }
 
@@ -156,7 +149,7 @@ public class ReadByte
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
+            Debug.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
             return false;
         }
 
@@ -168,7 +161,7 @@ public class ReadByte
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
+            Debug.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
             return false;
         }
 
@@ -180,7 +173,7 @@ public class ReadByte
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
+            Debug.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
             return false;
         }
 
@@ -192,7 +185,7 @@ public class ReadByte
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
+            Debug.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
             return false;
         }
 
@@ -209,7 +202,7 @@ public class ReadByte
         System.Threading.Thread asyncReadThread = new System.Threading.Thread(new System.Threading.ThreadStart(asyncRead.Read));
         bool retValue = true;
 
-        Console.WriteLine("Verifying that ReadByte() will read bytes that have been received after the call to Read was made");
+        Debug.WriteLine("Verifying that ReadByte() will read bytes that have been received after the call to Read was made");
 
         com1.Encoding = System.Text.Encoding.UTF8;
         com2.Encoding = System.Text.Encoding.UTF8;
@@ -230,12 +223,12 @@ public class ReadByte
         if (null != asyncRead.Exception)
         {
             retValue = false;
-            Console.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
+            Debug.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
         }
         else if (asyncRead.Result != byteXmitBuffer[0])
         {
             retValue = false;
-            Console.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", byteXmitBuffer[0], asyncRead.Result);
+            Debug.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", byteXmitBuffer[0], asyncRead.Result);
         }
         else
         {
@@ -246,7 +239,7 @@ public class ReadByte
             if (1 + readResult != byteXmitBuffer.Length)
             {
                 retValue = false;
-                Console.WriteLine("Err_051884ajoedo Expected Read to read {0} bytes actually read {1}",
+                Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} bytes actually read {1}",
                     byteXmitBuffer.Length - 1, readResult);
             }
             else
@@ -256,7 +249,7 @@ public class ReadByte
                     if (byteRcvBuffer[i] != byteXmitBuffer[i])
                     {
                         retValue = false;
-                        Console.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
+                        Debug.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
                             i, byteXmitBuffer[i], byteRcvBuffer[i], asyncRead.Result);
                     }
                 }
@@ -264,7 +257,7 @@ public class ReadByte
         }
 
         if (!retValue)
-            Console.WriteLine("Err_018068ajkid Verifying that ReadByte() will read bytes that have been received after the call to Read was made failed");
+            Debug.WriteLine("Err_018068ajkid Verifying that ReadByte() will read bytes that have been received after the call to Read was made failed");
 
         com1.Close();
         com2.Close();
@@ -359,7 +352,7 @@ public class ReadByte
 
         if (com1.BytesToRead != bytesToWrite.Length)
         {
-            Console.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -401,7 +394,7 @@ public class ReadByte
             if (expectedBytes.Length <= i)
             {
                 //If we have read in more bytes then were actually sent
-                Console.WriteLine("ERROR!!!: We have received more bytes then were sent");
+                Debug.WriteLine("ERROR!!!: We have received more bytes then were sent");
                 retValue = false;
                 break;
             }
@@ -411,7 +404,7 @@ public class ReadByte
             if (readInt != expectedBytes[i])
             {
                 //If the byte read is not the expected byte
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read byte {1}", (int)expectedBytes[i], readInt);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read byte {1}", (int)expectedBytes[i], readInt);
                 retValue = false;
             }
 
@@ -419,14 +412,14 @@ public class ReadByte
 
             if (expectedBytes.Length - i != com1.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", expectedBytes.Length - i, com1.BytesToRead);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", expectedBytes.Length - i, com1.BytesToRead);
                 retValue = false;
             }
         }
 
         if (0 != com1.BytesToRead)
         {
-            System.Console.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
+            System.Debug.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
             retValue = false;
         }
 

@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class ParityReplace_Property
+public class ParityReplace_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ParityReplace";
@@ -31,7 +31,7 @@ public class ParityReplace_Property
         ParityReplace_Property objTest = new ParityReplace_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -39,7 +39,7 @@ public class ParityReplace_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -47,11 +47,11 @@ public class ParityReplace_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -60,14 +60,7 @@ public class ParityReplace_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -104,14 +97,14 @@ public class ParityReplace_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ParityReplace before Open");
+        Debug.WriteLine("Verifying default ParityReplace before Open");
 
         serPortProp.SetAllPropertiesToDefaults();
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default ParityReplace before Open FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default ParityReplace before Open FAILED");
         }
 
         if (com1.IsOpen)
@@ -127,7 +120,7 @@ public class ParityReplace_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ParityReplace after Open");
+        Debug.WriteLine("Verifying default ParityReplace after Open");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -136,7 +129,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying default ParityReplace after Open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying default ParityReplace after Open FAILED");
         }
 
         if (com1.IsOpen)
@@ -150,12 +143,12 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with Read(byte[], int, int)");
+        Debug.WriteLine("Verifying random ParityReplace with Read(byte[], int, int)");
         retValue &= VerifyParityReplaceByte(new ReadMethodDelegate(Read_byte_int_int), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_003!!! Verifying random ParityReplace with Read(byte[], int, int) FAILED");
+            Debug.WriteLine("Err_003!!! Verifying random ParityReplace with Read(byte[], int, int) FAILED");
         }
 
         return retValue;
@@ -166,12 +159,12 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with Read(char[], int, int)");
+        Debug.WriteLine("Verifying random ParityReplace with Read(char[], int, int)");
         retValue &= VerifyParityReplaceByte(new ReadMethodDelegate(Read_char_int_int), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_004!!! Verifying random ParityReplace with Read(char[], int, int) FAILED");
+            Debug.WriteLine("Err_004!!! Verifying random ParityReplace with Read(char[], int, int) FAILED");
         }
 
         return retValue;
@@ -182,12 +175,12 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with ReadByte()");
+        Debug.WriteLine("Verifying random ParityReplace with ReadByte()");
         retValue &= VerifyParityReplaceByte(new ReadMethodDelegate(ReadByte), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying random ParityReplace with ReadByte() FAILED");
+            Debug.WriteLine("Err_005!!! Verifying random ParityReplace with ReadByte() FAILED");
         }
 
         return retValue;
@@ -198,12 +191,12 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with ReadChar()");
+        Debug.WriteLine("Verifying random ParityReplace with ReadChar()");
         retValue &= VerifyParityReplaceByte(new ReadMethodDelegate(ReadChar), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying random ParityReplace with ReadChar() FAILED");
+            Debug.WriteLine("Err_006!!! Verifying random ParityReplace with ReadChar() FAILED");
         }
 
         return retValue;
@@ -214,13 +207,13 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with ReadLine()");
+        Debug.WriteLine("Verifying random ParityReplace with ReadLine()");
 
         retValue &= VerifyParityReplaceByte(17, new ReadMethodDelegate(ReadLine), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_007!!! Verifying random ParityReplace with ReadLine() FAILED");
+            Debug.WriteLine("Err_007!!! Verifying random ParityReplace with ReadLine() FAILED");
         }
 
         return retValue;
@@ -231,12 +224,12 @@ public class ParityReplace_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying random ParityReplace with ReadTo(string)");
+        Debug.WriteLine("Verifying random ParityReplace with ReadTo(string)");
         retValue &= VerifyParityReplaceByte(new ReadMethodDelegate(ReadTo), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_008!!! Verifying random ParityReplace with ReadTo(string) FAILED");
+            Debug.WriteLine("Err_008!!! Verifying random ParityReplace with ReadTo(string) FAILED");
         }
 
         return retValue;
@@ -249,7 +242,7 @@ public class ParityReplace_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ParityReplace after Parity has been set");
+        Debug.WriteLine("Verifying setting ParityReplace after Parity has been set");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -268,7 +261,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_04748ajoied!!! Verifying setting ParityReplace after Parity has been set FAILED");
+            Debug.WriteLine("Err_04748ajoied!!! Verifying setting ParityReplace after Parity has been set FAILED");
         }
 
         if (com1.IsOpen)
@@ -287,7 +280,7 @@ public class ParityReplace_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ParityReplace after ParityReplace has aready been set");
+        Debug.WriteLine("Verifying setting ParityReplace after ParityReplace has aready been set");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -307,7 +300,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_51848ajhied!!! Verifying setting ParityReplace after ParityReplace has aready been set FAILED");
+            Debug.WriteLine("Err_51848ajhied!!! Verifying setting ParityReplace after ParityReplace has aready been set FAILED");
         }
 
         if (com1.IsOpen)
@@ -326,7 +319,7 @@ public class ParityReplace_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ParityReplace after ParityReplace and Parity have aready been set");
+        Debug.WriteLine("Verifying setting ParityReplace after ParityReplace and Parity have aready been set");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -346,7 +339,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_50848ajoied!!! Verifying setting ParityReplace after ParityReplace and Parity have aready been set FAILED");
+            Debug.WriteLine("Err_50848ajoied!!! Verifying setting ParityReplace after ParityReplace and Parity have aready been set FAILED");
         }
 
         if (com1.IsOpen)
@@ -399,7 +392,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_2509pqzhz Verifying setting ParityReplaceByte BEFORE calling Open failed ParityReplace={0}", parityReplace);
+            Debug.WriteLine("Err_2509pqzhz Verifying setting ParityReplaceByte BEFORE calling Open failed ParityReplace={0}", parityReplace);
         }
 
         return retValue;
@@ -423,7 +416,7 @@ public class ParityReplace_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_0825qnza Verifying setting ParityReplaceByte AFTER calling Open failed ParityReplace={0}", parityReplace);
+            Debug.WriteLine("Err_0825qnza Verifying setting ParityReplaceByte AFTER calling Open failed ParityReplace={0}", parityReplace);
         }
 
         return retValue;
@@ -487,20 +480,20 @@ public class ParityReplace_Property
         {
             if (actualChars.Length <= i)
             {
-                System.Console.WriteLine("ERROR!!!: Expected more characters then were actually read");
+                System.Debug.WriteLine("ERROR!!!: Expected more characters then were actually read");
                 retValue = false;
                 break;
             }
             else if (expectedChars[i] != actualChars[i])
             {
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1} at {2}", (int)expectedChars[i], (int)actualChars[i], i);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1} at {2}", (int)expectedChars[i], (int)actualChars[i], i);
                 retValue = false;
             }
         }
 
         if (actualChars.Length > expectedChars.Length)
         {
-            System.Console.WriteLine("ERROR!!!: Read in more characters then expected");
+            System.Debug.WriteLine("ERROR!!!: Read in more characters then expected");
             retValue = false;
         }
 

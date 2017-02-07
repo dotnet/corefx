@@ -13,9 +13,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="Legacy\SerialPort\BaseStream.cs" />
+    <Compile Include="Legacy\SerialPort\BaudRate.cs" />
+    <Compile Include="Legacy\SerialPort\BreakState.cs" />
+    <Compile Include="Legacy\SerialPort\BytesToRead.cs" />
+    <Compile Include="Legacy\SerialPort\BytesToSend.cs" />
+    <Compile Include="Legacy\SerialPort\CDHolding.cs" />
     <Compile Include="Legacy\SerialPort\Close.cs" />
     <Compile Include="Legacy\SerialPort\ctor.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_IContainer.cs" />
     <Compile Include="Legacy\SerialPort\ctor_str.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_str_int.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_str_int_parity.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_str_int_parity_int.cs" />
+    <Compile Include="Legacy\SerialPort\ctor_str_int_parity_int_stopbits.cs" />
+    <Compile Include="Legacy\SerialPort\CtsHolding.cs" />
+    <Compile Include="Legacy\SerialPort\DataBits.cs" />
+    <Compile Include="Legacy\SerialPort\DiscardInBuffer.cs" />
+    <Compile Include="Legacy\SerialPort\DiscardInBuffer_Generic.cs" />
+    <Compile Include="Legacy\SerialPort\DiscardNull.cs" />
+    <Compile Include="Legacy\SerialPort\DiscardOutBuffer.cs" />
+    <Compile Include="Legacy\SerialPort\Encoding.cs" />
+    <Compile Include="Legacy\SerialPort\ErrorEvent.cs" />
+    <Compile Include="Legacy\SerialPort\GetPortNames.cs" />
+    <Compile Include="Legacy\SerialPort\IsOpen.cs" />
     <Compile Include="Legacy\SerialPort\Open.cs" />
     <Compile Include="Legacy\SerialPort\Open_Stress.cs" />
     <Compile Include="Legacy\Support\LocalMachineSerialInfo.cs" />
@@ -24,7 +45,7 @@
     <Compile Include="Legacy\Support\SerialPortProperties.cs" />
     <Compile Include="Legacy\Support\TCSupport.cs" />
     <Compile Include="Legacy\Support\TestDelegate.cs" />
-    <Compile Include="PortsTest.cs" />
+    <Compile Include="Legacy\Support\PortsTest.cs" />
     <Compile Include="System\IO\Ports\SmokeTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,9 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO.Ports;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class StopBits_Property
+public class StopBits_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.StopBits";
@@ -37,7 +40,7 @@ public class StopBits_Property
         StopBits_Property objTest = new StopBits_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -45,7 +48,7 @@ public class StopBits_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -53,11 +56,11 @@ public class StopBits_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -66,14 +69,7 @@ public class StopBits_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -109,7 +105,7 @@ public class StopBits_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default StopBits");
+        Debug.WriteLine("Verifying default StopBits");
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         com1.Open();
@@ -119,7 +115,7 @@ public class StopBits_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default StopBits FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default StopBits FAILED");
         }
 
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
@@ -133,10 +129,10 @@ public class StopBits_Property
 
     public bool StopBits_1_BeforeOpen()
     {
-        Console.WriteLine("Verifying 1 StopBits before open");
+        Debug.WriteLine("Verifying 1 StopBits before open");
         if (!VerifyStopBitsBeforeOpen((int)StopBits.One))
         {
-            Console.WriteLine("Err_002!!! Verifying 1 StopBits before open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying 1 StopBits before open FAILED");
             return false;
         }
 
@@ -146,10 +142,10 @@ public class StopBits_Property
 
     public bool StopBits_1Point5_BeforeOpen()
     {
-        Console.WriteLine("Verifying 1.5 StopBits before open");
+        Debug.WriteLine("Verifying 1.5 StopBits before open");
         if (!VerifyStopBitsBeforeOpen((int)StopBits.OnePointFive, 5))
         {
-            Console.WriteLine("Err_003!!! Verifying 1.5 StopBits before open FAILED");
+            Debug.WriteLine("Err_003!!! Verifying 1.5 StopBits before open FAILED");
             return false;
         }
 
@@ -159,10 +155,10 @@ public class StopBits_Property
 
     public bool StopBits_2_BeforeOpen()
     {
-        Console.WriteLine("Verifying 2 StopBits before open");
+        Debug.WriteLine("Verifying 2 StopBits before open");
         if (!VerifyStopBitsBeforeOpen((int)StopBits.Two))
         {
-            Console.WriteLine("Err_004!!! Verifying 2 StopBits before open FAILED");
+            Debug.WriteLine("Err_004!!! Verifying 2 StopBits before open FAILED");
             return false;
         }
 
@@ -172,10 +168,10 @@ public class StopBits_Property
 
     public bool StopBits_1_AfterOpen()
     {
-        Console.WriteLine("Verifying 1 StopBits after open");
+        Debug.WriteLine("Verifying 1 StopBits after open");
         if (!VerifyStopBitsAfterOpen((int)StopBits.One))
         {
-            Console.WriteLine("Err_005!!! Verifying 1 StopBits after open FAILED");
+            Debug.WriteLine("Err_005!!! Verifying 1 StopBits after open FAILED");
             return false;
         }
 
@@ -185,10 +181,10 @@ public class StopBits_Property
 
     public bool StopBits_1Point5_AfterOpen()
     {
-        Console.WriteLine("Verifying 1.5 StopBits after open");
+        Debug.WriteLine("Verifying 1.5 StopBits after open");
         if (!VerifyStopBitsAfterOpen((int)StopBits.OnePointFive, 5))
         {
-            Console.WriteLine("Err_006!!! Verifying 1.5 StopBits after open FAILED");
+            Debug.WriteLine("Err_006!!! Verifying 1.5 StopBits after open FAILED");
             return false;
         }
 
@@ -198,10 +194,10 @@ public class StopBits_Property
 
     public bool StopBits_2_AfterOpen()
     {
-        Console.WriteLine("Verifying 2 StopBits after open");
+        Debug.WriteLine("Verifying 2 StopBits after open");
         if (!VerifyStopBitsAfterOpen((int)StopBits.Two))
         {
-            Console.WriteLine("Err_007!!! Verifying 2 StopBits after open FAILED");
+            Debug.WriteLine("Err_007!!! Verifying 2 StopBits after open FAILED");
             return false;
         }
 
@@ -211,10 +207,10 @@ public class StopBits_Property
 
     public bool StopBits_Int32MinValue()
     {
-        Console.WriteLine("Verifying Int32.MinValue StopBits");
+        Debug.WriteLine("Verifying Int32.MinValue StopBits");
         if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_008!!! Verifying Int32.MinValue StopBits FAILED");
+            Debug.WriteLine("Err_008!!! Verifying Int32.MinValue StopBits FAILED");
             return false;
         }
 
@@ -224,10 +220,10 @@ public class StopBits_Property
 
     public bool StopBits_Neg1()
     {
-        Console.WriteLine("Verifying -1 StopBits");
+        Debug.WriteLine("Verifying -1 StopBits");
         if (!VerifyException(-1, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_009!!! Verifying -1 StopBits FAILED");
+            Debug.WriteLine("Err_009!!! Verifying -1 StopBits FAILED");
             return false;
         }
 
@@ -237,10 +233,10 @@ public class StopBits_Property
 
     public bool StopBits_0()
     {
-        Console.WriteLine("Verifying 0 StopBits");
+        Debug.WriteLine("Verifying 0 StopBits");
         if (!VerifyException(0, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_010!!! Verifying 0 StopBits FAILED");
+            Debug.WriteLine("Err_010!!! Verifying 0 StopBits FAILED");
             return false;
         }
 
@@ -250,10 +246,10 @@ public class StopBits_Property
 
     public bool StopBits_4()
     {
-        Console.WriteLine("Verifying 4 StopBits");
+        Debug.WriteLine("Verifying 4 StopBits");
         if (!VerifyException(4, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_011!!! Verifying 4 StopBits FAILED");
+            Debug.WriteLine("Err_011!!! Verifying 4 StopBits FAILED");
             return false;
         }
 
@@ -263,10 +259,10 @@ public class StopBits_Property
 
     public bool StopBits_Int32MaxValue()
     {
-        Console.WriteLine("Verifying Int32.MaxValue StopBits");
+        Debug.WriteLine("Verifying Int32.MaxValue StopBits");
         if (!VerifyException(Int32.MaxValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_012!!! Verifying Int32.MaxValue StopBits FAILED");
+            Debug.WriteLine("Err_012!!! Verifying Int32.MaxValue StopBits FAILED");
             return false;
         }
 
@@ -276,10 +272,10 @@ public class StopBits_Property
 
     public bool StopBits_1Point5()
     {
-        Console.WriteLine("Verifying 1.5 StopBits");
+        Debug.WriteLine("Verifying 1.5 StopBits");
         if (!VerifyException((int)StopBits.OnePointFive, ThrowAt.Open, typeof(System.IO.IOException)))
         {
-            Console.WriteLine("Err_013!!! Verifying 1.5 StopBits FAILED");
+            Debug.WriteLine("Err_013!!! Verifying 1.5 StopBits FAILED");
             return false;
         }
 
@@ -327,7 +323,7 @@ public class StopBits_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -335,12 +331,12 @@ public class StopBits_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -367,7 +363,7 @@ public class StopBits_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the StopBits after Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected setting the StopBits after Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -375,12 +371,12 @@ public class StopBits_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the StopBits after Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the StopBits after Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the StopBits after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the StopBits after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -534,7 +530,7 @@ public class StopBits_Property
         //then the expected baud rate must not have been used and we should report an error
         if (MAX_ACCEPTABEL_PERCENTAGE_DIFFERENCE < percentageDifference)
         {
-            Console.WriteLine("ERROR!!! StopBits not used Expected time:{0}, actual time:{1} percentageDifference:{2}", expectedTime, actualTime, percentageDifference, numBytes);
+            Debug.WriteLine("ERROR!!! StopBits not used Expected time:{0}, actual time:{1} percentageDifference:{2}", expectedTime, actualTime, percentageDifference, numBytes);
             retValue = false;
         }
 
@@ -545,7 +541,7 @@ public class StopBits_Property
         {
             if (expectedBytes[i] != rcvBytes[i])
             {
-                Console.WriteLine("ERROR!!! Expected to read {0} actual read {1}", expectedBytes[i], rcvBytes[i]);
+                Debug.WriteLine("ERROR!!! Expected to read {0} actual read {1}", expectedBytes[i], rcvBytes[i]);
                 retValue = false;
             }
         }

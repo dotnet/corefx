@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class DtrEnable_Property
+public class DtrEnable_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.DtrEnable";
@@ -22,7 +22,7 @@ public class DtrEnable_Property
         DtrEnable_Property objTest = new DtrEnable_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -30,7 +30,7 @@ public class DtrEnable_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -38,11 +38,11 @@ public class DtrEnable_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -51,14 +51,7 @@ public class DtrEnable_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -89,7 +82,7 @@ public class DtrEnable_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default DtrEnable");
+        Debug.WriteLine("Verifying default DtrEnable");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -101,7 +94,7 @@ public class DtrEnable_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default DtrEnable FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default DtrEnable FAILED");
         }
 
         if (com1.IsOpen)
@@ -113,10 +106,10 @@ public class DtrEnable_Property
 
     public bool DtrEnable_true_BeforeOpen()
     {
-        Console.WriteLine("Verifying true DtrEnable before open");
+        Debug.WriteLine("Verifying true DtrEnable before open");
         if (!VerifyDtrEnableBeforeOpen(true))
         {
-            Console.WriteLine("Err_002!!! Verifying true DtrEnable before open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying true DtrEnable before open FAILED");
             return false;
         }
 
@@ -126,10 +119,10 @@ public class DtrEnable_Property
 
     public bool DtrEnable_false_BeforeOpen()
     {
-        Console.WriteLine("Verifying false DtrEnable before open");
+        Debug.WriteLine("Verifying false DtrEnable before open");
         if (!VerifyDtrEnableBeforeOpen(false))
         {
-            Console.WriteLine("Err_003!!! Verifying false DtrEnable before open FAILED");
+            Debug.WriteLine("Err_003!!! Verifying false DtrEnable before open FAILED");
             return false;
         }
 
@@ -143,7 +136,7 @@ public class DtrEnable_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying seting DtrEnable to true then false before open");
+        Debug.WriteLine("Verifying seting DtrEnable to true then false before open");
 
         com1.DtrEnable = true;
 
@@ -159,7 +152,7 @@ public class DtrEnable_Property
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
         if (!retValue)
         {
-            Console.WriteLine("Err_9072akldjs!!! Verifying seting DtrEnable to true then false before open FAILED");
+            Debug.WriteLine("Err_9072akldjs!!! Verifying seting DtrEnable to true then false before open FAILED");
         }
 
         if (com1.IsOpen)
@@ -171,10 +164,10 @@ public class DtrEnable_Property
 
     public bool DtrEnable_true_AfterOpen()
     {
-        Console.WriteLine("Verifying true DtrEnable after open");
+        Debug.WriteLine("Verifying true DtrEnable after open");
         if (!VerifyDtrEnableAfterOpen(true))
         {
-            Console.WriteLine("Err_002!!! Verifying true DtrEnable after open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying true DtrEnable after open FAILED");
             return false;
         }
 
@@ -184,10 +177,10 @@ public class DtrEnable_Property
 
     public bool DtrEnable_false_AfterOpen()
     {
-        Console.WriteLine("Verifying false DtrEnable after open");
+        Debug.WriteLine("Verifying false DtrEnable after open");
         if (!VerifyDtrEnableAfterOpen(false))
         {
-            Console.WriteLine("Err_003!!! Verifying false DtrEnable after open FAILED");
+            Debug.WriteLine("Err_003!!! Verifying false DtrEnable after open FAILED");
             return false;
         }
 
@@ -201,7 +194,7 @@ public class DtrEnable_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying seting DtrEnable to true then false after open");
+        Debug.WriteLine("Verifying seting DtrEnable to true then false after open");
 
         com1.Open();
 
@@ -218,7 +211,7 @@ public class DtrEnable_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_15987aphl!!! Verifying seting DtrEnable to true then false after open FAILED");
+            Debug.WriteLine("Err_15987aphl!!! Verifying seting DtrEnable to true then false after open FAILED");
         }
 
         if (com1.IsOpen)

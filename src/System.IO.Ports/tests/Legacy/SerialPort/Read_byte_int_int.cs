@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 
-public class Read_byte_int_int_Generic
+public class Read_byte_int_int : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.Read(byte[], int, int,)";
@@ -44,7 +44,7 @@ public class Read_byte_int_int_Generic
         Read_byte_int_int_Generic objTest = new Read_byte_int_int_Generic();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -52,7 +52,7 @@ public class Read_byte_int_int_Generic
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -60,11 +60,11 @@ public class Read_byte_int_int_Generic
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -73,14 +73,7 @@ public class Read_byte_int_int_Generic
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -129,7 +122,7 @@ public class Read_byte_int_int_Generic
     {
         if (!VerifyReadException(null, 0, 1, typeof(System.ArgumentNullException)))
         {
-            Console.WriteLine("Err_001!!! Verifying read method throws exception with buffer equal to null FAILED");
+            Debug.WriteLine("Err_001!!! Verifying read method throws exception with buffer equal to null FAILED");
             return false;
         }
 
@@ -141,7 +134,7 @@ public class Read_byte_int_int_Generic
     {
         if (!VerifyReadException(new byte[defaultByteArraySize], -1, defaultByteCount, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_002!!! Verifying read method throws exception with offset equal to -1");
+            Debug.WriteLine("Err_002!!! Verifying read method throws exception with offset equal to -1");
             return false;
         }
 
@@ -155,7 +148,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[defaultByteArraySize], rndGen.Next(Int32.MinValue, 0), defaultByteCount, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_003!!! Verifying read method throws exception with offset equal to negative random number");
+            Debug.WriteLine("Err_003!!! Verifying read method throws exception with offset equal to negative random number");
             return false;
         }
 
@@ -167,7 +160,7 @@ public class Read_byte_int_int_Generic
     {
         if (!VerifyReadException(new byte[defaultByteArraySize], Int32.MinValue, defaultByteCount, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_004!!! Verifying read method throws exception with count equal to MintInt");
+            Debug.WriteLine("Err_004!!! Verifying read method throws exception with count equal to MintInt");
             return false;
         }
 
@@ -179,7 +172,7 @@ public class Read_byte_int_int_Generic
     {
         if (!VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, -1, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_005!!! Verifying read method throws exception with count equal to -1");
+            Debug.WriteLine("Err_005!!! Verifying read method throws exception with count equal to -1");
             return false;
         }
 
@@ -193,7 +186,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, rndGen.Next(Int32.MinValue, 0), typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_006!!! Verifying read method throws exception with count equal to negative random number");
+            Debug.WriteLine("Err_006!!! Verifying read method throws exception with count equal to negative random number");
             return false;
         }
 
@@ -205,7 +198,7 @@ public class Read_byte_int_int_Generic
     {
         if (!VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, Int32.MinValue, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_007!!! Verifying read method throws exception with count equal to MintInt");
+            Debug.WriteLine("Err_007!!! Verifying read method throws exception with count equal to MintInt");
             return false;
         }
 
@@ -223,7 +216,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_009!!! Verifying read method throws exception with offset+count=buffer.length+1");
+            Debug.WriteLine("Err_009!!! Verifying read method throws exception with offset+count=buffer.length+1");
             return false;
         }
 
@@ -241,7 +234,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_010!!! Verifying read method throws exception with offset+count>buffer.length+1");
+            Debug.WriteLine("Err_010!!! Verifying read method throws exception with offset+count>buffer.length+1");
             return false;
         }
 
@@ -259,7 +252,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_011!!! Verifying read method throws exception with offset>buffer.length");
+            Debug.WriteLine("Err_011!!! Verifying read method throws exception with offset>buffer.length");
             return false;
         }
 
@@ -277,7 +270,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyReadException(new byte[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_012!!! Verifying read method throws exception with count>buffer.length + 1");
+            Debug.WriteLine("Err_012!!! Verifying read method throws exception with count>buffer.length + 1");
             return false;
         }
 
@@ -294,7 +287,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_013!!! Verifying read method with offset + count=buffer.length");
+            Debug.WriteLine("Err_013!!! Verifying read method with offset + count=buffer.length");
             return false;
         }
 
@@ -311,7 +304,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_014!!! Verifying read method with offset + count=buffer.length");
+            Debug.WriteLine("Err_014!!! Verifying read method with offset + count=buffer.length");
             return false;
         }
 
@@ -328,7 +321,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_015!!! Verifying read method with offset + count=buffer.length");
+            Debug.WriteLine("Err_015!!! Verifying read method with offset + count=buffer.length");
             return false;
         }
 
@@ -344,7 +337,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count, 32, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
+            Debug.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
             return false;
         }
 
@@ -360,7 +353,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count, 32, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
+            Debug.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
             return false;
         }
 
@@ -376,7 +369,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count, 32, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
+            Debug.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
             return false;
         }
 
@@ -392,7 +385,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count, 32, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
+            Debug.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
             return false;
         }
 
@@ -413,7 +406,7 @@ public class Read_byte_int_int_Generic
         int numBytesRead;
         bool retValue = true;
 
-        Console.WriteLine("Verifying that Read(byte[], int, int) will read everything from internal buffer and drivers buffer");
+        Debug.WriteLine("Verifying that Read(byte[], int, int) will read everything from internal buffer and drivers buffer");
         for (int i = 0; i < utf32CharBytes.Length; i++)
         {
             expectedBytes[i] = utf32CharBytes[i];
@@ -447,7 +440,7 @@ public class Read_byte_int_int_Generic
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -463,7 +456,7 @@ public class Read_byte_int_int_Generic
 
         if (expectedBytes.Length != (numBytesRead = com1.Read(byteRcvBuffer, 0, byteRcvBuffer.Length)))
         {
-            Console.WriteLine("Err_6481sfadw Expected read to read {0} chars actually read {1}", expectedBytes.Length, numBytesRead);
+            Debug.WriteLine("Err_6481sfadw Expected read to read {0} chars actually read {1}", expectedBytes.Length, numBytesRead);
             retValue = false;
         }
 
@@ -471,7 +464,7 @@ public class Read_byte_int_int_Generic
         {
             if (expectedBytes[i] != byteRcvBuffer[i])
             {
-                Console.WriteLine("Err_70782apzh Expected to read {0} actually read {1} at {2}", (int)expectedBytes[i], (int)byteRcvBuffer[i], i);
+                Debug.WriteLine("Err_70782apzh Expected to read {0} actually read {1} at {2}", (int)expectedBytes[i], (int)byteRcvBuffer[i], i);
                 retValue = false;
                 break;
             }
@@ -479,12 +472,12 @@ public class Read_byte_int_int_Generic
 
         if (0 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
+            Debug.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_1389 Verifying that Read(byte[], int, int) will read everything from internal buffer and drivers buffer failed");
+            Debug.WriteLine("Err_1389 Verifying that Read(byte[], int, int) will read everything from internal buffer and drivers buffer failed");
 
         com1.Close();
         com2.Close();
@@ -503,7 +496,7 @@ public class Read_byte_int_int_Generic
 
         if (!VerifyRead(new byte[bufferLength], offset, count, largeNumRndBytesToRead))
         {
-            Console.WriteLine("Err_016!!! Verifying read method with large input buffer");
+            Debug.WriteLine("Err_016!!! Verifying read method with large input buffer");
             return false;
         }
 
@@ -520,7 +513,7 @@ public class Read_byte_int_int_Generic
         System.Threading.Thread asyncReadThread = new System.Threading.Thread(new System.Threading.ThreadStart(asyncRead.Read));
         bool retValue = true;
 
-        Console.WriteLine("Verifying that Read(byte[], int, int) will read characters that have been received after the call to Read was made");
+        Debug.WriteLine("Verifying that Read(byte[], int, int) will read characters that have been received after the call to Read was made");
 
         com1.Encoding = System.Text.Encoding.UTF8;
         com2.Encoding = System.Text.Encoding.UTF8;
@@ -541,12 +534,12 @@ public class Read_byte_int_int_Generic
         if (null != asyncRead.Exception)
         {
             retValue = false;
-            Console.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
+            Debug.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
         }
         else if (asyncRead.Result < 1)
         {
             retValue = false;
-            Console.WriteLine("Err_0158ahei Expected Read to read at least one character {0}", asyncRead.Result);
+            Debug.WriteLine("Err_0158ahei Expected Read to read at least one character {0}", asyncRead.Result);
         }
         else
         {
@@ -556,7 +549,7 @@ public class Read_byte_int_int_Generic
             if (asyncRead.Result + readResult != byteXmitBuffer.Length)
             {
                 retValue = false;
-                Console.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
                     byteXmitBuffer.Length - asyncRead.Result, readResult);
             }
             else
@@ -566,7 +559,7 @@ public class Read_byte_int_int_Generic
                     if (byteRcvBuffer[i] != byteXmitBuffer[i])
                     {
                         retValue = false;
-                        Console.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
+                        Debug.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
                             i, byteXmitBuffer[i], byteRcvBuffer[i], asyncRead.Result);
                     }
                 }
@@ -574,7 +567,7 @@ public class Read_byte_int_int_Generic
         }
 
         if (!retValue)
-            Console.WriteLine("Err_018068ajkid Verifying that Read(byte[], int, int) will read characters that have been received after the call to Read was made failed");
+            Debug.WriteLine("Err_018068ajkid Verifying that Read(byte[], int, int) will read characters that have been received after the call to Read was made failed");
 
         com1.Close();
         com2.Close();
@@ -590,20 +583,20 @@ public class Read_byte_int_int_Generic
         bool retValue = true;
         int bufferLength = null == buffer ? 0 : buffer.Length;
 
-        Console.WriteLine("Verifying read method throws {0} buffer.Lenght={1}, offset={2}, count={3}", expectedException, bufferLength, offset, count);
+        Debug.WriteLine("Verifying read method throws {0} buffer.Lenght={1}, offset={2}, count={3}", expectedException, bufferLength, offset, count);
         com.Open();
 
         try
         {
             com.Read(buffer, offset, count);
-            Console.WriteLine("ERROR!!!: No Excpetion was thrown");
+            Debug.WriteLine("ERROR!!!: No Excpetion was thrown");
             retValue = false;
         }
         catch (System.Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
+                Debug.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
                 retValue = false;
             }
         }
@@ -649,7 +642,7 @@ public class Read_byte_int_int_Generic
             buffer[i] = randByte;
         }
 
-        Console.WriteLine("Verifying read method buffer.Lenght={0}, offset={1}, count={2} with {3} random chars", buffer.Length, offset, count, bytesToWrite.Length);
+        Debug.WriteLine("Verifying read method buffer.Lenght={0}, offset={1}, count={2} with {3} random chars", buffer.Length, offset, count, bytesToWrite.Length);
 
         com1.ReadTimeout = 500;
 
@@ -715,7 +708,7 @@ public class Read_byte_int_int_Generic
 
         if (com1.BytesToRead != bytesToWrite.Length)
         {
-            Console.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -767,14 +760,14 @@ public class Read_byte_int_int_Generic
             if ((bytesToRead > bytesRead && count != bytesRead) || (bytesToRead <= bytesRead && bytesRead != bytesToRead))
             {
                 //If we have not read all of the characters that we should have
-                Console.WriteLine("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
+                Debug.WriteLine("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
                 retValue = false;
             }
 
             if (expectedBytes.Length < totalBytesRead + bytesRead)
             {
                 //If we have read in more characters then we expect
-                Console.WriteLine("ERROR!!!: We have received more characters then were sent {0}", totalBytesRead + bytesRead);
+                Debug.WriteLine("ERROR!!!: We have received more characters then were sent {0}", totalBytesRead + bytesRead);
                 retValue = false;
                 break;
             }
@@ -787,7 +780,7 @@ public class Read_byte_int_int_Generic
 
             if (expectedBytes.Length - totalBytesRead != com1.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", expectedBytes.Length - totalBytesRead, com1.BytesToRead);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", expectedBytes.Length - totalBytesRead, com1.BytesToRead);
                 retValue = false;
             }
 
@@ -803,14 +796,14 @@ public class Read_byte_int_int_Generic
         {
             if (expectedBytes[i] != buffer[i])
             {
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1} at {2}", expectedBytes[i], buffer[i], i);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1} at {2}", expectedBytes[i], buffer[i], i);
                 retValue = false;
             }
         }
 
         if (0 != com1.BytesToRead)
         {
-            System.Console.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
+            System.Debug.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
             retValue = false;
         }
 
@@ -833,7 +826,7 @@ public class Read_byte_int_int_Generic
         {
             if (actualBuffer[i] != expectedBuffer[i])
             {
-                Console.WriteLine("Err_2038apzn!!!: Expected {0} in buffer at {1} actual {2}", (int)expectedBuffer[i], i, (int)actualBuffer[i]);
+                Debug.WriteLine("Err_2038apzn!!!: Expected {0} in buffer at {1} actual {2}", (int)expectedBuffer[i], i, (int)actualBuffer[i]);
                 retValue = false;
             }
         }
@@ -843,7 +836,7 @@ public class Read_byte_int_int_Generic
         {
             if (actualBuffer[i] != expectedBuffer[i])
             {
-                Console.WriteLine("Err_7025nbht!!!: Expected {0} in buffer at {1} actual {2}", (int)expectedBuffer[i], i, (int)actualBuffer[i]);
+                Debug.WriteLine("Err_7025nbht!!!: Expected {0} in buffer at {1} actual {2}", (int)expectedBuffer[i], i, (int)actualBuffer[i]);
                 retValue = false;
             }
         }

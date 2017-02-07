@@ -3,10 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class WriteBufferSize_Property
+public class WriteBufferSize_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/04/01 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.WriteBuffer_Property";
@@ -25,7 +28,7 @@ public class WriteBufferSize_Property
         WriteBufferSize_Property objTest = new WriteBufferSize_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -33,7 +36,7 @@ public class WriteBufferSize_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -41,11 +44,11 @@ public class WriteBufferSize_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -54,14 +57,7 @@ public class WriteBufferSize_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -100,19 +96,19 @@ public class WriteBufferSize_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default WriteBufferSize before Open");
+        Debug.WriteLine("Verifying default WriteBufferSize before Open");
         serPortProp.SetAllPropertiesToDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
-        Console.WriteLine("Verifying default WriteBufferSize after Open");
+        Debug.WriteLine("Verifying default WriteBufferSize after Open");
         com1.Open();
         serPortProp = new SerialPortProperties();
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
-        Console.WriteLine("Verifying default WriteBufferSize after Close");
+        Debug.WriteLine("Verifying default WriteBufferSize after Close");
         com1.Close();
         serPortProp = new SerialPortProperties();
         serPortProp.SetAllPropertiesToDefaults();
@@ -121,7 +117,7 @@ public class WriteBufferSize_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default WriteBufferSize FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default WriteBufferSize FAILED");
         }
 
         if (com1.IsOpen)
@@ -135,7 +131,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyException(1024, null, typeof(InvalidOperationException)))
         {
-            Console.WriteLine("Err_54458ahpba!!! Verifying setting WriteBufferSize to 1024 FAILED");
+            Debug.WriteLine("Err_54458ahpba!!! Verifying setting WriteBufferSize to 1024 FAILED");
             return false;
         }
 
@@ -146,7 +142,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyException(-1, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_002!!! Verifying setting WriteBufferSize to -1 FAILED");
+            Debug.WriteLine("Err_002!!! Verifying setting WriteBufferSize to -1 FAILED");
             return false;
         }
 
@@ -158,7 +154,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyException(Int32.MinValue, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_003!!! Verifying setting WriteBufferSize to Int32.MinValue FAILED");
+            Debug.WriteLine("Err_003!!! Verifying setting WriteBufferSize to Int32.MinValue FAILED");
             return false;
         }
 
@@ -170,7 +166,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyException(0, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_004!!! Verifying setting WriteBufferSize to 0 FAILED");
+            Debug.WriteLine("Err_004!!! Verifying setting WriteBufferSize to 0 FAILED");
             return false;
         }
 
@@ -180,12 +176,12 @@ public class WriteBufferSize_Property
 
     public bool WriteBufferSize_1()
     {
-        Console.WriteLine("Verifying setting WriteBufferSize=1");
+        Debug.WriteLine("Verifying setting WriteBufferSize=1");
 
 
         if (!VerifyException(1, typeof(IOException), typeof(InvalidOperationException), true))
         {
-            Console.WriteLine("Err_005!!! Verifying setting WriteBufferSize to 1 FAILED");
+            Debug.WriteLine("Err_005!!! Verifying setting WriteBufferSize to 1 FAILED");
             return false;
         }
         return true;
@@ -200,7 +196,7 @@ public class WriteBufferSize_Property
 
         if (!VerifyWriteBufferSize((int)newWriteBufferSize))
         {
-            Console.WriteLine("Err_006!!! Verifying setting WriteBufferSize to a smaller value FAILED");
+            Debug.WriteLine("Err_006!!! Verifying setting WriteBufferSize to a smaller value FAILED");
             return false;
         }
 
@@ -212,7 +208,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyWriteBufferSize(((new SerialPort()).WriteBufferSize) * 2))
         {
-            Console.WriteLine("Err_007!!! Verifying setting WriteBufferSize to a larger value FAILED");
+            Debug.WriteLine("Err_007!!! Verifying setting WriteBufferSize to a larger value FAILED");
             return false;
         }
 
@@ -221,13 +217,13 @@ public class WriteBufferSize_Property
 
     public bool WriteBufferSize_Odd()
     {
-        Console.WriteLine("Verifying setting WriteBufferSize=Odd");
+        Debug.WriteLine("Verifying setting WriteBufferSize=Odd");
         int bufferSize = ((new SerialPort()).WriteBufferSize) * 2 + 1;
 
 
         if (!VerifyException(bufferSize, typeof(IOException), typeof(InvalidOperationException), true))
         {
-            Console.WriteLine("Err_010!!! Verifying setting WriteBufferSize to an odd value FAILED");
+            Debug.WriteLine("Err_010!!! Verifying setting WriteBufferSize to an odd value FAILED");
             return false;
         }
 
@@ -238,10 +234,10 @@ public class WriteBufferSize_Property
 
     public bool WriteBufferSize_Even()
     {
-        Console.WriteLine("Verifying setting WriteBufferSize=Even");
+        Debug.WriteLine("Verifying setting WriteBufferSize=Even");
         if (!VerifyWriteBufferSize(((new SerialPort()).WriteBufferSize) * 2))
         {
-            Console.WriteLine("Err_011!!! Verifying setting WriteBufferSize to an even value FAILED");
+            Debug.WriteLine("Err_011!!! Verifying setting WriteBufferSize to an even value FAILED");
             return false;
         }
 
@@ -258,7 +254,7 @@ public class WriteBufferSize_Property
 
         if (!VerifyWriteBufferSize((int)newWriteBufferSize))
         {
-            Console.WriteLine("Err_012!!! Verifying setting WriteBufferSize to a random value FAILED");
+            Debug.WriteLine("Err_012!!! Verifying setting WriteBufferSize to a random value FAILED");
             return false;
         }
 
@@ -270,7 +266,7 @@ public class WriteBufferSize_Property
     {
         if (!VerifyWriteBufferSize(LARGE_BUFFER_SIZE))
         {
-            Console.WriteLine("Err_013!!! Verifying setting WriteBufferSize to a large value FAILED");
+            Debug.WriteLine("Err_013!!! Verifying setting WriteBufferSize to a large value FAILED");
             return false;
         }
 
@@ -291,14 +287,14 @@ public class WriteBufferSize_Property
 
         if (!VerifyExceptionBeforeOpen(newWriteBufferSize, expectedExceptionBeforeOpen, throwAtOpen))
         {
-            Console.WriteLine("Err_170821hapb Verifying setting WriteBufferSize={0} BEFORE a call to Open() has been made FAILED", newWriteBufferSize);
+            Debug.WriteLine("Err_170821hapb Verifying setting WriteBufferSize={0} BEFORE a call to Open() has been made FAILED", newWriteBufferSize);
             retValue = false;
         }
 
 
         if (!VerifyExceptionAfterOpen(newWriteBufferSize, expectedExceptionAfterOpen))
         {
-            Console.WriteLine("Err_23564ahpba Verifying setting WriteBufferSize={0} AFTER a call to Open() has been made FAILED", newWriteBufferSize);
+            Debug.WriteLine("Err_23564ahpba Verifying setting WriteBufferSize={0} AFTER a call to Open() has been made FAILED", newWriteBufferSize);
             retValue = false;
         }
 
@@ -318,7 +314,7 @@ public class WriteBufferSize_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("Err_707278ahpa!!! expected exception {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("Err_707278ahpa!!! expected exception {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -326,12 +322,12 @@ public class WriteBufferSize_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("Err_201890ioyun Expected no exception to be thrown and following was thrown \n{0}", e);
+                Debug.WriteLine("Err_201890ioyun Expected no exception to be thrown and following was thrown \n{0}", e);
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("Err_545498ahpba!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("Err_545498ahpba!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -354,24 +350,24 @@ public class WriteBufferSize_Property
         try
         {
             com.WriteBufferSize = newWriteBufferSize;
-            Console.WriteLine("Err_561567anhbp!!! expected exception {0} and nothing was thrown", expectedException);
+            Debug.WriteLine("Err_561567anhbp!!! expected exception {0} and nothing was thrown", expectedException);
             retValue = false;
         }
         catch (Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("Err_21288ajpbam!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("Err_21288ajpbam!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
             else if (originalWriteBufferSize != com.WriteBufferSize)
             {
-                Console.WriteLine("Err_454987ahbopa!!! expected WriteBufferSize={0} and actual={1}", originalWriteBufferSize, com.WriteBufferSize);
+                Debug.WriteLine("Err_454987ahbopa!!! expected WriteBufferSize={0} and actual={1}", originalWriteBufferSize, com.WriteBufferSize);
                 retValue = false;
             }
             else if (TCSupport.SufficientHardwareRequirements(TCSupport.SerialPortRequirements.NullModem) && !VerifyWriteBufferSize(com, originalWriteBufferSize))
             {
-                Console.WriteLine("Err_56459847ahjpba!!! Verifying actual write after exception thrown failed");
+                Debug.WriteLine("Err_56459847ahjpba!!! Verifying actual write after exception thrown failed");
                 retValue = false;
             }
         }
@@ -387,7 +383,7 @@ public class WriteBufferSize_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting WriteBufferSize={0} BEFORE a call to Open() has been made", newWriteBufferSize);
+        Debug.WriteLine("Verifying setting WriteBufferSize={0} BEFORE a call to Open() has been made", newWriteBufferSize);
         retValue &= VerifyWriteBufferSizeBeforeOpen(newWriteBufferSize);
 
         return retValue;
@@ -397,7 +393,7 @@ public class WriteBufferSize_Property
     {
         SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying setting WriteBufferSize to {0}", newWriteBufferSize);
+        Debug.WriteLine("Verifying setting WriteBufferSize to {0}", newWriteBufferSize);
 
         com1.WriteBufferSize = newWriteBufferSize;
         com1.Open();
@@ -438,7 +434,7 @@ public class WriteBufferSize_Property
         while (xmitBytes.Length > com2.BytesToRead)
             System.Threading.Thread.Sleep(50);
 
-        Console.WriteLine("Verifying properties after changing WriteBufferSize");
+        Debug.WriteLine("Verifying properties after changing WriteBufferSize");
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
         com2.Read(rcvBytes, 0, rcvBytes.Length);
@@ -447,7 +443,7 @@ public class WriteBufferSize_Property
         {
             if (rcvBytes[i] != xmitBytes[i])
             {
-                Console.WriteLine("ERROR!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i], rcvBytes[i], i);
+                Debug.WriteLine("ERROR!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i], rcvBytes[i], i);
                 retValue = false;
             }
         }

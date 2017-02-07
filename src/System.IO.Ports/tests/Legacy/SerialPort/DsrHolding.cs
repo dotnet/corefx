@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class DsrHolding_Property
+public class DsrHolding_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.DsrHolding";
@@ -22,7 +22,7 @@ public class DsrHolding_Property
         DsrHolding_Property objTest = new DsrHolding_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -30,7 +30,7 @@ public class DsrHolding_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -38,11 +38,11 @@ public class DsrHolding_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -51,14 +51,7 @@ public class DsrHolding_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -88,7 +81,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default DsrHolding before Open");
+        Debug.WriteLine("Verifying default DsrHolding before Open");
 
         serPortProp.SetAllPropertiesToDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -96,7 +89,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default DsrHolding before Open FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default DsrHolding before Open FAILED");
         }
 
         if (com1.IsOpen)
@@ -112,7 +105,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default DsrHolding after Open");
+        Debug.WriteLine("Verifying default DsrHolding after Open");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -121,7 +114,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying default DsrHolding after Open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying default DsrHolding after Open FAILED");
         }
 
         if (com1.IsOpen)
@@ -138,7 +131,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying DsrHolding=true on com1 when com2.DtrEnable=true");
+        Debug.WriteLine("Verifying DsrHolding=true on com1 when com2.DtrEnable=true");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -153,7 +146,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_003!!! Verifying DsrHolding=true on com1 when com2.DtrEnable=true FAILED");
+            Debug.WriteLine("Err_003!!! Verifying DsrHolding=true on com1 when com2.DtrEnable=true FAILED");
         }
 
         if (com1.IsOpen)
@@ -173,7 +166,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then false");
+        Debug.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then false");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -193,7 +186,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_004!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then false FAILED");
+            Debug.WriteLine("Err_004!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then false FAILED");
         }
 
         if (com1.IsOpen)
@@ -213,7 +206,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com1 is closed");
+        Debug.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com1 is closed");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -235,7 +228,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com1 is closed FAILED");
+            Debug.WriteLine("Err_005!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com1 is closed FAILED");
         }
 
         if (com1.IsOpen)
@@ -255,7 +248,7 @@ public class DsrHolding_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com2 is closed");
+        Debug.WriteLine("Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com2 is closed");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -279,7 +272,7 @@ public class DsrHolding_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com2 is closed FAILED");
+            Debug.WriteLine("Err_006!!! Verifying DsrHolding=true then false on com1 when com2.DtrEnable=true then com2 is closed FAILED");
         }
 
         if (com1.IsOpen)

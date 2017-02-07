@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 
-public class ReadLine
+public class ReadLine : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadLine()";
@@ -36,7 +36,7 @@ public class ReadLine
         ReadLine objTest = new ReadLine();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -44,7 +44,7 @@ public class ReadLine
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -52,11 +52,11 @@ public class ReadLine
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -65,14 +65,7 @@ public class ReadLine
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -131,7 +124,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), "\0"))
         {
-            Console.WriteLine("Err_001!!! Verifying read method with NewLine containing just the null character");
+            Debug.WriteLine("Err_001!!! Verifying read method with NewLine containing just the null character");
             return false;
         }
 
@@ -143,7 +136,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), "\r"))
         {
-            Console.WriteLine("Err_002!!! Verifying read method with \\r NewLine");
+            Debug.WriteLine("Err_002!!! Verifying read method with \\r NewLine");
             return false;
         }
 
@@ -155,7 +148,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), "\n"))
         {
-            Console.WriteLine("Err_003!!! Verifying read method with \\n NewLine");
+            Debug.WriteLine("Err_003!!! Verifying read method with \\n NewLine");
             return false;
         }
 
@@ -167,7 +160,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), "\r\n"))
         {
-            Console.WriteLine("Err_004!!! Verifying read method with \\r\\n NewLine and a random string");
+            Debug.WriteLine("Err_004!!! Verifying read method with \\r\\n NewLine and a random string");
             return false;
         }
 
@@ -180,7 +173,7 @@ public class ReadLine
         SerialPort com1 = TCSupport.InitFirstSerialPort();
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
 
-        Console.WriteLine("Verifying read method with \\r\\n NewLine and a string containing just \\r");
+        Debug.WriteLine("Verifying read method with \\r\\n NewLine and a string containing just \\r");
 
         com1.Open();
         com2.Open();
@@ -188,7 +181,7 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, "TEST\r"))
         {
-            Console.WriteLine("Err_005!!! Verifying read method with \\r\\n NewLine and a string containing just \\r");
+            Debug.WriteLine("Err_005!!! Verifying read method with \\r\\n NewLine and a string containing just \\r");
             return false;
         }
 
@@ -201,7 +194,7 @@ public class ReadLine
         SerialPort com1 = TCSupport.InitFirstSerialPort();
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
 
-        Console.WriteLine("Verifying read method with \\r\\n NewLine and a string containing just \\n");
+        Debug.WriteLine("Verifying read method with \\r\\n NewLine and a string containing just \\n");
 
         com1.Open();
         com2.Open();
@@ -209,7 +202,7 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, "TEST\n"))
         {
-            Console.WriteLine("Err_006!!! Verifying read method with \\r\\n NewLine and a string containing just \\n");
+            Debug.WriteLine("Err_006!!! Verifying read method with \\r\\n NewLine and a string containing just \\n");
             return false;
         }
 
@@ -221,7 +214,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), "END"))
         {
-            Console.WriteLine("Err_007!!! Verifying read method with END NewLine");
+            Debug.WriteLine("Err_007!!! Verifying read method with END NewLine");
             return false;
         }
 
@@ -232,7 +225,7 @@ public class ReadLine
     {
         if (!VerifyRead(System.Text.Encoding.UTF8, "\uD800\uDC00"))
         {
-            Console.WriteLine("Err_007a!!! Verifying read method with surrogate as the newline");
+            Debug.WriteLine("Err_007a!!! Verifying read method with surrogate as the newline");
             return false;
         }
 
@@ -244,7 +237,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_08!!! Verifying read method with ASCIIEncoding");
+            Debug.WriteLine("Err_08!!! Verifying read method with ASCIIEncoding");
             return false;
         }
 
@@ -256,7 +249,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.UTF7Encoding(), GenRandomNewLine(false)))
         {
-            Console.WriteLine("Err_009!!! Verifying read method with UTF7Encoding");
+            Debug.WriteLine("Err_009!!! Verifying read method with UTF7Encoding");
             return false;
         }
 
@@ -268,7 +261,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.UTF8Encoding(), GenRandomNewLine(false)))
         {
-            Console.WriteLine("Err_010!!! Verifying read method with UTF8Encoding");
+            Debug.WriteLine("Err_010!!! Verifying read method with UTF8Encoding");
             return false;
         }
 
@@ -280,7 +273,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.UTF32Encoding(), GenRandomNewLine(false)))
         {
-            Console.WriteLine("Err_011!!! Verifying read method with UTF32Encoding");
+            Debug.WriteLine("Err_011!!! Verifying read method with UTF32Encoding");
             return false;
         }
 
@@ -292,7 +285,7 @@ public class ReadLine
     {
         if (!VerifyRead(new System.Text.UnicodeEncoding(), GenRandomNewLine(false)))
         {
-            Console.WriteLine("Err_012!!! Verifying read method with Unicode");
+            Debug.WriteLine("Err_012!!! Verifying read method with Unicode");
             return false;
         }
 
@@ -304,7 +297,7 @@ public class ReadLine
     {
         if (!VerifyRead(LARGE_NUM_CHARS_TO_READ))
         {
-            Console.WriteLine("Err_013!!! Verifying read method with large input buffer");
+            Debug.WriteLine("Err_013!!! Verifying read method with large input buffer");
             return false;
         }
 
@@ -316,7 +309,7 @@ public class ReadLine
     {
         if (!VerifyReadLineWithWriteLine(new System.Text.ASCIIEncoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_014!!! Verifying ReadLine with WriteLine and ASCIIEncoding");
+            Debug.WriteLine("Err_014!!! Verifying ReadLine with WriteLine and ASCIIEncoding");
             return false;
         }
 
@@ -328,7 +321,7 @@ public class ReadLine
     {
         if (!VerifyReadLineWithWriteLine(new System.Text.UTF7Encoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_015!!! Verifying ReadLine with WriteLine and UTF7Encoding");
+            Debug.WriteLine("Err_015!!! Verifying ReadLine with WriteLine and UTF7Encoding");
             return false;
         }
 
@@ -340,7 +333,7 @@ public class ReadLine
     {
         if (!VerifyReadLineWithWriteLine(new System.Text.UTF8Encoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_016!!! Verifying ReadLine with WriteLine and UTF8Encoding");
+            Debug.WriteLine("Err_016!!! Verifying ReadLine with WriteLine and UTF8Encoding");
             return false;
         }
 
@@ -352,7 +345,7 @@ public class ReadLine
     {
         if (!VerifyReadLineWithWriteLine(new System.Text.UTF32Encoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_017!!! Verifying ReadLine with WriteLine and UTF32Encoding");
+            Debug.WriteLine("Err_017!!! Verifying ReadLine with WriteLine and UTF32Encoding");
             return false;
         }
 
@@ -364,7 +357,7 @@ public class ReadLine
     {
         if (!VerifyReadLineWithWriteLine(new System.Text.UnicodeEncoding(), GenRandomNewLine(true)))
         {
-            Console.WriteLine("Err_018!!! Verifying ReadLine with WriteLine and UnicodeEncoding");
+            Debug.WriteLine("Err_018!!! Verifying ReadLine with WriteLine and UnicodeEncoding");
             return false;
         }
 
@@ -409,7 +402,7 @@ public class ReadLine
 
         if (!retValue)
         {
-            Console.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
+            Debug.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
             return false;
         }
 
@@ -429,7 +422,7 @@ public class ReadLine
 
         if (!VerifyRead(System.Text.Encoding.ASCII, GenRandomNewLine(true), numBytesToRead, 1, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
+            Debug.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
             return false;
         }
 
@@ -477,7 +470,7 @@ public class ReadLine
 
         if (!retValue)
         {
-            Console.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
+            Debug.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
             return false;
         }
 
@@ -497,7 +490,7 @@ public class ReadLine
 
         if (!VerifyRead(System.Text.Encoding.ASCII, GenRandomNewLine(true), numBytesToRead, 1, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
+            Debug.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
             return false;
         }
 
@@ -519,7 +512,7 @@ public class ReadLine
         int numBytes;
         bool retValue = true;
 
-        Console.WriteLine("Verifying that ReadLine() will read everything from internal buffer and drivers buffer");
+        Debug.WriteLine("Verifying that ReadLine() will read everything from internal buffer and drivers buffer");
 
         //Put the first byte of the utf32 encoder char in the last byte of this buffer
         //when we read this later the buffer will have to be resized
@@ -542,7 +535,7 @@ public class ReadLine
         com1.Read(new char[1023], 0, 1023);
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -569,7 +562,7 @@ public class ReadLine
 
         if (null == (rcvString = com1.ReadLine()))
         {
-            Console.WriteLine("Err_6481sfadw ReadLine returned null");
+            Debug.WriteLine("Err_6481sfadw ReadLine returned null");
             retValue = false;
         }
         else
@@ -577,7 +570,7 @@ public class ReadLine
             actualChars = rcvString.ToCharArray();
             if (actualChars.Length != expectedChars.Length)
             {
-                Console.WriteLine("Err_0872watr Expected to read {0} chars actually read {1} chars", expectedChars.Length, actualChars.Length);
+                Debug.WriteLine("Err_0872watr Expected to read {0} chars actually read {1} chars", expectedChars.Length, actualChars.Length);
                 retValue = false;
             }
             else
@@ -586,7 +579,7 @@ public class ReadLine
                 {
                     if (expectedChars[i] != actualChars[i])
                     {
-                        Console.WriteLine("Err_70782apzh Expected to read {0} actually read {1}", (int)expectedChars[i], (int)actualChars[i]);
+                        Debug.WriteLine("Err_70782apzh Expected to read {0} actually read {1}", (int)expectedChars[i], (int)actualChars[i]);
                         retValue = false;
                         break;
                     }
@@ -596,12 +589,12 @@ public class ReadLine
 
         if (0 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
+            Debug.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_1389 Verifying that ReadChar() will read everything from internal buffer and drivers buffer failed");
+            Debug.WriteLine("Err_1389 Verifying that ReadChar() will read everything from internal buffer and drivers buffer failed");
 
         com1.Close();
         com2.Close();
@@ -615,7 +608,7 @@ public class ReadLine
         SerialPort com1 = TCSupport.InitFirstSerialPort();
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
 
-        Console.WriteLine("Verifying read method with sub strings of the new line appearing in the string being read");
+        Debug.WriteLine("Verifying read method with sub strings of the new line appearing in the string being read");
         com1.Open();
 
         if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
@@ -628,7 +621,7 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, testStr))
         {
-            Console.WriteLine("Err_019!!! Verifying read method with sub strings of the new line appearing in the string being read FAILED");
+            Debug.WriteLine("Err_019!!! Verifying read method with sub strings of the new line appearing in the string being read FAILED");
             return false;
         }
 
@@ -647,7 +640,7 @@ public class ReadLine
         char endLineChar = com1.NewLine[0];
         char notEndLineChar = TCSupport.GetRandomOtherChar(endLineChar, TCSupport.CharacterOptions.None);
 
-        Console.WriteLine("Verifying that Read(char[], int, int) will read characters that have been received after the call to Read was made");
+        Debug.WriteLine("Verifying that Read(char[], int, int) will read characters that have been received after the call to Read was made");
 
         //Ensure the new line is not in charXmitBuffer
         for (int i = 0; i < charXmitBuffer.Length; ++i)
@@ -678,12 +671,12 @@ public class ReadLine
         if (null != asyncRead.Exception)
         {
             retValue = false;
-            Console.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
+            Debug.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
         }
         else if (null == asyncRead.Result || 0 == asyncRead.Result.Length)
         {
             retValue = false;
-            Console.WriteLine("Err_0158ahei Expected Read to read at least one character");
+            Debug.WriteLine("Err_0158ahei Expected Read to read at least one character");
         }
         else
         {
@@ -692,7 +685,7 @@ public class ReadLine
             if (charRcvBuffer.Length != charXmitBuffer.Length)
             {
                 retValue = false;
-                Console.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
                     charXmitBuffer.Length, charRcvBuffer.Length);
             }
             else
@@ -702,7 +695,7 @@ public class ReadLine
                     if (charRcvBuffer[i] != charXmitBuffer[i])
                     {
                         retValue = false;
-                        Console.WriteLine("Err_018956ahiaz Characters differ at {0} expected:{1}({2:X}) actual:{3}({4:X})",
+                        Debug.WriteLine("Err_018956ahiaz Characters differ at {0} expected:{1}({2:X}) actual:{3}({4:X})",
                             i, charXmitBuffer[i], (int)charXmitBuffer[i], charRcvBuffer[i], (int)charRcvBuffer[i]);
                     }
                 }
@@ -711,12 +704,12 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, new string(charXmitBuffer)))
         {
-            Console.WriteLine("Err_05188ajied Verify ReadLine after read failed");
+            Debug.WriteLine("Err_05188ajied Verify ReadLine after read failed");
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_018068ajkid Verifying that Read(char[], int, int) will read characters that have been received after the call to Read was made failed");
+            Debug.WriteLine("Err_018068ajkid Verifying that Read(char[], int, int) will read characters that have been received after the call to Read was made failed");
 
         com1.Close();
         com2.Close();
@@ -735,7 +728,7 @@ public class ReadLine
         char notEndChar = TCSupport.GetRandomOtherChar(endChar, TCSupport.CharacterOptions.None);
         string result;
 
-        Console.WriteLine("Verifying that ReadLine(string) works appropriately after TimeoutException has been thrown");
+        Debug.WriteLine("Verifying that ReadLine(string) works appropriately after TimeoutException has been thrown");
 
         //Ensure the new line is not in charXmitBuffer
         for (int i = 0; i < charXmitBuffer.Length; ++i)
@@ -760,14 +753,14 @@ public class ReadLine
         try
         {
             com1.ReadLine();
-            Console.WriteLine("Err_29299aize Expected ReadLine to throw TimeoutException");
+            Debug.WriteLine("Err_29299aize Expected ReadLine to throw TimeoutException");
             retValue = false;
         }
         catch (TimeoutException) { }//Expected
 
         if (2 * charXmitBuffer.Length != com1.BytesToRead)
         {
-            Console.WriteLine("Err_0585haieidp Expected BytesToRead: {0} actual: {1}", 2 * charXmitBuffer.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_0585haieidp Expected BytesToRead: {0} actual: {1}", 2 * charXmitBuffer.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -778,7 +771,7 @@ public class ReadLine
         if (charRcvBuffer.Length != charXmitBuffer.Length)
         {
             retValue = false;
-            Console.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+            Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
                 charXmitBuffer.Length, charRcvBuffer.Length);
         }
         else
@@ -788,7 +781,7 @@ public class ReadLine
                 if (charRcvBuffer[i] != charXmitBuffer[i])
                 {
                     retValue = false;
-                    Console.WriteLine("Err_8988auzobn Characters differ at {0} expected:{1}({2:X}) actual:{3}({4:X})",
+                    Debug.WriteLine("Err_8988auzobn Characters differ at {0} expected:{1}({2:X}) actual:{3}({4:X})",
                         i, charXmitBuffer[i], (int)charXmitBuffer[i], charRcvBuffer[i], (int)charRcvBuffer[i]);
                 }
             }
@@ -796,12 +789,12 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, new string(charXmitBuffer)))
         {
-            Console.WriteLine("Err_05188ajied Verify ReadLine after read failed");
+            Debug.WriteLine("Err_05188ajied Verify ReadLine after read failed");
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_05498352aiiueid Verifying that ReadLine(string) works appropriately after TimeoutException has been thrown failed");
+            Debug.WriteLine("Err_05498352aiiueid Verifying that ReadLine(string) works appropriately after TimeoutException has been thrown failed");
 
         com1.Close();
         com2.Close();
@@ -860,7 +853,7 @@ public class ReadLine
         {
             com2.ReadLine();
             retValue = false;
-            Console.WriteLine("Err_2928aneieud Expected ReadLine() to throw timeoutException()");
+            Debug.WriteLine("Err_2928aneieud Expected ReadLine() to throw timeoutException()");
         }
         catch (TimeoutException) { };
 
@@ -878,7 +871,7 @@ public class ReadLine
                 if (stringRcvBuffer[i] != charXmitBuffer[i % charXmitBuffer.Length])
                 {
                     retValue = false;
-                    Console.WriteLine("Err_292aneid Expected to read {0} actually read {1}", charXmitBuffer[i % charXmitBuffer.Length], stringRcvBuffer[i]);
+                    Debug.WriteLine("Err_292aneid Expected to read {0} actually read {1}", charXmitBuffer[i % charXmitBuffer.Length], stringRcvBuffer[i]);
                     break;
                 }
             }
@@ -886,7 +879,7 @@ public class ReadLine
         else
         {
             retValue = false;
-            Console.WriteLine("Err_292haie Expected to read {0} characters actually read {1}", charXmitBuffer.Length * numberOfIterations, stringRcvBuffer.Length);
+            Debug.WriteLine("Err_292haie Expected to read {0} characters actually read {1}", charXmitBuffer.Length * numberOfIterations, stringRcvBuffer.Length);
         }
 
         com1.Close();
@@ -900,7 +893,7 @@ public class ReadLine
         SerialPort com1 = TCSupport.InitFirstSerialPort();
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
 
-        Console.WriteLine("Verifying read method with surrogate pair in the input and a surrogate pair for the newline");
+        Debug.WriteLine("Verifying read method with surrogate pair in the input and a surrogate pair for the newline");
         com1.Open();
 
         if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
@@ -914,7 +907,7 @@ public class ReadLine
 
         if (!VerifyReadLine(com1, com2, input, newLine))
         {
-            Console.WriteLine("Err_342882haue!!! Verifying read method with surrogate pair in the input and a surrogate pair for the newline FAILED");
+            Debug.WriteLine("Err_342882haue!!! Verifying read method with surrogate pair in the input and a surrogate pair for the newline FAILED");
             return false;
         }
 
@@ -966,7 +959,7 @@ public class ReadLine
             strBldrToWrite.Insert(newLineIndex + (i * divisionLength) + (i * numNewLineChars), newLine);
         }
 
-        Console.WriteLine("Verifying ReadLine encoding={0}, newLine={1}, numBytesRead={2}, numNewLines={3}", encoding, newLine, numBytesRead, numNewLines);
+        Debug.WriteLine("Verifying ReadLine encoding={0}, newLine={1}, numBytesRead={2}, numNewLines={3}", encoding, newLine, numBytesRead, numNewLines);
 
         com1.ReadTimeout = 500;
         com1.Encoding = encoding;
@@ -1033,7 +1026,7 @@ public class ReadLine
 
         if (com1.BytesToRead != bytesToWrite.Length)
         {
-            Console.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -1123,17 +1116,17 @@ public class ReadLine
             if ((indexOfNewLine - (lastIndexOfNewLine + newLineStringLength)) != charsRead)
             {
                 //If we have not read all of the characters that we should have
-                Console.WriteLine("Err_1707ahsp!!!: Read did not return all of the characters that were in SerialPort buffer");
-                Console.WriteLine("indexOfNewLine={0} lastIndexOfNewLine={1} charsRead={2} numNewLineChars={3} newLineStringLength={4} strToWrite.Length={5}",
+                Debug.WriteLine("Err_1707ahsp!!!: Read did not return all of the characters that were in SerialPort buffer");
+                Debug.WriteLine("indexOfNewLine={0} lastIndexOfNewLine={1} charsRead={2} numNewLineChars={3} newLineStringLength={4} strToWrite.Length={5}",
                     indexOfNewLine, lastIndexOfNewLine, charsRead, numNewLineChars, newLineStringLength, strToWrite.Length);
-                Console.WriteLine(strToWrite);
+                Debug.WriteLine(strToWrite);
                 retValue = false;
             }
 
             if (charsToWrite.Length < totalCharsRead + charsRead)
             {
                 //If we have read in more characters then we expect
-                Console.WriteLine("Err_21707adad!!!: We have received more characters then were sent");
+                Debug.WriteLine("Err_21707adad!!!: We have received more characters then were sent");
                 retValue = false;
                 break;
             }
@@ -1147,7 +1140,7 @@ public class ReadLine
 
             if (bytesToWrite.Length - totalBytesRead != com1.BytesToRead)
             {
-                System.Console.WriteLine("Err_99087ahpbx!!!: Expected BytesToRead={0} actual={1}", bytesToWrite.Length - totalBytesRead, com1.BytesToRead);
+                System.Debug.WriteLine("Err_99087ahpbx!!!: Expected BytesToRead={0} actual={1}", bytesToWrite.Length - totalBytesRead, com1.BytesToRead);
                 retValue = false;
             }
         }//End while there are more characters to read
@@ -1167,8 +1160,8 @@ public class ReadLine
                 catch (TimeoutException) { break; }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Err_15054akjeid!!!: The following exception was thrown while reading remaining chars");
-                    Console.WriteLine(e);
+                    Debug.WriteLine("Err_15054akjeid!!!: The following exception was thrown while reading remaining chars");
+                    Debug.WriteLine(e);
                     retValue = false;
                 }
             }
@@ -1176,22 +1169,22 @@ public class ReadLine
 
         if (0 != com1.BytesToRead && (!isUTF7Encoding || 1 != com1.BytesToRead))
         {
-            System.Console.WriteLine("Err_558596ahbpa!!!: BytesToRead is not zero");
+            System.Debug.WriteLine("Err_558596ahbpa!!!: BytesToRead is not zero");
             retValue = false;
         }
 
         if (0 != expectedString.CompareTo(strBldrRead.ToString()))
         {
-            System.Console.WriteLine("Err_7797ajpba!!!: Expected to read \"{0}\"  actual read  \"{1}\"", expectedString, strBldrRead.ToString());
+            System.Debug.WriteLine("Err_7797ajpba!!!: Expected to read \"{0}\"  actual read  \"{1}\"", expectedString, strBldrRead.ToString());
             retValue = false;
         }
 
         if (!retValue)
         {
-            Console.WriteLine("\nstrToWrite = ");
+            Debug.WriteLine("\nstrToWrite = ");
             TCSupport.PrintChars(strToWrite.ToCharArray());
 
-            Console.WriteLine("\nnewLine = ");
+            Debug.WriteLine("\nnewLine = ");
             TCSupport.PrintChars(newLine.ToCharArray());
         }
 
@@ -1216,7 +1209,7 @@ public class ReadLine
         bool retValue = true;
         bool isUTF7Encoding = encoding.EncodingName == System.Text.Encoding.UTF7.EncodingName;
 
-        Console.WriteLine("Verifying ReadLine with WriteLine encoding={0}, newLine={1}", encoding, newLine);
+        Debug.WriteLine("Verifying ReadLine with WriteLine encoding={0}, newLine={1}", encoding, newLine);
 
         com1.ReadTimeout = 500;
         com1.NewLine = newLine;
@@ -1248,13 +1241,13 @@ public class ReadLine
 
         if (0 != strBldrToWrite.ToString().CompareTo(strRead))
         {
-            Console.WriteLine("ERROR!!! The string written: \"{0}\" and the string read \"{1}\" differ", strBldrToWrite, strRead);
+            Debug.WriteLine("ERROR!!! The string written: \"{0}\" and the string read \"{1}\" differ", strBldrToWrite, strRead);
             retValue = false;
         }
 
         if (0 != com1.BytesToRead && (!isUTF7Encoding || 1 != com1.BytesToRead))
         {
-            Console.WriteLine("ERROR!!! BytesToRead={0} expected 0", com1.BytesToRead);
+            Debug.WriteLine("ERROR!!! BytesToRead={0} expected 0", com1.BytesToRead);
             retValue = false;
         }
 

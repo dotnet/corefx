@@ -5,14 +5,8 @@
 using System;
 using System.IO.Ports;
 
-public class Parity_Property
+public class Parity_Property : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.Parity";
-    public static readonly String s_strTFName = "Parity.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
     //The default number of bytes to read/write to verify the speed of the port
     //and that the bytes were transfered successfully
     public static readonly int DEFAULT_BYTE_SIZE = 512;
@@ -31,49 +25,6 @@ public class Parity_Property
     private int _numErrors = 0;
     private int _numTestcases = 0;
     private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
-    {
-        Parity_Property objTest = new Parity_Property();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
 
     public bool RunTest()
     {
@@ -127,7 +78,7 @@ public class Parity_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default Parity");
+        Debug.WriteLine("Verifying default Parity");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -138,7 +89,7 @@ public class Parity_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default Parity FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default Parity FAILED");
         }
 
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
@@ -151,10 +102,10 @@ public class Parity_Property
 
     public bool Parity_None_BeforeOpen()
     {
-        Console.WriteLine("Verifying None Parity before open");
+        Debug.WriteLine("Verifying None Parity before open");
         if (!VerifyParityBeforeOpen((int)Parity.None, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_002!!! Verifying None Parity before open FAILED");
+            Debug.WriteLine("Err_002!!! Verifying None Parity before open FAILED");
             return false;
         }
 
@@ -164,10 +115,10 @@ public class Parity_Property
 
     public bool Parity_Even_BeforeOpen()
     {
-        Console.WriteLine("Verifying Even Parity before open");
+        Debug.WriteLine("Verifying Even Parity before open");
         if (!VerifyParityBeforeOpen((int)Parity.Even, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_003!!! Verifying Even Parity before open FAILED");
+            Debug.WriteLine("Err_003!!! Verifying Even Parity before open FAILED");
             return false;
         }
 
@@ -177,10 +128,10 @@ public class Parity_Property
 
     public bool Parity_Odd_BeforeOpen()
     {
-        Console.WriteLine("Verifying Odd Parity before open");
+        Debug.WriteLine("Verifying Odd Parity before open");
         if (!VerifyParityBeforeOpen((int)Parity.Odd, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_004!!! Verifying Odd Parity before open FAILED");
+            Debug.WriteLine("Err_004!!! Verifying Odd Parity before open FAILED");
             return false;
         }
 
@@ -190,10 +141,10 @@ public class Parity_Property
 
     public bool Parity_Mark_BeforeOpen()
     {
-        Console.WriteLine("Verifying Mark Parity before open");
+        Debug.WriteLine("Verifying Mark Parity before open");
         if (!VerifyParityBeforeOpen((int)Parity.Mark, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_005!!! Verifying Mark Parity before open FAILED");
+            Debug.WriteLine("Err_005!!! Verifying Mark Parity before open FAILED");
             return false;
         }
 
@@ -203,10 +154,10 @@ public class Parity_Property
 
     public bool Parity_Space_BeforeOpen()
     {
-        Console.WriteLine("Verifying Space before open");
+        Debug.WriteLine("Verifying Space before open");
         if (!VerifyParityBeforeOpen((int)Parity.Space, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_006!!! Verifying Space Parity before open FAILED");
+            Debug.WriteLine("Err_006!!! Verifying Space Parity before open FAILED");
             return false;
         }
 
@@ -216,10 +167,10 @@ public class Parity_Property
 
     public bool Parity_None_AfterOpen()
     {
-        Console.WriteLine("Verifying None Parity after open");
+        Debug.WriteLine("Verifying None Parity after open");
         if (!VerifyParityAfterOpen((int)Parity.None, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_007!!! Verifying None Parity after open FAILED");
+            Debug.WriteLine("Err_007!!! Verifying None Parity after open FAILED");
             return false;
         }
 
@@ -229,10 +180,10 @@ public class Parity_Property
 
     public bool Parity_Even_AfterOpen()
     {
-        Console.WriteLine("Verifying Even Parity after open");
+        Debug.WriteLine("Verifying Even Parity after open");
         if (!VerifyParityAfterOpen((int)Parity.Even, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_008!!! Verifying Even Parity after open FAILED");
+            Debug.WriteLine("Err_008!!! Verifying Even Parity after open FAILED");
             return false;
         }
 
@@ -242,10 +193,10 @@ public class Parity_Property
 
     public bool Parity_Odd_AfterOpen()
     {
-        Console.WriteLine("Verifying Odd Parity after open");
+        Debug.WriteLine("Verifying Odd Parity after open");
         if (!VerifyParityAfterOpen((int)Parity.Odd, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_009!!! Verifying Odd Parity after open FAILED");
+            Debug.WriteLine("Err_009!!! Verifying Odd Parity after open FAILED");
             return false;
         }
 
@@ -255,10 +206,10 @@ public class Parity_Property
 
     public bool Parity_Mark_AfterOpen()
     {
-        Console.WriteLine("Verifying Mark Parity after open");
+        Debug.WriteLine("Verifying Mark Parity after open");
         if (!VerifyParityAfterOpen((int)Parity.Mark, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_010!!! Verifying Mark Parity after open FAILED");
+            Debug.WriteLine("Err_010!!! Verifying Mark Parity after open FAILED");
             return false;
         }
 
@@ -268,10 +219,10 @@ public class Parity_Property
 
     public bool Parity_Space_AfterOpen()
     {
-        Console.WriteLine("Verifying Space Parity after open");
+        Debug.WriteLine("Verifying Space Parity after open");
         if (!VerifyParityAfterOpen((int)Parity.Space, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_011!!! Verifying Space Parity after open FAILED");
+            Debug.WriteLine("Err_011!!! Verifying Space Parity after open FAILED");
             return false;
         }
 
@@ -283,12 +234,12 @@ public class Parity_Property
     {
         SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying None Parity with 5 DataBits");
+        Debug.WriteLine("Verifying None Parity with 5 DataBits");
         com1.DataBits = 5;
         com1.Open();
         if (!VerifyParity(com1, DEFAULT_BYTE_SIZE, 5))
         {
-            Console.WriteLine("Err_012!!! Verifying None Parity with 5 DataBits FAILED");
+            Debug.WriteLine("Err_012!!! Verifying None Parity with 5 DataBits FAILED");
             return false;
         }
 
@@ -301,10 +252,10 @@ public class Parity_Property
 
     public bool Parity_Even_DataBits_5_Read()
     {
-        Console.WriteLine("Verifying Even Parity with 5 DataBits on Read");
+        Debug.WriteLine("Verifying Even Parity with 5 DataBits on Read");
         if (!VerifyReadParity((int)Parity.Even, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_013!!! Verifying Even Parity with 5 DataBits on Read FAILED");
+            Debug.WriteLine("Err_013!!! Verifying Even Parity with 5 DataBits on Read FAILED");
             return false;
         }
 
@@ -314,10 +265,10 @@ public class Parity_Property
 
     public bool Parity_Odd_DataBits_5_Read()
     {
-        Console.WriteLine("Verifying Odd Parity with 5 DataBits on Read");
+        Debug.WriteLine("Verifying Odd Parity with 5 DataBits on Read");
         if (!VerifyReadParity((int)Parity.Odd, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_014!!! Verifying Odd Parity with 5 DataBits on Read FAILED");
+            Debug.WriteLine("Err_014!!! Verifying Odd Parity with 5 DataBits on Read FAILED");
             return false;
         }
 
@@ -327,10 +278,10 @@ public class Parity_Property
 
     public bool Parity_Mark_DataBits_5_Read()
     {
-        Console.WriteLine("Verifying Mark Parity with 5 DataBits on Read");
+        Debug.WriteLine("Verifying Mark Parity with 5 DataBits on Read");
         if (!VerifyReadParity((int)Parity.Mark, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_015!!! Verifying Mark Parity with 5 DataBits on Read FAILED");
+            Debug.WriteLine("Err_015!!! Verifying Mark Parity with 5 DataBits on Read FAILED");
             return false;
         }
 
@@ -340,10 +291,10 @@ public class Parity_Property
 
     public bool Parity_Space_DataBits_5_Read()
     {
-        Console.WriteLine("Verifying Space Parity with 5 DataBits on Read");
+        Debug.WriteLine("Verifying Space Parity with 5 DataBits on Read");
         if (!VerifyReadParity((int)Parity.Space, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_016!!! Verifying Space Parity with 5 DataBits on Read FAILED");
+            Debug.WriteLine("Err_016!!! Verifying Space Parity with 5 DataBits on Read FAILED");
             return false;
         }
 
@@ -353,10 +304,10 @@ public class Parity_Property
 
     public bool Parity_Even_DataBits_5_Write()
     {
-        Console.WriteLine("Verifying Even Parity with 5 DataBits on Write");
+        Debug.WriteLine("Verifying Even Parity with 5 DataBits on Write");
         if (!VerifyWriteParity((int)Parity.Even, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_017!!! Verifying Even Parity with 5 DataBits on Write FAILED");
+            Debug.WriteLine("Err_017!!! Verifying Even Parity with 5 DataBits on Write FAILED");
             return false;
         }
 
@@ -366,10 +317,10 @@ public class Parity_Property
 
     public bool Parity_Odd_DataBits_5_Write()
     {
-        Console.WriteLine("Verifying Odd Parity with 5 DataBits on Write");
+        Debug.WriteLine("Verifying Odd Parity with 5 DataBits on Write");
         if (!VerifyWriteParity((int)Parity.Odd, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_018!!! Verifying Odd Parity with 5 DataBits on Write FAILED");
+            Debug.WriteLine("Err_018!!! Verifying Odd Parity with 5 DataBits on Write FAILED");
             return false;
         }
 
@@ -379,10 +330,10 @@ public class Parity_Property
 
     public bool Parity_Mark_DataBits_5_Write()
     {
-        Console.WriteLine("Verifying Mark Parity with 5 DataBits on Write");
+        Debug.WriteLine("Verifying Mark Parity with 5 DataBits on Write");
         if (!VerifyWriteParity((int)Parity.Mark, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_019!!! Verifying Mark Parity with 5 DataBits on Write FAILED");
+            Debug.WriteLine("Err_019!!! Verifying Mark Parity with 5 DataBits on Write FAILED");
             return false;
         }
 
@@ -392,10 +343,10 @@ public class Parity_Property
 
     public bool Parity_Space_DataBits_5_Write()
     {
-        Console.WriteLine("Verifying Space Parity with 5 DataBits on Write");
+        Debug.WriteLine("Verifying Space Parity with 5 DataBits on Write");
         if (!VerifyWriteParity((int)Parity.Space, 5, DEFAULT_BYTE_SIZE))
         {
-            Console.WriteLine("Err_020!!! Verifying Space Parity with 5 DataBits on Write FAILED");
+            Debug.WriteLine("Err_020!!! Verifying Space Parity with 5 DataBits on Write FAILED");
             return false;
         }
 
@@ -405,10 +356,10 @@ public class Parity_Property
 
     public bool Parity_Int32MinValue()
     {
-        Console.WriteLine("Verifying Int32.MinValue Parity");
+        Debug.WriteLine("Verifying Int32.MinValue Parity");
         if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_021!!! Verifying Int32.MinValue Parity FAILED");
+            Debug.WriteLine("Err_021!!! Verifying Int32.MinValue Parity FAILED");
             return false;
         }
 
@@ -418,10 +369,10 @@ public class Parity_Property
 
     public bool Parity_Neg1()
     {
-        Console.WriteLine("Verifying -1 Parity");
+        Debug.WriteLine("Verifying -1 Parity");
         if (!VerifyException(-1, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_022!!! Verifying -1 Parity FAILED");
+            Debug.WriteLine("Err_022!!! Verifying -1 Parity FAILED");
             return false;
         }
 
@@ -431,10 +382,10 @@ public class Parity_Property
 
     public bool Parity_5()
     {
-        Console.WriteLine("Verifying 5 Parity");
+        Debug.WriteLine("Verifying 5 Parity");
         if (!VerifyException(5, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_023!!! Verifying 5 Parity FAILED");
+            Debug.WriteLine("Err_023!!! Verifying 5 Parity FAILED");
             return false;
         }
 
@@ -444,10 +395,10 @@ public class Parity_Property
 
     public bool Parity_Int32MaxValue()
     {
-        Console.WriteLine("Verifying Int32.MaxValue Parity");
+        Debug.WriteLine("Verifying Int32.MaxValue Parity");
         if (!VerifyException(Int32.MaxValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_024!!! Verifying Int32.MaxValue Parity FAILED");
+            Debug.WriteLine("Err_024!!! Verifying Int32.MaxValue Parity FAILED");
             return false;
         }
 
@@ -460,7 +411,7 @@ public class Parity_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying Parity Even and then Odd");
+        Debug.WriteLine("Verifying Parity Even and then Odd");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -474,7 +425,7 @@ public class Parity_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_551808ahied!!! Verifying Parity Even and then Odd FAILED");
+            Debug.WriteLine("Err_551808ahied!!! Verifying Parity Even and then Odd FAILED");
         }
 
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
@@ -490,7 +441,7 @@ public class Parity_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying Parity Odd and then Even");
+        Debug.WriteLine("Verifying Parity Odd and then Even");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -504,7 +455,7 @@ public class Parity_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_648ahied!!! Verifying Parity Odd and then Even FAILED");
+            Debug.WriteLine("Err_648ahied!!! Verifying Parity Odd and then Even FAILED");
         }
 
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
@@ -520,7 +471,7 @@ public class Parity_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying Parity Odd and then Mark");
+        Debug.WriteLine("Verifying Parity Odd and then Mark");
 
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -534,7 +485,7 @@ public class Parity_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_05188ahiued!!! Verifying Parity Odd and then Mark FAILED");
+            Debug.WriteLine("Err_05188ahiued!!! Verifying Parity Odd and then Mark FAILED");
         }
 
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
@@ -584,7 +535,7 @@ public class Parity_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -592,12 +543,12 @@ public class Parity_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -623,7 +574,7 @@ public class Parity_Property
             com.Parity = (Parity)parity;
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the Parity after Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected setting the Parity after Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -631,12 +582,12 @@ public class Parity_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the Parity after Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the Parity after Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the Parity after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the Parity after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -788,13 +739,13 @@ public class Parity_Property
         xmitBytes[parityIndex] = parityErrorByte;
         expectedBytes[parityIndex] = com2.ParityReplace;
 
-        Console.WriteLine("parityIndex={0}", parityIndex);
+        Debug.WriteLine("parityIndex={0}", parityIndex);
 
         parityIndex = rndGen.Next((3 * xmitBytes.Length) / 4, xmitBytes.Length - 1);
         xmitBytes[parityIndex] = parityErrorByte;
         expectedBytes[parityIndex] = com2.ParityReplace;
 
-        Console.WriteLine("parityIndex={0}", parityIndex);
+        Debug.WriteLine("parityIndex={0}", parityIndex);
 
         /*
             for(int i=0; i<xmitBytes.Length; i++) {
@@ -899,14 +850,14 @@ public class Parity_Property
         //then the expected baud rate must not have been used and we should report an error
         if (MAX_ACCEPTABEL_PERCENTAGE_DIFFERENCE < percentageDifference)
         {
-            Console.WriteLine("ERROR!!! Parity not used Expected time:{0}, actual time:{1} percentageDifference:{2}", expectedTime, actualTime, percentageDifference);
+            Debug.WriteLine("ERROR!!! Parity not used Expected time:{0}, actual time:{1} percentageDifference:{2}", expectedTime, actualTime, percentageDifference);
             retValue = false;
         }
 
         rcvLength = com2.Read(rcvBytes, 0, rcvBytes.Length);
         if (0 != com2.BytesToRead)
         {
-            Console.WriteLine("ERROR!!! BytesToRead={0} expected 0", com2.BytesToRead);
+            Debug.WriteLine("ERROR!!! BytesToRead={0} expected 0", com2.BytesToRead);
             retValue = false;
         }
 
@@ -925,27 +876,27 @@ public class Parity_Property
                 }
                 else
                 {
-                    Console.WriteLine(
+                    Debug.WriteLine(
                         "ERROR: Expected to read {0,2:X} at {1,3} actually read {2,2:X} sent {3,2:X}",
                         expectedBytes[expectedIndex],
                         expectedIndex,
                         rcvBytes[actualIndex],
                         xmitBytes[expectedIndex]);
 
-                    Console.WriteLine();
-                    Console.WriteLine("Bytes Sent:");
+                    Debug.WriteLine();
+                    Debug.WriteLine("Bytes Sent:");
                     TCSupport.PrintBytes(xmitBytes);
-                    Console.WriteLine();
+                    Debug.WriteLine();
 
-                    Console.WriteLine();
-                    Console.WriteLine("Bytes Recieved:");
+                    Debug.WriteLine();
+                    Debug.WriteLine("Bytes Recieved:");
                     TCSupport.PrintBytes(rcvBytes);
-                    Console.WriteLine();
+                    Debug.WriteLine();
 
-                    Console.WriteLine();
-                    Console.WriteLine("Expected Bytes:");
+                    Debug.WriteLine();
+                    Debug.WriteLine("Expected Bytes:");
                     TCSupport.PrintBytes(expectedBytes);
-                    Console.WriteLine();
+                    Debug.WriteLine();
 
                     retValue = false;
                     break;
@@ -955,7 +906,7 @@ public class Parity_Property
 
         if (expectedIndex < expectedBytes.Length)
         {
-            Console.WriteLine("ERRROR: Did not enumerate all of the expected bytes index={0} length={1}", expectedIndex, expectedBytes.Length);
+            Debug.WriteLine("ERRROR: Did not enumerate all of the expected bytes index={0} length={1}", expectedIndex, expectedBytes.Length);
             retValue = false;
         }
 
@@ -1088,7 +1039,7 @@ public class Parity_Property
         byte parityMask = 0x80;
         int numTrueBits = 0;
 
-        //Console.WriteLine("parityByte={0}", System.Convert.ToString(parityByte, 16));
+        //Debug.WriteLine("parityByte={0}", System.Convert.ToString(parityByte, 16));
         parityByte <<= 8 - parityWordSize;
 
         for (int i = 0; i < parityWordSize; i++)
@@ -1099,7 +1050,7 @@ public class Parity_Property
             parityByte <<= 1;
         }
 
-        //Console.WriteLine("Number of true bits: {0}", numTrueBits);
+        //Debug.WriteLine("Number of true bits: {0}", numTrueBits);
         return numTrueBits;
     }
     #endregion

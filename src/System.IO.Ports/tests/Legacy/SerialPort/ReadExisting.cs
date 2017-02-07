@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 
-public class ReadExisting
+public class ReadExisting : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadExisting()";
@@ -41,7 +41,7 @@ public class ReadExisting
         ReadExisting objTest = new ReadExisting();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -49,7 +49,7 @@ public class ReadExisting
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -57,11 +57,11 @@ public class ReadExisting
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -70,14 +70,7 @@ public class ReadExisting
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -110,7 +103,7 @@ public class ReadExisting
     {
         if (!VerifyRead(new System.Text.ASCIIEncoding()))
         {
-            Console.WriteLine("Err_016!!! Verifying read method with count=buffer.length and ASCIIEncoding");
+            Debug.WriteLine("Err_016!!! Verifying read method with count=buffer.length and ASCIIEncoding");
             return false;
         }
 
@@ -122,7 +115,7 @@ public class ReadExisting
     {
         if (!VerifyRead(new System.Text.UTF7Encoding()))
         {
-            Console.WriteLine("Err_017!!! Verifying read method with count=buffer.length and UTF7Encoding");
+            Debug.WriteLine("Err_017!!! Verifying read method with count=buffer.length and UTF7Encoding");
             return false;
         }
 
@@ -134,7 +127,7 @@ public class ReadExisting
     {
         if (!VerifyRead(new System.Text.UTF8Encoding()))
         {
-            Console.WriteLine("Err_018!!! Verifying read method with count=buffer.length and UTF8Encoding");
+            Debug.WriteLine("Err_018!!! Verifying read method with count=buffer.length and UTF8Encoding");
             return false;
         }
 
@@ -146,7 +139,7 @@ public class ReadExisting
     {
         if (!VerifyRead(new System.Text.UTF32Encoding()))
         {
-            Console.WriteLine("Err_019!!! Verifying read method with count=buffer.length and UTF32Encoding");
+            Debug.WriteLine("Err_019!!! Verifying read method with count=buffer.length and UTF32Encoding");
             return false;
         }
 
@@ -160,7 +153,7 @@ public class ReadExisting
 
         if (!VerifyRead(System.Text.Encoding.ASCII, numberOfBytesToRead, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
+            Debug.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
             return false;
         }
 
@@ -174,7 +167,7 @@ public class ReadExisting
 
         if (!VerifyRead(System.Text.Encoding.ASCII, numberOfBytesToRead, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
+            Debug.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
             return false;
         }
 
@@ -188,7 +181,7 @@ public class ReadExisting
 
         if (!VerifyRead(System.Text.Encoding.ASCII, numberOfBytesToRead, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
+            Debug.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
             return false;
         }
 
@@ -202,7 +195,7 @@ public class ReadExisting
 
         if (!VerifyRead(System.Text.Encoding.ASCII, numberOfBytesToRead, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
+            Debug.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
             return false;
         }
 
@@ -225,7 +218,7 @@ public class ReadExisting
         int numBytes;
         bool retValue = true;
 
-        Console.WriteLine("Verifying that ReadExisting() will read everything from internal buffer and drivers buffer");
+        Debug.WriteLine("Verifying that ReadExisting() will read everything from internal buffer and drivers buffer");
 
         //Put the first byte of the utf32 encoder char in the last byte of this buffer
         //when we read this later the buffer will have to be resized
@@ -247,7 +240,7 @@ public class ReadExisting
         com1.Read(new char[1023], 0, 1023);
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -273,7 +266,7 @@ public class ReadExisting
 
         if (null == (rcvString = com1.ReadExisting()))
         {
-            Console.WriteLine("Err_6481sfadw ReadExisting returned null");
+            Debug.WriteLine("Err_6481sfadw ReadExisting returned null");
             retValue = false;
         }
         else
@@ -282,7 +275,7 @@ public class ReadExisting
 
             if (actualChars.Length != expectedChars.Length)
             {
-                Console.WriteLine("Err_0872watr Expected to read {0} chars actually read {1} chars", expectedChars.Length, actualChars.Length);
+                Debug.WriteLine("Err_0872watr Expected to read {0} chars actually read {1} chars", expectedChars.Length, actualChars.Length);
                 retValue = false;
             }
             else
@@ -291,7 +284,7 @@ public class ReadExisting
                 {
                     if (expectedChars[i] != actualChars[i])
                     {
-                        Console.WriteLine("Err_70782apzh Expected to read {0} actually read {1}", (int)expectedChars[i], (int)actualChars[i]);
+                        Debug.WriteLine("Err_70782apzh Expected to read {0} actually read {1}", (int)expectedChars[i], (int)actualChars[i]);
                         retValue = false;
                         break;
                     }
@@ -301,12 +294,12 @@ public class ReadExisting
 
         if (0 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
+            Debug.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_1389 Verifying that ReadExisting() will read everything from internal buffer and drivers buffer failed");
+            Debug.WriteLine("Err_1389 Verifying that ReadExisting() will read everything from internal buffer and drivers buffer failed");
 
         com1.Close();
         com2.Close();
@@ -318,7 +311,7 @@ public class ReadExisting
     {
         if (!VerifyRead(largeNumRndBytesToRead))
         {
-            Console.WriteLine("Err_020!!! Verifying read method with large input buffer");
+            Debug.WriteLine("Err_020!!! Verifying read method with large input buffer");
             return false;
         }
 
@@ -367,7 +360,7 @@ public class ReadExisting
             charsToWrite[i] = randChar;
         }
 
-        Console.WriteLine("Verifying read method endocing={0} with {1} random chars", encoding.EncodingName, bytesToWrite.Length);
+        Debug.WriteLine("Verifying read method endocing={0} with {1} random chars", encoding.EncodingName, bytesToWrite.Length);
 
         com1.ReadTimeout = 500;
         com1.Encoding = encoding;
@@ -442,7 +435,7 @@ public class ReadExisting
 
         if (com1.BytesToRead != bytesToWrite.Length)
         {
-            Console.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -474,7 +467,7 @@ public class ReadExisting
         if (expectedChars.Length != rcvBuffer.Length)
         {
             //If we have read in more characters then we expect
-            Console.WriteLine("ERROR!!!: We have not read all of the characters that were sent");
+            Debug.WriteLine("ERROR!!!: We have not read all of the characters that were sent");
             retValue = false;
             //break;
         }
@@ -484,14 +477,14 @@ public class ReadExisting
         {
             if (expectedChars[i] != rcvBuffer[i])
             {
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)rcvBuffer[i]);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)rcvBuffer[i]);
                 retValue = false;
             }
         }
 
         if (0 != com1.BytesToRead && (!isUTF7Encoding || 1 != com1.BytesToRead))
         {
-            System.Console.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
+            System.Debug.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
             retValue = false;
         }
 

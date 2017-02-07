@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class ReceivedEvent
+public class ReceivedEvent : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReceivedBytesThreshold";
@@ -33,7 +33,7 @@ public class ReceivedEvent
         ReceivedEvent objTest = new ReceivedEvent();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -41,7 +41,7 @@ public class ReceivedEvent
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -49,11 +49,11 @@ public class ReceivedEvent
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -62,14 +62,7 @@ public class ReceivedEvent
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -97,7 +90,7 @@ public class ReceivedEvent
         bool retValue = true;
         Random rndGen = new Random(-55);
 
-        Console.WriteLine("Verifying ReceivedChars event");
+        Debug.WriteLine("Verifying ReceivedChars event");
 
         com1.Open();
         com2.Open();
@@ -110,19 +103,19 @@ public class ReceivedEvent
 
             if (!rcvEventHandler.Validate(SerialData.Chars, com1.ReceivedBytesThreshold))
             {
-                Console.WriteLine("Err_2097asd!!! ReceivedChars Event not fired {0}", i);
+                Debug.WriteLine("Err_2097asd!!! ReceivedChars Event not fired {0}", i);
                 retValue = false;
             }
 
             if (0 != rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof))
             {
-                Console.WriteLine("Err_21087qpua!!! Unexpected EofReceived event fireed {0}", i);
+                Debug.WriteLine("Err_21087qpua!!! Unexpected EofReceived event fireed {0}", i);
                 retValue = false;
             }
 
             if (0 != rcvEventHandler.NumberOfOccurencesOfType(SerialData.Chars))
             {
-                Console.WriteLine("Err_32417!!! Unexpected EofReceived event fireed {0}", i);
+                Debug.WriteLine("Err_32417!!! Unexpected EofReceived event fireed {0}", i);
                 retValue = false;
             }
 
@@ -131,7 +124,7 @@ public class ReceivedEvent
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying ReceivedChars event FAILED");
+            Debug.WriteLine("Err_002!!! Verifying ReceivedChars event FAILED");
         }
 
         if (com1.IsOpen)
@@ -152,7 +145,7 @@ public class ReceivedEvent
         bool retValue = true;
         byte[] xmitBytes = new byte[1];
 
-        Console.WriteLine("Verifying EofReceived event");
+        Debug.WriteLine("Verifying EofReceived event");
         com1.Open();
         com2.Open();
         com1.DataReceived += new SerialDataReceivedEventHandler(rcvEventHandler.HandleEvent);
@@ -167,32 +160,32 @@ public class ReceivedEvent
 
             if (!rcvEventHandler.Validate(SerialData.Eof, i))
             {
-                Console.WriteLine("Err_1048apqa!!! EofReceived Event not fired {0}", i);
+                Debug.WriteLine("Err_1048apqa!!! EofReceived Event not fired {0}", i);
                 retValue = false;
             }
 
             if (!rcvEventHandler.Validate(SerialData.Chars, i + com1.ReceivedBytesThreshold))
             {
-                Console.WriteLine("Err_16489qayas!!! ReceivedChars Event not fired {0}", i);
+                Debug.WriteLine("Err_16489qayas!!! ReceivedChars Event not fired {0}", i);
                 retValue = false;
             }
 
             if (0 != rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof))
             {
-                Console.WriteLine("Err_01278qaods!!! Unexpected EofReceived event fireed {0}", i);
+                Debug.WriteLine("Err_01278qaods!!! Unexpected EofReceived event fireed {0}", i);
                 retValue = false;
             }
 
             if (1 < rcvEventHandler.NumberOfOccurencesOfType(SerialData.Chars))
             {
-                Console.WriteLine("Err_2972qoypa!!! Unexpected ReceivedChars event fireed {0}", i);
+                Debug.WriteLine("Err_2972qoypa!!! Unexpected ReceivedChars event fireed {0}", i);
                 retValue = false;
             }
         }
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying EofReceived event FAILED");
+            Debug.WriteLine("Err_002!!! Verifying EofReceived event FAILED");
         }
 
         if (com1.IsOpen)
@@ -213,7 +206,7 @@ public class ReceivedEvent
         bool retValue = true;
         byte[] xmitBytes = new byte[3];
 
-        Console.WriteLine("Verifying EofReceived event");
+        Debug.WriteLine("Verifying EofReceived event");
 
         com1.Open();
         com2.Open();
@@ -231,19 +224,19 @@ public class ReceivedEvent
 
             if (!rcvEventHandler.Validate(SerialData.Eof, i * xmitBytes.Length))
             {
-                Console.WriteLine("Err_09727ahsp!!!EOF Event not fired {0}", i);
+                Debug.WriteLine("Err_09727ahsp!!!EOF Event not fired {0}", i);
                 retValue = false;
             }
 
             if (!rcvEventHandler.Validate(SerialData.Chars, (i * xmitBytes.Length) + com1.ReceivedBytesThreshold))
             {
-                Console.WriteLine("Err_27928adshs !!!ReceivedChars Event not fired {0}", i);
+                Debug.WriteLine("Err_27928adshs !!!ReceivedChars Event not fired {0}", i);
                 retValue = false;
             }
 
             if (0 != rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof))
             {
-                Console.WriteLine("Err_20712asdfhow!!! Unexpected EofReceived event fired {0} iteration:{1}",
+                Debug.WriteLine("Err_20712asdfhow!!! Unexpected EofReceived event fired {0} iteration:{1}",
                     rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof), i);
                 retValue = false;
             }
@@ -253,7 +246,7 @@ public class ReceivedEvent
 
         if (!retValue)
         {
-            Console.WriteLine("Err_3468eadhs!!! Verifying CharsReceived and EofReceived event FAILED");
+            Debug.WriteLine("Err_3468eadhs!!! Verifying CharsReceived and EofReceived event FAILED");
         }
 
         if (com1.IsOpen)
@@ -273,7 +266,7 @@ public class ReceivedEvent
         bool retValue = true;
         byte[] xmitBytes = new byte[3];
 
-        Console.WriteLine("Verifying EofReceived and ReceivedChars events where all chars are read in the ReceivedChars event");
+        Debug.WriteLine("Verifying EofReceived and ReceivedChars events where all chars are read in the ReceivedChars event");
 
         com1.Open();
         com2.Open();
@@ -291,19 +284,19 @@ public class ReceivedEvent
 
             if (!rcvEventHandler.Validate(SerialData.Eof, 0))
             {
-                Console.WriteLine("Err_09727ahsp!!!EOF Event not fired {0}", i);
+                Debug.WriteLine("Err_09727ahsp!!!EOF Event not fired {0}", i);
                 retValue = false;
             }
 
             if (!rcvEventHandler.Validate(SerialData.Chars, 1))
             {
-                Console.WriteLine("Err_27928adshs !!!ReceivedChars Event not fired {0}", i);
+                Debug.WriteLine("Err_27928adshs !!!ReceivedChars Event not fired {0}", i);
                 retValue = false;
             }
 
             if (0 != rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof))
             {
-                Console.WriteLine("Err_20712asdfhow!!! Unexpected EofReceived event fired {0} iteration:{1}",
+                Debug.WriteLine("Err_20712asdfhow!!! Unexpected EofReceived event fired {0} iteration:{1}",
                     rcvEventHandler.NumberOfOccurencesOfType(SerialData.Eof), i);
                 retValue = false;
             }
@@ -313,7 +306,7 @@ public class ReceivedEvent
 
         if (rcvEventHandler.NumBytesRead != NUM_TRYS * xmitBytes.Length)
         {
-            Console.WriteLine("Err_1298129ahnied!!! Expected to read {0} chars actually read {1}",
+            Debug.WriteLine("Err_1298129ahnied!!! Expected to read {0} chars actually read {1}",
                 NUM_TRYS * xmitBytes.Length, rcvEventHandler.NumBytesRead);
             retValue = false;
         }
@@ -325,7 +318,7 @@ public class ReceivedEvent
                 {
                     if (xmitBytes[j] != rcvEventHandler.BytesRead[(i * xmitBytes.Length) + j])
                     {
-                        Console.WriteLine("Err_2829aneid Expected to Read '{0}'({0:X}) actually read {1}'({1:X})",
+                        Debug.WriteLine("Err_2829aneid Expected to Read '{0}'({0:X}) actually read {1}'({1:X})",
                             xmitBytes[j], rcvEventHandler.BytesRead[(i * xmitBytes.Length) + j]);
                         retValue = false;
                     }
@@ -335,7 +328,7 @@ public class ReceivedEvent
 
         if (!retValue)
         {
-            Console.WriteLine("Err_3468eadhs!!! Verifying CharsReceived and EofReceived event FAILED");
+            Debug.WriteLine("Err_3468eadhs!!! Verifying CharsReceived and EofReceived event FAILED");
         }
 
         if (com1.IsOpen)

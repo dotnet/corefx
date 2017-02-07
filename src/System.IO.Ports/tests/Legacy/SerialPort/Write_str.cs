@@ -5,8 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class Write_str
+public class Write_str : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.Write(string)";
@@ -35,7 +37,7 @@ public class Write_str
         Write_str objTest = new Write_str();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -43,7 +45,7 @@ public class Write_str
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -51,11 +53,11 @@ public class Write_str
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -64,14 +66,7 @@ public class Write_str
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -99,10 +94,10 @@ public class Write_str
     #region Test Cases
     public bool ASCIIEncoding()
     {
-        Console.WriteLine("Verifying write method with ASCIIEncoding");
+        Debug.WriteLine("Verifying write method with ASCIIEncoding");
         if (!VerifyWrite(new System.Text.ASCIIEncoding(), ENCODING_STRING_SIZE))
         {
-            Console.WriteLine("Err_001!!! Verifying write method with ASCIIEncoding FAILED");
+            Debug.WriteLine("Err_001!!! Verifying write method with ASCIIEncoding FAILED");
             return false;
         }
 
@@ -112,10 +107,10 @@ public class Write_str
 
     public bool UTF7Encoding()
     {
-        Console.WriteLine("Verifying write method with UTF7Encoding");
+        Debug.WriteLine("Verifying write method with UTF7Encoding");
         if (!VerifyWrite(new System.Text.UTF7Encoding(), ENCODING_STRING_SIZE))
         {
-            Console.WriteLine("Err_002!!! Verifying write method with UTF7Encoding FAILED");
+            Debug.WriteLine("Err_002!!! Verifying write method with UTF7Encoding FAILED");
             return false;
         }
 
@@ -125,10 +120,10 @@ public class Write_str
 
     public bool UTF8Encoding()
     {
-        Console.WriteLine("Verifying write method with UTF8Encoding");
+        Debug.WriteLine("Verifying write method with UTF8Encoding");
         if (!VerifyWrite(new System.Text.UTF8Encoding(), ENCODING_STRING_SIZE))
         {
-            Console.WriteLine("Err_003!!! Verifying write method with UTF8Encoding FAILED");
+            Debug.WriteLine("Err_003!!! Verifying write method with UTF8Encoding FAILED");
             return false;
         }
 
@@ -138,10 +133,10 @@ public class Write_str
 
     public bool UTF32Encoding()
     {
-        Console.WriteLine("Verifying write method with UTF32Encoding");
+        Debug.WriteLine("Verifying write method with UTF32Encoding");
         if (!VerifyWrite(new System.Text.UTF32Encoding(), ENCODING_STRING_SIZE))
         {
-            Console.WriteLine("Err_004!!! Verifying write method with UTF32Encoding FAILED");
+            Debug.WriteLine("Err_004!!! Verifying write method with UTF32Encoding FAILED");
             return false;
         }
 
@@ -151,10 +146,10 @@ public class Write_str
 
     public bool UnicodeEncoding()
     {
-        Console.WriteLine("Verifying write method with UnicodeEncoding");
+        Debug.WriteLine("Verifying write method with UnicodeEncoding");
         if (!VerifyWrite(new System.Text.UnicodeEncoding(), ENCODING_STRING_SIZE))
         {
-            Console.WriteLine("Err_005!!! Verifying write method with UnicodeEncoding FAILED");
+            Debug.WriteLine("Err_005!!! Verifying write method with UnicodeEncoding FAILED");
             return false;
         }
 
@@ -167,7 +162,7 @@ public class Write_str
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         bool retValue = true;
 
-        Console.WriteLine("Verifying Write with a null string");
+        Debug.WriteLine("Verifying Write with a null string");
         com.Open();
 
         try
@@ -179,12 +174,12 @@ public class Write_str
         }
         catch (System.Exception e)
         {
-            Console.WriteLine("Write threw {0} expected System.ArgumentNullException", e.GetType());
+            Debug.WriteLine("Write threw {0} expected System.ArgumentNullException", e.GetType());
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_006!!! Verifying Write with a null string FAILED");
+            Debug.WriteLine("Err_006!!! Verifying Write with a null string FAILED");
 
         if (com.IsOpen)
             com.Close();
@@ -199,7 +194,7 @@ public class Write_str
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
         bool retValue = true;
 
-        Console.WriteLine("Verifying Write with an empty string");
+        Debug.WriteLine("Verifying Write with an empty string");
 
         com1.Open();
 
@@ -209,7 +204,7 @@ public class Write_str
         retValue &= VerifyWriteStr(com1, com2, "");
 
         if (!retValue)
-            Console.WriteLine("Err_007!!! Verifying Write with an empty string FAILED");
+            Debug.WriteLine("Err_007!!! Verifying Write with an empty string FAILED");
 
         return retValue;
     }
@@ -221,7 +216,7 @@ public class Write_str
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
         bool retValue = true;
 
-        Console.WriteLine("Verifying Write with an string containing only the null character");
+        Debug.WriteLine("Verifying Write with an string containing only the null character");
 
         com1.Open();
 
@@ -231,7 +226,7 @@ public class Write_str
         retValue &= VerifyWriteStr(com1, com2, "\0");
 
         if (!retValue)
-            Console.WriteLine("Err_008!!! Verifying Write with an string containing only the null character FAILED");
+            Debug.WriteLine("Err_008!!! Verifying Write with an string containing only the null character FAILED");
 
         return retValue;
     }
@@ -239,10 +234,10 @@ public class Write_str
 
     public bool LargeString()
     {
-        Console.WriteLine("Verifying write method with a large string size");
+        Debug.WriteLine("Verifying write method with a large string size");
         if (!VerifyWrite(new System.Text.UnicodeEncoding(), LARGE_STRING_SIZE, 1))
         {
-            Console.WriteLine("Err_009!!! Verifying write method with a large string size FAILED");
+            Debug.WriteLine("Err_009!!! Verifying write method with a large string size FAILED");
             return false;
         }
 
@@ -316,7 +311,7 @@ public class Write_str
             if (actualBytes.Length <= index)
             {
                 //If we have read in more bytes then we expect
-                Console.WriteLine("ERROR!!!: We have received more bytes then were sent");
+                Debug.WriteLine("ERROR!!!: We have received more bytes then were sent");
                 retValue = false;
                 break;
             }
@@ -326,7 +321,7 @@ public class Write_str
 
             if (actualBytes.Length - index != com2.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", actualBytes.Length - index, com2.BytesToRead);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", actualBytes.Length - index, com2.BytesToRead);
                 retValue = false;
             }
         }
@@ -335,7 +330,7 @@ public class Write_str
 
         if (actualChars.Length != expectedChars.Length * numWrites)
         {
-            System.Console.WriteLine("ERROR!!!: Expected to read {0} chars actually read {1}", expectedChars.Length * numWrites, actualChars.Length);
+            System.Debug.WriteLine("ERROR!!!: Expected to read {0} chars actually read {1}", expectedChars.Length * numWrites, actualChars.Length);
             retValue = false;
         }
         else
@@ -347,7 +342,7 @@ public class Write_str
                 {
                     if (expectedChars[i] != actualChars[i + expectedChars.Length * j])
                     {
-                        System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read {1} at {2}", (int)expectedChars[i], (int)actualChars[i + expectedChars.Length * j], i);
+                        System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read {1} at {2}", (int)expectedChars[i], (int)actualChars[i + expectedChars.Length * j], i);
                         retValue = false;
                     }
                 }
@@ -361,7 +356,7 @@ public class Write_str
             {
                 if (expectedBytes[i] != actualBytes[i + expectedBytes.Length * j])
                 {
-                    System.Console.WriteLine("ERROR!!!: Expected to read byte {0}  actual read {1} at {2}", (int)expectedBytes[i], (int)actualBytes[i + expectedBytes.Length * j], i);
+                    System.Debug.WriteLine("ERROR!!!: Expected to read byte {0}  actual read {1} at {2}", (int)expectedBytes[i], (int)actualBytes[i + expectedBytes.Length * j], i);
                     retValue = false;
                 }
             }

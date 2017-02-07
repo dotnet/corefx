@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.IO;
 
-public class ReadBufferSize_Property
+public class ReadBufferSize_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/04/01 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadBuffer_Property";
@@ -31,7 +31,7 @@ public class ReadBufferSize_Property
         ReadBufferSize_Property objTest = new ReadBufferSize_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -39,7 +39,7 @@ public class ReadBufferSize_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -47,11 +47,11 @@ public class ReadBufferSize_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -60,14 +60,7 @@ public class ReadBufferSize_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -111,13 +104,13 @@ public class ReadBufferSize_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadBufferSize before Open");
+        Debug.WriteLine("Verifying default ReadBufferSize before Open");
 
         serPortProp.SetAllPropertiesToDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
-        Console.WriteLine("Verifying default ReadBufferSize after Open");
+        Debug.WriteLine("Verifying default ReadBufferSize after Open");
 
         com1.Open();
         serPortProp = new SerialPortProperties();
@@ -125,7 +118,7 @@ public class ReadBufferSize_Property
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
-        Console.WriteLine("Verifying default ReadBufferSize after Close");
+        Debug.WriteLine("Verifying default ReadBufferSize after Close");
 
         com1.Close();
         serPortProp = new SerialPortProperties();
@@ -135,7 +128,7 @@ public class ReadBufferSize_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default ReadBufferSize FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default ReadBufferSize FAILED");
         }
 
         if (com1.IsOpen)
@@ -149,7 +142,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyException(1024, null, typeof(InvalidOperationException)))
         {
-            Console.WriteLine("Err_54458ahpba!!! Verifying setting ReadBufferSize to 1024 FAILED");
+            Debug.WriteLine("Err_54458ahpba!!! Verifying setting ReadBufferSize to 1024 FAILED");
             return false;
         }
 
@@ -160,7 +153,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyException(-1, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_002!!! Verifying setting ReadBufferSize to -1 FAILED");
+            Debug.WriteLine("Err_002!!! Verifying setting ReadBufferSize to -1 FAILED");
             return false;
         }
 
@@ -172,7 +165,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyException(Int32.MinValue, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_003!!! Verifying setting ReadBufferSize to Int32.MinValue FAILED");
+            Debug.WriteLine("Err_003!!! Verifying setting ReadBufferSize to Int32.MinValue FAILED");
             return false;
         }
 
@@ -184,7 +177,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyException(0, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_004!!! Verifying setting ReadBufferSize to 0 FAILED");
+            Debug.WriteLine("Err_004!!! Verifying setting ReadBufferSize to 0 FAILED");
             return false;
         }
 
@@ -194,11 +187,11 @@ public class ReadBufferSize_Property
 
     public bool ReadBufferSize_1()
     {
-        Console.WriteLine("Verifying setting ReadBufferSize=1");
+        Debug.WriteLine("Verifying setting ReadBufferSize=1");
 
         if (!VerifyException(1, typeof(IOException), typeof(InvalidOperationException), true))
         {
-            Console.WriteLine("Err_005!!! Verifying setting ReadBufferSize to 1 FAILED");
+            Debug.WriteLine("Err_005!!! Verifying setting ReadBufferSize to 1 FAILED");
             return false;
         }
 
@@ -207,11 +200,11 @@ public class ReadBufferSize_Property
 
     public bool ReadBufferSize_2()
     {
-        Console.WriteLine("Verifying setting ReadBufferSize=");
+        Debug.WriteLine("Verifying setting ReadBufferSize=");
 
         if (!VerifyReadBufferSize(2))
         {
-            Console.WriteLine("Err_005a!!! Verifying setting ReadBufferSize to 2 FAILED");
+            Debug.WriteLine("Err_005a!!! Verifying setting ReadBufferSize to 2 FAILED");
             return false;
         }
 
@@ -227,7 +220,7 @@ public class ReadBufferSize_Property
 
         if (!VerifyReadBufferSize((int)newReadBufferSize))
         {
-            Console.WriteLine("Err_006!!! Verifying setting ReadBufferSize to a smaller value FAILED");
+            Debug.WriteLine("Err_006!!! Verifying setting ReadBufferSize to a smaller value FAILED");
             return false;
         }
 
@@ -239,7 +232,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyReadBufferSize(((new SerialPort()).ReadBufferSize) * 2))
         {
-            Console.WriteLine("Err_007!!! Verifying setting ReadBufferSize to a larger value FAILED");
+            Debug.WriteLine("Err_007!!! Verifying setting ReadBufferSize to a larger value FAILED");
             return false;
         }
 
@@ -248,11 +241,11 @@ public class ReadBufferSize_Property
 
     public bool ReadBufferSize_Odd()
     {
-        Console.WriteLine("Verifying setting ReadBufferSize=Odd");
+        Debug.WriteLine("Verifying setting ReadBufferSize=Odd");
 
         if (!VerifyException(((new SerialPort()).ReadBufferSize) * 2 + 1, typeof(IOException), typeof(InvalidOperationException), true))
         {
-            Console.WriteLine("Err_010!!! Verifying setting ReadBufferSize to an odd value FAILED");
+            Debug.WriteLine("Err_010!!! Verifying setting ReadBufferSize to an odd value FAILED");
             return false;
         }
 
@@ -262,10 +255,10 @@ public class ReadBufferSize_Property
 
     public bool ReadBufferSize_Even()
     {
-        Console.WriteLine("Verifying setting ReadBufferSize=Even");
+        Debug.WriteLine("Verifying setting ReadBufferSize=Even");
         if (!VerifyReadBufferSize(((new SerialPort()).ReadBufferSize) * 2))
         {
-            Console.WriteLine("Err_011!!! Verifying setting ReadBufferSize to an even value FAILED");
+            Debug.WriteLine("Err_011!!! Verifying setting ReadBufferSize to an even value FAILED");
             return false;
         }
 
@@ -283,7 +276,7 @@ public class ReadBufferSize_Property
         //		if(!VerifyReadBufferSize((int)newReadBufferSize)){
         if (!VerifyReadBufferSize(11620))
         {
-            Console.WriteLine("Err_012!!! Verifying setting ReadBufferSize to a random value FAILED");
+            Debug.WriteLine("Err_012!!! Verifying setting ReadBufferSize to a random value FAILED");
             return false;
         }
 
@@ -295,7 +288,7 @@ public class ReadBufferSize_Property
     {
         if (!VerifyReadBufferSize(LARGE_BUFFER_SIZE))
         {
-            Console.WriteLine("Err_013!!! Verifying setting ReadBufferSize to a large value FAILED");
+            Debug.WriteLine("Err_013!!! Verifying setting ReadBufferSize to a large value FAILED");
             return false;
         }
 
@@ -315,14 +308,14 @@ public class ReadBufferSize_Property
 
         if (!VerifyExceptionBeforeOpen(newReadBufferSize, expectedExceptionBeforeOpen, throwAtOpen))
         {
-            Console.WriteLine("Err_170821hapb Verifying setting ReadBufferSize={0} BEFORE a call to Open() has been made FAILED", newReadBufferSize);
+            Debug.WriteLine("Err_170821hapb Verifying setting ReadBufferSize={0} BEFORE a call to Open() has been made FAILED", newReadBufferSize);
             retValue = false;
         }
 
 
         if (!VerifyExceptionAfterOpen(newReadBufferSize, expectedExceptionAfterOpen))
         {
-            Console.WriteLine("Err_23564ahpba Verifying setting ReadBufferSize={0} AFTER a call to Open() has been made FAILED", newReadBufferSize);
+            Debug.WriteLine("Err_23564ahpba Verifying setting ReadBufferSize={0} AFTER a call to Open() has been made FAILED", newReadBufferSize);
             retValue = false;
         }
 
@@ -342,7 +335,7 @@ public class ReadBufferSize_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("Err_707278ahpa!!! expected exception {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("Err_707278ahpa!!! expected exception {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -350,12 +343,12 @@ public class ReadBufferSize_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("Err_201890ioyun Expected no exception to be thrown and following was thrown \n{0}", e);
+                Debug.WriteLine("Err_201890ioyun Expected no exception to be thrown and following was thrown \n{0}", e);
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("Err_545498ahpba!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("Err_545498ahpba!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -378,24 +371,24 @@ public class ReadBufferSize_Property
         try
         {
             com.ReadBufferSize = newReadBufferSize;
-            Console.WriteLine("Err_561567anhbp!!! expected exception {0} and nothing was thrown", expectedException);
+            Debug.WriteLine("Err_561567anhbp!!! expected exception {0} and nothing was thrown", expectedException);
             retValue = false;
         }
         catch (Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("Err_21288ajpbam!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("Err_21288ajpbam!!! expected exception {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
             else if (originalReadBufferSize != com.ReadBufferSize)
             {
-                Console.WriteLine("Err_454987ahbopa!!! expected ReadBufferSize={0} and actual={1}", originalReadBufferSize, com.ReadBufferSize);
+                Debug.WriteLine("Err_454987ahbopa!!! expected ReadBufferSize={0} and actual={1}", originalReadBufferSize, com.ReadBufferSize);
                 retValue = false;
             }
             else if (!VerifyReadBufferSize(com))
             {
-                Console.WriteLine("Err_56459847ahjpba!!! Verifying actual read after exception thrown failed");
+                Debug.WriteLine("Err_56459847ahjpba!!! Verifying actual read after exception thrown failed");
                 retValue = false;
             }
         }
@@ -412,7 +405,7 @@ public class ReadBufferSize_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ReadBufferSize={0} BEFORE a call to Open() has been made", newReadBufferSize);
+        Debug.WriteLine("Verifying setting ReadBufferSize={0} BEFORE a call to Open() has been made", newReadBufferSize);
         retValue &= VerifyReadBufferSizeBeforeOpen(newReadBufferSize);
 
         return retValue;
@@ -468,7 +461,7 @@ public class ReadBufferSize_Property
             serPortProp.SetProperty("BytesToRead", newBytesToRead);
             serPortProp.SetProperty("BaudRate", 115200);
 
-            Console.WriteLine("Verifying properties after bytes have been written");
+            Debug.WriteLine("Verifying properties after bytes have been written");
             retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
             com1.Read(rcvBytes, 0, newBytesToRead);
@@ -477,12 +470,12 @@ public class ReadBufferSize_Property
             {
                 if (rcvBytes[i] != xmitBytes[i])
                 {
-                    Console.WriteLine("ERROR!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i], rcvBytes[i], i);
+                    Debug.WriteLine("ERROR!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i], rcvBytes[i], i);
                     retValue = false;
                 }
             }
 
-            Console.WriteLine("Verifying properties after bytes have been read");
+            Debug.WriteLine("Verifying properties after bytes have been read");
             serPortProp.SetProperty("BytesToRead", 0);
             retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
         }
@@ -494,7 +487,7 @@ public class ReadBufferSize_Property
             System.Threading.Thread.Sleep(50);
 
         serPortProp.SetProperty("BytesToRead", newBytesToRead);
-        Console.WriteLine("Verifying properties after writing bytes");
+        Debug.WriteLine("Verifying properties after writing bytes");
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
         com2.BaudRate = origBaudRate;
@@ -557,7 +550,7 @@ public class ReadBufferSize_Property
         rcvBytes = new byte[(int)(bytesToRead * 1.5)];
         if (bytesToRead != (bytesRead = com1.Read(rcvBytes, 0, rcvBytes.Length)))
         {
-            Console.WriteLine("Err_2971ahius Did not read all expected bytes({0}) bytesRead={1} ReadBufferSize={2}", bytesToRead, bytesRead, com1.ReadBufferSize);
+            Debug.WriteLine("Err_2971ahius Did not read all expected bytes({0}) bytesRead={1} ReadBufferSize={2}", bytesToRead, bytesRead, com1.ReadBufferSize);
             retValue = false;
         }
 
@@ -565,7 +558,7 @@ public class ReadBufferSize_Property
         {
             if (rcvBytes[i] != xmitBytes[i % xmitBytes.Length])
             {
-                Console.WriteLine("Err_70929apba!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i % xmitBytes.Length], rcvBytes[i], i);
+                Debug.WriteLine("Err_70929apba!!!: Expected to read byte {0} actual={1} at {2}", xmitBytes[i % xmitBytes.Length], rcvBytes[i], i);
                 retValue = false;
             }
         }
@@ -573,7 +566,7 @@ public class ReadBufferSize_Property
         serPortProp.SetProperty("BytesToRead", 0);
         if (!serPortProp.VerifyPropertiesAndPrint(com1))
         {
-            Console.WriteLine("Err_56488wypag!!!: Verifying properties failed");
+            Debug.WriteLine("Err_56488wypag!!!: Verifying properties failed");
         }
 
         com1.ReadTimeout = 250;
@@ -581,7 +574,7 @@ public class ReadBufferSize_Property
         try
         {
             com1.ReadByte();
-            Console.WriteLine("Err_1707ahspb!!!: After reading all bytes from buffer ReadByte() did not timeout");
+            Debug.WriteLine("Err_1707ahspb!!!: After reading all bytes from buffer ReadByte() did not timeout");
             retValue = false;
         }
         catch (TimeoutException) { }

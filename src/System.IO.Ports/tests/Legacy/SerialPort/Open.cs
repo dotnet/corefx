@@ -14,12 +14,11 @@ public class Open : PortsTest
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OpenDefault()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPortProperties serPortProp = new SerialPortProperties();
-
-        com.Open();
-        try
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
+            SerialPortProperties serPortProp = new SerialPortProperties();
+
+            com.Open();
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
@@ -27,64 +26,48 @@ public class Open : PortsTest
 
             serPortProp.VerifyPropertiesAndPrint(com);
         }
-        finally
-        {
-            com.Close();
-        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OpenTwice()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPortProperties serPortProp = new SerialPortProperties();
-
-        serPortProp.SetAllPropertiesToOpenDefaults();
-        serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-
-        Debug.Print("Verifying after calling Open() twice");
-
-        com.Open();
-        try
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
+            SerialPortProperties serPortProp = new SerialPortProperties();
+
+            serPortProp.SetAllPropertiesToOpenDefaults();
+            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+
+            Debug.Print("Verifying after calling Open() twice");
+
+            com.Open();
+
             Assert.Throws<InvalidOperationException>(() => com.Open());
             serPortProp.VerifyPropertiesAndPrint(com);
-        }
-        finally
-        {
-            com.Close();
         }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OpenTwoInstances()
     {
-        SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPortProperties serPortProp1 = new SerialPortProperties();
-        SerialPortProperties serPortProp2 = new SerialPortProperties();
-
-        Debug.Print("Verifying calling Open() on two instances of SerialPort");
-        serPortProp1.SetAllPropertiesToOpenDefaults();
-        serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-
-        serPortProp2.SetAllPropertiesToDefaults();
-        serPortProp2.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-
-        com1.Open();
-        try
+        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
+            SerialPortProperties serPortProp1 = new SerialPortProperties();
+            SerialPortProperties serPortProp2 = new SerialPortProperties();
+
+            Debug.Print("Verifying calling Open() on two instances of SerialPort");
+            serPortProp1.SetAllPropertiesToOpenDefaults();
+            serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+
+            serPortProp2.SetAllPropertiesToDefaults();
+            serPortProp2.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+
+            com1.Open();
             Assert.Throws<UnauthorizedAccessException>(() => com2.Open());
 
             serPortProp1.VerifyPropertiesAndPrint(com1);
             serPortProp2.VerifyPropertiesAndPrint(com2);
-        }
-        finally
-        {
-            com1.Close();
-
-            if (com2.IsOpen)
-                com2.Close();
         }
     }
 }

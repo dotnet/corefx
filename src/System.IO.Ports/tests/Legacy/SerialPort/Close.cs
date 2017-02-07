@@ -12,32 +12,33 @@ using Xunit;
 public class Close : PortsTest
 {
     // The number of the bytes that should read/write buffers
-    public static readonly int numReadBytes = 32;
-    public static readonly int numWriteBytes = 32;
+    static readonly int numReadBytes = 32;
+    static readonly int numWriteBytes = 32;
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void CloseWithoutOpen()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPortProperties serPortProp = new SerialPortProperties();
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        {
+            SerialPortProperties serPortProp = new SerialPortProperties();
 
-        Debug.WriteLine("Calling Close() without first calling Open()");
+            Debug.WriteLine("Calling Close() without first calling Open()");
 
-        com.Close();
+            com.Close();
 
-        serPortProp.SetAllPropertiesToDefaults();
-        serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        serPortProp.VerifyPropertiesAndPrint(com);
+            serPortProp.SetAllPropertiesToDefaults();
+            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+            serPortProp.VerifyPropertiesAndPrint(com);
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OpenClose()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPortProperties serPortProp = new SerialPortProperties();
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        { 
+            SerialPortProperties serPortProp = new SerialPortProperties();
 
-        try
-        {
             Debug.WriteLine("Calling Close() after calling Open()");
             com.Open();
             com.Close();
@@ -45,28 +46,21 @@ public class Close : PortsTest
             serPortProp.SetAllPropertiesToDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
             serPortProp.VerifyPropertiesAndPrint(com);
-
-        }
-        finally
-        {
-            if (com.IsOpen)
-                com.Close();
         }
     }
 
     [ConditionalFact(nameof(HasNullModem), Skip="Doesn't pass on FTDI USB->Serial device")]
     public void OpenFillBuffersClose()
     {
-        SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
-        SerialPortProperties serPortProp = new SerialPortProperties();
-
-        Debug.WriteLine("Calling Open(), fill both transmit and receive buffers, call Close()");
-        serPortProp.SetAllPropertiesToOpenDefaults();
-        serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-
-        try
+        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
+            SerialPortProperties serPortProp = new SerialPortProperties();
+
+            Debug.WriteLine("Calling Open(), fill both transmit and receive buffers, call Close()");
+            serPortProp.SetAllPropertiesToOpenDefaults();
+            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+
             // Setting com1 to use Handshake so we can fill read buffer
             com1.Handshake = Handshake.RequestToSend;
             com1.Open();
@@ -100,44 +94,27 @@ public class Close : PortsTest
             Debug.WriteLine("Verifying properties after port has been opened again");
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
-        finally
-        {
-            if (com1.IsOpen)
-                com1.Close();
-
-            if (com2.IsOpen)
-                com2.Close();
-        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OpenCloseNewInstanceOpen()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPort newCom = null;
-        SerialPortProperties serPortProp = new SerialPortProperties();
-
-        try
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            Debug.WriteLine(
-                "Calling Close() after calling Open() then create a new instance of SerialPort and call Open() again");
+            SerialPortProperties serPortProp = new SerialPortProperties();
+
+            Debug.WriteLine("Calling Close() after calling Open() then create a new instance of SerialPort and call Open() again");
             com.Open();
             com.Close();
 
-            newCom = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-            newCom.Open();
+            using (var newCom = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                newCom.Open();
 
-            serPortProp.SetAllPropertiesToOpenDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-            serPortProp.VerifyPropertiesAndPrint(newCom);
-        }
-        finally
-        {
-            if (com.IsOpen)
-                com.Close();
-
-            if (newCom != null && newCom.IsOpen)
-                newCom.Close();
+                serPortProp.SetAllPropertiesToOpenDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                serPortProp.VerifyPropertiesAndPrint(newCom);
+            }
         }
     }
 }

@@ -5,8 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class Write_str
+public class Write_str_Generic : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.Write(string)";
@@ -46,7 +48,7 @@ public class Write_str
         Write_str objTest = new Write_str();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -54,7 +56,7 @@ public class Write_str
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -62,11 +64,11 @@ public class Write_str
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -75,14 +77,7 @@ public class Write_str
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -118,11 +113,11 @@ public class Write_str
     {
         SerialPort com = new SerialPort();
 
-        Console.WriteLine("Verifying write method throws exception without a call to Open()");
+        Debug.WriteLine("Verifying write method throws exception without a call to Open()");
 
         if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_001!!! Verifying write method throws exception without a call to Open() FAILED");
+            Debug.WriteLine("Err_001!!! Verifying write method throws exception without a call to Open() FAILED");
             return false;
         }
 
@@ -134,7 +129,7 @@ public class Write_str
     {
         SerialPort com = new SerialPort("BAD_PORT_NAME");
 
-        Console.WriteLine("Verifying write method throws exception with a failed call to Open()");
+        Debug.WriteLine("Verifying write method throws exception with a failed call to Open()");
 
         //Since the PortName is set to a bad port name Open will thrown an exception
         //however we don't care what it is since we are verfifying a write method
@@ -148,7 +143,7 @@ public class Write_str
 
         if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_002!!! Verifying write method throws exception with a failed call to Open() FAILED");
+            Debug.WriteLine("Err_002!!! Verifying write method throws exception with a failed call to Open() FAILED");
             return false;
         }
 
@@ -160,13 +155,13 @@ public class Write_str
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying write method throws exception after a call to Cloes()");
+        Debug.WriteLine("Verifying write method throws exception after a call to Cloes()");
         com.Open();
         com.Close();
 
         if (!VerifyWriteException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_003!!! Verifying write method throws exception after a call to Cloes() FAILED");
+            Debug.WriteLine("Err_003!!! Verifying write method throws exception after a call to Cloes() FAILED");
             return false;
         }
 
@@ -186,7 +181,7 @@ public class Write_str
         com1.WriteTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
         com1.Handshake = Handshake.XOnXOff;
 
-        Console.WriteLine("Verifying WriteTimeout={0}", com1.WriteTimeout);
+        Debug.WriteLine("Verifying WriteTimeout={0}", com1.WriteTimeout);
 
         com1.Open();
         com2.Open();
@@ -198,7 +193,7 @@ public class Write_str
 
         if (!VerifyTimeout(com1))
         {
-            Console.WriteLine("Err_004!!! Verifying timeout FAILED");
+            Debug.WriteLine("Err_004!!! Verifying timeout FAILED");
             return false;
         }
 
@@ -217,7 +212,7 @@ public class Write_str
         //		com.Encoding = new System.Text.UTF7Encoding();
         com.Encoding = System.Text.Encoding.Unicode;
 
-        Console.WriteLine("Verifying WriteTimeout={0} with successive call to write method", com.WriteTimeout);
+        Debug.WriteLine("Verifying WriteTimeout={0} with successive call to write method", com.WriteTimeout);
         com.Open();
 
         try
@@ -229,7 +224,7 @@ public class Write_str
         }
         catch (System.Exception e)
         {
-            Console.WriteLine("The following exception was thrown: {0}", e.GetType());
+            Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
             retValue = false;
         }
 
@@ -237,7 +232,7 @@ public class Write_str
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying WriteTimeout with successive call to write method FAILED");
+            Debug.WriteLine("Err_005!!! Verifying WriteTimeout with successive call to write method FAILED");
             return false;
         }
 
@@ -258,7 +253,7 @@ public class Write_str
         com1.Handshake = Handshake.RequestToSend;
         com1.Encoding = new System.Text.UTF8Encoding();
 
-        Console.WriteLine("Verifying WriteTimeout={0} with successive call to write method with the write succeeding sometime before it's timeout", com1.WriteTimeout);
+        Debug.WriteLine("Verifying WriteTimeout={0} with successive call to write method with the write succeeding sometime before it's timeout", com1.WriteTimeout);
         com1.Open();
 
         //Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
@@ -281,7 +276,7 @@ public class Write_str
         }
         catch (System.Exception e)
         {
-            Console.WriteLine("The following exception was thrown: {0}", e.GetType());
+            Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
             retValue = false;
         }
 
@@ -294,7 +289,7 @@ public class Write_str
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying WriteTimeout with  successive call to write method FAILED");
+            Debug.WriteLine("Err_006!!! Verifying WriteTimeout with  successive call to write method FAILED");
             return false;
         }
 
@@ -310,7 +305,7 @@ public class Write_str
         bool retValue = true;
         int waitTime = 0;
 
-        Console.WriteLine("Verifying BytesToWrite with one call to Write");
+        Debug.WriteLine("Verifying BytesToWrite with one call to Write");
         com.Handshake = Handshake.RequestToSend;
         com.Open();
         com.WriteTimeout = 500;
@@ -336,7 +331,7 @@ public class Write_str
         if (STRING_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
         }
 
         //Wait for write method to timeout
@@ -347,7 +342,7 @@ public class Write_str
             com.Close();
 
         if (!retValue)
-            Console.WriteLine("Err_007!!! Verifying BytesToWrite with one call to Write FAILED");
+            Debug.WriteLine("Err_007!!! Verifying BytesToWrite with one call to Write FAILED");
 
         return retValue;
     }
@@ -362,7 +357,7 @@ public class Write_str
         bool retValue = true;
         int waitTime = 0;
 
-        Console.WriteLine("Verifying BytesToWrite with successive calls to Write");
+        Debug.WriteLine("Verifying BytesToWrite with successive calls to Write");
         com.Handshake = Handshake.RequestToSend;
         com.Open();
         com.WriteTimeout = 1000;
@@ -388,7 +383,7 @@ public class Write_str
         if (STRING_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
         }
 
         //Write a random string asynchronously so we can verify some things while the write call is blocking
@@ -412,7 +407,7 @@ public class Write_str
         if (STRING_SIZE_BYTES_TO_WRITE * 2 != com.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after second write", STRING_SIZE_BYTES_TO_WRITE * 2, com.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1} after second write", STRING_SIZE_BYTES_TO_WRITE * 2, com.BytesToWrite);
         }
 
         //Wait for both write methods to timeout
@@ -423,7 +418,7 @@ public class Write_str
             com.Close();
 
         if (!retValue)
-            Console.WriteLine("Err_008!!! Verifying BytesToWrite with successive calls to Write FAILED");
+            Debug.WriteLine("Err_008!!! Verifying BytesToWrite with successive calls to Write FAILED");
 
         return retValue;
     }
@@ -438,7 +433,7 @@ public class Write_str
         int waitTime = 0;
 
         //Write a random string asynchronously so we can verify some things while the write call is blocking
-        Console.WriteLine("Verifying Handshake=None");
+        Debug.WriteLine("Verifying Handshake=None");
         com.Open();
 
         t.Start();
@@ -457,11 +452,11 @@ public class Write_str
         if (0 != com.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite=0 actual {0}", com.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite=0 actual {0}", com.BytesToWrite);
         }
 
         if (!retValue)
-            Console.WriteLine("Err_009!!! Verifying Handshake=None FAILED");
+            Debug.WriteLine("Err_009!!! Verifying Handshake=None FAILED");
 
         if (com.IsOpen)
             com.Close();
@@ -477,7 +472,7 @@ public class Write_str
         retValue &= Verify_Handshake(Handshake.RequestToSend);
 
         if (!retValue)
-            Console.WriteLine("Err_010!!! Verifying Handshake=RequestToSend FAILED");
+            Debug.WriteLine("Err_010!!! Verifying Handshake=RequestToSend FAILED");
 
         return retValue;
     }
@@ -490,7 +485,7 @@ public class Write_str
         retValue &= Verify_Handshake(Handshake.XOnXOff);
 
         if (!retValue)
-            Console.WriteLine("Err_011!!! Verifying Handshake=XOnXOff FAILED");
+            Debug.WriteLine("Err_011!!! Verifying Handshake=XOnXOff FAILED");
 
         return retValue;
     }
@@ -503,7 +498,7 @@ public class Write_str
         retValue &= Verify_Handshake(Handshake.RequestToSendXOnXOff);
 
         if (!retValue)
-            Console.WriteLine("Err_012!!! Verifying Handshake=RequestToSendXOnXOff FAILED");
+            Debug.WriteLine("Err_012!!! Verifying Handshake=RequestToSendXOnXOff FAILED");
 
         return retValue;
     }
@@ -589,14 +584,14 @@ public class Write_str
         {
             com.Write(DEFAULT_STRING);
 
-            Console.WriteLine("ERROR!!!: No Excpetion was thrown");
+            Debug.WriteLine("ERROR!!!: No Excpetion was thrown");
             retValue = false;
         }
         catch (System.Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
+                Debug.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
                 retValue = false;
             }
         }
@@ -633,7 +628,7 @@ public class Write_str
             catch (System.TimeoutException) { }
             catch (System.Exception e)
             {
-                Console.WriteLine("The following exception was thrown: {0}", e.GetType());
+                Debug.WriteLine("The following exception was thrown: {0}", e.GetType());
                 retValue = false;
             }
 
@@ -650,7 +645,7 @@ public class Write_str
         //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
         if (maxPercentageDifference < percentageDifference)
         {
-            Console.WriteLine("ERROR!!!: The write method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference);
+            Debug.WriteLine("ERROR!!!: The write method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference);
             retValue = false;
         }
 
@@ -675,7 +670,7 @@ public class Write_str
         XOffBuffer[0] = 19;
         XOnBuffer[0] = 17;
 
-        Console.WriteLine("Verifying Handshake={0}", handshake);
+        Debug.WriteLine("Verifying Handshake={0}", handshake);
 
         com1.Handshake = handshake;
         com1.Open();
@@ -714,14 +709,14 @@ public class Write_str
         if (STRING_SIZE_HANDSHAKE != com1.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1}", STRING_SIZE_HANDSHAKE, com1.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite={0} actual {1}", STRING_SIZE_HANDSHAKE, com1.BytesToWrite);
         }
 
         //Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
         if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) && com1.CtsHolding)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted CtsHolding={0} actual {1}", false, com1.CtsHolding);
+            Debug.WriteLine("ERROR!!! Expcted CtsHolding={0} actual {1}", false, com1.CtsHolding);
         }
 
         //Setup to ensure write will succeed
@@ -743,14 +738,14 @@ public class Write_str
         if (0 != com1.BytesToWrite)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted BytesToWrite=0 actual {0}", com1.BytesToWrite);
+            Debug.WriteLine("ERROR!!! Expcted BytesToWrite=0 actual {0}", com1.BytesToWrite);
         }
 
         //Verify that CtsHolding is true if the RequestToSend or RequestToSendXOnXOff handshake method is used
         if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) && !com1.CtsHolding)
         {
             retValue = false;
-            Console.WriteLine("ERROR!!! Expcted CtsHolding={0} actual {1}", true, com1.CtsHolding);
+            Debug.WriteLine("ERROR!!! Expcted CtsHolding={0} actual {1}", true, com1.CtsHolding);
         }
 
         if (com1.IsOpen)

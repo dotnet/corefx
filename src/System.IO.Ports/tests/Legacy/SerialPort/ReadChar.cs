@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 
-public class ReadChar
+public class ReadChar : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/05 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadChar()";
@@ -38,7 +38,7 @@ public class ReadChar
         ReadChar objTest = new ReadChar();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -46,7 +46,7 @@ public class ReadChar
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -54,11 +54,11 @@ public class ReadChar
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -67,14 +67,7 @@ public class ReadChar
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -116,10 +109,10 @@ public class ReadChar
     #region Test Cases
     public bool ASCIIEncoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with ASCIIEncoding");
+        Debug.WriteLine("Verifying read with bytes encoded with ASCIIEncoding");
         if (!VerifyRead(new System.Text.ASCIIEncoding()))
         {
-            Console.WriteLine("Err_001!!! Verifying read with bytes encoded with ASCIIEncoding FAILED");
+            Debug.WriteLine("Err_001!!! Verifying read with bytes encoded with ASCIIEncoding FAILED");
             return false;
         }
 
@@ -129,10 +122,10 @@ public class ReadChar
 
     public bool UTF7Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF7Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF7Encoding");
         if (!VerifyRead(new System.Text.UTF7Encoding()))
         {
-            Console.WriteLine("Err_002!!! Verifying read with bytes encoded with UTF7Encoding FAILED");
+            Debug.WriteLine("Err_002!!! Verifying read with bytes encoded with UTF7Encoding FAILED");
             return false;
         }
 
@@ -142,10 +135,10 @@ public class ReadChar
 
     public bool UTF8Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF8Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF8Encoding");
         if (!VerifyRead(new System.Text.UTF8Encoding()))
         {
-            Console.WriteLine("Err_003!!! Verifying read with bytes encoded with UTF8Encoding FAILED");
+            Debug.WriteLine("Err_003!!! Verifying read with bytes encoded with UTF8Encoding FAILED");
             return false;
         }
 
@@ -155,10 +148,10 @@ public class ReadChar
 
     public bool UTF32Encoding()
     {
-        Console.WriteLine("Verifying read with bytes encoded with UTF32Encoding");
+        Debug.WriteLine("Verifying read with bytes encoded with UTF32Encoding");
         if (!VerifyRead(new System.Text.UTF32Encoding()))
         {
-            Console.WriteLine("Err_004!!! Verifying read with bytes encoded with UTF32Encoding FAILED");
+            Debug.WriteLine("Err_004!!! Verifying read with bytes encoded with UTF32Encoding FAILED");
             return false;
         }
 
@@ -170,7 +163,7 @@ public class ReadChar
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
+            Debug.WriteLine("Err_2507ajlsp!!! Verifying read method with reading all of the buffered data in one call");
             return false;
         }
 
@@ -182,7 +175,7 @@ public class ReadChar
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.Buffered))
         {
-            Console.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
+            Debug.WriteLine("Err_1659akl!!! Verifying read method with reading the buffered data in several calls");
             return false;
         }
 
@@ -194,7 +187,7 @@ public class ReadChar
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
+            Debug.WriteLine("Err_2082aspzh!!! Verifying read method with reading all of the buffered an non buffered data in one call");
             return false;
         }
 
@@ -206,7 +199,7 @@ public class ReadChar
     {
         if (!VerifyRead(System.Text.Encoding.ASCII, ReadDataFromEnum.BufferedAndNonBuffered))
         {
-            Console.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
+            Debug.WriteLine("Err_5687nhnhl!!! Verifying read method with reading the buffered and non buffereddata in several calls");
             return false;
         }
 
@@ -225,7 +218,7 @@ public class ReadChar
         char[] expectedChars = new char[charXmitBuffer.Length + 1];
         bool retValue = true;
 
-        Console.WriteLine("Verifying Read method with zero timeout that resizes SerialPort's buffer");
+        Debug.WriteLine("Verifying Read method with zero timeout that resizes SerialPort's buffer");
 
         expectedChars[0] = utf32Char;
         Array.Copy(charXmitBuffer, 0, expectedChars, 1, charXmitBuffer.Length);
@@ -252,7 +245,7 @@ public class ReadChar
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_8728asfdi ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_8728asfdi ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -262,14 +255,14 @@ public class ReadChar
         try
         {
             Char c = (char)com1.ReadChar();
-            Console.WriteLine("Err_1027asdh ReadChar() did not throw timeout exception when it only contained part of a character in it's buffer returned:{0}({1})", c, (int)c);
+            Debug.WriteLine("Err_1027asdh ReadChar() did not throw timeout exception when it only contained part of a character in it's buffer returned:{0}({1})", c, (int)c);
             retValue = false;
         }
         catch (TimeoutException) { } //Expected
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_54232ashz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_54232ashz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -287,7 +280,7 @@ public class ReadChar
         }
 
         if (!retValue)
-            Console.WriteLine("Err_2348asdz Verifying Read method with zero timeout that resizes SerialPort's buffer");
+            Debug.WriteLine("Err_2348asdz Verifying Read method with zero timeout that resizes SerialPort's buffer");
 
         return retValue;
     }
@@ -304,7 +297,7 @@ public class ReadChar
         char[] expectedChars = new char[charXmitBuffer.Length + 1];
         bool retValue = true;
 
-        Console.WriteLine("Verifying Read method with non zero timeout that resizes SerialPort's buffer");
+        Debug.WriteLine("Verifying Read method with non zero timeout that resizes SerialPort's buffer");
 
         expectedChars[0] = utf32Char;
         Array.Copy(charXmitBuffer, 0, expectedChars, 1, charXmitBuffer.Length);
@@ -331,7 +324,7 @@ public class ReadChar
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_6797auji ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_6797auji ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -341,14 +334,14 @@ public class ReadChar
         try
         {
             com1.ReadChar();
-            Console.WriteLine("Err_1027asdh ReadChar() did not timeout when it only contained part of a character in it's buffer");
+            Debug.WriteLine("Err_1027asdh ReadChar() did not timeout when it only contained part of a character in it's buffer");
             retValue = false;
         }
         catch (TimeoutException) { }
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_6189jhxcn ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_6189jhxcn ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -366,7 +359,7 @@ public class ReadChar
         }
 
         if (!retValue)
-            Console.WriteLine("Err_2348asdz Verifying Read method with non zero timeout that resizes SerialPort's buffer");
+            Debug.WriteLine("Err_2348asdz Verifying Read method with non zero timeout that resizes SerialPort's buffer");
 
         return retValue;
     }
@@ -382,7 +375,7 @@ public class ReadChar
         int charRead;
         bool retValue = true;
 
-        Console.WriteLine("Verifying that ReadChar() will read everything from internal buffer and drivers buffer");
+        Debug.WriteLine("Verifying that ReadChar() will read everything from internal buffer and drivers buffer");
 
         //Put the first byte of the utf32 encoder char in the last byte of this buffer
         //when we read this later the buffer will have to be resized
@@ -405,7 +398,7 @@ public class ReadChar
 
         if (1 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
+            Debug.WriteLine("Err_9416sapz ExpectedByteToRead={0} actual={1}", 1, com1.BytesToRead);
             retValue = false;
         }
 
@@ -419,18 +412,18 @@ public class ReadChar
 
         if (utf32Char != (charRead = com1.ReadChar()))
         {
-            Console.WriteLine("Err_6481sfadw ReadChar() returned={0} expected={1}", charRead, utf32Char);
+            Debug.WriteLine("Err_6481sfadw ReadChar() returned={0} expected={1}", charRead, utf32Char);
             retValue = false;
         }
 
         if (0 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
+            Debug.WriteLine("Err_78028asdf ExpectedByteToRead={0} actual={1}", 0, com1.BytesToRead);
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_1389 Verifying that ReadChar() will read everything from internal buffer and drivers buffer failed");
+            Debug.WriteLine("Err_1389 Verifying that ReadChar() will read everything from internal buffer and drivers buffer failed");
 
         com1.Close();
         com2.Close();
@@ -441,10 +434,10 @@ public class ReadChar
 
     public bool LargeInputBuffer()
     {
-        Console.WriteLine("Verifying read with large input buffer");
+        Debug.WriteLine("Verifying read with large input buffer");
         if (!VerifyRead(System.Text.Encoding.ASCII, largeNumRndBytesToRead))
         {
-            Console.WriteLine("Err_7207ajpah!!! Verifying read with large input buffeg FAILED");
+            Debug.WriteLine("Err_7207ajpah!!! Verifying read with large input buffeg FAILED");
             return false;
         }
 
@@ -461,7 +454,7 @@ public class ReadChar
         bool retValue = true;
         int readChar;
 
-        Console.WriteLine("Verifying Read method with zero timeout that resizes SerialPort's buffer");
+        Debug.WriteLine("Verifying Read method with zero timeout that resizes SerialPort's buffer");
 
         com1.Encoding = System.Text.Encoding.UTF32;
         com1.ReadTimeout = 0;
@@ -477,7 +470,7 @@ public class ReadChar
             try
             {
                 readChar = com1.ReadChar();
-                Console.WriteLine("Err_28292haied Expected ReadChar to throw TimeoutException with no bytes in " +
+                Debug.WriteLine("Err_28292haied Expected ReadChar to throw TimeoutException with no bytes in " +
                     "the buffer {0}({0:X}) returned instead", readChar);
                 retValue = false;
             }
@@ -488,13 +481,13 @@ public class ReadChar
 
             if (0 != com1.BytesToRead)
             {
-                Console.WriteLine("Err_155anjied Expected BytesToRead={0} actual={1}", 0, com1.BytesToRead);
+                Debug.WriteLine("Err_155anjied Expected BytesToRead={0} actual={1}", 0, com1.BytesToRead);
                 retValue = false;
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine("Err_205566ahuied Unexpected exception thrown: {0}", e);
+            Debug.WriteLine("Err_205566ahuied Unexpected exception thrown: {0}", e);
             retValue = false;
         }
 
@@ -509,7 +502,7 @@ public class ReadChar
             try
             {
                 readChar = com1.ReadChar();
-                Console.WriteLine("Err_9279ajei Expected ReadChar to throw TimeoutException with some bytes available " +
+                Debug.WriteLine("Err_9279ajei Expected ReadChar to throw TimeoutException with some bytes available " +
                     "in the SerialPort {0}({0:X}) returned instead", readChar);
                 retValue = false;
             }
@@ -520,13 +513,13 @@ public class ReadChar
 
             if (1 != com1.BytesToRead)
             {
-                Console.WriteLine("Err_1983218aheid Expected BytesToRead={0} actual={1}", 1, com1.BytesToRead);
+                Debug.WriteLine("Err_1983218aheid Expected BytesToRead={0} actual={1}", 1, com1.BytesToRead);
                 retValue = false;
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine("Err_021855aueid Unexpected exception thrown: {0}", e);
+            Debug.WriteLine("Err_021855aueid Unexpected exception thrown: {0}", e);
             retValue = false;
         }
 
@@ -543,12 +536,12 @@ public class ReadChar
             if (readChar != utf32Char)
             {
                 retValue = false;
-                Console.WriteLine("Err_19173ahid Expected to read {0}({0:X}) actually read {1}({1:X})", utf32Char, readChar);
+                Debug.WriteLine("Err_19173ahid Expected to read {0}({0:X}) actually read {1}({1:X})", utf32Char, readChar);
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine("Err_4929aheidea Unexpected exception thrown: {0}", e);
+            Debug.WriteLine("Err_4929aheidea Unexpected exception thrown: {0}", e);
             retValue = false;
         }
 
@@ -559,7 +552,7 @@ public class ReadChar
             com2.Close();
 
         if (!retValue)
-            Console.WriteLine("Err_115858ahjeid Verifying Read method with zero timeout");
+            Debug.WriteLine("Err_115858ahjeid Verifying Read method with zero timeout");
 
         return retValue;
     }
@@ -574,7 +567,7 @@ public class ReadChar
         System.Threading.Thread asyncReadThread = new System.Threading.Thread(new System.Threading.ThreadStart(asyncRead.Read));
         bool retValue = true;
 
-        Console.WriteLine("Verifying that ReadChar will read characters that have been received after the call to Read was made");
+        Debug.WriteLine("Verifying that ReadChar will read characters that have been received after the call to Read was made");
 
         com1.Encoding = System.Text.Encoding.UTF8;
         com2.Encoding = System.Text.Encoding.UTF8;
@@ -595,12 +588,12 @@ public class ReadChar
         if (null != asyncRead.Exception)
         {
             retValue = false;
-            Console.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
+            Debug.WriteLine("Err_04448ajhied Unexpected exception thrown from async read:\n{0}", asyncRead.Exception);
         }
         else if (asyncRead.Result != charXmitBuffer[0])
         {
             retValue = false;
-            Console.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0], asyncRead.Result);
+            Debug.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0], asyncRead.Result);
         }
         else
         {
@@ -611,7 +604,7 @@ public class ReadChar
             if (readResult + 1 != charXmitBuffer.Length)
             {
                 retValue = false;
-                Console.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
                     charXmitBuffer.Length - 1, readResult);
             }
             else
@@ -621,7 +614,7 @@ public class ReadChar
                     if (charRcvBuffer[i] != charXmitBuffer[i])
                     {
                         retValue = false;
-                        Console.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
+                        Debug.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
                             i, charXmitBuffer[i], charRcvBuffer[i], asyncRead.Result);
                     }
                 }
@@ -629,7 +622,7 @@ public class ReadChar
         }
 
         if (!retValue)
-            Console.WriteLine("Err_018068ajkid Verifying that ReadChar() will read characters that have been received after the call to Read was made failed");
+            Debug.WriteLine("Err_018068ajkid Verifying that ReadChar() will read characters that have been received after the call to Read was made failed");
 
         com1.Close();
         com2.Close();
@@ -647,7 +640,7 @@ public class ReadChar
         bool retValue = true;
         int result;
 
-        Console.WriteLine("Verifying that Read(char[], int, int) works appropriately after TimeoutException has been thrown");
+        Debug.WriteLine("Verifying that Read(char[], int, int) works appropriately after TimeoutException has been thrown");
 
         com1.Encoding = new System.Text.UTF32Encoding();
         com2.Encoding = new System.Text.UTF32Encoding();
@@ -664,14 +657,14 @@ public class ReadChar
         try
         {
             com1.ReadChar();
-            Console.WriteLine("Err_29299aize Expected ReadChar to throw TimeoutException");
+            Debug.WriteLine("Err_29299aize Expected ReadChar to throw TimeoutException");
             retValue = false;
         }
         catch (TimeoutException) { }//Expected
 
         if (3 != com1.BytesToRead)
         {
-            Console.WriteLine("Err_689855ozpbea Expected BytesToRead: {0} actual: {1}", 3, com1.BytesToRead);
+            Debug.WriteLine("Err_689855ozpbea Expected BytesToRead: {0} actual: {1}", 3, com1.BytesToRead);
             retValue = false;
         }
 
@@ -685,7 +678,7 @@ public class ReadChar
         if (result != charXmitBuffer[0])
         {
             retValue = false;
-            Console.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0], result);
+            Debug.WriteLine("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0], result);
         }
         else
         {
@@ -695,7 +688,7 @@ public class ReadChar
             if (readResult + 1 != charXmitBuffer.Length)
             {
                 retValue = false;
-                Console.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                Debug.WriteLine("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
                     charXmitBuffer.Length - 1, readResult);
             }
             else
@@ -705,7 +698,7 @@ public class ReadChar
                     if (charRcvBuffer[i] != charXmitBuffer[i])
                     {
                         retValue = false;
-                        Console.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X})",
+                        Debug.WriteLine("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X})",
                             i, charXmitBuffer[i], charRcvBuffer[i]);
                     }
                 }
@@ -714,12 +707,12 @@ public class ReadChar
 
         if (!VerifyBytesReadOnCom1FromCom2(com1, com2, byteXmitBuffer, charXmitBuffer))
         {
-            Console.WriteLine("Err_05188ajied Verify ReadLine after read failed");
+            Debug.WriteLine("Err_05188ajied Verify ReadLine after read failed");
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_9858wiapxzg Verifying that ReadChar() works appropriately after TimeoutException has been thrown failed");
+            Debug.WriteLine("Err_9858wiapxzg Verifying that ReadChar() works appropriately after TimeoutException has been thrown failed");
 
         com1.Close();
         com2.Close();
@@ -738,7 +731,7 @@ public class ReadChar
         bool retValue = true;
         int result;
 
-        Console.WriteLine("Verifying that ReadChar works correctly when trying to read surrogate characters");
+        Debug.WriteLine("Verifying that ReadChar works correctly when trying to read surrogate characters");
 
         com1.Encoding = new System.Text.UTF32Encoding();
         com2.Encoding = new System.Text.UTF32Encoding();
@@ -762,7 +755,7 @@ public class ReadChar
         {
             com1.ReadChar();
             retValue = false;
-            Console.WriteLine("Err_11919aueic Expected ReadChar() to throw when reading a surrogate");
+            Debug.WriteLine("Err_11919aueic Expected ReadChar() to throw when reading a surrogate");
         }
         catch (ArgumentException) { } //Expected		
 
@@ -771,29 +764,29 @@ public class ReadChar
         if (2 != result)
         {
             retValue = false;
-            Console.WriteLine("Err_2829aheid Expected to Read 2 chars instead read={0}", result);
+            Debug.WriteLine("Err_2829aheid Expected to Read 2 chars instead read={0}", result);
         }
         else if (charRcvBuffer[0] != surrogateChars[0])
         {
             retValue = false;
-            Console.WriteLine("Err_12929anied Expected first char read={0}({1:X}) actually read={2}({3:X})",
+            Debug.WriteLine("Err_12929anied Expected first char read={0}({1:X}) actually read={2}({3:X})",
                 surrogateChars[0], (int)surrogateChars[0], charRcvBuffer[0], (int)charRcvBuffer[0]);
         }
         else if (charRcvBuffer[1] != surrogateChars[1])
         {
-            Console.WriteLine("Err_12929anied Expected second char read={0}({1:X}) actually read={2}({3:X})",
+            Debug.WriteLine("Err_12929anied Expected second char read={0}({1:X}) actually read={2}({3:X})",
                 surrogateChars[1], (int)surrogateChars[1], charRcvBuffer[1], (int)charRcvBuffer[1]);
         }
 
 
         if (!PerformReadOnCom1FromCom2(com1, com2, additionalChars))
         {
-            Console.WriteLine("Err_01588akeid Verify ReadChar after read failed");
+            Debug.WriteLine("Err_01588akeid Verify ReadChar after read failed");
             retValue = false;
         }
 
         if (!retValue)
-            Console.WriteLine("Err_0154688aieide Verifying that ReadChar works correctly when trying to read surrogate characters failed");
+            Debug.WriteLine("Err_0154688aieide Verifying that ReadChar works correctly when trying to read surrogate characters failed");
 
         com1.Close();
         com2.Close();
@@ -901,7 +894,7 @@ public class ReadChar
 
         if (com1.BytesToRead != bytesToWrite.Length)
         {
-            Console.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
+            Debug.WriteLine("Err_7083zaz Expected com1.BytesToRead={0} actual={1}", bytesToWrite.Length, com1.BytesToRead);
             retValue = false;
         }
 
@@ -941,7 +934,7 @@ public class ReadChar
             {
                 if (i != expectedChars.Length)
                 {
-                    Console.WriteLine("Err_1282198anied Expected to read {0} chars actually read{1}", expectedChars.Length, i);
+                    Debug.WriteLine("Err_1282198anied Expected to read {0} chars actually read{1}", expectedChars.Length, i);
                     retValue = false;
                 }
 
@@ -952,7 +945,7 @@ public class ReadChar
             if (expectedChars.Length <= i)
             {
                 //If we have read in more characters then were actually sent
-                Console.WriteLine("ERROR!!!: We have received more characters then were sent");
+                Debug.WriteLine("ERROR!!!: We have received more characters then were sent");
                 retValue = false;
                 break;
             }
@@ -965,7 +958,7 @@ public class ReadChar
 
             if (bytesToRead - rcvBufferSize != com1.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1} at {2}", bytesToRead - rcvBufferSize, com1.BytesToRead, i);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1} at {2}", bytesToRead - rcvBufferSize, com1.BytesToRead, i);
                 retValue = false;
                 break;
             }
@@ -973,7 +966,7 @@ public class ReadChar
             if (readInt != expectedChars[i])
             {
                 //If the character read is not the expected character
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read char {1} at {2}", (int)expectedChars[i], readInt, i);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read char {1} at {2}", (int)expectedChars[i], readInt, i);
                 retValue = false;
                 break;
             }
@@ -983,7 +976,7 @@ public class ReadChar
 
         if (!isUTF7Encoding && 0 != com1.BytesToRead)
         {
-            System.Console.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
+            System.Debug.WriteLine("ERROR!!!: Expected BytesToRead=0  actual BytesToRead={0}", com1.BytesToRead);
             retValue = false;
         }
 

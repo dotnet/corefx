@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class PinChangedEvent
+public class PinChangedEvent : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.PinChangedEvent";
@@ -32,7 +32,7 @@ public class PinChangedEvent
         PinChangedEvent objTest = new PinChangedEvent();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -40,7 +40,7 @@ public class PinChangedEvent
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -48,11 +48,11 @@ public class PinChangedEvent
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -61,14 +61,7 @@ public class PinChangedEvent
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -103,7 +96,7 @@ public class PinChangedEvent
         PinChangedEventHandler eventHandler = new PinChangedEventHandler(com1);
         bool retValue = true;
 
-        Console.WriteLine("Verifying CtsChanged event");
+        Debug.WriteLine("Verifying CtsChanged event");
 
         com1.PinChanged += new SerialPinChangedEventHandler(eventHandler.HandleEvent);
         com1.Open();
@@ -112,18 +105,18 @@ public class PinChangedEvent
         for (int i = 0; i < NUM_TRYS; i++)
         {
             com2.RtsEnable = true;
-            Console.WriteLine("Verifying when RtsEnable set to true on remote port try: {0}", i);
+            Debug.WriteLine("Verifying when RtsEnable set to true on remote port try: {0}", i);
             eventHandler.WaitForEvent(MAX_TIME_WAIT, 1);
 
             if (!eventHandler.Validate(SerialPinChange.CtsChanged, 0))
             {
-                Console.WriteLine("Err_1351adsf!!! CtsChanged event not fired");
+                Debug.WriteLine("Err_1351adsf!!! CtsChanged event not fired");
                 retValue = false;
             }
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_4217qyza!!! unexpected event fired");
+                Debug.WriteLine("Err_4217qyza!!! unexpected event fired");
                 retValue = false;
             }
 
@@ -132,13 +125,13 @@ public class PinChangedEvent
 
             if (!eventHandler.Validate(SerialPinChange.CtsChanged, 0))
             {
-                Console.WriteLine("Err_24597aqqoo!!! CtsChanged event not fired");
+                Debug.WriteLine("Err_24597aqqoo!!! CtsChanged event not fired");
                 retValue = false;
             }
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_4309714qaoya!!! unexpected event fired");
+                Debug.WriteLine("Err_4309714qaoya!!! unexpected event fired");
                 retValue = false;
             }
         }
@@ -160,7 +153,7 @@ public class PinChangedEvent
         PinChangedEventHandler eventHandler = new PinChangedEventHandler(com1);
         bool retValue = true;
 
-        Console.WriteLine("Verifying DsrChanged event");
+        Debug.WriteLine("Verifying DsrChanged event");
         com1.PinChanged += new SerialPinChangedEventHandler(eventHandler.HandleEvent);
         com1.Open();
         com2.Open();
@@ -169,12 +162,12 @@ public class PinChangedEvent
         {
             com2.DtrEnable = true;
 
-            Console.WriteLine("Verifying when DtrEnable set to true on remote port {0}", i);
+            Debug.WriteLine("Verifying when DtrEnable set to true on remote port {0}", i);
             eventHandler.WaitForEvent(MAX_TIME_WAIT, 2);
 
             if (!eventHandler.Validate(SerialPinChange.DsrChanged, 0))
             {
-                Console.WriteLine("Err_5239aopz!!! DsrChanged event not fired");
+                Debug.WriteLine("Err_5239aopz!!! DsrChanged event not fired");
                 retValue = false;
             }
 
@@ -182,7 +175,7 @@ public class PinChangedEvent
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_1431qpzy!!! unexpected event fired");
+                Debug.WriteLine("Err_1431qpzy!!! unexpected event fired");
                 retValue = false;
             }
 
@@ -191,7 +184,7 @@ public class PinChangedEvent
 
             if (!eventHandler.Validate(SerialPinChange.DsrChanged, 0))
             {
-                Console.WriteLine("Err_1520qhoa!!! DsrChanged event not fired");
+                Debug.WriteLine("Err_1520qhoa!!! DsrChanged event not fired");
                 retValue = false;
             }
 
@@ -199,14 +192,14 @@ public class PinChangedEvent
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_2500qarf!!! unexpected event fired");
+                Debug.WriteLine("Err_2500qarf!!! unexpected event fired");
                 retValue = false;
             }
         }
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying DsrChanged event FAILED");
+            Debug.WriteLine("Err_002!!! Verifying DsrChanged event FAILED");
         }
 
         if (com1.IsOpen)
@@ -225,7 +218,7 @@ public class PinChangedEvent
         PinChangedEventHandler eventHandler = new PinChangedEventHandler(com1);
         bool retValue = true;
 
-        Console.WriteLine("Verifying Break event");
+        Debug.WriteLine("Verifying Break event");
 
         com1.PinChanged += new SerialPinChangedEventHandler(eventHandler.HandleEvent);
         com1.Open();
@@ -234,18 +227,18 @@ public class PinChangedEvent
         for (int i = 0; i < NUM_TRYS; i++)
         {
             com2.BreakState = true;
-            Console.WriteLine("Verifying when Break set to true on remote port try: {0}", i);
+            Debug.WriteLine("Verifying when Break set to true on remote port try: {0}", i);
             eventHandler.WaitForEvent(MAX_TIME_WAIT, 1);
 
             if (!eventHandler.Validate(SerialPinChange.Break, 0))
             {
-                Console.WriteLine("Err_67894ahlead!!! Break event not fired");
+                Debug.WriteLine("Err_67894ahlead!!! Break event not fired");
                 retValue = false;
             }
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_5784dahed!!! unexpected events({0}) fired ", eventHandler.NumEventsHandled);
+                Debug.WriteLine("Err_5784dahed!!! unexpected events({0}) fired ", eventHandler.NumEventsHandled);
                 retValue = false;
             }
 
@@ -254,7 +247,7 @@ public class PinChangedEvent
 
             if (0 != eventHandler.NumEventsHandled)
             {
-                Console.WriteLine("Err_56189awjhaos!!! unexpected event fired");
+                Debug.WriteLine("Err_56189awjhaos!!! unexpected event fired");
                 retValue = false;
             }
         }
@@ -276,7 +269,7 @@ public class PinChangedEvent
             bool retValue = true;
             int elapsedTime;
 
-            Console.WriteLine("Verifying CDChanged event");
+            Debug.WriteLine("Verifying CDChanged event");
 
             com1.PinChangedEvent += new SerialPinChangedEventHandler(eventHandler.HandleEvent);
 
@@ -285,7 +278,7 @@ public class PinChangedEvent
             com2.DtrEnable = true;
             elapsedTime = 0;
 
-            Console.WriteLine("Verifying when DtrEnable set to true on remote port");
+            Debug.WriteLine("Verifying when DtrEnable set to true on remote port");
             while(1 > eventHandler.NumEventsHandled && elapsedTime < MAX_TIME_WAIT) {
                 System.Threading.Thread.Sleep(ITERATION_TIME_WAIT);
                 elapsedTime += ITERATION_TIME_WAIT;
@@ -297,7 +290,7 @@ public class PinChangedEvent
             com2.DtrEnable = false;
             elapsedTime = 0;
 
-            Console.WriteLine("Verifying when DtrEnable set to false on remote port");
+            Debug.WriteLine("Verifying when DtrEnable set to false on remote port");
             while(1 > eventHandler.NumEventsHandled && elapsedTime < MAX_TIME_WAIT) {
                 System.Threading.Thread.Sleep(ITERATION_TIME_WAIT);
                 elapsedTime += ITERATION_TIME_WAIT;
@@ -306,7 +299,7 @@ public class PinChangedEvent
             retValue &= eventHandler.Validate(SerialPinChange.CDChanged, 0, 0);	  
 
             if(!retValue) {
-                Console.WriteLine("Err_003!!! Verifying CDChanged event FAILED");
+                Debug.WriteLine("Err_003!!! Verifying CDChanged event FAILED");
             }
 
             if(com1.IsOpen)
@@ -326,7 +319,7 @@ public class PinChangedEvent
             bool retValue = true;
             int elapsedTime;
 
-            Console.WriteLine("Verifying Break event");
+            Debug.WriteLine("Verifying Break event");
 
             com1.PinChangedEvent += new SerialPinChangedEventHandler(eventHandler.HandleEvent);
 
@@ -335,7 +328,7 @@ public class PinChangedEvent
             com2.BreakState = true;
             elapsedTime = 0;
 
-            Console.WriteLine("Verifying when Break set to true on remote port");
+            Debug.WriteLine("Verifying when Break set to true on remote port");
             while(1 > eventHandler.NumEventsHandled && elapsedTime < MAX_TIME_WAIT) {
                 System.Threading.Thread.Sleep(ITERATION_TIME_WAIT);
                 elapsedTime += ITERATION_TIME_WAIT;
@@ -344,7 +337,7 @@ public class PinChangedEvent
             retValue &= eventHandler.Validate(SerialPinChange.Break, 0, 0);
 
             if(!retValue) {
-                Console.WriteLine("Err_004!!! Verifying Break event FAILED");
+                Debug.WriteLine("Err_004!!! Verifying Break event FAILED");
             }
 
             if(com1.IsOpen)
@@ -364,7 +357,7 @@ public class PinChangedEvent
         bool retValue = true;
         SerialPinChangedEventHandler pinchangedEventHandler = new SerialPinChangedEventHandler(eventHandler.HandleEvent);
 
-        Console.WriteLine("Verifying multiple PinChangedEvents");
+        Debug.WriteLine("Verifying multiple PinChangedEvents");
 
         com1.PinChanged += pinchangedEventHandler;
 
@@ -385,25 +378,25 @@ public class PinChangedEvent
 
         if (!eventHandler.Validate(SerialPinChange.Break, 0))
         {
-            Console.WriteLine("Verifying Break State FAILED");
+            Debug.WriteLine("Verifying Break State FAILED");
             retValue = false;
         }
 
         if (!eventHandler.Validate(SerialPinChange.DsrChanged, 0))
         {
-            Console.WriteLine("Verifying DsrChanged FAILED");
+            Debug.WriteLine("Verifying DsrChanged FAILED");
             retValue = false;
         }
 
         if (!eventHandler.Validate(SerialPinChange.CtsChanged, 0))
         {
-            Console.WriteLine("Verifying CtsCahnged FAILED");
+            Debug.WriteLine("Verifying CtsCahnged FAILED");
             retValue = false;
         }
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying multiple PinChangedEvents FAILED");
+            Debug.WriteLine("Err_005!!! Verifying multiple PinChangedEvents FAILED");
         }
 
         com1.PinChanged -= pinchangedEventHandler;

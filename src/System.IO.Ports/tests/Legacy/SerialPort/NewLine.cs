@@ -5,61 +5,8 @@
 using System;
 using System.IO.Ports;
 
-public class NewLine_Property
+public class NewLine_Property : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.NewLine";
-    public static readonly String s_strTFName = "NewLine.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
-    private int _numErrors = 0;
-    private int _numTestcases = 0;
-    private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
-    {
-        NewLine_Property objTest = new NewLine_Property();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
-
     public bool RunTest()
     {
         bool retValue = true;
@@ -84,7 +31,7 @@ public class NewLine_Property
         SerialPortProperties serPortProp = new SerialPortProperties();
         bool retValue = true;
 
-        Console.WriteLine("Verifying default NewLine");
+        Debug.WriteLine("Verifying default NewLine");
         serPortProp.SetAllPropertiesToDefaults();
         retValue &= serPortProp.VerifyPropertiesAndPrint(com1);
 
@@ -97,10 +44,10 @@ public class NewLine_Property
 
     public bool NewLine_null()
     {
-        Console.WriteLine("Verifying null NewLine");
+        Debug.WriteLine("Verifying null NewLine");
         if (!VerifyException(null, typeof(System.ArgumentNullException)))
         {
-            Console.WriteLine("Err_002!!! Verifying null NewLine FAILED");
+            Debug.WriteLine("Err_002!!! Verifying null NewLine FAILED");
             return false;
         }
 
@@ -110,10 +57,10 @@ public class NewLine_Property
 
     public bool NewLine_empty_string()
     {
-        Console.WriteLine("Verifying empty string NewLine");
+        Debug.WriteLine("Verifying empty string NewLine");
         if (!VerifyException("", typeof(System.ArgumentException)))
         {
-            Console.WriteLine("Err_003!!! Verifying empty string NewLine FAILED");
+            Debug.WriteLine("Err_003!!! Verifying empty string NewLine FAILED");
             return false;
         }
 
@@ -156,7 +103,7 @@ public class NewLine_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -164,12 +111,12 @@ public class NewLine_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -196,7 +143,7 @@ public class NewLine_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the NewLine after Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected setting the NewLine after Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -204,12 +151,12 @@ public class NewLine_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the NewLine after Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the NewLine after Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the NewLine after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the NewLine after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }

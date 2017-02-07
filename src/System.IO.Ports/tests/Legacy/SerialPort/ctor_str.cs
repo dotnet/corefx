@@ -125,17 +125,23 @@ public class ctor_str : PortsTest
         Debug.Print("Verifying properties where PortName={0}", portName);
         try
         {
-            SerialPort com = new SerialPort(portName);
-
-            if (null != expectedException && throwAt == ThrowAt.Set)
+            using (SerialPort com = new SerialPort(portName))
             {
-                Assert.True(false, $"Err_7212ahsdj Expected Ctor to throw {expectedException}");
+                if (null != expectedException && throwAt == ThrowAt.Set)
+                {
+                    Assert.True(false, $"Err_7212ahsdj Expected Ctor to throw {expectedException}");
+                }
+
+                serPortProp.SetAllPropertiesToDefaults();
+                serPortProp.SetProperty("PortName", portName);
+
+                serPortProp.VerifyPropertiesAndPrint(com);
             }
-
-            serPortProp.SetAllPropertiesToDefaults();
-            serPortProp.SetProperty("PortName", portName);
-
-            serPortProp.VerifyPropertiesAndPrint(com);
+        }
+        catch (Xunit.Sdk.TrueException)
+        {
+            // This is an inner failure
+            throw;
         }
         catch (Exception e)
         {

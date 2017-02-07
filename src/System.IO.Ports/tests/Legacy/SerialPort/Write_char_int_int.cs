@@ -5,8 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class Write_char_int_int
+public class Write_char_int_int : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/17 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.Write(char[], int, int)";
@@ -48,7 +50,7 @@ public class Write_char_int_int
         Write_char_int_int objTest = new Write_char_int_int();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -56,7 +58,7 @@ public class Write_char_int_int
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -64,11 +66,11 @@ public class Write_char_int_int
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -77,14 +79,7 @@ public class Write_char_int_int
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -131,7 +126,7 @@ public class Write_char_int_int
     {
         if (!VerifyWriteException(null, 0, 1, typeof(System.ArgumentNullException)))
         {
-            Console.WriteLine("Err_001!!! Verifying write method throws exception with buffer equal to null FAILED");
+            Debug.WriteLine("Err_001!!! Verifying write method throws exception with buffer equal to null FAILED");
             return false;
         }
 
@@ -143,7 +138,7 @@ public class Write_char_int_int
     {
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], -1, DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_002!!! Verifying write method throws exception with offset equal to -1");
+            Debug.WriteLine("Err_002!!! Verifying write method throws exception with offset equal to -1");
             return false;
         }
 
@@ -157,7 +152,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], rndGen.Next(Int32.MinValue, 0), DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_003!!! Verifying write method throws exception with offset equal to negative random number");
+            Debug.WriteLine("Err_003!!! Verifying write method throws exception with offset equal to negative random number");
             return false;
         }
 
@@ -169,7 +164,7 @@ public class Write_char_int_int
     {
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], Int32.MinValue, DEFAULT_CHAR_COUNT, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_004!!! Verifying write method throws exception with count equal to MintInt");
+            Debug.WriteLine("Err_004!!! Verifying write method throws exception with count equal to MintInt");
             return false;
         }
 
@@ -181,7 +176,7 @@ public class Write_char_int_int
     {
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, -1, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_005!!! Verifying write method throws exception with count equal to -1");
+            Debug.WriteLine("Err_005!!! Verifying write method throws exception with count equal to -1");
             return false;
         }
 
@@ -195,7 +190,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, rndGen.Next(Int32.MinValue, 0), typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_006!!! Verifying write method throws exception with count equal to negative random number");
+            Debug.WriteLine("Err_006!!! Verifying write method throws exception with count equal to negative random number");
             return false;
         }
 
@@ -207,7 +202,7 @@ public class Write_char_int_int
     {
         if (!VerifyWriteException(new char[DEFAULT_BUFFER_SIZE], DEFAULT_CHAR_OFFSET, Int32.MinValue, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_007!!! Verifying write method throws exception with count equal to MintInt");
+            Debug.WriteLine("Err_007!!! Verifying write method throws exception with count equal to MintInt");
             return false;
         }
 
@@ -225,7 +220,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_009!!! Verifying write method throws exception with offset+count=buffer.length+1");
+            Debug.WriteLine("Err_009!!! Verifying write method throws exception with offset+count=buffer.length+1");
             return false;
         }
 
@@ -243,7 +238,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_010!!! Verifying write method throws exception with offset+count>buffer.length+1");
+            Debug.WriteLine("Err_010!!! Verifying write method throws exception with offset+count>buffer.length+1");
             return false;
         }
 
@@ -261,7 +256,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_011!!! Verifying write method throws exception with offset>buffer.length");
+            Debug.WriteLine("Err_011!!! Verifying write method throws exception with offset>buffer.length");
             return false;
         }
 
@@ -279,7 +274,7 @@ public class Write_char_int_int
 
         if (!VerifyWriteException(new char[bufferLength], offset, count, expectedException))
         {
-            Console.WriteLine("Err_012!!! Verifying write method throws exception with count>buffer.length + 1");
+            Debug.WriteLine("Err_012!!! Verifying write method throws exception with count>buffer.length + 1");
             return false;
         }
 
@@ -297,7 +292,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_013!!! Verifying write method with offset + count=buffer.length");
+            Debug.WriteLine("Err_013!!! Verifying write method with offset + count=buffer.length");
             return false;
         }
 
@@ -315,7 +310,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_014!!! Verifying write method with offset=buffer.length - 1");
+            Debug.WriteLine("Err_014!!! Verifying write method with offset=buffer.length - 1");
             return false;
         }
 
@@ -333,7 +328,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_015!!! Verifying write method with count=buffer.length");
+            Debug.WriteLine("Err_015!!! Verifying write method with count=buffer.length");
             return false;
         }
 
@@ -350,7 +345,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count))
         {
-            Console.WriteLine("Err_082salkj!!! Verifying write method with count=0");
+            Debug.WriteLine("Err_082salkj!!! Verifying write method with count=0");
             return false;
         }
 
@@ -367,7 +362,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.ASCIIEncoding()))
         {
-            Console.WriteLine("Err_016!!! Verifying write method with count=buffer.length and ASCIIEncoding");
+            Debug.WriteLine("Err_016!!! Verifying write method with count=buffer.length and ASCIIEncoding");
             return false;
         }
 
@@ -384,7 +379,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF7Encoding()))
         {
-            Console.WriteLine("Err_017!!! Verifying write method with count=buffer.length and UTF7Encoding");
+            Debug.WriteLine("Err_017!!! Verifying write method with count=buffer.length and UTF7Encoding");
             return false;
         }
 
@@ -401,7 +396,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF8Encoding()))
         {
-            Console.WriteLine("Err_018!!! Verifying write method with count=buffer.length and UTF8Encoding");
+            Debug.WriteLine("Err_018!!! Verifying write method with count=buffer.length and UTF8Encoding");
             return false;
         }
 
@@ -418,7 +413,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UTF32Encoding()))
         {
-            Console.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UTF32Encoding");
+            Debug.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UTF32Encoding");
             return false;
         }
 
@@ -435,7 +430,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, new System.Text.UnicodeEncoding()))
         {
-            Console.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UnicodeEncoding");
+            Debug.WriteLine("Err_019!!! Verifying write method with count=buffer.length and UnicodeEncoding");
             return false;
         }
 
@@ -452,7 +447,7 @@ public class Write_char_int_int
 
         if (!VerifyWrite(new char[bufferLength], offset, count, 1))
         {
-            Console.WriteLine("Err_016!!! Verifying write method with large input buffer");
+            Debug.WriteLine("Err_016!!! Verifying write method with large input buffer");
             return false;
         }
 
@@ -467,21 +462,21 @@ public class Write_char_int_int
         bool retValue = true;
         int bufferLength = null == buffer ? 0 : buffer.Length;
 
-        Console.WriteLine("Verifying write method throws {0} buffer.Lenght={1}, offset={2}, count={3}", expectedException, bufferLength, offset, count);
+        Debug.WriteLine("Verifying write method throws {0} buffer.Lenght={1}, offset={2}, count={3}", expectedException, bufferLength, offset, count);
         com.Open();
 
         try
         {
             com.Write(buffer, offset, count);
 
-            Console.WriteLine("ERROR!!!: No Excpetion was thrown");
+            Debug.WriteLine("ERROR!!!: No Excpetion was thrown");
             retValue = false;
         }
         catch (System.Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
+                Debug.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
                 retValue = false;
             }
         }
@@ -515,7 +510,7 @@ public class Write_char_int_int
         SerialPort com1 = TCSupport.InitFirstSerialPort();
         SerialPort com2 = TCSupport.InitSecondSerialPort(com1);
 
-        Console.WriteLine("Verifying write method buffer.Lenght={0}, offset={1}, count={2}, endocing={3}", buffer.Length, offset, count, encoding.EncodingName);
+        Debug.WriteLine("Verifying write method buffer.Lenght={0}, offset={1}, count={2}, endocing={3}", buffer.Length, offset, count, encoding.EncodingName);
 
         com1.Encoding = encoding;
         com1.Open();
@@ -562,7 +557,7 @@ public class Write_char_int_int
         {
             if (buffer[i] != oldBuffer[i])
             {
-                System.Console.WriteLine("ERROR!!!: The contents of the buffer were changed from {0} to {1] at {2}", oldBuffer[i], buffer[i], i);
+                System.Debug.WriteLine("ERROR!!!: The contents of the buffer were changed from {0} to {1] at {2}", oldBuffer[i], buffer[i], i);
                 retValue = false;
             }
         }
@@ -581,7 +576,7 @@ public class Write_char_int_int
             if (actualBytes.Length <= index)
             {
                 //If we have read in more bytes then we expect
-                Console.WriteLine("ERROR!!!: We have received more bytes then were sent");
+                Debug.WriteLine("ERROR!!!: We have received more bytes then were sent");
                 retValue = false;
                 break;
             }
@@ -591,7 +586,7 @@ public class Write_char_int_int
 
             if (actualBytes.Length - index != com2.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", actualBytes.Length - index, com2.BytesToRead);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", actualBytes.Length - index, com2.BytesToRead);
                 retValue = false;
             }
         }
@@ -600,7 +595,7 @@ public class Write_char_int_int
 
         if (actualChars.Length != expectedChars.Length * numWrites)
         {
-            System.Console.WriteLine("ERROR!!!: Expected to read {0} chars actually read {1}", expectedChars.Length * numWrites, actualChars.Length);
+            System.Debug.WriteLine("ERROR!!!: Expected to read {0} chars actually read {1}", expectedChars.Length * numWrites, actualChars.Length);
             retValue = false;
         }
         else
@@ -612,7 +607,7 @@ public class Write_char_int_int
                 {
                     if (expectedChars[i] != actualChars[i + expectedChars.Length * j])
                     {
-                        System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read {1} at {2}", (int)expectedChars[i], (int)actualChars[i + expectedChars.Length * j], i);
+                        System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read {1} at {2}", (int)expectedChars[i], (int)actualChars[i + expectedChars.Length * j], i);
                         retValue = false;
                     }
                 }
@@ -626,7 +621,7 @@ public class Write_char_int_int
             {
                 if (expectedBytes[i] != actualBytes[i + expectedBytes.Length * j])
                 {
-                    System.Console.WriteLine("ERROR!!!: Expected to read byte {0}  actual read {1} at {2}", (int)expectedBytes[i], (int)actualBytes[i + expectedBytes.Length * j], i);
+                    System.Debug.WriteLine("ERROR!!!: Expected to read byte {0}  actual read {1} at {2}", (int)expectedBytes[i], (int)actualBytes[i + expectedBytes.Length * j], i);
                     retValue = false;
                 }
             }

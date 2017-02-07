@@ -5,7 +5,7 @@
 using System;
 using System.IO.Ports;
 
-public class ReadTimeout_Property
+public class ReadTimeout_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadTimeout";
@@ -45,7 +45,7 @@ public class ReadTimeout_Property
         ReadTimeout_Property objTest = new ReadTimeout_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -53,7 +53,7 @@ public class ReadTimeout_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -61,11 +61,11 @@ public class ReadTimeout_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -74,26 +74,7 @@ public class ReadTimeout_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        System.Threading.ThreadAbortException tae = e.ExceptionObject as System.Threading.ThreadAbortException;
-
-        if (null != tae)
-        {
-            Object o = tae.ExceptionState;
-
-            if (null != o && o == this)
-            {
-                return;
-            }
-        }
-
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -139,12 +120,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadTimeout with Read(byte[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying default ReadTimeout with Read(byte[] buffer, int offset, int count)");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(Read_byte_int_int), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -155,12 +136,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadTimeout with Read(char[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying default ReadTimeout with Read(char[] buffer, int offset, int count)");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(Read_char_int_int), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying default ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_002!!! Verifying default ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -171,12 +152,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadTimeout with ReadByte()");
+        Debug.WriteLine("Verifying default ReadTimeout with ReadByte()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadByte), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_003!!! Verifying default ReadTimeout with ReadByte() FAILED");
+            Debug.WriteLine("Err_003!!! Verifying default ReadTimeout with ReadByte() FAILED");
         }
 
         return retValue;
@@ -187,12 +168,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadTimeout with ReadLine()");
+        Debug.WriteLine("Verifying default ReadTimeout with ReadLine()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadLine), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_004!!! Verifying default ReadTimeout with ReadLine() FAILED");
+            Debug.WriteLine("Err_004!!! Verifying default ReadTimeout with ReadLine() FAILED");
         }
 
         return retValue;
@@ -203,12 +184,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying default ReadTimeout with ReadTo()");
+        Debug.WriteLine("Verifying default ReadTimeout with ReadTo()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadTo), false);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying default ReadTimeout with ReadTo() FAILED");
+            Debug.WriteLine("Err_005!!! Verifying default ReadTimeout with ReadTo() FAILED");
         }
 
         return retValue;
@@ -219,12 +200,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying infinite ReadTimeout with Read(byte[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying infinite ReadTimeout with Read(byte[] buffer, int offset, int count)");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(Read_byte_int_int), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying infinite ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_006!!! Verifying infinite ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -235,12 +216,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying infinite ReadTimeout with Read(char[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying infinite ReadTimeout with Read(char[] buffer, int offset, int count)");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(Read_char_int_int), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_007!!! Verifying infinite ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_007!!! Verifying infinite ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -251,12 +232,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying infinite ReadTimeout with ReadByte()");
+        Debug.WriteLine("Verifying infinite ReadTimeout with ReadByte()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadByte), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_008!!! Verifying infinite ReadTimeout with ReadByte() FAILED");
+            Debug.WriteLine("Err_008!!! Verifying infinite ReadTimeout with ReadByte() FAILED");
         }
 
         return retValue;
@@ -267,12 +248,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying infinite ReadTimeout with ReadLine()");
+        Debug.WriteLine("Verifying infinite ReadTimeout with ReadLine()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadLine), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_009!!! Verifying infinite ReadTimeout with ReadLine() FAILED");
+            Debug.WriteLine("Err_009!!! Verifying infinite ReadTimeout with ReadLine() FAILED");
         }
 
         return retValue;
@@ -283,12 +264,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying infinite ReadTimeout with ReadTo()");
+        Debug.WriteLine("Verifying infinite ReadTimeout with ReadTo()");
         retValue &= VerifyInfiniteTimeout(new ReadMethodDelegate(ReadTo), true);
 
         if (!retValue)
         {
-            Console.WriteLine("Err_010!!! Verifying infinite ReadTimeout with ReadTo() FAILED");
+            Debug.WriteLine("Err_010!!! Verifying infinite ReadTimeout with ReadTo() FAILED");
         }
 
         return retValue;
@@ -299,12 +280,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ReadTimeout=0 before Open() with Read(byte[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying setting ReadTimeout=0 before Open() with Read(byte[] buffer, int offset, int count)");
         retValue &= VerifyZeroTimeoutBeforeOpen(new ReadMethodDelegate(Read_byte_int_int));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_011!!! Verifying zero ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_011!!! Verifying zero ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -315,12 +296,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ReadTimeout=0 before Open() with Read(char[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying setting ReadTimeout=0 before Open() with Read(char[] buffer, int offset, int count)");
         retValue &= VerifyZeroTimeoutBeforeOpen(new ReadMethodDelegate(Read_char_int_int));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_012!!! Verifying zero ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_012!!! Verifying zero ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -331,12 +312,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout before Open with ReadByte()");
+        Debug.WriteLine("Verifying zero ReadTimeout before Open with ReadByte()");
         retValue &= VerifyZeroTimeoutBeforeOpen(new ReadMethodDelegate(ReadByte));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_013!!! Verifying zero ReadTimeout before Open with ReadByte() FAILED");
+            Debug.WriteLine("Err_013!!! Verifying zero ReadTimeout before Open with ReadByte() FAILED");
         }
 
         return retValue;
@@ -347,12 +328,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout before Open with ReadLine()");
+        Debug.WriteLine("Verifying zero ReadTimeout before Open with ReadLine()");
         retValue &= VerifyZeroTimeoutBeforeOpen(new ReadMethodDelegate(ReadLine));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_014!!! Verifying zero ReadTimeout before Open with ReadLine() FAILED");
+            Debug.WriteLine("Err_014!!! Verifying zero ReadTimeout before Open with ReadLine() FAILED");
         }
 
         return retValue;
@@ -363,12 +344,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout before Open with ReadTo()");
+        Debug.WriteLine("Verifying zero ReadTimeout before Open with ReadTo()");
         retValue &= VerifyZeroTimeoutBeforeOpen(new ReadMethodDelegate(ReadTo));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_015!!! Verifying zero ReadTimeout before Open with ReadTo() FAILED");
+            Debug.WriteLine("Err_015!!! Verifying zero ReadTimeout before Open with ReadTo() FAILED");
         }
 
         return retValue;
@@ -379,12 +360,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ReadTimeout=0 after Open() with Read(byte[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying setting ReadTimeout=0 after Open() with Read(byte[] buffer, int offset, int count)");
         retValue &= VerifyZeroTimeoutAfterOpen(new ReadMethodDelegate(Read_byte_int_int));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_016!!! Verifying zero ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_016!!! Verifying zero ReadTimeout with Read(byte[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -395,12 +376,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying setting ReadTimeout=0 after Open() with Read(char[] buffer, int offset, int count)");
+        Debug.WriteLine("Verifying setting ReadTimeout=0 after Open() with Read(char[] buffer, int offset, int count)");
         retValue &= VerifyZeroTimeoutAfterOpen(new ReadMethodDelegate(Read_char_int_int));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_017!!! Verifying zero ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
+            Debug.WriteLine("Err_017!!! Verifying zero ReadTimeout with Read(char[] buffer, int offset, int count) FAILED");
         }
 
         return retValue;
@@ -411,12 +392,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout after Open with ReadByte()");
+        Debug.WriteLine("Verifying zero ReadTimeout after Open with ReadByte()");
         retValue &= VerifyZeroTimeoutAfterOpen(new ReadMethodDelegate(ReadByte));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_018!!! Verifying zero ReadTimeout after Open with ReadByte() FAILED");
+            Debug.WriteLine("Err_018!!! Verifying zero ReadTimeout after Open with ReadByte() FAILED");
         }
 
         return retValue;
@@ -427,12 +408,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout after Open with ReadLine()");
+        Debug.WriteLine("Verifying zero ReadTimeout after Open with ReadLine()");
         retValue &= VerifyZeroTimeoutAfterOpen(new ReadMethodDelegate(ReadLine));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_019!!! Verifying zero ReadTimeout after Open with ReadLine() FAILED");
+            Debug.WriteLine("Err_019!!! Verifying zero ReadTimeout after Open with ReadLine() FAILED");
         }
 
         return retValue;
@@ -443,12 +424,12 @@ public class ReadTimeout_Property
     {
         bool retValue = true;
 
-        Console.WriteLine("Verifying zero ReadTimeout after Open with ReadTo()");
+        Debug.WriteLine("Verifying zero ReadTimeout after Open with ReadTo()");
         retValue &= VerifyZeroTimeoutAfterOpen(new ReadMethodDelegate(ReadTo));
 
         if (!retValue)
         {
-            Console.WriteLine("Err_020!!! Verifying zero ReadTimeout after Open with ReadTo() FAILED");
+            Debug.WriteLine("Err_020!!! Verifying zero ReadTimeout after Open with ReadTo() FAILED");
         }
 
         return retValue;
@@ -457,11 +438,11 @@ public class ReadTimeout_Property
 
     public bool ReadTimeout_Int32MinValue()
     {
-        Console.WriteLine("Verifying Int32.MinValue ReadTimeout");
+        Debug.WriteLine("Verifying Int32.MinValue ReadTimeout");
 
         if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_021!!! Verifying Int32.MinValue ReadTimeout FAILED");
+            Debug.WriteLine("Err_021!!! Verifying Int32.MinValue ReadTimeout FAILED");
             return false;
         }
 
@@ -471,11 +452,11 @@ public class ReadTimeout_Property
 
     public bool ReadTimeout_NEG2()
     {
-        Console.WriteLine("Verifying -2 ReadTimeout");
+        Debug.WriteLine("Verifying -2 ReadTimeout");
 
         if (!VerifyException(Int32.MinValue, ThrowAt.Set, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_022!!! Verifying -2 ReadTimeout FAILED");
+            Debug.WriteLine("Err_022!!! Verifying -2 ReadTimeout FAILED");
             return false;
         }
 
@@ -514,7 +495,7 @@ public class ReadTimeout_Property
 
         if (!t.IsAlive)
         {
-            Console.WriteLine("ERROR!!! {0} terminated with infinite timeout", readMethod.Method.Name);
+            Debug.WriteLine("ERROR!!! {0} terminated with infinite timeout", readMethod.Method.Name);
             retValue = false;
         }
 
@@ -586,7 +567,7 @@ public class ReadTimeout_Property
 
         if (MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT < sw.ElapsedMilliseconds)
         {
-            Console.WriteLine("Err_2570ajdlkj!!! Read Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, sw.ElapsedMilliseconds, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT);
+            Debug.WriteLine("Err_2570ajdlkj!!! Read Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, sw.ElapsedMilliseconds, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT);
             retValue = false;
         }
 
@@ -607,7 +588,7 @@ public class ReadTimeout_Property
 
         if (MAX_ACCEPTABLE_ZERO_TIMEOUT < actualTime)
         {
-            Console.WriteLine("ERROR!!! Read Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, actualTime, MAX_ACCEPTABLE_ZERO_TIMEOUT);
+            Debug.WriteLine("ERROR!!! Read Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, actualTime, MAX_ACCEPTABLE_ZERO_TIMEOUT);
             retValue = false;
         }
 
@@ -661,7 +642,7 @@ public class ReadTimeout_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -669,12 +650,12 @@ public class ReadTimeout_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -700,7 +681,7 @@ public class ReadTimeout_Property
             com.ReadTimeout = readTimeout;
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -708,12 +689,12 @@ public class ReadTimeout_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the ReadTimeout after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }

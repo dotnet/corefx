@@ -6,14 +6,8 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 
-public class Event_Generic
+public class Event_Generic : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "SerialPort.PinChangedEvent";
-    public static readonly String s_strTFName = "PinChangedEvent.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
     //Maximum time to wait for all of the expected events to be firered
     public static readonly int MAX_TIME_WAIT = 5000;
 
@@ -30,7 +24,7 @@ public class Event_Generic
 
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -38,7 +32,7 @@ public class Event_Generic
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -46,11 +40,11 @@ public class Event_Generic
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -59,19 +53,7 @@ public class Event_Generic
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        if (e.ExceptionObject is IgnoreException)
-        { // Ignore Exceptions of the type IgnoreException
-            return;
-        }
-
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -110,7 +92,7 @@ public class Event_Generic
         handlers to die.		
         ***************************************************************/
 
-        Console.WriteLine("Verifying where the event handlers throws");
+        Debug.WriteLine("Verifying where the event handlers throws");
 
         com1.Open();
         com2.Open();
@@ -168,19 +150,19 @@ public class Event_Generic
 
         if (!pinChangedEventHandler.WaitForEvent(MAX_TIME_WAIT, 3))
         {
-            Console.WriteLine("Err_28282haied Expected 3 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_28282haied Expected 3 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
         if (!receivedEventHandler.WaitForEvent(MAX_TIME_WAIT, 2))
         {
-            Console.WriteLine("Err_2912hsie Expected 2 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_2912hsie Expected 2 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
         if (!errorEventHandler.WaitForEvent(MAX_TIME_WAIT, 2))
         {
-            Console.WriteLine("Err_191291jaied Expected 3 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_191291jaied Expected 3 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
             retValue = false;
         }
 
@@ -188,45 +170,45 @@ public class Event_Generic
         //[] Verify all PinChangedEvents should have occured
         if (!pinChangedEventHandler.Validate(SerialPinChange.DsrChanged, 0))
         {
-            Console.WriteLine("Err_24597aqqoo!!! PinChangedEvent DsrChanged event not fired");
+            Debug.WriteLine("Err_24597aqqoo!!! PinChangedEvent DsrChanged event not fired");
             retValue = false;
         }
 
         if (!pinChangedEventHandler.Validate(SerialPinChange.CtsChanged, 0))
         {
-            Console.WriteLine("Err_144754ajied!!! PinChangedEvent CtsChanged event not fired");
+            Debug.WriteLine("Err_144754ajied!!! PinChangedEvent CtsChanged event not fired");
             retValue = false;
         }
 
         if (!pinChangedEventHandler.Validate(SerialPinChange.Break, 0))
         {
-            Console.WriteLine("Err_15488ahied!!! PinChangedEvent Break event not fired");
+            Debug.WriteLine("Err_15488ahied!!! PinChangedEvent Break event not fired");
             retValue = false;
         }
 
         //[] Verify all ReceivedEvent should have occured
         if (!receivedEventHandler.Validate(SerialData.Chars, 0))
         {
-            Console.WriteLine("Err_54552aheied!!! ReceivedEvent ReceivedChars event not fired");
+            Debug.WriteLine("Err_54552aheied!!! ReceivedEvent ReceivedChars event not fired");
             retValue = false;
         }
 
         if (!receivedEventHandler.Validate(SerialData.Eof, 0))
         {
-            Console.WriteLine("Err_4588ajeod!!! ReceivedEvent EofReceived event not fired");
+            Debug.WriteLine("Err_4588ajeod!!! ReceivedEvent EofReceived event not fired");
             retValue = false;
         }
 
         //[] Verify all ErrorEvents should have occured
         if (!errorEventHandler.Validate(SerialError.RXParity, 0))
         {
-            Console.WriteLine("Err_1051ajheid!!! ErrorEvent RxParity event not fired");
+            Debug.WriteLine("Err_1051ajheid!!! ErrorEvent RxParity event not fired");
             retValue = false;
         }
 
         if (!errorEventHandler.Validate(SerialError.Frame, 0))
         {
-            Console.WriteLine("Err_61805aheud!!! ErrorEvent Frame event not fired");
+            Debug.WriteLine("Err_61805aheud!!! ErrorEvent Frame event not fired");
             retValue = false;
         }
 
@@ -258,7 +240,7 @@ public class Event_Generic
 
         ***************************************************************/
 
-        Console.WriteLine("Verifying where the event handlers are called serially");
+        Debug.WriteLine("Verifying where the event handlers are called serially");
 
         com1.Open();
         com2.Open();
@@ -324,13 +306,13 @@ public class Event_Generic
                 {//A thread is in PinChangedEvent verify that it is not in any other
                     if (receivedEventHandler.NumEventsHandled != numReceivedEvents)
                     {
-                        Console.WriteLine("Err_191818ahied A thread is in PinChangedEvent and ReceivedEvent");
+                        Debug.WriteLine("Err_191818ahied A thread is in PinChangedEvent and ReceivedEvent");
                         retValue = false;
                     }
 
                     if (errorEventHandler.NumEventsHandled != numErrorEvents)
                     {
-                        Console.WriteLine("Err_198119hjaheid A thread is in PinChangedEvent and ErrorEvent");
+                        Debug.WriteLine("Err_198119hjaheid A thread is in PinChangedEvent and ErrorEvent");
                         retValue = false;
                     }
 
@@ -344,13 +326,13 @@ public class Event_Generic
                 {//A thread is in ReceivedEvent verify that it is not in any other
                     if (pinChangedEventHandler.NumEventsHandled != numPinChangedEvents)
                     {
-                        Console.WriteLine("Err_2288ajed A thread is in ReceivedEvent and PinChangedEvent");
+                        Debug.WriteLine("Err_2288ajed A thread is in ReceivedEvent and PinChangedEvent");
                         retValue = false;
                     }
 
                     if (errorEventHandler.NumEventsHandled != numErrorEvents)
                     {
-                        Console.WriteLine("Err_25158ajeiod A thread is in ReceivedEvent and ErrorEvent");
+                        Debug.WriteLine("Err_25158ajeiod A thread is in ReceivedEvent and ErrorEvent");
                         retValue = false;
                     }
 
@@ -364,13 +346,13 @@ public class Event_Generic
                 {//A thread is in ErrorEvent verify that it is not in any other
                     if (pinChangedEventHandler.NumEventsHandled != numPinChangedEvents)
                     {
-                        Console.WriteLine("Err_01208akiehd A thread is in ErrorEvent and PinChangedEvent");
+                        Debug.WriteLine("Err_01208akiehd A thread is in ErrorEvent and PinChangedEvent");
                         retValue = false;
                     }
 
                     if (receivedEventHandler.NumEventsHandled != numReceivedEvents)
                     {
-                        Console.WriteLine("Err_1254847ajied A thread is in ErrorEvent and ReceivedEvent");
+                        Debug.WriteLine("Err_1254847ajied A thread is in ErrorEvent and ReceivedEvent");
                         retValue = false;
                     }
 
@@ -384,64 +366,64 @@ public class Event_Generic
 
         if (!pinChangedEventHandler.WaitForEvent(MAX_TIME_WAIT, 3))
         {
-            Console.WriteLine("Err_2288ajied Expected 3 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_2288ajied Expected 3 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
         if (!receivedEventHandler.WaitForEvent(MAX_TIME_WAIT, 2))
         {
-            Console.WriteLine("Err_122808aoeid Expected 2 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_122808aoeid Expected 2 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
         if (!errorEventHandler.WaitForEvent(MAX_TIME_WAIT, 2))
         {
-            Console.WriteLine("Err_215887ajeid Expected 3 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_215887ajeid Expected 3 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
             retValue = false;
         }
 
         //[] Verify all PinChangedEvents should have occured
         if (!pinChangedEventHandler.Validate(SerialPinChange.DsrChanged, 0))
         {
-            Console.WriteLine("Err_258087aieid!!! PinChangedEvent DsrChanged event not fired");
+            Debug.WriteLine("Err_258087aieid!!! PinChangedEvent DsrChanged event not fired");
             retValue = false;
         }
 
         if (!pinChangedEventHandler.Validate(SerialPinChange.CtsChanged, 0))
         {
-            Console.WriteLine("Err_5548ajhied!!! PinChangedEvent CtsChanged event not fired");
+            Debug.WriteLine("Err_5548ajhied!!! PinChangedEvent CtsChanged event not fired");
             retValue = false;
         }
 
         if (!pinChangedEventHandler.Validate(SerialPinChange.Break, 0))
         {
-            Console.WriteLine("Err_25848ajiied!!! PinChangedEvent Break event not fired");
+            Debug.WriteLine("Err_25848ajiied!!! PinChangedEvent Break event not fired");
             retValue = false;
         }
 
         //[] Verify all ReceivedEvent should have occured
         if (!receivedEventHandler.Validate(SerialData.Chars, 0))
         {
-            Console.WriteLine("Err_0211558ajoied!!! ReceivedEvent ReceivedChars event not fired");
+            Debug.WriteLine("Err_0211558ajoied!!! ReceivedEvent ReceivedChars event not fired");
             retValue = false;
         }
 
         if (!receivedEventHandler.Validate(SerialData.Eof, 0))
         {
-            Console.WriteLine("Err_215588zahid!!! ReceivedEvent EofReceived event not fired");
+            Debug.WriteLine("Err_215588zahid!!! ReceivedEvent EofReceived event not fired");
             retValue = false;
         }
 
         //[] Verify all ErrorEvents should have occured
         if (!errorEventHandler.Validate(SerialError.RXParity, 0))
         {
-            Console.WriteLine("Err_515188ahjid!!! ErrorEvent RxParity event not fired");
+            Debug.WriteLine("Err_515188ahjid!!! ErrorEvent RxParity event not fired");
             retValue = false;
         }
 
         if (!errorEventHandler.Validate(SerialError.Frame, 0))
         {
-            Console.WriteLine("Err_55874884ajie!!! ErrorEvent Frame event not fired");
+            Debug.WriteLine("Err_55874884ajie!!! ErrorEvent Frame event not fired");
             retValue = false;
         }
 
@@ -462,7 +444,7 @@ public class Event_Generic
         Thread closeThread = new Thread(delegate () { com1.Close(); });
         bool retValue = true;
 
-        Console.WriteLine("Verifying that if a thread is blocked in a PinChangedEvent handler the port can still be closed");
+        Debug.WriteLine("Verifying that if a thread is blocked in a PinChangedEvent handler the port can still be closed");
 
         com1.Open();
         com2.Open();
@@ -476,7 +458,7 @@ public class Event_Generic
 
         if (!pinChangedEventHandler.WaitForEvent(MAX_TIME_WAIT, 1))
         {
-            Console.WriteLine("Err_32688ajoid Expected 1 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_32688ajoid Expected 1 PinChangedEvents to be fired and only {0} occured", pinChangedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
@@ -503,7 +485,7 @@ public class Event_Generic
         Thread closeThread = new Thread(delegate () { com1.Close(); });
         bool retValue = true;
 
-        Console.WriteLine("Verifying that if a thread is blocked in a RecevedEvent handler the port can still be closed");
+        Debug.WriteLine("Verifying that if a thread is blocked in a RecevedEvent handler the port can still be closed");
 
         com1.Open();
         com2.Open();
@@ -520,7 +502,7 @@ public class Event_Generic
 
         if (!receivedEventHandler.WaitForEvent(MAX_TIME_WAIT, 1))
         {
-            Console.WriteLine("Err_122808aoeid Expected 1 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_122808aoeid Expected 1 ReceivedEvents  to be fired and only {0} occured", receivedEventHandler.NumEventsHandled);
             retValue = false;
         }
 
@@ -547,7 +529,7 @@ public class Event_Generic
         Thread closeThread = new Thread(delegate () { com1.Close(); });
         bool retValue = true;
 
-        Console.WriteLine("Verifying that if a thread is blocked in a ErrorEvent handler the port can still be closed");
+        Debug.WriteLine("Verifying that if a thread is blocked in a ErrorEvent handler the port can still be closed");
 
         com1.Open();
         com2.Open();
@@ -565,7 +547,7 @@ public class Event_Generic
 
         if (!errorEventHandler.WaitForEvent(MAX_TIME_WAIT, 1))
         {
-            Console.WriteLine("Err_215887ajeid Expected 1 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
+            Debug.WriteLine("Err_215887ajeid Expected 1 ErrorEvents to be fired and only {0} occured", errorEventHandler.NumEventsHandled);
             retValue = false;
         }
 

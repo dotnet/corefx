@@ -3,65 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Security.Permissions;
 using System.IO;
 using System.IO.Ports;
+using Legacy.Support;
 
-public class Security_TestCase
+public class Security_TestCase : PortsTest
 {
-    public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
-    public static readonly String s_strClassMethod = "Security";
-    public static readonly String s_strTFName = "Security.cs";
-    public static readonly String s_strTFAbbrev = s_strTFName.Substring(0, 6);
-    public static readonly String s_strTFPath = Environment.CurrentDirectory;
-
-    private int _numErrors = 0;
-    private int _numTestcases = 0;
-    private int _exitValue = TCSupport.PassExitCode;
-
-    public static void Main(string[] args)
-    {
-        Security_TestCase objTest = new Security_TestCase();
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
-
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
-
-        try
-        {
-            objTest.RunTest();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
-            objTest._numErrors++;
-            objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        ////	Finish Diagnostics
-        if (objTest._numErrors == 0)
-        {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
-        }
-        else
-        {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
-
-            if (TCSupport.PassExitCode == objTest._exitValue)
-                objTest._exitValue = TCSupport.FailExitCode;
-        }
-
-        Environment.ExitCode = objTest._exitValue;
-    }
-
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
-
     public bool RunTest()
     {
         bool retValue = true;
@@ -82,7 +31,7 @@ public class Security_TestCase
         SerialPort com1;
         bool retValue = true;
 
-        Console.WriteLine("PermitOnly UnmanagedCode");
+        Debug.WriteLine("PermitOnly UnmanagedCode");
         (new SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).PermitOnly();
 
         com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
@@ -94,8 +43,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Open threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Open threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -105,7 +54,7 @@ public class Security_TestCase
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! PermitOnly UnmanagedCode FAILED");
+            Debug.WriteLine("Err_001!!! PermitOnly UnmanagedCode FAILED");
         }
 
         if (com1.IsOpen)
@@ -119,14 +68,14 @@ public class Security_TestCase
         SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
         bool retValue = true;
 
-        Console.WriteLine("Deny UnmanagedCode");
+        Debug.WriteLine("Deny UnmanagedCode");
         (new SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Deny();
 
         try
         {
             com1.Open();
             retValue = false;
-            Console.WriteLine("Expected ctor to throw SecurityException");
+            Debug.WriteLine("Expected ctor to throw SecurityException");
         }
         catch (System.Security.SecurityException) { }
 
@@ -150,8 +99,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ErrorReceived Add threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ErrorReceived Add threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -162,8 +111,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ErrorReceived Remove threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ErrorReceived Remove threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -174,8 +123,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("PinChanged Add threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("PinChanged Add threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -186,8 +135,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("PinChanged Remove threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("PinChanged Remove threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -198,8 +147,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DataReceived Add threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DataReceived Add threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -210,8 +159,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DataReceived Remove threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DataReceived Remove threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -229,8 +178,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BaseStream get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BaseStream get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -241,8 +190,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BaudRate get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BaudRate get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -253,8 +202,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BaudRate set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BaudRate set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -265,8 +214,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BreakState get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BreakState get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -278,8 +227,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BaudRBreakStateate set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BaudRBreakStateate set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -290,8 +239,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BytesToWrite get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BytesToWrite get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -302,8 +251,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("BytesToRead get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("BytesToRead get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -314,8 +263,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("CDHolding get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("CDHolding get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -326,8 +275,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("CtsHolding get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("CtsHolding get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -338,8 +287,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DataBits get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DataBits get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -351,8 +300,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DataBits set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DataBits set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -363,8 +312,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DiscardNull get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DiscardNull get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -376,8 +325,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DiscardNull set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DiscardNull set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -388,8 +337,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DsrHolding get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DsrHolding get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -400,8 +349,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DtrEnable get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DtrEnable get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -413,8 +362,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DtrEnable set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DtrEnable set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -425,8 +374,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Encoding get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Encoding get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -438,8 +387,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Encoding set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Encoding set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -450,8 +399,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Handshake get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Handshake get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -463,8 +412,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Handshake set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Handshake set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -475,8 +424,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("IsOpen get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("IsOpen get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -487,8 +436,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("NewLine get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("NewLine get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -500,8 +449,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("NewLine set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("NewLine set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -512,8 +461,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Parity get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Parity get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -525,8 +474,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Parity set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Parity set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -537,8 +486,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ParityReplace get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ParityReplace get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -550,8 +499,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ParityReplace set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ParityReplace set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -562,8 +511,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("PortName get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("PortName get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -577,8 +526,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("PortName set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("PortName set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -589,8 +538,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReadBufferSize get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadBufferSize get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -604,8 +553,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReadBufferSize set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadBufferSize set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -616,8 +565,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReadTimeout get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadTimeout get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -629,8 +578,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReadTimeout set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadTimeout set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -641,8 +590,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReceivedBytesThreshold get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReceivedBytesThreshold get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -654,8 +603,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("ReceivedBytesThreshold set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReceivedBytesThreshold set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -666,8 +615,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("RtsEnable get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("RtsEnable get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -679,8 +628,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("RtsEnable set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("RtsEnable set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -691,8 +640,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("StopBits get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("StopBits get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -704,8 +653,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("StopBits set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("StopBits set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -716,8 +665,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("WriteBufferSize get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("WriteBufferSize get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -731,8 +680,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("WriteBufferSize set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("WriteBufferSize set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -743,8 +692,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("WriteTimeout get threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("WriteTimeout get threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -756,8 +705,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("WriteTimeout set threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("WriteTimeout set threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -777,8 +726,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DiscardInBuffer threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DiscardInBuffer threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -789,8 +738,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("DiscardOutBuffer threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("DiscardOutBuffer threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -801,8 +750,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("GetPortNames threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("GetPortNames threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -814,8 +763,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("Read(byte[], int, int) threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Read(byte[], int, int) threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -827,8 +776,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("ReadChar threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadChar threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -840,8 +789,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("Read(char[], int, int) threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Read(char[], int, int) threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -853,8 +802,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("ReadByte threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadByte threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -866,8 +815,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("ReadExisting threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadExisting threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -879,8 +828,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("ReadLine threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadLine threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -892,8 +841,8 @@ public class Security_TestCase
         catch (TimeoutException) { }
         catch (Exception e)
         {
-            Console.WriteLine("ReadTo threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("ReadTo threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -904,8 +853,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Write(string) threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Write(string) threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -916,8 +865,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Write(char[], int, int) threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Write(char[], int, int) threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -928,8 +877,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("Write(byte[], int, int) threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("Write(byte[], int, int) threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 
@@ -940,8 +889,8 @@ public class Security_TestCase
         }
         catch (Exception e)
         {
-            Console.WriteLine("WriteLine threw the following unexpected exception:");
-            Console.WriteLine(e);
+            Debug.WriteLine("WriteLine threw the following unexpected exception:");
+            Debug.WriteLine(e);
             retValue = false;
         }
 

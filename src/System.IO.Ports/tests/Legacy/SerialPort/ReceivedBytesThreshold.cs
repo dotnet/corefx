@@ -3,9 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO.Ports;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class ReceivedBytesThreshold_Property
+public class ReceivedBytesThreshold_Property : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/21 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReceivedBytesThreshold";
@@ -31,7 +34,7 @@ public class ReceivedBytesThreshold_Property
         ReceivedBytesThreshold_Property objTest = new ReceivedBytesThreshold_Property();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -39,7 +42,7 @@ public class ReceivedBytesThreshold_Property
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -47,11 +50,11 @@ public class ReceivedBytesThreshold_Property
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -60,14 +63,7 @@ public class ReceivedBytesThreshold_Property
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -110,13 +106,13 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetAllPropertiesToOpenDefaults();
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying default ReceivedBytesThreshold");
+        Debug.WriteLine("Verifying default ReceivedBytesThreshold");
 
         com2.Write(new byte[1], 0, 1);
 
         if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
         {
-            Console.WriteLine("ERROR!!!: Event never fired");
+            Debug.WriteLine("ERROR!!!: Event never fired");
             retValue = false;
         }
 
@@ -127,7 +123,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_001!!! Verifying default ReceivedBytesThreshold FAILED");
+            Debug.WriteLine("Err_001!!! Verifying default ReceivedBytesThreshold FAILED");
         }
 
         if (com1.IsOpen)
@@ -159,13 +155,13 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", receivedBytesThreshold);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing exactly the number of bytes of ReceivedBytesThreshold");
+        Debug.WriteLine("Verifying writing exactly the number of bytes of ReceivedBytesThreshold");
 
         com2.Write(new byte[com1.ReceivedBytesThreshold], 0, com1.ReceivedBytesThreshold);
 
         if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
         {
-            Console.WriteLine("ERROR!!!: Event never fired");
+            Debug.WriteLine("ERROR!!!: Event never fired");
             retValue = false;
         }
 
@@ -176,7 +172,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_002!!! Verifying writing exactly the number of bytes of ReceivedBytesThreshold FAILED");
+            Debug.WriteLine("Err_002!!! Verifying writing exactly the number of bytes of ReceivedBytesThreshold FAILED");
         }
 
         if (com1.IsOpen)
@@ -208,14 +204,14 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", receivedBytesThreshold);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing the number of bytes of ReceivedBytesThreshold after several write calls");
+        Debug.WriteLine("Verifying writing the number of bytes of ReceivedBytesThreshold after several write calls");
 
         com2.Write(new byte[(int)System.Math.Floor(com1.ReceivedBytesThreshold / 2.0)], 0, (int)System.Math.Floor(com1.ReceivedBytesThreshold / 2.0));
         com2.Write(new byte[(int)System.Math.Ceiling(com1.ReceivedBytesThreshold / 2.0)], 0, (int)System.Math.Ceiling(com1.ReceivedBytesThreshold / 2.0));
 
         if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
         {
-            Console.WriteLine("ERROR!!!: Event never fired");
+            Debug.WriteLine("ERROR!!!: Event never fired");
             retValue = false;
         }
 
@@ -226,7 +222,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_003!!! Verifying writing the number of bytes of ReceivedBytesThreshold after several write calls FAILED");
+            Debug.WriteLine("Err_003!!! Verifying writing the number of bytes of ReceivedBytesThreshold after several write calls FAILED");
         }
 
         if (com1.IsOpen)
@@ -258,7 +254,7 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", receivedBytesThreshold);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then setting " + "ReceivedBytesThreshold to the number of bytes written");
+        Debug.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then setting " + "ReceivedBytesThreshold to the number of bytes written");
 
         com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
@@ -267,7 +263,7 @@ public class ReceivedBytesThreshold_Property
 
         if (0 != rcvEventHandler.NumEventsHandled)
         {
-            Console.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
+            Debug.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
             retValue = false;
         }
         else
@@ -276,7 +272,7 @@ public class ReceivedBytesThreshold_Property
 
             if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
             {
-                Console.WriteLine("ERROR!!!: Event never fired");
+                Debug.WriteLine("ERROR!!!: Event never fired");
                 retValue = false;
             }
         }
@@ -288,7 +284,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_004!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to the number of bytes written FAILED");
+            Debug.WriteLine("Err_004!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to the number of bytes written FAILED");
         }
 
         if (com1.IsOpen)
@@ -320,7 +316,7 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", receivedBytesThreshold - 1);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then setting " + "ReceivedBytesThreshold to less then the number of bytes written");
+        Debug.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then setting " + "ReceivedBytesThreshold to less then the number of bytes written");
 
         com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
@@ -329,7 +325,7 @@ public class ReceivedBytesThreshold_Property
 
         if (0 != rcvEventHandler.NumEventsHandled)
         {
-            Console.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
+            Debug.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
             retValue = false;
         }
         else
@@ -338,7 +334,7 @@ public class ReceivedBytesThreshold_Property
 
             if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
             {
-                Console.WriteLine("ERROR!!!: Event never fired");
+                Debug.WriteLine("ERROR!!!: Event never fired");
                 retValue = false;
             }
         }
@@ -350,7 +346,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to less then the number of bytes written FAILED");
+            Debug.WriteLine("Err_005!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to less then the number of bytes written FAILED");
         }
 
         if (com1.IsOpen)
@@ -382,7 +378,7 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", 1);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to 1");
+        Debug.WriteLine("Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to 1");
 
         com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
@@ -391,7 +387,7 @@ public class ReceivedBytesThreshold_Property
 
         if (0 != rcvEventHandler.NumEventsHandled)
         {
-            Console.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
+            Debug.WriteLine("ERROR!!! Unexpected ReceivedEvent was firered NumEventsHandled={0}", rcvEventHandler.NumEventsHandled);
             retValue = false;
         }
         else
@@ -400,7 +396,7 @@ public class ReceivedBytesThreshold_Property
 
             if (!rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT))
             {
-                Console.WriteLine("ERROR!!!: Event never fired");
+                Debug.WriteLine("ERROR!!!: Event never fired");
                 retValue = false;
             }
         }
@@ -412,7 +408,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to 1 FAILED");
+            Debug.WriteLine("Err_006!!! Verifying writing less then number of bytes of ReceivedBytesThreshold then " + "setting ReceivedBytesThreshold to 1 FAILED");
         }
 
         if (com1.IsOpen)
@@ -444,13 +440,13 @@ public class ReceivedBytesThreshold_Property
         serPortProp.SetProperty("ReceivedBytesThreshold", receivedBytesThreshold);
         serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying writing twice the number of bytes of ReceivedBytesThreshold and ReceivedEvent firered twice");
+        Debug.WriteLine("Verifying writing twice the number of bytes of ReceivedBytesThreshold and ReceivedEvent firered twice");
 
         com2.Write(new byte[com1.ReceivedBytesThreshold * 2], 0, com1.ReceivedBytesThreshold * 2);
 
         if (!rcvEventHandler.WaitForEvent(SerialData.Chars, 2, MAX_TIME_WAIT))
         {
-            Console.WriteLine("ERROR!!!: Event never fired");
+            Debug.WriteLine("ERROR!!!: Event never fired");
             retValue = false;
         }
 
@@ -462,7 +458,7 @@ public class ReceivedBytesThreshold_Property
 
         if (!retValue)
         {
-            Console.WriteLine("Err_007!!! Verifying writing twice the number of bytes of ReceivedBytesThreshold and ReceivedEvent firered twice FAILED");
+            Debug.WriteLine("Err_007!!! Verifying writing twice the number of bytes of ReceivedBytesThreshold and ReceivedEvent firered twice FAILED");
         }
 
         if (com1.IsOpen)
@@ -477,10 +473,10 @@ public class ReceivedBytesThreshold_Property
 
     public bool ReceivedBytesThreshold_Int32MinValue()
     {
-        Console.WriteLine("Verifying Int32.MinValue ReceivedBytesThreshold");
+        Debug.WriteLine("Verifying Int32.MinValue ReceivedBytesThreshold");
         if (!VerifyException(Int32.MinValue, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_008!!! Verifying Int32.MinValue ReceivedBytesThreshold FAILED");
+            Debug.WriteLine("Err_008!!! Verifying Int32.MinValue ReceivedBytesThreshold FAILED");
             return false;
         }
 
@@ -490,10 +486,10 @@ public class ReceivedBytesThreshold_Property
 
     public bool ReceivedBytesThreshold_Neg1()
     {
-        Console.WriteLine("Verifying -1 ReceivedBytesThreshold");
+        Debug.WriteLine("Verifying -1 ReceivedBytesThreshold");
         if (!VerifyException(-1, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_009!!! Verifying -1 ReceivedBytesThreshold FAILED");
+            Debug.WriteLine("Err_009!!! Verifying -1 ReceivedBytesThreshold FAILED");
             return false;
         }
 
@@ -503,10 +499,10 @@ public class ReceivedBytesThreshold_Property
 
     public bool ReceivedBytesThreshold_0()
     {
-        Console.WriteLine("Verifying 0 ReceivedBytesThreshold");
+        Debug.WriteLine("Verifying 0 ReceivedBytesThreshold");
         if (!VerifyException(0, typeof(System.ArgumentOutOfRangeException)))
         {
-            Console.WriteLine("Err_010!!! Verifying 0 ReceivedBytesThreshold FAILED");
+            Debug.WriteLine("Err_010!!! Verifying 0 ReceivedBytesThreshold FAILED");
             return false;
         }
 
@@ -549,7 +545,7 @@ public class ReceivedBytesThreshold_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -557,12 +553,12 @@ public class ReceivedBytesThreshold_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -590,7 +586,7 @@ public class ReceivedBytesThreshold_Property
 
             if (null != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() to throw {0} and nothing was thrown", expectedException);
+                Debug.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() to throw {0} and nothing was thrown", expectedException);
                 retValue = false;
             }
         }
@@ -598,12 +594,12 @@ public class ReceivedBytesThreshold_Property
         {
             if (null == expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() NOT to throw an exception and {0} was thrown", e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() NOT to throw an exception and {0} was thrown", e.GetType());
                 retValue = false;
             }
             else if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
+                Debug.WriteLine("ERROR!!! Expected setting the ReceivedBytesThreshold after Open() throw {0} and {1} was thrown", expectedException, e.GetType());
                 retValue = false;
             }
         }
@@ -647,8 +643,8 @@ public class ReceivedBytesThreshold_Property
                 }
                 catch (System.Exception exp)
                 {
-                    Console.WriteLine(exp);
-                    Console.WriteLine(exp.StackTrace);
+                    Debug.WriteLine(exp);
+                    Debug.WriteLine(exp.StackTrace);
                 }
                 System.Threading.Monitor.Pulse(this);
             }
@@ -663,25 +659,25 @@ public class ReceivedBytesThreshold_Property
             {
                 if (eventIndex >= NumEventsHandled)
                 {
-                    Console.WriteLine("ERROR!!! Expected EvenIndex={0} is greater then the number of events handled {1}", eventIndex, NumEventsHandled);
+                    Debug.WriteLine("ERROR!!! Expected EvenIndex={0} is greater then the number of events handled {1}", eventIndex, NumEventsHandled);
                     return false;
                 }
 
                 if (eventType != (SerialData)EventType[eventIndex])
                 {
-                    Console.WriteLine("ERROR!!! Expected {0} event type actual={1}", eventType, (SerialData)EventType[eventIndex]);
+                    Debug.WriteLine("ERROR!!! Expected {0} event type actual={1}", eventType, (SerialData)EventType[eventIndex]);
                     retValue = false;
                 }
 
                 if (bytesToRead > (int)BytesToRead[eventIndex])
                 {
-                    Console.WriteLine("ERROR!!! Expected BytesToRead={0} actual={1}", bytesToRead, (int)BytesToRead[eventIndex]);
+                    Debug.WriteLine("ERROR!!! Expected BytesToRead={0} actual={1}", bytesToRead, (int)BytesToRead[eventIndex]);
                     retValue = false;
                 }
 
                 if (_com != (SerialPort)Source[eventIndex])
                 {
-                    Console.WriteLine("ERROR!!! Expected {0} source actual={1}", _com.BaseStream, (System.IO.Stream)Source[eventIndex]);
+                    Debug.WriteLine("ERROR!!! Expected {0} source actual={1}", _com.BaseStream, (System.IO.Stream)Source[eventIndex]);
                     retValue = false;
                 }
             }

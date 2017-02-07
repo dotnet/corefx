@@ -22,18 +22,18 @@ public class DosDevices : IEnumerable<KeyValuePair<string, string>>
 
         foreach (KeyValuePair<string, string> keyValuePair in dosDevices)
         {
-            Console.WriteLine("'{0}'='{1}'", keyValuePair.Key, keyValuePair.Value.Trim());
+            Debug.WriteLine("'{0}'='{1}'", keyValuePair.Key, keyValuePair.Value.Trim());
         }
 
-        Console.WriteLine("CommonNameExists(\"LPT1\")={0}", dosDevices.CommonNameExists("LPT1"));
-        Console.WriteLine("CommonNameExists(\"A:\")={0}", dosDevices.CommonNameExists("A:"));
+        Debug.WriteLine("CommonNameExists(\"LPT1\")={0}", dosDevices.CommonNameExists("LPT1"));
+        Debug.WriteLine("CommonNameExists(\"A:\")={0}", dosDevices.CommonNameExists("A:"));
 
-        Console.WriteLine("CommonNameExists(\"LPT\")={0}", dosDevices.CommonNameExists("LPT"));
+        Debug.WriteLine("CommonNameExists(\"LPT\")={0}", dosDevices.CommonNameExists("LPT"));
 
         string s = dosDevices["LPT1"];
         for (int i = 0; i < s.Length; ++i)
         {
-            Console.WriteLine("{0}({1})", (int)s[i], s[i]);
+            Debug.WriteLine("{0}({1})", (int)s[i], s[i]);
         }
     }
 

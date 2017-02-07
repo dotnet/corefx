@@ -6,7 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 
-public class Event_Generic
+public class Event_Generic : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2005/06/14 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.Events";
@@ -27,7 +27,7 @@ public class Event_Generic
 
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -35,7 +35,7 @@ public class Event_Generic
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -43,11 +43,11 @@ public class Event_Generic
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -56,14 +56,7 @@ public class Event_Generic
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -109,7 +102,7 @@ public class Event_Generic
 
         com2.Close();
 
-        Console.WriteLine("PinChanged={0}", _pinChangedCount);
+        Debug.WriteLine("PinChanged={0}", _pinChangedCount);
 
         return true;
     }
@@ -148,7 +141,7 @@ public class Event_Generic
 
         com2.Close();
 
-        Console.WriteLine("DataReceived={0}", _dataReceivedCount);
+        Debug.WriteLine("DataReceived={0}", _dataReceivedCount);
 
         return true;
     }
@@ -194,7 +187,7 @@ public class Event_Generic
 
         com2.Close();
 
-        Console.WriteLine("ErrorReceived={0}", _errorReceivedCount);
+        Debug.WriteLine("ErrorReceived={0}", _errorReceivedCount);
 
         return true;
     }

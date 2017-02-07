@@ -5,8 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class ReadLine
+public class ReadLine_Generic : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2003/02/19 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPort.ReadLine()";
@@ -55,7 +57,7 @@ public class ReadLine
         ReadLine objTest = new ReadLine();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -63,7 +65,7 @@ public class ReadLine
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -71,11 +73,11 @@ public class ReadLine
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -84,14 +86,7 @@ public class ReadLine
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
     public bool RunTest()
     {
@@ -127,10 +122,10 @@ public class ReadLine
     {
         SerialPort com = new SerialPort();
 
-        Console.WriteLine("Verifying read method throws exception without a call to Open()");
+        Debug.WriteLine("Verifying read method throws exception without a call to Open()");
         if (!VerifyReadException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_001!!! Verifying read method throws exception without a call to Open() FAILED");
+            Debug.WriteLine("Err_001!!! Verifying read method throws exception without a call to Open() FAILED");
             return false;
         }
 
@@ -142,7 +137,7 @@ public class ReadLine
     {
         SerialPort com = new SerialPort("BAD_PORT_NAME");
 
-        Console.WriteLine("Verifying read method throws exception with a failed call to Open()");
+        Debug.WriteLine("Verifying read method throws exception with a failed call to Open()");
 
         //Since the PortName is set to a bad port name Open will thrown an exception
         //however we don't care what it is since we are verfifying a read method
@@ -155,7 +150,7 @@ public class ReadLine
         }
         if (!VerifyReadException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_002!!! Verifying read method throws exception with a failed call to Open() FAILED");
+            Debug.WriteLine("Err_002!!! Verifying read method throws exception with a failed call to Open() FAILED");
             return false;
         }
 
@@ -167,12 +162,12 @@ public class ReadLine
     {
         SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-        Console.WriteLine("Verifying read method throws exception after a call to Cloes()");
+        Debug.WriteLine("Verifying read method throws exception after a call to Cloes()");
         com.Open();
         com.Close();
         if (!VerifyReadException(com, typeof(System.InvalidOperationException)))
         {
-            Console.WriteLine("Err_003!!! Verifying read method throws exception after a call to Cloes() FAILED");
+            Debug.WriteLine("Err_003!!! Verifying read method throws exception after a call to Cloes() FAILED");
             return false;
         }
 
@@ -186,12 +181,12 @@ public class ReadLine
         Random rndGen = new Random(-55);
 
         com.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
-        Console.WriteLine("Verifying ReadTimeout={0}", com.ReadTimeout);
+        Debug.WriteLine("Verifying ReadTimeout={0}", com.ReadTimeout);
         com.Open();
 
         if (!VerifyTimeout(com))
         {
-            Console.WriteLine("Err_004!!! Verifying timeout FAILED");
+            Debug.WriteLine("Err_004!!! Verifying timeout FAILED");
             return false;
         }
 
@@ -208,13 +203,13 @@ public class ReadLine
         com.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
         //		com.Encoding = new System.Text.UTF7Encoding();
         com.Encoding = System.Text.Encoding.Unicode;
-        Console.WriteLine("Verifying ReadTimeout={0} with successive call to read method and no data", com.ReadTimeout);
+        Debug.WriteLine("Verifying ReadTimeout={0} with successive call to read method and no data", com.ReadTimeout);
         com.Open();
 
         try
         {
             com.ReadLine();
-            Console.WriteLine("Err_702872ahps!!!: Read did not throw TimeoutException when it timed out");
+            Debug.WriteLine("Err_702872ahps!!!: Read did not throw TimeoutException when it timed out");
             retValue = false;
         }
         catch (TimeoutException) { }
@@ -222,7 +217,7 @@ public class ReadLine
         retValue &= VerifyTimeout(com);
         if (!retValue)
         {
-            Console.WriteLine("Err_005!!! Verifying with successive call to read method and no data FAILED");
+            Debug.WriteLine("Err_005!!! Verifying with successive call to read method and no data FAILED");
         }
 
         return retValue;
@@ -238,7 +233,7 @@ public class ReadLine
 
         com1.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
         com1.Encoding = new System.Text.UTF8Encoding();
-        Console.WriteLine("Verifying ReadTimeout={0} with successive call to read method and some data being received in the first call", com1.ReadTimeout);
+        Debug.WriteLine("Verifying ReadTimeout={0} with successive call to read method and some data being received in the first call", com1.ReadTimeout);
         com1.Open();
 
         //Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
@@ -261,7 +256,7 @@ public class ReadLine
 
         if (!retValue)
         {
-            Console.WriteLine("Err_006!!! Verifying with with successive call to read method and some data being received in the first call FAILED");
+            Debug.WriteLine("Err_006!!! Verifying with with successive call to read method and some data being received in the first call FAILED");
             return false;
         }
 
@@ -290,7 +285,7 @@ public class ReadLine
     {
         if (!VerifyParityReplaceByte(-1, numRndBytesPairty - 2))
         {
-            Console.WriteLine("Err_007!!! Verifying default ParityReplace byte FAILED");
+            Debug.WriteLine("Err_007!!! Verifying default ParityReplace byte FAILED");
             return false;
         }
 
@@ -304,7 +299,7 @@ public class ReadLine
 
         if (!VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndBytesPairty - 1)))
         {
-            Console.WriteLine("Err_008!!! Verifying no ParityReplace byte FAILED");
+            Debug.WriteLine("Err_008!!! Verifying no ParityReplace byte FAILED");
             return false;
         }
 
@@ -318,7 +313,7 @@ public class ReadLine
 
         if (!VerifyParityReplaceByte(rndGen.Next(0, 128), 0))
         {
-            Console.WriteLine("Err_009!! Verifying random ParityReplace byte FAILED");
+            Debug.WriteLine("Err_009!! Verifying random ParityReplace byte FAILED");
             return false;
         }
 
@@ -340,7 +335,7 @@ public class ReadLine
 
         /* 1 Additional character gets added to the input buffer when the parity error occurs on the last byte of a stream
              We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
-        Console.WriteLine("Verifying default ParityReplace byte with a parity errro on the last byte");
+        Debug.WriteLine("Verifying default ParityReplace byte with a parity errro on the last byte");
 
         //Genrate random characters without an parity error
         for (int i = 0; i < bytesToWrite.Length; i++)
@@ -380,15 +375,15 @@ public class ReadLine
         {
             if (expectedChars[i] != actualChars[i])
             {
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)actualChars[i]);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)actualChars[i]);
                 retValue = false;
             }
         }
 
         if (1 < com1.BytesToRead)
         {
-            Console.WriteLine("ERROR!!!: Expected BytesToRead=0 actual={0}", com1.BytesToRead);
-            Console.WriteLine("ByteRead={0}, {1}", com1.ReadByte(), bytesToWrite[bytesToWrite.Length - 1]);
+            Debug.WriteLine("ERROR!!!: Expected BytesToRead=0 actual={0}", com1.BytesToRead);
+            Debug.WriteLine("ByteRead={0}, {1}", com1.ReadByte(), bytesToWrite[bytesToWrite.Length - 1]);
             retValue = false;
         }
 
@@ -403,7 +398,7 @@ public class ReadLine
         com2.Close();
 
         if (!retValue)
-            Console.WriteLine("Err_010!!! Verifying default ParityReplace byte with a parity errro on the last byte failed");
+            Debug.WriteLine("Err_010!!! Verifying default ParityReplace byte with a parity errro on the last byte failed");
 
         return retValue;
     }
@@ -415,7 +410,7 @@ public class ReadLine
 
         if (!VerifyBytesToRead(rndGen.Next(1, 2 * numRndBytesToRead)))
         {
-            Console.WriteLine("Err_010!! Verifying BytesToRead with a random buffer size FAILED");
+            Debug.WriteLine("Err_010!! Verifying BytesToRead with a random buffer size FAILED");
             return false;
         }
 
@@ -427,7 +422,7 @@ public class ReadLine
     {
         if (!VerifyBytesToRead(1))
         {
-            Console.WriteLine("Err_011!! Verifying BytesToRead with a buffer size of 1 FAILED");
+            Debug.WriteLine("Err_011!! Verifying BytesToRead with a buffer size of 1 FAILED");
             return false;
         }
 
@@ -441,7 +436,7 @@ public class ReadLine
 
         if (!VerifyBytesToRead(numRndBytesToRead))
         {
-            Console.WriteLine("Err_012!! Verifying BytesToRead with a buffer size equal to the number of byte written FAILED");
+            Debug.WriteLine("Err_012!! Verifying BytesToRead with a buffer size equal to the number of byte written FAILED");
             return false;
         }
 
@@ -461,7 +456,7 @@ public class ReadLine
         try
         {
             com.ReadLine(); //Warm up read method
-            Console.WriteLine("Err_6941814ahbpa!!!: Read did not throw Timeout Exception when it timed out for the first time");
+            Debug.WriteLine("Err_6941814ahbpa!!!: Read did not throw Timeout Exception when it timed out for the first time");
             retValue = false;
         }
         catch (TimeoutException) { }
@@ -474,7 +469,7 @@ public class ReadLine
             try
             {
                 com.ReadLine();
-                Console.WriteLine("Err_17087ahps!!!: Read did not reuturn 0 when it timed out");
+                Debug.WriteLine("Err_17087ahps!!!: Read did not reuturn 0 when it timed out");
                 retValue = false;
             }
             catch (TimeoutException) { }
@@ -491,7 +486,7 @@ public class ReadLine
         //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
         if (maxPercentageDifference < percentageDifference)
         {
-            Console.WriteLine("ERROR!!!: The read method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference);
+            Debug.WriteLine("ERROR!!!: The read method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference);
             retValue = false;
         }
 
@@ -509,14 +504,14 @@ public class ReadLine
         try
         {
             com.ReadLine();
-            Console.WriteLine("ERROR!!!: No Excpetion was thrown");
+            Debug.WriteLine("ERROR!!!: No Excpetion was thrown");
             retValue = false;
         }
         catch (System.Exception e)
         {
             if (e.GetType() != expectedException)
             {
-                Console.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
+                Debug.WriteLine("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
                 retValue = false;
             }
         }
@@ -564,7 +559,7 @@ public class ReadLine
         bytesToWrite[parityErrorIndex] = (byte)(bytesToWrite[parityErrorIndex] | 0x80);
         expectedChars[parityErrorIndex] = (char)expectedByte;
 
-        Console.WriteLine("Verifying ParityReplace={0} with an ParityError at: {1} ", com1.ParityReplace, parityErrorIndex);
+        Debug.WriteLine("Verifying ParityReplace={0} with an ParityError at: {1} ", com1.ParityReplace, parityErrorIndex);
 
         com1.Parity = Parity.Space;
         com1.DataBits = 7;
@@ -612,7 +607,7 @@ public class ReadLine
             expectedChars[newLineIndex] = (char)'\n';
         }
 
-        Console.WriteLine("Verifying BytesToRead with a buffer of: {0} ", numBytesRead);
+        Debug.WriteLine("Verifying BytesToRead with a buffer of: {0} ", numBytesRead);
 
         com1.Open();
         com2.Open();
@@ -670,15 +665,15 @@ public class ReadLine
             if (indexOfNewLine - (lastIndexOfNewLine + 1) != charsRead)
             {
                 //If we have not read all of the characters that we should have
-                Console.WriteLine("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
-                Console.WriteLine("indexOfNewLine={0} lastIndexOfNewLine={1} charsRead={2}", indexOfNewLine, lastIndexOfNewLine, charsRead);
+                Debug.WriteLine("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
+                Debug.WriteLine("indexOfNewLine={0} lastIndexOfNewLine={1} charsRead={2}", indexOfNewLine, lastIndexOfNewLine, charsRead);
                 retValue = false;
             }
 
             if (expectedChars.Length < totalCharsRead + charsRead)
             {
                 //If we have read in more characters then we expect
-                Console.WriteLine("ERROR!!!: We have received more characters then were sent");
+                Debug.WriteLine("ERROR!!!: We have received more characters then were sent");
                 retValue = false;
                 break;
             }
@@ -693,7 +688,7 @@ public class ReadLine
 
             if (bytesToWrite.Length - totalBytesRead != com1.BytesToRead)
             {
-                System.Console.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", bytesToWrite.Length - totalBytesRead, com1.BytesToRead);
+                System.Debug.WriteLine("ERROR!!!: Expected BytesToRead={0} actual={1}", bytesToWrite.Length - totalBytesRead, com1.BytesToRead);
                 retValue = false;
             }
 
@@ -705,7 +700,7 @@ public class ReadLine
         {
             if (expectedChars[i] != actualChars[i])
             {
-                System.Console.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)actualChars[i]);
+                System.Debug.WriteLine("ERROR!!!: Expected to read {0}  actual read  {1}", (int)expectedChars[i], (int)actualChars[i]);
                 retValue = false;
             }
         }

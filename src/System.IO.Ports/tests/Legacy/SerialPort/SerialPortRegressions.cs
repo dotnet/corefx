@@ -5,8 +5,10 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO.PortsTests;
+using Legacy.Support;
 
-public class SerialPortRegressions
+public class SerialPortRegressions : PortsTest
 {
     public static readonly String s_strDtTmVer = "MsftEmpl, 2006/10/10 15:37 MsftEmpl";
     public static readonly String s_strClassMethod = "SerialPortRegressions()";
@@ -28,7 +30,7 @@ public class SerialPortRegressions
         SerialPortRegressions objTest = new SerialPortRegressions();
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(objTest.AppDomainUnhandledException_EventHandler);
 
-        Console.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
+        Debug.WriteLine(s_strTFPath + " " + s_strTFName + " , for " + s_strClassMethod + " , Source ver : " + s_strDtTmVer);
 
         try
         {
@@ -36,7 +38,7 @@ public class SerialPortRegressions
         }
         catch (Exception e)
         {
-            Console.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
+            Debug.WriteLine(s_strTFAbbrev + " : FAIL The following exception was thorwn in RunTest(): \n" + e.ToString());
             objTest._numErrors++;
             objTest._exitValue = TCSupport.FailExitCode;
         }
@@ -44,11 +46,11 @@ public class SerialPortRegressions
         ////	Finish Diagnostics
         if (objTest._numErrors == 0)
         {
-            Console.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
+            Debug.WriteLine("PASS.	 " + s_strTFPath + " " + s_strTFName + " ,numTestcases==" + objTest._numTestcases);
         }
         else
         {
-            Console.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
+            Debug.WriteLine("FAIL!	 " + s_strTFPath + " " + s_strTFName + " ,numErrors==" + objTest._numErrors);
 
             if (TCSupport.PassExitCode == objTest._exitValue)
                 objTest._exitValue = TCSupport.FailExitCode;
@@ -57,14 +59,7 @@ public class SerialPortRegressions
         Environment.ExitCode = objTest._exitValue;
     }
 
-    private void AppDomainUnhandledException_EventHandler(Object sender, UnhandledExceptionEventArgs e)
-    {
-        _numErrors++;
-        Console.WriteLine("\nAn unhandled exception was thrown and not caught in the app domain: \n{0}", e.ExceptionObject);
-        Console.WriteLine("Test FAILED!!!\n");
-
-        Environment.ExitCode = 101;
-    }
+    
 
 
     //This test is a regression test for DevDivBugs 14181: SerialPort: Data corruption occurs if 
@@ -87,7 +82,7 @@ public class SerialPortRegressions
     {
         if (!VerifyReadExisting(new System.Text.UTF8Encoding()))
         {
-            Console.WriteLine("Err_018!!! Verifying readexisting");
+            Debug.WriteLine("Err_018!!! Verifying readexisting");
             return false;
         }
 
@@ -117,14 +112,14 @@ public class SerialPortRegressions
 
         if (String.Compare(s_receivedstr, text) == 0)
         {
-            Console.WriteLine("Received and Sent strings are the same");
+            Debug.WriteLine("Received and Sent strings are the same");
             return true;
         }
         else
         {
-            Console.WriteLine("Received and Sent strings are different");
-            Console.WriteLine("Sent string:" + text);
-            Console.WriteLine("Received string:" + s_receivedstr);
+            Debug.WriteLine("Received and Sent strings are different");
+            Debug.WriteLine("Sent string:" + text);
+            Debug.WriteLine("Received string:" + s_receivedstr);
             return false;
         }
     }
