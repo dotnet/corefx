@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Reflection;
 using System.IO;
@@ -128,7 +129,7 @@ namespace System.Tests
             // Value_Invalid_Impl(ref x, new Lazy<int>(f, LazyThreadSafetyMode.PublicationOnly));
         }
         
-        class InitiallyExceptionThrowingCtor
+        public class InitiallyExceptionThrowingCtor
         {
             public static int counter = 0;
             public static int getValue()
@@ -147,7 +148,19 @@ namespace System.Tests
             }
         }
 
-        private static void Ctor_ExceptionRecovery_Impl(Lazy<InitiallyExceptionThrowingCtor> lazy, int? expected)
+        public static IEnumerable<object[]> Ctor_ExceptionRecovery_MemberData()
+        {
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(), 5 };
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(true), 5 };
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(false), 5 };
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.ExecutionAndPublication), 5 };
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.None), 5 };
+            yield return new object[] { new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.PublicationOnly), 5 };
+        }
+
+        [Theory]
+        [MemberData(nameof(Ctor_ExceptionRecovery_MemberData))]
+        public static void Ctor_ExceptionRecovery(Lazy<InitiallyExceptionThrowingCtor> lazy, int? expected)
         {
             InitiallyExceptionThrowingCtor.counter = 0;
             var result = default(InitiallyExceptionThrowingCtor);
@@ -159,17 +172,6 @@ namespace System.Tests
                 Assert.Null(result);
             else
                 Assert.Equal(result.Value, expected.Value);
-        }
-
-        [Fact]
-        public static void Ctor_ExceptionRecovery()
-        {
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(), 5);
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(true), 5);
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(false), 5);
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.ExecutionAndPublication), 5);
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.None), 5);
-            Ctor_ExceptionRecovery_Impl(new Lazy<InitiallyExceptionThrowingCtor>(LazyThreadSafetyMode.PublicationOnly), 5);
         }
 
         private static void Value_ExceptionRecovery_IntImpl(Lazy<int> lazy, ref int counter, int expected)
@@ -241,126 +243,125 @@ namespace System.Tests
             }
         }
 
-        private static void CheckException<T>(Type expected, Lazy<T> lazy)
+        public static IEnumerable<object[]> Value_Func_Exception_MemberData()
         {
-            Exception e = null;
-            try
-            {
-                var t = lazy.Value;
-            }
-            catch (Exception ex)
-            {
-                e = ex;
-            }
-            Assert.NotNull(e);
-            Assert.Same(expected, e.GetType());
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, true) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, false) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Value_Func_Exception_MemberData))]
+        public static void Value_Func_Exception(Lazy<int> lazy)
+        {
+            Assert.Throws<MyException>(() => lazy.Value);
+        }
+
+        public static IEnumerable<object[]> Value_FuncCtor_Exception_MemberData()
+        { 
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Value_FuncCtor_Exception_MemberData))]
+        public static void Value_FuncCtor_Exception(Lazy<ExceptionInCtor> lazy)
+        {
+            Assert.Throws<MyException>(() => lazy.Value);
+        }
+
+        public static IEnumerable<object[]> Value_TargetInvocationException_MemberData()
+        {
+            yield return new object[] { new Lazy<ExceptionInCtor>() };
+            yield return new object[] { new Lazy<ExceptionInCtor>(true) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(false) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Value_TargetInvocationException_MemberData))]
+        public static void Value_TargetInvocationException(Lazy<ExceptionInCtor> lazy)
+        {
+            Assert.Throws<TargetInvocationException>(() => lazy.Value);
+        }
+
+        public static IEnumerable<object[]> Exceptions_Func_Idempotent_MemberData()
+        {
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, true) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, false) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Exceptions_Func_Idempotent_MemberData))]
+        public static void Exceptions_Func_Idempotent(Lazy<int> x)
+        {
+            var e = Assert.ThrowsAny<Exception>(() => x.Value);
+            Assert.Same(e, Assert.ThrowsAny<Exception>(() => x.Value));
+        }
+
+        public static IEnumerable<object[]> Exceptions_Ctor_Idempotent_MemberData()
+        {
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Exceptions_Ctor_Idempotent_MemberData))]
+        public static void Exceptions_Ctor_Idempotent(Lazy<ExceptionInCtor> x)
+        {
+            var e = Assert.ThrowsAny<Exception>(() => x.Value);
+            Assert.Same(e, Assert.ThrowsAny<Exception>(() => x.Value));
+        }
+
+        public static IEnumerable<object[]> Exceptions_Func_NotIdempotent_MemberData()
+        {
+            yield return new object[] { new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly) };
+        }
+
+        public static IEnumerable<object[]> Exceptions_Ctor_NotIdempotent_MemberData()
+        {
+            yield return new object[] { new Lazy<ExceptionInCtor>() };
+            yield return new object[] { new Lazy<ExceptionInCtor>(true) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(false) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly) };
+            yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Exceptions_Func_NotIdempotent_MemberData))]
+        public static void Exceptions_Func_NotIdempotent(Lazy<int> x)
+        {
+            var e = Assert.ThrowsAny<Exception>(() => x.Value);
+            Assert.NotSame(e, Assert.ThrowsAny<Exception>(() => x.Value));
+        }
+
+        [Theory]
+        [MemberData(nameof(Exceptions_Ctor_NotIdempotent_MemberData))]
+        public static void Exceptions_Ctor_NotIdempotent(Lazy<ExceptionInCtor> x)
+        {
+            var e = Assert.ThrowsAny<Exception>(() => x.Value);
+            Assert.NotSame(e, Assert.ThrowsAny<Exception>(() => x.Value));
         }
 
         [Fact]
-        public static void CheckExceptions()
-        {
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }));
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, true));
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, false));
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication));
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None));
-            CheckException(typeof(MyException), new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly));
-
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>());
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(true));
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(false));
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication));
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None));
-            CheckException(typeof(TargetInvocationException), new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly));
-
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)));
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true));
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false));
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication));
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None));
-            CheckException(typeof(MyException), new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly));
-        }
-
-        private static void SameException<T>(Lazy<T> x)
-        {
-            Exception first = null;
-            try
-            {
-                var _ = x.Value;
-            }
-            catch (Exception thrown1)
-            {
-                first = thrown1;
-            }
-            Assert.NotNull(first);
-
-            try
-            {
-                var _ = x.Value;
-            }
-            catch (MyException thrown2)
-            {
-                Assert.Same(first, thrown2);
-            }
-        }
-
-        private static void DifferentException<T>(Lazy<T> x)
-        {
-            Exception first = null;
-            try
-            {
-                var _ = x.Value;
-            }
-            catch (Exception thrown1)
-            {
-                first = thrown1;
-            }
-            Assert.NotNull(first);
-
-            Exception second = null;
-            try
-            {
-                var _ = x.Value;
-            }
-            catch (Exception thrown2)
-            {
-                second = thrown2;
-            }
-            Assert.NotNull(second);
-
-            Assert.NotEqual(first, second);
-        }
-
-        [Fact]
-        public static void SameOrDifferentException()
-        {
-            SameException(new Lazy<int>(() => { throw new MyException(99); }));
-            SameException(new Lazy<int>(() => { throw new MyException(99); }, true));
-            SameException(new Lazy<int>(() => { throw new MyException(99); }, false));
-            SameException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.ExecutionAndPublication));
-            SameException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.None));
-
-            DifferentException(new Lazy<int>(() => { throw new MyException(99); }, LazyThreadSafetyMode.PublicationOnly));
-
-            DifferentException(new Lazy<ExceptionInCtor>());
-            DifferentException(new Lazy<ExceptionInCtor>(true));
-            DifferentException(new Lazy<ExceptionInCtor>(false));
-            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.ExecutionAndPublication));
-            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.None));
-
-            DifferentException(new Lazy<ExceptionInCtor>(LazyThreadSafetyMode.PublicationOnly));
-
-            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)));
-            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true));
-            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false));
-            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.ExecutionAndPublication));
-            SameException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.None));
-
-            DifferentException(new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), LazyThreadSafetyMode.PublicationOnly));
-        }
-
-        [Fact]
-        static void Serialization_ValueType()
+        public static void Serialization_ValueType()
         {
             var stream = new MemoryStream();
             var formatter = new BinaryFormatter();
@@ -373,13 +374,14 @@ namespace System.Tests
         }
 
         [Fact]
-        static void Serialization_RefType()
+        public static void Serialization_RefType()
         {
             var stream = new MemoryStream();
             var formatter = new BinaryFormatter();
             formatter.Serialize(stream, new Lazy<string>(() => "42"));
             stream.Seek(0, SeekOrigin.Begin);
 
+            var x = BinaryFormatterHelpers.Clone(new object());
             var fortytwo = (Lazy<string>)formatter.Deserialize(stream);
             Assert.True(fortytwo.IsValueCreated);
             Assert.Equal(fortytwo.Value, "42");
