@@ -5,6 +5,9 @@
 using System.Diagnostics.Tracing;
 using System.Net.Http;
 using System.Globalization;
+#if NET46
+using System.Security;
+#endif
 
 namespace System.Net
 {
@@ -12,6 +15,9 @@ namespace System.Net
     [EventSource(Name = "Microsoft-System-Net-Http",
         Guid = "bdd9a83e-1929-5482-0d73-2fe5e1c0e16d",
         LocalizationResources = "FxResources.System.Net.Http.SR")]
+#if NET46
+    [SecuritySafeCritical]
+#endif
     internal sealed class HttpEventSource : EventSource
     {
         private const int AssociateId = 1;

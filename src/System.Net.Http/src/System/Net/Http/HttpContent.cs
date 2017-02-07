@@ -307,6 +307,15 @@ namespace System.Net.Http
             return CopyToAsync(stream, null);
         }
 
+#if NET46
+        // Workaround for HttpWebRequest synchronous resubmit. This code is required because the underlying
+        // .NET Framework HttpWebRequest implementation cannot use CopyToAsync and only uses sync based CopyTo.
+        internal void CopyTo(Stream stream)
+        {
+            CopyToAsync(stream).Wait();
+        }
+#endif
+
         public Task LoadIntoBufferAsync()
         {
             return LoadIntoBufferAsync(MaxBufferSize);
