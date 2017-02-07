@@ -1526,10 +1526,11 @@ extern "C" Error SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t mu
     ipv6_mreq opt;
     memset(&opt, 0, sizeof(ipv6_mreq));
 
+    opt.ipv6mr_interface =
 #if IPV6MR_INTERFACE_UNSIGNED
-    opt.ipv6mr_interface = static_cast<unsigned int>(option->InterfaceIndex);
+        static_cast<unsigned int>(option->InterfaceIndex);
 #else
-    opt.ipv6mr_interface = option->InterfaceIndex;
+        option->InterfaceIndex;
 #endif
 
     ConvertByteArrayToIn6Addr(opt.ipv6mr_multiaddr, &option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
@@ -1789,10 +1790,13 @@ extern "C" Error SystemNative_Bind(intptr_t socket, uint8_t* socketAddress, int3
 
     int fd = ToFileDescriptor(socket);
 
+    int err = bind(
+        fd,
+        reinterpret_cast<sockaddr*>(socketAddress),
 #if BIND_ADDRLEN_UNSIGNED
-    int err = bind(fd, reinterpret_cast<sockaddr*>(socketAddress), static_cast<socklen_t>(socketAddressLen));
+        static_cast<socklen_t>(socketAddressLen));
 #else
-    int err = bind(fd, reinterpret_cast<sockaddr*>(socketAddress), socketAddressLen);
+        socketAddressLen);
 #endif
 
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
