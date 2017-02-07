@@ -366,10 +366,6 @@ check_cxx_source_compiles(
     BIND_ADDRLEN_SIGNED
 )
 
-if(NOT BIND_ADDRLEN_UNSIGNED AND NOT BIND_ADDRLEN_SIGNED)
-    message(FATAL_ERROR "The addrlen parameter in bind() must be a signed int or an unsigned int.")
-endif()
-
 check_cxx_source_compiles(
     "
     #include <netinet/in.h>
@@ -403,10 +399,6 @@ check_cxx_source_compiles(
 )
 
 set (CMAKE_REQUIRED_FLAGS ${PREVIOUS_CMAKE_REQUIRED_FLAGS})
-
-if(NOT IPV6MR_INTERFACE_UNSIGNED AND NOT IPV6MR_INTERFACE_SIGNED)
-    message(FATAL_ERROR "ipv6mr_inteface must be either a signed int or an unsigned int.")
-endif()
 
 check_cxx_source_runs(
     "
