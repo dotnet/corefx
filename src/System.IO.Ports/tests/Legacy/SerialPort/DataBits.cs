@@ -108,7 +108,7 @@ public class DataBits_Property : PortsTest
     public void DataBits_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue DataBits");
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]

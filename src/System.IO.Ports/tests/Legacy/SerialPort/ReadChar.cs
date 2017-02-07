@@ -654,7 +654,7 @@ public class ReadChar : PortsTest
         public ASyncRead(SerialPort com)
         {
             _com = com;
-            _result = Int32.MinValue;
+            _result = int.MinValue;
 
             _readCompletedEvent = new System.Threading.AutoResetEvent(false);
             _readStartedEvent = new System.Threading.AutoResetEvent(false);

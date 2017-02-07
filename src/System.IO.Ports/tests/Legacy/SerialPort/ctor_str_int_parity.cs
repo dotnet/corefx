@@ -70,7 +70,7 @@ public class ctor_str_int_parity : PortsTest
     [Fact]
     public void Empty_9600_None()
     {
-        string portName = String.Empty;
+        string portName = string.Empty;
         int baudRate = 9600;
         int parity = (int)Parity.None;
 
@@ -152,7 +152,7 @@ public class ctor_str_int_parity : PortsTest
     public void COM1_Int32MinValue_None()
     {
         string portName = "Com1";
-        int baudRate = Int32.MinValue;
+        int baudRate = int.MinValue;
         int parity = (int)Parity.None;
 
         VerifyCtor(portName, baudRate, parity, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
@@ -182,7 +182,7 @@ public class ctor_str_int_parity : PortsTest
     public void COM4_Int32MaxValue_Mark()
     {
         string portName = "Com4";
-        int baudRate = Int32.MaxValue;
+        int baudRate = int.MaxValue;
         int parity = (int)Parity.Mark;
 
         VerifyCtor(portName, baudRate, parity, typeof(ArgumentOutOfRangeException), ThrowAt.Open);
@@ -194,7 +194,7 @@ public class ctor_str_int_parity : PortsTest
     {
         string portName = "Com1";
         int baudRate = 9600;
-        int parity = Int32.MinValue;
+        int parity = int.MinValue;
 
         VerifyCtor(portName, baudRate, parity, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }
@@ -224,7 +224,7 @@ public class ctor_str_int_parity : PortsTest
     {
         string portName = "Com4";
         int baudRate = 57600;
-        int parity = Int32.MaxValue;
+        int parity = int.MaxValue;
 
         VerifyCtor(portName, baudRate, parity, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }

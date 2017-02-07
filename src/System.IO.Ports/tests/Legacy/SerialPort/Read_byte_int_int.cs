@@ -50,13 +50,13 @@ public class Read_byte_int_int : PortsTest
     {
         Random rndGen = new Random();
 
-        VerifyReadException(new byte[defaultByteArraySize], rndGen.Next(Int32.MinValue, 0), defaultByteCount, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new byte[defaultByteArraySize], rndGen.Next(int.MinValue, 0), defaultByteCount, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void Offset_MinInt()
     {
-        VerifyReadException(new byte[defaultByteArraySize], Int32.MinValue, defaultByteCount, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new byte[defaultByteArraySize], int.MinValue, defaultByteCount, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -70,13 +70,13 @@ public class Read_byte_int_int : PortsTest
     {
         Random rndGen = new Random();
 
-        VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, rndGen.Next(Int32.MinValue, 0), typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, rndGen.Next(int.MinValue, 0), typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void Count_MinInt()
     {
-        VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, Int32.MinValue, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new byte[defaultByteArraySize], defaultByteOffset, int.MinValue, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasLoopbackOrNullModem))]
@@ -97,7 +97,7 @@ public class Read_byte_int_int : PortsTest
         Random rndGen = new Random();
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
         int offset = rndGen.Next(0, bufferLength);
-        int count = rndGen.Next(bufferLength + 1 - offset, Int32.MaxValue);
+        int count = rndGen.Next(bufferLength + 1 - offset, int.MaxValue);
         Type expectedException = typeof(ArgumentException);
 
         VerifyReadException(new byte[bufferLength], offset, count, expectedException);
@@ -108,7 +108,7 @@ public class Read_byte_int_int : PortsTest
     {
         Random rndGen = new Random();
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
-        int offset = rndGen.Next(bufferLength, Int32.MaxValue);
+        int offset = rndGen.Next(bufferLength, int.MaxValue);
         int count = defaultByteCount;
         Type expectedException = typeof(ArgumentException);
 
@@ -121,7 +121,7 @@ public class Read_byte_int_int : PortsTest
         Random rndGen = new Random();
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
         int offset = defaultByteOffset;
-        int count = rndGen.Next(bufferLength + 1, Int32.MaxValue);
+        int count = rndGen.Next(bufferLength + 1, int.MaxValue);
         Type expectedException = typeof(ArgumentException);
 
         VerifyReadException(new byte[bufferLength], offset, count, expectedException);

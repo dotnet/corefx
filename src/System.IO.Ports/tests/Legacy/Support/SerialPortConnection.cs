@@ -22,19 +22,20 @@ namespace Legacy.Support
         {
             SerialPort com1 = new SerialPort(portName1);
             SerialPort com2 = new SerialPort(portName2);
-            bool retValue = true;
+
+            bool connectionVerified;
 
             try
             {
                 com1.Open();
                 com2.Open();
-                retValue = VerifyReadWrite(com1, com2);
+                connectionVerified = VerifyReadWrite(com1, com2);
             }
             catch (Exception)
             {
                 // One of the com ports does not exist on the machine that this is being run on
                 // thus their can not be a connection between com1 and com2
-                retValue = false;
+                connectionVerified = false;
             }
             finally
             {
@@ -42,32 +43,32 @@ namespace Legacy.Support
                 com2.Close();
             }
 
-            return retValue;
+            return connectionVerified;
         }
 
         public static bool VerifyLoopback(string portName)
         {
-            bool retValue = true;
-
             SerialPort com = new SerialPort(portName);
+
+            bool loopbackVerified;
 
             try
             {
                 com.Open();
-                retValue = VerifyReadWrite(com, com);
+                loopbackVerified = VerifyReadWrite(com, com);
             }
             catch (Exception)
             {
                 // The com ports does not exist on the machine that this is being run on
                 // thus their can not be a loopback between the ports
-                retValue = false;
+                loopbackVerified = false;
             }
             finally
             {
                 com.Close();
             }
 
-            return retValue;
+            return loopbackVerified;
         }
 
         private static bool VerifyReadWrite(SerialPort com1, SerialPort com2)

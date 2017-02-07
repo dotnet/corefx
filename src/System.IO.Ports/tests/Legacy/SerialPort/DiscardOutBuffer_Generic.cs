@@ -62,10 +62,7 @@ public class DiscardOutBuffer_Generic : PortsTest
             com.Open();
             VerifyDiscardException(com, null);
 
-            if (0 != com.BytesToRead)
-            {
-                Debug.WriteLine("Error!!! BytesToRead is not 0");
-            }
+            Assert.Equal(0, com.BytesToRead);
         }
     }
     #endregion
@@ -73,26 +70,7 @@ public class DiscardOutBuffer_Generic : PortsTest
     #region Verification for Test Cases
     private void VerifyDiscardException(SerialPort com, Type expectedException)
     {
-        try
-        {
-            com.DiscardOutBuffer();
-            if (null != expectedException)
-            {
-                Fail("ERROR!!!: No Excpetion was thrown");
-            }
-        }
-        catch (Exception e)
-        {
-            if (null == expectedException)
-            {
-                Fail("ERROR!!!: No Excpetion was expected and {0} was thrown", e.GetType());
-            }
-
-            if (e.GetType() != expectedException)
-            {
-                Fail("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
-            }
-        }
+        Assert.Throws(expectedException, () => com.DiscardOutBuffer());
     }
     #endregion
 }

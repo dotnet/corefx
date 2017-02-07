@@ -146,7 +146,7 @@ public class ctor_str_int : PortsTest
     public void COM1_Int32MinValue()
     {
         string portName = "Com1";
-        int baudRate = Int32.MinValue;
+        int baudRate = int.MinValue;
 
         VerifyCtor(portName, baudRate, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }
@@ -176,7 +176,7 @@ public class ctor_str_int : PortsTest
     public void COM4_Int32MaxValue()
     {
         string portName = "Com4";
-        int baudRate = Int32.MaxValue;
+        int baudRate = int.MaxValue;
 
         VerifyCtor(portName, baudRate, typeof(ArgumentOutOfRangeException), ThrowAt.Open);
     }

@@ -118,7 +118,7 @@ public class Handshake_Property : PortsTest
     public void Handshake_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue Handshake");
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -139,7 +139,7 @@ public class Handshake_Property : PortsTest
     public void Handshake_Int32MaxValue()
     {
         Debug.WriteLine("Verifying Int32.MaxValue Handshake");
-        VerifyException(Int32.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
     #endregion
 

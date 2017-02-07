@@ -131,7 +131,6 @@ namespace Legacy.Support
                         s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
                 case SerialPortRequirements.TwoSerialPorts:
                     return s_localMachineSerialPortRequirements == SerialPortRequirements.TwoSerialPorts ||
-                        s_localMachineSerialPortRequirements == SerialPortRequirements.Loopback ||
                         s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
                 case SerialPortRequirements.NullModem:
                     return s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
@@ -562,17 +561,10 @@ namespace Legacy.Support
         /// <param name="expectedArray">The expected items in the array.</param>
         /// <param name="actualArray">The actual array.</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
-        public static bool VerifyArray<T>(T[] expectedArray, T[] actualArray)
+        public static void VerifyArray<T>(T[] expectedArray, T[] actualArray)
         {
-            if (expectedArray.Length != actualArray.Length)
-            {
-                Debug.WriteLine("Err_29289ahieadb Array Length");
-                return false;
-            }
-            else
-            {
-                return VerifyArray<T>(expectedArray, actualArray, 0, expectedArray.Length);
-            }
+            Assert.Equal(expectedArray.Length, actualArray.Length);
+            VerifyArray(expectedArray, actualArray, 0, expectedArray.Length);
         }
 
         /// <summary>
@@ -584,9 +576,8 @@ namespace Legacy.Support
         /// <param name="index">The index to start verifying the items at.</param>
         /// <param name="length">The number of item to verify</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
-        public static bool VerifyArray<T>(T[] expectedArray, T[] actualArray, int index, int length)
+        public static void VerifyArray<T>(T[] expectedArray, T[] actualArray, int index, int length)
         {
-            bool retValue = true;
             bool result;
             int tempLength;
 
@@ -597,12 +588,9 @@ namespace Legacy.Support
 
                 if (!result)
                 {
-                    retValue = false;
-                    Debug.WriteLine("Err_55808aoped Items differ at {0} expected {1} actual {2}", i, expectedArray[i], actualArray[i]);
+                    Assert.True(false, string.Format("Err_55808aoped Items differ at {0} expected {1} actual {2}", i, expectedArray[i], actualArray[i]));
                 }
             }
-
-            return retValue;
         }
     }
 }

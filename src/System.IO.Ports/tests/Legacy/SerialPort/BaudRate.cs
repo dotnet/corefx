@@ -80,7 +80,7 @@ public class BaudRate_Property : PortsTest
     public void BaudRate_MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue BaudRate");
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -101,7 +101,7 @@ public class BaudRate_Property : PortsTest
     public void BaudRate_MaxValue()
     {
         Debug.WriteLine("Verifying Int32.MaxValue BaudRate");
-        VerifyException(Int32.MaxValue, ThrowAt.Open, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MaxValue, ThrowAt.Open, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort), Skip="Modern serial ports are happy to set 12345 baud")]

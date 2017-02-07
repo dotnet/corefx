@@ -181,7 +181,7 @@ public class ReadTimeout_Property : PortsTest
     {
         Debug.WriteLine("Verifying Int32.MinValue ReadTimeout");
 
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -189,7 +189,7 @@ public class ReadTimeout_Property : PortsTest
     {
         Debug.WriteLine("Verifying -2 ReadTimeout");
 
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
     #endregion
 
@@ -226,7 +226,7 @@ public class ReadTimeout_Property : PortsTest
 
             serPortProp.VerifyPropertiesAndPrint(com1);
 
-            com2.WriteLine(String.Empty);
+            com2.WriteLine(string.Empty);
 
             while (t.IsAlive)
                 System.Threading.Thread.Sleep(10);

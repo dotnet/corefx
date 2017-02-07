@@ -68,7 +68,7 @@ public class ReadBufferSize_Property : PortsTest
     [ConditionalFact(nameof(HasNullModem))]
     public void ReadBufferSize_Int32MinValue()
     {
-        VerifyException(Int32.MinValue, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, typeof(ArgumentOutOfRangeException), typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasNullModem))]
@@ -96,7 +96,7 @@ public class ReadBufferSize_Property : PortsTest
     [ConditionalFact(nameof(HasNullModem))]
     public void ReadBufferSize_Smaller()
     {
-        UInt32 newReadBufferSize = (uint)(new SerialPort()).ReadBufferSize;
+        uint newReadBufferSize = (uint)(new SerialPort()).ReadBufferSize;
 
         newReadBufferSize /= 2; //Make the new buffer size half the original size
         newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit
@@ -129,7 +129,7 @@ public class ReadBufferSize_Property : PortsTest
     public void ReadBufferSize_Rnd()
     {
         Random rndGen = new Random(-55);
-        UInt32 newReadBufferSize = (uint)rndGen.Next(MAX_RANDMOM_BUFFER_SIZE);
+        uint newReadBufferSize = (uint)rndGen.Next(MAX_RANDMOM_BUFFER_SIZE);
 
         newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit    
 

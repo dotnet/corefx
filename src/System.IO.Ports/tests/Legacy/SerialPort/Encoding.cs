@@ -233,7 +233,7 @@ public class Encoding_Property : PortsTest
             if (ThrowAt.Open == throwAt)
                 com.Open();
 
-            Object myEncoding = com.Encoding;
+            object myEncoding = com.Encoding;
 
             com.Encoding = origEncoding;
 
@@ -359,7 +359,7 @@ public class Encoding_Property : PortsTest
 
                 if (MAX_WAIT_TIME < waitTime)
                 {
-                    Debug.WriteLine("ERROR!!! Expected BytesToRead={0} actual={1}", xmitBytes.Length, com1.BytesToRead);
+                    Fail("ERROR!!! Expected BytesToRead={0} actual={1}", xmitBytes.Length, com1.BytesToRead);
                     break;
                 }
             }

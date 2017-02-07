@@ -24,7 +24,7 @@ public class ReadLine : PortsTest
     public static readonly int MIN_NUM_NEWLINE_CHARS = 1;
     public static readonly int MAX_NUM_NEWLINE_CHARS = 5;
 
-    public enum ReadDataFromEnum
+    private enum ReadDataFromEnum
     {
         NonBuffered,
         Buffered,
@@ -847,20 +847,7 @@ public class ReadLine : PortsTest
             return new string(TCSupport.GetRandomChars(newLineLength, TCSupport.CharacterOptions.Surrogates));
     }
 
-    private int GetUTF7EncodingBytes(char[] chars, int index, int count)
-    {
-        byte[] bytes = Encoding.UTF7.GetBytes(chars, index, count);
-        int byteCount = bytes.Length;
-
-        while (Encoding.UTF7.GetCharCount(bytes, 0, byteCount) == count)
-        {
-            --byteCount;
-        }
-
-        return byteCount + 1;
-    }
-
-    public class ASyncRead
+    private class ASyncRead
     {
         private readonly SerialPort _com;
         private string _result;

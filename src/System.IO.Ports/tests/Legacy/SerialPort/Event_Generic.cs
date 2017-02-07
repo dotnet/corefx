@@ -189,7 +189,7 @@ public class Event_Generic : PortsTest
             com1.Parity = Parity.Mark;
             com2.BaseStream.Write(new byte[1], 0, 1);
 
-            Debug.WriteLine("ErrorEvent Triggered");
+            Debug.Print("ERROREvent Triggered");
             Thread.Sleep(TRIGERING_EVENTS_WAIT_TIME);
 
 

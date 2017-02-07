@@ -91,7 +91,7 @@ public class ctor_str_int_parity_int : PortsTest
     [Fact]
     public void Empty_9600_None_5()
     {
-        string portName = String.Empty;
+        string portName = string.Empty;
         int baudRate = 9600;
         int parity = (int)Parity.None;
         int dataBits = 5;
@@ -182,7 +182,7 @@ public class ctor_str_int_parity_int : PortsTest
     public void COM1_Int32MinValue_None_5()
     {
         string portName = "Com1";
-        int baudRate = Int32.MinValue;
+        int baudRate = int.MinValue;
         int parity = (int)Parity.None;
         int dataBits = 5;
 
@@ -218,7 +218,7 @@ public class ctor_str_int_parity_int : PortsTest
     public void COM4_Int32MaxValue_Mark_8()
     {
         string portName = "Com4";
-        int baudRate = Int32.MaxValue;
+        int baudRate = int.MaxValue;
         int parity = (int)Parity.Mark;
         int dataBits = 8;
 
@@ -232,7 +232,7 @@ public class ctor_str_int_parity_int : PortsTest
     {
         string portName = "Com1";
         int baudRate = 9600;
-        int parity = Int32.MinValue;
+        int parity = int.MinValue;
         int dataBits = 5;
 
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
@@ -268,7 +268,7 @@ public class ctor_str_int_parity_int : PortsTest
     {
         string portName = "Com4";
         int baudRate = 57600;
-        int parity = Int32.MaxValue;
+        int parity = int.MaxValue;
         int dataBits = 8;
 
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
@@ -282,7 +282,7 @@ public class ctor_str_int_parity_int : PortsTest
         string portName = "Com1";
         int baudRate = 9600;
         int parity = (int)Parity.None;
-        int dataBits = Int32.MinValue;
+        int dataBits = int.MinValue;
 
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }
@@ -330,7 +330,7 @@ public class ctor_str_int_parity_int : PortsTest
         string portName = "Com255";
         int baudRate = 115200;
         int parity = (int)Parity.Space;
-        int dataBits = Int32.MaxValue;
+        int dataBits = int.MaxValue;
 
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }

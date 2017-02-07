@@ -16,7 +16,8 @@ public class DiscardOutBuffer : PortsTest
     public static readonly string DEFAULT_STRING = "Hello World";
 
     //The buffer length used whe filling the output buffer
-    public static readonly int DEFAULT_BUFFER_LENGTH = 8;
+    // This was set to 8, but the TX Fifo on a UART can swallow that completely, so you can't then tell if the data has been sent or not.
+    public static readonly int DEFAULT_BUFFER_LENGTH = 128;
 
     #region Test Cases
 

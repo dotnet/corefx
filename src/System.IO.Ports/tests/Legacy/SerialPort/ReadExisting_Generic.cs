@@ -83,7 +83,7 @@ public class ReadExisting_Generic : PortsTest
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            com.ReadTimeout = Int32.MaxValue;
+            com.ReadTimeout = int.MaxValue;
             Debug.WriteLine("Verifying ReadTimeout={0}", com.ReadTimeout);
             com.Open();
 

@@ -131,7 +131,7 @@ public class Event_Close_Stress : PortsTest
 
             com2.Close();
 
-            Debug.WriteLine("ErrorReceived={0}", _errorReceivedCount);
+            Debug.Print("ERRORReceived={0}", _errorReceivedCount);
         }
     }
 

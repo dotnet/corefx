@@ -93,7 +93,7 @@ public class StopBits_Property : PortsTest
     public void StopBits_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue StopBits");
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
 
@@ -125,7 +125,7 @@ public class StopBits_Property : PortsTest
     public void StopBits_Int32MaxValue()
     {
         Debug.WriteLine("Verifying Int32.MaxValue StopBits");
-        VerifyException(Int32.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
 

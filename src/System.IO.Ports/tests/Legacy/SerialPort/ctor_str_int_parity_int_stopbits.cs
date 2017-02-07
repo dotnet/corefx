@@ -173,7 +173,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
     [Fact]
     public void Empty_9600_None_5_15()
     {
-        string portName = String.Empty;
+        string portName = string.Empty;
         int baudRate = 9600;
         int parity = (int)Parity.None;
         int dataBits = 5;
@@ -268,7 +268,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
     public void COM1_Int32MinValue_None_5_15()
     {
         string portName = "Com1";
-        int baudRate = Int32.MinValue;
+        int baudRate = int.MinValue;
         int parity = (int)Parity.None;
         int dataBits = 5;
         int stopBits = (int)StopBits.OnePointFive;
@@ -304,7 +304,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
     public void COM4_Int32MaxValue_Mark_8_2()
     {
         string portName = "Com4";
-        int baudRate = Int32.MaxValue;
+        int baudRate = int.MaxValue;
         int parity = (int)Parity.Mark;
         int dataBits = 8;
         int stopBits = (int)StopBits.Two;
@@ -318,7 +318,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
     {
         string portName = "Com1";
         int baudRate = 9600;
-        int parity = Int32.MinValue;
+        int parity = int.MinValue;
         int dataBits = 5;
         int stopBits = (int)StopBits.OnePointFive;
 
@@ -354,7 +354,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
     {
         string portName = "Com4";
         int baudRate = 57600;
-        int parity = Int32.MaxValue;
+        int parity = int.MaxValue;
         int dataBits = 8;
         int stopBits = (int)StopBits.Two;
 
@@ -368,7 +368,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
         string portName = "Com1";
         int baudRate = 9600;
         int parity = (int)Parity.None;
-        int dataBits = Int32.MinValue;
+        int dataBits = int.MinValue;
         int stopBits = (int)StopBits.OnePointFive;
 
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
@@ -416,7 +416,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
         string portName = "Com255";
         int baudRate = 115200;
         int parity = (int)Parity.Space;
-        int dataBits = Int32.MaxValue;
+        int dataBits = int.MaxValue;
         int stopBits = (int)StopBits.One;
 
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
@@ -430,7 +430,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
         int baudRate = 9600;
         int parity = (int)Parity.None;
         int dataBits = 5;
-        int stopBits = Int32.MinValue;
+        int stopBits = int.MinValue;
 
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }
@@ -478,7 +478,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
         int baudRate = 115200;
         int parity = (int)Parity.Space;
         int dataBits = 8;
-        int stopBits = Int32.MaxValue;
+        int stopBits = int.MaxValue;
 
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentOutOfRangeException), ThrowAt.Set);
     }

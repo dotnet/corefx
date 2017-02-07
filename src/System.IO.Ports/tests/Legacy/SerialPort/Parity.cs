@@ -190,7 +190,7 @@ public class Parity_Property : PortsTest
     public void Parity_Int32MinValue()
     {
         Debug.WriteLine("Verifying Int32.MinValue Parity");
-        VerifyException(Int32.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MinValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -212,7 +212,7 @@ public class Parity_Property : PortsTest
     public void Parity_Int32MaxValue()
     {
         Debug.WriteLine("Verifying Int32.MaxValue Parity");
-        VerifyException(Int32.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
+        VerifyException(int.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasNullModem))]

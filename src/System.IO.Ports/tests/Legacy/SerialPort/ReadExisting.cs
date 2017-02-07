@@ -187,7 +187,7 @@ public class ReadExisting : PortsTest
             //Genrate random chars to send
             for (int i = 0; i < bytesToWrite.Length; i++)
             {
-                char randChar = (char)rndGen.Next(0, UInt16.MaxValue);
+                char randChar = (char)rndGen.Next(0, ushort.MaxValue);
 
                 charsToWrite[i] = randChar;
             }

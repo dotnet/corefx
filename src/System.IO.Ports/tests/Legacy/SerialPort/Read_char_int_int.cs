@@ -50,13 +50,13 @@ public class Read_char_int_int : PortsTest
     {
         Random rndGen = new Random(-55);
 
-        VerifyReadException(new char[defaultCharArraySize], rndGen.Next(Int32.MinValue, 0), defaultCharCount, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new char[defaultCharArraySize], rndGen.Next(int.MinValue, 0), defaultCharCount, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void Offset_MinInt()
     {
-        VerifyReadException(new char[defaultCharArraySize], Int32.MinValue, defaultCharCount, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new char[defaultCharArraySize], int.MinValue, defaultCharCount, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -70,13 +70,13 @@ public class Read_char_int_int : PortsTest
     {
         Random rndGen = new Random(-55);
 
-        VerifyReadException(new char[defaultCharArraySize], defaultCharOffset, rndGen.Next(Int32.MinValue, 0), typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new char[defaultCharArraySize], defaultCharOffset, rndGen.Next(int.MinValue, 0), typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void Count_MinInt()
     {
-        VerifyReadException(new char[defaultCharArraySize], defaultCharOffset, Int32.MinValue, typeof(ArgumentOutOfRangeException));
+        VerifyReadException(new char[defaultCharArraySize], defaultCharOffset, int.MinValue, typeof(ArgumentOutOfRangeException));
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -97,7 +97,7 @@ public class Read_char_int_int : PortsTest
         Random rndGen = new Random(-55);
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
         int offset = rndGen.Next(0, bufferLength);
-        int count = rndGen.Next(bufferLength + 1 - offset, Int32.MaxValue);
+        int count = rndGen.Next(bufferLength + 1 - offset, int.MaxValue);
         Type expectedException = typeof(ArgumentException);
 
         VerifyReadException(new char[bufferLength], offset, count, expectedException);
@@ -109,7 +109,7 @@ public class Read_char_int_int : PortsTest
     {
         Random rndGen = new Random(-55);
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
-        int offset = rndGen.Next(bufferLength, Int32.MaxValue);
+        int offset = rndGen.Next(bufferLength, int.MaxValue);
         int count = defaultCharCount;
         Type expectedException = typeof(ArgumentException);
 
@@ -123,7 +123,7 @@ public class Read_char_int_int : PortsTest
         Random rndGen = new Random(-55);
         int bufferLength = rndGen.Next(1, maxBufferSizeForException);
         int offset = defaultCharOffset;
-        int count = rndGen.Next(bufferLength + 1, Int32.MaxValue);
+        int count = rndGen.Next(bufferLength + 1, int.MaxValue);
         Type expectedException = typeof(ArgumentException);
 
         VerifyReadException(new char[bufferLength], offset, count, expectedException);
@@ -461,11 +461,9 @@ public class Read_char_int_int : PortsTest
                 Fail("Err_55084aheid Expected to read {0} chars actual {1}", charXmitBuffer.Length - 1,
                     readResult);
             }
-            else if (!TCSupport.VerifyArray(expectedChars, charRcvBuffer))
-            {
-                Fail("Err_505818ahkijed Verifying characters read in FAILED");
-            }
 
+            TCSupport.VerifyArray(expectedChars, charRcvBuffer);
+                
             //[] Write 16 more cahrs and read in 16 chars
             expectedChars = new char[16];
             charRcvBuffer = new char[16];
@@ -480,11 +478,9 @@ public class Read_char_int_int : PortsTest
             {
                 Fail("Err_650848ahide Expected to read {0} chars actual {1}", 16, readResult);
             }
-            else if (!TCSupport.VerifyArray(expectedChars, charRcvBuffer))
-            {
-                Fail("Err_015615ajied Verifying characters read in FAILED");
-            }
 
+            Assert.Equal(expectedChars, charRcvBuffer);
+            
             //[] Write more chars and read in all of the chars
             expectedChars = new char[charXmitBuffer.Length + 1];
             charRcvBuffer = new char[charXmitBuffer.Length + 1];
@@ -499,10 +495,7 @@ public class Read_char_int_int : PortsTest
             {
                 Fail("Err_460574ajied Expected to read {0} chars actual {1}", charXmitBuffer.Length + 1, readResult);
             }
-            else if (!TCSupport.VerifyArray(expectedChars, charRcvBuffer))
-            {
-                Fail("Err_20484ahjeid Verifying characters read in FAILED");
-            }
+            Assert.Equal(expectedChars, charRcvBuffer);
         }
     }
 
@@ -735,7 +728,7 @@ public class Read_char_int_int : PortsTest
             //Genrate some random chars in the buffer
             for (int i = 0; i < buffer.Length; i++)
             {
-                char randChar = (char)rndGen.Next(0, UInt16.MaxValue);
+                char randChar = (char)rndGen.Next(0, ushort.MaxValue);
 
                 buffer[i] = randChar;
             }

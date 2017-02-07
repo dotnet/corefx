@@ -19,7 +19,7 @@ namespace System.IO.PortsTests
 
         public static bool HasLoopbackOrNullModem => TCSupport.SufficientHardwareRequirements(TCSupport.SerialPortRequirements.LoopbackOrNullModem);
 
-        protected void Fail(string format, params object[] args)
+        protected static void Fail(string format, params object[] args)
         {
             Assert.True(false, string.Format(format, args));
         }
