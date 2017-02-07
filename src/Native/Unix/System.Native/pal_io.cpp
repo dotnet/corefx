@@ -593,9 +593,11 @@ extern "C" intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLeng
 
     int32_t pathTemplateLength = static_cast<int32_t>(strlen(pathTemplate));
 
-    if (suffixLength < 0 || suffixLength > pathTemplateLength)
+    // pathTemplate must include at least XXXXXX (6 characters) which are not part of
+    // the suffix
+    if (suffixLength < 0 || suffixLength > pathTemplateLength - 6)
     {
-        errno = ERANGE;
+        errno = EINVAL;
         return -1;
     }
 
