@@ -57,3 +57,34 @@ For ECC the value should not be used.
 0 is returned for invalid inputs.
 */
 extern "C" uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef publicKey);
+
+/*
+Get a CFRetain()ed SecKeychainRef value for the keychain to which the keychain item belongs.
+
+The behavior of this function is undefined if `item` is not a CFTypeRef.
+For types that are not understood by this function to be keychain items an invalid parameter error is returned.
+Errors of the item having no keychain are suppressed, returning success (0) with *pKeychainOut set to NULL.
+
+For all other situations, see SecKeychainItemCopyKeychain documentation.
+*/
+extern "C" int32_t AppleCryptoNative_SecKeychainItemCopyKeychain(SecKeychainItemRef item, SecKeychainRef* pKeychainOut);
+
+/*
+Create a keychain at the specified location with a given (UTF-8 encoded) lock passphrase.
+
+Returns the result of SecKeychainCreate.
+
+Output:
+pKeychainOut: The SecKeychainRef created by this function
+*/
+extern "C" int32_t AppleCryptoNative_SecKeychainCreate(const char* pathName,
+                                                       uint32_t passphraseLength,
+                                                       const uint8_t* passphraseUtf8,
+                                                       SecKeychainRef* pKeychainOut);
+
+/*
+Delete a keychain, including the file on disk.
+
+Returns the result of SecKeychainDelete
+*/
+extern "C" int32_t AppleCryptoNative_SecKeychainDelete(SecKeychainRef keychain);

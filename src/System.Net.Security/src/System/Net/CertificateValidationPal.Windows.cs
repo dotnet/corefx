@@ -3,14 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Diagnostics;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Threading;
 
 namespace System.Net
 {
@@ -22,6 +20,7 @@ namespace System.Net
         private static volatile X509Store s_myMachineCertStoreEx;
 
         internal static SslPolicyErrors VerifyCertificateProperties(
+            SafeDeleteContext securityContext,
             X509Chain chain,
             X509Certificate2 remoteCertificate,
             bool checkCertName,
