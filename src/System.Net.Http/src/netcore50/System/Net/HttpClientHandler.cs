@@ -36,7 +36,7 @@ namespace System.Net.Http
         #region Fields
 
         private readonly RTHttpBaseProtocolFilter rtFilter;
-        private readonly HttpHandlerToFilter handlerToFilter;
+        private readonly HttpMessageHandler handlerToFilterPipeline;
 
         private volatile bool operationStarted;
         private volatile bool disposed;
@@ -420,7 +420,8 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             this.rtFilter = new RTHttpBaseProtocolFilter();
-            this.handlerToFilter = new HttpHandlerToFilter(this.rtFilter);
+            HttpHandlerToFilter handlerToFilter = new HttpHandlerToFilter(this.rtFilter);
+            this.handlerToFilterPipeline = new DiagnosticsHandler(handlerToFilter);
 
             this.clientCertificateOptions = ClientCertificateOption.Manual;
 
@@ -554,7 +555,7 @@ namespace System.Net.Http
             {
                 await ConfigureRequest(request).ConfigureAwait(false);
             
-                response = await this.handlerToFilter.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                response = await this.handlerToFilterPipeline.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {

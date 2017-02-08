@@ -173,6 +173,40 @@ namespace System.Net.Http.Functional.Tests
             }).Dispose();
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticExceptionLogging()
+        {
+            RemoteInvoke(() =>
+            {
+                bool exceptionLogged = false;
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.Response"))
+                    {
+                        Assert.NotNull(kvp.Value);
+                        GetPropertyValueFromAnonymousTypeInstance<Exception>(kvp.Value, "Exception");
+                        exceptionLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+                    using (var client = new HttpClient())
+                    {
+                        Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync($"http://{Guid.NewGuid()}.com")).Wait();
+                    }
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => exceptionLogged, TimeSpan.FromSeconds(1),
+                        "Exception was not logged within 1 second timeout.");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
         private static T GetPropertyValueFromAnonymousTypeInstance<T>(object obj, string propertyName)
         {
             Type t = obj.GetType();

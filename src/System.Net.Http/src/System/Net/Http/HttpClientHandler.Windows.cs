@@ -194,6 +194,7 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _winHttpHandler = new WinHttpHandler();
+            _winHttpHandlerPipeline = new DiagnosticsHandler(_winHttpHandler);
 
             // Adjust defaults to match current .NET Desktop HttpClientHandler (based on HWR stack).
             AllowAutoRedirect = true;
@@ -265,7 +266,7 @@ namespace System.Net.Http
                 }
             }
 
-            return _winHttpHandler.SendAsync(request, cancellationToken);
+            return _winHttpHandlerPipeline.SendAsync(request, cancellationToken);
         }
 
         #endregion Request Execution
@@ -273,6 +274,7 @@ namespace System.Net.Http
         #region Private
 
         private WinHttpHandler _winHttpHandler;
+        private readonly HttpMessageHandler _winHttpHandlerPipeline;
         private bool _useProxy;
         private volatile bool _disposed;
         #endregion Private

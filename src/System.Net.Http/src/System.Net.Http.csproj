@@ -116,6 +116,8 @@
   </ItemGroup>
   <!-- Common, except for Windows net46 build -->
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'  And '$(TargetGroup)' != 'netfx'">
+    <Compile Include="System\Net\Http\DiagnosticsHandler.cs" />    
+    <Compile Include="System\Net\Http\DiagnosticsHandlerLoggingStrings.cs"/>    
     <Compile Include="$(CommonPath)\System\Net\Mail\DomainLiteralReader.cs">
       <Link>Common\System\Net\Mail\DomainLiteralReader.cs</Link>
     </Compile>

@@ -143,6 +143,7 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _curlHandler = new CurlHandler();
+            _curlHandlerPipeline = new DiagnosticsHandler(_curlHandler);
         }
 
         protected override void Dispose(bool disposing)
@@ -160,7 +161,7 @@ namespace System.Net.Http
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            return _curlHandler.SendAsync(request, cancellationToken);
+            return _curlHandlerPipeline.SendAsync(request, cancellationToken);
         }
 
         #endregion Request Execution
@@ -168,6 +169,7 @@ namespace System.Net.Http
         #region Private
 
         private readonly CurlHandler _curlHandler;
+        private readonly HttpMessageHandler _curlHandlerPipeline;
 
         #endregion Private
     }
