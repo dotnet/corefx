@@ -152,7 +152,7 @@ if (NOT WIN32)
         # Ensure that objcopy is present
         if(DEFINED ENV{CROSSCOMPILE})
             if(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l OR CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL i686)
-                find_program(OBJCOPY ${TOOLCHAIN_PREFIX}objcopy)
+                find_program(OBJCOPY ${TOOLCHAIN}-objcopy)
             else()
                 message(FATAL_ERROR "Only AMD64, X86, ARM64 and ARM are supported")
             endif()

@@ -8,12 +8,13 @@ set(CMAKE_SYSTEM_PROCESSOR aarch64)
 
 ## Specify the toolchain
 set(TOOLCHAIN "aarch64-linux-android")
-set(TOOLCHAIN_PREFIX ${CROSS_NDK_TOOLCHAIN}/bin/${TOOLCHAIN}-)
-set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}clang)
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}clang++)
-set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}clang)
-set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}objcopy)
-set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}objdump)
+set(CMAKE_PREFIX_PATH ${CROSS_NDK_TOOLCHAIN})
+
+find_program(CMAKE_C_COMPILER ${TOOLCHAIN}-clang)
+find_program(CMAKE_CXX_COMPILER ${TOOLCHAIN}-clang++)
+find_program(CMAKE_ASM_COMPILER ${TOOLCHAIN}-clang)
+find_program(CMAKE_OBJCOPY ${TOOLCHAIN}-objcopy)
+find_program(CMAKE_OBJDUMP ${TOOLCHAIN}-objdump)
 
 add_compile_options(--sysroot=${CROSS_ROOTFS})
 add_compile_options(-fPIE)
