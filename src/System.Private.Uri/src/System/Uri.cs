@@ -3661,8 +3661,8 @@ namespace System
                 }
             }
 
-            //NB: A string must have at least 1 characters and at least 1 before ':'
-            if (idx == length || end == idx)
+            //NB: A string must have at least 3(Windows)/1(Unix) characters and at least 1 before ':'
+            if ((idx + (IsWindowsSystem ? 2 : 0)) >= length || end == idx)
             {
                 err = ParsingError.BadFormat;
                 return 0;
@@ -3672,7 +3672,7 @@ namespace System
             //NB: A string may not have ':' if this is a UNC path
             {
                 char c;
-                if ((idx + 2 < length) && ((c = uriString[idx + 1]) == ':' || c == '|'))
+                if ((c = uriString[idx + 1]) == ':' || c == '|')
                 {
                     //Windows: DOS-like path?
                     if (IsWindowsSystem && UriHelper.IsAsciiLetter(uriString[idx]))
@@ -3699,7 +3699,7 @@ namespace System
                     syntax = UriParser.UnixFileUri;
                     return idx;
                 }
-                else if ((idx + 1 < length) && ((c = uriString[idx]) == '/' || c == '\\'))
+                else if ((c = uriString[idx]) == '/' || c == '\\')
                 {
                     //Windows: UNC share?
                     if (IsWindowsSystem && ((c = uriString[idx + 1]) == '\\' || c == '/')) {
@@ -3717,7 +3717,8 @@ namespace System
                 }
             }
 
-            if (end == length)
+            //NB: A string must have at least 3 characters and contain a ':'
+            if (idx + 2 >= length || end == length)
             {
                 err = ParsingError.BadFormat;
                 return 0;
