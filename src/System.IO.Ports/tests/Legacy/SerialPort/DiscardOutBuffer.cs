@@ -33,19 +33,13 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
-            {
-                System.Threading.Thread.Sleep(50);
-            }
+            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout
-            // The write method is supposed to catch its own TimeoutException 
-            // So this should leave cleanly
-            task.Wait();
+            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
+            Assert.True(task.Wait(2000));
         }
-
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
@@ -61,18 +55,14 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
-            {
-                System.Threading.Thread.Sleep(50);
-                Debug.Print(".");
-            }
+            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
             VerifyDiscard(com1);
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout
-            task.Wait();
+            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
+            Assert.True(task.Wait(2000));
         }
     }
 
@@ -90,8 +80,7 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
-                System.Threading.Thread.Sleep(50);
+            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -100,8 +89,7 @@ public class DiscardOutBuffer : PortsTest
 
             task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
-                System.Threading.Thread.Sleep(50);
+            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -127,25 +115,19 @@ public class DiscardOutBuffer : PortsTest
             com1.Handshake = Handshake.RequestToSend;
             com2.Write(DEFAULT_STRING);
 
-            while (DEFAULT_STRING.Length > com1.BytesToRead)
-            {
-                System.Threading.Thread.Sleep(50);
-            }
+            WaitForTxBufferToLoad(com2, DEFAULT_STRING.Length);
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
             origBytesToRead = com1.BytesToRead;
 
-            while (DEFAULT_BUFFER_LENGTH > com1.BytesToWrite)
-            {
-                System.Threading.Thread.Sleep(50);
-            }
+            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
             Assert.Equal(origBytesToRead,com1.BytesToRead);
 
-            //Wait for write method to timeout
-            task.Wait();
+            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
+            Assert.True(task.Wait(2000));
         }
     }
 
@@ -185,4 +167,22 @@ public class DiscardOutBuffer : PortsTest
         Assert.Equal(0, com.BytesToWrite);
     }
     #endregion
+
+    /// <summary>
+    /// Wait for the write data to be written into a blocked (by adverse flow control) port
+    /// </summary>
+    /// <param name="com"></param>
+    /// <param name="bufferLength"></param>
+    private static void WaitForTxBufferToLoad(SerialPort com, int bufferLength)
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        while (com.BytesToWrite < bufferLength)
+        {
+            System.Threading.Thread.Sleep(50);
+            if (sw.ElapsedMilliseconds > 3000)
+            {
+                Assert.True(false, "Timeout while waiting for data to be written to port");
+            }
+        }
+    }
 }

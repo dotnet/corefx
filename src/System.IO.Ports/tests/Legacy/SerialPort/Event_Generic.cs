@@ -152,7 +152,7 @@ public class Event_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip="Hanging with FTDI loopback?  Driver issue perhaps?")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void EventHandlers_CalledSerially()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -236,7 +236,8 @@ public class Event_Generic : PortsTest
             Thread.Sleep(TRIGERING_EVENTS_WAIT_TIME);
 
             threadFound = true;
-            while (threadFound)
+            Stopwatch sw = Stopwatch.StartNew();
+            while (threadFound && sw.ElapsedMilliseconds < MAX_TIME_WAIT)
             {
                 threadFound = false;
 

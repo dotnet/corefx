@@ -360,7 +360,6 @@ public class Encoding_Property : PortsTest
                 if (MAX_WAIT_TIME < waitTime)
                 {
                     Fail("ERROR!!! Expected BytesToRead={0} actual={1}", xmitBytes.Length, com1.BytesToRead);
-                    break;
                 }
             }
 
