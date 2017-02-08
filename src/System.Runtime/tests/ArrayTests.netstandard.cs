@@ -141,11 +141,6 @@ namespace System.Tests
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(int).MakeByRefType(), 0)); // Element type is not supported (ref)
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.CreateInstance(typeof(int), -1)); // Length < 0
-
-#if netcoreapp
-            // Type is not a valid RuntimeType
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
-#endif // netcoreapp
         }
 
         [Fact]
@@ -158,11 +153,6 @@ namespace System.Tests
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(int).MakeByRefType(), 0, 1)); // Element type is not supported (ref)
 
             Assert.Throws<ArgumentOutOfRangeException>("length2", () => Array.CreateInstance(typeof(int), 0, -1)); // Length < 0
-
-#if netcoreapp
-            // Type is not a valid RuntimeType
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0, 1));
-#endif // netcoreapp
         }
 
         [Fact]
@@ -184,11 +174,6 @@ namespace System.Tests
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(int).MakeByRefType(), 0, 1, 2)); // Element type is not supported (ref)
 
             Assert.Throws<ArgumentOutOfRangeException>("length3", () => Array.CreateInstance(typeof(int), 0, 1, -1)); // Length < 0
-
-#if netcoreapp
-            // Type is not a valid RuntimeType
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0, 1, 2));
-#endif // netcoreapp
         }
 
         [Fact]
