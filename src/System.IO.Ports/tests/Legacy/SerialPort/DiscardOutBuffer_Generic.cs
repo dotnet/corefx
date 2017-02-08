@@ -60,7 +60,7 @@ public class DiscardOutBuffer_Generic : PortsTest
         {
             Debug.WriteLine("Verifying Discard method does not throw an exception after a call to Open()");
             com.Open();
-            VerifyDiscardException(com, null);
+            com.DiscardOutBuffer();
 
             Assert.Equal(0, com.BytesToRead);
         }

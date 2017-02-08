@@ -5,6 +5,7 @@
 using System;
 using System.IO.Ports;
 using System.Diagnostics;
+using System.IO;
 using System.IO.PortsTests;
 using System.Threading.Tasks;
 using Legacy.Support;
@@ -37,8 +38,9 @@ public class DiscardOutBuffer : PortsTest
 
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
-            Assert.True(task.Wait(2000));
+            // Wait for write method to fail with IOException
+            Assert.Throws<AggregateException>(() => task.Wait(2000));
+            Assert.IsType<IOException>(task.Exception.InnerException);
         }
     }
 
@@ -61,8 +63,9 @@ public class DiscardOutBuffer : PortsTest
             VerifyDiscard(com1);
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
-            Assert.True(task.Wait(2000));
+            // Wait for write method to fail with IOException
+            Assert.Throws<AggregateException>(() => task.Wait(2000));
+            Assert.IsType<IOException>(task.Exception.InnerException);
         }
     }
 
@@ -84,17 +87,19 @@ public class DiscardOutBuffer : PortsTest
 
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout
-            task.Wait();
+            // Wait for write method to fail with IOException
+            Assert.Throws<AggregateException>(() => task.Wait(2000));
+            Assert.IsType<IOException>(task.Exception.InnerException);
 
-            task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
+            Task task2 = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
             WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
-            //Wait for write method to timeout
-            task.Wait();
+            // Wait for write method to fail with IOException
+            Assert.Throws<AggregateException>(() => task2.Wait(2000));
+            Assert.IsType<IOException>(task2.Exception.InnerException);
         }
     }
 
@@ -126,11 +131,11 @@ public class DiscardOutBuffer : PortsTest
 
             Assert.Equal(origBytesToRead,com1.BytesToRead);
 
-            //Wait for write method to timeout (it's the write method which should time-out, NOT the task)
-            Assert.True(task.Wait(2000));
+            // Wait for write method to fail with IOException
+            Assert.Throws<AggregateException>(() => task.Wait(2000));
+            Assert.IsType<IOException>(task.Exception.InnerException);
         }
     }
-
 
     private void WriteRndByteArray(SerialPort com, int byteLength)
     {
@@ -142,21 +147,9 @@ public class DiscardOutBuffer : PortsTest
             buffer[i] = (byte)rndGen.Next(0, 256);
         }
 
-        try
-        {
-            com.Write(buffer, 0, buffer.Length);
-        }
-        catch (TimeoutException)
-        {
-//            Debug.WriteLine("WriteRndByteArray: Caught timeout");
-        }
-/*
-        catch (Exception ex)
-        {
-            Debug.Print("WriteRndByteArray: Caught {0}", ex.Message);
-            throw;
-        }
-*/
+        // This will abort with an IOException when the test calls DiscardOutBuffer
+        // we will catch that exception on the Task.Wait()
+        com.Write(buffer, 0, buffer.Length);
     }
     #endregion
 
@@ -171,8 +164,6 @@ public class DiscardOutBuffer : PortsTest
     /// <summary>
     /// Wait for the write data to be written into a blocked (by adverse flow control) port
     /// </summary>
-    /// <param name="com"></param>
-    /// <param name="bufferLength"></param>
     private static void WaitForTxBufferToLoad(SerialPort com, int bufferLength)
     {
         Stopwatch sw = Stopwatch.StartNew();
