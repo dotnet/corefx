@@ -14,7 +14,8 @@
     <SkipValidatePackage>true</SkipValidatePackage>
 
     <RefBinDir>$(UAPPackageRefPath)</RefBinDir>
-    <LibBinDir>$(UAPPackageRuntimePath)</LibBinDir>
+    <LibBinDir Condition="'$(_bc_TargetGroup)'=='uap'">$(UAPPackageRuntimePath)</LibBinDir>
+    <LibBinDir Condition="'$(_bc_TargetGroup)'=='uapaot'">$(UAPAOTPackageRuntimePath)</LibBinDir>
 
     <NETStandardLibraryPackage>NETStandard.Library2</NETStandardLibraryPackage>
     <NETStandardLibraryPackageVersion>2.0.0-beta-24709-0</NETStandardLibraryPackageVersion>
@@ -59,8 +60,9 @@
   <ItemGroup>
     <IgnoredReference Include="System.Private.CoreLib" />
     <IgnoredReference Include="Windows" />
-    <IgnoredReference Include="Microsoft.Win32.Registry" /> <!-- Ignore for now since it's being exclude from closure bellow -->
-    <IgnoredReference Include="System.IO.IsolatedStorage" /> <!-- Ignore for now since it's being exclude from closure bellow -->
+    <IgnoredReference Include="System.Private.Interop" />
+    <IgnoredReference Include="Microsoft.Win32.Registry" /> <!-- Ignore for now since it's being exclude from closure below. Issue https://github.com/dotnet/corefx/issues/15966 -->
+    <IgnoredReference Include="System.IO.IsolatedStorage" /> <!-- Ignore for now since it's being exclude from closure below. Issue https://github.com/dotnet/corefx/issues/15968 -->
   </ItemGroup>
 
   <Target Name="VerifyClosure" AfterTargets="Build">
