@@ -29,6 +29,7 @@ namespace Legacy.Support
 
         static TCSupport()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             InitializeSerialInfo();
         }
 
