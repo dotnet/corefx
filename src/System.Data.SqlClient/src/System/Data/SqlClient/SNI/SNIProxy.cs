@@ -289,7 +289,6 @@ namespace System.Data.SqlClient.SNI
             instanceName[0] = 0;
 
             SNIHandle sniHandle = null;
-            IPAddress address = null;
             if (!fullServerName.Contains(":"))
             {
                 // default to using tcp if no protocol is provided
@@ -297,46 +296,54 @@ namespace System.Data.SqlClient.SNI
             }
             else
             {
-                // when a protocol is specified
-                if (fullServerName.Split(':').Length == 2)
+                // when tcp protocol is specified
+                if (fullServerName.ToLower().StartsWith(TdsEnums.TCP + ":"))
                 {
-                    // tcp protocol
-                    if (fullServerName.StartsWith(TdsEnums.TCP + ":"))
-                    {
-                        int protocolHeaderLength = TdsEnums.TCP.Length + 1; // including ':'
-                        string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
-                        sniHandle = CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-                    }
-                    // np protocol
-                    else if (fullServerName.StartsWith(TdsEnums.NP + ":"))
-                    {
-                        int protocolHeaderLength = TdsEnums.NP.Length + 1; // including ':'
-                        string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
-                        sniHandle = CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
-                    }
-                    // invalid protocol
-                    else
-                    {
-                        if (parallel)
-                        {
-                            SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
-                        }
-                        else
-                        {
-                            SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.ProtocolNotSupportedError, string.Empty);
-                        }
-                    }
+                    int protocolHeaderLength = TdsEnums.TCP.Length + 1; // including ':'
+                    string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
+                    sniHandle = CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
                 }
-                // when no protocol is specified, and fullServerName is IPv6
-                else if (IPAddress.TryParse(fullServerName, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
+                // when np protocol is specified
+                else if (fullServerName.ToLower().StartsWith(TdsEnums.NP + ":"))
                 {
-                    // default to using tcp if no protocol is provided
-                    sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                    int protocolHeaderLength = TdsEnums.NP.Length + 1; // including ':'
+                    string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
+                    sniHandle = CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
                 }
-                // when fullServerName is in invalid format
+                // possibly error case
                 else
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    int portOrInstanceNameIndex = Math.Max(fullServerName.LastIndexOf(','), fullServerName.LastIndexOf('\\'));
+                    string serverNameWithOutPortOrInstanceName = portOrInstanceNameIndex > 0 ? fullServerName.Substring(0, portOrInstanceNameIndex) : fullServerName;
+                    IPAddress address = null;
+
+                    // when no protocol is specified, and fullServerName is IPv6
+                    if (IPAddress.TryParse(serverNameWithOutPortOrInstanceName, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        // default to using tcp if no protocol is provided
+                        sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                    }
+                    // error case for sure
+                    else
+                    {
+                        // when invalid protocol is specified
+                        if (fullServerName.Split(':').Length == 2)
+                        {
+                            if (parallel)
+                            {
+                                SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
+                            }
+                            else
+                            {
+                                SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.ProtocolNotSupportedError, string.Empty);
+                            }
+                        }
+                        // when fullServerName is in invalid format
+                        else
+                        {
+                            SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                        }
+                    }
                 }
             }
 
