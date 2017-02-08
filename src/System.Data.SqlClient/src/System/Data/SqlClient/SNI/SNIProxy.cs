@@ -288,33 +288,35 @@ namespace System.Data.SqlClient.SNI
             instanceName = new byte[1];
             instanceName[0] = 0;
 
-            string[] serverNameParts = fullServerName.Split(':');
-
-            // when no protocol specified
-            // serverNameParts.Length == 1 -> fullServerName is in hostname or ipv4 format
-            // serverNameParts.Length == 8 -> fullServerName is in ipv6 format
-            if (serverNameParts.Length == 1 || serverNameParts.Length == 8)
+            SNIHandle sniHandle = null;
+            IPAddress address = null;
+            if (!fullServerName.Contains(":"))
             {
-                // Default to using tcp if no protocol is provided
-                return CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                // default to using tcp if no protocol is provided
+                sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
             }
-            // when protocol specified
-            // serverNameParts.Length == 2 -> <protocol>:<hostname_or_ipv4> format
-            // serverNameParts.Length == 9 -> <protocol>:<hostname_or_ipv6> format
-            else if (serverNameParts.Length == 2 || serverNameParts.Length == 9)
+            else
             {
-                int protocolLength = serverNameParts[0].Length + 1; // including ':'
-                string serverNameWithOutProtocol = fullServerName.Substring(protocolLength, fullServerName.Length - protocolLength);
-
-                switch (serverNameParts[0])
+                // when a protocol is specified
+                if (fullServerName.Split(':').Length == 2)
                 {
-                    case TdsEnums.TCP:
-                        return CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-
-                    case TdsEnums.NP:
-                        return CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
-
-                    default:
+                    // tcp protocol
+                    if (fullServerName.StartsWith(TdsEnums.TCP + ":"))
+                    {
+                        int protocolHeaderLength = TdsEnums.TCP.Length + 1; // including ':'
+                        string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
+                        sniHandle = CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                    }
+                    // np protocol
+                    else if (fullServerName.StartsWith(TdsEnums.NP + ":"))
+                    {
+                        int protocolHeaderLength = TdsEnums.NP.Length + 1; // including ':'
+                        string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
+                        sniHandle = CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
+                    }
+                    // invalid protocol
+                    else
+                    {
                         if (parallel)
                         {
                             SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
@@ -323,15 +325,22 @@ namespace System.Data.SqlClient.SNI
                         {
                             SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.ProtocolNotSupportedError, string.Empty);
                         }
-                        return null;
+                    }
+                }
+                // when no protocol is specified, and fullServerName is IPv6
+                else if (IPAddress.TryParse(fullServerName, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    // default to using tcp if no protocol is provided
+                    sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                }
+                // when fullServerName is in invalid format
+                else
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                 }
             }
-            // all other cases are in wrong format
-            else
-            {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                return null;
-            }
+
+            return sniHandle;
         }
 
         private static byte[] MakeMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
