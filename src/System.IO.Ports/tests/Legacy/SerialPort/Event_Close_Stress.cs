@@ -15,7 +15,7 @@ public class Event_Close_Stress : PortsTest
 
     #region Test Cases
 
-    [ConditionalFact(nameof(HasNullModem), Skip="Useless test with no verification")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void PinChanged_Close_Stress()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -42,7 +42,6 @@ public class Event_Close_Stress : PortsTest
                 ++count;
             }
 
-
             Debug.WriteLine("PinChanged={0}", _pinChangedCount);
         }
     }
@@ -54,7 +53,7 @@ public class Event_Close_Stress : PortsTest
         ++_pinChangedCount;
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Useless test with no verification")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void DataReceived_Close_Stress()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -95,7 +94,7 @@ public class Event_Close_Stress : PortsTest
         ++_dataReceivedCount;
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Useless test with no verification")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void ErrorReceived_Close_Stress()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))

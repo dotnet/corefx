@@ -415,7 +415,7 @@ public class ReadTo : PortsTest
 
                 if (charRcvBuffer.Length != charXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}", charXmitBuffer.Length, charRcvBuffer.Length);
+                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}", charXmitBuffer.Length, charRcvBuffer.Length);
                 }
                 else
                 {

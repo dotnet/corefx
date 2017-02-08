@@ -140,29 +140,26 @@ public class ReadByte_Generic : PortsTest
 
     private void WriteToCom1()
     {
-        SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
-        Random rndGen = new Random(-55);
-        byte[] xmitBuffer = new byte[1];
-        int sleepPeriod = rndGen.Next(minRandomTimeout, maxRandomTimeout / 2);
+        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+        {
+            Random rndGen = new Random(-55);
+            byte[] xmitBuffer = new byte[1];
+            int sleepPeriod = rndGen.Next(minRandomTimeout, maxRandomTimeout / 2);
 
-        //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
-        System.Threading.Thread.Sleep(sleepPeriod);
+            //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
+            System.Threading.Thread.Sleep(sleepPeriod);
 
-        com2.Open();
-        com2.Write(xmitBuffer, 0, xmitBuffer.Length);
-
-        if (com2.IsOpen)
-            com2.Close();
+            com2.Open();
+            com2.Write(xmitBuffer, 0, xmitBuffer.Length);
+        }
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void DefaultParityReplaceByte()
     {
         VerifyParityReplaceByte(-1, numRndByte - 2);
     }
-
-
+    
     [ConditionalFact(nameof(HasNullModem))]
     public void NoParityReplaceByte()
     {

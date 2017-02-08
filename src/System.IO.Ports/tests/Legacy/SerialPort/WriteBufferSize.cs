@@ -88,29 +88,34 @@ public class WriteBufferSize_Property : PortsTest
         VerifyWriteBufferSize((int)newWriteBufferSize);
     }
 
-
     [ConditionalFact(nameof(HasNullModem))]
     public void WriteBufferSize_Larger()
     {
-        VerifyWriteBufferSize(((new SerialPort()).WriteBufferSize) * 2);
+        using (var com = new SerialPort())
+        {
+            VerifyWriteBufferSize(com.WriteBufferSize * 2);
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteBufferSize_Odd()
     {
         Debug.WriteLine("Verifying setting WriteBufferSize=Odd");
-        int bufferSize = ((new SerialPort()).WriteBufferSize) * 2 + 1;
-
-
-        VerifyException(bufferSize, typeof(IOException), typeof(InvalidOperationException), true);
+        using (var com = new SerialPort())
+        {
+            int bufferSize = com.WriteBufferSize * 2 + 1;
+            VerifyException(bufferSize, typeof(IOException), typeof(InvalidOperationException), true);
+        }
     }
-
 
     [ConditionalFact(nameof(HasNullModem))]
     public void WriteBufferSize_Even()
     {
         Debug.WriteLine("Verifying setting WriteBufferSize=Even");
-        VerifyWriteBufferSize(((new SerialPort()).WriteBufferSize) * 2);
+        using (var com = new SerialPort())
+        {
+            VerifyWriteBufferSize(com.WriteBufferSize * 2);
+        }
     }
 
 

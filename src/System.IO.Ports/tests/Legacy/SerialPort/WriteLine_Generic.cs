@@ -131,44 +131,46 @@ public class WriteLine_Generic : PortsTest
     [ConditionalFact(nameof(HasNullModem))]
     public void SuccessiveReadTimeoutWithWriteSucceeding()
     {
-        SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        Random rndGen = new Random(-55);
-        AsyncEnableRts asyncEnableRts = new AsyncEnableRts();
-        Thread t = new Thread(asyncEnableRts.EnableRTS);
-
-        int waitTime;
-
-        com1.WriteTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
-        com1.Handshake = Handshake.RequestToSend;
-        com1.Encoding = new System.Text.UTF8Encoding();
-
-        Debug.WriteLine("Case SuccessiveReadTimeoutWithWriteSucceeding : Verifying WriteTimeout={0} with successive call to write method with the write succeeding sometime before its timeout", com1.WriteTimeout);
-        com1.Open();
-
-        //Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
-        //before the timeout is reached
-        t.Start();
-        waitTime = 0;
-        while (t.ThreadState == System.Threading.ThreadState.Unstarted && waitTime < 2000)
+        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
-            //Wait for the thread to start
-            Thread.Sleep(50);
-            waitTime += 50;
-        }
+            Random rndGen = new Random(-55);
+            AsyncEnableRts asyncEnableRts = new AsyncEnableRts();
+            Thread t = new Thread(asyncEnableRts.EnableRTS);
 
-        try
-        {
-            com1.WriteLine(DEFAULT_STRING);
-        }
-        catch (TimeoutException)
-        {
-        }
+            int waitTime;
 
-        asyncEnableRts.Stop();
-        while (t.IsAlive)
-            Thread.Sleep(100);
+            com1.WriteTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
+            com1.Handshake = Handshake.RequestToSend;
+            com1.Encoding = new System.Text.UTF8Encoding();
 
-        VerifyTimeout(com1);
+            Debug.WriteLine("Case SuccessiveReadTimeoutWithWriteSucceeding : Verifying WriteTimeout={0} with successive call to write method with the write succeeding sometime before its timeout", com1.WriteTimeout);
+            com1.Open();
+
+            //Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
+            //before the timeout is reached
+            t.Start();
+            waitTime = 0;
+            while (t.ThreadState == System.Threading.ThreadState.Unstarted && waitTime < 2000)
+            {
+                //Wait for the thread to start
+                Thread.Sleep(50);
+                waitTime += 50;
+            }
+
+            try
+            {
+                com1.WriteLine(DEFAULT_STRING);
+            }
+            catch (TimeoutException)
+            {
+            }
+
+            asyncEnableRts.Stop();
+            while (t.IsAlive)
+                Thread.Sleep(100);
+
+            VerifyTimeout(com1);
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]

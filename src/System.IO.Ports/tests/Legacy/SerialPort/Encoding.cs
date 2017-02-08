@@ -48,13 +48,6 @@ public class Encoding_Property : PortsTest
         Debug.WriteLine("Verifying ASCIIEncoding Encoding before open");
         VerifyEncodingBeforeOpen(new System.Text.ASCIIEncoding());
     }
-
-    [ConditionalFact(nameof(HasNullModem), Skip= "UTF7 Not supported even on netfx")]
-    public void Encoding_UTF7Encoding_BeforeOpen()
-    {
-        Debug.WriteLine("Verifying UTF7Encoding Encoding before open");
-        VerifyEncodingBeforeOpen(new System.Text.UTF7Encoding());
-    }
     
     [ConditionalFact(nameof(HasNullModem))]
     public void Encoding_UTF8Encoding_BeforeOpen()
@@ -82,13 +75,6 @@ public class Encoding_Property : PortsTest
     {
         Debug.WriteLine("Verifying ASCIIEncoding Encoding after open");
         VerifyEncodingAfterOpen(new System.Text.ASCIIEncoding());
-    }
-    
-    [ConditionalFact(nameof(HasNullModem), Skip = "UTF7 Not supported even on netfx")]
-    public void Encoding_UTF7Encoding_AfterOpen()
-    {
-        Debug.WriteLine("Verifying UTF7Encoding Encoding after open");
-        VerifyEncodingAfterOpen(new System.Text.UTF7Encoding());
     }
     
     [ConditionalFact(nameof(HasNullModem))]

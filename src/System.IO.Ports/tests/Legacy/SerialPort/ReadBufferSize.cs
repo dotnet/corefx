@@ -96,12 +96,15 @@ public class ReadBufferSize_Property : PortsTest
     [ConditionalFact(nameof(HasNullModem))]
     public void ReadBufferSize_Smaller()
     {
-        uint newReadBufferSize = (uint)(new SerialPort()).ReadBufferSize;
+        using (var com = new SerialPort())
+        {
+            uint newReadBufferSize = (uint)com.ReadBufferSize;
 
-        newReadBufferSize /= 2; //Make the new buffer size half the original size
-        newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit
+            newReadBufferSize /= 2; //Make the new buffer size half the original size
+            newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit
 
-        VerifyReadBufferSize((int)newReadBufferSize);
+            VerifyReadBufferSize((int)newReadBufferSize);
+        }
     }
 
     [ConditionalFact(nameof(HasNullModem))]

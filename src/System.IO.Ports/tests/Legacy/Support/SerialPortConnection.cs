@@ -20,55 +20,44 @@ namespace Legacy.Support
     {
         public static bool VerifyConnection(string portName1, string portName2)
         {
-            SerialPort com1 = new SerialPort(portName1);
-            SerialPort com2 = new SerialPort(portName2);
-
-            bool connectionVerified;
-
-            try
+            using (SerialPort com1 = new SerialPort(portName1))
+            using (SerialPort com2 = new SerialPort(portName2))
             {
-                com1.Open();
-                com2.Open();
-                connectionVerified = VerifyReadWrite(com1, com2);
+                bool connectionVerified;
+                try
+                {
+                    com1.Open();
+                    com2.Open();
+                    connectionVerified = VerifyReadWrite(com1, com2);
+                }
+                catch (Exception)
+                {
+                    // One of the com ports does not exist on the machine that this is being run on
+                    // thus their can not be a connection between com1 and com2
+                    connectionVerified = false;
+                }
+                return connectionVerified;
             }
-            catch (Exception)
-            {
-                // One of the com ports does not exist on the machine that this is being run on
-                // thus their can not be a connection between com1 and com2
-                connectionVerified = false;
-            }
-            finally
-            {
-                com1.Close();
-                com2.Close();
-            }
-
-            return connectionVerified;
         }
 
         public static bool VerifyLoopback(string portName)
         {
-            SerialPort com = new SerialPort(portName);
-
-            bool loopbackVerified;
-
-            try
+            using (SerialPort com = new SerialPort(portName))
             {
-                com.Open();
-                loopbackVerified = VerifyReadWrite(com, com);
+                bool loopbackVerified;
+                try
+                {
+                    com.Open();
+                    loopbackVerified = VerifyReadWrite(com, com);
+                }
+                catch (Exception)
+                {
+                    // The com ports does not exist on the machine that this is being run on
+                    // thus their can not be a loopback between the ports
+                    loopbackVerified = false;
+                }
+                return loopbackVerified;
             }
-            catch (Exception)
-            {
-                // The com ports does not exist on the machine that this is being run on
-                // thus their can not be a loopback between the ports
-                loopbackVerified = false;
-            }
-            finally
-            {
-                com.Close();
-            }
-
-            return loopbackVerified;
         }
 
         private static bool VerifyReadWrite(SerialPort com1, SerialPort com2)

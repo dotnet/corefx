@@ -107,17 +107,18 @@ namespace Legacy.Support
             List<string> openablePortNames = new List<string>();
             foreach (string portName in installedPortNames)
             {
-                SerialPort com = new SerialPort(portName);
-
-                try
+                using (SerialPort com = new SerialPort(portName))
                 {
-                    com.Open();
-                    com.Close();
+                    try
+                    {
+                        com.Open();
+                        com.Close();
 
-                    openablePortNames.Add(portName);
-                }
-                catch (Exception)
-                {
+                        openablePortNames.Add(portName);
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
             return openablePortNames;

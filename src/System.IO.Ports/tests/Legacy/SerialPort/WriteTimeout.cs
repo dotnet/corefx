@@ -165,7 +165,7 @@ public class WriteTimeout_Property : PortsTest
 
     #region Verification for Test Cases
 
-    public void VerifyInfiniteTimeout(WriteMethodDelegate readMethod, bool setInfiniteTimeout)
+    private void VerifyInfiniteTimeout(WriteMethodDelegate readMethod, bool setInfiniteTimeout)
     {
         using (SerialPort com1 = TCSupport.InitFirstSerialPort())
         {
@@ -173,7 +173,6 @@ public class WriteTimeout_Property : PortsTest
             System.Threading.Thread t = new System.Threading.Thread(readThread.CallWrite);
             SerialPortProperties serPortProp = new SerialPortProperties();
         
-
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
@@ -183,8 +182,6 @@ public class WriteTimeout_Property : PortsTest
             com1.ReadTimeout = 10;
 
             com1.Open();
-
-
 
             if (setInfiniteTimeout)
             {
@@ -202,8 +199,9 @@ public class WriteTimeout_Property : PortsTest
             while (t.IsAlive)
                 System.Threading.Thread.Sleep(10);
 
-
             com1.DiscardOutBuffer();
+            // If we're looped-back, then there will be data queud on the receive side which we need to discard
+            com1.DiscardInBuffer();
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
     }
@@ -412,8 +410,6 @@ public class WriteTimeout_Property : PortsTest
         {
         }
     }
-
-
 
     public class WriteDelegateThread
     {

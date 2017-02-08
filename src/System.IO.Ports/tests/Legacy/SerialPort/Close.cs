@@ -49,7 +49,7 @@ public class Close : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip="Doesn't pass on FTDI USB->Serial device")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void OpenFillBuffersClose()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))

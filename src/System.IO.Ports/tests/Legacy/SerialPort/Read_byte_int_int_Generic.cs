@@ -43,24 +43,26 @@ public class Read_byte_int_int_Generic : PortsTest
     [Fact]
     public void ReadWithoutOpen()
     {
-        SerialPort com = new SerialPort();
+        using (SerialPort com = new SerialPort())
+        {
+            Debug.WriteLine("Verifying read method throws exception without a call to Open()");
 
-        Debug.WriteLine("Verifying read method throws exception without a call to Open()");
-
-        VerifyReadException(com, typeof(InvalidOperationException));
+            VerifyReadException(com, typeof(InvalidOperationException));
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void ReadAfterFailedOpen()
     {
-        SerialPort com = new SerialPort("BAD_PORT_NAME");
+        using (SerialPort com = new SerialPort("BAD_PORT_NAME"))
+        {
+            Debug.WriteLine("Verifying read method throws exception with a failed call to Open()");
 
-        Debug.WriteLine("Verifying read method throws exception with a failed call to Open()");
-
-        //Since the PortName is set to a bad port name Open will thrown an exception
-        //however we don't care what it is since we are verifying a read method
-        Assert.ThrowsAny<Exception>(() => com.Open());
-        VerifyReadException(com, typeof(InvalidOperationException));
+            //Since the PortName is set to a bad port name Open will thrown an exception
+            //however we don't care what it is since we are verifying a read method
+            Assert.ThrowsAny<Exception>(() => com.Open());
+            VerifyReadException(com, typeof(InvalidOperationException));
+        }
     }
 
 
@@ -154,19 +156,21 @@ public class Read_byte_int_int_Generic : PortsTest
 
     private void WriteToCom1()
     {
-        SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
-        Random rndGen = new Random();
-        byte[] xmitBuffer = new byte[1];
-        int sleepPeriod = rndGen.Next(minRandomTimeout, maxRandomTimeout / 2);
+        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+        {
+            Random rndGen = new Random();
+            byte[] xmitBuffer = new byte[1];
+            int sleepPeriod = rndGen.Next(minRandomTimeout, maxRandomTimeout / 2);
 
-        //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
-        System.Threading.Thread.Sleep(sleepPeriod);
+            //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
+            System.Threading.Thread.Sleep(sleepPeriod);
 
-        com2.Open();
-        com2.Write(xmitBuffer, 0, xmitBuffer.Length);
+            com2.Open();
+            com2.Write(xmitBuffer, 0, xmitBuffer.Length);
 
-        if (com2.IsOpen)
-            com2.Close();
+            if (com2.IsOpen)
+                com2.Close();
+        }
     }
 
 
@@ -198,61 +202,66 @@ public class Read_byte_int_int_Generic : PortsTest
     [ConditionalFact(nameof(HasNullModem))]
     public void ParityErrorOnLastByte()
     {
-        SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-        SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName);
-        Random rndGen = new Random(15);
-        byte[] bytesToWrite = new byte[numRndBytesPairty];
-        byte[] expectedBytes = new byte[numRndBytesPairty];
-        byte[] actualBytes = new byte[numRndBytesPairty + 1];
-        int waitTime;
-
-        /* 1 Additional character gets added to the input buffer when the parity error occurs on the last byte of a stream
-             We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
-        Debug.WriteLine("Verifying default ParityReplace byte with a parity errro on the last byte");
-
-        //Genrate random characters without an parity error
-        for (int i = 0; i < bytesToWrite.Length; i++)
+        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
-            byte randByte = (byte)rndGen.Next(0, 128);
+            Random rndGen = new Random(15);
+            byte[] bytesToWrite = new byte[numRndBytesPairty];
+            byte[] expectedBytes = new byte[numRndBytesPairty];
+            byte[] actualBytes = new byte[numRndBytesPairty + 1];
+            int waitTime;
 
-            bytesToWrite[i] = randByte;
-            expectedBytes[i] = randByte;
+            /* 1 Additional character gets added to the input buffer when the parity error occurs on the last byte of a stream
+                 We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
+            Debug.WriteLine("Verifying default ParityReplace byte with a parity errro on the last byte");
+
+            //Genrate random characters without an parity error
+            for (int i = 0; i < bytesToWrite.Length; i++)
+            {
+                byte randByte = (byte)rndGen.Next(0, 128);
+
+                bytesToWrite[i] = randByte;
+                expectedBytes[i] = randByte;
+            }
+
+            bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] | 0x80);
+                //Create a parity error on the last byte
+            expectedBytes[expectedBytes.Length - 1] = com1.ParityReplace;
+                // Set the last expected byte to be the ParityReplace Byte
+
+            com1.Parity = Parity.Space;
+            com1.DataBits = 7;
+            com1.ReadTimeout = 250;
+
+            com1.Open();
+            com2.Open();
+
+            com2.Write(bytesToWrite, 0, bytesToWrite.Length);
+
+            waitTime = 0;
+
+            while (bytesToWrite.Length + 1 > com1.BytesToRead && waitTime < 500)
+            {
+                System.Threading.Thread.Sleep(50);
+                waitTime += 50;
+            }
+
+            com1.Read(actualBytes, 0, actualBytes.Length);
+
+            //Compare the chars that were written with the ones we expected to read
+            Assert.Equal(expectedBytes, actualBytes);
+
+            if (1 < com1.BytesToRead)
+            {
+                Fail("ERROR!!!: Expected BytesToRead=0 actual={0}", com1.BytesToRead);
+                Debug.WriteLine("ByteRead={0}, {1}", com1.ReadByte(), bytesToWrite[bytesToWrite.Length - 1]);
+            }
+
+            bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] & 0x7F);
+                //Clear the parity error on the last byte
+            expectedBytes[expectedBytes.Length - 1] = bytesToWrite[bytesToWrite.Length - 1];
+            VerifyRead(com1, com2, bytesToWrite, expectedBytes, expectedBytes.Length / 2);
         }
-
-        bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] | 0x80); //Create a parity error on the last byte
-        expectedBytes[expectedBytes.Length - 1] = com1.ParityReplace; // Set the last expected byte to be the ParityReplace Byte
-
-        com1.Parity = Parity.Space;
-        com1.DataBits = 7;
-        com1.ReadTimeout = 250;
-
-        com1.Open();
-        com2.Open();
-
-        com2.Write(bytesToWrite, 0, bytesToWrite.Length);
-
-        waitTime = 0;
-
-        while (bytesToWrite.Length + 1 > com1.BytesToRead && waitTime < 500)
-        {
-            System.Threading.Thread.Sleep(50);
-            waitTime += 50;
-        }
-
-        com1.Read(actualBytes, 0, actualBytes.Length);
-
-        //Compare the chars that were written with the ones we expected to read
-        Assert.Equal(expectedBytes, actualBytes);
-
-        if (1 < com1.BytesToRead)
-        {
-            Fail("ERROR!!!: Expected BytesToRead=0 actual={0}", com1.BytesToRead);
-            Debug.WriteLine("ByteRead={0}, {1}", com1.ReadByte(), bytesToWrite[bytesToWrite.Length - 1]);
-        }
-
-        bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] & 0x7F); //Clear the parity error on the last byte
-        expectedBytes[expectedBytes.Length - 1] = bytesToWrite[bytesToWrite.Length - 1];
-        VerifyRead(com1, com2, bytesToWrite, expectedBytes, expectedBytes.Length / 2);
     }
 
     [ConditionalFact(nameof(HasNullModem))]

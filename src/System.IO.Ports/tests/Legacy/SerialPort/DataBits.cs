@@ -48,14 +48,14 @@ public class DataBits_Property : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Not available on FTDI")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void DataBits_5_BeforeOpen()
     {
         Debug.WriteLine("Verifying 5 DataBits before open");
         VerifyDataBitsBeforeOpen(5, DEFAULT_BYTE_SIZE);
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Not available on FTDI")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void DataBits_6_BeforeOpen()
     {
         Debug.WriteLine("Verifying 6 DataBits before open");
@@ -76,14 +76,14 @@ public class DataBits_Property : PortsTest
         VerifyDataBitsBeforeOpen(8, DEFAULT_BYTE_SIZE);
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Not available on FTDI")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void DataBits_5_AfterOpen()
     {
         Debug.WriteLine("Verifying 5 DataBits after open");
         VerifyDataBitsAfterOpen(5, DEFAULT_BYTE_SIZE);
     }
 
-    [ConditionalFact(nameof(HasNullModem), Skip = "Not available on FTDI")]
+    [ConditionalFact(nameof(HasNullModem))]
     public void DataBits_6_AfterOpen()
     {
         Debug.WriteLine("Verifying 6 DataBits after open");
@@ -160,7 +160,7 @@ public class DataBits_Property : PortsTest
         VerifyException(int.MaxValue, ThrowAt.Set, typeof(ArgumentOutOfRangeException));
     }
     
-    [ConditionalFact(nameof(HasOneSerialPort), Skip = "Not available on FTDI")]
+    [ConditionalFact(nameof(HasOneSerialPort))]
     public void DataBits_8_StopBitsOnePointFive()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))

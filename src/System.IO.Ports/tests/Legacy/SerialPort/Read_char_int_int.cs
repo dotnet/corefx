@@ -6,6 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Linq;
 using Legacy.Support;
 using Xunit;
 
@@ -308,8 +309,6 @@ public class Read_char_int_int : PortsTest
             char utf32Char = (char)8169;
             byte[] utf32CharBytes = System.Text.Encoding.UTF32.GetBytes(new[] {utf32Char});
             int numCharsRead;
-            
-            int numBytes;
 
             Debug.WriteLine(
                 "Verifying that Read(char[], int, int) will read everything from internal buffer and drivers buffer");
@@ -344,7 +343,7 @@ public class Read_char_int_int : PortsTest
             com2.Write(utf32CharBytes, 1, 3);
             com2.Write(charXmitBuffer, 0, charXmitBuffer.Length);
 
-            numBytes = System.Text.Encoding.UTF32.GetByteCount(charXmitBuffer);
+            int numBytes = System.Text.Encoding.UTF32.GetByteCount(charXmitBuffer);
 
             byte[] byteBuffer = System.Text.Encoding.UTF32.GetBytes(charXmitBuffer);
 
@@ -365,7 +364,7 @@ public class Read_char_int_int : PortsTest
                     numCharsRead);
             }
 
-            Assert.Equal(expectedChars, charRcvBuffer);
+            Assert.Equal(expectedChars, charRcvBuffer.Take(expectedChars.Length).ToArray());
 
             Assert.Equal(0, com1.BytesToRead);
         }
@@ -416,7 +415,7 @@ public class Read_char_int_int : PortsTest
 
                 if (asyncRead.Result + readResult != charXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}",
                         charXmitBuffer.Length - asyncRead.Result, readResult);
                 }
                 else

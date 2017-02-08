@@ -40,37 +40,40 @@ public class Write_str_Generic : PortsTest
     [Fact]
     public void WriteWithoutOpen()
     {
-        SerialPort com = new SerialPort();
+        using (SerialPort com = new SerialPort())
+        {
+            Debug.WriteLine("Verifying write method throws exception without a call to Open()");
 
-        Debug.WriteLine("Verifying write method throws exception without a call to Open()");
-
-        VerifyWriteException(com, typeof(InvalidOperationException));
+            VerifyWriteException(com, typeof(InvalidOperationException));
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteAfterFailedOpen()
     {
-        SerialPort com = new SerialPort("BAD_PORT_NAME");
+        using (SerialPort com = new SerialPort("BAD_PORT_NAME"))
+        {
+            Debug.WriteLine("Verifying write method throws exception with a failed call to Open()");
 
-        Debug.WriteLine("Verifying write method throws exception with a failed call to Open()");
+            //Since the PortName is set to a bad port name Open will thrown an exception
+            //however we don't care what it is since we are verifying a write method
+            Assert.ThrowsAny<Exception>(() => com.Open());
 
-        //Since the PortName is set to a bad port name Open will thrown an exception
-        //however we don't care what it is since we are verifying a write method
-        Assert.ThrowsAny<Exception>(() => com.Open());
-
-        VerifyWriteException(com, typeof(InvalidOperationException));
+            VerifyWriteException(com, typeof(InvalidOperationException));
+        }
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteAfterClose()
     {
-        SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        {
+            Debug.WriteLine("Verifying write method throws exception after a call to Cloes()");
+            com.Open();
+            com.Close();
 
-        Debug.WriteLine("Verifying write method throws exception after a call to Cloes()");
-        com.Open();
-        com.Close();
-
-        VerifyWriteException(com, typeof(InvalidOperationException));
+            VerifyWriteException(com, typeof(InvalidOperationException));
+        }
     }
 
     [ConditionalFact(nameof(HasNullModem))]
