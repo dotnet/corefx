@@ -195,20 +195,6 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentNullException), ThrowAt.Set);
     }
 
-
-    [Fact]
-    public void SlashSlash_28800_Odd_7_2()
-    {
-        string portName = "\\\\";
-        int baudRate = 28800;
-        int parity = (int)Parity.Odd;
-        int dataBits = 7;
-        int stopBits = (int)StopBits.Two;
-
-        VerifyCtor(portName, baudRate, parity, dataBits, stopBits, typeof(ArgumentException), ThrowAt.Set);
-    }
-
-
     [Fact]
     public void COM257_57600_Mark_8_2()
     {
@@ -220,8 +206,7 @@ public class ctor_str_int_parity_int_stopbits : PortsTest
 
         VerifyCtor(portName, baudRate, parity, dataBits, stopBits);
     }
-
-
+    
     [Fact]
     public void Filename_9600_Space_8_1()
     {

@@ -72,8 +72,7 @@ public class ctor_str_int : PortsTest
 
         VerifyCtor(portName, baudRate, typeof(ArgumentException), ThrowAt.Set);
     }
-
-
+    
     [Fact]
     public void Null_14400()
     {
@@ -83,17 +82,6 @@ public class ctor_str_int : PortsTest
         VerifyCtor(portName, baudRate, typeof(ArgumentNullException), ThrowAt.Set);
     }
 
-
-    [Fact]
-    public void SlashSlash_28800()
-    {
-        string portName = "\\\\";
-        int baudRate = 28800;
-
-        VerifyCtor(portName, baudRate, typeof(ArgumentException), ThrowAt.Set);
-    }
-
-
     [Fact]
     public void COM257_57600()
     {
@@ -102,7 +90,6 @@ public class ctor_str_int : PortsTest
 
         VerifyCtor(portName, baudRate);
     }
-
 
     [Fact]
     public void Filename_9600()

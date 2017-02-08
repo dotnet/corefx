@@ -66,15 +66,6 @@ public class ctor_str : PortsTest
     }
 
     [Fact]
-    public void SlashSlash()
-    {
-        // This throws on NetFX (Desktop) - in keeping with other device path changes
-        // we don't block on \\.\ or \\?\ paths in CoreFX.
-        string portName = "\\\\";
-        VerifyCtor(portName);
-    }
-
-    [Fact]
     public void COM257()
     {
         string portName = "COM257";

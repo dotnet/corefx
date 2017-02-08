@@ -99,7 +99,6 @@ public class ctor_str_int_parity_int : PortsTest
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentException), ThrowAt.Set);
     }
 
-
     [Fact]
     public void Null_14400_Even_6()
     {
@@ -111,19 +110,6 @@ public class ctor_str_int_parity_int : PortsTest
         VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentNullException), ThrowAt.Set);
     }
 
-
-    [Fact]
-    public void SlashSlash_28800_Odd_7()
-    {
-        string portName = "\\\\";
-        int baudRate = 28800;
-        int parity = (int)Parity.Odd;
-        int dataBits = 7;
-
-        VerifyCtor(portName, baudRate, parity, dataBits, typeof(ArgumentException), ThrowAt.Set);
-    }
-
-
     [Fact]
     public void COM257_57600_Mark_8()
     {
@@ -134,8 +120,7 @@ public class ctor_str_int_parity_int : PortsTest
 
         VerifyCtor(portName, baudRate, parity, dataBits);
     }
-
-
+    
     [Fact]
     public void Filename_9600_Space_8()
     {

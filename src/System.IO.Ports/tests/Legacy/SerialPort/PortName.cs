@@ -80,40 +80,6 @@ public class PortName_Property : PortsTest
         VerifyException(rndStrBuf.ToString(), ThrowAt.Open, typeof(ArgumentException), typeof(InvalidOperationException));
     }
 
-
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void PortName_SlashSlash()
-    {
-        Debug.WriteLine("Verifying setting PortName=\\\\");
-        VerifyException("\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
-    }
-
-
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void PortName_SlashSlashSlash()
-    {
-        Debug.WriteLine("Verifying setting PortName=\\\\\\");
-        VerifyException("\\\\\\", ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
-    }
-
-
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void PortName_SlashSlashRND()
-    {
-        Random rndGen = new Random();
-        System.Text.StringBuilder rndStrBuf = new System.Text.StringBuilder();
-
-        rndStrBuf.Append("\\\\");
-        for (int i = 0; i < rndPortNameSize; i++)
-        {
-            rndStrBuf.Append((char)rndGen.Next(0, ushort.MaxValue));
-        }
-
-        Debug.WriteLine("Verifying setting PortName=\\\\ + RND_STR");
-        VerifyException(rndStrBuf.ToString(), ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
-    }
-
-
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void PortName_FileName()
     {

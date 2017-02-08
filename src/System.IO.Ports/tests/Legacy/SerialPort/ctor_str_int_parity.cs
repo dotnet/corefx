@@ -88,17 +88,6 @@ public class ctor_str_int_parity : PortsTest
         VerifyCtor(portName, baudRate, parity, typeof(ArgumentNullException), ThrowAt.Set);
     }
 
-
-    [Fact]
-    public void SlashSlash_28800_Odd()
-    {
-        string portName = "\\\\";
-        int baudRate = 28800;
-        int parity = (int)Parity.Odd;
-
-        VerifyCtor(portName, baudRate, parity, typeof(ArgumentException), ThrowAt.Set);
-    }
-
     [Fact]
     public void COM257_57600_Mark()
     {
