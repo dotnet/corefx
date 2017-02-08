@@ -345,7 +345,7 @@ public class ReadChar : PortsTest
 
                 if (readResult + 1 != charXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}",
                         charXmitBuffer.Length - 1, readResult);
                 }
                 else
@@ -413,7 +413,7 @@ public class ReadChar : PortsTest
 
                 if (readResult + 1 != charXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}", charXmitBuffer.Length - 1, readResult);
+                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}", charXmitBuffer.Length - 1, readResult);
                 }
                 else
                 {

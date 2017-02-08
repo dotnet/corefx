@@ -340,7 +340,7 @@ public class Read_byte_int_int : PortsTest
 
                 if (asyncRead.Result + readResult != byteXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} cahracters actually read {1}",
+                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}",
                         byteXmitBuffer.Length - asyncRead.Result, readResult);
                 }
                 else

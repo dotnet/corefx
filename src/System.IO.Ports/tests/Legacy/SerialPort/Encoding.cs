@@ -99,6 +99,7 @@ public class Encoding_Property : PortsTest
     }
     
     [ConditionalFact(nameof(HasOneSerialPort))]
+    [ActiveIssue(15949)]
     public void Encoding_ISCIIAssemese()
     {
         Debug.WriteLine("Verifying ISCIIAssemese Encoding");
@@ -127,6 +128,7 @@ public class Encoding_Property : PortsTest
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
+    [ActiveIssue(15949)]
     public void Encoding_Japanese_JIS()
     {
         Debug.WriteLine("Verifying Japanese (JIS) Encoding before open");
@@ -141,6 +143,7 @@ public class Encoding_Property : PortsTest
     }
 
     [ConditionalFact(nameof(HasOneSerialPort))]
+    [ActiveIssue(15949)]
     public void Encoding_Custom()
     {
         Debug.WriteLine("Verifying Custom Encoding before open");
