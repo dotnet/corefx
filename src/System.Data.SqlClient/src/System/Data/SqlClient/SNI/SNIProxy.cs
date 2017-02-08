@@ -28,7 +28,7 @@ namespace System.Data.SqlClient.SNI
         private const int DefaultSqlServerPort = 1433;
         private const string DefaultHostName = "localhost";
         private const string DefaultSqlServerInstanceName = "MSSQLSERVER";
-        private const string NonWindowsSspiPackage = "Kerberos";
+        private const string Kerberos = "Kerberos";
         private const string SqlServerSpnHeader = "MSSQLSvc";
 
         internal class SspiClientContextResult
@@ -97,6 +97,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="receivedBuff">Receive buffer</param>
         /// <param name="receivedLength">Received length</param>
         /// <param name="sendBuff">Send buffer</param>
+        /// <param name="sendLength">Send length</param>
         /// <param name="serverName">Service Principal Name buffer</param>
         /// <param name="serverNameLength">Length of Service Principal Name</param>
         /// <returns>SNI error code</returns>
@@ -107,16 +108,16 @@ namespace System.Data.SqlClient.SNI
             ContextFlagsPal contextFlags = tcpHandle.ContextFlags;
 
             SecurityBuffer[] inSecurityBufferArray = null;
-            if (securityContext == null) // when it is first iteration
+            if (securityContext == null) //first iteration
             {
-                tcpHandle.CredentialsHandle = NegotiateStreamPal.AcquireDefaultCredential(NonWindowsSspiPackage, false);
+                tcpHandle.CredentialsHandle = NegotiateStreamPal.AcquireDefaultCredential(Kerberos, false);
             }
             else
             {
                 inSecurityBufferArray = new SecurityBuffer[] { new SecurityBuffer(receivedBuff, SecurityBufferType.SECBUFFER_TOKEN) };
             }
 
-            int tokenSize = NegotiateStreamPal.QueryMaxTokenSize(NonWindowsSspiPackage);
+            int tokenSize = NegotiateStreamPal.QueryMaxTokenSize(Kerberos);
             SecurityBuffer outSecurityBuffer = new SecurityBuffer(tokenSize, SecurityBufferType.SECBUFFER_TOKEN);
 
             ContextFlagsPal requestedContextFlags = ContextFlagsPal.Connection
@@ -134,7 +135,7 @@ namespace System.Data.SqlClient.SNI
                        outSecurityBuffer,
                        ref contextFlags);
 
-            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded || 
+            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded ||
                 statusCode.ErrorCode == SecurityStatusPalErrorCode.CompAndContinue)
             {
                 inSecurityBufferArray = new SecurityBuffer[] { outSecurityBuffer };
@@ -147,14 +148,18 @@ namespace System.Data.SqlClient.SNI
             tcpHandle.ContextFlags = contextFlags;
 
             uint result = SspiClientContextResult.OK;
-            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
-                statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException)) // when Kerberos ticket is missing
+            if (IsErrorStatus(statusCode.ErrorCode))
             {
-                result = SspiClientContextResult.KerberosTicketMissing;    
-            }
-            else if (IsErrorStatus(statusCode.ErrorCode))
-            {
-                result = SspiClientContextResult.Failed;
+                // Kerberos Ticket missing
+                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
+                    statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException))
+                {
+                    result = SspiClientContextResult.KerberosTicketMissing;
+                }
+                else
+                {
+                    result = SspiClientContextResult.Failed;
+                }
             }
 
             return result;
@@ -329,13 +334,13 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        private byte[] MakeSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
+        private static byte[] MakeMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
         {
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + port;
             return Encoding.ASCII.GetBytes(serverSpn);
         }
 
-        private string GetFullyQualifiedDomainName(string hostNameOrAddress)
+        private static string GetFullyQualifiedDomainName(string hostNameOrAddress)
         {
             IPHostEntry hostEntry = null;
             try
@@ -346,7 +351,7 @@ namespace System.Data.SqlClient.SNI
             {
                 throw new Exception(SR.reverse_lookup_failed);
             }
-            
+
             return hostEntry.HostName;
         }
 
@@ -397,7 +402,6 @@ namespace System.Data.SqlClient.SNI
                     {
                         exception = e;
                     }
-
                 }
                 // when instance name is provided, and no port
                 else if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length == 2)
@@ -415,23 +419,14 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            if (hostName != null && port > 0 && exception == null && isIntegratedSecurity) // when Integrated Authentication is used
-            {
-                string fqdnHostName = null;
-                try
-                {
-                    fqdnHostName = GetFullyQualifiedDomainName(hostName);
-                    spnBuffer = MakeSqlServerSPN(fqdnHostName, port);
-                }
-                catch(Exception e)
-                {
-                    exception = e;
-                }
-            }
-
             SNITCPHandle sniTcpHandle = null;
             if (hostName != null && port > 0 && exception == null)
             {
+                if (isIntegratedSecurity)
+                {
+                    hostName = GetFullyQualifiedDomainName(hostName);
+                    spnBuffer = MakeMsSqlServerSPN(hostName, port);
+                }
                 sniTcpHandle = new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
             }
             else if (exception != null)
@@ -543,7 +538,9 @@ namespace System.Data.SqlClient.SNI
             const int sendTimeOut = 1000;
             const int receiveTimeOut = 1000;
             byte[] responsePacket = null;
-            using (UdpClient client = new UdpClient(AddressFamily.InterNetwork))
+            IPAddress address = null;
+            IPAddress.TryParse(browserHostname, out address);
+            using (UdpClient client = new UdpClient(address == null ? AddressFamily.InterNetwork : address.AddressFamily))
             {
                 Task<int> sendTask = client.SendAsync(requestPacket, requestPacket.Length, browserHostname, port);
                 Task<UdpReceiveResult> receiveTask = null;
