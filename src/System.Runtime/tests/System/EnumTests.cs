@@ -62,6 +62,7 @@ namespace System.Tests
             yield return new object[] { "1", false, UInt64Enum.One };
             yield return new object[] { "5", false, (UInt64Enum)5 };
 
+#if netcoreapp
             // Char
             yield return new object[] { "Value1", false, Enum.ToObject(s_charEnumType, (char)1) };
             yield return new object[] { "vaLue2", true, Enum.ToObject(s_charEnumType, (char)2) };
@@ -78,6 +79,7 @@ namespace System.Tests
             // Double - parses successfully, but doesn't properly represent the underlying value
             yield return new object[] { "Value1", false, Enum.GetValues(s_doubleEnumType).GetValue(0) };
             yield return new object[] { "vaLue2", true, Enum.GetValues(s_doubleEnumType).GetValue(0) };
+#endif // netcoreapp
             
             // SimpleEnum
             yield return new object[] { "Red", false, SimpleEnum.Red };
@@ -142,6 +144,7 @@ namespace System.Tests
             yield return new object[] { typeof(SimpleEnum), "2147483649", false, typeof(ArgumentException) };
             yield return new object[] { typeof(SimpleEnum), "2147483648", false, typeof(OverflowException) };
 
+#if netcoreapp
             // Char
             yield return new object[] { s_charEnumType, ((char)1).ToString(), false, typeof(ArgumentException) };
             yield return new object[] { s_charEnumType, ((char)5).ToString(), false, typeof(ArgumentException) };
@@ -167,6 +170,7 @@ namespace System.Tests
             // UIntPtr
             yield return new object[] { s_uintPtrEnumType, "1", false, typeof(InvalidCastException) };
             yield return new object[] { s_uintPtrEnumType, "5", false, typeof(InvalidCastException) };
+#endif // netcoreapp
         }
 
         [Theory]
@@ -289,6 +293,7 @@ namespace System.Tests
             yield return new object[] { typeof(UInt64Enum), ulong.MaxValue, "Max" };
             yield return new object[] { typeof(UInt64Enum), 3UL, null };
 
+#if netcoreapp
             // Char
             yield return new object[] { s_charEnumType, Enum.Parse(s_charEnumType, "Value1"), "Value1" };
             yield return new object[] { s_charEnumType, Enum.Parse(s_charEnumType, "Value2"), "Value2" };
@@ -301,6 +306,7 @@ namespace System.Tests
             yield return new object[] { s_boolEnumType, Enum.Parse(s_boolEnumType, "Value2"), "Value2" };
             yield return new object[] { s_boolEnumType, true, "Value1" };
             yield return new object[] { s_boolEnumType, false, "Value2" };
+#endif // netcoreapp            
         }
 
         [Theory]
@@ -328,6 +334,7 @@ namespace System.Tests
             Assert.True(s == "Green" || s == "Green_a" || s == "Green_b");
         }
 
+#if netcoreapp
         public static IEnumerable<object[]> UnsupportedEnumType_TestData()
         {
             yield return new object[] { s_floatEnumType, 1.0f };
@@ -342,6 +349,7 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentException>("value", () => Enum.GetName(enumType, value));
         }
+#endif // netcoreapp
 
         [Fact]
         public static void GetName_Invalid()
@@ -446,6 +454,7 @@ namespace System.Tests
             yield return new object[] { typeof(UInt64Enum), (ulong)1, true };
             yield return new object[] { typeof(UInt64Enum), (ulong)99, false };
 
+#if netcoreapp
             // Char
             yield return new object[] { s_charEnumType, "Value1", true };
             yield return new object[] { s_charEnumType, "None", false };
@@ -460,6 +469,7 @@ namespace System.Tests
             yield return new object[] { s_boolEnumType, "Value1", true };
             yield return new object[] { s_boolEnumType, true, true };
             yield return new object[] { s_boolEnumType, false, true };
+#endif // netcoreapp            
         }
 
         [Theory]
@@ -469,6 +479,7 @@ namespace System.Tests
             Assert.Equal(expected, Enum.IsDefined(enumType, value));
         }
 
+#if netcoreapp
         [Theory]
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void IsDefined_UnsupportedEnumType_ThrowsInvalidOperationException(Type enumType, object value)
@@ -478,6 +489,7 @@ namespace System.Tests
             string exName = ex.GetType().Name;
             Assert.True(exName == nameof(InvalidOperationException) || exName == "ContractException");
         }
+#endif // netcoreapp
 
         [Fact]
         public static void IsDefined_Invalid()
@@ -573,6 +585,7 @@ namespace System.Tests
             yield return new object[] { (UInt64Enum)0x3f06, (UInt64Enum)0x0010, false };
             yield return new object[] { (UInt64Enum)0x3f06, (UInt64Enum)0x3f16, false };
 
+#if netcoreapp
             // Char
             yield return new object[] { Enum.Parse(s_charEnumType, "Value0x3f06"), Enum.Parse(s_charEnumType, "Value0x3000"), true };
             yield return new object[] { Enum.Parse(s_charEnumType, "Value0x3f06"), Enum.Parse(s_charEnumType, "Value0x0f06"), true };
@@ -623,6 +636,7 @@ namespace System.Tests
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 0x3f06), Enum.ToObject(s_uintPtrEnumType, 0x3f06), true };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 0x3f06), Enum.ToObject(s_uintPtrEnumType, 0x0010), false };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 0x3f06), Enum.ToObject(s_uintPtrEnumType, 0x3f16), false };
+#endif // netcoreapp
         }
 
         [Theory]
@@ -687,6 +701,7 @@ namespace System.Tests
             yield return new object[] { typeof(UInt64Enum), (ulong)77, (UInt64Enum)77 };
             yield return new object[] { typeof(UInt64Enum), (ulong)0x0123456789abcdefL, (UInt64Enum)0x0123456789abcdefL };
 
+#if netcoreapp
             // Char
             yield return new object[] { s_charEnumType, (char)1, Enum.Parse(s_charEnumType, "Value1") };
             yield return new object[] { s_charEnumType, (char)2, Enum.Parse(s_charEnumType, "Value2") };
@@ -694,6 +709,7 @@ namespace System.Tests
             // Bool
             yield return new object[] { s_boolEnumType, true, Enum.Parse(s_boolEnumType, "Value1") };
             yield return new object[] { s_boolEnumType, false, Enum.Parse(s_boolEnumType, "Value2") };
+#endif // netcoreapp            
         }
 
         [Theory]
@@ -708,7 +724,9 @@ namespace System.Tests
             yield return new object[] { null, typeof(ArgumentNullException) };
             yield return new object[] { typeof(Enum), typeof(ArgumentException) };
             yield return new object[] { typeof(object), typeof(ArgumentException) };
+#if netcoreapp
             yield return new object[] { GetNonRuntimeEnumTypeBuilder(typeof(int)).AsType(), typeof(ArgumentException) };
+#endif // netcoreapp            
         }
 
         [Theory]
@@ -731,10 +749,12 @@ namespace System.Tests
         {
             yield return new object[] { typeof(SimpleEnum), null, typeof(ArgumentNullException) };
             yield return new object[] { typeof(SimpleEnum), "Hello", typeof(ArgumentException) };
+#if netcoreapp            
             yield return new object[] { s_floatEnumType, 1.0f, typeof(ArgumentException) };
             yield return new object[] { s_doubleEnumType, 1.0, typeof(ArgumentException) };
             yield return new object[] { s_intPtrEnumType, (IntPtr)1, typeof(ArgumentException) };
             yield return new object[] { s_uintPtrEnumType, (UIntPtr)1, typeof(ArgumentException) };
+#endif // netcoreapp
         }
 
         [Theory]
@@ -811,6 +831,7 @@ namespace System.Tests
             yield return new object[] { UInt64Enum.One, new object(), false };
             yield return new object[] { UInt64Enum.One, null, false };
 
+#if netcoreapp
             // Char
             yield return new object[] { Enum.Parse(s_charEnumType, "Value1"), Enum.Parse(s_charEnumType, "Value1"), true };
             yield return new object[] { Enum.Parse(s_charEnumType, "Value1"), Enum.Parse(s_charEnumType, "Value2"), false };
@@ -858,6 +879,7 @@ namespace System.Tests
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 1), (UIntPtr)1, false };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 1), new object(), false };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 1), null, false };
+#endif // netcoreapp 
         }
 
         [Theory]
@@ -919,6 +941,7 @@ namespace System.Tests
             yield return new object[] { UInt64Enum.One, UInt64Enum.Max, -1 };
             yield return new object[] { UInt64Enum.One, null, 1 };
 
+#if netcoreapp
             // Char
             yield return new object[] { Enum.Parse(s_charEnumType, "Value2"), Enum.Parse(s_charEnumType, "Value2"), 0 };
             yield return new object[] { Enum.Parse(s_charEnumType, "Value2"), Enum.Parse(s_charEnumType, "Value1"), 1 };
@@ -954,6 +977,7 @@ namespace System.Tests
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 1), Enum.ToObject(s_uintPtrEnumType, 2), -1 };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 3), Enum.ToObject(s_uintPtrEnumType, 2), 1 };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 1), null, 1 };
+#endif // netcoreapp 
         }
 
         [Theory]
@@ -980,12 +1004,14 @@ namespace System.Tests
             yield return new object[] { typeof(UInt32Enum), typeof(uint) };
             yield return new object[] { typeof(Int64Enum), typeof(long) };
             yield return new object[] { typeof(UInt64Enum), typeof(ulong) };
+#if netcoreapp
             yield return new object[] { s_charEnumType, typeof(char) };
             yield return new object[] { s_boolEnumType, typeof(bool) };
             yield return new object[] { s_floatEnumType, typeof(float) };
             yield return new object[] { s_doubleEnumType, typeof(double) };
             yield return new object[] { s_intPtrEnumType, typeof(IntPtr) };
             yield return new object[] { s_uintPtrEnumType, typeof(UIntPtr) };
+#endif // netcoreapp
         }
 
         [Theory]
@@ -1076,6 +1102,7 @@ namespace System.Tests
                 new object[] { UInt64Enum.Min, UInt64Enum.One, UInt64Enum.Two, UInt64Enum.Max }
             };
 
+#if netcoreapp
             // Char
             yield return new object[]
             {
@@ -1123,6 +1150,7 @@ namespace System.Tests
                 new string[0],
                 new object[0]
             };
+#endif // netcoreapp
         }
 
         [Theory]
@@ -1149,7 +1177,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToString_Format_TestData()
         {
-            // Format "D": the decimal equivilent of the value is returned.
+            // Format "D": the decimal equivalent of the value is returned.
             // Format "X": value in hex form without a leading "0x"
             // Format "F": value is treated as a bit field that contains one or more flags that consist of one or more bits.
             // If value is equal to a combination of named enumerated constants, a delimiter-separated list of the names
@@ -1217,6 +1245,7 @@ namespace System.Tests
             yield return new object[] { (UInt64Enum)99, "D", "99" };
             yield return new object[] { UInt64Enum.Max, "D", "18446744073709551615" };
 
+#if netcoreapp
             // "D": Char
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)0), "D", ((char)0).ToString() };
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)1), "D", ((char)1).ToString() };
@@ -1236,6 +1265,7 @@ namespace System.Tests
             yield return new object[] { Enum.ToObject(s_doubleEnumType, 0), "D", "0" };
             yield return new object[] { Enum.ToObject(s_doubleEnumType, 1), "D", double.Epsilon.ToString() };
             yield return new object[] { Enum.ToObject(s_doubleEnumType, long.MaxValue), "D", double.NaN.ToString() };
+#endif // netcoreapp
 
             // "D": SimpleEnum
             yield return new object[] { SimpleEnum.Red, "D", "1" };
@@ -1296,6 +1326,7 @@ namespace System.Tests
             yield return new object[] { (UInt64Enum)99, "X", "0000000000000063" };
             yield return new object[] { UInt64Enum.Max, "X", "FFFFFFFFFFFFFFFF" };
 
+#if netcoreapp
             // "X": Char
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)0), "X", "0000" };
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)1), "X", "0001" };
@@ -1305,7 +1336,8 @@ namespace System.Tests
             yield return new object[] { Enum.ToObject(s_boolEnumType, false), "X", "00" };
             yield return new object[] { Enum.ToObject(s_boolEnumType, true), "X", "01" };
             yield return new object[] { Enum.ToObject(s_boolEnumType, 123), "X", "01" };
-            
+#endif // netcoreapp
+
             // "X": SimpleEnum
             yield return new object[] { SimpleEnum.Red, "X", "00000001" };
 
@@ -1357,6 +1389,7 @@ namespace System.Tests
             yield return new object[] { (UInt64Enum)5, "F", "5" };
             yield return new object[] { UInt64Enum.Max, "F", "Max" };
             
+#if netcoreapp
             // "F": Char
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)1), "F", "Value1" };
             yield return new object[] { Enum.ToObject(s_charEnumType, (char)(1 | 2)), "F", "Value1, Value2" };
@@ -1371,6 +1404,7 @@ namespace System.Tests
 
             // "F": UIntPtr
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 5), "F", "5" };
+#endif // netcoreapp
 
             // "F": SimpleEnum
             yield return new object[] { SimpleEnum.Red, "F", "Red" };
@@ -1450,6 +1484,7 @@ namespace System.Tests
             Format(e.GetType(), e, format, expected);
         }
 
+#if netcoreapp 
         [Fact]
         public static void ToString_InvalidUnicodeChars()
         {
@@ -1459,6 +1494,7 @@ namespace System.Tests
             ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "F", char.MaxValue.ToString());
             ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "G", char.MaxValue.ToString());
         }
+#endif // netcoreapp
 
         [Fact]
         public static void ToString_Format_MultipleMatches()
@@ -1470,6 +1506,7 @@ namespace System.Tests
             Assert.True(s == "Green" || s == "Green_a" || s == "Green_b");
         }
 
+#if netcoreapp 
         public static IEnumerable<object[]> UnsupportedEnum_TestData()
         {
             yield return new object[] { Enum.ToObject(s_floatEnumType, 1) };
@@ -1487,6 +1524,7 @@ namespace System.Tests
             string formatXExceptionName = formatXException.GetType().Name;
             Assert.True(formatXExceptionName == nameof(InvalidOperationException) || formatXExceptionName == "ContractException");
         }
+#endif // netcoreapp
 
         [Fact]
         public static void ToString_InvalidFormat_ThrowsFormatException()
@@ -1519,6 +1557,7 @@ namespace System.Tests
             Assert.Equal(expected, Enum.Format(enumType, value, format.ToLowerInvariant()));
         }
 
+#if netcoreapp
         [Theory]
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void Format_UnsupportedEnumType_ThrowsArgumentException(Type enumType, object value)
@@ -1536,6 +1575,7 @@ namespace System.Tests
             string formatFExceptionName = formatFException.GetType().Name;
             Assert.True(formatFExceptionName == nameof(InvalidOperationException) || formatFExceptionName == "ContractException");
         }
+#endif // netcoreapp
 
         [Fact]
         public static void Format_Invalid()
@@ -1555,7 +1595,8 @@ namespace System.Tests
             Assert.Throws<FormatException>(() => Enum.Format(typeof(SimpleEnum), SimpleEnum.Red, "   \t")); // Format is whitespace
             Assert.Throws<FormatException>(() => Enum.Format(typeof(SimpleEnum), SimpleEnum.Red, "t")); // No such format
         }
-        
+
+#if netcoreapp // EnumBuilder is defined in netcoreapp
         private static EnumBuilder GetNonRuntimeEnumTypeBuilder(Type underlyingType)
         {
             AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
@@ -1643,5 +1684,6 @@ namespace System.Tests
 
             return enumBuilder.CreateTypeInfo().AsType();
         }
+#endif // netcoreapp
     }
 }

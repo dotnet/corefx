@@ -18,7 +18,7 @@
   -->  
   <Target Name="ConstructTestingHost"
           BeforeTargets="Build;BuildAllProjects"
-          Condition="!Exists('$(ConstructSharedFxSem)') OR '$(ReconstructSharedFx)' == 'true'" >
+          Condition="(!Exists('$(ConstructSharedFxSem)') OR '$(ReconstructSharedFx)' == 'true') And '$(TargetGroup)' != 'netfx'" >
           
     <ItemGroup>
       <!-- This will only copy over the related file -->

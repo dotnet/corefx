@@ -6,15 +6,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)'=='netstandard'">$(DefineConstants);netstandard17</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
     <!-- Remove this when TypeBuilder extends TypeInfo. See https://github.com/dotnet/corefx/issues/14334 -->
-    <Compile Include="$(CommonTestPath)\System\TypeBuilderExtensions.cs" />
+    <!-- EnumBuilder type is defined in netcoreapp and not in netstandard -->    
+    <Compile Include="$(CommonTestPath)\System\TypeBuilderExtensions.cs"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">

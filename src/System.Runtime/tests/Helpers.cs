@@ -10,6 +10,8 @@ namespace System.Tests
 {
     public static class Helpers
     {
+#if netcoreapp // AssemblyBuilder is not in netstandard yet 
+
         private static Type s_nonRuntimeType;
 
         public static Type NonRuntimeType()
@@ -28,6 +30,7 @@ namespace System.Tests
 
             return s_nonRuntimeType;
         }
+#endif // netcoreapp
 
         public static void PerformActionWithCulture(CultureInfo culture, Action test)
         {

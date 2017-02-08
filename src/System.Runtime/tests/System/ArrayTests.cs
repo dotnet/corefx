@@ -1431,6 +1431,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }, new int[1]));
         }
 
+#if netcoreapp
         [Fact]
         public static void CreateInstance_TypeNotRuntimeType_ThrowsArgumentException()
         {
@@ -1438,6 +1439,7 @@ namespace System.Tests
             Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
             Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1], new int[1]));
         }
+#endif // netcoreapp
 
         [Fact]
         public static void CreateInstance_LengthsNull_ThrowsArgumentNullException()
