@@ -102,7 +102,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void SuccessiveReadTimeout()
     {
@@ -174,7 +174,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void BytesToWrite()
     {
@@ -222,7 +222,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void BytesToWriteSuccessive()
     {

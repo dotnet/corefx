@@ -103,7 +103,7 @@ public class Write_byte_int_int_generic : PortsTest
         }
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void SuccessiveReadTimeout()
     {
