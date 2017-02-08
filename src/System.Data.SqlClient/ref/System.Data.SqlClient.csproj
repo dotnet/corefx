@@ -4,10 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{D58E8D2B-3331-4660-8DFB-512D66F8EC63}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Data.SqlClient.cs" />
     <Compile Include="System.Data.SqlClient.Manual.cs" />

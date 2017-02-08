@@ -7,9 +7,6 @@
     <IncludePerformanceTests>true</IncludePerformanceTests>
     <ProjectGuid>{D9906F1A-A41A-43CD-81D2-BA94CF0001C9}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
     <Compile Include="HashCodeTest.cs" />
     <Compile Include="Perf.Vector2.cs" />

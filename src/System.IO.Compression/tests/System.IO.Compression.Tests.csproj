@@ -4,10 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{BC2E1649-291D-412E-9529-EDDA94FA7AD6}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="DeflateStreamTests.cs" />
     <Compile Include="DeflateStreamTests.netstandard.cs" Condition="'$(TargetGroup)'=='netstandard'" />

@@ -6,8 +6,6 @@
     <RootNamespace>ConventionsUnitTests</RootNamespace>
     <AssemblyName>System.Composition.Convention.Tests</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\..\System.Composition\tests\Util\AssertX.cs">
       <Link>Util\AssertX.cs</Link>

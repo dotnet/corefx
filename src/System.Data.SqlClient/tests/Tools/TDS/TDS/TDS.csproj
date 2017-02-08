@@ -7,8 +7,6 @@
     <AssemblyName>Microsoft.SqlServer.TDS</AssemblyName>
     <ClsCompliant>false</ClsCompliant>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AllHeaders\TDSQueryNotificationsHeader.cs" />
     <Compile Include="AllHeaders\TDSTraceHeader.cs" />

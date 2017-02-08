@@ -15,11 +15,6 @@
     <AssemblyName>Microsoft.VisualBasic</AssemblyName>
     <NoStdLib>true</NoStdLib>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ConversionResolution.vb" />

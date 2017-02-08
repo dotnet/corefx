@@ -5,8 +5,6 @@
     <ProjectGuid>{749ED7AD-E3C1-4611-99BD-C5D4B3934B3A}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="ProtectedDataTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">

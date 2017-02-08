@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{75DE4259-43BB-4067-9F30-3AC920D51AEC}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.IO.Ports.cs" />
     <Reference Include="netstandard" />

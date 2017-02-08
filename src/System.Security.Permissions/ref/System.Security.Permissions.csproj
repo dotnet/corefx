@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{07CAF142-B259-418E-86EF-C4BD8B50253E}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Security.Permissions.cs" />
   </ItemGroup>

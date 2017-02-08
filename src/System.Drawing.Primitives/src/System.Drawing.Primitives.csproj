@@ -7,10 +7,6 @@
     <AssemblyName>System.Drawing.Primitives</AssemblyName>
     <ProjectGuid>{8F472B93-574C-4AEC-9D28-6C2360A55BBF}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Contracts" />

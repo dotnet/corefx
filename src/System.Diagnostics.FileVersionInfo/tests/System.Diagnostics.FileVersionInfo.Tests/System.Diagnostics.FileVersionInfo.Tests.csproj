@@ -8,11 +8,6 @@
     <AssemblyName>System.Diagnostics.FileVersionInfo.Tests</AssemblyName>
     <ProjectGuid>{6DFDB760-CC88-48AE-BD81-C64844EA3CBC}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
   <ItemGroup>
     <!-- Checked in test binaries for FileVersionInfoTest -->
     <Content Include="NativeConsoleApp.exe">
