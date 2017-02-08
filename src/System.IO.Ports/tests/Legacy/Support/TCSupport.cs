@@ -58,22 +58,7 @@ namespace Legacy.Support
 
             Array.Sort(installedPortNames);
 
-            var openablePortNames = new List<string>();
-            foreach (string portName in installedPortNames)
-            {
-                SerialPort com = new SerialPort(portName);
-
-                try
-                {
-                    com.Open();
-                    com.Close();
-
-                    openablePortNames.Add(portName);
-                }
-                catch (Exception)
-                {
-                }
-            }
+            var openablePortNames = CheckPortsCanBeOpened(installedPortNames);
 
             // Find the first port which is looped-back
             foreach (var portName in openablePortNames)
@@ -115,6 +100,27 @@ namespace Legacy.Support
 
             s_localMachineSerialInfo = new LocalMachineSerialInfo(portName1, portName2, loopbackPortName, nullModemPresent);
 
+        }
+
+        private static IList<string> CheckPortsCanBeOpened(IEnumerable<string> installedPortNames)
+        {
+            List<string> openablePortNames = new List<string>();
+            foreach (string portName in installedPortNames)
+            {
+                SerialPort com = new SerialPort(portName);
+
+                try
+                {
+                    com.Open();
+                    com.Close();
+
+                    openablePortNames.Add(portName);
+                }
+                catch (Exception)
+                {
+                }
+            }
+            return openablePortNames;
         }
 
         public static bool SufficientHardwareRequirements(SerialPortRequirements serialPortRequirements)
