@@ -416,18 +416,16 @@ public class ReadLine : PortsTest
         using (SerialPort com2 = TCSupport.InitSecondSerialPort(com1))
         {
             char[] charXmitBuffer = TCSupport.GetRandomChars(512, TCSupport.CharacterOptions.None);
-            char[] charRcvBuffer;
 
             char endChar = com1.NewLine[0];
             char notEndChar = TCSupport.GetRandomOtherChar(endChar, TCSupport.CharacterOptions.None);
-            string result;
 
             Debug.WriteLine("Verifying that ReadLine(string) works appropriately after TimeoutException has been thrown");
 
             //Ensure the new line is not in charXmitBuffer
             for (var i = 0; i < charXmitBuffer.Length; ++i)
             {
-                //Se any appearances of a character in the new line string to some other char
+                // Set any appearances of a character in the new line string to some other char
                 if (endChar == charXmitBuffer[i])
                 {
                     charXmitBuffer[i] = notEndChar;
@@ -447,14 +445,11 @@ public class ReadLine : PortsTest
 
             Assert.Throws<TimeoutException>(() => com1.ReadLine());
 
-            if (2 * charXmitBuffer.Length != com1.BytesToRead)
-            {
-                Fail("Err_0585haieidp Expected BytesToRead: {0} actual: {1}", 2 * charXmitBuffer.Length, com1.BytesToRead);
-            }
+            Assert.Equal(2 * charXmitBuffer.Length, com1.BytesToRead);
 
             com2.WriteLine(string.Empty);
-            result = com1.ReadLine();
-            charRcvBuffer = result.ToCharArray();
+            string result = com1.ReadLine();
+            char[] charRcvBuffer = result.ToCharArray();
 
             Assert.Equal(charXmitBuffer, charRcvBuffer);
 

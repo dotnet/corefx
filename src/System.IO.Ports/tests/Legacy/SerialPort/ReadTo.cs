@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
+using System.Threading;
 using Legacy.Support;
 using Xunit;
 
@@ -689,17 +690,16 @@ public class ReadTo : PortsTest
         char[] charsToWrite = strToWrite.ToCharArray();
         byte[] bytesToWrite = com1.Encoding.GetBytes(charsToWrite);
 
-        com2.Write(bytesToWrite, 0, 1); // Write one byte at the begining because we are going to read this to buffer the rest of the data    
+        com2.Write(bytesToWrite, 0, 1); // Write one byte at the beginning because we are going to read this to buffer the rest of the data    
         com2.Write(bytesToWrite, 0, bytesToWrite.Length);
 
         while (com1.BytesToRead < bytesToWrite.Length)
         {
-            System.Threading.Thread.Sleep(50);
+            Thread.Sleep(50);
         }
 
-        com1.Read(new char[1], 0, 1); // This should put the rest of the bytes in SerialPorts own internal buffer
-
-        Assert.Equal(com1.BytesToRead, bytesToWrite.Length);
+        com1.Read(new char[1], 0, 1); // This should put the rest of the bytes in SerialPort's own internal buffer
+        Assert.Equal(bytesToWrite.Length, com1.BytesToRead);
     }
 
     private void VerifyReadTo(SerialPort com1, SerialPort com2, string strToWrite, string newLine)

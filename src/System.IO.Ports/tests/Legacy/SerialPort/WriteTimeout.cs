@@ -36,7 +36,7 @@ public class WriteTimeout_Property : PortsTest
 
     #region Test Cases
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Default_Write_byte_int_int()
     {
@@ -44,7 +44,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_byte_int_int, false);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Default_Write_char_int_int()
     {
@@ -52,7 +52,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_char_int_int, false);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Default_Write_str()
     {
@@ -60,7 +60,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_str, false);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Default_WriteLine()
     {
@@ -68,7 +68,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(WriteLine, false);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Infinite_Write_byte_int_int()
     {
@@ -76,7 +76,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_byte_int_int, true);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Infinite_Write_char_int_int()
     {
@@ -84,7 +84,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_char_int_int, true);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Infinite_Write_str()
     {
@@ -92,7 +92,7 @@ public class WriteTimeout_Property : PortsTest
         VerifyInfiniteTimeout(Write_str, true);
     }
 
-    [ActiveIssue(15867)]
+    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void WriteTimeout_Infinite_WriteLine()
     {

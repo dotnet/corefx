@@ -240,14 +240,12 @@ public class ReadChar : PortsTest
         }
     }
 
-
     [ConditionalFact(nameof(HasLoopbackOrNullModem))]
     public void LargeInputBuffer()
     {
         Debug.WriteLine("Verifying read with large input buffer");
         VerifyRead(System.Text.Encoding.ASCII, largeNumRndBytesToRead);
     }
-
 
     [ConditionalFact(nameof(HasLoopbackOrNullModem))]
     public void ReadTimeout_Zero_Bytes()
@@ -334,8 +332,7 @@ public class ReadChar : PortsTest
 
             if (asyncRead.Result != charXmitBuffer[0])
             {
-                Fail("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0],
-                    asyncRead.Result);
+                Fail("Err_0158ahei Expected ReadChar to read {0}({0:X}) actual {1}({1:X})", charXmitBuffer[0], asyncRead.Result);
             }
             else
             {
@@ -440,9 +437,6 @@ public class ReadChar : PortsTest
             char[] surrogateChars = {(char)0xDB26, (char)0xDC49};
             char[] additionalChars = TCSupport.GetRandomChars(32, TCSupport.CharacterOptions.None);
             char[] charRcvBuffer = new char[2];
-            int numBytes;
-
-            int result;
 
             Debug.WriteLine("Verifying that ReadChar works correctly when trying to read surrogate characters");
 
@@ -455,7 +449,7 @@ public class ReadChar : PortsTest
             if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                 com2.Open();
 
-            numBytes = com2.Encoding.GetByteCount(surrogateChars);
+            int numBytes = com2.Encoding.GetByteCount(surrogateChars);
             numBytes += com2.Encoding.GetByteCount(additionalChars);
 
             com2.Write(surrogateChars, 0, 2);
@@ -466,7 +460,7 @@ public class ReadChar : PortsTest
 
             Assert.Throws<TimeoutException>(() => com1.ReadChar());
 
-            result = com1.Read(charRcvBuffer, 0, 2);
+            int result = com1.Read(charRcvBuffer, 0, 2);
 
             Assert.Equal(2, result);
 
@@ -534,15 +528,13 @@ public class ReadChar : PortsTest
             }
         }
     }
-
-
+    
     private void VerifyReadNonBuffered(SerialPort com1, SerialPort com2, byte[] bytesToWrite)
     {
         char[] expectedChars = com1.Encoding.GetChars(bytesToWrite, 0, bytesToWrite.Length);
 
         VerifyBytesReadOnCom1FromCom2(com1, com2, bytesToWrite, expectedChars);
     }
-
 
     private void VerifyReadBuffered(SerialPort com1, SerialPort com2, byte[] bytesToWrite)
     {
@@ -552,8 +544,7 @@ public class ReadChar : PortsTest
 
         PerformReadOnCom1FromCom2(com1, com2, expectedChars);
     }
-
-
+    
     private void VerifyReadBufferedAndNonBuffered(SerialPort com1, SerialPort com2, byte[] bytesToWrite)
     {
         char[] expectedChars = new char[com1.Encoding.GetCharCount(bytesToWrite, 0, bytesToWrite.Length) * 2];
@@ -566,7 +557,6 @@ public class ReadChar : PortsTest
 
         VerifyBytesReadOnCom1FromCom2(com1, com2, bytesToWrite, expectedChars);
     }
-
 
     private void BufferData(SerialPort com1, SerialPort com2, byte[] bytesToWrite)
     {
@@ -624,9 +614,11 @@ public class ReadChar : PortsTest
             charRcvBuffer[i] = (char)readInt;
             rcvBufferSize += com1.Encoding.GetByteCount(charRcvBuffer, i, 1);
 
-            if (bytesToRead - rcvBufferSize != com1.BytesToRead)
+            int com1ToRead = com1.BytesToRead;
+
+            if (bytesToRead - rcvBufferSize != com1ToRead)
             {
-                Fail("ERROR!!!: Expected BytesToRead={0} actual={1} at {2}", bytesToRead - rcvBufferSize, com1.BytesToRead, i);
+                Fail("ERROR!!!: Expected BytesToRead={0} actual={1} at {2}", bytesToRead - rcvBufferSize, com1ToRead, i);
             }
 
             if (readInt != expectedChars[i])
@@ -679,37 +671,13 @@ public class ReadChar : PortsTest
             }
         }
 
-        public System.Threading.AutoResetEvent ReadStartedEvent
-        {
-            get
-            {
-                return _readStartedEvent;
-            }
-        }
+        public System.Threading.AutoResetEvent ReadStartedEvent => _readStartedEvent;
 
-        public System.Threading.AutoResetEvent ReadCompletedEvent
-        {
-            get
-            {
-                return _readCompletedEvent;
-            }
-        }
+        public System.Threading.AutoResetEvent ReadCompletedEvent => _readCompletedEvent;
 
-        public int Result
-        {
-            get
-            {
-                return _result;
-            }
-        }
+        public int Result => _result;
 
-        public Exception Exception
-        {
-            get
-            {
-                return _exception;
-            }
-        }
+        public Exception Exception => _exception;
     }
     #endregion
 }

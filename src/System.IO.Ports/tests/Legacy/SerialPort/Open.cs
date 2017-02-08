@@ -22,7 +22,7 @@ public class Open : PortsTest
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            Debug.Print("BytesToWrite={0}", com.BytesToWrite);
+            Debug.WriteLine("BytesToWrite={0}", com.BytesToWrite);
 
             serPortProp.VerifyPropertiesAndPrint(com);
         }
@@ -38,7 +38,7 @@ public class Open : PortsTest
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            Debug.Print("Verifying after calling Open() twice");
+            Debug.WriteLine("Verifying after calling Open() twice");
 
             com.Open();
 
@@ -56,7 +56,7 @@ public class Open : PortsTest
             SerialPortProperties serPortProp1 = new SerialPortProperties();
             SerialPortProperties serPortProp2 = new SerialPortProperties();
 
-            Debug.Print("Verifying calling Open() on two instances of SerialPort");
+            Debug.WriteLine("Verifying calling Open() on two instances of SerialPort");
             serPortProp1.SetAllPropertiesToOpenDefaults();
             serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 

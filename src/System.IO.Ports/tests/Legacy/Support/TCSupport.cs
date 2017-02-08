@@ -51,7 +51,7 @@ namespace Legacy.Support
         private static void GenerateSerialInfo()
         {
             string[] installedPortNames = PortHelper.GetPorts();
-            Debug.WriteLine("total ports : " + installedPortNames.Length);
+            Console.WriteLine("Installed ports : " + string.Join(",", installedPortNames));
             bool nullModemPresent = false;
 
             string portName1 = null, portName2 = null, loopbackPortName = null;
@@ -86,7 +86,7 @@ namespace Legacy.Support
                         portName2 = secondPortName;
                         nullModemPresent = true;
 
-                        Debug.Print("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
+                        Console.WriteLine("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
                     }
                 }
             }

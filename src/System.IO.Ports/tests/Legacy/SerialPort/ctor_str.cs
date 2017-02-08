@@ -113,7 +113,7 @@ public class ctor_str : PortsTest
     {
         SerialPortProperties serPortProp = new SerialPortProperties();
 
-        Debug.Print("Verifying properties where PortName={0}", portName);
+        Debug.WriteLine($"Verifying properties where PortName={portName}");
         try
         {
             using (SerialPort com = new SerialPort(portName))
