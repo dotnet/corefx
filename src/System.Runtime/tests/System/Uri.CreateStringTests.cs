@@ -245,7 +245,10 @@ namespace System.Tests
             
             // File - empty path
             yield return new object[] { "file:///", "file", "", "", UriHostNameType.Basic, -1, true, true };
-            yield return new object[] { @"file://\", "file", "", "", UriHostNameType.Basic, -1, true, true };
+            if (s_IsWindowsSystem)
+            {
+                yield return new object[] { @"file://\", "file", "", "", UriHostNameType.Basic, -1, true, true };
+            }
             // File - host
 
             yield return new object[] { "file://path1/path2", "file", "", "path1", UriHostNameType.Dns, -1, true, false };
@@ -565,7 +568,10 @@ namespace System.Tests
 
             // File with empty path
             yield return new object[] { "file:///", "/", "", "" };
-            yield return new object[] { @"file://\", "/", "", "" };
+            if (s_IsWindowsSystem)
+            {
+                yield return new object[] { @"file://\", "/", "", "" };
+            }
 
             if (s_IsWindowsSystem)
             {
@@ -1294,6 +1300,10 @@ namespace System.Tests
                 yield return new object[] { @"\\unchost", UriKind.Absolute };
                 yield return new object[] { @"\\unchost\", UriKind.Absolute };
                 yield return new object[] { @"\\unchost\path\file", UriKind.Absolute };
+
+                // Unix path must start with '/'
+                yield return new object[] { @"file://\", UriKind.Absolute };
+                yield return new object[] { @"file://host\", UriKind.Absolute };
             }
         }
 

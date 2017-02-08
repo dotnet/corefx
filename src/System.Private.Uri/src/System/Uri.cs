@@ -2190,6 +2190,12 @@ namespace System
                     if (err != ParsingError.None)
                         return err;
 
+                    // Unix paths must start with '/'
+                    if (InFact(Flags.UnixPath) && idx < (ushort)length && pUriString[idx] != '/')
+                    {
+                        return ParsingError.BadFormat;
+                    }
+
                     // This will disallow '\' as the host terminator for any scheme that is not implicitFile or cannot have a Dos Path
                     if ((idx < (ushort)length && pUriString[idx] == '\\') && NotAny(Flags.ImplicitFile) &&
                         _syntax.NotAny(UriSyntaxFlags.AllowDOSPath))

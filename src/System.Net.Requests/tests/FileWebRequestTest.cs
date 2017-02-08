@@ -25,7 +25,7 @@ namespace System.Net.Tests
         [Fact]
         public void Ctor_VerifyDefaults_Success()
         {
-            Uri uri = new Uri("file://somefilepath");
+            Uri uri = new Uri("file:///somefilepath");
             FileWebRequest request = (FileWebRequest)WebRequest.Create(uri);
             Assert.Null(request.ContentType);
             Assert.Null(request.Credentials);
@@ -39,7 +39,7 @@ namespace System.Net.Tests
         [Fact]
         public void FileWebRequest_Properties_Roundtrips()
         {
-            WebRequest request = WebRequest.Create("file://anything");
+            WebRequest request = WebRequest.Create("file:///anything");
 
             request.ContentLength = 42;
             Assert.Equal(42, request.ContentLength);
@@ -54,7 +54,7 @@ namespace System.Net.Tests
         [Fact]
         public void InvalidArguments_Throws()
         {
-            WebRequest request = WebRequest.Create("file://anything");
+            WebRequest request = WebRequest.Create("file:///anything");
             Assert.Throws<ArgumentException>("value", () => request.ContentLength = -1);
             Assert.Throws<ArgumentException>("value", () => request.Method = null);
             Assert.Throws<ArgumentException>("value", () => request.Method = "");
@@ -64,14 +64,14 @@ namespace System.Net.Tests
         [Fact]
         public void GetRequestStream_MethodGet_ThrowsProtocolViolation()
         {
-            WebRequest request = WebRequest.Create("file://anything");
+            WebRequest request = WebRequest.Create("file:///anything");
             Assert.Throws<ProtocolViolationException>(() => request.BeginGetRequestStream(null, null));
         }
 
         [Fact]
         public void GetRequestResponseAfterAbort_Throws()
         {
-            WebRequest request = WebRequest.Create("file://anything");
+            WebRequest request = WebRequest.Create("file:///anything");
             request.Abort();
             Assert.Throws<WebException>(() => request.BeginGetRequestStream(null, null));
             Assert.Throws<WebException>(() => request.BeginGetResponse(null, null));
@@ -80,7 +80,7 @@ namespace System.Net.Tests
         [Fact]
         public void NotImplementedMembers_Throws()
         {
-            WebRequest request = WebRequest.Create("file://anything");
+            WebRequest request = WebRequest.Create("file:///anything");
             Assert.Throws<NotImplementedException>(() => request.UseDefaultCredentials);
             Assert.Throws<NotImplementedException>(() => request.UseDefaultCredentials = true);
         }
@@ -214,7 +214,7 @@ namespace System.Net.Tests
         [InlineData(true)]
         public async Task BeginGetResponse_OnNonexistentFile_ShouldNotCrashApplication(bool? abortWithDelay)
         {
-            FileWebRequest request = (FileWebRequest)WebRequest.Create("file://" + Path.GetRandomFileName());
+            FileWebRequest request = (FileWebRequest)WebRequest.Create("file://" + Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
             Task<WebResponse> responseTask = GetResponseAsync(request);
             if (abortWithDelay.HasValue)
             {
