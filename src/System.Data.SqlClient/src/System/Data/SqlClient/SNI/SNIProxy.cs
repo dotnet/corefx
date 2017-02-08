@@ -553,10 +553,15 @@ namespace System.Data.SqlClient.SNI
 
             const int sendTimeOut = 1000;
             const int receiveTimeOut = 1000;
-            byte[] responsePacket = null;
+
             IPAddress address = null;
-            IPAddress.TryParse(browserHostname, out address);
-            using (UdpClient client = new UdpClient(address == null ? AddressFamily.InterNetwork : address.AddressFamily))
+            if (IPAddress.TryParse(browserHostname, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                browserHostname = GetFullyQualifiedDomainName(browserHostname);
+            }
+
+            byte[] responsePacket = null;
+            using (UdpClient client = new UdpClient(AddressFamily.InterNetwork))
             {
                 Task<int> sendTask = client.SendAsync(requestPacket, requestPacket.Length, browserHostname, port);
                 Task<UdpReceiveResult> receiveTask = null;
