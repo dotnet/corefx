@@ -6,8 +6,6 @@
 /// Task APM helper based on http://blogs.msdn.com/b/pfxteam/archive/2011/06/27/10179452.aspx
 /// </summary>
 
-// TODO: #3144 - Remove this class and rewrite tests to work directly with TPL.
-
 namespace System.Threading.Tasks
 {
     public static class TaskAPMExtensions
