@@ -94,17 +94,17 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitNullableCoalesce(b);
             }
-            else if (b.Left.Type.GetTypeInfo().IsValueType)
-            {
-                throw Error.CoalesceUsedOnNonNullType();
-            }
-            else if (b.Conversion != null)
-            {
-                EmitLambdaReferenceCoalesce(b);
-            }
             else
             {
-                EmitReferenceCoalesceWithoutConversion(b);
+                Debug.Assert(!b.Left.Type.GetTypeInfo().IsValueType); // Enforced in Coalesce and ValidateCoalesceArgTypes
+                if (b.Conversion != null)
+                {
+                    EmitLambdaReferenceCoalesce(b);
+                }
+                else
+                {
+                    EmitReferenceCoalesceWithoutConversion(b);
+                }
             }
         }
 
