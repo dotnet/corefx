@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class Array17NetcoreappTests
+    public static class ArrayNetcoreappTests
     {
         [Fact]
         public static void CreateInstance_Type_Int_Invalid()
