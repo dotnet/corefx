@@ -151,6 +151,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(StorageFlags))]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportWithPrivateKey(X509KeyStorageFlags keyStorageFlags)
         {
             using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable | keyStorageFlags))

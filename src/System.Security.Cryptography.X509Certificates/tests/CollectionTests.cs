@@ -701,6 +701,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportPkcs7()
         {
             TestExportStore(X509ContentType.Pkcs7);
@@ -725,6 +726,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Fact]
         [ActiveIssue(2746, TestPlatforms.AnyUnix)]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportEmpty_Pkcs12()
         {
             var collection = new X509Certificate2Collection();
@@ -735,6 +737,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportUnrelatedPfx()
         {
             // Export multiple certificates which are not part of any kind of certificate chain.
@@ -801,6 +804,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Fact]
         [ActiveIssue(2743, TestPlatforms.AnyUnix)]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportMultiplePrivateKeys()
         {
             var collection = new X509Certificate2Collection();

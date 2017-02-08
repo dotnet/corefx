@@ -175,6 +175,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void X509Cert2ToStringVerbose()
         {
             using (X509Store store = new X509Store("My", StoreLocation.CurrentUser))
@@ -216,24 +217,28 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void X509Certificate2FromPkcs7DerFile()
         {
             Assert.ThrowsAny<CryptographicException>(() => new X509Certificate2(Path.Combine("TestData", "singlecert.p7b")));
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void X509Certificate2FromPkcs7PemFile()
         {
             Assert.ThrowsAny<CryptographicException>(() => new X509Certificate2(Path.Combine("TestData", "singlecert.p7c")));
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void X509Certificate2FromPkcs7DerBlob()
         {
             Assert.ThrowsAny<CryptographicException>(() => new X509Certificate2(TestData.Pkcs7SingleDerBytes));
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void X509Certificate2FromPkcs7PemBlob()
         {
             Assert.ThrowsAny<CryptographicException>(() => new X509Certificate2(TestData.Pkcs7SinglePemBytes));
@@ -284,6 +289,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(-1, TestPlatforms.OSX)]
         public static void ExportPublicKeyAsPkcs12()
         {
             using (X509Certificate2 publicOnly = new X509Certificate2(TestData.MsCertificate))
