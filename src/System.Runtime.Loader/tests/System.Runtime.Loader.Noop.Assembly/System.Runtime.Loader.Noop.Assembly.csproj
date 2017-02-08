@@ -6,8 +6,6 @@
     <!-- Test expects an un-signed assembly -->
     <SkipSigning>true</SkipSigning>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="TestClass.cs" />
   </ItemGroup>

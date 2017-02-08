@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{301ABDC3-6604-477F-B7CB-1AAD6A8408CF}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Net.Mime.cs" />
     <Compile Include="System.Net.Mail.cs" />

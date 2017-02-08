@@ -5,11 +5,6 @@
     <ProjectGuid>{2C58640B-5BED-4E83-9554-CD2B9762643F}</ProjectGuid>
     <AssemblyName>System.Text.RegularExpressions</AssemblyName>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Text\RegularExpressions\HashtableExtensions.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.cs" />

@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{41899248-F846-4F88-91A1-01B037F93BF3}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Net.HttpListener.cs" />
   </ItemGroup>

@@ -5,10 +5,6 @@
     <UseECMAKey Condition="'$(UseECMAKey)' == ''">true</UseECMAKey>
     <ProjectGuid>{5208B51C-53E1-425A-A6A7-D3BB6BCCCF29}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.IO.Compression.ZipFile.cs" />
   </ItemGroup>

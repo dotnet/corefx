@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{C2B1A23B-16F9-4015-BE3C-DD871A7C108D}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Threading.AccessControl.cs" />
     <Compile Include="System.Threading.AccessControl.Manual.cs" />

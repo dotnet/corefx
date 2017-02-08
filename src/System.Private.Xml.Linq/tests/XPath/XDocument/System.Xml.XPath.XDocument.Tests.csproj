@@ -7,8 +7,6 @@
     <RootNamespace>System.Xml.XPath.XDocument.Tests</RootNamespace>
     <CommonPathXPath>$(CommonPath)\System\Xml\XPath</CommonPathXPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <!-- XPath.XDocument navigator -->
     <Compile Include="CreateNavigatorComparer.cs" />

@@ -13,9 +13,6 @@
          Instead give them this assembly.  -->
     <PackageTargetFramework>netstandard1.1;MonoAndroid10;MonoTouch10;xamarinios10;xamarintvos10;xamarinwatchos10</PackageTargetFramework>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Reference Include="System.Reflection" />
     <Reference Include="System.Runtime" />

@@ -4,8 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{5BDC8641-E3EE-47B5-BE7B-2D2275402412}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Diagnostics.PerformanceCounter.cs" />
   </ItemGroup>

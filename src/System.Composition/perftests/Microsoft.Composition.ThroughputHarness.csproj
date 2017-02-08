@@ -8,8 +8,6 @@
     <RootNamespace>CompositionThroughput</RootNamespace>
     <AssemblyName>CompositionThroughput</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Benchmark.cs" />
     <Compile Include="ControlBenchmark.cs" />

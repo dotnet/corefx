@@ -9,8 +9,6 @@
     <IncludePerformanceTests>true</IncludePerformanceTests>
     <ProjectGuid>{41CAE9F4-0FFB-4FD1-9413-039C3C561DEE}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\MemoryMappedFilesTestsBase.cs" />
     <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
