@@ -138,5 +138,5 @@ public class DosDevices : IEnumerable<KeyValuePair<string, string>>
     public const int ERROR_MORE_DATA = 234;
 
     [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    static extern int QueryDosDevice(string lpDeviceName, char[] lpTargetPath, int ucchMax);
+    private static extern int QueryDosDevice(string lpDeviceName, char[] lpTargetPath, int ucchMax);
 }
