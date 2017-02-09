@@ -94,12 +94,6 @@ namespace System.Collections.Immutable
             Debug.Assert(ilist != null);
             Debug.Assert(!(ilist is ImmutableList<T>), $"{nameof(ImmutableList<T>)} has poor random access complexity.");
 
-            var array = ilist as T[];
-            if (array != null)
-            {
-                return CreateRange(array: array);
-            }
-
             int count = ilist.Count;
             if (count <= 0)
             {
@@ -115,31 +109,6 @@ namespace System.Collections.Immutable
 
             return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
         }
-        
-        /// <summary>
-        /// Creates a new immutable queue from the specified array.
-        /// </summary>
-        /// <typeparam name="T">The type of items to store in the queue.</typeparam>
-        /// <param name="array">The array to copy items from.</param>
-        /// <returns>The new immutable queue.</returns>
-        private static ImmutableQueue<T> CreateRange<T>(T[] array)
-        {
-            Debug.Assert(array != null);
-
-            if (array.Length == 0)
-            {
-                return ImmutableQueue<T>.Empty;
-            }
-
-            var forwards = ImmutableStack<T>.Empty;
-
-            for (int i = array.Length - 1; i >= 0; i--)
-            {
-                forwards = forwards.Push(array[i]);
-            }
-
-            return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
-        }
 
         /// <summary>
         /// Creates a new immutable queue from the specified items.
@@ -151,7 +120,7 @@ namespace System.Collections.Immutable
         public static ImmutableQueue<T> Create<T>(params T[] items)
         {
             Requires.NotNull(items, nameof(items));
-            return CreateRange(array: items);
+            return CreateRange(ilist: items);
         }
 
         /// <summary>
