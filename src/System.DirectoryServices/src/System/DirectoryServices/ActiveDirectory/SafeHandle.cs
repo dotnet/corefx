@@ -11,7 +11,6 @@ namespace System.DirectoryServices.ActiveDirectory
     using System.Runtime.ConstrainedExecution;
     using System.Security;
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal sealed class PolicySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal PolicySafeHandle(IntPtr value) : base(true)
@@ -26,7 +25,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal sealed class LsaLogonProcessSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private LsaLogonProcessSafeHandle() : base(true) { }
@@ -43,7 +41,6 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal sealed class LoadLibrarySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private LoadLibrarySafeHandle() : base(true) { }

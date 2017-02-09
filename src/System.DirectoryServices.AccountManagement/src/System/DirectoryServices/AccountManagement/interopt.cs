@@ -18,7 +18,6 @@ namespace System.DirectoryServices.AccountManagement
         internal static Byte[] GUID_FOREIGNSECURITYPRINCIPALS_CONTAINER_BYTE = new Byte[] { 0x22, 0xb7, 0x0c, 0x67, 0xd5, 0x6e, 0x4e, 0xfb, 0x91, 0xe9, 0x30, 0x0f, 0xca, 0x3d, 0xc1, 0xaa };
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute]
     internal class SafeNativeMethods
     {
         // To stop the compiler from autogenerating a constructor for this class
@@ -31,7 +30,6 @@ namespace System.DirectoryServices.AccountManagement
         static extern public int LsaNtStatusToWinError(int ntStatus);
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute]
     internal class UnsafeNativeMethods
     {
         // To stop the compiler from autogenerating a constructor for this class
@@ -89,7 +87,6 @@ namespace System.DirectoryServices.AccountManagement
             int LowPart { get; set; }
         }
 
-        [SuppressUnmanagedCodeSecurityAttribute]
         [ComImport, Guid("927971f5-0939-11d1-8be1-00c04fd8d503")]
         public class ADsLargeInteger
         {
@@ -298,7 +295,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [SuppressUnmanagedCodeSecurityAttribute]
         [ComImport, Guid("080d0d78-f421-11d0-a36e-00c04fb950dc")]
         public class Pathname
         {

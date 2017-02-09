@@ -10,10 +10,8 @@ using System.Text;
 
 namespace Microsoft.Win32
 {
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal static class UnsafeNativeMethods
     {
-        [SuppressUnmanagedCodeSecurityAttribute()]
         internal static unsafe class ManifestEtw
         {
             //
@@ -88,7 +86,6 @@ namespace Microsoft.Win32
             }
 
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
             internal static uint EventUnregister([In] long registrationHandle)
             {
                 return Interop.Kernel32.EventUnregister((ulong)registrationHandle);
@@ -125,8 +122,6 @@ namespace Microsoft.Win32
                 return HResult;
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
-            [SuppressUnmanagedCodeSecurityAttribute]        // Don't do security checks 
             private static unsafe int EventWriteTransfer(
                     [In] long registrationHandle,
                     [In] ref EventDescriptor eventDescriptor,
@@ -164,8 +159,6 @@ namespace Microsoft.Win32
                 SetTraits,
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
-            [SuppressUnmanagedCodeSecurityAttribute]        // Don't do security checks 
             internal static int EventSetInformation(
                 [In] long registrationHandle,
                 [In] EVENT_INFO_CLASS informationClass,
@@ -216,8 +209,6 @@ namespace Microsoft.Win32
             };
 #pragma warning restore 0649
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
-            [SuppressUnmanagedCodeSecurityAttribute]        // Don't do security checks 
             internal static int EnumerateTraceGuidsEx(
                 TRACE_QUERY_INFO_CLASS TraceQueryInfoClass,
                 void* InBuffer,

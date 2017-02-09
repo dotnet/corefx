@@ -56,63 +56,53 @@ namespace System.DirectoryServices.Interop
             string Name
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             string Class
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             string GUID
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             string ADsPath
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             string Parent
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             string Schema
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void GetInfo();
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void SetInfo();
 
             Object Get(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string bstrName);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Put(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string bstrName,
                 [In]
                 Object vProp);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetEx(
                 [In, MarshalAs(UnmanagedType.BStr)]
@@ -120,7 +110,6 @@ namespace System.DirectoryServices.Interop
                 [Out]
                 out object value);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void PutEx(
                 [In, MarshalAs(UnmanagedType.U4)]
                 int lnControlCode,
@@ -129,7 +118,6 @@ namespace System.DirectoryServices.Interop
                 [In]
                 Object vProp);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void GetInfoEx(
                 [In]
                 Object vProperties,
@@ -142,14 +130,12 @@ namespace System.DirectoryServices.Interop
             int Count
             {
                 [return: MarshalAs(UnmanagedType.U4)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             object _NewEnum
             {
                 [return: MarshalAs(UnmanagedType.Interface)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
@@ -166,7 +152,6 @@ namespace System.DirectoryServices.Interop
             }
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             object GetObject(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string className,
@@ -174,14 +159,12 @@ namespace System.DirectoryServices.Interop
                 string relativeName);
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             object Create(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string className,
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string relativeName);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Delete(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string className,
@@ -189,7 +172,6 @@ namespace System.DirectoryServices.Interop
                 string relativeName);
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             object CopyHere(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string sourceName,
@@ -197,7 +179,6 @@ namespace System.DirectoryServices.Interop
                 string newName);
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             object MoveHere(
                 [In, MarshalAs(UnmanagedType.BStr)]
                 string sourceName,
@@ -207,7 +188,6 @@ namespace System.DirectoryServices.Interop
 
         public interface IAdsDeleteOps
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void DeleteObject(int flags);
         }
 
@@ -235,21 +215,17 @@ namespace System.DirectoryServices.Interop
 
         public interface IAdsPropertyValue
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Clear();
 
             int ADsType
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 set;
             }
 
             string DNString
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
                 set;
@@ -258,7 +234,6 @@ namespace System.DirectoryServices.Interop
             string CaseExactString
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
                 set;
@@ -267,7 +242,6 @@ namespace System.DirectoryServices.Interop
             string CaseIgnoreString
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
                 set;
@@ -276,7 +250,6 @@ namespace System.DirectoryServices.Interop
             string PrintableString
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
                 set;
@@ -285,7 +258,6 @@ namespace System.DirectoryServices.Interop
             string NumericString
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
                 set;
@@ -305,16 +277,13 @@ namespace System.DirectoryServices.Interop
 
             object OctetString
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
 
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 set;
             }
 
             object SecurityDescriptor
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
 
                 set;
@@ -322,7 +291,6 @@ namespace System.DirectoryServices.Interop
 
             object LargeInteger
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
 
                 set;
@@ -330,7 +298,6 @@ namespace System.DirectoryServices.Interop
 
             object UTCTime
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
 
                 set;
@@ -346,32 +313,25 @@ namespace System.DirectoryServices.Interop
 
         public interface IAdsPropertyEntry
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Clear();
 
             string Name
             {
                 [return: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
                 [param: MarshalAs(UnmanagedType.BStr)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 set;
             }
 
             int ADsType
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 set;
             }
 
             int ControlCode
             {
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 set;
             }
 
@@ -387,25 +347,21 @@ namespace System.DirectoryServices.Interop
             int PropertyCount
             {
                 [return: MarshalAs(UnmanagedType.U4)]
-                [SuppressUnmanagedCodeSecurityAttribute()]
                 get;
             }
 
             [return: MarshalAs(UnmanagedType.I4)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int Next([Out] out object nextProp);
 
             void Skip([In] int cElements);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Reset();
 
             object Item([In] object varIndex);
 
             object GetPropertyItem([In, MarshalAs(UnmanagedType.BStr)] string bstrName, int ADsType);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void PutPropertyItem([In] object varData);
 
             void ResetPropertyItem([In] object varEntry);
@@ -416,14 +372,12 @@ namespace System.DirectoryServices.Interop
         [ComImport, Guid("109BA8EC-92F0-11D0-A790-00C04FD8D5A8"), System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
         public interface IDirectorySearch
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void SetSearchPreference(
                 [In]
                 IntPtr /*ads_searchpref_info * */pSearchPrefs,
                 //ads_searchpref_info[] pSearchPrefs,
                 int dwNumPrefs);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void ExecuteSearch(
                 [In, MarshalAs(UnmanagedType.LPWStr)]
                 string pszSearchFilter,
@@ -434,33 +388,27 @@ namespace System.DirectoryServices.Interop
                 [Out]
                 out IntPtr hSearchResult);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void AbandonSearch([In] IntPtr hSearchResult);
 
             [return: MarshalAs(UnmanagedType.U4)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetFirstRow([In] IntPtr hSearchResult);
 
             [return: MarshalAs(UnmanagedType.U4)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetNextRow([In] IntPtr hSearchResult);
 
             [return: MarshalAs(UnmanagedType.U4)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetPreviousRow([In] IntPtr hSearchResult);
 
             [return: MarshalAs(UnmanagedType.U4)]
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetNextColumnName(
                 [In] IntPtr hSearchResult,
                 [Out]
                 IntPtr ppszColumnName);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void GetColumn(
                 [In] IntPtr hSearchResult,
                 [In] //, MarshalAs(UnmanagedType.LPWStr)]
@@ -468,12 +416,10 @@ namespace System.DirectoryServices.Interop
                 [In]
                 IntPtr pSearchColumn);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void FreeColumn(
                 [In]
                 IntPtr pSearchColumn);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void CloseSearchHandle([In] IntPtr hSearchResult);
         }
 
@@ -481,7 +427,6 @@ namespace System.DirectoryServices.Interop
         {
             object GetOption(int flag);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void SetOption(int flag, [In] object varValue);
         }
 
@@ -490,11 +435,9 @@ namespace System.DirectoryServices.Interop
 
         public interface IAdsObjectOptions2
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             [PreserveSig]
             int GetOption(int flag, [Out] out object value);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void SetOption(int option, Variant value);
         }
 

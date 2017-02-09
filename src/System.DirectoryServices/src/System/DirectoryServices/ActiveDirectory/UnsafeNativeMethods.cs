@@ -644,22 +644,16 @@ namespace System.DirectoryServices.ActiveDirectory
         public static extern int FormatMessageW(int dwFlags, int lpSource, int dwMessageId,
                                                 int dwLanguageId, StringBuilder lpBuffer, int nSize, int arguments);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaConsistencyCheck([In]IntPtr handle, int taskID, int flags);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaGetInfo2W(IntPtr handle, int type, [MarshalAs(UnmanagedType.LPWStr)] string objectPath, IntPtr sourceGUID, string attributeName, string value, int flag, int context, ref IntPtr info);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaGetInfoW(IntPtr handle, int type, [MarshalAs(UnmanagedType.LPWStr)] string objectPath, IntPtr sourceGUID, ref IntPtr info);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaFreeInfo(int type, IntPtr value);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaSyncW(IntPtr handle, [MarshalAs(UnmanagedType.LPWStr)] string partition, IntPtr uuid, int option);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsReplicaSyncAllW(IntPtr handle, [MarshalAs(UnmanagedType.LPWStr)] string partition, int flags, SyncReplicaFromAllServersCallback callback, IntPtr data, ref IntPtr error);
 
         [DllImport("kernel32.dll", EntryPoint = "LocalFree")]
@@ -674,10 +668,8 @@ namespace System.DirectoryServices.ActiveDirectory
         [DllImport("netapi32.dll", EntryPoint = "DsGetSiteNameW", CharSet = CharSet.Unicode)]
         public static extern int DsGetSiteName(string dcName, ref IntPtr ptr);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate int DsListDomainsInSiteW(IntPtr handle, [MarshalAs(UnmanagedType.LPWStr)] string site, ref IntPtr info);
 
-        [SuppressUnmanagedCodeSecurityAttribute()]
         public delegate void DsFreeNameResultW(IntPtr result);
 
         [DllImport("Netapi32.dll", EntryPoint = "DsEnumerateDomainTrustsW", CharSet = CharSet.Unicode)]
