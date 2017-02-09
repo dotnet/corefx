@@ -17,7 +17,6 @@
   
   <Target Name="GenerateSignForWindowsNative">
     <WriteSigningRequired AuthenticodeSig="$(AuthenticodeSig)"
-                          StrongNameSig="$(null)"
                           MarkerFile="%(WindowsNativeLocation.Identity).requires_signing" />
   </Target>
 
