@@ -1342,6 +1342,19 @@
     <StablePackage Include="System.Net.Http.WinHttpHandler">
       <Version>4.0.1</Version>
     </StablePackage>
-    
+
+    <!-- Servicing 1.0.4 wave -->
+    <StablePackage Include="System.Linq.Expressions">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="System.Private.DataContractSerialization">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.Runtime.Serialization.Json">
+      <Version>4.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="System.Runtime.Serialization.Xml">
+      <Version>4.1.2</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>
