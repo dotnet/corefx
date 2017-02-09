@@ -46,6 +46,7 @@ namespace System.Net
 
     /// <summary>Provides logging facilities for System.Net libraries.</summary>
 #if NET46    
+    [SecuritySafeCritical]
 #endif
     internal sealed partial class NetEventSource : EventSource
     {
