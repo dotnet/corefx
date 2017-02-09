@@ -6397,11 +6397,12 @@ namespace System.Data.SqlClient
                     {
                         // use local for ref param to defer setting s_maxSSPILength until we know the call succeeded.
                         UInt32 maxLength = 0;
-
+#if MANAGED_SNI
+                        if (0 != SNIProxy.Singleton.InitializeSspiPackage(ref maxLength))
+#else
                         if (0 != SNINativeMethodWrapper.SNISecInitPackage(ref maxLength))
-                        {
+#endif // MANAGED_SNI
                             SSPIError(SQLMessage.SSPIInitializeError(), TdsEnums.INIT_SSPI_PACKAGE);
-                        }
 
                         s_maxSSPILength = maxLength;
                         s_fSSPILoaded = true;
