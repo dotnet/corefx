@@ -72,9 +72,7 @@ namespace Microsoft.Win32
         public Microsoft.Win32.RegistryKey OpenSubKey(string name, System.Security.AccessControl.RegistryRights rights) { throw null; }
         public Microsoft.Win32.RegistryKey OpenSubKey(string name, Microsoft.Win32.RegistryKeyPermissionCheck permissionCheck, System.Security.AccessControl.RegistryRights rights) { throw null; }
         public System.Security.AccessControl.RegistrySecurity GetAccessControl() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public System.Security.AccessControl.RegistrySecurity GetAccessControl(System.Security.AccessControl.AccessControlSections includeSections) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public void SetAccessControl(System.Security.AccessControl.RegistrySecurity registrySecurity) { throw null; }
         public void SetValue(string name, object value) { }
         public void SetValue(string name, object value, Microsoft.Win32.RegistryValueKind valueKind) { }

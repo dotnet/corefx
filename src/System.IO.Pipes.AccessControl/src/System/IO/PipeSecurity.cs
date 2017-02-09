@@ -16,7 +16,6 @@ namespace System.IO.Pipes
             : base(false, ResourceType.KernelObject) { }
 
         // Used by PipeStream.GetAccessControl
-        [System.Security.SecuritySafeCritical]
         internal PipeSecurity(SafePipeHandle safeHandle, AccessControlSections includeSections)
             : base(false, ResourceType.KernelObject, safeHandle, includeSections) { }
 

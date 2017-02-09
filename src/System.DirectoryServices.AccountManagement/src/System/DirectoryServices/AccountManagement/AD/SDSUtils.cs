@@ -780,7 +780,6 @@ namespace System.DirectoryServices.AccountManagement
             return ds;
         }
 
-        [System.Security.SecuritySafeCritical]
         static internal bool IsObjectFromGC(string path)
         {
             return path.StartsWith("GC:", StringComparison.OrdinalIgnoreCase);

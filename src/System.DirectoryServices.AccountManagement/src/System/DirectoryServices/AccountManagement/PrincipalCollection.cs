@@ -459,7 +459,6 @@ namespace System.DirectoryServices.AccountManagement
         // Contains
         //
 
-        [System.Security.SecuritySafeCritical]
         private bool ContainsEnumTest(Principal principal)
         {
             CheckDisposed();
@@ -509,7 +508,6 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        [System.Security.SecuritySafeCritical]
         private bool ContainsNativeTest(Principal principal)
         {
             CheckDisposed();
@@ -652,7 +650,6 @@ namespace System.DirectoryServices.AccountManagement
         //
 
         // The group we're a PrincipalCollection of        
-        [System.Security.SecuritySafeCritical]
         private GroupPrincipal _owningGroup;
 
         //

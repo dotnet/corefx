@@ -62,7 +62,6 @@ namespace System.IO.MemoryMappedFiles
 
         public bool IsClosed
         {
-            [SecuritySafeCritical]
             get { return _viewHandle.IsClosed; }
         }
 

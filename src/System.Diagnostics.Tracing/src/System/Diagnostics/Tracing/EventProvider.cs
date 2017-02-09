@@ -147,7 +147,6 @@ namespace System.Diagnostics.Tracing
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             //
@@ -330,7 +329,6 @@ namespace System.Diagnostics.Tracing
         /// ETW session that was added or remove, and the bool specifies whether the
         /// session was added or whether it was removed from the set.
         /// </summary>
-        [System.Security.SecuritySafeCritical]
         private List<Tuple<SessionInfo, bool>> GetSessions()
         {
             List<SessionInfo> liveSessionList = null;

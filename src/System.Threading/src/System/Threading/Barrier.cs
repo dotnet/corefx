@@ -754,7 +754,6 @@ namespace System.Threading
         /// last arrival thread
         /// </summary>
         /// <param name="observedSense">The current phase sense</param>
-        [SecuritySafeCritical]
         private void FinishPhase(bool observedSense)
         {
             // Execute the PHA in try/finally block to reset the variables back in case of it threw an exception

@@ -89,7 +89,6 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecuritySafeCritical]
         private bool ExecuteTask(Task task)
         {
             return TryExecuteTask(task);

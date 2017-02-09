@@ -309,7 +309,6 @@ namespace System.Text
 
         protected abstract unsafe void ReadBestFitTable();
 
-        [System.Security.SecuritySafeCritical]
         internal char[] GetBestFitUnicodeToBytesData()
         {
             // Read in our best fit table if necessary
@@ -321,7 +320,6 @@ namespace System.Text
             return arrayUnicodeBestFit;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal char[] GetBestFitBytesToUnicodeData()
         {
             // Read in our best fit table if necessary

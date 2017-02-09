@@ -22,7 +22,6 @@ namespace System.IO
 
         private FileInfo() { }
 
-        [System.Security.SecuritySafeCritical]
         public FileInfo(String fileName)
         {
             if (fileName == null)
@@ -54,7 +53,6 @@ namespace System.IO
             return originalPath;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal FileInfo(String fullPath, String originalPath)
         {
             Debug.Assert(Path.IsPathRooted(fullPath), "fullPath must be fully qualified!");
@@ -72,7 +70,6 @@ namespace System.IO
 
         public long Length
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 if ((FileSystemObject.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
@@ -86,7 +83,6 @@ namespace System.IO
         /* Returns the name of the directory that the file is in */
         public String DirectoryName
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return Path.GetDirectoryName(FullPath);
@@ -120,7 +116,6 @@ namespace System.IO
             }
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public StreamReader OpenText()
         {
             return new StreamReader(FullPath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
@@ -195,7 +190,6 @@ namespace System.IO
         // 
         // Your application must have Delete permission to the target file.
         // 
-        [System.Security.SecuritySafeCritical]
         public override void Delete()
         {
             FileSystem.Current.DeleteFile(FullPath);
@@ -208,7 +202,6 @@ namespace System.IO
         // Your application must have Read permission for the target directory.
         public override bool Exists
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 try
@@ -239,7 +232,6 @@ namespace System.IO
         }
 
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public FileStream OpenRead()
         {
             return new FileStream(FullPath, FileMode.Open, FileAccess.Read,
@@ -261,7 +253,6 @@ namespace System.IO
         // sourceFileName and Write 
         // permissions to destFileName.
         // 
-        [System.Security.SecuritySafeCritical]
         public void MoveTo(String destFileName)
         {
             if (destFileName == null)

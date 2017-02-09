@@ -712,7 +712,6 @@ namespace System.Diagnostics.Tracing
 
 #pragma warning disable 1591
         // optimized for common signatures (no args)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId)
         {
@@ -720,7 +719,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (ints)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, int arg1)
         {
@@ -733,7 +731,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, int arg1, int arg2)
         {
@@ -748,7 +745,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, int arg1, int arg2, int arg3)
         {
@@ -766,7 +762,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (longs)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, long arg1)
         {
@@ -779,7 +774,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, long arg1, long arg2)
         {
@@ -794,7 +788,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, long arg1, long arg2, long arg3)
         {
@@ -812,7 +805,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (strings)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1)
         {
@@ -829,7 +821,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1, string arg2)
         {
@@ -850,7 +841,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3)
         {
@@ -876,7 +866,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (string and ints)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1, int arg2)
         {
@@ -895,7 +884,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1, int arg2, int arg3)
         {
@@ -917,7 +905,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (string and longs)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, string arg1, long arg2)
         {
@@ -937,7 +924,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (long and string)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, long arg1, string arg2)
         {
@@ -957,7 +943,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // optimized for common signatures (int and string)
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, int arg1, string arg2)
         {
@@ -976,7 +961,6 @@ namespace System.Diagnostics.Tracing
             }
         }
  
-         [SecuritySafeCritical] 
          [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")] 
          protected unsafe void WriteEvent(int eventId, byte[] arg1) 
          { 
@@ -1007,7 +991,6 @@ namespace System.Diagnostics.Tracing
              } 
          } 
 
-         [SecuritySafeCritical] 
          [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")] 
          protected unsafe void WriteEvent(int eventId, long arg1, byte[] arg2) 
          { 
@@ -1293,7 +1276,6 @@ namespace System.Diagnostics.Tracing
         /// method signature. Even if you use this for rare events, this call should be guarded by an <see cref="IsEnabled()"/> 
         /// check so that the varargs call is not made when the EventSource is not active.  
         /// </summary>
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         protected unsafe void WriteEvent(int eventId, params object[] args)
         {
@@ -1308,7 +1290,6 @@ namespace System.Diagnostics.Tracing
         /// particular method signature. Even if you use this for rare events, this call should be guarded by an <see cref="IsEnabled()"/>
         /// check so that the varargs call is not made when the EventSource is not active.
         /// </summary>
-        [SecuritySafeCritical]
         protected unsafe void WriteEventWithRelatedActivityId(int eventId, Guid relatedActivityId, params object[] args)
         {
             WriteEventVarargs(eventId, &relatedActivityId, args);
@@ -1437,7 +1418,6 @@ namespace System.Diagnostics.Tracing
         /// member, and any future access to the "Log" would throw the cached exception).
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "guid")]
-        [SecuritySafeCritical]
         private unsafe void Initialize(Guid eventSourceGuid, string eventSourceName, string[] traits)
         {
             try
@@ -2203,7 +2183,6 @@ namespace System.Diagnostics.Tracing
             }
         }
         
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "This does not need to be correct when racing with other threads")]
         private unsafe void WriteEventString(EventLevel level, long keywords, string msgString)
         {
@@ -3009,7 +2988,6 @@ namespace System.Diagnostics.Tracing
             get { return m_eventSourceDisposed; }
         }
 
-        [SecuritySafeCritical]
         private void EnsureDescriptorsInitialized()
         {
 #if !ES_BUILD_STANDALONE
@@ -3076,7 +3054,6 @@ namespace System.Diagnostics.Tracing
 
         // Send out the ETW manifest XML out to ETW
         // Today, we only send the manifest to ETW, custom listeners don't get it. 
-        [SecuritySafeCritical]
         private unsafe bool SendManifest(byte[] rawManifest)
         {
             bool success = true;
@@ -3808,7 +3785,6 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         /// <param name="method">The method to probe.</param>
         /// <returns>The literal value or -1 if the value could not be determined. </returns>
-        [SecuritySafeCritical]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Switch statement is clearer than alternatives")]
         private static int GetHelperCallFirstArg(MethodInfo method)
         {
@@ -5498,7 +5474,6 @@ namespace System.Diagnostics.Tracing
             return shouldBeLogged;
         }
 
-        [System.Security.SecuritySafeCritical]
         public static bool IsCurrentActivityActive(ActivityFilter filterList)
         {
             var activeActivities = GetActiveActivities(filterList);

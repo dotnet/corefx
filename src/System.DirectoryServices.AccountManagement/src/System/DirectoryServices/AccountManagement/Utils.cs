@@ -118,7 +118,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // SID Utilities
         //        
-        [System.Security.SecuritySafeCritical]
 
         internal static string ConvertSidToSDDL(byte[] sid)
         {
@@ -180,7 +179,6 @@ namespace System.DirectoryServices.AccountManagement
             return pBytes;
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static byte[] ConvertNativeSidToByteArray(IntPtr pSid)
         {
@@ -208,7 +206,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static SidType ClassifySID(IntPtr pSid)
         {
@@ -255,7 +252,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static int GetLastRidFromSid(IntPtr pSid)
         {
@@ -352,7 +348,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static IntPtr GetCurrentUserSid()
         {
@@ -483,7 +478,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static IntPtr GetMachineDomainSid()
         {
@@ -567,7 +561,6 @@ namespace System.DirectoryServices.AccountManagement
         [System.Security.Permissions.SecurityPermission(
                                         System.Security.Permissions.SecurityAction.Assert,
                                         Flags = System.Security.Permissions.SecurityPermissionFlag.ControlPrincipal)]
-        [System.Security.SecuritySafeCritical]
 
         internal static string GetNT4UserName()
         {
@@ -582,7 +575,6 @@ namespace System.DirectoryServices.AccountManagement
         [System.Security.Permissions.EnvironmentPermission(
                                         System.Security.Permissions.SecurityAction.Assert,
                                         Unrestricted = true)]
-        [System.Security.SecuritySafeCritical]
 
         internal static string GetComputerFlatName()
         {
@@ -596,7 +588,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Interop support
         //
-        [System.Security.SecuritySafeCritical]
 
         internal static UnsafeNativeMethods.DomainControllerInfo GetDcName(string computerName, string domainName, string siteName, int flags)
         {
@@ -697,7 +688,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         static internal Principal ConstructFakePrincipalFromSID(
                                                             byte[] sid,
@@ -844,7 +834,6 @@ namespace System.DirectoryServices.AccountManagement
             UnsafeNativeMethods.CloseHandle(hUserToken);
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static bool IsMachineDC(String computerName)
         {
             IntPtr dsRoleInfoPtr = IntPtr.Zero;

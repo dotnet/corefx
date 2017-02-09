@@ -458,7 +458,6 @@ namespace System.IO.MemoryMappedFiles
             GC.SuppressFinalize(this);
         }
 
-        [SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             try

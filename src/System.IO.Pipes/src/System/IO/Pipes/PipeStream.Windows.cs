@@ -79,7 +79,6 @@ namespace System.IO.Pipes
             return r;
         }
 
-        [SecuritySafeCritical]
         private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: false);
@@ -146,7 +145,6 @@ namespace System.IO.Pipes
             Debug.Assert(r >= 0, "PipeStream's WriteCore is likely broken.");
         }
 
-        [SecuritySafeCritical]
         private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: true);

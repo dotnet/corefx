@@ -39,7 +39,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         public PrincipalContext Context
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 CheckDisposed();
@@ -202,7 +201,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Private implementation
         //
-        [System.Security.SecuritySafeCritical]
         private PrincipalContext _ctx;
 
         // Are we disposed?
@@ -249,7 +247,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Returns at most one result in the FindResult<Principal> if returnOne == true, no limit on results
         // returned otherwise.
-        [System.Security.SecuritySafeCritical]
         private PrincipalSearchResult<Principal> FindAll(bool returnOne)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearcher", "Entering FindAll, returnOne=" + returnOne.ToString());
@@ -298,7 +295,6 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         // Checks this.qbeFilter to determine if any referential properties are set
-        [System.Security.SecuritySafeCritical]
         private bool HasReferentialPropertiesSet()
         {
             // If using a null query filter, nothing to validate, as it can't have any referential

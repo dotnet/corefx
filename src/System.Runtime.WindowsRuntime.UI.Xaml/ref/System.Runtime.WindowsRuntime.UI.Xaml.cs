@@ -18,14 +18,11 @@ namespace Windows.UI.Xaml
         public double BottomRight { get { throw null; } set { } }
         public double TopLeft { get { throw null; } set { } }
         public double TopRight { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.CornerRadius cornerRadius) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.CornerRadius cr1, global::Windows.UI.Xaml.CornerRadius cr2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.CornerRadius cr1, global::Windows.UI.Xaml.CornerRadius cr2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
     [global::System.Security.SecurityCriticalAttribute]
@@ -39,11 +36,9 @@ namespace Windows.UI.Xaml
         public global::System.TimeSpan TimeSpan { get { throw null; } }
         public global::Windows.UI.Xaml.Duration Add(global::Windows.UI.Xaml.Duration duration) { throw null; }
         public static int Compare(global::Windows.UI.Xaml.Duration t1, global::Windows.UI.Xaml.Duration t2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object value) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Duration duration) { throw null; }
         public static bool Equals(global::Windows.UI.Xaml.Duration t1, global::Windows.UI.Xaml.Duration t2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static global::Windows.UI.Xaml.Duration operator +(global::Windows.UI.Xaml.Duration t1, global::Windows.UI.Xaml.Duration t2) { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Duration t1, global::Windows.UI.Xaml.Duration t2) { throw null; }
@@ -56,7 +51,6 @@ namespace Windows.UI.Xaml
         public static global::Windows.UI.Xaml.Duration operator -(global::Windows.UI.Xaml.Duration t1, global::Windows.UI.Xaml.Duration t2) { throw null; }
         public static global::Windows.UI.Xaml.Duration operator +(global::Windows.UI.Xaml.Duration duration) { throw null; }
         public global::Windows.UI.Xaml.Duration Subtract(global::Windows.UI.Xaml.Duration duration) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
     [global::System.Security.SecurityCriticalAttribute]
@@ -78,14 +72,11 @@ namespace Windows.UI.Xaml
         public bool IsAuto { get { throw null; } }
         public bool IsStar { get { throw null; } }
         public double Value { get { throw null; } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object oCompare) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.GridLength gridLength) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.GridLength gl1, global::Windows.UI.Xaml.GridLength gl2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.GridLength gl1, global::Windows.UI.Xaml.GridLength gl2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
     [global::System.Security.SecurityCriticalAttribute]
@@ -112,14 +103,11 @@ namespace Windows.UI.Xaml
         public double Left { get { throw null; } set { } }
         public double Right { get { throw null; } set { } }
         public double Top { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Thickness thickness) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Thickness t1, global::Windows.UI.Xaml.Thickness t2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Thickness t1, global::Windows.UI.Xaml.Thickness t2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
 }
@@ -149,13 +137,10 @@ namespace Windows.UI.Xaml.Controls.Primitives
         public GeneratorPosition(int index, int offset) { throw null; }
         public int Index { get { throw null; } set { } }
         public int Offset { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Controls.Primitives.GeneratorPosition gp1, global::Windows.UI.Xaml.Controls.Primitives.GeneratorPosition gp2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Controls.Primitives.GeneratorPosition gp1, global::Windows.UI.Xaml.Controls.Primitives.GeneratorPosition gp2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
 }
@@ -184,16 +169,12 @@ namespace Windows.UI.Xaml.Media
         public double M22 { get { throw null; } set { } }
         public double OffsetX { get { throw null; } set { } }
         public double OffsetY { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Media.Matrix value) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Media.Matrix matrix1, global::Windows.UI.Xaml.Media.Matrix matrix2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Media.Matrix matrix1, global::Windows.UI.Xaml.Media.Matrix matrix2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         string System.IFormattable.ToString(string format, global::System.IFormatProvider provider) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider provider) { throw null; }
         public global::Windows.Foundation.Point Transform(global::Windows.Foundation.Point point) { throw null; }
@@ -206,17 +187,14 @@ namespace Windows.UI.Xaml.Media.Animation
     public partial struct KeyTime
     {
         public global::System.TimeSpan TimeSpan { get { throw null; } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object value) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Media.Animation.KeyTime value) { throw null; }
         public static bool Equals(global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime1, global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime2) { throw null; }
         public static global::Windows.UI.Xaml.Media.Animation.KeyTime FromTimeSpan(global::System.TimeSpan timeSpan) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime1, global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime2) { throw null; }
         public static implicit operator global::Windows.UI.Xaml.Media.Animation.KeyTime(global::System.TimeSpan timeSpan) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime1, global::Windows.UI.Xaml.Media.Animation.KeyTime keyTime2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
     [global::System.Security.SecurityCriticalAttribute]
@@ -231,17 +209,13 @@ namespace Windows.UI.Xaml.Media.Animation
         public bool HasCount { get { throw null; } }
         public bool HasDuration { get { throw null; } }
         public global::Windows.UI.Xaml.Media.Animation.RepeatBehaviorType Type { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object value) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior) { throw null; }
         public static bool Equals(global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior1, global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior1, global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior1, global::Windows.UI.Xaml.Media.Animation.RepeatBehavior repeatBehavior2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         string System.IFormattable.ToString(string format, global::System.IFormatProvider formatProvider) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider formatProvider) { throw null; }
     }
@@ -279,18 +253,14 @@ namespace Windows.UI.Xaml.Media.Media3D
         public double OffsetX { get { throw null; } set { } }
         public double OffsetY { get { throw null; } set { } }
         public double OffsetZ { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.UI.Xaml.Media.Media3D.Matrix3D value) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public void Invert() { }
         public static bool operator ==(global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix1, global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix2) { throw null; }
         public static bool operator !=(global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix1, global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix2) { throw null; }
         public static global::Windows.UI.Xaml.Media.Media3D.Matrix3D operator *(global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix1, global::Windows.UI.Xaml.Media.Media3D.Matrix3D matrix2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         string System.IFormattable.ToString(string format, global::System.IFormatProvider provider) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider provider) { throw null; }
     }

@@ -609,7 +609,6 @@ namespace System
 
         public static string Title
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 string title = null;
@@ -628,7 +627,6 @@ namespace System
                 return title;
             }
 
-            [System.Security.SecuritySafeCritical]  // auto-generated
             set
             {
                 if (value == null)
@@ -821,7 +819,6 @@ namespace System
 
         public static int BufferWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -835,7 +832,6 @@ namespace System
 
         public static int BufferHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -847,7 +843,6 @@ namespace System
             }
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public static void SetBufferSize(int width, int height)
         {
             // Ensure the new size is not smaller than the console window
@@ -869,7 +864,6 @@ namespace System
 
         public static int LargestWindowWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 
@@ -881,7 +875,6 @@ namespace System
 
         public static int LargestWindowHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 

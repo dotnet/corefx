@@ -112,7 +112,6 @@ namespace System.IO
         private readonly string _normalizedSearchPath;
         private readonly uint _oldMode;
 
-        [SecuritySafeCritical]
         internal Win32FileSystemEnumerableIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption, SearchResultHandler<TSource> resultHandler)
         {
             Debug.Assert(path != null);
@@ -207,7 +206,6 @@ namespace System.IO
             }
         }
 
-        [SecuritySafeCritical]
         private Win32FileSystemEnumerableIterator(string fullPath, string normalizedSearchPath, string searchCriteria, string userPath, SearchOption searchOption, SearchResultHandler<TSource> resultHandler)
         {
             _fullPath = fullPath;
@@ -237,7 +235,6 @@ namespace System.IO
             return new Win32FileSystemEnumerableIterator<TSource>(_fullPath, _normalizedSearchPath, _searchCriteria, _userPath, _searchOption, _resultHandler);
         }
 
-        [SecuritySafeCritical]
         protected override void Dispose(bool disposing)
         {
             try
@@ -254,7 +251,6 @@ namespace System.IO
             }
         }
 
-        [SecuritySafeCritical]
         public override bool MoveNext()
         {
             Interop.Kernel32.WIN32_FIND_DATA data = new Interop.Kernel32.WIN32_FIND_DATA();

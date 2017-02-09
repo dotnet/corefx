@@ -30,7 +30,6 @@ namespace System.DirectoryServices.AccountManagement
         // Context property
         public PrincipalContext Context
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 // Make sure we're not disposed or deleted.
@@ -744,7 +743,6 @@ namespace System.DirectoryServices.AccountManagement
         internal bool fakePrincipal = false;
 
         // Directly corresponds to the Principal.PrincipalContext public property
-        [System.Security.SecuritySafeCritical]
         private PrincipalContext _ctx = null;
 
         internal bool Loaded
@@ -805,7 +803,6 @@ namespace System.DirectoryServices.AccountManagement
         // returns the appropriate StoreCtx from the PrincipalContext that we should use for
         // all StoreCtx-related operations.
         // Returns null if no context has been set yet.
-        [System.Security.SecuritySafeCritical]
         internal StoreCtx GetStoreCtxToUse()
         {
             if (_ctx == null)
@@ -890,7 +887,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Checks if the principal has been disposed or deleted, and throws an appropriate exception if it has.
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
-        [System.Security.SecuritySafeCritical]
         protected void CheckDisposedOrDeleted()
         {
             if (_disposed)
@@ -952,7 +948,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         private ResultSet GetGroupsHelper()
         {
             // Make sure we're not disposed or deleted.
@@ -974,7 +969,6 @@ namespace System.DirectoryServices.AccountManagement
             return resultSet;
         }
 
-        [System.Security.SecuritySafeCritical]
         private ResultSet GetGroupsHelper(PrincipalContext contextToQuery)
         {
             // Make sure we're not disposed or deleted.
@@ -1157,7 +1151,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Given a property name, returns true if that property has changed since it was loaded, false otherwise.
         //[StrongNameIdentityPermission(SecurityAction.InheritanceDemand,  PublicKey = Microsoft.Internal.BuildInfo.WINDOWS_PUBLIC_KEY_STRING)]        
-        [System.Security.SecuritySafeCritical]
         internal virtual bool GetChangeStatusForProperty(string propertyName)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Principal", "GetChangeStatusForProperty: name=" + propertyName);

@@ -139,14 +139,11 @@ namespace Windows.Foundation
         public Point(double x, double y) { throw null; }
         public double X { get { throw null; } set { } }
         public double Y { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.Foundation.Point value) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.Foundation.Point point1, global::Windows.Foundation.Point point2) { throw null; }
         public static bool operator !=(global::Windows.Foundation.Point point1, global::Windows.Foundation.Point point2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider provider) { throw null; }
     }
@@ -168,15 +165,12 @@ namespace Windows.Foundation
         public double X { get { throw null; } set { } }
         public double Y { get { throw null; } set { } }
         public bool Contains(global::Windows.Foundation.Point point) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.Foundation.Rect value) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public void Intersect(global::Windows.Foundation.Rect rect) { }
         public static bool operator ==(global::Windows.Foundation.Rect rect1, global::Windows.Foundation.Rect rect2) { throw null; }
         public static bool operator !=(global::Windows.Foundation.Rect rect1, global::Windows.Foundation.Rect rect2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider provider) { throw null; }
         public void Union(global::Windows.Foundation.Point point) { }
@@ -191,14 +185,11 @@ namespace Windows.Foundation
         public double Height { get { throw null; } set { } }
         public bool IsEmpty { get { throw null; } }
         public double Width { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.Foundation.Size value) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.Foundation.Size size1, global::Windows.Foundation.Size size2) { throw null; }
         public static bool operator !=(global::Windows.Foundation.Size size1, global::Windows.Foundation.Size size2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
     }
 }
@@ -212,15 +203,12 @@ namespace Windows.UI
         public byte B { get { throw null; } set { } }
         public byte G { get { throw null; } set { } }
         public byte R { get { throw null; } set { } }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override bool Equals(object o) { throw null; }
         public bool Equals(global::Windows.UI.Color color) { throw null; }
         public static global::Windows.UI.Color FromArgb(byte a, byte r, byte g, byte b) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::Windows.UI.Color color1, global::Windows.UI.Color color2) { throw null; }
         public static bool operator !=(global::Windows.UI.Color color1, global::Windows.UI.Color color2) { throw null; }
-        [global::System.Security.SecuritySafeCriticalAttribute]
         public override string ToString() { throw null; }
         public string ToString(global::System.IFormatProvider provider) { throw null; }
     }

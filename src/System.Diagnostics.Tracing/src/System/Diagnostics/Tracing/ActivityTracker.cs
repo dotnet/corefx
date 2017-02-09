@@ -221,7 +221,6 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// Turns on activity tracking.    It is sticky, once on it stays on (race issues otherwise)
         /// </summary>
-        [System.Security.SecuritySafeCritical]
         public void Enable()
         {
             if (m_current == null)
@@ -366,7 +365,6 @@ namespace System.Diagnostics.Tracing
             /// byte (since the top nibble can't be zero you can determine if this is true by seeing if 
             /// this byte is nonZero.   This offset is needed to efficiently create the ID for child activities. 
             /// </summary>
-            [System.Security.SecuritySafeCritical]
             private unsafe void CreateActivityPathGuid(out Guid idRet, out int activityPathGuidOffset)
             {
                 fixed (Guid* outPtr = &idRet)

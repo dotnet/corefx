@@ -16,26 +16,22 @@ namespace System.IO.Pipes
         private SafePipeHandle _clientHandle;
         private bool _clientHandleExposed;
 
-        [SecuritySafeCritical]
         public AnonymousPipeServerStream()
             : this(PipeDirection.Out, HandleInheritability.None, 0)
         {
         }
 
-        [SecuritySafeCritical]
         public AnonymousPipeServerStream(PipeDirection direction)
             : this(direction, HandleInheritability.None, 0)
         {
         }
 
-        [SecuritySafeCritical]
         public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability)
             : this(direction, inheritability, 0)
         { 
         }
 
         // Create an AnonymousPipeServerStream from two existing pipe handles.
-        [SecuritySafeCritical]
         public AnonymousPipeServerStream(PipeDirection direction, SafePipeHandle serverSafePipeHandle, SafePipeHandle clientSafePipeHandle)
             : base(direction, 0)
         {
@@ -71,7 +67,6 @@ namespace System.IO.Pipes
 
         // bufferSize is used as a suggestion; specify 0 to let OS decide
         // This constructor instantiates the PipeSecurity using just the inheritability flag
-        [SecuritySafeCritical]
         public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
             : base(direction, bufferSize)
         {

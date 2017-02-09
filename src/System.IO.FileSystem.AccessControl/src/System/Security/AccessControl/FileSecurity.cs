@@ -440,7 +440,6 @@ namespace System.Security.AccessControl
             }
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         internal void Persist(SafeFileHandle handle, String fullPath)
         {
             WriteLock();
@@ -613,13 +612,11 @@ namespace System.Security.AccessControl
     {
         #region Constructors
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public FileSecurity()
             : base(false)
         {
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public FileSecurity(String fileName, AccessControlSections includeSections)
             : base(false, fileName, includeSections, false)
         {
@@ -642,13 +639,11 @@ namespace System.Security.AccessControl
     {
         #region Constructors
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public DirectorySecurity()
             : base(true)
         {
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public DirectorySecurity(String name, AccessControlSections includeSections)
             : base(true, name, includeSections, true)
         {

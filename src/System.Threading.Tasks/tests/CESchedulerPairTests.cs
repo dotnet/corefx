@@ -51,7 +51,6 @@ namespace System.Threading.Tasks.Tests
             }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
-        [SecuritySafeCritical] //This has to be SecuritySafeCritical since its accesses TaskScheduler.TryExecuteTask (which is safecritical)
         private void ExecuteTask(Task task)
         {
             base.TryExecuteTask(task);

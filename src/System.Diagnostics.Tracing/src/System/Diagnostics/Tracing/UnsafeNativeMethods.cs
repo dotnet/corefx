@@ -248,7 +248,6 @@ namespace Microsoft.Win32
         private const string CoreLocalizationApiSet = "kernel32.dll";
 #endif
 
-        [System.Security.SecuritySafeCritical]
         // Gets an error message for a Win32 error code.
         internal static String GetMessage(int errorCode)
         {

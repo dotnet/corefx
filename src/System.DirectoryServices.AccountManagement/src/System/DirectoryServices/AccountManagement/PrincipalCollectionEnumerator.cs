@@ -19,7 +19,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public Principal Current
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 CheckDisposed();
@@ -58,7 +57,6 @@ namespace System.DirectoryServices.AccountManagement
         // Public methods
         //
 
-        [System.Security.SecuritySafeCritical]
         public bool MoveNext()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalCollectionEnumerator", "Entering MoveNext");

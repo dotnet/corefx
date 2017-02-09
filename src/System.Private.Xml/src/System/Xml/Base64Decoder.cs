@@ -44,7 +44,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(char[] chars, int startPos, int len)
         {
             if (chars == null)
@@ -80,7 +79,6 @@ namespace System.Xml
             return charsDecoded;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(string str, int startPos, int len)
         {
             if (str == null)

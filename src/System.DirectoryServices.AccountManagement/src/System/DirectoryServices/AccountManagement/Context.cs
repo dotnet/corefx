@@ -226,7 +226,6 @@ namespace System.DirectoryServices.AccountManagement
             return true;
         }
 
-        [System.Security.SecuritySafeCritical]
         private void lockedLdapBind(LdapConnection current, NetworkCredential creds, ContextOptions contextOptions)
         {
             current.AuthType = ((ContextOptions.SimpleBind & contextOptions) > 0 ? AuthType.Basic : AuthType.Negotiate);
@@ -1092,7 +1091,6 @@ namespace System.DirectoryServices.AccountManagement
 
         internal StoreCtx QueryCtx
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 Initialize();

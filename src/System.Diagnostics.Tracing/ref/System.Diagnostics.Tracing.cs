@@ -159,7 +159,7 @@ namespace System.Diagnostics.Tracing
         public EventSource(string eventSourceName, System.Diagnostics.Tracing.EventSourceSettings config) { }
         public EventSource(string eventSourceName, System.Diagnostics.Tracing.EventSourceSettings config, params string[] traits) { }
         public System.Exception ConstructionException { get { throw null; } }
-        public static System.Guid CurrentThreadActivityId {[System.Security.SecuritySafeCriticalAttribute]get { throw null; } }
+        public static System.Guid CurrentThreadActivityId { get { throw null; } }
         public System.Guid Guid { get { throw null; } }
         public string Name { get { throw null; } }
         public System.Diagnostics.Tracing.EventSourceSettings Settings { get { throw null; } }

@@ -95,7 +95,6 @@ namespace System.IO.Pipes
         // Once a PipeStream has a handle ready, it should call this method to set up the PipeStream.  If
         // the pipe is in a connected state already, it should also set the IsConnected (protected) property.
         // This method may also be called to uninitialize a handle, setting it to null.
-        [SecuritySafeCritical]
         protected void InitializeHandle(SafePipeHandle handle, bool isExposed, bool isAsync)
         {
             if (isAsync && handle != null)
@@ -128,7 +127,6 @@ namespace System.IO.Pipes
             return ReadCore(buffer, offset, count);
         }
 
-        [SecuritySafeCritical]
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckReadWriteArgs(buffer, offset, count);
@@ -192,7 +190,6 @@ namespace System.IO.Pipes
             WriteCore(buffer, offset, count);
         }
 
-        [SecuritySafeCritical]
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckReadWriteArgs(buffer, offset, count);

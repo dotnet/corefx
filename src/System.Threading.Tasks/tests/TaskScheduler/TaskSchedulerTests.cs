@@ -336,7 +336,6 @@ namespace System.Threading.Tasks.Tests
 
         // Buggy task scheduler to make sure that we handle QueueTask()/TryExecuteTaskInline()
         // exceptions correctly.  Used in RunBuggySchedulerTests() below.
-        [SecuritySafeCritical]
         public class BuggyTaskScheduler : TaskScheduler
         {
             private readonly ConcurrentQueue<Task> _tasks = new ConcurrentQueue<Task>();

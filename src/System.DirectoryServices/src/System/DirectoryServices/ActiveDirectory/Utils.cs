@@ -2066,7 +2066,6 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static IntPtr GetCurrentUserSid()
         {
@@ -2183,7 +2182,6 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static IntPtr GetMachineDomainSid()
         {
             IntPtr pPolicyHandle = IntPtr.Zero;
@@ -2254,7 +2252,6 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static bool IsMachineDC(String computerName)
         {
             IntPtr dsRoleInfoPtr = IntPtr.Zero;
@@ -2289,7 +2286,6 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static SidType ClassifySID(IntPtr pSid)
         {
             Debug.Assert(UnsafeNativeMethods.IsValidSid(pSid));
@@ -2335,7 +2331,6 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [System.Security.SecuritySafeCritical]
 
         internal static int GetLastRidFromSid(IntPtr pSid)
         {

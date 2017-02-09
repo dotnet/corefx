@@ -44,7 +44,6 @@ namespace System.IO
         // Full path of the directory/file
         public virtual String FullName
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FullPath;
@@ -100,7 +99,6 @@ namespace System.IO
 
         public DateTime CreationTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FileSystemObject.CreationTime.UtcDateTime;
@@ -128,7 +126,6 @@ namespace System.IO
 
         public DateTime LastAccessTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FileSystemObject.LastAccessTime.UtcDateTime;
@@ -156,7 +153,6 @@ namespace System.IO
 
         public DateTime LastWriteTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FileSystemObject.LastWriteTime.UtcDateTime;
@@ -175,7 +171,6 @@ namespace System.IO
 
         public FileAttributes Attributes
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FileSystemObject.Attributes;

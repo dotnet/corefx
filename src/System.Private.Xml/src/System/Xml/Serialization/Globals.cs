@@ -14,7 +14,6 @@ namespace System.Xml.Serialization
         private static Type s_typeOfDBNull;
         internal static Type TypeOfDBNull
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_typeOfDBNull == null)
@@ -26,7 +25,6 @@ namespace System.Xml.Serialization
         private static object s_valueOfDBNull;
         internal static object ValueOfDBNull
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_valueOfDBNull == null && TypeOfDBNull != null)

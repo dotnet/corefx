@@ -13,7 +13,6 @@ namespace System.IO
     [Serializable]
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
-        [System.Security.SecuritySafeCritical]
         public DirectoryInfo(String path)
         {
             if (path == null)
@@ -25,7 +24,6 @@ namespace System.IO
             DisplayPath = GetDisplayName(OriginalPath);
         }
 
-        [System.Security.SecuritySafeCritical]
         internal DirectoryInfo(String fullPath, String originalPath)
         {
             Debug.Assert(Path.IsPathRooted(fullPath), "fullPath must be fully qualified!");
@@ -51,7 +49,6 @@ namespace System.IO
 
         public DirectoryInfo Parent
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 string s = FullPath;
@@ -72,7 +69,6 @@ namespace System.IO
         }
 
 
-        [System.Security.SecuritySafeCritical]
         public DirectoryInfo CreateSubdirectory(String path)
         {
             if (path == null)
@@ -114,7 +110,6 @@ namespace System.IO
         //
         public override bool Exists
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 try
@@ -366,7 +361,6 @@ namespace System.IO
 
         public DirectoryInfo Root
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 String rootPath = Path.GetPathRoot(FullPath);
@@ -375,7 +369,6 @@ namespace System.IO
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         public void MoveTo(String destDirName)
         {
             if (destDirName == null)
@@ -420,13 +413,11 @@ namespace System.IO
             Invalidate();
         }
 
-        [System.Security.SecuritySafeCritical]
         public override void Delete()
         {
             FileSystem.Current.RemoveDirectory(FullPath, false);
         }
 
-        [System.Security.SecuritySafeCritical]
         public void Delete(bool recursive)
         {
             FileSystem.Current.RemoveDirectory(FullPath, recursive);

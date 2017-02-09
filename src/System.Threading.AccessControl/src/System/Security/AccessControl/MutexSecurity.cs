@@ -116,7 +116,6 @@ namespace System.Security.AccessControl
         {
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public MutexSecurity(String name, AccessControlSections includeSections)
             : base(true, ResourceType.KernelObject, name, includeSections, _HandleErrorCode, null)
         {

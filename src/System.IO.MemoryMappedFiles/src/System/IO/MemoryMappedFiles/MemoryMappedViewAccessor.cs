@@ -30,7 +30,6 @@ namespace System.IO.MemoryMappedFiles
             get { return _view.PointerOffset; }
         }
 
-        [SecuritySafeCritical]
         protected override void Dispose(bool disposing)
         {
             try

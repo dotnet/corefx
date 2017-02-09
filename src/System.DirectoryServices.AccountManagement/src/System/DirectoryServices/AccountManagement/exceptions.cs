@@ -282,7 +282,6 @@ namespace System.DirectoryServices.AccountManagement
             return exception;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static Exception GetExceptionFromErrorCode(int errorCode)
         {
             return GetExceptionFromErrorCode(errorCode, null);

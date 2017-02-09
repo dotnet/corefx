@@ -1255,7 +1255,6 @@ namespace System.Threading.Tasks.Tests
                 Task.Run(() => TryExecuteTaskWrapper(task));
             }
 
-            [SecuritySafeCritical]
             private void TryExecuteTaskWrapper(Task task)
             {
                 TryExecuteTask(task);

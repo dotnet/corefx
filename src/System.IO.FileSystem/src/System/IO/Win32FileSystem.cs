@@ -61,7 +61,6 @@ namespace System.IO
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         public override void CreateDirectory(string fullPath)
         {
             if (PathInternal.IsDirectoryTooLong(fullPath))
