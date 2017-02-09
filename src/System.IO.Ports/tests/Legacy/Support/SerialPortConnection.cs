@@ -20,8 +20,8 @@ namespace Legacy.Support
     {
         public static bool VerifyConnection(string portName1, string portName2)
         {
-            using (SerialPort com1 = new SerialPort(portName1))
-            using (SerialPort com2 = new SerialPort(portName2))
+            using (SerialPort com1 = new SerialPort(portName1, 115200))
+            using (SerialPort com2 = new SerialPort(portName2, 115200))
             {
                 bool connectionVerified;
                 try
@@ -42,7 +42,7 @@ namespace Legacy.Support
 
         public static bool VerifyLoopback(string portName)
         {
-            using (SerialPort com = new SerialPort(portName))
+            using (SerialPort com = new SerialPort(portName, 115200))
             {
                 bool loopbackVerified;
                 try

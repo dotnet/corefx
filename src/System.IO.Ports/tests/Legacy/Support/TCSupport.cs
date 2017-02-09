@@ -613,5 +613,20 @@ namespace Legacy.Support
                 }
             }
         }
+
+        /// <summary>
+        /// Set both ports to 115200 baud to speed test performance
+        /// </summary>
+        public static void SetHighSpeed(SerialPort com1, SerialPort com2)
+        {
+            if (com1 != null)
+            {
+                com1.BaudRate = 115200;
+            }
+            if (com2 != null && com2 != com1)
+            {
+                com2.BaudRate = 115200;
+            }
+        }
     }
 }

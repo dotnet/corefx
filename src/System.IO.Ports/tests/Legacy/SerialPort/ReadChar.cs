@@ -206,6 +206,8 @@ public class ReadChar : PortsTest
             //when we read this later the buffer will have to be resized
             byteXmitBuffer[byteXmitBuffer.Length - 1] = utf32CharBytes[0];
 
+            TCSupport.SetHighSpeed(com1, com2);
+
             com1.Open();
 
             if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
@@ -495,6 +497,8 @@ public class ReadChar : PortsTest
 
             com1.ReadTimeout = 500;
             com1.Encoding = encoding;
+
+            TCSupport.SetHighSpeed(com1,com2);
 
             com1.Open();
 
