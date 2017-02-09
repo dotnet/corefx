@@ -4037,7 +4037,7 @@ namespace System
                 {
                     flags &= ~Flags.UncPath;    //UNC cannot have an empty hostname
                     if (StaticInFact(flags, Flags.ImplicitFile)
-                        && !StaticInFact(flags, Flags.UnixPath))
+                        && (IsWindowsSystem || !StaticInFact(flags, Flags.UnixPath)))
                         err = ParsingError.BadHostName;
                     else
                         flags |= Flags.BasicHostType;
@@ -5273,7 +5273,7 @@ namespace System
                         path = Compress(path, 3, ref length, basePart.Syntax);
                         return new string(path, 1, length - 1) + extra;
                     }
-                    else if (basePart.IsUnixPath)
+                    else if (!IsWindowsSystem && basePart.IsUnixPath)
                     {
                         left = basePart.GetParts(UriComponents.Host, UriFormat.Unescaped);
                     }
