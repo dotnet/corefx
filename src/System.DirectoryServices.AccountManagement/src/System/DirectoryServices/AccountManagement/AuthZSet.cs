@@ -573,8 +573,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Guarantees finalization of the native resources
         //
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
         private sealed class SafeMemoryPtr : SafeHandle
         {
             private SafeMemoryPtr() : base(IntPtr.Zero, true)

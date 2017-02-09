@@ -12,8 +12,6 @@ using System.Text.RegularExpressions;
 
 namespace System.DirectoryServices.AccountManagement
 {
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     internal class SAMQuerySet : ResultSet
     {
         // We will iterate over all principals under ctxBase, returning only those which are in the list of types and which
@@ -205,8 +203,6 @@ namespace System.DirectoryServices.AccountManagement
     // The matcher routines for query-by-example support
     //
 
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     internal class QbeMatcher : SAMMatcher
     {
         private QbeFilterDescription _propertiesToMatch;
@@ -700,8 +696,6 @@ namespace System.DirectoryServices.AccountManagement
     // The matcher routines for FindBy* support
     //
 
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     internal class FindByDateMatcher : SAMMatcher
     {
         internal enum DateProperty
@@ -840,8 +834,6 @@ namespace System.DirectoryServices.AccountManagement
         }
     }
 
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     internal class GroupMemberMatcher : SAMMatcher
     {
         private byte[] _memberSidToMatch;

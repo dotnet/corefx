@@ -345,8 +345,6 @@ namespace System.DirectoryServices.AccountManagement
     // ********************************************
     [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Assert,
                                                 Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     //    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted=true)]
     public class PrincipalContext : IDisposable
     {

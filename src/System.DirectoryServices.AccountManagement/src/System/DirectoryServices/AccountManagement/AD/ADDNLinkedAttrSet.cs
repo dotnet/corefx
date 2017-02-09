@@ -11,8 +11,6 @@ using System.Security.Principal;
 
 namespace System.DirectoryServices.AccountManagement
 {
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
     internal class ADDNLinkedAttrSet : BookmarkableResultSet
     {
         // This class can be used to either enumerate the members of a group, or the groups

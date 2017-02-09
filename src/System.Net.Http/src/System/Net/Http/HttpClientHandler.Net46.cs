@@ -1098,7 +1098,6 @@ namespace System.Net.Http
         }
 
         // Security: We need an assert for a call into WindowsIdentity.GetCurrent
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification="Needed for identity flow.")]
         private void SafeCaptureIdenity(RequestState state)
         {
             state.identity = WindowsIdentity.GetCurrent();

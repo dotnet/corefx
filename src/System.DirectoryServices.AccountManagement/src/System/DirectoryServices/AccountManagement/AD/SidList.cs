@@ -13,8 +13,6 @@ using System.Net;
 
 namespace System.DirectoryServices.AccountManagement
 {
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-#pragma warning restore 618
 
     internal class SidList
     {
