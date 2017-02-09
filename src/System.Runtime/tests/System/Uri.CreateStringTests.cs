@@ -716,6 +716,8 @@ namespace System.Tests
                 // Explicit with empty host and non-empty path
                 yield return new object[] { "file:///", "/", "", "" };
                 yield return new object[] { "file:////", "//", "", "" };
+                yield return new object[] { @"file://\", "/", "", "" };
+                yield return new object[] { @"file:///path1\path2/path3\path4\", @"/path1/path2/path3/path4/", "", "" };
                 // Explicit with empty host and query
                 yield return new object[] { "file:///?query", "/", "?query", "" };
                 yield return new object[] { "file:////?query", "//", "?query", "" };
@@ -1302,8 +1304,8 @@ namespace System.Tests
                 yield return new object[] { @"\\unchost\path\file", UriKind.Absolute };
 
                 // Unix path must start with '/'
-                yield return new object[] { @"file://\", UriKind.Absolute };
-                yield return new object[] { @"file://host\", UriKind.Absolute };
+                //yield return new object[] { @"file://\", UriKind.Absolute };
+                //yield return new object[] { @"file://host\", UriKind.Absolute };
             }
         }
 
