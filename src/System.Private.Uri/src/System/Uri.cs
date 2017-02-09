@@ -3661,7 +3661,8 @@ namespace System
                 }
             }
 
-            //NB: A string must have at least 3(Windows)/1(Unix) characters and at least 1 before ':'
+            //NB: A Uri must have at least 3 characters, except when it's an implicit unix path
+            //    and at least one before ':'
             if ((idx + (IsWindowsSystem ? 2 : 0)) >= length || end == idx)
             {
                 err = ParsingError.BadFormat;
@@ -3717,8 +3718,9 @@ namespace System
                 }
             }
 
-            //NB: A string must have at least 3 characters and contain a ':'
-            if (idx + 2 >= length || end == length)
+            //NB: A Uri must have at least 3 characters on Unix too
+            //    and contain a ':'
+            if ((!IsWindowsSystem && idx + 2 >= length) || end == length)
             {
                 err = ParsingError.BadFormat;
                 return 0;
