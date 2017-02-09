@@ -22,19 +22,23 @@ namespace System.Net.Http
         {
         }
 
+        internal static bool IsEnabled()
+        {
+            return s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteName);
+        }
+
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            //do not write to diagnostic source if request is invalid or cancelled,
-            //let inner handler decide what to do with it
-            if (request == null || cancellationToken.IsCancellationRequested)
-            {
-                return base.SendAsync(request, cancellationToken);
-            }
-
+            //HttpClientHandler is responsible to call DelegatingHandler.IsEnabled() before forwarding request to it.
+            //so this code will never be reached if RequestWriteName is not enabled
             Guid loggingRequestId = LogHttpRequest(request);
             Task<HttpResponseMessage> responseTask = base.SendAsync(request, cancellationToken);
-            LogHttpResponse(responseTask, loggingRequestId);
+
+            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteName))
+            {
+                LogHttpResponse(responseTask, loggingRequestId);
+            }
             return responseTask;
         }
 
@@ -44,35 +48,6 @@ namespace System.Net.Http
             new DiagnosticListener(DiagnosticsHandlerLoggingStrings.DiagnosticListenerName);
 
         private static Guid LogHttpRequest(HttpRequestMessage request)
-        {
-            return s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteName) ?
-                LogHttpRequestCore(request) :
-                Guid.Empty;
-        }
-
-        private static void LogHttpResponse(Task<HttpResponseMessage> responseTask, Guid loggingRequestId)
-        {
-            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteName))
-            {
-                ScheduleLogResponse(responseTask, loggingRequestId);
-            }
-        }
-
-        private static void ScheduleLogResponse(
-            Task<HttpResponseMessage> responseTask, Guid loggingRequestId)
-        {
-            responseTask.ContinueWith(
-                t =>
-                {
-                    if (!t.IsCanceled)
-                    {
-                        LogHttpResponseCore(t.IsFaulted ? null : t.Result, t.Exception, loggingRequestId);
-                    }
-                },
-                TaskScheduler.Default);
-        }
-
-        private static Guid LogHttpRequestCore(HttpRequestMessage request)
         {
             Guid loggingRequestId = Guid.NewGuid();
             long timestamp = Stopwatch.GetTimestamp();
@@ -90,26 +65,25 @@ namespace System.Net.Http
             return loggingRequestId;
         }
 
-        private static void LogHttpResponseCore(HttpResponseMessage response, Exception exception,
-            Guid loggingRequestId)
+        private static void LogHttpResponse(Task<HttpResponseMessage> responseTask, Guid loggingRequestId)
         {
-            // An empty loggingRequestId signifies that the request was not logged, so do
-            // not attempt to log response.
-            if (loggingRequestId != Guid.Empty)
-            {
-                long timestamp = Stopwatch.GetTimestamp();
+            responseTask.ContinueWith(
+                (t, s) =>
+                {
+                    long timestamp = Stopwatch.GetTimestamp();
 
-                s_diagnosticListener.Write(
-                    DiagnosticsHandlerLoggingStrings.ResponseWriteName,
-                    new
-                    {
-                        Response = response,
-                        LoggingRequestId = loggingRequestId,
-                        TimeStamp = timestamp,
-                        Exception = exception
-                    }
-                );
-            }
+                    s_diagnosticListener.Write(
+                        DiagnosticsHandlerLoggingStrings.ResponseWriteName,
+                        new
+                        {
+                            Response = t.Status == TaskStatus.RanToCompletion ? t.Result : null,
+                            LoggingRequestId = s,
+                            TimeStamp = timestamp,
+                            Exception = t.Exception,
+                            RequestTaskStatus = t.Status
+                        }
+                    );
+                }, loggingRequestId, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         #endregion
