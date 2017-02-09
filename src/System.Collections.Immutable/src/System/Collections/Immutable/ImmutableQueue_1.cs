@@ -17,7 +17,7 @@ namespace System.Collections.Immutable
     [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Ignored")]
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Ignored")]
-    public sealed partial class ImmutableQueue<T> : IImmutableQueue<T>, IImmutableEnumerable<T>
+    public sealed partial class ImmutableQueue<T> : IImmutableQueue<T>
     {
         /// <summary>
         /// The singleton empty queue.
