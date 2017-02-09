@@ -78,7 +78,7 @@ namespace System.Collections.Immutable
         /// Creates a new immutable queue from the specified list.
         /// </summary>
         /// <typeparam name="T">The type of items to store in the queue.</typeparam>
-        /// <param name="list">The list to copy items from.</param>
+        /// <param name="ilist">The list to copy items from.</param>
         /// <returns>The new immutable queue.</returns>
         /// <remarks>
         /// This version is a faster method of creating an immutable queue because it pushes
