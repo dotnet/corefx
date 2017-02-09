@@ -470,7 +470,6 @@ namespace System.ComponentModel
         ///     Derived classes can override this method and call base.Clone to get proper cloning semantics but must
         ///     implement the full-paramter contructor (passing parameters to the base constructor as well).
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods")]
         public object Clone()
         {
             MaskedTextProvider clonedProvider;

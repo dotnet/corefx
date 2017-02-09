@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Security.Permissions;
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods", Scope = "member", Target = "System.ComponentModel.InstallerTypeAttribute.get_InstallerType():System.Type")]
 
 namespace System.ComponentModel
 {
