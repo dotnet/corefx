@@ -95,7 +95,6 @@ namespace System.Threading.Tasks.Tests
             return TryExecuteTask(task);
         }
 
-        [SecurityCritical]
         protected override void QueueTask(Task task)
         {
             _tasks.Add(task);
@@ -109,7 +108,6 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecurityCritical]
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
             RunSyncCalledCount++;
@@ -128,7 +126,6 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecurityCritical]
         protected override IEnumerable<Task> GetScheduledTasks()
         {
             return _tasks;

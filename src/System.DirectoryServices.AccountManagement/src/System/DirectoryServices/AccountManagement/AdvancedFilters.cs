@@ -155,7 +155,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         protected void AdvancedFilterSet(string attribute, object value, Type objectType, MatchType mt)
         {
             _p.AdvancedFilterSet(attribute, value, objectType, mt);

@@ -21,7 +21,6 @@ namespace System.IO.Pipes
         {
         }
 
-        [SecurityCritical]
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]
         public AnonymousPipeClientStream(PipeDirection direction, String pipeHandleAsString)
             : base(direction, 0)
@@ -53,7 +52,6 @@ namespace System.IO.Pipes
             Init(direction, safePipeHandle);
         }
 
-        [SecurityCritical]
         public AnonymousPipeClientStream(PipeDirection direction, SafePipeHandle safePipeHandle)
             : base(direction, 0)
         {
@@ -93,13 +91,11 @@ namespace System.IO.Pipes
         // which P/Invokes (and sometimes fails).
         public override PipeTransmissionMode TransmissionMode
         {
-            [SecurityCritical]
             get { return PipeTransmissionMode.Byte; }
         }
 
         public override PipeTransmissionMode ReadMode
         {
-            [SecurityCritical]
             set
             {
                 CheckPipePropertyOperations();

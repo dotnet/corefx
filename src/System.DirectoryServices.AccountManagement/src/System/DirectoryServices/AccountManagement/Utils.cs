@@ -156,7 +156,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // The caller must call Marshal.FreeHGlobal on the returned
         // value to free it.
-        [System.Security.SecurityCritical]
         internal static IntPtr ConvertByteArrayToIntPtr(byte[] bytes)
         {
             IntPtr pBytes = IntPtr.Zero;
@@ -192,7 +191,6 @@ namespace System.DirectoryServices.AccountManagement
             return sid;
         }
 
-        [System.Security.SecurityCritical]
         internal static SidType ClassifySID(byte[] sid)
         {
             IntPtr pSid = IntPtr.Zero;
@@ -269,7 +267,6 @@ namespace System.DirectoryServices.AccountManagement
             return lastRid;
         }
 
-        [System.Security.SecurityCritical]
         internal static int GetLastRidFromSid(byte[] sid)
         {
             IntPtr pSid = IntPtr.Zero;
@@ -292,7 +289,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         //
 
-        [System.Security.SecurityCritical]
         internal static bool IsSamUser()
         {
             //
@@ -632,7 +628,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         internal static int LookupSid(string serverName, NetCred credentials, byte[] sid, out string name, out string domainName, out int accountUsage)
         {
             IntPtr pSid = IntPtr.Zero;
@@ -774,7 +769,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Impersonation
         //
-        [System.Security.SecurityCritical]
         internal static bool BeginImpersonation(NetCred credential, out IntPtr hUserToken)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Utils", "Entering BeginImpersonation");
@@ -842,7 +836,6 @@ namespace System.DirectoryServices.AccountManagement
             return true;
         }
 
-        [System.Security.SecurityCritical]
         internal static void EndImpersonation(IntPtr hUserToken)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Utils", "Entering EndImpersonation");

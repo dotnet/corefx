@@ -9659,7 +9659,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecurityCritical]
         internal static unsafe void AdjustLineInfo(char* pChars, int length, bool isNormalized, ref LineInfo lineInfo)
         {
             int lastNewLinePos = -1;

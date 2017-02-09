@@ -87,7 +87,6 @@ namespace System.DirectoryServices.AccountManagement
             _serverProperties = serverProperties;
         }
 
-        [System.Security.SecurityCritical]
         private bool BindSam(string target, string userName, string password)
         {
             StringBuilder adsPath = new StringBuilder();
@@ -243,7 +242,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         [DirectoryServicesPermission(SecurityAction.Assert, Unrestricted = true)]
         public bool Validate(string userName, string password)
         {
@@ -314,7 +312,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         [DirectoryServicesPermission(SecurityAction.Assert, Unrestricted = true)]
         public bool Validate(string userName, string password, ContextOptions connectionMethod)
         {
@@ -352,7 +349,6 @@ namespace System.DirectoryServices.AccountManagement
     [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Assert,
                                                 Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [System.Security.SecurityCritical(System.Security.SecurityCriticalScope.Everything)]
 #pragma warning restore 618
     [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
     [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Unrestricted = true)]

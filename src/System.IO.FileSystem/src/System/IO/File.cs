@@ -209,7 +209,6 @@ namespace System.IO
             return false;
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal static bool InternalExists(String path)
         {
             return FileSystem.Current.FileExists(path);
@@ -327,7 +326,6 @@ namespace System.IO
             return FileSystem.Current.GetAttributes(fullPath);
         }
 
-        [System.Security.SecurityCritical]
         public static void SetAttributes(String path, FileAttributes fileAttributes)
         {
             String fullPath = Path.GetFullPath(path);
@@ -373,7 +371,6 @@ namespace System.IO
             return InternalReadAllText(path, encoding);
         }
 
-        [System.Security.SecurityCritical]
         private static String InternalReadAllText(String path, Encoding encoding)
         {
             Debug.Assert(path != null);
@@ -422,7 +419,6 @@ namespace System.IO
             return InternalReadAllBytes(path);
         }
 
-        [System.Security.SecurityCritical]
         private static byte[] InternalReadAllBytes(String path)
         {
             // bufferSize == 1 used to avoid unnecessary buffer in FileStream
@@ -461,7 +457,6 @@ namespace System.IO
             InternalWriteAllBytes(path, bytes);
         }
 
-        [System.Security.SecurityCritical]
         private static void InternalWriteAllBytes(String path, byte[] bytes)
         {
             Debug.Assert(path != null);

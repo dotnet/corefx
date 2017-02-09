@@ -708,7 +708,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecurityCritical]
         private unsafe void WriteToAllListeners(string eventName, ref EventDescriptor eventDescriptor, EventTags tags, Guid* pActivityId, EventPayload payload)
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
@@ -737,7 +736,6 @@ namespace System.Diagnostics.Tracing
             System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState,
             System.Runtime.ConstrainedExecution.Cer.Success)]
 #endif
-        [SecurityCritical]
         [NonEvent]
         private unsafe void WriteCleanup(GCHandle* pPins, int cPins)
         {

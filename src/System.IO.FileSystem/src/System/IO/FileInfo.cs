@@ -20,7 +20,6 @@ namespace System.IO
     {
         private String _name;
 
-        [System.Security.SecurityCritical]
         private FileInfo() { }
 
         [System.Security.SecuritySafeCritical]
@@ -39,7 +38,6 @@ namespace System.IO
             DisplayPath = GetDisplayPath(OriginalPath);
         }
 
-        [System.Security.SecurityCritical]
         private void Init(String fileName)
         {
             OriginalPath = fileName;

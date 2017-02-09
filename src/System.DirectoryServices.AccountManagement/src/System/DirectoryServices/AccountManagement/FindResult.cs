@@ -16,7 +16,6 @@ namespace System.DirectoryServices.AccountManagement
         // Public methods
         //
 
-        [System.Security.SecurityCritical]
         public IEnumerator<T> GetEnumerator()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearchResult", "Entering GetEnumerator");
@@ -26,7 +25,6 @@ namespace System.DirectoryServices.AccountManagement
             return new FindResultEnumerator<T>(_resultSet);
         }
 
-        [System.Security.SecurityCritical]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)GetEnumerator();

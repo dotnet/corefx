@@ -1250,7 +1250,6 @@ namespace System.Threading.Tasks.Tests
         // Used for parallel scheduler tests
         public class ParallelTestsScheduler : TaskScheduler
         {
-            [SecurityCritical]
             protected override void QueueTask(Task task)
             {
                 Task.Run(() => TryExecuteTaskWrapper(task));
@@ -1262,13 +1261,11 @@ namespace System.Threading.Tasks.Tests
                 TryExecuteTask(task);
             }
 
-            [SecurityCritical]
             protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
             {
                 return TryExecuteTask(task);
             }
 
-            [SecurityCritical]
             protected override IEnumerable<Task> GetScheduledTasks()
             {
                 return null;

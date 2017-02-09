@@ -142,7 +142,6 @@ namespace System.IO.Pipes
             ConnectInternal(timeout, CancellationToken.None, Environment.TickCount);
         }
 
-        [SecurityCritical]
         private void ConnectInternal(int timeout, CancellationToken cancellationToken, int startTime)
         {
             // This is the main connection loop. It will loop until the timeout expires.  
@@ -213,7 +212,6 @@ namespace System.IO.Pipes
 
         // override because named pipe clients can't get/set properties when waiting to connect
         // or broken
-        [SecurityCritical]
         protected internal override void CheckPipePropertyOperations()
         {
             base.CheckPipePropertyOperations();

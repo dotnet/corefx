@@ -20,7 +20,6 @@ namespace System.IO
         protected String OriginalPath;      // path passed in by the user
         private String _displayPath = "";   // path that can be displayed to the user
 
-        [System.Security.SecurityCritical]
         protected FileSystemInfo()
         {
         }
@@ -181,7 +180,6 @@ namespace System.IO
             {
                 return FileSystemObject.Attributes;
             }
-            [System.Security.SecurityCritical] // auto-generated
             set
             {
                 FileSystemObject.Attributes = value;

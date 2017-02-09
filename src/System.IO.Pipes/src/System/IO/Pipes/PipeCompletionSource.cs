@@ -51,7 +51,7 @@ namespace System.IO.Pipes
 
         internal NativeOverlapped* Overlapped
         {
-            [SecurityCritical]get { return _overlapped; }
+            get { return _overlapped; }
         }
 
         internal void RegisterForCancellation()

@@ -17,14 +17,12 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Public constructors
         //
-        [System.Security.SecurityCritical]
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Demand, Unrestricted = true)]
         public PrincipalSearcher()
         {
             SetDefaultPageSizeForContext();
         }
 
-        [System.Security.SecurityCritical]
         public PrincipalSearcher(Principal queryFilter)
         {
             if (null == queryFilter)
@@ -52,7 +50,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public Principal QueryFilter
         {
-            [System.Security.SecurityCritical]
             get
             {
                 CheckDisposed();
@@ -60,7 +57,6 @@ namespace System.DirectoryServices.AccountManagement
                 return _qbeFilter;
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 if (null == value)
@@ -83,7 +79,6 @@ namespace System.DirectoryServices.AccountManagement
         //
 
         // Calls FindAll(false) to retrieve all matching results
-        [System.Security.SecurityCritical]
         public PrincipalSearchResult<Principal> FindAll()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearcher", "Entering FindAll()");
@@ -95,7 +90,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Calls FindAll(true) to retrieve at most one result, then retrieves the first (and only) result from the
         // FindResult<Principal> and returns it.
-        [System.Security.SecurityCritical]
         public Principal FindOne()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearcher", "Entering FindOne()");
@@ -130,7 +124,6 @@ namespace System.DirectoryServices.AccountManagement
         // Otherwise, calls StoreCtx.PushFilterToNativeSearcher to push the current QBE filter 
         // into underlyingSearcher (automatically constructing a fresh native searcher if underlyingSearcher is null),
         // and returns underlyingSearcher.
-        [System.Security.SecurityCritical]
         public object GetUnderlyingSearcher()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearcher", "Entering GetUnderlyingSearcher");
@@ -165,7 +158,6 @@ namespace System.DirectoryServices.AccountManagement
             return _underlyingSearcher;
         }
 
-        [System.Security.SecurityCritical]
         public Type GetUnderlyingSearcherType()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearcher", "Entering GetUnderlyingSearcherType");
@@ -186,7 +178,6 @@ namespace System.DirectoryServices.AccountManagement
             return storeCtx.SearcherNativeType();
         }
 
-        [System.Security.SecurityCritical]
         public virtual void Dispose()
         {
             if (!_disposed)
@@ -283,7 +274,6 @@ namespace System.DirectoryServices.AccountManagement
             return fr;
         }
 
-        [System.Security.SecurityCritical]
         private void SetDefaultPageSizeForContext()
         {
             _pageSize = 0;

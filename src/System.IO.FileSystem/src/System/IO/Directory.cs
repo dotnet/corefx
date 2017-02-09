@@ -513,7 +513,6 @@ namespace System.IO
         }
 
 
-        [System.Security.SecurityCritical] // auto-generated
         public static void SetCurrentDirectory(String path)
         {
             if (path == null)

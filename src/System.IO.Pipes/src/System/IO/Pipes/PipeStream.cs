@@ -111,7 +111,6 @@ namespace System.IO.Pipes
             _isFromExistingHandle = isExposed;
         }
 
-        [SecurityCritical]
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (_isAsync)
@@ -175,7 +174,6 @@ namespace System.IO.Pipes
                 return base.EndRead(asyncResult);
         }
 
-        [SecurityCritical]
         public override void Write(byte[] buffer, int offset, int count)
         {
             if (_isAsync)
@@ -272,7 +270,6 @@ namespace System.IO.Pipes
 
         // Reads a byte from the pipe stream.  Returns the byte cast to an int
         // or -1 if the connection has been broken.
-        [SecurityCritical]
         public override int ReadByte()
         {
             byte[] buffer = SingleByteArray;
@@ -281,7 +278,6 @@ namespace System.IO.Pipes
                 -1;
         }
 
-        [SecurityCritical]
         public override void WriteByte(byte value)
         {
             byte[] buffer = SingleByteArray;
@@ -291,7 +287,6 @@ namespace System.IO.Pipes
 
         // Does nothing on PipeStreams.  We cannot call Interop.FlushFileBuffers here because we can deadlock
         // if the other end of the pipe is no longer interested in reading from the pipe. 
-        [SecurityCritical]
         public override void Flush()
         {
             CheckWriteOperations();
@@ -301,7 +296,6 @@ namespace System.IO.Pipes
             }
         }
 
-        [SecurityCritical]
         protected override void Dispose(bool disposing)
         {
             try
@@ -349,7 +343,6 @@ namespace System.IO.Pipes
         // message, otherwise it is set to true. 
         public bool IsMessageComplete
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -391,7 +384,6 @@ namespace System.IO.Pipes
 
         public SafePipeHandle SafePipeHandle
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -411,7 +403,6 @@ namespace System.IO.Pipes
 
         internal SafePipeHandle InternalHandle
         {
-            [SecurityCritical]
             get
             {
                 return _handle;

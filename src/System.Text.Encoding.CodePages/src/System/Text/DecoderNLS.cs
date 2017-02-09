@@ -153,7 +153,6 @@ namespace System.Text
                 return GetCharCount(pBytes + index, count, flush);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetCharCount(byte* bytes, int count, bool flush)
         {
             // Validate parameters
@@ -213,7 +212,6 @@ namespace System.Text
                                     pChars + charIndex, charCount, flush);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetChars(byte* bytes, int byteCount,
                                               char* chars, int charCount, bool flush)
         {
@@ -277,7 +275,6 @@ namespace System.Text
 
         // This is the version that used pointers.  We call the base encoding worker function
         // after setting our appropriate internal variables.  This is getting chars
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe void Convert(byte* bytes, int byteCount,
                                               char* chars, int charCount, bool flush,
                                               out int bytesUsed, out int charsUsed, out bool completed)

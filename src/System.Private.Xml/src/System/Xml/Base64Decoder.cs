@@ -153,7 +153,6 @@ namespace System.Xml
             return mapBase64;
         }
 
-        [System.Security.SecurityCritical]
         private unsafe void Decode(char* pChars, char* pCharsEndPos,
                              byte* pBytes, byte* pBytesEndPos,
                              out int charsDecoded, out int bytesDecoded)

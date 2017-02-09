@@ -181,7 +181,6 @@ namespace System.Xml
         // Private methods
         //
 
-        [System.Security.SecurityCritical]
         private static unsafe void Decode(char* pChars, char* pCharsEndPos,
                                     byte* pBytes, byte* pBytesEndPos,
                                     ref bool hasHalfByteCached, ref byte cachedHalfByte,

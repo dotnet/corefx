@@ -22,7 +22,6 @@ namespace System.DirectoryServices.AccountManagement
         // Public properties
         //
 
-        [System.Security.SecurityCritical]
         public override string ToString()
         {
             return Name;
@@ -47,7 +46,6 @@ namespace System.DirectoryServices.AccountManagement
         // ContextType property
         public ContextType ContextType
         {
-            [System.Security.SecurityCritical]
             get
             {
                 // Make sure we're not disposed or deleted.
@@ -72,13 +70,11 @@ namespace System.DirectoryServices.AccountManagement
 
         public string Description
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _description, PropertyNames.PrincipalDescription, ref _descriptionChanged);
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 if (!GetStoreCtxToUse().IsValidProperty(this, PropertyNames.PrincipalDescription))
@@ -98,13 +94,11 @@ namespace System.DirectoryServices.AccountManagement
 
         public string DisplayName
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _displayName, PropertyNames.PrincipalDisplayName, ref _displayNameChanged);
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 if (!GetStoreCtxToUse().IsValidProperty(this, PropertyNames.PrincipalDisplayName))
@@ -126,13 +120,11 @@ namespace System.DirectoryServices.AccountManagement
 
         public string SamAccountName
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _samName, PropertyNames.PrincipalSamAccountName, ref _samNameChanged);
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 if (null == value || 0 == value.Length)
@@ -153,13 +145,11 @@ namespace System.DirectoryServices.AccountManagement
         private LoadState _userPrincipalNameChanged = LoadState.NotSet;    // change-tracking           
         public string UserPrincipalName
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _userPrincipalName, PropertyNames.PrincipalUserPrincipalName, ref _userPrincipalNameChanged);
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 if (!GetStoreCtxToUse().IsValidProperty(this, PropertyNames.PrincipalUserPrincipalName))
@@ -178,7 +168,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public SecurityIdentifier Sid
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<SecurityIdentifier>(ref _sid, PropertyNames.PrincipalSid, ref _sidChanged);
@@ -193,7 +182,6 @@ namespace System.DirectoryServices.AccountManagement
         private LoadState _guidChanged = LoadState.NotSet;
         public Nullable<Guid> Guid
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<Nullable<Guid>>(ref _guid, PropertyNames.PrincipalGuid, ref _guidChanged);
@@ -208,7 +196,6 @@ namespace System.DirectoryServices.AccountManagement
         private LoadState _distinguishedNameChanged = LoadState.NotSet;
         public string DistinguishedName
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _distinguishedName, PropertyNames.PrincipalDistinguishedName, ref _distinguishedNameChanged);
@@ -224,7 +211,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public string StructuralObjectClass
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return HandleGet<string>(ref _structuralObjectClass, PropertyNames.PrincipalStructuralObjectClass, ref _structuralObjectClassChanged);
@@ -239,7 +225,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public string Name
         {
-            [System.Security.SecurityCritical]
             get
             {
                 // TODO Store should be mapping both to the same property already....
@@ -260,7 +245,6 @@ namespace System.DirectoryServices.AccountManagement
                     return HandleGet<string>(ref _name, PropertyNames.PrincipalName, ref _nameChanged);
                 }
             }
-            [System.Security.SecurityCritical]
             set
             {
                 if (null == value || 0 == value.Length)
@@ -300,19 +284,16 @@ namespace System.DirectoryServices.AccountManagement
         // Public methods
         //
 
-        [System.Security.SecurityCritical]
         public static Principal FindByIdentity(PrincipalContext context, string identityValue)
         {
             return FindByIdentityWithType(context, typeof(Principal), identityValue);
         }
 
-        [System.Security.SecurityCritical]
         public static Principal FindByIdentity(PrincipalContext context, IdentityType identityType, string identityValue)
         {
             return FindByIdentityWithType(context, typeof(Principal), identityType, identityValue);
         }
 
-        [System.Security.SecurityCritical]
         public void Save()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Principal", "Entering Save");
@@ -350,7 +331,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         public void Save(PrincipalContext context)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Principal", "Entering Save(Context)");
@@ -465,7 +445,6 @@ namespace System.DirectoryServices.AccountManagement
             _ctx.QueryCtx = newStoreCtx;  // so Updates go to the right StoreCtx
         }
 
-        [System.Security.SecurityCritical]
         public void Delete()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Principal", "Entering Delete");
@@ -509,7 +488,6 @@ namespace System.DirectoryServices.AccountManagement
             return base.GetHashCode();
         }
 
-        [System.Security.SecurityCritical]
         public object GetUnderlyingObject()
         {
             // Make sure we're not disposed or deleted.
@@ -526,7 +504,6 @@ namespace System.DirectoryServices.AccountManagement
             return this.UnderlyingObject;
         }
 
-        [System.Security.SecurityCritical]
         public Type GetUnderlyingObjectType()
         {
             // Make sure we're not disposed or deleted.
@@ -554,13 +531,11 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         public PrincipalSearchResult<Principal> GetGroups()
         {
             return new PrincipalSearchResult<Principal>(GetGroupsHelper());
         }
 
-        [System.Security.SecurityCritical]
         public PrincipalSearchResult<Principal> GetGroups(PrincipalContext contextToQuery)
         {
             if (contextToQuery == null)
@@ -569,7 +544,6 @@ namespace System.DirectoryServices.AccountManagement
             return new PrincipalSearchResult<Principal>(GetGroupsHelper(contextToQuery));
         }
 
-        [System.Security.SecurityCritical]
         public bool IsMemberOf(GroupPrincipal group)
         {
             // Make sure we're not disposed or deleted.
@@ -581,7 +555,6 @@ namespace System.DirectoryServices.AccountManagement
             return group.Members.Contains(this);
         }
 
-        [System.Security.SecurityCritical]
         public bool IsMemberOf(PrincipalContext context, IdentityType identityType, string identityValue)
         {
             // Make sure we're not disposed or deleted.
@@ -609,7 +582,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // IDisposable
         //
-        [System.Security.SecurityCritical]
         public virtual void Dispose()
         {
             if (!_disposed)
@@ -649,7 +621,6 @@ namespace System.DirectoryServices.AccountManagement
         private ExtensionCache _extensionCache = new ExtensionCache();
         private LoadState _extensionCacheChanged = LoadState.NotSet;
 
-        [System.Security.SecurityCritical]
         protected object[] ExtensionGet(string attribute)
         {
             if (null == attribute)
@@ -723,7 +694,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         protected void ExtensionSet(string attribute, object value)
         {
             if (null == attribute)
@@ -739,7 +709,6 @@ namespace System.DirectoryServices.AccountManagement
             _extensionCacheChanged = LoadState.Changed;
         }
 
-        [System.Security.SecurityCritical]
         internal void AdvancedFilterSet(string attribute, object value, Type objectType, MatchType mt)
         {
             if (null == attribute)
@@ -797,12 +766,10 @@ namespace System.DirectoryServices.AccountManagement
         internal protected PrincipalContext ContextRaw
         {
             //[StrongNameIdentityPermission(SecurityAction.LinkDemand,  PublicKey = Microsoft.Internal.BuildInfo.WINDOWS_PUBLIC_KEY_STRING)]                
-            [System.Security.SecurityCritical]
             get
             { return _ctx; }
 
             //[StrongNameIdentityPermission(SecurityAction.LinkDemand,  PublicKey = Microsoft.Internal.BuildInfo.WINDOWS_PUBLIC_KEY_STRING)]                    
-            [System.Security.SecurityCritical]
             set
             {
                 // Verify that the passed context is not disposed.
@@ -939,7 +906,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         protected static Principal FindByIdentityWithType(PrincipalContext context, Type principalType, string identityValue)
         {
@@ -952,7 +918,6 @@ namespace System.DirectoryServices.AccountManagement
             return FindByIdentityWithTypeHelper(context, principalType, null, identityValue, DateTime.UtcNow);
         }
 
-        [System.Security.SecurityCritical]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         protected static Principal FindByIdentityWithType(PrincipalContext context, Type principalType, IdentityType identityType, string identityValue)
         {
@@ -968,7 +933,6 @@ namespace System.DirectoryServices.AccountManagement
             return FindByIdentityWithTypeHelper(context, principalType, identityType, identityValue, DateTime.UtcNow);
         }
 
-        [System.Security.SecurityCritical]
         private static Principal FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable<IdentityType> identityType, string identityValue, DateTime refDate)
         {
             // Ask the store to find a Principal based on this IdentityReference info.
@@ -1028,7 +992,6 @@ namespace System.DirectoryServices.AccountManagement
         // If we're the result of a query and our properties haven't been loaded yet, do so now
         // We'd like this to be marked protected AND internal, but that's not possible, so we'll settle for
         // internal and treat it as if it were also protected.
-        [System.Security.SecurityCritical]
         internal void LoadIfNeeded(string principalPropertyName)
         {
             // Fake principals have nothing to load, since they have no store object.
@@ -1071,7 +1034,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // We'd like this to be marked protected AND internal, but that's not possible, so we'll settle for
         // internal and treat it as if it were also protected.        
-        [System.Security.SecurityCritical]
         internal T HandleGet<T>(ref T currentValue, string name, ref LoadState state)
         {
             // Make sure we're not disposed or deleted.
@@ -1092,7 +1054,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // We'd like this to be marked protected AND internal, but that's not possible, so we'll settle for
         // internal and treat it as if it were also protected.
-        [System.Security.SecurityCritical]
         internal void HandleSet<T>(ref T currentValue, T newValue, ref LoadState state, string name)
         {
             // Make sure we're not disposed or deleted.

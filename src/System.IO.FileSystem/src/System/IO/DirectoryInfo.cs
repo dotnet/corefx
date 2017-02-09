@@ -82,7 +82,6 @@ namespace System.IO
             return CreateSubdirectoryHelper(path);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private DirectoryInfo CreateSubdirectoryHelper(String path)
         {
             Debug.Assert(path != null);
@@ -103,7 +102,6 @@ namespace System.IO
             return new DirectoryInfo(fullPath);
         }
 
-        [System.Security.SecurityCritical]
         public void Create()
         {
             FileSystem.Current.CreateDirectory(FullPath);
@@ -132,7 +130,6 @@ namespace System.IO
 
         // Returns an array of Files in the current DirectoryInfo matching the 
         // given search criteria (i.e. "*.txt").
-        [SecurityCritical]
         public FileInfo[] GetFiles(String searchPattern)
         {
             if (searchPattern == null)

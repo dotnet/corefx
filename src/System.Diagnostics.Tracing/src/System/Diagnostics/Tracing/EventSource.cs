@@ -529,7 +529,6 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal static Guid InternalCurrentThreadActivityId
         {
-            [System.Security.SecurityCritical]
             get
             {
                 Guid retval = CurrentThreadActivityId;
@@ -543,7 +542,6 @@ namespace System.Diagnostics.Tracing
 
         internal static Guid FallbackActivityId
         {
-            [System.Security.SecurityCritical]
             get
             {
 #pragma warning disable 612, 618
@@ -1067,7 +1065,6 @@ namespace System.Diagnostics.Tracing
             /// <param name="pointer">Pinned tracelogging-compatible metadata blob.</param>
             /// <param name="size">The size of the metadata blob.</param>
             /// <param name="reserved">Value for reserved: 2 for per-provider metadata, 1 for per-event metadata</param>
-            [SecurityCritical]
             internal unsafe void SetMetadata(byte* pointer, int size, int reserved)
             {
                 this.m_Ptr = (long)(ulong)(UIntPtr)pointer;
@@ -1109,7 +1106,6 @@ namespace System.Diagnostics.Tracing
         ///    }
         /// </code>
         /// </remarks>
-        [SecurityCritical]
         [CLSCompliant(false)]
         protected unsafe void WriteEventCore(int eventId, int eventDataCount, EventSource.EventData* data)
         {
@@ -1141,7 +1137,6 @@ namespace System.Diagnostics.Tracing
         ///    }
         /// </code>
         /// </remarks>
-        [SecurityCritical]
         [CLSCompliant(false)]
         protected unsafe void WriteEventWithRelatedActivityIdCore(int eventId, Guid* relatedActivityId, int eventDataCount, EventSource.EventData* data)
         {
@@ -1401,7 +1396,6 @@ namespace System.Diagnostics.Tracing
         }
 #endif
 
-        [SecurityCritical]
         private unsafe void WriteEventRaw(
             string eventName,
             ref EventDescriptor eventDescriptor,
@@ -1742,7 +1736,6 @@ namespace System.Diagnostics.Tracing
             return new Guid(bytes);
         }
 
-        [SecurityCritical]
         private unsafe object DecodeObject(int eventId, int parameterId, ref EventSource.EventData* data)
         {
             // TODO FIX : We use reflection which in turn uses EventSource, right now we carefully avoid
@@ -1889,7 +1882,6 @@ namespace System.Diagnostics.Tracing
             return dispatcher;
         }
 
-        [SecurityCritical]
         private unsafe void WriteEventVarargs(int eventId, Guid* childActivityID, object[] args)
         {
             if (m_eventSourceEnabled)
@@ -2059,7 +2051,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [SecurityCritical]
         private unsafe object[] SerializeEventArgs(int eventId, object[] args)
         {
             TraceLoggingEventTypes eventTypes = m_eventData[eventId].TraceLoggingEventTypes;
@@ -2135,7 +2126,6 @@ namespace System.Diagnostics.Tracing
             return sum;
         }
 
-        [SecurityCritical]
         private unsafe void WriteToAllListeners(int eventId, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
         {
             // We represent a byte[] as a integer denoting the length  and then a blob of bytes in the data pointer. This causes a spurious
@@ -2159,7 +2149,6 @@ namespace System.Diagnostics.Tracing
         }
 
         // helper for writing to all EventListeners attached the current eventSource.  
-        [SecurityCritical]
         private unsafe void WriteToAllListeners(int eventId, Guid* childActivityID, params object[] args)
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
@@ -2173,7 +2162,6 @@ namespace System.Diagnostics.Tracing
             DispatchToAllListeners(eventId, childActivityID, eventCallbackArgs);
         }
 
-        [SecurityCritical]
         private unsafe void DispatchToAllListeners(int eventId, Guid* childActivityID, EventWrittenEventArgs eventCallbackArgs)
         {
             Exception lastThrownException = null;
@@ -2310,7 +2298,6 @@ namespace System.Diagnostics.Tracing
         }
 
 #if FEATURE_ACTIVITYSAMPLING
-        [SecurityCritical]
         private unsafe SessionMask GetEtwSessionMask(int eventId, Guid* childActivityID)
         {
             SessionMask etwSessions = new SessionMask();
@@ -4819,7 +4806,6 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public Guid ActivityId
         {
-            [System.Security.SecurityCritical]
             get { return EventSource.CurrentThreadActivityId; }
         }
 
@@ -4828,7 +4814,6 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public Guid RelatedActivityId
         {
-            [System.Security.SecurityCritical]
             get;
             internal set;
         }
@@ -5433,7 +5418,6 @@ namespace System.Diagnostics.Tracing
         /// If 'childActivityID' is present, it will be added to the active set if the 
         /// current activity is active.  
         /// </summary>
-        [SecurityCritical]
         public static unsafe bool PassesActivityFilter(
                                     ActivityFilter filterList,
                                     Guid* childActivityID,
@@ -5531,7 +5515,6 @@ namespace System.Diagnostics.Tracing
         /// value for  'currentActivityid' is an indication tha caller has already verified
         /// that the current activity is active.
         /// </summary>
-        [SecurityCritical]
         public static unsafe void FlowActivityIfNeeded(ActivityFilter filterList, Guid* currentActivityId, Guid* childActivityID)
         {
             Contract.Assert(childActivityID != null);

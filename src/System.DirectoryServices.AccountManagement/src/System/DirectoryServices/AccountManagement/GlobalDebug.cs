@@ -18,7 +18,6 @@ namespace System.DirectoryServices.AccountManagement
 
     internal static class GlobalDebug
     {
-        [System.Security.SecurityCritical]
         static GlobalDebug()
         {
             GlobalDebug.s_debugLevel = GlobalConfig.DebugLevel;

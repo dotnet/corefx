@@ -24,14 +24,12 @@ namespace System.DirectoryServices.AccountManagement
         // computers with users, you must test an object for computer status before testing it for
         // user status.
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
-        [System.Security.SecurityCritical]
         static internal bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
         {
             return de.Properties["objectClass"].Contains(classToCompare);
         }
 
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
-        [System.Security.SecurityCritical]
         static internal bool IsOfObjectClass(SearchResult sr, string classToCompare)
         {
             return sr.Properties["objectClass"].Contains(classToCompare);
@@ -39,7 +37,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Retrieves the name of the actual server that the DirectoryEntry is connected to
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
-        [System.Security.SecurityCritical]
         static internal string GetServerName(DirectoryEntry de)
         {
             UnsafeNativeMethods.IAdsObjectOptions objOptions = (UnsafeNativeMethods.IAdsObjectOptions)de.NativeObject;
@@ -49,7 +46,6 @@ namespace System.DirectoryServices.AccountManagement
         // This routine escapes values used in DNs, per RFC 2253 and ADSI escaping rules.
         // It treats its input as a unescaped literal and produces a LDAP string that represents that literal
         // and that is escaped according to RFC 2253 and ADSI rules for DN components.        
-        [System.Security.SecurityCritical]
         static internal string EscapeDNComponent(string dnComponent)
         {
             //
@@ -156,7 +152,6 @@ namespace System.DirectoryServices.AccountManagement
         // This routine escapes values used in search filters, per RFC 2254 escaping rules.
         // It treats its input as a unescaped literal and produces a LDAP string that represents that literal
         // and that is escaped according to RFC 2254 rules.
-        [System.Security.SecurityCritical]
         static internal string EscapeRFC2254SpecialChars(string s)
         {
             StringBuilder sb = new StringBuilder(s.Length);
@@ -366,7 +361,6 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        [System.Security.SecurityCritical]
         static internal bool ArePrincipalsInSameForest(Principal p1, Principal p2)
         {
             string p1DnsForestName = ((ADStoreCtx)p1.GetStoreCtxToUse()).DnsForestName;
@@ -399,7 +393,6 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
-        [System.Security.SecurityCritical]
         static internal Principal DirectoryEntryAsPrincipal(DirectoryEntry de, ADStoreCtx storeCtx)
         {
             if (ADUtils.IsOfObjectClass(de, "computer") ||
@@ -419,7 +412,6 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
-        [System.Security.SecurityCritical]
         static internal Principal SearchResultAsPrincipal(SearchResult sr, ADStoreCtx storeCtx, object discriminant)
         {
             if (ADUtils.IsOfObjectClass(sr, "computer") ||
@@ -444,7 +436,6 @@ namespace System.DirectoryServices.AccountManagement
         // domain or the current forest and the target domain's forest.
         // target domain must be the full DNS domain name of the target domain to make the string
         // compare below work properly.
-        [System.Security.SecurityCritical]
         static internal bool VerifyOutboundTrust(string targetDomain, string username, string password)
         {
             Domain currentDom = null;
@@ -506,7 +497,6 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        [System.Security.SecurityCritical]
         static internal string RetriveWkDn(DirectoryEntry deBase, string defaultNamingContext, string serverName, Byte[] wellKnownContainerGuid)
         {
             /*

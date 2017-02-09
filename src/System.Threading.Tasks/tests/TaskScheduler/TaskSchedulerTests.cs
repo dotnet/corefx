@@ -342,7 +342,6 @@ namespace System.Threading.Tasks.Tests
             private readonly ConcurrentQueue<Task> _tasks = new ConcurrentQueue<Task>();
 
             private bool _faultQueues;
-            [SecurityCritical]
             protected override void QueueTask(Task task)
             {
                 if (_faultQueues)
@@ -351,13 +350,11 @@ namespace System.Threading.Tasks.Tests
                 _tasks.Enqueue(task);
             }
 
-            [SecurityCritical]
             protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
             {
                 throw new ArgumentException("I am your worst nightmare!");
             }
 
-            [SecurityCritical]
             protected override IEnumerable<Task> GetScheduledTasks()
             {
                 return _tasks;

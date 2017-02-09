@@ -48,7 +48,6 @@ namespace System.DirectoryServices.AccountManagement
 
         object IEnumerator.Current
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return Current;
@@ -208,13 +207,11 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        [System.Security.SecurityCritical]
         bool IEnumerator.MoveNext()
         {
             return MoveNext();
         }
 
-        [System.Security.SecurityCritical]
         public void Reset()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalCollectionEnumerator", "Reset");
@@ -228,7 +225,6 @@ namespace System.DirectoryServices.AccountManagement
             _currentMode = CurrentEnumeratorMode.None;
         }
 
-        [System.Security.SecurityCritical]
         void IEnumerator.Reset()
         {
             Reset();
@@ -315,7 +311,6 @@ namespace System.DirectoryServices.AccountManagement
 
         private PrincipalCollection _memberCollection = null;
 
-        [System.Security.SecurityCritical]
         private void CheckChanged()
         {
             // Make sure the app hasn't changed our underlying list

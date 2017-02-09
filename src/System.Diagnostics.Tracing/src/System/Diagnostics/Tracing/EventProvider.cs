@@ -74,7 +74,6 @@ namespace System.Diagnostics.Tracing
 
         private static bool m_setInformationMissing;
 
-        [SecurityCritical]
         UnsafeNativeMethods.ManifestEtw.EtwEnableCallback m_etwCallback;     // Trace Callback function
         private long m_regHandle;                        // Trace Registration Handle
         private byte m_level;                            // Tracing Level
@@ -123,7 +122,6 @@ namespace System.Diagnostics.Tracing
         /// Vista or above. If not a PlatformNotSupported exception will be thrown. If for some 
         /// reason the ETW Register call failed a NotSupported exception will be thrown. 
         /// </summary>
-        [System.Security.SecurityCritical]
         internal unsafe void Register(Guid providerGuid)
         {
             m_providerId = providerGuid;
@@ -212,7 +210,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [System.Security.SecurityCritical]
         unsafe void EtwEnableCallBack(
                         [In] ref System.Guid sourceId,
                         [In] int controlCode,
@@ -409,7 +406,6 @@ namespace System.Diagnostics.Tracing
         /// for the current process ID, calling 'action' for each session, and passing it the
         /// ETW session and the 'AllKeywords' the session enabled for the current provider.
         /// </summary>
-        [System.Security.SecurityCritical]
         private unsafe void GetSessionInfo(Action<int, long> action)
         {
             // We wish the EventSource package to be legal for Windows Store applications.   
@@ -537,7 +533,6 @@ namespace System.Diagnostics.Tracing
         /// returns an array of bytes representing the data, the index into that byte array where the data
         /// starts, and the command being issued associated with that data.  
         /// </summary>
-        [System.Security.SecurityCritical]
         private unsafe bool GetDataFromController(int etwSessionId,
                 UnsafeNativeMethods.ManifestEtw.EVENT_FILTER_DESCRIPTOR* filterData, out ControllerCommand command, out byte[] data, out int dataStart)
         {
@@ -650,7 +645,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        [System.Security.SecurityCritical]
         private static unsafe object EncodeObject(ref object data, ref EventData* dataDescriptor, ref byte* dataBuffer, ref uint totalEventSize)
         /*++
 
@@ -882,7 +876,6 @@ namespace System.Diagnostics.Tracing
         /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Performance-critical code")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        [System.Security.SecurityCritical]
         internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, Guid* activityID, Guid* childActivityID, params object[] eventPayload)
         {
             int status = 0;
@@ -1076,7 +1069,6 @@ namespace System.Diagnostics.Tracing
         /// pointer  do the event data
         /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        [System.Security.SecurityCritical]
         protected internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
         {
             if (childActivityID != null)
@@ -1099,7 +1091,6 @@ namespace System.Diagnostics.Tracing
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        [System.Security.SecurityCritical]
         internal unsafe bool WriteEventRaw(
             ref EventDescriptor eventDescriptor,
             Guid* activityID,
@@ -1128,7 +1119,6 @@ namespace System.Diagnostics.Tracing
 
         // These are look-alikes to the Manifest based ETW OS APIs that have been shimmed to work
         // either with Manifest ETW or Classic ETW (if Manifest based ETW is not available).  
-        [SecurityCritical]
         private unsafe uint EventRegister(ref Guid providerId, UnsafeNativeMethods.ManifestEtw.EtwEnableCallback enableCallback)
         {
             m_providerId = providerId;
@@ -1136,7 +1126,6 @@ namespace System.Diagnostics.Tracing
             return UnsafeNativeMethods.ManifestEtw.EventRegister(ref providerId, enableCallback, null, ref m_regHandle);
         }
 
-        [SecurityCritical]
         private uint EventUnregister()
         {
             uint status = UnsafeNativeMethods.ManifestEtw.EventUnregister(m_regHandle);

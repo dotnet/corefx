@@ -15,7 +15,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // ICollection
         //
-        [System.Security.SecurityCritical]
         void ICollection.CopyTo(Array array, int index)
         {
             CheckDisposed();
@@ -97,7 +96,6 @@ namespace System.DirectoryServices.AccountManagement
 
         int ICollection.Count
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return Count;
@@ -106,7 +104,6 @@ namespace System.DirectoryServices.AccountManagement
 
         bool ICollection.IsSynchronized
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return IsSynchronized;
@@ -115,7 +112,6 @@ namespace System.DirectoryServices.AccountManagement
 
         object ICollection.SyncRoot
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return SyncRoot;
@@ -141,7 +137,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // IEnumerable
         //
-        [System.Security.SecurityCritical]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)GetEnumerator();
@@ -165,7 +160,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public int Count
         {
-            [System.Security.SecurityCritical]
             get
             {
                 CheckDisposed();
@@ -217,7 +211,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // IEnumerable<Principal>
         //
-        [System.Security.SecurityCritical]
         public IEnumerator<Principal> GetEnumerator()
         {
             CheckDisposed();
@@ -235,25 +228,21 @@ namespace System.DirectoryServices.AccountManagement
         // Add
         //
 
-        [System.Security.SecurityCritical]
         public void Add(UserPrincipal user)
         {
             Add((Principal)user);
         }
 
-        [System.Security.SecurityCritical]
         public void Add(GroupPrincipal group)
         {
             Add((Principal)group);
         }
 
-        [System.Security.SecurityCritical]
         public void Add(ComputerPrincipal computer)
         {
             Add((Principal)computer);
         }
 
-        [System.Security.SecurityCritical]
         public void Add(Principal principal)
         {
             CheckDisposed();
@@ -298,7 +287,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         public void Add(PrincipalContext context, IdentityType identityType, string identityValue)
         {
             CheckDisposed();
@@ -326,7 +314,6 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Clear
         //
-        [System.Security.SecurityCritical]
         public void Clear()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalCollection", "Clear");
@@ -364,25 +351,21 @@ namespace System.DirectoryServices.AccountManagement
         // Remove
         //
 
-        [System.Security.SecurityCritical]
         public bool Remove(UserPrincipal user)
         {
             return Remove((Principal)user);
         }
 
-        [System.Security.SecurityCritical]
         public bool Remove(GroupPrincipal group)
         {
             return Remove((Principal)group);
         }
 
-        [System.Security.SecurityCritical]
         public bool Remove(ComputerPrincipal computer)
         {
             return Remove((Principal)computer);
         }
 
-        [System.Security.SecurityCritical]
         public bool Remove(Principal principal)
         {
             CheckDisposed();
@@ -451,7 +434,6 @@ namespace System.DirectoryServices.AccountManagement
             return removed;
         }
 
-        [System.Security.SecurityCritical]
         public bool Remove(PrincipalContext context, IdentityType identityType, string identityValue)
         {
             CheckDisposed();
@@ -566,25 +548,21 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        [System.Security.SecurityCritical]
         public bool Contains(UserPrincipal user)
         {
             return Contains((Principal)user);
         }
 
-        [System.Security.SecurityCritical]
         public bool Contains(GroupPrincipal group)
         {
             return Contains((Principal)group);
         }
 
-        [System.Security.SecurityCritical]
         public bool Contains(ComputerPrincipal computer)
         {
             return Contains((Principal)computer);
         }
 
-        [System.Security.SecurityCritical]
         public bool Contains(Principal principal)
         {
             StoreCtx storeCtxToUse = _owningGroup.GetStoreCtxToUse();
@@ -607,7 +585,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         public bool Contains(PrincipalContext context, IdentityType identityType, string identityValue)
         {
             CheckDisposed();
@@ -634,7 +611,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Constructs a fresh PrincipalCollection based on the supplied ResultSet.
         // The ResultSet may not be null (use an EmptySet instead).
-        [System.Security.SecurityCritical]
         internal PrincipalCollection(BookmarkableResultSet results, GroupPrincipal owningGroup)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalCollection", "Ctor");

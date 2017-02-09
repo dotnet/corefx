@@ -186,7 +186,6 @@ namespace System
         // we will lose repeated keystrokes when someone switches from
         // calling ReadKey to calling Read or ReadLine.  Those methods should 
         // ideally flush this cache as well.
-        [System.Security.SecurityCritical] // auto-generated
         private static Interop.InputRecord _cachedInputRecord;
 
         // Skip non key events. Generally we want to surface only KeyDown event 
@@ -194,13 +193,11 @@ namespace System
         // where the assumption of KeyDown-KeyUp pairing for a given key press 
         // is invalid. For example in IME Unicode keyboard input, we often see
         // only KeyUp until the key is released.  
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsKeyDownEvent(Interop.InputRecord ir)
         {
             return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsModKey(Interop.InputRecord ir)
         {
             // We should also skip over Shift, Control, and Alt, as well as caps lock.
@@ -230,7 +227,6 @@ namespace System
         // desired effect is to translate the sequence into one Unicode KeyPress. 
         // We need to keep track of the Alt+NumPad sequence and surface the final
         // unicode char alone when the Alt key is released. 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsAltKeyDown(Interop.InputRecord ir)
         {
             return (((ControlKeyState)ir.keyEvent.controlKeyState)

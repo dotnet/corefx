@@ -21,7 +21,6 @@ namespace System.IO
             return GetExceptionForWin32DriveError(errorCode, driveName);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal static Exception GetExceptionForWin32DriveError(int errorCode, String driveName)
         {
             switch (errorCode)

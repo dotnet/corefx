@@ -11,7 +11,6 @@ namespace System.Xml.Serialization
 {
     internal static class Globals
     {
-        [SecurityCritical]
         private static Type s_typeOfDBNull;
         internal static Type TypeOfDBNull
         {
@@ -24,7 +23,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        [SecurityCritical]
         private static object s_valueOfDBNull;
         internal static object ValueOfDBNull
         {

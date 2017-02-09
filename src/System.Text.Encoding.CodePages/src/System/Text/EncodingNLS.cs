@@ -87,7 +87,6 @@ namespace System.Text
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others.
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetByteCount(char* chars, int count)
         {
             // Validate Parameters
@@ -185,7 +184,6 @@ namespace System.Text
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others. 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
         {
             // Validate Parameters
@@ -230,7 +228,6 @@ namespace System.Text
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others.  
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetCharCount(byte* bytes, int count)
         {
             // Validate Parameters
@@ -285,7 +282,6 @@ namespace System.Text
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others.  
-        [System.Security.SecurityCritical]  // auto-generated
         public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
         {
             // Validate Parameters

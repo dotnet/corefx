@@ -288,7 +288,6 @@ namespace System.Diagnostics.Tracing
     
     internal partial class EventProvider
     {
-        [System.Security.SecurityCritical]
         internal unsafe int SetInformation(
             UnsafeNativeMethods.ManifestEtw.EVENT_INFO_CLASS eventInfoClass,
             IntPtr data,
