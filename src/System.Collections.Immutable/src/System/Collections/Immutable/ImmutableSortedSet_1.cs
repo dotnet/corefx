@@ -20,8 +20,8 @@ namespace System.Collections.Immutable
     /// We implement <see cref="IList{T}"/> because it gives us <see cref="IList{T}.IndexOf"/>, which is important for some folks.
     /// </devremarks>
     [DebuggerDisplay("Count = {Count}")]
-    [DebuggerTypeProxy(typeof(ImmutableSortedSetDebuggerProxy<>))]
-    public sealed partial class ImmutableSortedSet<T> : IImmutableSet<T>, ISortKeyCollection<T>, IReadOnlyList<T>, IList<T>, ISet<T>, IList, IStrongEnumerable<T, ImmutableSortedSet<T>.Enumerator>
+    [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
+    public sealed partial class ImmutableSortedSet<T> : IImmutableSet<T>, ISortKeyCollection<T>, IReadOnlyList<T>, IList<T>, ISet<T>, IList, IStrongEnumerable<T, ImmutableSortedSet<T>.Enumerator>, IImmutableEnumerable<T>
     {
         /// <summary>
         /// This is the factor between the small collection's size and the large collection's size in a bulk operation,

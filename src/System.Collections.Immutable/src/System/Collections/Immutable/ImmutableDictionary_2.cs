@@ -15,8 +15,8 @@ namespace System.Collections.Immutable
     /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TValue">The type of the value.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
-    [DebuggerTypeProxy(typeof(ImmutableDictionaryDebuggerProxy<,>))]
-    public sealed partial class ImmutableDictionary<TKey, TValue> : IImmutableDictionary<TKey, TValue>, IImmutableDictionaryInternal<TKey, TValue>, IHashKeyCollection<TKey>, IDictionary<TKey, TValue>, IDictionary
+    [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
+    public sealed partial class ImmutableDictionary<TKey, TValue> : IImmutableDictionary<TKey, TValue>, IImmutableDictionaryInternal<TKey, TValue>, IHashKeyCollection<TKey>, IDictionary<TKey, TValue>, IDictionary, IImmutableEnumerable<KeyValuePair<TKey, TValue>>
     {
         /// <summary>
         /// An empty immutable dictionary with default equality comparers.
