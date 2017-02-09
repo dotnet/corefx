@@ -90,7 +90,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest1()
+        public static void TryStartNoGCRegion_EndNoGCRegion_ThrowsInvalidOperationException()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -103,7 +103,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest2()
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -120,7 +120,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest3()
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_BlockingCollection()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -137,7 +137,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest4()
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_LargeObjectHeapSize()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -154,7 +154,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest4()
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_BlockingCollectionAndLOH()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -171,7 +171,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionNegTest5()
+        public static void TryStartNoGCRegion_SettingLatencyMode_ThrowsInvalidOperationException()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -189,7 +189,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionPosTest()
+        public static void TryStartNoGCRegion_SOHSize()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -207,7 +207,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionPosTest2()
+        public static void TryStartNoGCRegion_SOHSize_BlockingCollection()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -224,7 +224,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionPosTest3()
+        public static void TryStartNoGCRegion_SOHSize_LOHSize()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
@@ -241,7 +241,7 @@ namespace System.Tests
 
         [Fact]
         [OuterLoop]
-        public static void TryStartNoGCRegionPosTest4()
+        public static void TryStartNoGCRegion_SOHSize_LOHSize_BlockingCollection()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
