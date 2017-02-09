@@ -2504,8 +2504,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private static bool isDivByZero(ExpressionKind kind, EXPR op2)
+        private static bool IsDivByZero(ExpressionKind kind, EXPR op2, PredefinedType ptOp)
         {
+            switch (kind)
+            {
+                case ExpressionKind.EK_DIV:
+                case ExpressionKind.EK_MOD:
+                    EXPRCONSTANT opConst2 = op2?.GetConst().asCONSTANT();
+                    if (opConst2 != null)
+                    {
+                        if (ptOp == PredefinedType.PT_LONG)
+                        {
+                            return opConst2.getVal().longVal == 0;
+                        }
+
+                        return opConst2.getVal().ulongVal == 0;
+                    }
+
+                    break;
+            }
+
             return false;
         }
 
@@ -2553,7 +2571,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(op2 == null || op2.type == typeOp);
             Debug.Assert((op2 == null) == (kind == ExpressionKind.EK_NEG || kind == ExpressionKind.EK_UPLUS || kind == ExpressionKind.EK_BITNOT));
 
-            if (isDivByZero(kind, op2))
+            if (IsDivByZero(kind, op2, ptOp))
             {
                 GetErrorContext().Error(ErrorCode.ERR_IntDivByZero);
                 EXPR rval = GetExprFactory().CreateBinop(kind, typeOp, op1, op2);
@@ -2716,14 +2734,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         uRes = u1 / u2;
                     }
-                    else if (u2 != 0)
-                    {
-                        uRes = (uint)((int)u1 / (int)u2);
-                    }
                     else
                     {
-                        uRes = (uint)-(int)u1;
-                        EnsureChecked(u1 != uSign);
+                        uRes = (uint)((int)u1 / (int)u2);
                     }
                     break;
 
@@ -2733,13 +2746,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         uRes = u1 % u2;
                     }
-                    else if (u2 != 0)
-                    {
-                        uRes = (uint)((int)u1 % (int)u2);
-                    }
                     else
                     {
-                        uRes = 0;
+                        uRes = (uint)((int)u1 % (int)u2);
                     }
                     break;
 
