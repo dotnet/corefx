@@ -6,8 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace System.Configuration
 {
-    // obsolete
-    [ComVisible(false)]
     public interface IConfigurationSystem
     {
         // Returns the config object for the specified key.
