@@ -6043,7 +6043,7 @@ namespace System.Data.SqlClient
                     _physicalStateObj.SniContext = SniContext.Snix_LoginSspi;
 
 #if MANAGED_SNI
-                    SSPIData(null, 0, ref outSSPIBuff, ref outSSPILength);
+                    SSPIData(null, ref outSSPIBuff);
                     outSSPILength = outSSPIBuff != null ? (uint)outSSPIBuff.Length : 0;
 #else
                     SSPIData(null, 0, outSSPIBuff, ref outSSPILength);
@@ -6303,7 +6303,7 @@ namespace System.Data.SqlClient
         }// tdsLogin
 
 #if MANAGED_SNI
-        private void SSPIData(byte[] receivedBuff, UInt32 receivedLength, ref byte[] sendBuff, ref UInt32 sendLength)
+        private void SSPIData(byte[] receivedBuff, ref byte[] sendBuff)
         {
             SNISSPIData(receivedBuff, ref sendBuff);
         }
@@ -6361,7 +6361,7 @@ namespace System.Data.SqlClient
 
             // make call for SSPI data
 #if MANAGED_SNI            
-            SSPIData(receivedBuff, (UInt32)receivedLength, ref sendBuff, ref sendLength);
+            SSPIData(receivedBuff, ref sendBuff);
 #else
             SSPIData(receivedBuff, (UInt32)receivedLength, sendBuff, ref sendLength);
 #endif
