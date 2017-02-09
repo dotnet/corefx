@@ -455,7 +455,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Dos path
         public void UriFile_ExplicitDosFile_QueryAllowed()
         {
             string input = "file:///c:/path/path?query?#fragment?";
@@ -468,7 +468,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Dos path
         public void UriFile_ImplicitDosFile_QueryNotAllowed()
         {
             string input = "c:/path/path?query";
@@ -481,7 +481,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix path
         public void UriFile_ImplicitUnixFile_QueryNotAllowed()
         {
             string input = "/path/path?query";
@@ -494,7 +494,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc path
         public void UriFile_ImplicitUncFile_QueryNotAllowed()
         {
             string input = @"\\Server\share\path?query";
@@ -507,7 +507,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Dos path
         public void UriFile_ImplicitDosFile_FragmentNotAllowed()
         {
             string input = "c:/path/path#fragment#";
@@ -520,7 +520,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix path
         public void UriFile_ImplicitUnixFile_FragmentNotAllowed()
         {
             string input = "/path/path#fragment#";
@@ -533,7 +533,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc path
         public void UriFile_ImplicitUncFile_FragmentNotAllowed()
         {
             string input = @"\\Server\share\path#fragment#";

@@ -278,7 +278,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Dos path
         public void Uri_Relative_BaseVsFileLikeUri_MissingRootSlash_ThrowsUriFormatException()
         {
             // A Dos path must be rooted

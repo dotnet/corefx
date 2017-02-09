@@ -71,7 +71,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc Path
         public void IriRelativeResolution_CompareImplcitAndExplicitUncWithNoUnicode_AllPropertiesTheSame()
         {
             string nonUnicodeImplicitTestUnc = @"\\c\path\path3\test.txt";
@@ -85,7 +85,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc Path
         public void IriRelativeResolution_CompareImplcitAndExplicitUncForwardSlashesWithNoUnicode_AllPropertiesTheSame()
         {
             string nonUnicodeImplicitTestUnc = @"//c/path/path3/test.txt";
@@ -99,7 +99,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc Path
         public void IriRelativeResolution_CompareImplcitAndExplicitUncWithUnicodeIriOn_AllPropertiesTheSame()
         {
             string unicodeImplicitTestUnc = @"\\c\path\\u30AF\path3\\u30EB\u30DE.text";
@@ -170,7 +170,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc Path
         public void IriRelativeResolution_CompareUncAndOriginalFileWithNoUnicode_AllPropertiesTheSame()
         {
             string nonUnicodeUncTestFile = @"\\c\path\path3\test.txt";
@@ -184,7 +184,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc Path
         public void IriRelativeResolution_CompareUncForwardSlashesAndOriginalFileWithNoUnicode_AllPropertiesTheSame()
         {
             string nonUnicodeUncTestFile = @"//c/path/path3/test.txt";

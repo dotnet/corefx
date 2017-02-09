@@ -1006,7 +1006,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unc path
         [MemberData(nameof(IsFile_IsUnc_TestData))]
         public void IsFile_IsUnc(string uriString, bool isFile, bool isUnc)
         {
