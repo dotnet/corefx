@@ -34,27 +34,69 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableQueue<T> Create<T>(T item)
         {
-            return ImmutableQueue<T>.Empty.Enqueue(item);
+            return new ImmutableQueue<T>(ImmutableStack.Create(item), ImmutableStack<T>.Empty);
         }
 
         /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
+        /// Creates a new immutable queue from the specified items.
         /// </summary>
-        /// <typeparam name="T">The type of items stored by the collection.</typeparam>
-        /// <param name="items">The items to prepopulate.</param>
-        /// <returns>The new immutable collection.</returns>
+        /// <typeparam name="T">The type of items to store in the queue.</typeparam>
+        /// <param name="items">The enumerable to copy items from.</param>
+        /// <returns>The new immutable queue.</returns>
         [Pure]
         public static ImmutableQueue<T> CreateRange<T>(IEnumerable<T> items)
         {
             Requires.NotNull(items, nameof(items));
 
-            var queue = ImmutableQueue<T>.Empty;
-            foreach (var item in items)
+            var ilist = items as IList<T>;
+            if (ilist != null)
             {
-                queue = queue.Enqueue(item);
+                return CreateRange(ilist: ilist);
             }
 
-            return queue;
+            using (IEnumerator<T> e = items.GetEnumerator())
+            {
+                if (!e.MoveNext())
+                {
+                    return ImmutableQueue<T>.Empty;
+                }
+
+                var forwards = ImmutableStack.Create(e.Current);
+                var backwards = ImmutableStack<T>.Empty;
+                
+                while (e.MoveNext())
+                {
+                    backwards = backwards.Push(e.Current);
+                }
+
+                return new ImmutableQueue<T>(forwards: forwards, backwards: backwards);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new immutable queue from the specified list.
+        /// </summary>
+        /// <typeparam name="T">The type of items to store in the queue.</typeparam>
+        /// <param name="list">The list to copy items from.</param>
+        /// <returns>The new immutable queue.</returns>
+        private static ImmutableQueue<T> CreateRange<T>(IList<T> ilist)
+        {
+            Debug.Assert(ilist != null);
+
+            int count = ilist.Count;
+            if (count <= 0)
+            {
+                return ImmutableQueue<T>.Empty;
+            }
+
+            var forwards = ImmutableStack<T>.Empty;
+
+            for (int i = count - 1; i >= 0; i--)
+            {
+                forwards = forwards.Push(ilist[i]);
+            }
+
+            return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
         }
 
         /// <summary>
