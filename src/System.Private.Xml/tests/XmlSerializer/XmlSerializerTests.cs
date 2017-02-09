@@ -2713,11 +2713,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void SoapEncodedSerialization_SoapAttribute()
     {
         var soapAtts1 = new SoapAttributes();
-        SoapAttributeAttribute soapAtt1 = new SoapAttributeAttribute();
+        var soapAtt1 = new SoapAttributeAttribute();
         soapAtt1.Namespace = "http://www.cpandl.com";
         soapAtts1.SoapAttribute = soapAtt1;
         var soapAtts2 = new SoapAttributes();
-        SoapAttributeAttribute soapAtt2 = new SoapAttributeAttribute();
+        var soapAtt2 = new SoapAttributeAttribute();
         soapAtt2.DataType = "date";
         soapAtt2.AttributeName = "CreationDate";
         soapAtts2.SoapAttribute = soapAtt2;
@@ -2773,8 +2773,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void SoapEncodedSerialization_CircularLink()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCircularLink));
-        XmlSerializer ser = new XmlSerializer(myTypeMapping);
-        MyCircularLink value = new MyCircularLink(true);
+        var ser = new XmlSerializer(myTypeMapping);
+        var value = new MyCircularLink(true);
         var ms = new MemoryStream();
         using (var writer = new XmlTextWriter(ms, Encoding.UTF8))
         {
@@ -2782,11 +2782,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             writer.WriteStartElement("wrapper");
             ser.Serialize(writer, value);
             writer.WriteEndElement();
+            writer.Flush();
             ms.Position = 0;
             string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "<wrapper>\r\n  <MyCircularLink xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <Link href=\"#id2\" />\r\n    <IntValue xsi:type=\"xsd:int\">0</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id2\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id3\" />\r\n    <IntValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:int\">1</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id3\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id1\" />\r\n    <IntValue xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:int\">2</IntValue>\r\n  </MyCircularLink>";
-            Assert.Equal(actualOutput, baseline);
-            writer.Flush();
+            string baseline = "<wrapper>\r\n  <MyCircularLink xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <Link href=\"#id2\" />\r\n    <IntValue xsi:type=\"xsd:int\">0</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id2\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id3\" />\r\n    <IntValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:int\">1</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id3\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id1\" />\r\n    <IntValue xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:int\">2</IntValue>\r\n  </MyCircularLink>\r\n</wrapper>";
+            Utils.Compare(actualOutput, baseline);
             ms.Position = 0;
             using (var reader = new XmlTextReader(ms))
             {
@@ -2806,11 +2806,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup));
         XmlSerializer ser = new XmlSerializer(myTypeMapping);
-        Thing[] things = new Thing[] { new Thing() { ThingName = "AAA" }, new Thing() { ThingName = "BBB" } };
+        MyItem[] things = new MyItem[] { new MyItem() { ItemName = "AAA" }, new MyItem() { ItemName = "BBB" } };
         var value = new MyGroup()
         {
             GroupName = "MyName",
-            Things = things
+            MyItems = things
         };
 
         var ms = new MemoryStream();
@@ -2820,19 +2820,18 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             writer.WriteStartElement("wrapper");
             ser.Serialize(writer, value);
             writer.WriteEndElement();
+            writer.Flush();
             ms.Position = 0;
             string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "< wrapper >\r\n < MyGroup xmlns: xsi =\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <Things href=\"#id2\" />\r\n  </MyGroup>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"Thing[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <Thing id=\"id3\" d2p1:type=\"Thing\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ThingName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ThingName>\r\n  </Thing>\r\n  <Thing id=\"id4\" d2p1:type=\"Thing\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ThingName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ThingName>\r\n  </Thing>";
-            Assert.Equal(actualOutput, baseline);
-            ms.Position = 0;
-            writer.Flush();
+            string baseline = "<wrapper>\r\n  <MyGroup xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</wrapper>";
+            Utils.Compare(actualOutput, baseline);
             ms.Position = 0;
             using (var reader = new XmlTextReader(ms))
             {
                 reader.ReadStartElement("wrapper");
                 var deserialized = (MyGroup)ser.Deserialize(reader);
                 Assert.Equal(value.GroupName, deserialized.GroupName);
-                Assert.Equal(value.Things, deserialized.Things);
+                Assert.Equal(value.MyItems.Count(), deserialized.MyItems.Count());
             }
         }
     }
@@ -2842,12 +2841,12 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void SoapEncodedSerializationTest_List()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup2));
-        XmlSerializer ser = new XmlSerializer(myTypeMapping);
-        List<Thing> things = new List<Thing>() { new Thing() { ThingName = "AAA" }, new Thing() { ThingName = "BBB" } };
+        var ser = new XmlSerializer(myTypeMapping);
+        List<MyItem> things = new List<MyItem>() { new MyItem() { ItemName = "AAA" }, new MyItem() { ItemName = "BBB" } };
         var value = new MyGroup2()
         {
             GroupName = "MyName",
-            Things = things
+            MyItems = things
         };
 
         var ms = new MemoryStream();
@@ -2857,18 +2856,18 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             writer.WriteStartElement("wrapper");
             ser.Serialize(writer, value);
             writer.WriteEndElement();
+            writer.Flush();
             ms.Position = 0;
             string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "< wrapper >\r\n < MyGroup xmlns: xsi =\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <Things href=\"#id2\" />\r\n  </MyGroup>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"Thing[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <Thing id=\"id3\" d2p1:type=\"Thing\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ThingName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ThingName>\r\n  </Thing>\r\n  <Thing id=\"id4\" d2p1:type=\"Thing\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ThingName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ThingName>\r\n  </Thing>";
-            Assert.Equal(actualOutput, baseline);
-            writer.Flush();
+            string baseline = "<wrapper>\r\n  <MyGroup2 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup2>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</wrapper>";
+            Utils.Compare(actualOutput, baseline);
             ms.Position = 0;
             using (var reader = new XmlTextReader(ms))
             {
                 reader.ReadStartElement("wrapper");
                 var deserialized = (MyGroup2)ser.Deserialize(reader);
                 Assert.Equal(value.GroupName, deserialized.GroupName);
-                Assert.Equal(value.Things, deserialized.Things);
+                Assert.Equal(value.MyItems.Count(), deserialized.MyItems.Count());
             }
         }
     }

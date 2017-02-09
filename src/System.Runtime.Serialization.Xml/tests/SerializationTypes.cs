@@ -4196,24 +4196,24 @@ public class MyCircularLink
 public class MyGroup
 {
     public string GroupName;
-    public Thing[] Things;
+    public MyItem[] MyItems;
 }
 
 public class MyGroup2
 {
     public string GroupName;
-    public List<Thing> Things;
+    public List<MyItem> MyItems;
 }
 
 public class MyGroup3
 {
     public string GroupName;
-    public Dictionary<int, Thing> Things;
+    public Dictionary<int, MyItem> MyItems;
 }
 
-public class Thing
+public class MyItem
 {
-    public string ThingName;
+    public string ItemName;
 }
 
 public class MyOrder
