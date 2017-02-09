@@ -81,7 +81,6 @@ public class ReadBufferSize_Property : PortsTest
     public void ReadBufferSize_1()
     {
         Debug.WriteLine("Verifying setting ReadBufferSize=1");
-
         VerifyException(1, typeof(IOException), typeof(InvalidOperationException), true);
     }
 
@@ -89,7 +88,6 @@ public class ReadBufferSize_Property : PortsTest
     public void ReadBufferSize_2()
     {
         Debug.WriteLine("Verifying setting ReadBufferSize=");
-
         VerifyReadBufferSize(2);
     }
 
