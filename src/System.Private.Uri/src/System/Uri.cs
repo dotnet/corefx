@@ -4028,12 +4028,6 @@ namespace System
             bool hostNotUnicodeNormalized = ((flags & Flags.HostUnicodeNormalized) == 0); // perf
             UriSyntaxFlags syntaxFlags = syntax.Flags;
 
-            // need to build new Iri'zed string
-            if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
-            {
-                newHost = _originalUnicodeString.Substring(0, startInput);
-            }
-
             //Special case is an empty authority
             if (idx == length || ((ch = pString[idx]) == '/' || (ch == '\\' && StaticIsFile(syntax)) || ch == '#' || ch == '?'))
             {
@@ -4055,6 +4049,12 @@ namespace System
                 }
 
                 return idx;
+            }
+
+            // need to build new Iri'zed string
+            if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
+            {
+                newHost = _originalUnicodeString.Substring(0, startInput);
             }
 
             string userInfoString = null;
