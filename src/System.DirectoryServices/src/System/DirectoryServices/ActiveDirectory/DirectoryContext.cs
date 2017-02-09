@@ -45,7 +45,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region constructors
 
-        [EnvironmentPermission(SecurityAction.Assert, Unrestricted = true)]
         static DirectoryContext()
         {
             //
@@ -286,7 +285,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal string Password
         {
-            [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.UnmanagedCode)]
             get
             {
                 if (passwordIsNull)
@@ -826,7 +824,6 @@ namespace System.DirectoryServices.ActiveDirectory
             return domainControllerInfo.DomainName;
         }
 
-        [EnvironmentPermission(SecurityAction.Assert, Unrestricted = true)]
         private static void GetLibraryHandle()
         {
             // first get AD handle

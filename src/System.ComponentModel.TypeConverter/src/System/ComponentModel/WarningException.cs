@@ -86,7 +86,6 @@ namespace System.ComponentModel
         /// <summary>
         ///     Need this since Exception implements ISerializable and we have fields to save out.
         /// </summary>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)

@@ -441,7 +441,6 @@ namespace System.DirectoryServices.Protocols
             }
         }
 
-        [EnvironmentPermission(SecurityAction.Assert, Unrestricted = true)]
         private void PrepareHttpWebRequest(HttpWebRequest dsmlConnection)
         {
             // set the credentials appropriately

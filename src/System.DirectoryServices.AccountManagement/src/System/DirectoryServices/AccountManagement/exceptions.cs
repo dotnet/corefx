@@ -127,7 +127,6 @@ namespace System.DirectoryServices.AccountManagement
             _serverName = (string)info.GetValue("serverName", typeof(String));
         }
 
-        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("errorCode", _errorCode);
@@ -164,7 +163,6 @@ namespace System.DirectoryServices.AccountManagement
             _errorCode = info.GetInt32("errorCode");
         }
 
-        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("errorCode", _errorCode);

@@ -19,7 +19,6 @@ namespace System.DirectoryServices.AccountManagement
 {
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
 #pragma warning restore 618
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
     internal partial class ADAMStoreCtx : ADStoreCtx
     {
         private const int mappingIndex = 1;

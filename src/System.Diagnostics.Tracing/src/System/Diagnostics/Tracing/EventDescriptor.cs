@@ -22,7 +22,6 @@ namespace System.Diagnostics.Tracing
 #endif
 {
     [StructLayout(LayoutKind.Explicit, Size = 16)]
-    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     internal struct EventDescriptor
     {
         # region private

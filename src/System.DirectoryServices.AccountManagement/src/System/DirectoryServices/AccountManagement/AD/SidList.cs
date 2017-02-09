@@ -15,7 +15,6 @@ namespace System.DirectoryServices.AccountManagement
 {
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
 #pragma warning restore 618
-    [System.DirectoryServices.DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
 
     internal class SidList
     {

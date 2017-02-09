@@ -302,7 +302,6 @@ namespace System.Net.Mail
             _isConnected = true;
         }
 
-        [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.ControlPrincipal)]
         private Authorization SetContextAndTryAuthenticate(ISmtpAuthenticationModule module, NetworkCredential credential, ContextAwareResult context)
         {
             // We may need to restore user thread token here

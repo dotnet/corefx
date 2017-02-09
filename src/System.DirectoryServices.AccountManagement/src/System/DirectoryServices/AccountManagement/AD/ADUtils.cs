@@ -23,20 +23,17 @@ namespace System.DirectoryServices.AccountManagement
         // Note that, since computer is a derived class of user in AD, if you don't want to confuse
         // computers with users, you must test an object for computer status before testing it for
         // user status.
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
         static internal bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
         {
             return de.Properties["objectClass"].Contains(classToCompare);
         }
 
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
         static internal bool IsOfObjectClass(SearchResult sr, string classToCompare)
         {
             return sr.Properties["objectClass"].Contains(classToCompare);
         }
 
         // Retrieves the name of the actual server that the DirectoryEntry is connected to
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
         static internal string GetServerName(DirectoryEntry de)
         {
             UnsafeNativeMethods.IAdsObjectOptions objOptions = (UnsafeNativeMethods.IAdsObjectOptions)de.NativeObject;
@@ -392,7 +389,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
         static internal Principal DirectoryEntryAsPrincipal(DirectoryEntry de, ADStoreCtx storeCtx)
         {
             if (ADUtils.IsOfObjectClass(de, "computer") ||
@@ -411,7 +407,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.Assert, Unrestricted = true)]
         static internal Principal SearchResultAsPrincipal(SearchResult sr, ADStoreCtx storeCtx, object discriminant)
         {
             if (ADUtils.IsOfObjectClass(sr, "computer") ||
