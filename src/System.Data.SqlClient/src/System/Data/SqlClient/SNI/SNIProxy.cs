@@ -101,16 +101,18 @@ namespace System.Data.SqlClient.SNI
         /// <param name="serverName">Service Principal Name buffer</param>
         /// <param name="serverNameLength">Length of Service Principal Name</param>
         /// <returns>SNI error code</returns>
-        public uint GenSspiClientContext(SNIHandle handle, byte[] receivedBuff, ref byte[] sendBuff, byte[] serverName)
+        public uint GenSspiClientContext(TdsParserStateObject tdsParserStateObject, byte[] receivedBuff, ref byte[] sendBuff, byte[] serverName)
         {
-            SNITCPHandle tcpHandle = (SNITCPHandle)handle;
-            SafeDeleteContext securityContext = tcpHandle.SecurityContext;
-            ContextFlagsPal contextFlags = tcpHandle.ContextFlags;
+            SNITCPHandle tcpHandle = (SNITCPHandle)tdsParserStateObject.Handle;
+
+            SafeDeleteContext securityContext = tdsParserStateObject.sspiClientContextStatus.SecurityContext;
+            ContextFlagsPal contextFlags = tdsParserStateObject.sspiClientContextStatus.ContextFlags;
+            SafeFreeCredentials credentialsHandle = tdsParserStateObject.sspiClientContextStatus.CredentialsHandle;
 
             SecurityBuffer[] inSecurityBufferArray = null;
             if (securityContext == null) //first iteration
             {
-                tcpHandle.CredentialsHandle = NegotiateStreamPal.AcquireDefaultCredential(Kerberos, false);
+                credentialsHandle = NegotiateStreamPal.AcquireDefaultCredential(Kerberos, false);
             }
             else
             {
@@ -127,7 +129,7 @@ namespace System.Data.SqlClient.SNI
             string serverSPN = System.Text.Encoding.UTF8.GetString(serverName);
 
             SecurityStatusPal statusCode = NegotiateStreamPal.InitializeSecurityContext(
-                       tcpHandle.CredentialsHandle,
+                       credentialsHandle,
                        ref securityContext,
                        serverSPN,
                        requestedContextFlags,
@@ -144,8 +146,9 @@ namespace System.Data.SqlClient.SNI
 
             sendBuff = outSecurityBuffer.token;
 
-            tcpHandle.SecurityContext = securityContext;
-            tcpHandle.ContextFlags = contextFlags;
+            tdsParserStateObject.sspiClientContextStatus.SecurityContext = securityContext;
+            tdsParserStateObject.sspiClientContextStatus.ContextFlags = contextFlags;
+            tdsParserStateObject.sspiClientContextStatus.CredentialsHandle = credentialsHandle;
 
             uint result = SspiClientContextResult.OK;
             if (IsErrorStatus(statusCode.ErrorCode))

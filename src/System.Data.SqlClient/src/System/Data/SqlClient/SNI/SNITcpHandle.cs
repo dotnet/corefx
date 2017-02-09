@@ -39,8 +39,6 @@ namespace System.Data.SqlClient.SNI
 
         private const int MaxParallelIpAddresses = 64;
 
-        private ContextFlagsPal _contextFlags = ContextFlagsPal.None;
-
         /// <summary>
         /// Dispose object
         /// </summary>
@@ -68,31 +66,6 @@ namespace System.Data.SqlClient.SNI
 
                 //Release any references held by _stream.
                 _stream = null;
-            }
-        }
-
-        public SafeFreeCredentials CredentialsHandle
-        {
-            get;
-            set;
-        }
-
-        public SafeDeleteContext SecurityContext
-        {
-            get;
-            set;
-        }
-
-        public ContextFlagsPal ContextFlags
-        {
-            get
-            {
-                return _contextFlags;
-            }
-
-            set
-            {
-                _contextFlags = value;
             }
         }
 

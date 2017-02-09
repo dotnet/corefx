@@ -15,8 +15,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+
 #if MANAGED_SNI
 using System.Data.SqlClient.SNI;
+using System.Net.Security;
+using System.Net;
 #endif
 
 namespace System.Data.SqlClient
@@ -242,6 +245,41 @@ namespace System.Data.SqlClient
         // Set to true to enable checking the call stacks match when packet retry occurs.
         internal static bool _checkNetworkPacketRetryStacks;
 #pragma warning restore 0649
+#endif
+
+#if MANAGED_SNI
+
+        internal SspiClientContextStatus sspiClientContextStatus = new SspiClientContextStatus();
+
+        internal class SspiClientContextStatus
+        {
+            private ContextFlagsPal _contextFlags = ContextFlagsPal.None;
+
+            public SafeFreeCredentials CredentialsHandle
+            {
+                get;
+                set;
+            }
+
+            public SafeDeleteContext SecurityContext
+            {
+                get;
+                set;
+            }
+
+            public ContextFlagsPal ContextFlags
+            {
+                get
+                {
+                    return _contextFlags;
+                }
+
+                set
+                {
+                    _contextFlags = value;
+                }
+            }
+        }
 #endif
 
         //////////////////

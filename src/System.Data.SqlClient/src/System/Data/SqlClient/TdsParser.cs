@@ -6305,7 +6305,7 @@ namespace System.Data.SqlClient
 #if MANAGED_SNI
         private void SSPIData(byte[] receivedBuff, UInt32 receivedLength, ref byte[] sendBuff, ref UInt32 sendLength)
         {
-            SNISSPIData(receivedBuff, receivedLength, ref sendBuff, ref sendLength);
+            SNISSPIData(receivedBuff, ref sendBuff);
         }
 #else
         private void SSPIData(byte[] receivedBuff, UInt32 receivedLength, byte[] sendBuff, ref UInt32 sendLength)
@@ -6316,13 +6316,13 @@ namespace System.Data.SqlClient
 
 
 #if MANAGED_SNI
-        private void SNISSPIData(byte[] receivedBuff, UInt32 receivedLength, ref byte[] sendBuff, ref UInt32 sendLength)
+        private void SNISSPIData(byte[] receivedBuff, ref byte[] sendBuff)
         {
-            uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj.Handle, receivedBuff, ref sendBuff, _sniSpnBuffer);
+            uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj, receivedBuff, ref sendBuff, _sniSpnBuffer);
             if (clientContextResult != SNIProxy.SspiClientContextResult.OK)
             {
                 string errorMessage = clientContextResult == SNIProxy.SspiClientContextResult.KerberosTicketMissing ?
-                                        "Kerberos Ticket is missing. Run 'kinit'." : SQLMessage.SSPIGenerateError();
+                                        SR.kerberos_ticket_missing : SQLMessage.SSPIGenerateError();
                 SSPIError(errorMessage, TdsEnums.GEN_CLIENT_CONTEXT);
             }
         }
