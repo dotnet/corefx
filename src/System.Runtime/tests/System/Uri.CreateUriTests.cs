@@ -10,7 +10,7 @@ namespace System.Tests
 {
     public class UriCreateUriTests
     {
-        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
 
         public static IEnumerable<object[]> Create_Uri_TestData()
         {

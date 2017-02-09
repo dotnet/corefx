@@ -9,7 +9,7 @@ namespace System.PrivateUri.Tests
 {
     public static class UriTests
     {
-        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
 
         [Fact]
         public static void TestCtor_String()

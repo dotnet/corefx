@@ -8,6 +8,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.3-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Tests.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <SupplementalTestData Include="$(PackagesDir)System.IO.Packaging.TestData\1.0.0-prerelease\content\**\*.*" />

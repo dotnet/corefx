@@ -12,7 +12,7 @@ namespace System.Tests
 {
     public class UriCreateStringTests
     {
-        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
         public static readonly string s_longString = new string('a', 65520 + 1);
 
         public static IEnumerable<object[]> OriginalString_AbsoluteUri_ToString_TestData()

@@ -18,7 +18,7 @@ namespace System.PrivateUri.Tests
     /// </summary>
     public class IriRelativeFileResolutionTest
     {
-        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
 
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndExplicitFileWithNoUnicode_AllPropertiesTheSame()

@@ -11,7 +11,7 @@ namespace System.Tests
 {
     public class UriMethodTests
     {
-        private static readonly bool s_IsWindowsSystem = Path.DirectorySeparatorChar == '\\';
+        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
 
         public static IEnumerable<object[]> MakeRelative_TestData()
         {
