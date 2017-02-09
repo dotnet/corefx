@@ -31,7 +31,7 @@
       <RefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</RefPath>
       <RuntimePath>$(NETCoreAppPackageRuntimePath)</RuntimePath>
     </BinplaceConfiguration>
-    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' And '$(_bc_TargetGroup)'!='uapaot'" Include="uap-$(OSGroup)">
+    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' And '$(_bc_TargetGroup)'=='uap'" Include="uap-$(OSGroup)">
       <RefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</RefPath>
       <RuntimePath>$(UAPPackageRuntimePath)</RuntimePath>
     </BinplaceConfiguration>
