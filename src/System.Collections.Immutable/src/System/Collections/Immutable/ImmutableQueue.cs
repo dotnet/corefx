@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
@@ -79,6 +80,13 @@ namespace System.Collections.Immutable
         /// <typeparam name="T">The type of items to store in the queue.</typeparam>
         /// <param name="list">The list to copy items from.</param>
         /// <returns>The new immutable queue.</returns>
+        /// <remarks>
+        /// This version is a faster method of creating an immutable queue because it pushes
+        /// the items onto the queue's forwards stack in reverse order. This eliminates the need
+        /// to have a backwards stack and then expensively reverse that stack when two items are
+        /// dequeued. Additionally, we make one fewer virtual method call per item than the
+        /// enumerable version.
+        /// </remarks>
         private static ImmutableQueue<T> CreateRange<T>(IList<T> ilist)
         {
             Debug.Assert(ilist != null);

@@ -46,8 +46,8 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableQueue{T}"/> class.
         /// </summary>
-        /// <param name="forwards">The forward stack.</param>
-        /// <param name="backwards">The backward stack.</param>
+        /// <param name="forwards">The forwards stack.</param>
+        /// <param name="backwards">The backwards stack.</param>
         internal ImmutableQueue(ImmutableStack<T> forwards, ImmutableStack<T> backwards)
         {
             Requires.NotNull(forwards, nameof(forwards));
@@ -154,7 +154,7 @@ namespace System.Collections.Immutable
 
             if (this.IsEmpty)
             {
-                return new ImmutableQueue<T>(ImmutableStack.Create(item), ImmutableStack<T>.Empty);
+                return new ImmutableQueue<T>(ImmutableStack.Create(value), ImmutableStack<T>.Empty);
             }
             else
             {
