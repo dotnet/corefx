@@ -6329,9 +6329,9 @@ namespace System.Data.SqlClient
 #else
         private void SNISSPIData(byte[] receivedBuff, UInt32 receivedLength, byte[] sendBuff, ref UInt32 sendLength)
         {
-            // if we do not have SSPI data coming from server, send over 0's for pointer and length
             if (receivedBuff == null)
             {
+                // if we do not have SSPI data coming from server, send over 0's for pointer and length
                 receivedLength = 0;
             }
 
