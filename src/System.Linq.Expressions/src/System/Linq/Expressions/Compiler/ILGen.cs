@@ -1093,35 +1093,58 @@ namespace System.Linq.Expressions.Compiler
 
         #region Support for emitting constants
 
-        internal static void EmitDecimal(this ILGenerator il, decimal value)
+        private static void EmitDecimal(this ILGenerator il, decimal value)
         {
             if (decimal.Truncate(value) == value)
             {
                 if (int.MinValue <= value && value <= int.MaxValue)
                 {
                     int intValue = decimal.ToInt32(value);
-                    il.EmitInt(intValue);
-                    il.EmitNew(Decimal_Ctor_Int32);
+                    switch (intValue)
+                    {
+                        case 0:
+                            il.EmitDefault(typeof(decimal));
+                            return;
+                        case 1:
+                            il.Emit(OpCodes.Ldsfld, Decimal_One);
+                            return;
+                        case -1:
+                            il.Emit(OpCodes.Ldsfld, Decimal_MinusOne);
+                            return;
+                        default:
+                            il.EmitInt(intValue);
+                            il.EmitNew(Decimal_Ctor_Int32);
+                            return;
+                    }
                 }
-                else if (long.MinValue <= value && value <= long.MaxValue)
-                {
-                    long longValue = decimal.ToInt64(value);
-                    il.EmitLong(longValue);
-                    il.EmitNew(Decimal_Ctor_Int64);
-                }
-                else
-                {
-                    il.EmitDecimalBits(value);
-                }
-            }
-            else
-            {
-                il.EmitDecimalBits(value);
-            }
-        }
 
-        private static void EmitDecimalBits(this ILGenerator il, decimal value)
-        {
+                if (long.MinValue <= value && value <= long.MaxValue)
+                {
+                    il.EmitLong(decimal.ToInt64(value));
+                    il.EmitNew(Decimal_Ctor_Int64);
+                    return;
+                }
+
+                if (value > 0 && value <= ulong.MaxValue)
+                {
+                    il.EmitULong(decimal.ToUInt64(value));
+                    il.EmitNew(Decimal_Ctor_UInt64);
+                    return;
+                }
+
+                if (value == decimal.MinValue)
+                {
+                    il.Emit(OpCodes.Ldsfld, Decimal_MinValue);
+                    return;
+                }
+
+                if (value == decimal.MaxValue)
+                {
+                    il.Emit(OpCodes.Ldsfld, Decimal_MaxValue);
+                    return;
+                }
+            }
+
             int[] bits = decimal.GetBits(value);
             il.EmitInt(bits[0]);
             il.EmitInt(bits[1]);
