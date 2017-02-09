@@ -448,7 +448,10 @@
     <value>A severe error occurred on the current command.  The results, if any, should be discarded.</value>
   </data>
   <data name="SQL_SSPIGenerateError" xml:space="preserve">
-    <value>The target principal name is incorrect.  Cannot generate SSPI context.</value>
+    <value>Failed to generate SSPI context.</value>
+  </data>
+  <data name="SQL_KerberosTicketMissingError" xml:space="preserve">
+    <value>Cannot access to Kerberos Ticket. (Did you forget to run 'kinit'?)</value>
   </data>
   <data name="SQL_InvalidSSPIPacketSize" xml:space="preserve">
     <value>Invalid SSPI packet size.</value>
@@ -1082,8 +1085,5 @@
   </data>
   <data name="net_context_buffer_too_small" xml:space="preserve">
     <value>Insufficient buffer space. Required: {0} Actual: {1}.</value>
-  </data>
-  <data name="kerberos_ticket_missing" xml:space="preserve">
-    <value>Kerberos Ticket is missing. Run 'kinit'.</value>
   </data>
 </root>
