@@ -304,6 +304,7 @@ namespace System.Net.Http
                 return _proxy;
             }
 
+            [SecuritySafeCritical]
             set
             {
                 if (!UseProxy && value != null)
@@ -1098,6 +1099,9 @@ namespace System.Net.Http
         }
 
         // Security: We need an assert for a call into WindowsIdentity.GetCurrent
+        [SecuritySafeCritical]
+        [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.ControlPrincipal)]
+        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification="Needed for identity flow.")]
         private void SafeCaptureIdenity(RequestState state)
         {
             state.identity = WindowsIdentity.GetCurrent();
