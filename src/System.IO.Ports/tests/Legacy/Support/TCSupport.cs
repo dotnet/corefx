@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace Legacy.Support
