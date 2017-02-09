@@ -123,6 +123,7 @@
     <Compile Include="$(CommonPath)\System\Resources\NeutralResourcesLanguageAttribute.cs">
       <Link>Common\System\Resources\NeutralResourcesLanguageAttribute.cs</Link>
     </Compile>
+    <Compile Include="System\Uri.Windows.cs" />
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
