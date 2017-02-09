@@ -29,6 +29,7 @@ namespace BasicEventSourceTests
             TestUtilities.CheckNoEventSourcesRunning("Stop");
         }
 
+        [SecurityPermission(SecurityAction.PermitOnly, Execution = true)]
         static void RunLowTrustTest()
         {
             System.Array arr = Array.CreateInstance(typeof(byte), 100L, 200L);
