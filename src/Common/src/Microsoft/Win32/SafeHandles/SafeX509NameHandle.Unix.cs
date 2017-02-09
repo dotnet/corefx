@@ -8,7 +8,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32.SafeHandles
 {
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeX509NameHandle : SafeHandle
     {
         private SafeX509NameHandle() :

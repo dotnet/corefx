@@ -29,7 +29,9 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeAsn1BitStringHandle : SafeHandle
     {
         private SafeAsn1BitStringHandle() :
@@ -50,7 +52,9 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeAsn1OctetStringHandle : SafeHandle
     {
         private SafeAsn1OctetStringHandle() :
@@ -71,7 +75,9 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeAsn1StringHandle : SafeHandle
     {
         private SafeAsn1StringHandle() :

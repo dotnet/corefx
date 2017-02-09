@@ -9,7 +9,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32.SafeHandles
 {
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeX509Handle : SafeHandle
     {
         internal static readonly SafeX509Handle InvalidHandle = new SafeX509Handle();
@@ -19,7 +21,9 @@ namespace Microsoft.Win32.SafeHandles
         {
         }
 
+#if NET46
         [SecurityCritical]
+#endif // NET46
         protected override bool ReleaseHandle()
         {
             Interop.Crypto.X509Destroy(handle);
@@ -54,7 +58,9 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeX509StoreHandle : SafeHandle
     {
         private SafeX509StoreHandle() :
