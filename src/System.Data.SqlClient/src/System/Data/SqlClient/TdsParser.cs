@@ -42,7 +42,6 @@ namespace System.Data.SqlClient
             get
             {
                 if (s_completedTask == null)
-
                 {
                     s_completedTask = Task.FromResult<object>(null);
                 }

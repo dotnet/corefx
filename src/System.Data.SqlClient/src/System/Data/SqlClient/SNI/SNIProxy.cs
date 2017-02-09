@@ -361,16 +361,7 @@ namespace System.Data.SqlClient.SNI
 
         private static string GetFullyQualifiedDomainName(string hostNameOrAddress)
         {
-            IPHostEntry hostEntry = null;
-            try
-            {
-                hostEntry = Dns.GetHostEntry(hostNameOrAddress);
-            }
-            catch
-            {
-                throw new Exception(SR.reverse_lookup_failed);
-            }
-
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
             return hostEntry.HostName;
         }
 
@@ -388,7 +379,7 @@ namespace System.Data.SqlClient.SNI
             // tcp:<host name>\<instance name>
             // tcp:<host name>,<TCP/IP port number>
 
-            string hostName = null; ;
+            string hostName = null;
             int port = -1;
             Exception exception = null;
 
@@ -438,14 +429,22 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            SNITCPHandle sniTcpHandle = null;
-            if (hostName != null && port > 0 && exception == null)
+            if (hostName != null && port > 0 && exception == null && isIntegratedSecurity)
             {
-                if (isIntegratedSecurity)
+                try
                 {
                     hostName = GetFullyQualifiedDomainName(hostName);
                     spnBuffer = MakeMsSqlServerSPN(hostName, port);
                 }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+            }
+
+            SNITCPHandle sniTcpHandle = null;
+            if (hostName != null && port > 0 && exception == null)
+            {
                 sniTcpHandle = new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
             }
             else if (exception != null)
