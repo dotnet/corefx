@@ -54,7 +54,7 @@
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.MutationInput.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.MutationResult.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary_2.cs" />
-    <Compile Include="System\Collections\Immutable\ImmutableEnumerable.DebuggerProxy.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableEnumerableDebuggerProxy.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableExtensions.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableExtensions.Minimal.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableHashSet.cs" />
