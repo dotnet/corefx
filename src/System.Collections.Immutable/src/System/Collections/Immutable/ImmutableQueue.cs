@@ -48,13 +48,11 @@ namespace System.Collections.Immutable
         public static ImmutableQueue<T> CreateRange<T>(IEnumerable<T> items)
         {
             Requires.NotNull(items, nameof(items));
-
-            var ilist = items as IList<T>;
-            // Even though ImmutableList supports random access, its indexer has O(log N) time complexity.
-            // So don't employ any IList-based optimizations if `items` is an ImmutableList.
-            if (ilist != null && !(items is ImmutableList<T>))
+            
+            var array = items as T[];
+            if (array != null)
             {
-                return CreateRange(ilist: ilist);
+                return Create(items: array);
             }
 
             using (IEnumerator<T> e = items.GetEnumerator())
@@ -77,40 +75,6 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Creates a new immutable queue from the specified list.
-        /// </summary>
-        /// <typeparam name="T">The type of items to store in the queue.</typeparam>
-        /// <param name="ilist">The list to copy items from.</param>
-        /// <returns>The new immutable queue.</returns>
-        /// <remarks>
-        /// This version is a faster method of creating an immutable queue because it pushes
-        /// the items onto the queue's forwards stack in reverse order. This eliminates the need
-        /// to have a backwards stack and then expensively reverse that stack when two items are
-        /// dequeued. Additionally, we make one fewer virtual method call per item than the
-        /// enumerable version.
-        /// </remarks>
-        private static ImmutableQueue<T> CreateRange<T>(IList<T> ilist)
-        {
-            Debug.Assert(ilist != null);
-            Debug.Assert(!(ilist is ImmutableList<T>), $"{nameof(ImmutableList<T>)} has poor random access complexity.");
-
-            int count = ilist.Count;
-            if (count <= 0)
-            {
-                return ImmutableQueue<T>.Empty;
-            }
-
-            var forwards = ImmutableStack<T>.Empty;
-
-            for (int i = count - 1; i >= 0; i--)
-            {
-                forwards = forwards.Push(ilist[i]);
-            }
-
-            return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
-        }
-
-        /// <summary>
         /// Creates a new immutable queue from the specified items.
         /// </summary>
         /// <typeparam name="T">The type of items to store in the queue.</typeparam>
@@ -120,7 +84,20 @@ namespace System.Collections.Immutable
         public static ImmutableQueue<T> Create<T>(params T[] items)
         {
             Requires.NotNull(items, nameof(items));
-            return CreateRange(ilist: items);
+
+            if (items.Length == 0)
+            {
+                return ImmutableQueue<T>.Empty;
+            }
+
+            var forwards = ImmutableStack<T>.Empty;
+
+            for (int i = items.Length - 1; i >= 0; i--)
+            {
+                forwards = forwards.Push(items[i]);
+            }
+
+            return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
         }
 
         /// <summary>
