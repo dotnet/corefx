@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,7 +15,7 @@ namespace Legacy.SerialStream
 {
     public class ReadByte : PortsTest
     {
-        //  The number of random bytes to receive
+        // The number of random bytes to receive
         private static int numRndByte = 8;
         
         #region Test Cases
@@ -55,7 +55,7 @@ namespace Legacy.SerialStream
                 var byteRcvBuffer = new byte[bufferSize];
                 int i;
 
-                //  Generate random bytes
+                // Generate random bytes
                 for (i = 0; i < byteXmitBuffer.Length; i++)
                 {
                     byteXmitBuffer[i] = (byte)rndGen.Next(0, 256);

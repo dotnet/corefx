@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -205,7 +205,7 @@ namespace Legacy.SerialStream
            We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
                 Debug.WriteLine("Verifying default ParityReplace byte with a parity errro on the last byte");
 
-                //  Generate random characters without an parity error
+                // Generate random characters without an parity error
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 128);
@@ -217,7 +217,7 @@ namespace Legacy.SerialStream
                 bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] | 0x80);
                 // Create a parity error on the last byte
                 expectedBytes[expectedBytes.Length - 1] = com1.ParityReplace;
-                //  Set the last expected byte to be the ParityReplace Byte
+                // Set the last expected byte to be the ParityReplace Byte
 
                 com1.Parity = Parity.Space;
                 com1.DataBits = 7;
@@ -294,7 +294,7 @@ namespace Legacy.SerialStream
 
             try
             {
-                com.BaseStream.Read(new byte[defaultByteArraySize], 0, defaultByteArraySize); //  Warm up read method
+                com.BaseStream.Read(new byte[defaultByteArraySize], 0, defaultByteArraySize); // Warm up read method
                 Fail("Err_6941814ahbpa!!!: Read did not throw Timeout Exception when it timed out for the first time");
             }
             catch (TimeoutException) { }
@@ -353,7 +353,7 @@ namespace Legacy.SerialStream
                 var expectedBytes = new byte[numRndBytesPairty];
                 byte expectedByte;
 
-                //  Generate random characters without an parity error
+                // Generate random characters without an parity error
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 128);
@@ -411,7 +411,7 @@ namespace Legacy.SerialStream
                 var rndGen = new Random(-55);
                 var bytesToWrite = new byte[numRndBytesToRead];
 
-                //  Generate random characters 
+                // Generate random characters 
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);

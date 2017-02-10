@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -19,20 +19,20 @@ namespace Legacy.SerialStream
         // The default number of bytes to write with when testing timeout with Write(byte[], int, int)
         private static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = 8;
 
-        //  The large number of bytes to write with when testing timeout with Write(byte[], int, int)
-        //  This needs to be large enough for Write timeout
+        // The large number of bytes to write with when testing timeout with Write(byte[], int, int)
+        // This needs to be large enough for Write timeout
         private static readonly int DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE = 1024 * 100;
 
-        //  The BaudRate to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE bytes 
+        // The BaudRate to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE bytes 
         private static readonly int LARGEWRITE_BAUDRATE = 1200;
 
-        //  The timeout to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE
+        // The timeout to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE
         private static readonly int LARGEWRITE_TIMEOUT = 750;
 
-        //  The default byte to call with WriteByte
+        // The default byte to call with WriteByte
         private static readonly byte DEFAULT_WRITE_BYTE = 33;
 
-        //  The amount of time to wait when expecting an long timeout
+        // The amount of time to wait when expecting an long timeout
         private static readonly int DEFAULT_WAIT_LONG_TIMEOUT = 250;
 
         // The maximum acceptable time allowed when a write method should timeout immediately

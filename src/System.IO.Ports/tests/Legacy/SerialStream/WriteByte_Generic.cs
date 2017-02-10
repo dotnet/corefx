@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -525,7 +525,7 @@ namespace Legacy.SerialStream
                 while (t.IsAlive)
                     Thread.Sleep(100);
 
-                //  Verify that the correct number of bytes are in the buffer
+                // Verify that the correct number of bytes are in the buffer
                 if (0 != com1.BytesToWrite)
                 {
                     Fail("ERROR!!! Expcted BytesToWrite=0 actual {0}", com1.BytesToWrite);

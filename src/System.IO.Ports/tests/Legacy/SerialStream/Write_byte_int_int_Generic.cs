@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -511,17 +511,17 @@ namespace Legacy.SerialStream
                     waitTime += 50;
                 }
 
-                //  Verify that the correct number of bytes are in the buffer
+                // Verify that the correct number of bytes are in the buffer
                 Assert.Equal(BYTE_SIZE_HANDSHAKE, com1.BytesToWrite);
 
-                //  Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
+                // Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) &&
                     com1.CtsHolding)
                 {
                     Fail("ERROR!!! Expected CtsHolding={0} actual {1}", false, com1.CtsHolding);
                 }
 
-                //  Setup to ensure write will succeed
+                // Setup to ensure write will succeed
                 if (Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
                     com2.RtsEnable = true;

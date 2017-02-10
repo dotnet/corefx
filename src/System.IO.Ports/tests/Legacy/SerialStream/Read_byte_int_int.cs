@@ -1,6 +1,6 @@
-//  Licensed to the .NET Foundation under one or more agreements.
-//  The .NET Foundation licenses this file to you under the MIT license.
-//  See the LICENSE file in the project root for more information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -204,7 +204,7 @@ namespace Legacy.SerialStream
                 var rndGen = new Random(-55);
                 var bytesToWrite = new byte[numberOfBytesToRead];
 
-                //  Generate random bytes
+                // Generate random bytes
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);
@@ -212,7 +212,7 @@ namespace Legacy.SerialStream
                     bytesToWrite[i] = randByte;
                 }
 
-                //  Generate some random bytes in the buffer
+                // Generate some random bytes in the buffer
                 for (var i = 0; i < buffer.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);
