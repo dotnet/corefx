@@ -253,7 +253,10 @@ namespace System.Data.SqlClient
 
         internal class SspiClientContextStatus
         {
-            private ContextFlagsPal _contextFlags = ContextFlagsPal.None;
+            public SspiClientContextStatus()
+            {
+                ContextFlags = ContextFlagsPal.None;
+            }
 
             public SafeFreeCredentials CredentialsHandle
             {
@@ -269,15 +272,8 @@ namespace System.Data.SqlClient
 
             public ContextFlagsPal ContextFlags
             {
-                get
-                {
-                    return _contextFlags;
-                }
-
-                set
-                {
-                    _contextFlags = value;
-                }
+                get;
+                set;
             }
         }
 #endif

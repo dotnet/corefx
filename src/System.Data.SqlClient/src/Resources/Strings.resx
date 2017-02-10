@@ -1078,7 +1078,7 @@
     <value>Target name should be non empty if default credentials are passed.</value>
   </data>
   <data name="net_nego_server_not_supported" xml:space="preserve">
-    <value>Server implementation is not supported</value>
+    <value>Server implementation is not supported.</value>
   </data>
   <data name="net_nego_protection_level_not_supported" xml:space="preserve">
     <value>Requested protection level is not supported with the GSSAPI implementation currently installed.</value>

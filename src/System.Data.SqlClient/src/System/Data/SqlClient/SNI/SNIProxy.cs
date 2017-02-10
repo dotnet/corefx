@@ -155,7 +155,7 @@ namespace System.Data.SqlClient.SNI
             {
                 // Kerberos Ticket missing
                 if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
-                    statusCode.Exception.GetType() == typeof(Interop.NetSecurityNative.GssApiException))
+                    statusCode.Exception is Interop.NetSecurityNative.GssApiException)
                 {
                     result = SspiClientContextResult.KerberosTicketMissing;
                 }
