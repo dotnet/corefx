@@ -370,7 +370,7 @@ namespace System.Tests
             {
                 // Implicit file
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file"), true };
-                // Fails: yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/File"), false };
+                yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/File"), false };
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepata/path/file"), false };
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/pata/file"), false };
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file!"), false };
@@ -378,7 +378,7 @@ namespace System.Tests
 
                 // Explicit file
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file"), true };
-                // Fails: yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/File"), false };
+                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/File"), false };
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepata/path/file"), false };
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/pata/file"), false };
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file!"), false };
@@ -419,7 +419,8 @@ namespace System.Tests
                 Assert.Equal(expected, uri1.Equals(obj));
                 if (uri2 != null)
                 {
-                    Assert.Equal(expected, uri1.GetHashCode().Equals(uri2.GetHashCode()));
+                    bool onlyCaseDifference = string.Equals(uri1.OriginalString, uri2.OriginalString, StringComparison.OrdinalIgnoreCase);
+                    Assert.Equal(expected || onlyCaseDifference, uri1.GetHashCode().Equals(uri2.GetHashCode()));
                 }
             }
             if (!(obj is string))
