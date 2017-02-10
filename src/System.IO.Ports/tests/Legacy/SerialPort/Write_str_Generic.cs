@@ -28,10 +28,10 @@ public class Write_str_Generic : PortsTest
     //then the contents of the string itself
     public static readonly string DEFAULT_STRING = "DEFAULT_STRING";
 
-    //The string size used when veryifying BytesToWrite 
-    public static readonly int STRING_SIZE_BYTES_TO_WRITE = 4;
+    //The string size used when verifying BytesToWrite 
+    public static readonly int STRING_SIZE_BYTES_TO_WRITE = 2*TCSupport.MinimumBlockingByteCount;
 
-    //The string size used when veryifying Handshake 
+    //The string size used when verifying Handshake 
     public static readonly int STRING_SIZE_HANDSHAKE = 8;
     public static readonly int NUM_TRYS = 5;
 
@@ -209,19 +209,7 @@ public class Write_str_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-
-            while (STRING_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if (STRING_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE,
-                    com.BytesToWrite);
-            }
+            TCSupport.WaitForWriteBufferToLoad(com, STRING_SIZE_BYTES_TO_WRITE);
 
             //Wait for write method to timeout
             while (t.IsAlive)

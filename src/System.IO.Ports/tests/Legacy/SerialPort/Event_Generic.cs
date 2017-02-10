@@ -255,7 +255,7 @@ public class Event_Generic : PortsTest
 
             pinChangedEventHandler.ResumeHandleEvent();
 
-            Assert.True(task.Wait(2000), "Waiting for Close task completion");
+            TCSupport.WaitForTaskCompletion(task);
         }
     }
 
@@ -295,7 +295,7 @@ public class Event_Generic : PortsTest
 
             receivedEventHandler.ResumeHandleEvent();
 
-            Assert.True(task.Wait(2000), "Waiting for Close task completion");
+            TCSupport.WaitForTaskCompletion(task);
         }
     }
 
@@ -333,7 +333,7 @@ public class Event_Generic : PortsTest
             Thread.Sleep(5000);
 
             errorEventHandler.ResumeHandleEvent();
-            Assert.True(task.Wait(2000), "Waiting for Close task completion");
+            TCSupport.WaitForTaskCompletion(task);
         }
     }
     #endregion

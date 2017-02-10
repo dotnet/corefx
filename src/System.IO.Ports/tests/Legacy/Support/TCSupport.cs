@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Legacy.Support
@@ -113,6 +115,13 @@ namespace Legacy.Support
             }
 
             s_localMachineSerialInfo = new LocalMachineSerialInfo(portName1, portName2, loopbackPortName, nullModemPresent);
+
+            if (portName1 != null)
+            {
+                // Measure how big a packet we need to write to be sure to see blocking behaviour at a port
+                HardwareTransmitBufferSize = SerialPortConnection.MeasureTransmitBufferSize(portName1);
+                MinimumBlockingByteCount = Math.Max(128, HardwareTransmitBufferSize*2);
+            }
 
         }
 
@@ -246,6 +255,9 @@ namespace Legacy.Support
         /// Set this true to shorten the very long-running stress tests
         /// </summary>
         public static bool RunShortStressTests { get; set; } = true;
+
+        public static int MinimumBlockingByteCount { get; private set; } = 256;
+        public static int HardwareTransmitBufferSize { get; private set; } = 128;
 
         public delegate bool Predicate();
 
@@ -628,5 +640,39 @@ namespace Legacy.Support
                 com2.BaudRate = 115200;
             }
         }
+
+
+        /// <summary>
+        /// Wait for the write data to be written into a blocked (by adverse flow control) port
+        /// </summary>
+        public static void WaitForWriteBufferToLoad(SerialPort com, int bufferLength)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            while (com.BytesToWrite + HardwareTransmitBufferSize < bufferLength)
+            {
+                System.Threading.Thread.Sleep(50);
+                if (sw.ElapsedMilliseconds > 3000)
+                {
+                    Assert.True(false, $"Timeout while waiting for data to be written to port (wrote {bufferLength}, queued {com.BytesToWrite}, bufSize {TCSupport.HardwareTransmitBufferSize})");
+                }
+            }
+        }
+
+        public static void WaitForTaskToStart(Task task)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            while (task.Status < TaskStatus.Running)
+            {
+                // Wait for the thread to start
+                Thread.Sleep(50);
+                Assert.True(sw.ElapsedMilliseconds < 2000, "Timeout waiting for task to start");
+            }
+        }
+
+        public static void WaitForTaskCompletion(Task task)
+        {
+            Assert.True(task.Wait(5000), "Timeout waiting for task completion");
+        }
+
     }
 }

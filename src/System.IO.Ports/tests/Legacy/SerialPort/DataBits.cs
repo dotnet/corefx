@@ -163,6 +163,10 @@ public class DataBits_Property : PortsTest
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void DataBits_8_StopBitsOnePointFive()
     {
+        // Not all modern serial devices support this format, and it's not an error
+        // for the driver to reject it
+        // We'll allow an IOException at Open to be treated as a pass
+        
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
             SerialPortProperties serPortProp = new SerialPortProperties();
@@ -171,7 +175,15 @@ public class DataBits_Property : PortsTest
 
             com.DataBits = 5;
             com.StopBits = StopBits.OnePointFive;
-            com.Open();
+            try
+            {
+                com.Open();
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("DataBits_8_StopBitsOnePointFive - abandoning test - no support for 5/1.5 format");
+                return;
+            }
 
             serPortProp.SetAllPropertiesToOpenDefaults();
             serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);

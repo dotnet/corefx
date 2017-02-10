@@ -33,13 +33,13 @@ namespace Legacy.SerialStream
         private static readonly int BYTE_SIZE_EXCEPTION = 4;
 
         // The byte size used when veryifying timeout 
-        private static readonly int BYTE_SIZE_TIMEOUT = 4;
+        private static readonly int BYTE_SIZE_TIMEOUT = TCSupport.MinimumBlockingByteCount;
 
         // The byte size used when veryifying BytesToWrite 
-        private static readonly int BYTE_SIZE_BYTES_TO_WRITE = 4;
+        private static readonly int BYTE_SIZE_BYTES_TO_WRITE = TCSupport.MinimumBlockingByteCount;
 
         // The bytes size used when veryifying Handshake 
-        private static readonly int BYTE_SIZE_HANDSHAKE = 8;
+        private static readonly int BYTE_SIZE_HANDSHAKE = TCSupport.MinimumBlockingByteCount;
 
         private static readonly int NUM_TRYS = 5;
 
@@ -203,15 +203,7 @@ namespace Legacy.SerialStream
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-
-                while (BYTE_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                Assert.Equal(BYTE_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
+                TCSupport.WaitForWriteBufferToLoad(com, BYTE_SIZE_BYTES_TO_WRITE);
 
                 // Wait for write method to timeout
                 while (t.IsAlive)

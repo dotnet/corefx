@@ -18,7 +18,7 @@ public class DiscardOutBuffer : PortsTest
 
     //The buffer length used whe filling the output buffer
     // This was set to 8, but the TX Fifo on a UART can swallow that completely, so you can't then tell if the data has been sent or not.
-    public static readonly int DEFAULT_BUFFER_LENGTH = 128;
+    public static readonly int DEFAULT_BUFFER_LENGTH = TCSupport.MinimumBlockingByteCount;
 
     #region Test Cases
 
@@ -35,7 +35,7 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
+            TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -59,7 +59,7 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
+            TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
             VerifyDiscard(com1);
@@ -86,7 +86,7 @@ public class DiscardOutBuffer : PortsTest
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
+            TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -96,7 +96,7 @@ public class DiscardOutBuffer : PortsTest
 
             Task task2 = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
 
-            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
+            TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -121,12 +121,12 @@ public class DiscardOutBuffer : PortsTest
             com1.Handshake = Handshake.RequestToSend;
             com2.Write(DEFAULT_STRING);
 
-            WaitForTxBufferToLoad(com2, DEFAULT_STRING.Length);
+            TCSupport.WaitForWriteBufferToLoad(com2, DEFAULT_STRING.Length);
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
             int origBytesToRead = com1.BytesToRead;
 
-            WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
+            TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
             VerifyDiscard(com1);
 
@@ -162,19 +162,5 @@ public class DiscardOutBuffer : PortsTest
     }
     #endregion
 
-    /// <summary>
-    /// Wait for the write data to be written into a blocked (by adverse flow control) port
-    /// </summary>
-    private static void WaitForTxBufferToLoad(SerialPort com, int bufferLength)
-    {
-        Stopwatch sw = Stopwatch.StartNew();
-        while (com.BytesToWrite < bufferLength)
-        {
-            System.Threading.Thread.Sleep(50);
-            if (sw.ElapsedMilliseconds > 3000)
-            {
-                Assert.True(false, "Timeout while waiting for data to be written to port");
-            }
-        }
-    }
+ 
 }

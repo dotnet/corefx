@@ -17,7 +17,7 @@ namespace Legacy.SerialStream
     public class WriteTimeout_Property : PortsTest
     {
         // The default number of bytes to write with when testing timeout with Write(byte[], int, int)
-        private static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = 8;
+        private static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = TCSupport.MinimumBlockingByteCount;
 
         // The large number of bytes to write with when testing timeout with Write(byte[], int, int)
         // This needs to be large enough for Write timeout
@@ -115,7 +115,7 @@ namespace Legacy.SerialStream
         }
 
         [ActiveIssue(16033)]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasSingleByteTransmitBlocking))]
         public void WriteTimeout_Default_WriteByte()
         {
             Debug.WriteLine("Verifying default WriteTimeout with WriteByte()");
@@ -133,7 +133,7 @@ namespace Legacy.SerialStream
         }
 
         [ActiveIssue(16033)]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasSingleByteTransmitBlocking))]
         public void WriteTimeout_Infinite_WriteByte()
         {
             Debug.WriteLine("Verifying infinite WriteTimeout with WriteByte()");
@@ -151,7 +151,7 @@ namespace Legacy.SerialStream
         }
 
         [ActiveIssue(16033)]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasSingleByteTransmitBlocking))]
         public void WriteTimeout_Int32MaxValue_WriteByte()
         {
             Debug.WriteLine("Verifying Int32.MaxValue WriteTimeout with WriteByte()");
@@ -169,7 +169,7 @@ namespace Legacy.SerialStream
         }
 
         [OuterLoop("Slow test")]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasSingleByteTransmitBlocking))]
         public void WriteTimeout_750_WriteByte()
         {
             Debug.WriteLine("Verifying 750 WriteTimeout with WriteByte()");
@@ -604,7 +604,7 @@ namespace Legacy.SerialStream
             if (expectedException == null)
             {
                 stream.WriteTimeout = WriteTimeout;
-                Assert.Equal(WriteTimeout ,stream.WriteTimeout);
+                Assert.Equal(WriteTimeout, stream.WriteTimeout);
             }
             else
             {

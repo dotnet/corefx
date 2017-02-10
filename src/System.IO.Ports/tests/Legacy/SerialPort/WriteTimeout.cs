@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.IO.PortsTests;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Legacy.Support;
@@ -14,10 +15,10 @@ using Xunit;
 public class WriteTimeout_Property : PortsTest
 {
     //The default number of chars to write with when testing timeout with Write(char[], int, int)
-    public static readonly int DEFAULT_WRITE_CHAR_ARRAY_SIZE = 8;
+    public static readonly int DEFAULT_WRITE_CHAR_ARRAY_SIZE = TCSupport.MinimumBlockingByteCount;
 
     //The default number of bytes to write with when testing timeout with Write(byte[], int, int)
-    public static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = 8;
+    public static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = TCSupport.MinimumBlockingByteCount;
 
     //The ammount of time to wait when expecting an infinite timeout
     public static readonly int DEFAULT_WAIT_INFINITE_TIMEOUT = 250;
@@ -29,7 +30,7 @@ public class WriteTimeout_Property : PortsTest
     public static readonly int MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT = 5000;
 
     //The default string to write with when testing timeout with Write(str)
-    public static readonly string DEFAULT_STRING_TO_WRITE = "TEST";
+    public static readonly string DEFAULT_STRING_TO_WRITE = string.Concat(Enumerable.Repeat("TEST", TCSupport.MinimumBlockingByteCount/4));
     public static readonly int NUM_TRYS = 5;
 
     public delegate void WriteMethodDelegate(SerialPort com);
@@ -223,7 +224,7 @@ public class WriteTimeout_Property : PortsTest
 
             com1.Handshake = Handshake.None;
 
-            Assert.True(task.Wait(2000), "Waiting for task to complete");
+            TCSupport.WaitForTaskCompletion(task);
 
             com1.DiscardOutBuffer();
             // If we're looped-back, then there will be data queud on the receive side which we need to discard
