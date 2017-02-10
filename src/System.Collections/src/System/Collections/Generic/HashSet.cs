@@ -463,11 +463,14 @@ namespace System.Collections.Generic
         /// </remarks>
         public bool TryGetValue(T equalValue, out T actualValue)
         {
-            int i = _buckets != null ? InternalIndexOf(equalValue) : -1;
-            if (i >= 0)
+            if (_buckets != null)
             {
-                actualValue = _slots[i].value;
-                return true;
+                int i = InternalIndexOf(equalValue);
+                if (i >= 0)
+                {
+                    actualValue = _slots[i].value;
+                    return true;
+                }
             }
             actualValue = default(T);
             return false;
