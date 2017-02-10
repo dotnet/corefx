@@ -36,7 +36,7 @@ namespace Tests.System.Security
         }
 
         [Fact]
-        public void GetNormalizedUrlHash_Unix()
+        public void GetNormalizedUrlHash()
         {
             // Validating that we match the exact hash the desktop IsolatedStorage implementation would create.
             Uri uri = new Uri(@"file:///Users/jerem/Documents/Visual Studio 2015/Projects/LongPath/LongPath/bin/Debug/TestAssembly.EXE");
