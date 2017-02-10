@@ -972,14 +972,8 @@ namespace System.Linq.Expressions.Compiler
             else
             {
                 PropertyInfo pi = binding.Member as PropertyInfo;
-                if (pi != null)
-                {
-                    EmitCall(objectType, pi.GetSetMethod(nonPublic: true));
-                }
-                else
-                {
-                    throw Error.UnhandledBinding();
-                }
+                Debug.Assert(pi != null); // Enforced in factory in ValidateSettableFieldOrPropertyMember
+                EmitCall(objectType, pi.GetSetMethod(nonPublic: true));
             }
         }
 

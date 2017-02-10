@@ -673,10 +673,7 @@ namespace System.Linq.Expressions.Compiler
                 return;
             }
 
-            if (typeFrom == typeof(void) || typeTo == typeof(void))
-            {
-                throw ContractUtils.Unreachable;
-            }
+            Debug.Assert(typeFrom != typeof(void) && typeTo != typeof(void)); // Enforced in GetUserDefinedCoercionOrThrow
 
             bool isTypeFromNullable = typeFrom.IsNullableType();
             bool isTypeToNullable = typeTo.IsNullableType();
@@ -719,25 +716,18 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitCastToType(this ILGenerator il, Type typeFrom, Type typeTo)
         {
-            if (!typeFrom.GetTypeInfo().IsValueType && typeTo.GetTypeInfo().IsValueType)
+            if (!typeFrom.GetTypeInfo().IsValueType)
             {
-                il.Emit(OpCodes.Unbox_Any, typeTo);
+                il.Emit(typeTo.GetTypeInfo().IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, typeTo);
             }
-            else if (typeFrom.GetTypeInfo().IsValueType && !typeTo.GetTypeInfo().IsValueType)
+            else
             {
+                Debug.Assert(!typeTo.GetTypeInfo().IsValueType); // Enforced in GetUserDefinedCoercionOrThrow
                 il.Emit(OpCodes.Box, typeFrom);
                 if (typeTo != typeof(object))
                 {
                     il.Emit(OpCodes.Castclass, typeTo);
                 }
-            }
-            else if (!typeFrom.GetTypeInfo().IsValueType && !typeTo.GetTypeInfo().IsValueType)
-            {
-                il.Emit(OpCodes.Castclass, typeTo);
-            }
-            else
-            {
-                throw Error.InvalidCast(typeFrom, typeTo);
             }
         }
 

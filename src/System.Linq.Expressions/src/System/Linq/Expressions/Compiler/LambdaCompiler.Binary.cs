@@ -112,10 +112,7 @@ namespace System.Linq.Expressions.Compiler
                         case ExpressionType.LessThanOrEqual:
                         case ExpressionType.GreaterThan:
                         case ExpressionType.GreaterThanOrEqual:
-                            if (mc.Type != typeof(bool))
-                            {
-                                throw Error.ArgumentMustBeBoolean(nameof(b));
-                            }
+                            Debug.Assert(mc.Type == typeof(bool)); // Other return types would override user LiftedToNull to true in factory.
                             resultType = typeof(bool);
                             break;
                         default:
@@ -139,18 +136,14 @@ namespace System.Linq.Expressions.Compiler
         {
             bool leftIsNullable = leftType.IsNullableType();
             bool rightIsNullable = rightType.IsNullableType();
+            Debug.Assert(op != ExpressionType.Coalesce); // Calls into EmitCoalesceBinaryExpression instead.
 
             switch (op)
             {
                 case ExpressionType.ArrayIndex:
-                    if (rightType != typeof(int))
-                    {
-                        throw ContractUtils.Unreachable;
-                    }
+                    Debug.Assert(rightType == typeof(int)); // Enforced in factory.
                     EmitGetArrayElement(leftType);
                     return;
-                case ExpressionType.Coalesce:
-                    throw Error.UnexpectedCoalesceOperator();
             }
 
             if (leftIsNullable || rightIsNullable)
@@ -176,10 +169,8 @@ namespace System.Linq.Expressions.Compiler
                 EmitUnliftedEquality(op, leftType);
                 return;
             }
-            if (!leftType.GetTypeInfo().IsPrimitive)
-            {
-                throw Error.OperatorNotImplementedForType(op, leftType);
-            }
+
+            Debug.Assert(leftType.GetTypeInfo().IsPrimitive); // Enforced in BinaryExpression factories.
             switch (op)
             {
                 case ExpressionType.Add:
@@ -281,19 +272,12 @@ namespace System.Linq.Expressions.Compiler
                     _ilg.Emit(OpCodes.Xor);
                     break;
                 case ExpressionType.LeftShift:
-                    if (rightType != typeof(int))
-                    {
-                        throw ContractUtils.Unreachable;
-                    }
+                    Debug.Assert(rightType == typeof(int)); // Enforced in factory.
                     EmitShiftMask(leftType);
                     _ilg.Emit(OpCodes.Shl);
                     break;
                 case ExpressionType.RightShift:
-                    if (rightType != typeof(int))
-                    {
-                        throw ContractUtils.Unreachable;
-                    }
-                    EmitShiftMask(leftType);
+                    Debug.Assert(rightType == typeof(int)); // Enforced in factory.
                     _ilg.Emit(leftType.IsUnsigned() ? OpCodes.Shr_Un : OpCodes.Shr);
                     break;
                 default:
@@ -339,10 +323,7 @@ namespace System.Linq.Expressions.Compiler
         private void EmitUnliftedEquality(ExpressionType op, Type type)
         {
             Debug.Assert(op == ExpressionType.Equal || op == ExpressionType.NotEqual);
-            if (!type.GetTypeInfo().IsPrimitive && type.GetTypeInfo().IsValueType && !type.GetTypeInfo().IsEnum)
-            {
-                throw Error.OperatorNotImplementedForType(op, type);
-            }
+            Debug.Assert(type.GetTypeInfo().IsPrimitive || !type.GetTypeInfo().IsValueType || type.GetTypeInfo().IsEnum); // Enforced in factory
             _ilg.Emit(OpCodes.Ceq);
             if (op == ExpressionType.NotEqual)
             {
