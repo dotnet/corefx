@@ -101,7 +101,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="serverName">Service Principal Name buffer</param>
         /// <param name="serverNameLength">Length of Service Principal Name</param>
         /// <returns>SNI error code</returns>
-        public uint GenSspiClientContext(TdsParserStateObject tdsParserStateObject, byte[] receivedBuff, ref byte[] sendBuff, byte[] serverName)
+        public void GenSspiClientContext(TdsParserStateObject tdsParserStateObject, byte[] receivedBuff, ref byte[] sendBuff, byte[] serverName)
         {
             SNITCPHandle tcpHandle = (SNITCPHandle)tdsParserStateObject.Handle;
 
@@ -150,22 +150,18 @@ namespace System.Data.SqlClient.SNI
             tdsParserStateObject.sspiClientContextStatus.ContextFlags = contextFlags;
             tdsParserStateObject.sspiClientContextStatus.CredentialsHandle = credentialsHandle;
 
-            uint result = SspiClientContextResult.OK;
             if (IsErrorStatus(statusCode.ErrorCode))
             {
-                // Kerberos Ticket missing
                 if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
-                    statusCode.Exception is Interop.NetSecurityNative.GssApiException)
+                    statusCode.Exception is Interop.NetSecurityNative.GssApiException) // when unable to access Kerberos Ticket
                 {
-                    result = SspiClientContextResult.KerberosTicketMissing;
+                    throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
                 }
                 else
                 {
-                    result = SspiClientContextResult.Failed;
+                    throw new Exception(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
                 }
             }
-
-            return result;
         }
 
         private static bool IsErrorStatus(SecurityStatusPalErrorCode errorCode)

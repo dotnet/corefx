@@ -451,7 +451,7 @@
     <value>Failed to generate SSPI context.</value>
   </data>
   <data name="SQL_KerberosTicketMissingError" xml:space="preserve">
-    <value>Cannot access to Kerberos Ticket. (Did you forget to run 'kinit'?)</value>
+    <value>Cannot access Kerberos ticket. Ensure Kerberos has been initialized with 'kinit'.</value>
   </data>
   <data name="SQL_InvalidSSPIPacketSize" xml:space="preserve">
     <value>Invalid SSPI packet size.</value>
@@ -1075,7 +1075,7 @@
     <value>NTLM authentication is not possible with default credentials on this platform.</value>
   </data>
   <data name="net_nego_not_supported_empty_target_with_defaultcreds" xml:space="preserve">
-    <value>Target name should be non empty if default credentials are passed.</value>
+    <value>Target name should be non-empty if default credentials are passed.</value>
   </data>
   <data name="net_nego_server_not_supported" xml:space="preserve">
     <value>Server implementation is not supported.</value>

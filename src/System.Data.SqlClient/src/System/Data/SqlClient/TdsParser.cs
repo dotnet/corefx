@@ -6317,12 +6317,13 @@ namespace System.Data.SqlClient
 #if MANAGED_SNI
         private void SNISSPIData(byte[] receivedBuff, ref byte[] sendBuff)
         {
-            uint clientContextResult = SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj, receivedBuff, ref sendBuff, _sniSpnBuffer);
-            if (clientContextResult != SNIProxy.SspiClientContextResult.OK)
+            try
             {
-                string errorMessage = clientContextResult == SNIProxy.SspiClientContextResult.KerberosTicketMissing ?
-                                        SQLMessage.KerberosTicketMissingError() : SQLMessage.SSPIGenerateError();
-                SSPIError(errorMessage, TdsEnums.GEN_CLIENT_CONTEXT);
+                SNIProxy.Singleton.GenSspiClientContext(_physicalStateObj, receivedBuff, ref sendBuff, _sniSpnBuffer);
+            }
+            catch (Exception e)
+            {
+                SSPIError(e.Message + "\n" + e.StackTrace, TdsEnums.GEN_CLIENT_CONTEXT);
             }
         }
 #else
