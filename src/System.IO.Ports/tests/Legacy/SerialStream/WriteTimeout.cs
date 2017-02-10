@@ -105,6 +105,7 @@ namespace Legacy.SerialStream
             VerifyException(0, typeof(ArgumentOutOfRangeException));
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Default_Write_byte_int_int()
         {
@@ -113,6 +114,7 @@ namespace Legacy.SerialStream
             VerifyDefaultTimeout(Write_byte_int_int);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Default_WriteByte()
         {
@@ -121,6 +123,7 @@ namespace Legacy.SerialStream
             VerifyDefaultTimeout(WriteByte);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Infinite_Write_byte_int_int()
         {
@@ -129,6 +132,7 @@ namespace Legacy.SerialStream
             VerifyLongTimeout(Write_byte_int_int, -1);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Infinite_WriteByte()
         {
@@ -137,6 +141,7 @@ namespace Legacy.SerialStream
             VerifyLongTimeout(WriteByte, -1);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Int32MaxValue_Write_byte_int_int()
         {
@@ -145,6 +150,7 @@ namespace Legacy.SerialStream
             VerifyLongTimeout(Write_byte_int_int, int.MaxValue - 1);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_Int32MaxValue_WriteByte()
         {
@@ -329,6 +335,7 @@ namespace Legacy.SerialStream
             Verify0Timeout(WriteByte);
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void WriteTimeout_LargeWrite()
         {
@@ -339,7 +346,6 @@ namespace Legacy.SerialStream
                 com.Handshake = Handshake.RequestToSend;
                 Stream stream = com.BaseStream;
                 stream.WriteTimeout = LARGEWRITE_TIMEOUT;
-
 
                 Debug.WriteLine("Verifying {0} WriteTimeout with Write(byte[] , int, int) and writing {1} bytes", LARGEWRITE_TIMEOUT, DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE);
 

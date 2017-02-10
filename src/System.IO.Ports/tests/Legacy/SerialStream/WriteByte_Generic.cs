@@ -19,17 +19,17 @@ namespace Legacy.SerialStream
     {
         // Set bounds fore random timeout values.
         // If the min is to low write will not timeout accurately and the testcase will fail
-        public static int minRandomTimeout = 250;
+        private static int minRandomTimeout = 250;
 
         // If the max is to large then the testcase will take forever to run
-        public static int maxRandomTimeout = 2000;
+        private static int maxRandomTimeout = 2000;
 
         // If the percentage difference between the expected timeout and the actual timeout
         // found through Stopwatch is greater then 10% then the timeout value was not correctly
         // to the write method and the testcase fails.
-        public static double maxPercentageDifference = .15;
-        public static readonly int NUM_TRYS = 5;
-        public static readonly byte DEFAULT_BYTE = 0;
+        private static double maxPercentageDifference = .15;
+        private static readonly int NUM_TRYS = 5;
+        private static readonly byte DEFAULT_BYTE = 0;
 
         #region Test Cases
 
@@ -115,7 +115,6 @@ namespace Legacy.SerialStream
                 }
 
                 VerifyTimeout(com);
-
             }
         }
 
@@ -169,7 +168,7 @@ namespace Legacy.SerialStream
             }
         }
 
-
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void BytesToWrite()
         {

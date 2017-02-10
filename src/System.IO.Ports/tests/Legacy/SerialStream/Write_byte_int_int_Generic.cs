@@ -177,6 +177,7 @@ namespace Legacy.SerialStream
             }
         }
 
+        [ActiveIssue(16033)]
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void BytesToWrite()
         {
