@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,7 +15,7 @@ namespace Legacy.SerialStream
 {
     public class ReadByte : PortsTest
     {
-        // The number of random bytes to receive
+        //  The number of random bytes to receive
         private static int numRndByte = 8;
         
         #region Test Cases
@@ -55,7 +55,7 @@ namespace Legacy.SerialStream
                 var byteRcvBuffer = new byte[bufferSize];
                 int i;
 
-                //Genrate random bytes
+                //  Generate random bytes
                 for (i = 0; i < byteXmitBuffer.Length; i++)
                 {
                     byteXmitBuffer[i] = (byte)rndGen.Next(0, 256);
@@ -84,10 +84,10 @@ namespace Legacy.SerialStream
                         break;
                     }
 
-                    //While their are more bytes to be read
+                    // While their are more bytes to be read
                     if (byteXmitBuffer.Length <= i)
                     {
-                        //If we have read in more bytes then were actually sent
+                        // If we have read in more bytes then were actually sent
                         Fail("ERROR!!!: We have received more bytes then were sent");
                         break;
                     }
@@ -95,7 +95,7 @@ namespace Legacy.SerialStream
                     byteRcvBuffer[i] = (byte)readInt;
                     if (readInt != byteXmitBuffer[i])
                     {
-                        //If the byte read is not the expected byte
+                        // If the byte read is not the expected byte
                         Fail("ERROR!!!: Expected to read {0}  actual read byte {1}", (int)byteXmitBuffer[i], readInt);
                     }
 

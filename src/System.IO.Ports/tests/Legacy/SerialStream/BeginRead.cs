@@ -1,11 +1,12 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.IO.PortsTests;
+using System.Linq;
 using System.Threading;
 using Legacy.Support;
 using Xunit;
@@ -14,26 +15,26 @@ namespace Legacy.SerialStream
 {
     public class BeginRead : PortsTest
     {
-        //The number of random bytes to receive for read method testing
-        public static readonly int numRndBytesToRead = 16;
+        // The number of random bytes to receive for read method testing
+        private static readonly int numRndBytesToRead = 16;
 
-        //The number of random bytes to receive for large input buffer testing
-        public static readonly int largeNumRndBytesToRead = 2048;
+        // The number of random bytes to receive for large input buffer testing
+        private static readonly int largeNumRndBytesToRead = 2048;
 
-        //When we test Read and do not care about actually reading anything we must still
-        //create an byte array to pass into the method the following is the size of the 
-        //byte array used in this situation
-        public static readonly int defaultByteArraySize = 1;
-        public static readonly int defaultByteOffset = 0;
-        public static readonly int defaultByteCount = 1;
+        // When we test Read and do not care about actually reading anything we must still
+        // create an byte array to pass into the method the following is the size of the 
+        // byte array used in this situation
+        private static readonly int defaultByteArraySize = 1;
+        private static readonly int defaultByteOffset = 0;
+        private static readonly int defaultByteCount = 1;
 
-        //The maximum buffer size when a exception occurs
-        public static readonly int maxBufferSizeForException = 255;
+        // The maximum buffer size when a exception occurs
+        private static readonly int maxBufferSizeForException = 255;
 
-        //The maximum buffer size when a exception is not expected
-        public static readonly int maxBufferSize = 8;
+        // The maximum buffer size when a exception is not expected
+        private static readonly int maxBufferSize = 8;
 
-        //Maximum time to wait for processing the read command to complete
+        // Maximum time to wait for processing the read command to complete
         private const int MAX_WAIT_READ_COMPLETE = 1000;
 
         #region Test Cases
@@ -193,17 +194,19 @@ namespace Legacy.SerialStream
 
                 IAsyncResult readAsyncResult = com1.BaseStream.BeginRead(new byte[numRndBytesToRead], 0, numRndBytesToRead,
                     callbackHandler.Callback, null);
-                callbackHandler.BeginReadAysncResult = readAsyncResult;
-                VerifyAsyncResult(readAsyncResult, null, false, false,
-                    "of IAsyncResult returned from BeginRead BEFORE Write");
+                callbackHandler.BeginReadAsyncResult = readAsyncResult;
 
+                Assert.Equal(null, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously, "Should not have completed sync (read)");
+                Assert.False(readAsyncResult.IsCompleted, "Should not have completed yet");
+                
                 com2.Write(new byte[numRndBytesToRead], 0, numRndBytesToRead);
 
-                //callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
-                //the code calling the the callback has finished it's processing
+                // callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
+                // the code calling the the callback has finished it's processing
                 IAsyncResult callbackReadAsyncResult = callbackHandler.ReadAysncResult;
 
-                //No we have to wait for the callbackHandler to complete
+                // No we have to wait for the callbackHandler to complete
                 elapsedTime = 0;
                 while (!callbackReadAsyncResult.IsCompleted && elapsedTime < MAX_WAIT_READ_COMPLETE)
                 {
@@ -211,10 +214,13 @@ namespace Legacy.SerialStream
                     elapsedTime += 10;
                 }
 
-                VerifyAsyncResult(callbackReadAsyncResult, null, false, true,
-                    " of IAsyncResult passed into AsyncCallback");
-                VerifyAsyncResult(readAsyncResult, null, false, true,
-                    "of IAsyncResult returned from BeginRead AFTER Write");
+                Assert.Equal(null, callbackReadAsyncResult.AsyncState);
+                Assert.False(callbackReadAsyncResult.CompletedSynchronously, "Should not have completed sync (cback)");
+                Assert.True(callbackReadAsyncResult.IsCompleted, "Should have completed (cback)");
+                Assert.Equal(null, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously, "Should not have completed sync (read)");
+                Assert.True(readAsyncResult.IsCompleted, "Should have completed (read)");
+
             }
         }
         
@@ -235,17 +241,19 @@ namespace Legacy.SerialStream
 
                 IAsyncResult readAsyncResult = com1.BaseStream.BeginRead(new byte[numRndBytesToRead], 0, numRndBytesToRead,
                     callbackHandler.Callback, null);
-                callbackHandler.BeginReadAysncResult = readAsyncResult;
-                VerifyAsyncResult(readAsyncResult, null, false, false,
-                    "of IAsyncResult returned from BeginRead BEFORE Write");
+                callbackHandler.BeginReadAsyncResult = readAsyncResult;
+
+                Assert.Equal(null, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously);
+                Assert.False(readAsyncResult.IsCompleted);
 
                 com2.Write(new byte[numRndBytesToRead], 0, numRndBytesToRead);
 
-                //callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
-                //the code calling the the callback has finished it's processing
+                // callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
+                // the code calling the the callback has finished it's processing
                 IAsyncResult callbackReadAsyncResult = callbackHandler.ReadAysncResult;
 
-                //No we have to wait for the callbackHandler to complete
+                // No we have to wait for the callbackHandler to complete
                 elapsedTime = 0;
                 while (!callbackReadAsyncResult.IsCompleted && elapsedTime < MAX_WAIT_READ_COMPLETE)
                 {
@@ -253,8 +261,12 @@ namespace Legacy.SerialStream
                     elapsedTime += 10;
                 }
 
-                VerifyAsyncResult(callbackReadAsyncResult, null, false, true, " of IAsyncResult passed into AsyncCallback");
-                VerifyAsyncResult(readAsyncResult, null, false, true, "of IAsyncResult returned from BeginRead AFTER Write");
+                Assert.Equal(null, callbackReadAsyncResult.AsyncState);
+                Assert.False(callbackReadAsyncResult.CompletedSynchronously, "Should not have completed sync (cback)");
+                Assert.True(callbackReadAsyncResult.IsCompleted, "Should have completed (cback)");
+                Assert.Equal(null, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously, "Should not have completed sync (read)");
+                Assert.True(readAsyncResult.IsCompleted, "Should have completed (read)");
             }
         }
 
@@ -276,17 +288,18 @@ namespace Legacy.SerialStream
 
                 IAsyncResult readAsyncResult = com1.BaseStream.BeginRead(new byte[numRndBytesToRead], 0, numRndBytesToRead,
                     callbackHandler.Callback, this);
-                callbackHandler.BeginReadAysncResult = readAsyncResult;
-                VerifyAsyncResult(readAsyncResult, this, false, false,
-                    "of IAsyncResult returned from BeginRead BEFORE Write");
+                callbackHandler.BeginReadAsyncResult = readAsyncResult;
+                Assert.Equal(this, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously);
+                Assert.False(readAsyncResult.IsCompleted);
 
                 com2.Write(new byte[numRndBytesToRead], 0, numRndBytesToRead);
 
-                //callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
-                //the code calling the the callback has finished it's processing
+                // callbackHandler.ReadAsyncResult  guarantees that the callback has been calledhowever it does not gauarentee that 
+                // the code calling the the callback has finished it's processing
                 IAsyncResult callbackReadAsyncResult = callbackHandler.ReadAysncResult;
 
-                //No we have to wait for the callbackHandler to complete
+                // No we have to wait for the callbackHandler to complete
                 elapsedTime = 0;
                 while (!callbackReadAsyncResult.IsCompleted && elapsedTime < MAX_WAIT_READ_COMPLETE)
                 {
@@ -294,13 +307,12 @@ namespace Legacy.SerialStream
                     elapsedTime += 10;
                 }
 
-                VerifyAsyncResult(callbackReadAsyncResult, this, false, true,
-                    " of IAsyncResult passed into AsyncCallback");
-                VerifyAsyncResult(readAsyncResult, this, false, true,
-                    "of IAsyncResult returned from BeginRead AFTER Write");
-
-                
-
+                Assert.Equal(this, callbackReadAsyncResult.AsyncState);
+                Assert.False(callbackReadAsyncResult.CompletedSynchronously);
+                Assert.True(callbackReadAsyncResult.IsCompleted);
+                Assert.Equal(this, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously);
+                Assert.True(readAsyncResult.IsCompleted);
             }
         }
         #endregion
@@ -335,7 +347,7 @@ namespace Legacy.SerialStream
                 var rndGen = new Random(-55);
                 var bytesToWrite = new byte[numberOfBytesToRead];
 
-                //Genrate random bytes
+                //  Generate random bytes
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);
@@ -343,19 +355,13 @@ namespace Legacy.SerialStream
                     bytesToWrite[i] = randByte;
                 }
 
-                //Genrate some random bytes in the buffer
-                for (var i = 0; i < buffer.Length; i++)
-                {
-                    var randByte = (byte)rndGen.Next(0, 256);
+                //  Generate some random bytes in the buffer
+                rndGen.NextBytes(buffer);
 
-                    buffer[i] = randByte;
-                }
-
-                Debug.WriteLine(
-                    "Verifying read method buffer.Lenght={0}, offset={1}, count={2} with {3} random chars",
-                    buffer.Length, offset, count, bytesToWrite.Length);
+                Debug.WriteLine("Verifying read method buffer.Lenght={0}, offset={1}, count={2} with {3} random chars", buffer.Length, offset, count, bytesToWrite.Length);
 
                 com1.ReadTimeout = 500;
+
                 com1.Open();
                 com2.Open();
 
@@ -382,23 +388,27 @@ namespace Legacy.SerialStream
                 IAsyncResult readAsyncResult = com1.BaseStream.BeginRead(rcvBuffer, offset, count,
                     callbackHandler.Callback, this);
                 readAsyncResult.AsyncWaitHandle.WaitOne();
-                callbackHandler.BeginReadAysncResult = readAsyncResult;
+                callbackHandler.BeginReadAsyncResult = readAsyncResult;
 
                 int bytesRead = com1.BaseStream.EndRead(readAsyncResult);
-                VerifyAsyncResult(callbackHandler.ReadAysncResult, this, false, true,
-                    " of IAsyncResult passed into AsyncCallback");
-                VerifyAsyncResult(readAsyncResult, this, false, true, " of IAsyncResult returned from BeginRead");
+                IAsyncResult asyncResult = callbackHandler.ReadAysncResult;
+                Assert.Equal(this, asyncResult.AsyncState);
+                Assert.False(asyncResult.CompletedSynchronously);
+                Assert.True(asyncResult.IsCompleted);
+                Assert.Equal(this, readAsyncResult.AsyncState);
+                Assert.False(readAsyncResult.CompletedSynchronously);
+                Assert.True(readAsyncResult.IsCompleted);
 
                 if ((bytesToRead > bytesRead && count != bytesRead) ||
                     (bytesToRead <= bytesRead && bytesRead != bytesToRead))
                 {
-                    //If we have not read all of the characters that we should have
+                    // If we have not read all of the characters that we should have
                     Fail("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
                 }
 
                 if (bytesToWrite.Length < totalBytesRead + bytesRead)
                 {
-                    //If we have read in more characters then we expect
+                    // If we have read in more characters then we expect
                     Fail("ERROR!!!: We have received more characters then were sent");
                 }
 
@@ -414,21 +424,15 @@ namespace Legacy.SerialStream
 
                 oldRcvBuffer = (byte[])rcvBuffer.Clone();
                 bytesToRead = com1.BytesToRead;
-            } while (0 != com1.BytesToRead); //While there are more bytes to read
+            } while (0 != com1.BytesToRead); // While there are more bytes to read
 
-            //Compare the bytes that were written with the ones we read
-            for (var i = 0; i < bytesToWrite.Length; i++)
-            {
-                if (bytesToWrite[i] != buffer[i])
-                {
-                    Fail("ERROR!!!: Expected to read {0}  actual read  {1}", bytesToWrite[i], buffer[i]);
-                }
-            }
+            //  Compare the bytes that were written with the ones we read
+            Assert.Equal(bytesToWrite, buffer.Take(bytesToWrite.Length).ToArray());
         }
         
         private void VerifyBuffer(byte[] actualBuffer, byte[] expectedBuffer, int offset, int count)
         {
-            //Verify all character before the offset
+            // Verify all character before the offset
             for (var i = 0; i < offset; i++)
             {
                 if (actualBuffer[i] != expectedBuffer[i])
@@ -437,7 +441,7 @@ namespace Legacy.SerialStream
                 }
             }
 
-            //Verify all character after the offset + count
+            // Verify all character after the offset + count
             for (int i = offset + count; i < actualBuffer.Length; i++)
             {
                 if (actualBuffer[i] != expectedBuffer[i])
@@ -450,7 +454,7 @@ namespace Legacy.SerialStream
         private class CallbackHandler
         {
             private IAsyncResult _readAysncResult;
-            private IAsyncResult _beginReadAysncResult;
+            private IAsyncResult _beginReadAsyncResult;
             private readonly SerialPort _com;
 
             public CallbackHandler() : this(null) { }
@@ -466,32 +470,29 @@ namespace Legacy.SerialStream
                 {
                     _readAysncResult = readAysncResult;
 
-                    if (!readAysncResult.IsCompleted)
-                    {
-                        throw new Exception("Err_23984afaea Expected IAsyncResult passed into callback to not be completed");
-                    }
+                    Assert.True(readAysncResult.IsCompleted, "IAsyncResult passed into callback is not completed");
 
-                    while (null == _beginReadAysncResult)
+                    while (null == _beginReadAsyncResult)
                     {
                         Monitor.Wait(this);
                     }
 
-                    if (null != _beginReadAysncResult && !_beginReadAysncResult.IsCompleted)
+                    if (null != _beginReadAsyncResult && !_beginReadAsyncResult.IsCompleted)
                     {
-                        throw new Exception("Err_7907azpu Expected IAsyncResult returned from begin read to not be completed");
+                        Fail("Err_7907azpu Expected IAsyncResult returned from begin read to not be completed");
                     }
 
                     if (null != _com)
                     {
-                        _com.BaseStream.EndRead(_beginReadAysncResult);
-                        if (!_beginReadAysncResult.IsCompleted)
+                        _com.BaseStream.EndRead(_beginReadAsyncResult);
+                        if (!_beginReadAsyncResult.IsCompleted)
                         {
-                            throw new Exception("Err_6498afead Expected IAsyncResult returned from begin read to not be completed");
+                            Fail("Err_6498afead Expected IAsyncResult returned from begin read to not be completed");
                         }
 
                         if (!readAysncResult.IsCompleted)
                         {
-                            throw new Exception("Err_1398ehpo Expected IAsyncResult passed into callback to not be completed");
+                            Fail("Err_1398ehpo Expected IAsyncResult passed into callback to not be completed");
                         }
                     }
 
@@ -516,29 +517,23 @@ namespace Legacy.SerialStream
                 }
             }
 
-            public IAsyncResult BeginReadAysncResult
+            public IAsyncResult BeginReadAsyncResult
             {
                 get
                 {
-                    return _beginReadAysncResult;
+                    return _beginReadAsyncResult;
                 }
                 set
                 {
                     lock (this)
                     {
-                        _beginReadAysncResult = value;
+                        _beginReadAsyncResult = value;
                         Monitor.Pulse(this);
                     }
                 }
             }
         }
 
-        private void VerifyAsyncResult(IAsyncResult asyncResult, object expectedAsyncState, bool expectedCompletedSynchronously, bool expectedIsCompleted, string suffix)
-        {
-            Assert.Equal(expectedAsyncState, asyncResult.AsyncState);
-            Assert.Equal(expectedCompletedSynchronously, asyncResult.CompletedSynchronously);
-            Assert.Equal(expectedIsCompleted, asyncResult.IsCompleted);
-        }
         #endregion
     }
 }

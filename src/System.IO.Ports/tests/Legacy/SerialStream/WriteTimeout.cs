@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -16,35 +16,35 @@ namespace Legacy.SerialStream
 {
     public class WriteTimeout_Property : PortsTest
     {
-        //The default number of bytes to write with when testing timeout with Write(byte[], int, int)
+        // The default number of bytes to write with when testing timeout with Write(byte[], int, int)
         private static readonly int DEFAULT_WRITE_BYTE_ARRAY_SIZE = 8;
 
-        //The large number of bytes to write with when testing timeout with Write(byte[], int, int)
-        //This needs to be large enough for Write timeout
+        //  The large number of bytes to write with when testing timeout with Write(byte[], int, int)
+        //  This needs to be large enough for Write timeout
         private static readonly int DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE = 1024 * 100;
 
-        //The BaudRate to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE bytes 
+        //  The BaudRate to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE bytes 
         private static readonly int LARGEWRITE_BAUDRATE = 1200;
 
-        //The timeout to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE
+        //  The timeout to use to make Write timeout when writing DEFAULT_WRITE_BYTE_LARGE_ARRAY_SIZE
         private static readonly int LARGEWRITE_TIMEOUT = 750;
 
-        //The default byte to call with WriteByte
+        //  The default byte to call with WriteByte
         private static readonly byte DEFAULT_WRITE_BYTE = 33;
 
-        //The ammount of time to wait when expecting an long timeout
+        //  The amount of time to wait when expecting an long timeout
         private static readonly int DEFAULT_WAIT_LONG_TIMEOUT = 250;
 
-        //The maximum acceptable time allowed when a write method should timeout immediately
+        // The maximum acceptable time allowed when a write method should timeout immediately
         private static readonly int MAX_ACCEPTABLE_ZERO_TIMEOUT = 100;
 
-        //The maximum acceptable time allowed when a write method should timeout immediately when it is called for the first time
+        // The maximum acceptable time allowed when a write method should timeout immediately when it is called for the first time
         private static readonly int MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT = 1000;
 
-        //The maximum acceptable percentage difference allowed when a write method is called for the first time
+        // The maximum acceptable percentage difference allowed when a write method is called for the first time
         private static readonly double MAX_ACCEPTABLE_WARMUP_PERCENTAGE_DIFFERENCE = .5;
 
-        //The maximum acceptable percentage difference allowed
+        // The maximum acceptable percentage difference allowed
         private static readonly double MAX_ACCEPTABLE_PERCENTAGE_DIFFERENCE = .15;
 
         private static readonly int SUCCESSIVE_WriteTimeout_SOMEDATA = 950;
@@ -209,14 +209,14 @@ namespace Legacy.SerialStream
                     "Verifying WriteTimeout={0} with successive call to Write(byte[], int, int) and some data being received in the first call",
                     stream.WriteTimeout);
 
-                //Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
-                //before the timeout is reached
+                // Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
+                // before the timeout is reached
                 t.Start();
                 waitTime = 0;
 
                 while (t.ThreadState == ThreadState.Unstarted && waitTime < 2000)
                 {
-                    //Wait for the thread to start
+                    // Wait for the thread to start
                     Thread.Sleep(50);
                     waitTime += 50;
                 }
@@ -231,11 +231,11 @@ namespace Legacy.SerialStream
 
                 asyncEnableRts.Stop();
 
-                //Wait for the thread to finish
+                // Wait for the thread to finish
                 while (t.IsAlive)
                     Thread.Sleep(50);
 
-                //Make sure there is no bytes in the buffer so the next call to write will timeout
+                // Make sure there is no bytes in the buffer so the next call to write will timeout
                 com1.DiscardInBuffer();
 
                 VerifyTimeout(Write_byte_int_int, stream);
@@ -282,14 +282,14 @@ namespace Legacy.SerialStream
                     "Verifying WriteTimeout={0} with successive call to WriteByte() and some data being received in the first call",
                     stream.WriteTimeout);
 
-                //Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
-                //before the timeout is reached
+                // Call EnableRTS asynchronously this will enable RTS in the middle of the following write call allowing it to succeed 
+                // before the timeout is reached
                 t.Start();
                 waitTime = 0;
 
                 while (t.ThreadState == ThreadState.Unstarted && waitTime < 2000)
                 {
-                    //Wait for the thread to start
+                    // Wait for the thread to start
                     Thread.Sleep(50);
                     waitTime += 50;
                 }
@@ -304,11 +304,11 @@ namespace Legacy.SerialStream
 
                 asyncEnableRts.Stop();
 
-                //Wait for the thread to finish
+                // Wait for the thread to finish
                 while (t.IsAlive)
                     Thread.Sleep(50);
 
-                //Make sure there is no bytes in the buffer so the next call to write will timeout
+                // Make sure there is no bytes in the buffer so the next call to write will timeout
                 com1.DiscardInBuffer();
 
                 VerifyTimeout(WriteByte, stream);
@@ -359,7 +359,7 @@ namespace Legacy.SerialStream
                     {
                         int sleepPeriod = SUCCESSIVE_WriteTimeout_SOMEDATA / 2;
 
-                        //Sleep some random period with of a maximum duration of half the largest possible timeout value for a write method on COM1
+                        // Sleep some random period with of a maximum duration of half the largest possible timeout value for a write method on COM1
                         Thread.Sleep(sleepPeriod);
 
                         com2.Open();
@@ -461,7 +461,7 @@ namespace Legacy.SerialStream
             double percentageDifference;
             
 
-            //Warmup the write method. When called for the first time the write method seems to take much longer then subsequent calls
+            // Warmup the write method. When called for the first time the write method seems to take much longer then subsequent calls
             timer.Start();
             try
             {
@@ -472,7 +472,7 @@ namespace Legacy.SerialStream
             actualTime = (int)timer.ElapsedMilliseconds;
             percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
-            //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
+            // Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
             Assert.True(percentageDifference <= MAX_ACCEPTABLE_WARMUP_PERCENTAGE_DIFFERENCE,
                 string.Format("Err_88558amuph!!!: The write method timedout in {0} expected {1} percentage difference: {2} when called for the first time",
                     actualTime, expectedTime, percentageDifference));
@@ -480,7 +480,7 @@ namespace Legacy.SerialStream
             actualTime = 0;
             timer.Reset();
 
-            //Perform the actual test verifying that the write method times out in approximately WriteTimeout milliseconds
+            // Perform the actual test verifying that the write method times out in approximately WriteTimeout milliseconds
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             for (var i = 0; i < NUM_TRYS; i++)
@@ -498,7 +498,7 @@ namespace Legacy.SerialStream
             actualTime /= NUM_TRYS;
             percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
-            //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
+            // Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
             Assert.True(percentageDifference <= MAX_ACCEPTABLE_PERCENTAGE_DIFFERENCE,
                 string.Format("Err_56485ahpbz!!!: The write method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference));
 
@@ -529,7 +529,7 @@ namespace Legacy.SerialStream
             var timer = new Stopwatch();
             int actualTime;
 
-            //Warmup the write method. When called for the first time the write method seems to take much longer then subsequent calls
+            // Warmup the write method. When called for the first time the write method seems to take much longer then subsequent calls
             timer.Start();
             try
             {
@@ -539,7 +539,7 @@ namespace Legacy.SerialStream
             timer.Stop();
             actualTime = (int)timer.ElapsedMilliseconds;
 
-            //Verify that the time the method took to timeout is less then the maximum acceptable time
+            // Verify that the time the method took to timeout is less then the maximum acceptable time
             Assert.True(actualTime <= MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT,
                 string.Format("Err_277a0ahpsb!!!: With a timeout of 0 the write method timedout in {0} expected something less then {1} when called for the first time",
                     actualTime, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT));
@@ -547,7 +547,7 @@ namespace Legacy.SerialStream
             actualTime = 0;
             timer.Reset();
 
-            //Perform the actual test verifying that the write method times out in approximately WriteTimeout milliseconds
+            // Perform the actual test verifying that the write method times out in approximately WriteTimeout milliseconds
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             for (var i = 0; i < NUM_TRYS; i++)
@@ -564,7 +564,7 @@ namespace Legacy.SerialStream
             Thread.CurrentThread.Priority = ThreadPriority.Normal;
             actualTime /= NUM_TRYS;
 
-            //Verify that the time the method took to timeout is less then the maximum acceptable time
+            // Verify that the time the method took to timeout is less then the maximum acceptable time
             Assert.True(actualTime <= MAX_ACCEPTABLE_ZERO_TIMEOUT,
                 string.Format("Err_112389ahbp!!!: With a timeout of 0 the write method timedout in {0} expected something less then {1}",
                     actualTime, MAX_ACCEPTABLE_ZERO_TIMEOUT));

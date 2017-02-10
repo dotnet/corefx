@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,19 +15,19 @@ namespace Legacy.SerialStream
 {
     public class ReadTimeout_Property : PortsTest
     {
-        //The default number of bytes to write with when testing timeout with Read(byte[], int, int)
+        // The default number of bytes to write with when testing timeout with Read(byte[], int, int)
         private static readonly int DEFAULT_READ_BYTE_ARRAY_SIZE = 8;
 
-        //The ammount of time to wait when expecting an long timeout
+        // The amount of time to wait when expecting an long timeout
         private static readonly int DEFAULT_WAIT_LONG_TIMEOUT = 250;
 
-        //The maximum acceptable time allowed when a read method should timeout immediately when it is called for the first time
+        // The maximum acceptable time allowed when a read method should timeout immediately when it is called for the first time
         private static readonly int MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT = 1000;
 
-        //The maximum acceptable percentage difference allowed when a read method is called for the first time
+        // The maximum acceptable percentage difference allowed when a read method is called for the first time
         private static readonly double MAX_ACCEPTABLE_WARMUP_PERCENTAGE_DIFFERENCE = .5;
 
-        //The maximum acceptable percentage difference allowed
+        // The maximum acceptable percentage difference allowed
         private static readonly double MAX_ACCEPTABLE_PERCENTAGE_DIFFERENCE = .15;
 
         private static readonly int SUCCESSIVE_READTIMEOUT_SOMEDATA = 950;
@@ -175,8 +175,8 @@ namespace Legacy.SerialStream
                     "Verifying ReadTimeout={0} with successive call to Read(byte[], int, int) and some data being received in the first call",
                     stream.ReadTimeout);
 
-                //Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
-                //to a read method times out
+                // Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
+                // to a read method times out
                 t.Start();
 
                 try
@@ -187,11 +187,11 @@ namespace Legacy.SerialStream
                 {
                 }
 
-                //Wait for the thread to finish
+                // Wait for the thread to finish
                 while (t.IsAlive)
                     Thread.Sleep(50);
 
-                //Make sure there is no bytes in the buffer so the next call to read will timeout
+                // Make sure there is no bytes in the buffer so the next call to read will timeout
                 com1.DiscardInBuffer();
 
                 VerifyTimeout(Read_byte_int_int, stream);
@@ -231,8 +231,8 @@ namespace Legacy.SerialStream
                     "Verifying ReadTimeout={0} with successive call to ReadByte() and some data being received in the first call",
                     stream.ReadTimeout);
 
-                //Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
-                //to a read method times out
+                // Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
+                // to a read method times out
                 t.Start();
 
                 try
@@ -243,11 +243,11 @@ namespace Legacy.SerialStream
                 {
                 }
 
-                //Wait for the thread to finish
+                // Wait for the thread to finish
                 while (t.IsAlive)
                     Thread.Sleep(50);
 
-                //Make sure there is no bytes in the buffer so the next call to read will timeout
+                // Make sure there is no bytes in the buffer so the next call to read will timeout
                 com1.DiscardInBuffer();
 
                 VerifyTimeout(ReadByte, stream);
@@ -338,7 +338,7 @@ namespace Legacy.SerialStream
                 var xmitBuffer = new byte[1];
                 int sleepPeriod = SUCCESSIVE_READTIMEOUT_SOMEDATA / 2;
 
-                //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
+                // Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
                 Thread.Sleep(sleepPeriod);
 
                 com2.Open();
@@ -440,7 +440,7 @@ namespace Legacy.SerialStream
             double percentageDifference;
             
 
-            //Warmup the read method. When called for the first time the read method seems to take much longer then subsequent calls
+            // Warmup the read method. When called for the first time the read method seems to take much longer then subsequent calls
             timer.Start();
             try
             {
@@ -451,7 +451,7 @@ namespace Legacy.SerialStream
             actualTime = (int)timer.ElapsedMilliseconds;
             percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
-            //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
+            // Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
             Assert.True(percentageDifference <= MAX_ACCEPTABLE_WARMUP_PERCENTAGE_DIFFERENCE,
                 string.Format("Err_88558amuph!!!: The read method timedout in {0} expected {1} percentage difference: {2} when called for the first time",
                     actualTime, expectedTime, percentageDifference));
@@ -459,7 +459,7 @@ namespace Legacy.SerialStream
             actualTime = 0;
             timer.Reset();
 
-            //Perform the actual test verifying that the read method times out in approximately ReadTime milliseconds
+            // Perform the actual test verifying that the read method times out in approximately ReadTime milliseconds
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             for (var i = 0; i < NUM_TRYS; i++)
@@ -477,7 +477,7 @@ namespace Legacy.SerialStream
             actualTime /= NUM_TRYS;
             percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
-            //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
+            // Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
             Assert.True(percentageDifference <= MAX_ACCEPTABLE_PERCENTAGE_DIFFERENCE,
                 string.Format("Err_56485ahpbz!!!: The read method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference));
 
@@ -506,10 +506,9 @@ namespace Legacy.SerialStream
         private void Verify0Timeout(ReadMethodDelegate readMethod, Stream stream)
         {
             var timer = new Stopwatch();
-            int expectedTime = stream.ReadTimeout;
             int actualTime;
 
-            //Warmup the read method. When called for the first time the read method seems to take much longer then subsequent calls
+            // Warmup the read method. When called for the first time the read method seems to take much longer then subsequent calls
             timer.Start();
             try
             {
@@ -519,7 +518,7 @@ namespace Legacy.SerialStream
             timer.Stop();
             actualTime = (int)timer.ElapsedMilliseconds;
 
-            //Verify that the time the method took to timeout is less then the maximum acceptable time
+            // Verify that the time the method took to timeout is less then the maximum acceptable time
             Assert.True(actualTime <= MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT,
                 string.Format("Err_277a0ahpsb!!!: With a timeout of 0 the read method timedout in {0} expected something less then {1} when called for the first time",
                     actualTime, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT));
@@ -527,7 +526,7 @@ namespace Legacy.SerialStream
             actualTime = 0;
             timer.Reset();
 
-            //Perform the actual test verifying that the read method times out in approximately ReadTime milliseconds
+            // Perform the actual test verifying that the read method times out in approximately ReadTime milliseconds
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             for (var i = 0; i < NUM_TRYS; i++)
@@ -544,12 +543,10 @@ namespace Legacy.SerialStream
             Thread.CurrentThread.Priority = ThreadPriority.Normal;
             actualTime /= NUM_TRYS;
 
-            //Verify that the time the method took to timeout is less then the maximum acceptable time
+            // Verify that the time the method took to timeout is less then the maximum acceptable time
             Assert.True(actualTime <= MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT,
                 string.Format("Err_112389ahbp!!!: With a timeout of 0 the read method timedout in {0} expected something less then {1}",
                     actualTime, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT));
-
-            
         }
 
         private void VerifyException(int readTimeout, Type expectedException)

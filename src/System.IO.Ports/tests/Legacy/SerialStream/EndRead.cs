@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,33 +15,6 @@ namespace Legacy.SerialStream
 {
     public class EndRead : PortsTest
     {
-
-
-
-
-
-
-        //The number of random bytes to receive for read method testing
-        public static readonly int numRndBytesToRead = 16;
-
-        //The number of random bytes to receive for large input buffer testing
-        public static readonly int largeNumRndBytesToRead = 2048;
-
-        //When we test Read and do not care about actually reading anything we must still
-        //create an byte array to pass into the method the following is the size of the 
-        //byte array used in this situation
-        public static readonly int defaultByteArraySize = 1;
-        public static readonly int defaultByteOffset = 0;
-        public static readonly int defaultByteCount = 1;
-
-        //The maximum buffer size when a exception occurs
-        public static readonly int maxBufferSizeForException = 255;
-
-        //The maximum buffer size when a exception is not expected
-        public static readonly int maxBufferSize = 8;
-
-
-
         #region Test Cases
 
         [ConditionalFact(nameof(HasNullModem))]
@@ -50,16 +23,13 @@ namespace Legacy.SerialStream
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             using (var com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
             {
-                IAsyncResult asyncResult;
-                Stream serialStream;
-
                 Debug.WriteLine("Verifying EndRead method throws exception after a call to Cloes()");
 
                 com1.Open();
                 com2.Open();
 
-                serialStream = com1.BaseStream;
-                asyncResult = com1.BaseStream.BeginRead(new byte[8], 0, 8, null, null);
+                Stream serialStream = com1.BaseStream;
+                IAsyncResult asyncResult = com1.BaseStream.BeginRead(new byte[8], 0, 8, null, null);
 
                 com2.Write(new byte[16], 0, 16);
                 while (com1.BytesToRead == 0)
@@ -245,7 +215,14 @@ namespace Legacy.SerialStream
 
         private void VerifyEndReadException(Stream serialStream, IAsyncResult asyncResult, Type expectedException)
         {
-            Assert.Throws(expectedException, () => serialStream.EndRead(asyncResult));
+            if (expectedException == null)
+            {
+                serialStream.EndRead(asyncResult);
+            }
+            else
+            {
+                Assert.Throws(expectedException, () => serialStream.EndRead(asyncResult));
+            }
         }
         #endregion
     }

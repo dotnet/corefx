@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,10 +15,10 @@ namespace Legacy.SerialStream
 {
     public class WriteByte : PortsTest
     {
-        //The large number of times the write method is called when verifying write
+        // The large number of times the write method is called when verifying write
         private static readonly int LARGE_NUM_WRITES = 2048;
 
-        //The default number of times the write method is called when verifying write
+        // The default number of times the write method is called when verifying write
         private static readonly int DEFAULT_NUM_WRITES = 8;
 
         #region Test Cases
@@ -122,7 +122,7 @@ namespace Legacy.SerialStream
 
                 if (buffer.Length <= index)
                 {
-                    //If we have read in more bytes then we expect
+                    // If we have read in more bytes then we expect
                     Fail("ERROR!!!: We have received more bytes then were sent");
                     break;
                 }
@@ -135,7 +135,7 @@ namespace Legacy.SerialStream
                 }
             }
 
-            // Compare the bytes that were read with the ones we expected to read
+            //  Compare the bytes that were read with the ones we expected to read
             Assert.Equal(buffer, actualBytes);
         }
         #endregion

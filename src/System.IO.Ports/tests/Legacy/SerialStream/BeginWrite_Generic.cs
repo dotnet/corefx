@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -16,28 +16,28 @@ namespace Legacy.SerialStream
 {
     public class BeginWrite_Generic : PortsTest
     {
-        //Set bounds fore random timeout values.
-        //If the min is to low write will not timeout accurately and the testcase will fail
+        // Set bounds fore random timeout values.
+        // If the min is to low write will not timeout accurately and the testcase will fail
         public static int minRandomTimeout = 250;
 
-        //If the max is to large then the testcase will take forever to run
+        // If the max is to large then the testcase will take forever to run
         public static int maxRandomTimeout = 2000;
 
-        //If the percentage difference between the expected timeout and the actual timeout
-        //found through Stopwatch is greater then 10% then the timeout value was not correctly
-        //to the write method and the testcase fails.
+        // If the percentage difference between the expected timeout and the actual timeout
+        // found through Stopwatch is greater then 10% then the timeout value was not correctly
+        // to the write method and the testcase fails.
         public static double maxPercentageDifference = .15;
 
-        //The byte size used when veryifying exceptions that write will throw 
+        // The byte size used when veryifying exceptions that write will throw 
         public static readonly int BYTE_SIZE_EXCEPTION = 4;
 
-        //The byte size used when veryifying timeout 
+        // The byte size used when veryifying timeout 
         public static readonly int BYTE_SIZE_TIMEOUT = 4;
 
-        //The byte size used when veryifying BytesToWrite 
+        // The byte size used when veryifying BytesToWrite 
         public static readonly int BYTE_SIZE_BYTES_TO_WRITE = 4;
 
-        //The bytes size used when veryifying Handshake 
+        // The bytes size used when veryifying Handshake 
         public static readonly int BYTE_SIZE_HANDSHAKE = 8;
         public static readonly int MAX_WAIT = 250;
         public static readonly int ITERATION_WAIT = 50;
@@ -124,7 +124,7 @@ namespace Legacy.SerialStream
 
                 com2.RtsEnable = true;
 
-                //Wait for write method to complete
+                // Wait for write method to complete
                 elapsedTime = 0;
                 while (!writeAsyncResult.IsCompleted && elapsedTime < MAX_WAIT_THREAD)
                 {
@@ -154,7 +154,7 @@ namespace Legacy.SerialStream
                 com2.Open();
                 com1.WriteTimeout = 2000;
 
-                //Write a random byte[] asynchronously so we can verify some things while the write call is blocking
+                // Write a random byte[] asynchronously so we can verify some things while the write call is blocking
                 IAsyncResult writeAsyncResult1 = WriteRndByteArray(com1, BYTE_SIZE_BYTES_TO_WRITE);
                 while (elapsedTime < 1000 && BYTE_SIZE_BYTES_TO_WRITE != com1.BytesToWrite)
                 {
@@ -168,7 +168,7 @@ namespace Legacy.SerialStream
                         BYTE_SIZE_BYTES_TO_WRITE, com1.BytesToWrite);
                 }
 
-                //Write a random byte[] asynchronously so we can verify some things while the write call is blocking
+                // Write a random byte[] asynchronously so we can verify some things while the write call is blocking
                 IAsyncResult writeAsyncResult2 = WriteRndByteArray(com1, BYTE_SIZE_BYTES_TO_WRITE);
                 elapsedTime = 0;
 
@@ -186,7 +186,7 @@ namespace Legacy.SerialStream
 
                 com2.RtsEnable = true;
 
-                //Wait for write method to complete
+                // Wait for write method to complete
                 elapsedTime = 0;
                 while ((!writeAsyncResult1.IsCompleted || !writeAsyncResult2.IsCompleted) &&
                        elapsedTime < MAX_WAIT_THREAD)
@@ -207,13 +207,13 @@ namespace Legacy.SerialStream
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {
-                //Write a random byte[] asynchronously so we can verify some things while the write call is blocking
+                // Write a random byte[] asynchronously so we can verify some things while the write call is blocking
                 Debug.WriteLine("Verifying Handshake=None");
 
                 com.Open();
                 IAsyncResult writeAsyncResult = WriteRndByteArray(com, BYTE_SIZE_BYTES_TO_WRITE);
 
-                //Wait for both write methods to timeout
+                // Wait for both write methods to timeout
                 while (!writeAsyncResult.IsCompleted)
                     Thread.Sleep(100);
 
@@ -261,19 +261,11 @@ namespace Legacy.SerialStream
 
         private static void VerifyWriteException(Stream serialStream, Type expectedException)
         {
-            try
+            Assert.Throws(expectedException, () =>
             {
                 IAsyncResult writeAsyncResult = serialStream.BeginWrite(new byte[BYTE_SIZE_EXCEPTION], 0, BYTE_SIZE_EXCEPTION, null, null);
                 writeAsyncResult.AsyncWaitHandle.WaitOne();
-                Fail("ERROR!!!: No Excpetion was thrown");
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException)
-                {
-                    Fail("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
-                }
-            }
+            });
         }
 
         private void VerifyTimeout(int writeTimeout)
@@ -295,11 +287,11 @@ namespace Legacy.SerialStream
                 asyncRead.WriteAsyncResult = writeAsyncResult;
 
                 Thread.Sleep(100 > com1.WriteTimeout ? 2 * com1.WriteTimeout : 200);
-                //Sleep for 200ms or 2 times the WriteTimeout
+                // Sleep for 200ms or 2 times the WriteTimeout
 
                 if (writeAsyncResult.IsCompleted)
                 {
-                    //Verify the IAsyncResult has not completed
+                    // Verify the IAsyncResult has not completed
                     Fail("Err_565088aueiud!!!: Expected read to not have completed");
                 }
 
@@ -308,7 +300,7 @@ namespace Legacy.SerialStream
                 waitTime = 0;
                 while (asyncEndWrite.ThreadState == ThreadState.Unstarted && waitTime < MAX_WAIT_THREAD)
                 {
-                    //Wait for the thread to start
+                    // Wait for the thread to start
                     Thread.Sleep(50);
                     waitTime += 50;
                 }
@@ -319,11 +311,11 @@ namespace Legacy.SerialStream
                 }
 
                 Thread.Sleep(100 < com1.WriteTimeout ? 2 * com1.WriteTimeout : 200);
-                //Sleep for 200ms or 2 times the WriteTimeout
+                // Sleep for 200ms or 2 times the WriteTimeout
 
                 if (!asyncEndWrite.IsAlive)
                 {
-                    //Verify EndRead is blocking and is still alive
+                    // Verify EndRead is blocking and is still alive
                     Fail("Err_4085858aiehe!!!: Expected read to not have completed");
                 }
 
@@ -380,7 +372,7 @@ namespace Legacy.SerialStream
                 com1.Open();
                 com2.Open();
 
-                //Setup to ensure write will bock with type of handshake method being used
+                // Setup to ensure write will bock with type of handshake method being used
                 if (Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
                     com2.RtsEnable = false;
@@ -392,7 +384,7 @@ namespace Legacy.SerialStream
                     Thread.Sleep(250);
                 }
 
-                //Write a random byte asynchronously so we can verify some things while the write call is blocking
+                // Write a random byte asynchronously so we can verify some things while the write call is blocking
                 IAsyncResult writeAsyncResult = WriteRndByteArray(com1, BYTE_SIZE_HANDSHAKE);
                 while (BYTE_SIZE_HANDSHAKE > com1.BytesToWrite && waitTime < 500)
                 {
@@ -400,7 +392,7 @@ namespace Legacy.SerialStream
                     waitTime += 50;
                 }
 
-                //Verify that the correct number of bytes are in the buffer
+                // Verify that the correct number of bytes are in the buffer
                 if (BYTE_SIZE_HANDSHAKE != com1.BytesToWrite)
                 {
 
@@ -408,7 +400,7 @@ namespace Legacy.SerialStream
                         com1.BytesToWrite);
                 }
 
-                //Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
+                // Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) &&
                     com1.CtsHolding)
                 {
@@ -416,7 +408,7 @@ namespace Legacy.SerialStream
                     Fail("ERROR!!! Expcted CtsHolding={0} actual {1}", false, com1.CtsHolding);
                 }
 
-                //Setup to ensure write will succeed
+                // Setup to ensure write will succeed
                 if (Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
                     com2.RtsEnable = true;
@@ -427,18 +419,18 @@ namespace Legacy.SerialStream
                     com2.BaseStream.Write(XOnBuffer, 0, 1);
                 }
 
-                //Wait till write finishes
+                // Wait till write finishes
                 while (!writeAsyncResult.IsCompleted)
                     Thread.Sleep(100);
 
-                //Verify that the correct number of bytes are in the buffer
+                // Verify that the correct number of bytes are in the buffer
                 if (0 != com1.BytesToWrite)
                 {
 
                     Fail("ERROR!!! Expcted BytesToWrite=0 actual {0}", com1.BytesToWrite);
                 }
 
-                //Verify that CtsHolding is true if the RequestToSend or RequestToSendXOnXOff handshake method is used
+                // Verify that CtsHolding is true if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) &&
                     !com1.CtsHolding)
                 {

@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,9 +15,9 @@ namespace Legacy.SerialStream
 {
     public class Close : PortsTest
     {
-        //The number of the bytes that should read/write buffers
-        public static readonly int numReadBytes = 32;
-        public static readonly int numWriteBytes = 32;
+        // The number of the bytes that should read/write buffers
+        private static readonly int numReadBytes = 32;
+        private static readonly int numWriteBytes = 32;
 
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void OpenClose_WriteMethods()
@@ -209,12 +209,12 @@ namespace Legacy.SerialStream
                 serPortProp.SetAllPropertiesToOpenDefaults();
                 serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-                //Setting com1 to use Handshake so we can fill read buffer
+                // Setting com1 to use Handshake so we can fill read buffer
                 com1.Handshake = Handshake.RequestToSend;
                 com1.Open();
                 com2.Open();
 
-                //BeginWrite is used so we can fill the read buffer then go onto to verify
+                // BeginWrite is used so we can fill the read buffer then go onto to verify
                 com1.BaseStream.BeginWrite(new byte[numWriteBytes], 0, numWriteBytes, null, null);
                 com2.Write(new byte[numReadBytes], 0, numReadBytes);
                 Thread.Sleep(500);

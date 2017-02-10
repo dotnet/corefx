@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -24,10 +24,8 @@ namespace Legacy.SerialStream
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {
-                Stream serialStream;
-
                 com.Open();
-                serialStream = com.BaseStream;
+                Stream serialStream = com.BaseStream;
                 com.Close();
 
                 Debug.WriteLine("Verifying Position property throws exception After Open() then Close()");

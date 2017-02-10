@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -16,19 +16,19 @@ namespace Legacy.SerialStream
 {
     public class ReadByte_Generic : PortsTest
     {
-        //Set bounds fore random timeout values.
-        //If the min is to low read will not timeout accurately and the testcase will fail
+        // Set bounds fore random timeout values.
+        // If the min is to low read will not timeout accurately and the testcase will fail
         private static int minRandomTimeout = 250;
 
-        //If the max is to large then the testcase will take forever to run
+        // If the max is to large then the testcase will take forever to run
         private static int maxRandomTimeout = 2000;
 
-        //If the percentage difference between the expected timeout and the actual timeout
-        //found through Stopwatch is greater then 10% then the timeout value was not correctly
-        //to the read method and the testcase fails.
+        // If the percentage difference between the expected timeout and the actual timeout
+        // found through Stopwatch is greater then 10% then the timeout value was not correctly
+        // to the read method and the testcase fails.
         private static double maxPercentageDifference = .15;
 
-        //The number of random bytes to receive
+        // The number of random bytes to receive
         private static int numRndByte = 8;
         private static readonly int NUM_TRYS = 5;
 
@@ -118,8 +118,8 @@ namespace Legacy.SerialStream
                     com1.ReadTimeout);
                 com1.Open();
 
-                //Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
-                //to a read method times out
+                // Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
+                // to a read method times out
                 t.Start();
 
                 try
@@ -130,11 +130,11 @@ namespace Legacy.SerialStream
                 {
                 }
 
-                //Wait for the thread to finish
+                // Wait for the thread to finish
                 while (t.IsAlive)
                     Thread.Sleep(50);
 
-                //Make sure there is no bytes in the buffer so the next call to read will timeout
+                // Make sure there is no bytes in the buffer so the next call to read will timeout
                 com1.DiscardInBuffer();
                 VerifyTimeout(com1);
             }
@@ -148,7 +148,7 @@ namespace Legacy.SerialStream
                 var xmitBuffer = new byte[1];
                 int sleepPeriod = rndGen.Next(minRandomTimeout, maxRandomTimeout / 2);
 
-                //Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
+                // Sleep some random period with of a maximum duration of half the largest possible timeout value for a read method on COM1
                 Thread.Sleep(sleepPeriod);
                 com2.Open();
 
@@ -195,7 +195,7 @@ namespace Legacy.SerialStream
                  We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
                 Debug.WriteLine("Verifying default ParityReplace byte with a parity error on the last byte");
 
-                //Genrate random characters without an parity error
+                //  Generate random characters without an parity error
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 128);
@@ -205,9 +205,9 @@ namespace Legacy.SerialStream
                 }
 
                 bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] | 0x80);
-                //Create a parity error on the last byte
+                // Create a parity error on the last byte
                 expectedBytes[expectedBytes.Length - 1] = com1.ParityReplace;
-                // Set the last expected byte to be the ParityReplace Byte
+                //  Set the last expected byte to be the ParityReplace Byte
 
                 com1.Parity = Parity.Space;
                 com1.DataBits = 7;
@@ -241,7 +241,7 @@ namespace Legacy.SerialStream
                     actualByteIndex++;
                 }
 
-                //Compare the chars that were written with the ones we expected to read
+                // Compare the chars that were written with the ones we expected to read
                 for (var i = 0; i < expectedBytes.Length; i++)
                 {
                     if (expectedBytes[i] != actualBytes[i])
@@ -258,7 +258,7 @@ namespace Legacy.SerialStream
                 }
 
                 bytesToWrite[bytesToWrite.Length - 1] = (byte)(bytesToWrite[bytesToWrite.Length - 1] & 0x7F);
-                //Clear the parity error on the last byte
+                // Clear the parity error on the last byte
                 expectedBytes[expectedBytes.Length - 1] = bytesToWrite[bytesToWrite.Length - 1];
                 VerifyRead(com1, com2, bytesToWrite, expectedBytes, Encoding.ASCII);
             }
@@ -277,7 +277,7 @@ namespace Legacy.SerialStream
 
             try
             {
-                com.BaseStream.ReadByte(); // Warm up read method
+                com.BaseStream.ReadByte(); //  Warm up read method
                 Fail("Err_6941814ahbpa!!!: Read did not throw Timeout Exception when it timed out for the first time");
             }
             catch (TimeoutException) { }
@@ -303,7 +303,7 @@ namespace Legacy.SerialStream
             actualTime /= NUM_TRYS;
             percentageDifference = Math.Abs((expectedTime - actualTime) / (double)expectedTime);
 
-            //Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
+            // Verify that the percentage difference between the expected and actual timeout is less then maxPercentageDifference
             if (maxPercentageDifference < percentageDifference)
             {
                 Fail("ERROR!!!: The read method timedout in {0} expected {1} percentage difference: {2}", actualTime, expectedTime, percentageDifference);
@@ -318,21 +318,7 @@ namespace Legacy.SerialStream
 
         private void VerifyReadException(Stream serialStream, Type expectedException)
         {
-
-
-            try
-            {
-                serialStream.ReadByte();
-                Fail("ERROR!!!: No Excpetion was thrown");
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException)
-                {
-                    Fail("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
-                }
-            }
-
+            Assert.Throws(expectedException, () => serialStream.ReadByte());
         }
 
         private void VerifyParityReplaceByte(int parityReplace, int parityErrorIndex)
@@ -350,7 +336,7 @@ namespace Legacy.SerialStream
                 var expectedBytes = new byte[numRndByte];
                 int expectedChar;
 
-                //Genrate random bytes without an parity error
+                //  Generate random bytes without an parity error
                 for (var i = 0; i < byteBuffer.Length; i++)
                 {
                     int randChar = rndGen.Next(0, 128);
@@ -361,23 +347,23 @@ namespace Legacy.SerialStream
 
                 if (-1 == parityReplace)
                 {
-                    //If parityReplace is -1 and we should just use the default value
+                    // If parityReplace is -1 and we should just use the default value
                     expectedChar = com1.ParityReplace;
                 }
                 else if ('\0' == parityReplace)
                 {
-                    //If parityReplace is the null charachater and parity replacement should not occur
+                    // If parityReplace is the null charachater and parity replacement should not occur
                     com1.ParityReplace = (byte)parityReplace;
                     expectedChar = expectedBytes[parityErrorIndex];
                 }
                 else
                 {
-                    //Else parityReplace was set to a value and we should expect this value to be returned on a parity error
+                    // Else parityReplace was set to a value and we should expect this value to be returned on a parity error
                     com1.ParityReplace = (byte)parityReplace;
                     expectedChar = parityReplace;
                 }
 
-                //Create an parity error by setting the highest order bit to true
+                // Create an parity error by setting the highest order bit to true
                 byteBuffer[parityErrorIndex] = (byte)(byteBuffer[parityErrorIndex] | 0x80);
                 expectedBytes[parityErrorIndex] = (byte)expectedChar;
 
@@ -424,10 +410,10 @@ namespace Legacy.SerialStream
                     break;
                 }
 
-                //While their are more bytes to be read
+                // While their are more bytes to be read
                 if (expectedBytes.Length <= i)
                 {
-                    //If we have read in more bytes then we expecte
+                    // If we have read in more bytes then we expecte
                     Fail("ERROR!!!: We have received more bytes then were sent");
                     break;
                 }
@@ -442,7 +428,7 @@ namespace Legacy.SerialStream
 
                 if (readInt != expectedBytes[i])
                 {
-                    //If the bytes read is not the expected byte
+                    // If the bytes read is not the expected byte
                     Fail("ERROR!!!: Expected to read {0}  actual read byte {1}", expectedBytes[i], (byte)readInt);
                 }
 

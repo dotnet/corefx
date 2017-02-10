@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -15,27 +15,24 @@ namespace Legacy.SerialStream
 {
     public class Write_byte_int_int : PortsTest
     {
-        //The string size used when veryifying encoding 
-        public static readonly int ENCODING_BUFFER_SIZE = 4;
+        // The string size used for large byte array testing
+        private static readonly int LARGE_BUFFER_SIZE = 2048;
 
-        //The string size used for large byte array testing
-        public static readonly int LARGE_BUFFER_SIZE = 2048;
+        // When we test Write and do not care about actually writing anything we must still
+        // create an byte array to pass into the method the following is the size of the 
+        // byte array used in this situation
+        private static readonly int DEFAULT_BUFFER_SIZE = 1;
+        private static readonly int DEFAULT_BUFFER_OFFSET = 0;
+        private static readonly int DEFAULT_BUFFER_COUNT = 1;
 
-        //When we test Write and do not care about actually writing anything we must still
-        //create an byte array to pass into the method the following is the size of the 
-        //byte array used in this situation
-        public static readonly int DEFAULT_BUFFER_SIZE = 1;
-        public static readonly int DEFAULT_BUFFER_OFFSET = 0;
-        public static readonly int DEFAULT_BUFFER_COUNT = 1;
+        // The maximum buffer size when a exception occurs
+        private static readonly int MAX_BUFFER_SIZE_FOR_EXCEPTION = 255;
 
-        //The maximum buffer size when a exception occurs
-        public static readonly int MAX_BUFFER_SIZE_FOR_EXCEPTION = 255;
+        // The maximum buffer size when a exception is not expected
+        private static readonly int MAX_BUFFER_SIZE = 8;
 
-        //The maximum buffer size when a exception is not expected
-        public static readonly int MAX_BUFFER_SIZE = 8;
-
-        //The default number of times the write method is called when verifying write
-        public static readonly int DEFAULT_NUM_WRITES = 3;
+        // The default number of times the write method is called when verifying write
+        private static readonly int DEFAULT_NUM_WRITES = 3;
 
         #region Test Cases
         [ConditionalFact(nameof(HasOneSerialPort))]
@@ -269,18 +266,7 @@ namespace Legacy.SerialStream
                     expectedException, bufferLength, offset, count);
                 com.Open();
 
-                try
-                {
-                    com.BaseStream.Write(buffer, offset, count);
-                    Fail("ERROR!!!: No Excpetion was thrown");
-                }
-                catch (Exception e)
-                {
-                    if (e.GetType() != expectedException)
-                    {
-                        Fail("ERROR!!!: {0} exception was thrown expected {1}", e.GetType(), expectedException);
-                    }
-                }
+                Assert.Throws(expectedException, () => com.BaseStream.Write(buffer, offset, count));
             }
         }
 
@@ -324,11 +310,6 @@ namespace Legacy.SerialStream
             }
         }
 
-        public void VerifyWriteByteArray(byte[] buffer, int offset, int count, SerialPort com1, SerialPort com2)
-        {
-            VerifyWriteByteArray(buffer, offset, count, com1, com2, DEFAULT_NUM_WRITES);
-        }
-
         private void VerifyWriteByteArray(byte[] buffer, int offset, int count, SerialPort com1, SerialPort com2, int numWrites)
         {
             var index = 0;
@@ -350,7 +331,7 @@ namespace Legacy.SerialStream
             com2.ReadTimeout = 500;
             Thread.Sleep((int)(((expectedBytes.Length * numWrites * 10.0) / com1.BaudRate) * 1000) + 250);
 
-            //Make sure buffer was not altered during the write call
+            // Make sure buffer was not altered during the write call
             for (var i = 0; i < buffer.Length; i++)
             {
                 if (buffer[i] != oldBuffer[i])
@@ -373,7 +354,7 @@ namespace Legacy.SerialStream
 
                 if (actualBytes.Length <= index)
                 {
-                    //If we have read in more bytes then we expect
+                    // If we have read in more bytes then we expect
                     Fail("ERROR!!!: We have received more bytes then were sent");
                     break;
                 }
@@ -386,7 +367,7 @@ namespace Legacy.SerialStream
                 }
             }
 
-            //Compare the bytes that were read with the ones we expected to read
+            // Compare the bytes that were read with the ones we expected to read
             for (var j = 0; j < numWrites; j++)
             {
                 for (var i = 0; i < expectedBytes.Length; i++)

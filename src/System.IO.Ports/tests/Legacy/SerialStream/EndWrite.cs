@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -52,7 +52,7 @@ namespace Legacy.SerialStream
                 com.Close();
                 Thread.Sleep(200);
 
-                // Give the port time to finish closing since we have an unclosed BeginWrite - see  - see Dev10 #591344
+                //  Give the port time to finish closing since we have an unclosed BeginWrite - see  - see Dev10 #591344
             }
         }
 
@@ -83,11 +83,8 @@ namespace Legacy.SerialStream
                 IAsyncResult writeAsyncResult = com.BaseStream.BeginRead(new byte[8], 0, 8, null, null);
                 VerifyEndWriteException(com.BaseStream, writeAsyncResult, typeof(ArgumentException));
 
-
-
-                com.Close();
-                //Not needed if this scenario is run last.
-                //System.Threading.Thread.Sleep(200);  // Give the port time to finish closing since we have an unclosed BeginWrite
+                // Not needed if this scenario is run last.
+                // System.Threading.Thread.Sleep(200);  //  Give the port time to finish closing since we have an unclosed BeginWrite
             }
         }
 

@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//  Licensed to the .NET Foundation under one or more agreements.
+//  The .NET Foundation licenses this file to you under the MIT license.
+//  See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -14,24 +14,24 @@ namespace Legacy.SerialStream
 {
     public class Read_byte_int_int : PortsTest
     {
-        //The number of random bytes to receive for read method testing
-        public static readonly int numRndBytesToRead = 16;
+        // The number of random bytes to receive for read method testing
+        private static readonly int numRndBytesToRead = 16;
 
-        //The number of random bytes to receive for large input buffer testing
-        public static readonly int largeNumRndBytesToRead = 2048;
+        // The number of random bytes to receive for large input buffer testing
+        private static readonly int largeNumRndBytesToRead = 2048;
 
-        //When we test Read and do not care about actually reading anything we must still
-        //create an byte array to pass into the method the following is the size of the 
-        //byte array used in this situation
-        public static readonly int defaultByteArraySize = 1;
-        public static readonly int defaultByteOffset = 0;
-        public static readonly int defaultByteCount = 1;
+        // When we test Read and do not care about actually reading anything we must still
+        // create an byte array to pass into the method the following is the size of the 
+        // byte array used in this situation
+        private static readonly int defaultByteArraySize = 1;
+        private static readonly int defaultByteOffset = 0;
+        private static readonly int defaultByteCount = 1;
 
-        //The maximum buffer size when a exception occurs
-        public static readonly int maxBufferSizeForException = 255;
+        // The maximum buffer size when a exception occurs
+        private static readonly int maxBufferSizeForException = 255;
 
-        //The maximum buffer size when a exception is not expected
-        public static readonly int maxBufferSize = 8;
+        // The maximum buffer size when a exception is not expected
+        private static readonly int maxBufferSize = 8;
 
         #region Test Cases
 
@@ -204,7 +204,7 @@ namespace Legacy.SerialStream
                 var rndGen = new Random(-55);
                 var bytesToWrite = new byte[numberOfBytesToRead];
 
-                //Genrate random bytes
+                //  Generate random bytes
                 for (var i = 0; i < bytesToWrite.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);
@@ -212,7 +212,7 @@ namespace Legacy.SerialStream
                     bytesToWrite[i] = randByte;
                 }
 
-                //Genrate some random bytes in the buffer
+                //  Generate some random bytes in the buffer
                 for (var i = 0; i < buffer.Length; i++)
                 {
                     var randByte = (byte)rndGen.Next(0, 256);
@@ -258,16 +258,16 @@ namespace Legacy.SerialStream
                     break;
                 }
 
-                //While their are more characters to be read
+                // While their are more characters to be read
                 if ((bytesToRead > bytesRead && count != bytesRead) || (bytesToRead <= bytesRead && bytesRead != bytesToRead))
                 {
-                    //If we have not read all of the characters that we should have
+                    // If we have not read all of the characters that we should have
                     Fail("ERROR!!!: Read did not return all of the characters that were in SerialPort buffer");
                 }
 
                 if (bytesToWrite.Length < totalBytesRead + bytesRead)
                 {
-                    //If we have read in more characters then we expect
+                    // If we have read in more characters then we expect
                     Fail("ERROR!!!: We have received more characters then were sent");
                 }
 
@@ -285,19 +285,13 @@ namespace Legacy.SerialStream
                 bytesToRead = com1.BytesToRead;
             }
 
-            //Compare the bytes that were written with the ones we read
-            for (var i = 0; i < bytesToWrite.Length; i++)
-            {
-                if (bytesToWrite[i] != buffer[i])
-                {
-                    Fail("ERROR!!!: Expected to read {0}  actual read  {1}", bytesToWrite[i], buffer[i]);
-                }
-            }
+            // Compare the bytes that were written with the ones we read
+            Assert.Equal(bytesToWrite, buffer);
         }
 
         private void VerifyBuffer(byte[] actualBuffer, byte[] expectedBuffer, int offset, int count)
         {
-            //Verify all character before the offset
+            // Verify all character before the offset
             for (var i = 0; i < offset; i++)
             {
                 if (actualBuffer[i] != expectedBuffer[i])
@@ -306,7 +300,7 @@ namespace Legacy.SerialStream
                 }
             }
 
-            //Verify all character after the offset + count
+            // Verify all character after the offset + count
             for (int i = offset + count; i < actualBuffer.Length; i++)
             {
                 if (actualBuffer[i] != expectedBuffer[i])
