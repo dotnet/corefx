@@ -23,7 +23,7 @@ namespace System.Collections.Generic
     //
     // For a detailed description of the algorithm, take a look at "Algorithm" by Rebert Sedgewick.
 
-    internal delegate bool TreeWalkPredicate<T>(SortedSet<T>.Node node);
+    internal delegate bool TreeWalkPredicate<T>(Node node);
 
     internal enum TreeRotation
     {
@@ -92,29 +92,28 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(collection));
             }
 
-            // these are explicit type checks in the mould of HashSet. It would have worked better
-            // with something like an ISorted<T> (we could make this work for SortedList.Keys etc)
-            SortedSet<T> baseSortedSet = collection as SortedSet<T>;
-            SortedSet<T> baseTreeSubSet = collection as TreeSubSet;
-            if (baseSortedSet != null && baseTreeSubSet == null && AreComparersEqual(this, baseSortedSet))
+            // These are explicit type checks in the mould of HashSet. It would have worked better with
+            // something like an ISorted<T> interface. (We could make this work for SortedList.Keys, etc.)
+            SortedSet<T> sortedSet = collection as SortedSet<T>;
+            if (sortedSet != null && !(sortedSet is TreeSubSet) && HasEqualComparer(sortedSet))
             {
                 // breadth first traversal to recreate nodes
-                if (baseSortedSet.Count == 0)
+                if (sortedSet.Count == 0)
                 {
                     return;
                 }
 
                 // pre order way to replicate nodes
-                Stack<Node> theirStack = new Stack<SortedSet<T>.Node>(2 * Log2(baseSortedSet.Count) + 2);
-                Stack<Node> myStack = new Stack<SortedSet<T>.Node>(2 * Log2(baseSortedSet.Count) + 2);
-                Node theirCurrent = baseSortedSet._root;
-                Node myCurrent = (theirCurrent != null ? new SortedSet<T>.Node(theirCurrent.Item, theirCurrent.IsRed) : null);
+                Stack<Node> theirStack = new Stack<Node>(2 * Log2(sortedSet.Count) + 2);
+                Stack<Node> myStack = new Stack<Node>(2 * Log2(sortedSet.Count) + 2);
+                Node theirCurrent = sortedSet._root;
+                Node myCurrent = (theirCurrent != null ? new Node(theirCurrent.Item, theirCurrent.IsRed) : null);
                 _root = myCurrent;
                 while (theirCurrent != null)
                 {
                     theirStack.Push(theirCurrent);
                     myStack.Push(myCurrent);
-                    myCurrent.Left = (theirCurrent.Left != null ? new SortedSet<T>.Node(theirCurrent.Left.Item, theirCurrent.Left.IsRed) : null);
+                    myCurrent.Left = (theirCurrent.Left != null ? new Node(theirCurrent.Left.Item, theirCurrent.Left.IsRed) : null);
                     theirCurrent = theirCurrent.Left;
                     myCurrent = myCurrent.Left;
                 }
@@ -126,7 +125,7 @@ namespace System.Collections.Generic
                     Node myRight = null;
                     if (theirRight != null)
                     {
-                        myRight = new SortedSet<T>.Node(theirRight.Item, theirRight.IsRed);
+                        myRight = new Node(theirRight.Item, theirRight.IsRed);
                     }
                     myCurrent.Right = myRight;
 
@@ -134,12 +133,12 @@ namespace System.Collections.Generic
                     {
                         theirStack.Push(theirRight);
                         myStack.Push(myRight);
-                        myRight.Left = (theirRight.Left != null ? new SortedSet<T>.Node(theirRight.Left.Item, theirRight.Left.IsRed) : null);
+                        myRight.Left = (theirRight.Left != null ? new Node(theirRight.Left.Item, theirRight.Left.IsRed) : null);
                         theirRight = theirRight.Left;
                         myRight = myRight.Left;
                     }
                 }
-                _count = baseSortedSet._count;
+                _count = sortedSet._count;
             }
             else
             {
@@ -221,7 +220,7 @@ namespace System.Collections.Generic
             // See page 264 of "Introduction to algorithms" by Thomas H. Cormen
             // note: this should be logbase2, but since the stack grows itself, we
             // don't want the extra cost
-            Stack<Node> stack = new Stack<Node>(2 * (int)(SortedSet<T>.Log2(Count + 1)));
+            Stack<Node> stack = new Stack<Node>(2 * (int)(Log2(Count + 1)));
             Node current = _root;
             while (current != null)
             {
@@ -939,7 +938,7 @@ namespace System.Collections.Generic
                 return false;
             }
 
-            if (AreComparersEqual(set1, set2))
+            if (set1.HasEqualComparer(set2))
             {
                 if (set1.Count != set2.Count)
                     return false;
@@ -968,10 +967,11 @@ namespace System.Collections.Generic
 
         }
 
-        // This is a little frustrating because we can't support more sorted structures.
-        private static bool AreComparersEqual(SortedSet<T> set1, SortedSet<T> set2)
+        private bool HasEqualComparer(SortedSet<T> other)
         {
-            return set1.Comparer.Equals(set2.Comparer);
+            // Both comparers will most commonly be the default comparer.
+            // Avoid a virtual method call to Equals() in that case.
+            return Comparer == other.Comparer || Comparer.Equals(other.Comparer);
         }
 
         private static void Split4Node(Node node)
@@ -1007,7 +1007,7 @@ namespace System.Collections.Generic
                 return;
             }
 
-            if (s != null && t == null && AreComparersEqual(this, s) && (s.Count > this.Count / 2))
+            if (s != null && t == null && HasEqualComparer(s) && (s.Count > this.Count / 2))
             {
                 // This actually hurts if N is much greater than M. The /2 is arbitrary.
                 // First do a merge sort to an array.
@@ -1051,7 +1051,7 @@ namespace System.Collections.Generic
                 // safe to gc the root, we  have all the elements
                 _root = null;
 
-                _root = SortedSet<T>.ConstructRootFromSortedArray(merged, 0, c - 1, null);
+                _root = ConstructRootFromSortedArray(merged, 0, c - 1, null);
                 _count = c;
                 _version++;
             }
@@ -1146,7 +1146,7 @@ namespace System.Collections.Generic
             if (t != null)
                 VersionCheck();
             // only let this happen if i am also a SortedSet, not a SubSet
-            if (s != null && t == null && AreComparersEqual(this, s))
+            if (s != null && t == null && HasEqualComparer(s))
             {
                 // first do a merge sort to an array.
                 T[] merged = new T[this.Count];
@@ -1181,7 +1181,7 @@ namespace System.Collections.Generic
                 // safe to gc the root, we  have all the elements
                 _root = null;
 
-                _root = SortedSet<T>.ConstructRootFromSortedArray(merged, 0, c - 1, null);
+                _root = ConstructRootFromSortedArray(merged, 0, c - 1, null);
                 _count = c;
                 _version++;
             }
@@ -1228,7 +1228,7 @@ namespace System.Collections.Generic
 
             SortedSet<T> asSorted = other as SortedSet<T>;
 
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 // outside range, no point doing anything
                 if (!(_comparer.Compare(asSorted.Max, Min) < 0 || _comparer.Compare(asSorted.Min, Max) > 0))
@@ -1272,7 +1272,7 @@ namespace System.Collections.Generic
 
             SortedSet<T> asSorted = other as SortedSet<T>;
 
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 SymmetricExceptWithSameComparer(asSorted);
             }
@@ -1288,7 +1288,7 @@ namespace System.Collections.Generic
         private void SymmetricExceptWithSameComparer(SortedSet<T> other)
         {
             Debug.Assert(other != null);
-            Debug.Assert(AreComparersEqual(this, other));
+            Debug.Assert(HasEqualComparer(other));
 
             foreach (T item in other)
             {
@@ -1334,7 +1334,7 @@ namespace System.Collections.Generic
             }
 
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 if (Count > asSorted.Count)
                     return false;
@@ -1376,7 +1376,7 @@ namespace System.Collections.Generic
 
             // another for sorted sets with the same comparer
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 if (Count >= asSorted.Count)
                     return false;
@@ -1402,7 +1402,7 @@ namespace System.Collections.Generic
             // do it one way for HashSets
             // another for sorted sets with the same comparer
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 if (Count < asSorted.Count)
                     return false;
@@ -1434,7 +1434,7 @@ namespace System.Collections.Generic
 
             // another way for sorted sets
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(asSorted, this))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 if (asSorted.Count >= Count)
                     return false;
@@ -1463,7 +1463,7 @@ namespace System.Collections.Generic
             }
 
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(this, asSorted))
+            if (asSorted != null && HasEqualComparer(asSorted))
             {
                 Enumerator mine = GetEnumerator();
                 Enumerator theirs = asSorted.GetEnumerator();
@@ -1501,7 +1501,7 @@ namespace System.Collections.Generic
                 return false;
 
             SortedSet<T> asSorted = other as SortedSet<T>;
-            if (asSorted != null && AreComparersEqual(this, asSorted) && (_comparer.Compare(Min, asSorted.Max) > 0 || _comparer.Compare(Max, asSorted.Min) < 0))
+            if (asSorted != null && HasEqualComparer(asSorted) && (_comparer.Compare(Min, asSorted.Max) > 0 || _comparer.Compare(Max, asSorted.Min) < 0))
             {
                 return false;
             }
@@ -1802,13 +1802,13 @@ namespace System.Collections.Generic
         [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
-            private static SortedSet<T>.Node s_dummyNode = new SortedSet<T>.Node(default(T));
+            private static Node s_dummyNode = new Node(default(T));
 
             private SortedSet<T> _tree;
             private int _version;
 
-            private Stack<SortedSet<T>.Node> _stack;
-            private SortedSet<T>.Node _current;
+            private Stack<Node> _stack;
+            private Node _current;
 
             private bool _reverse;
             private SerializationInfo _siInfo;
@@ -1821,7 +1821,7 @@ namespace System.Collections.Generic
                 _version = _tree._version;
 
                 // 2lg(n + 1) is the maximum height
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(set.Count + 1));
+                _stack = new Stack<Node>(2 * (int)Log2(set.Count + 1));
                 _current = null;
                 _reverse = false;
 
@@ -1837,7 +1837,7 @@ namespace System.Collections.Generic
                 _version = _tree._version;
 
                 // 2lg(n + 1) is the maximum height
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(set.Count + 1));
+                _stack = new Stack<Node>(2 * (int)Log2(set.Count + 1));
                 _current = null;
                 _reverse = reverse;
 
@@ -1891,7 +1891,7 @@ namespace System.Collections.Generic
                 _version = _siInfo.GetInt32(EnumVersionName);
                 _reverse = _siInfo.GetBoolean(ReverseName);
                 bool EnumStarted = _siInfo.GetBoolean(EnumStartName);
-                _stack = new Stack<SortedSet<T>.Node>(2 * (int)SortedSet<T>.Log2(_tree.Count + 1));
+                _stack = new Stack<Node>(2 * (int)Log2(_tree.Count + 1));
                 _current = null;
                 if (EnumStarted)
                 {
@@ -1910,7 +1910,7 @@ namespace System.Collections.Generic
             private void Intialize()
             {
                 _current = null;
-                SortedSet<T>.Node node = _tree._root;
+                Node node = _tree._root;
                 Node next = null, other = null;
                 while (node != null)
                 {
@@ -1949,7 +1949,7 @@ namespace System.Collections.Generic
                 }
 
                 _current = _stack.Pop();
-                SortedSet<T>.Node node = (_reverse ? _current.Left : _current.Right);
+                Node node = (_reverse ? _current.Left : _current.Right);
                 Node next = null, other = null;
                 while (node != null)
                 {
