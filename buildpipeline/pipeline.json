@@ -292,7 +292,7 @@
             "Type": "build/product/",
             "Platform": "arm",
             "ConfigurationGroup": "Release",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -308,7 +308,7 @@
             "Type": "build/product/",
             "Platform": "arm64",
             "ConfigurationGroup": "Release",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -324,7 +324,7 @@
             "Type": "build/product/",
             "Platform": "x64",
             "ConfigurationGroup": "Release",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -341,7 +341,7 @@
             "Type": "build/product/",
             "Platform": "x86",
             "ConfigurationGroup": "Release",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -697,7 +697,7 @@
             "Type": "build/product/",
             "Platform": "arm",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -713,7 +713,7 @@
             "Type": "build/product/",
             "Platform": "arm64",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -729,7 +729,7 @@
             "Type": "build/product/",
             "Platform": "x64",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
@@ -746,7 +746,7 @@
             "Type": "build/product/",
             "Platform": "x86",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uap Vertical"
+            "SubType": "Uap"
           }
         },
         {
