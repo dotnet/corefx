@@ -556,14 +556,11 @@ namespace System.Net.Http
             {
                 await ConfigureRequest(request).ConfigureAwait(false);
 
-                if (DiagnosticsHandler.IsEnabled())
-                {
-                    response = await this.diagnosticsPipeline.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    response = await this.handlerToFilter.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                }
+                Task<HttpResponseMessage> responseTask = DiagnosticsHandler.IsEnabled() ? 
+                    this.diagnosticsPipeline.SendAsync(request, cancellationToken) :
+                    this.handlerToFilter.SendAsync(request, cancellationToken);
+
+                response = await responseTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {

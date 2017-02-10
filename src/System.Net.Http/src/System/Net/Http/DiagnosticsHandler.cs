@@ -24,21 +24,25 @@ namespace System.Net.Http
 
         internal static bool IsEnabled()
         {
-            return s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteName);
+            return s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteName);
         }
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            //HttpClientHandler is responsible to call DelegatingHandler.IsEnabled() before forwarding request to it.
-            //so this code will never be reached if RequestWriteName is not enabled
-            Guid loggingRequestId = LogHttpRequest(request);
+            //HttpClientHandler is responsible to call DelegatingHandler.IsEnabled() before forwarding request here.
+            //This code will not be reached if ResponseWriteName is not enabled, unless consumer unsubscribes
+            //from DiagnosticListener right after the check. So some requests happening right after subscription starts
+            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instumented
+
+            Guid loggingRequestId = Guid.NewGuid();
+            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteName))
+            {
+                LogHttpRequest(request,  loggingRequestId);
+            }
             Task<HttpResponseMessage> responseTask = base.SendAsync(request, cancellationToken);
 
-            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteName))
-            {
-                LogHttpResponse(responseTask, loggingRequestId);
-            }
+            LogHttpResponse(responseTask, loggingRequestId);
             return responseTask;
         }
 
@@ -47,9 +51,8 @@ namespace System.Net.Http
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(DiagnosticsHandlerLoggingStrings.DiagnosticListenerName);
 
-        private static Guid LogHttpRequest(HttpRequestMessage request)
+        private static void LogHttpRequest(HttpRequestMessage request, Guid loggingRequestId)
         {
-            Guid loggingRequestId = Guid.NewGuid();
             long timestamp = Stopwatch.GetTimestamp();
 
             s_diagnosticListener.Write(
@@ -61,8 +64,6 @@ namespace System.Net.Http
                     Timestamp = timestamp
                 }
             );
-
-            return loggingRequestId;
         }
 
         private static void LogHttpResponse(Task<HttpResponseMessage> responseTask, Guid loggingRequestId)
@@ -77,7 +78,7 @@ namespace System.Net.Http
                         new
                         {
                             Response = t.Status == TaskStatus.RanToCompletion ? t.Result : null,
-                            LoggingRequestId = s,
+                            LoggingRequestId = (Guid)s,
                             TimeStamp = timestamp,
                             Exception = t.Exception,
                             RequestTaskStatus = t.Status
