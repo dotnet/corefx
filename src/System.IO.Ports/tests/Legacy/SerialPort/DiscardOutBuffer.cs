@@ -112,8 +112,6 @@ public class DiscardOutBuffer : PortsTest
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
-            int origBytesToRead;
-
             Debug.WriteLine("Verifying Discard method after input buffer has been filled");
 
             com1.Open();
@@ -126,7 +124,7 @@ public class DiscardOutBuffer : PortsTest
             WaitForTxBufferToLoad(com2, DEFAULT_STRING.Length);
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
-            origBytesToRead = com1.BytesToRead;
+            int origBytesToRead = com1.BytesToRead;
 
             WaitForTxBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
