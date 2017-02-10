@@ -48,7 +48,7 @@ namespace System.ComponentModel.Tests
         public void ConvertFrom_String()
         {
             CultureInfo c;
-            
+
             c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture,
                 String.Empty);
             Assert.Equal(CultureInfo.InvariantCulture, c);
