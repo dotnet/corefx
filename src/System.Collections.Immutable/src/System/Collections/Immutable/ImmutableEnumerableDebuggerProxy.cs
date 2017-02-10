@@ -9,6 +9,23 @@ using System.Linq;
 namespace System.Collections.Immutable
 {
     /// <summary>
+    /// Displays immutable dictionaries in the debugger.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the dictionary's keys.</typeparam>
+    /// <typeparam name="TValue">The type of the dictionary's values.</typeparam>
+    internal class ImmutableDictionaryDebuggerProxy<TKey, TValue> : ImmutableEnumerableDebuggerProxy<KeyValuePair<TKey, TValue>>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImmutableDictionaryDebuggerProxy{TKey, TValue}"/> class.
+        /// </summary>
+        /// <param name="dictionary">The enumerable to show in the debugger.</param>
+        public ImmutableDictionaryDebuggerProxy(IImmutableDictionary<TKey, TValue> dictionary)
+            : base(enumerable: dictionary)
+        {
+        }
+    }
+
+    /// <summary>
     /// Displays immutable enumerables in the debugger.
     /// </summary>
     /// <typeparam name="T">The element type of the enumerable.</typeparam>
@@ -16,7 +33,7 @@ namespace System.Collections.Immutable
     /// This class should only be used with immutable enumerables, since it
     /// caches the enumerable into an array for display in the debugger.
     /// </remarks>
-    internal sealed class ImmutableEnumerableDebuggerProxy<T>
+    internal class ImmutableEnumerableDebuggerProxy<T>
     {
         /// <summary>
         /// The enumerable to show to the debugger.
