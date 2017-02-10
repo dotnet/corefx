@@ -557,13 +557,10 @@ namespace System.Data.SqlClient.SNI
             const int receiveTimeOut = 1000;
 
             IPAddress address = null;
-            if (IPAddress.TryParse(browserHostname, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                browserHostname = GetFullyQualifiedDomainName(browserHostname);
-            }
+            IPAddress.TryParse(browserHostname, out address);
 
             byte[] responsePacket = null;
-            using (UdpClient client = new UdpClient(AddressFamily.InterNetwork))
+            using (UdpClient client = new UdpClient(address == null ? AddressFamily.InterNetwork : address.AddressFamily))
             {
                 Task<int> sendTask = client.SendAsync(requestPacket, requestPacket.Length, browserHostname, port);
                 Task<UdpReceiveResult> receiveTask = null;
