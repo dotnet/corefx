@@ -333,5 +333,35 @@ namespace System.Collections.Tests
         }
 #endif
         #endregion
+
+        #region TryGetValue
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_Contains()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(1);
+            T actualValue;
+            bool contains = set.TryGetValue(equalValue, out actualValue);
+            Assert.True(contains);
+            Assert.Equal(value, actualValue);
+            if (!typeof(T).IsValueType)
+            {
+                Assert.Same(value, actualValue);
+            }
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_NotContains()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(2);
+            T actualValue;
+            Assert.False(set.TryGetValue(equalValue, out actualValue));
+        }
+
+        #endregion
     }
 }
