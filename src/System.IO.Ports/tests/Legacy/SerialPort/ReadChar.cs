@@ -449,7 +449,8 @@ public class ReadChar : PortsTest
             TCSupport.WaitForExpected(() => com1.BytesToRead, numBytes,
                 5000, "Err_91818aheid BytesToRead");
 
-            Assert.Throws<TimeoutException>(() => com1.ReadChar());
+            // We expect this to fail, because it can't read a surrogate
+            Assert.Throws<ArgumentException>(() => com1.ReadChar());
 
             int result = com1.Read(charRcvBuffer, 0, 2);
 
