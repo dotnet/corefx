@@ -280,7 +280,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "arm",
             "PB_BuildArguments": "-framework=uap -buildArch=arm -Release -- /p:SignType=real /p:RuntimeOS=win10",
@@ -296,23 +296,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
-          "Parameters": {
-            "PB_Platform": "arm64",
-            "PB_BuildArguments": "-framework=uap -buildArch=arm64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
-            "PB_CreateHelixArguments": "/t:CloudBuild /p:ArchGroup=arm64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"BuildMoniker=none\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:FilterToOSGroup=Windows_NT"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Release",
-            "SubType": "Uap"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x64",
             "PB_BuildArguments": "-framework=uap -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
@@ -328,7 +312,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x86",
             "PB_TargetQueue": "Windows.10.Amd64",
@@ -345,7 +329,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "arm",
             "PB_BuildArguments": "-framework=uapaot -buildArch=arm -Release -- /p:SignType=real /p:RuntimeOS=win10",
@@ -357,27 +341,11 @@
             "Type": "build/product/",
             "Platform": "arm",
             "ConfigurationGroup": "Release",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
-          "Parameters": {
-            "PB_Platform": "arm64",
-            "PB_BuildArguments": "-framework=uapaot -buildArch=arm64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
-            "PB_CreateHelixArguments": "/t:CloudBuild /p:ArchGroup=arm64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"BuildMoniker=none\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:FilterToOSGroup=Windows_NT"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Release",
-            "SubType": "Uapaot Vertical"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x64",
             "PB_BuildArguments": "-framework=uapaot -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
@@ -389,11 +357,11 @@
             "Type": "build/product/",
             "Platform": "x64",
             "ConfigurationGroup": "Release",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x86",
             "PB_TargetQueue": "Windows.10.Amd64",
@@ -406,7 +374,7 @@
             "Type": "build/product/",
             "Platform": "x86",
             "ConfigurationGroup": "Release",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         }
       ]
@@ -685,7 +653,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "arm",
             "PB_BuildArguments": "-framework:uap -buildArch=arm -Debug -- /p:SignType=real /p:RuntimeOS=win10",
@@ -701,23 +669,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
-          "Parameters": {
-            "PB_Platform": "arm64",
-            "PB_BuildArguments": "-framework:uap -buildArch=arm64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
-            "PB_CreateHelixArguments": "/t:CloudBuild /p:ArchGroup=arm64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"BuildMoniker=none\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:FilterToOSGroup=Windows_NT"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Debug",
-            "SubType": "Uap"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x64",
             "PB_BuildArguments": "-framework:uap -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
@@ -733,7 +685,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x86",
             "PB_TargetQueue": "Windows.10.Amd64",
@@ -750,7 +702,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "arm",
             "PB_BuildArguments": "-framework:uapaot -buildArch=arm -Debug -- /p:SignType=real /p:RuntimeOS=win10",
@@ -762,27 +714,11 @@
             "Type": "build/product/",
             "Platform": "arm",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
-          "Parameters": {
-            "PB_Platform": "arm64",
-            "PB_BuildArguments": "-framework:uapaot -buildArch=arm64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
-            "PB_SyncArguments": "-p -- /p:ArchGroup=arm64 /p:RuntimeOS=win10",
-            "PB_CreateHelixArguments": "/t:CloudBuild /p:ArchGroup=arm64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"BuildMoniker=none\" /p:\"TestProduct=corefx\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Windows_NT\" /p:FilterToOSGroup=Windows_NT"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64",
-            "ConfigurationGroup": "Debug",
-            "SubType": "Uapaot Vertical"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x64",
             "PB_BuildArguments": "-framework:uapaot -buildArch=x64 -Debug -- /p:SignType=real /p:RuntimeOS=win10",
@@ -794,11 +730,11 @@
             "Type": "build/product/",
             "Platform": "x64",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UWP",
+          "Name": "DotNet-CoreFx-Trusted-Windows-UAP",
           "Parameters": {
             "PB_Platform": "x86",
             "PB_TargetQueue": "Windows.10.Amd64",
@@ -811,7 +747,7 @@
             "Type": "build/product/",
             "Platform": "x86",
             "ConfigurationGroup": "Debug",
-            "SubType": "Uapaot Vertical"
+            "SubType": "Uapaot"
           }
         }
       ]
