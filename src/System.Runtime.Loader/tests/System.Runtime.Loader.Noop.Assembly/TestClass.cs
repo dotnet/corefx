@@ -25,6 +25,12 @@ namespace System.Runtime.Loader.Tests
             
             // Define "Assembly LoadStaticAssembly(string)" method that will load a static assembly
             MethodBuilder methodBuilder = typeBuilder.DefineMethod("LoadStaticAssembly", MethodAttributes.Public|MethodAttributes.Static, typeof(Assembly), new Type[]{typeof(string)});
+            
+            // Ensure that this method is not going to be inlined or optimized out by the JIT compiler.
+            // Otherwise, we could get incorrect load context (of RefEmitLoadContextTest assembly that this
+            // loaded in default context) of the caller.
+            methodBuilder.SetImplementationFlags(MethodImplAttributes.NoInlining|MethodImplAttributes.NoOptimization);
+
             ILGenerator ilGenerator = methodBuilder.GetILGenerator();
 
             // Generate the following code:
