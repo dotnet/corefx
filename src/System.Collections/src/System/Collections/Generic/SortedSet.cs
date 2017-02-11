@@ -290,6 +290,7 @@ namespace System.Collections.Generic
                 {
                     Threading.Interlocked.CompareExchange(ref _syncRoot, new object(), null);
                 }
+
                 return _syncRoot;
             }
         }
@@ -298,10 +299,10 @@ namespace System.Collections.Generic
 
         #region Subclass helpers
 
-        // virtual function for subclass that needs to update count
+        // Virtual function for TreeSubSet, which may need to update its count.
         internal virtual void VersionCheck() { }
 
-        // virtual function for subclass that needs to do range checks
+        // Virtual function for TreeSubSet, which may need to do range checks.
         internal virtual bool IsWithinRange(T item) => true;
 
         #endregion
@@ -316,7 +317,7 @@ namespace System.Collections.Generic
         {
             if (_root == null)
             {
-                // empty tree
+                // The tree is empty and this is the first item.
                 _root = new Node(item, isRed: false);
                 _count = 1;
                 _version++;
