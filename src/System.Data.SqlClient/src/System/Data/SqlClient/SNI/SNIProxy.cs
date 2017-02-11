@@ -273,7 +273,7 @@ namespace System.Data.SqlClient.SNI
         {
             string serverNameWithOutProtocol = null;
             if (fullServerName.Length > protocolHeader.Length &&
-                String.Compare(fullServerName, 0, protocolHeader, 0, tcpHeader.Length, true) == 0)
+                String.Compare(fullServerName, 0, protocolHeader, 0, protocolHeader.Length, true) == 0)
             {
                 serverNameWithOutProtocol = fullServerName.Substring(protocolHeader.Length, fullServerName.Length - protocolHeader.Length);
             }
