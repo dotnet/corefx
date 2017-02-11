@@ -269,6 +269,18 @@ namespace System.Data.SqlClient.SNI
             packet.Reset();
         }
 
+        private static string GetServerNameWithOutProtocol(string fullServerName, string protocolHeader)
+        {
+            string serverNameWithOutProtocol = null;
+            if (fullServerName.Length > protocolHeader.Length &&
+                String.Compare(fullServerName, 0, protocolHeader, 0, tcpHeader.Length, true) == 0)
+            {
+                serverNameWithOutProtocol = fullServerName.Substring(protocolHeader.Length, fullServerName.Length - protocolHeader.Length);
+            }
+
+            return serverNameWithOutProtocol;
+        }
+
         /// <summary>
         /// Create a SNI connection handle
         /// </summary>
@@ -285,28 +297,26 @@ namespace System.Data.SqlClient.SNI
         public SNIHandle CreateConnectionHandle(object callbackObject, string fullServerName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool parallel, bool isIntegratedSecurity)
         {
             instanceName = new byte[1];
-            instanceName[0] = 0;
 
             SNIHandle sniHandle = null;
-            if (!fullServerName.Contains(":"))
+            if (fullServerName.IndexOf(':') == -1)
             {
                 // default to using tcp if no protocol is provided
                 sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
             }
             else
             {
+                string serverNameWithOutProtocol = null;
+
                 // when tcp protocol is specified
-                if (fullServerName.ToLower().StartsWith(TdsEnums.TCP + ":"))
+                if ((serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, TdsEnums.TCP + ":")) != null)
                 {
-                    int protocolHeaderLength = TdsEnums.TCP.Length + 1; // including ':'
-                    string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
                     sniHandle = CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
                 }
                 // when np protocol is specified
-                else if (fullServerName.ToLower().StartsWith(TdsEnums.NP + ":"))
+                else if ((serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, TdsEnums.NP + ":\\\\")) != null ||
+                         (serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, "\\\\")) != null)
                 {
-                    int protocolHeaderLength = TdsEnums.NP.Length + 1; // including ':'
-                    string serverNameWithOutProtocol = fullServerName.Substring(protocolHeaderLength, fullServerName.Length - protocolHeaderLength);
                     sniHandle = CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
                 }
                 // possibly error case
