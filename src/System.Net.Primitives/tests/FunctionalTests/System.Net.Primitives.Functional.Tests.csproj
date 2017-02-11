@@ -27,8 +27,6 @@
     <Compile Include="IPEndPointTest.cs" />
     <Compile Include="NetworkCredentialTest.cs" />
     <Compile Include="SocketAddressTest.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="LoggingTest.cs" />
     <Compile Include="SerializationTest.cs" />
     <Compile Include="RequestCachePolicyTest.cs" />

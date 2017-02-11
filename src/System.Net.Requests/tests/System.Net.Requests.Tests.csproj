@@ -37,7 +37,7 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+  <ItemGroup>
     <Compile Include="AuthorizationTest.cs" />
     <Compile Include="AuthenticationManagerTest.cs" />
     <Compile Include="GlobalProxySelectionTest.cs" />
