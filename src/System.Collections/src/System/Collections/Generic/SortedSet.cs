@@ -97,36 +97,35 @@ namespace System.Collections.Generic
             SortedSet<T> sortedSet = collection as SortedSet<T>;
             if (sortedSet != null && !(sortedSet is TreeSubSet) && HasEqualComparer(sortedSet))
             {
-                if (sortedSet.Count == 0)
+                if (sortedSet.Count > 0)
                 {
-                    return;
+                    Debug.Assert(sortedSet._root != null);
+                    _count = sortedSet._count;
+                    _root = sortedSet._root.DeepClone(_count);
                 }
-
-                Debug.Assert(sortedSet._root != null);
-                _count = sortedSet._count;
-                _root = sortedSet._root.DeepClone(_count);
+                return;
             }
-            else
+            
+            int count;
+            T[] elements = EnumerableHelpers.ToArray(collection, out count);
+            if (count > 0)
             {
-                int count;
-                T[] els = EnumerableHelpers.ToArray(collection, out count);
-                if (count > 0)
-                {
-                    comparer = _comparer; // If comparer is null, sets it to Comparer<T>.Default
-                    Array.Sort(els, 0, count, comparer);
-                    int index = 1;
-                    for (int i = 1; i < count; i++)
-                    {
-                        if (comparer.Compare(els[i], els[i - 1]) != 0)
-                        {
-                            els[index++] = els[i];
-                        }
-                    }
-                    count = index;
+                Array.Sort(elements, 0, count, comparer);
 
-                    _root = ConstructRootFromSortedArray(els, 0, count - 1, null);
-                    _count = count;
+                // Overwrite duplicates while shifting the distinct elements towards
+                // the front of the array.
+                int index = 1;
+                for (int i = 1; i < count; i++)
+                {
+                    if (comparer.Compare(elements[i], elements[i - 1]) != 0)
+                    {
+                        elements[index++] = elements[i];
+                    }
                 }
+
+                count = index;
+                _root = ConstructRootFromSortedArray(elements, 0, count - 1, null);
+                _count = count;
             }
         }
 
@@ -144,7 +143,9 @@ namespace System.Collections.Generic
             foreach (T item in collection)
             {
                 if (!Contains(item))
+                {
                     Add(item);
+                }
             }
         }
 
@@ -155,7 +156,9 @@ namespace System.Collections.Generic
             foreach (T item in collection)
             {
                 if (!(_comparer.Compare(item, min) < 0 || _comparer.Compare(item, max) > 0) && Contains(item))
+                {
                     Remove(item);
+                }
             }
         }
 
@@ -168,13 +171,18 @@ namespace System.Collections.Generic
                     return false;
                 }
             }
+
             return true;
         }
 
-        // Do a in order walk on tree and calls the delegate for each node.
-        // If the action delegate returns false, stop the walk.
-        // Return true if the entire tree has been walked.
-        // Otherwise returns false.
+        /// <summary>
+        /// Does an inorder tree walk and calls the delegate for each node.
+        /// </summary>
+        /// <param name="action">
+        /// The delegate to invoke on each node.
+        /// If the delegate returns <c>false</c>, the walk is stopped.
+        /// </param>
+        /// <returns><c>true</c> if the entire tree has been walked; otherwise, <c>false</c>.</returns>
         internal virtual bool InOrderTreeWalk(TreeWalkPredicate<T> action)
         {
             if (_root == null)
@@ -182,18 +190,21 @@ namespace System.Collections.Generic
                 return true;
             }
 
-            // The maximum height of a red-black tree is 2*lg(n+1).
+            // The maximum height of a red-black tree is 2 * log2(n+1).
             // See page 264 of "Introduction to algorithms" by Thomas H. Cormen
-            // note: this should be logbase2, but since the stack grows itself, we
-            // don't want the extra cost
-            Stack<Node> stack = new Stack<Node>(2 * (int)(Log2(Count + 1)));
+            // Note: It's not strictly necessary to provide the stack capacity, but we don't
+            // want the stack to unnecessarily allocate arrays as it grows.
+
+            var stack = new Stack<Node>(2 * (int)(Log2(Count + 1)));
             Node current = _root;
+
             while (current != null)
             {
                 stack.Push(current);
                 current = current.Left;
             }
-            while (stack.Count != 0)
+
+            while (stack.Count > 0)
             {
                 current = stack.Pop();
                 if (!action(current))
@@ -208,14 +219,18 @@ namespace System.Collections.Generic
                     node = node.Left;
                 }
             }
+
             return true;
         }
 
-        // Do a left to right breadth first walk on tree and
-        // calls the delegate for each node.
-        // If the action delegate returns false, stop the walk.
-        // Return true if the entire tree has been walked.
-        // Otherwise returns false.
+        /// <summary>
+        /// Does a left-to-right breadth-first tree walk and calls the delegate for each node.
+        /// </summary>
+        /// <param name="action">
+        /// The delegate to invoke on each node.
+        /// If the delegate returns <c>false</c>, the walk is stopped.
+        /// </param>
+        /// <returns><c>true</c> if the entire tree has been walked; otherwise, <c>false</c>.</returns>
         internal virtual bool BreadthFirstTreeWalk(TreeWalkPredicate<T> action)
         {
             if (_root == null)
@@ -223,10 +238,10 @@ namespace System.Collections.Generic
                 return true;
             }
 
-            Queue<Node> processQueue = new Queue<Node>();
+            var processQueue = new Queue<Node>();
             processQueue.Enqueue(_root);
-            Node current;
 
+            Node current;
             while (processQueue.Count != 0)
             {
                 current = processQueue.Dequeue();
@@ -234,6 +249,7 @@ namespace System.Collections.Generic
                 {
                     return false;
                 }
+
                 if (current.Left != null)
                 {
                     processQueue.Enqueue(current.Left);
@@ -243,8 +259,10 @@ namespace System.Collections.Generic
                     processQueue.Enqueue(current.Right);
                 }
             }
+
             return true;
         }
+
         #endregion
 
         #region Properties
@@ -1766,8 +1784,9 @@ namespace System.Collections.Generic
             public Node DeepClone(int count)
             {
                 Debug.Assert(count == GetCount());
+                
+                // Breadth-first traversal to recreate nodes, preorder traversal to replicate nodes.
 
-                // Do a breadth-first preorder traversal to clone nodes.
                 var originalNodes = new Stack<Node>(2 * Log2(count) + 2);
                 var newNodes = new Stack<Node>(2 * Log2(count) + 2);
                 Node newRoot = ShallowClone();
