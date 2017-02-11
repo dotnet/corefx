@@ -6,6 +6,7 @@
     <ItemGroup Condition="'$(IsTestProject)'=='true'">
       <TargetingPackExclusions Include="System.Private.CoreLib" />
       <TargetingPackExclusions Include="System.Runtime.WindowsRuntime.UI.Xaml" /> <!-- Harmless, but causes PRI targets to run -->
+      <TargetingPackExclusions Include="@(ReferenceFromRuntime)"/>
 
       <!-- Whitelisted runtime assemblies that are OK to reference. -->
       <ReferenceFromRuntime Include="xunit.core" />
@@ -24,8 +25,6 @@
       <Reference Include="%(TargetingPackItems.Filename)" Exclude="@(TargetingPackExclusions)"> <!-- TODO: System.Private.CoreLib shouldn't even be in the targeting pack. -->
         <Private>false</Private>
       </Reference>
-      <ReferencePath Include="@(ReferenceFromRuntime->'$(RuntimePath)%(Identity).dll')" />
     </ItemGroup>
   </Target>
-
 </Project>

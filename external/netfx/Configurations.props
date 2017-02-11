@@ -9,7 +9,9 @@
       net461;
       net462;
       net463;
+      netfx;
       netcoreapp;
+      uap;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

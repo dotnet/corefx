@@ -2,31 +2,28 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
+    <BinPlaceRef>true</BinPlaceRef>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
     <NugetRuntimeIdentifier>None</NugetRuntimeIdentifier>
-    <OutputPath>$(RefRootPath)/$(TargetGroup)</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'net463'">
+  <PropertyGroup Condition="'$(NuGetTargetMoniker)' == '.NETFramework,Version=v4.6.3'">
     <!-- Missing 4.6.3 targeting pack, use 462 for now -->
     <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.6.2</TargetingPackNugetPackageId>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <!-- For NETCoreApp we need the net461 targeting pack to generate facades -->
+  <PropertyGroup Condition="!$(NuGetTargetMoniker.StartsWith('.NETFramework'))">
+    <!-- For things not .NETFramework we need the net461 targeting pack to generate facades -->
     <NuGetTargetMoniker>.NETFramework,Version=v4.6.1</NuGetTargetMoniker>
     <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.6.1</TargetingPackNugetPackageId>
-    <OutputPath>$(NetFxRefPath)</OutputPath>
+    <ForShims>true</ForShims>
   </PropertyGroup>
-  <!-- Filter the targeting pack to just these assemblies which we need netcoreapp shims for -->
   <ItemGroup>
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
-    <TargetingPackReference Include="System.Core" />
-    <TargetingPackReference Include="System.Drawing" />
-    <TargetingPackReference Include="System.Numerics" />
-    <TargetingPackReference Include="System.Runtime.Serialization" />
-    <TargetingPackReference Include="System.Web" />
-    <TargetingPackReference Include="System.Xml" />
-    <TargetingPackReference Include="System.Xml.Linq" />
+    <BinplaceConfiguration Include="$(Configuration)">
+      <RefPath Condition="'$(ForShims)' != 'true'">$(RefPath)</RefPath>
+      <RefPath Condition="'$(ForShims)' == 'true'">$(NetFxRefPath)</RefPath>
+    </BinplaceConfiguration>
+    
+    <FileToExclude Include="System.EnterpriseServices.Thunk" />
+    <FileToExclude Include="System.EnterpriseServices.Wrapper" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

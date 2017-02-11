@@ -47,15 +47,11 @@
 
   <Import Project="$(ToolRuntimePath)BuildVersion.targets" Condition="Exists('$(ToolRuntimePath)BuildVersion.targets')" />
 
-  <PropertyGroup>
-    <GenFacadesArgs>-ignoreBuildAndRevisionMismatch</GenFacadesArgs>
-  </PropertyGroup>
-
   <!-- Import Build tools common props file where repo-independent properties are found -->
   <Import Project="$(ToolsDir)Build.Common.props" Condition="Exists('$(ToolsDir)Build.Common.props')" />
 
   <PropertyGroup>
-    <BuildToolsTargets45 Condition="'$(OsEnvironment)'=='Windows_NT'">true</BuildToolsTargets45>
+    <BuildToolsTargetsDesktop Condition="'$(RunningOnCore)' != 'true'">true</BuildToolsTargetsDesktop>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)targetingpacks.props" />
@@ -150,7 +146,7 @@
       See Documentation/coding-guidelines/project-guidelines.md for more details on our configurations.
     -->
     <TargetGroup Condition="'$(TargetGroup)' == ''">netcoreapp</TargetGroup>
-    <OSGroup Condition="'$(OSGroup)' == ''">$(OSEnvironment)</OSGroup>
+    <OSGroup Condition="'$(OSGroup)' == ''">$(DefaultOSGroup)</OSGroup>
     <ConfigurationGroup Condition="'$(ConfigurationGroup)' == ''">Debug</ConfigurationGroup>
     <ArchGroup Condition="'$(ArchGroup)' == ''">x64</ArchGroup>
 
@@ -249,13 +245,15 @@
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
     <RefRootPath>$(BinDir)ref/</RefRootPath>
     <BuildConfigurationRefPath>$(RefRootPath)$(_bc_TargetGroup)/</BuildConfigurationRefPath>
-    <!-- RefPath should be based off Configuration, not BuildConfiguration
-         IE: $(RefRootPath)/$(TargetGroup)
-         but we cannot change this until we build ref folders for more than just the Building targetgroup -->
-    <RefPath>$(RefRootPath)$(_bc_TargetGroup)/</RefPath>
+    <BuildConfigurationRefPath Condition="$(_bc_TargetGroup.EndsWith('aot'))">$(RefRootPath)$(_bc_TargetGroup.TrimEnd('aot'))/</BuildConfigurationRefPath>
+    <RefPath>$(RefRootPath)$(TargetGroup)/</RefPath>
+    <RefPath Condition="$(TargetGroup.EndsWith('aot'))">$(RefRootPath)$(TargetGroup.TrimEnd('aot'))/</RefPath>
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
 
+    <!-- project file to use when resolving ReferenceFromRuntime items -->
+    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(ProjectDir)\external\runtime\runtime.depproj</RuntimeProjectFile>
+    
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(BinDir)netcoreapp\pkg\ref</NETCoreAppPackageRefPath>
     <NETCoreAppPackageRuntimePath>$(BinDir)netcoreapp\pkg\lib</NETCoreAppPackageRuntimePath>
