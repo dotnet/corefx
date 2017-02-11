@@ -5,6 +5,7 @@
 // Code adapted from https://blogs.msdn.microsoft.com/haibo_luo/2010/04/19/ilvisualizer-2010-solution
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -12,40 +13,30 @@ namespace System.Linq.Expressions.Tests
 {
     public interface IILStringCollector
     {
-        void Process(ILInstruction ilInstruction, string operandString);
+        void Process(ILInstruction ilInstruction, string operandString, Dictionary<int, int> targetLabels);
     }
 
     public class ReadableILStringToTextWriter : IILStringCollector
     {
         protected readonly TextWriter _writer;
 
-        public ReadableILStringToTextWriter(TextWriter writer)
+        protected ReadableILStringToTextWriter(TextWriter writer)
         {
             _writer = writer;
         }
 
-        public virtual void Process(ILInstruction ilInstruction, string operandString)
+        public virtual void Process(ILInstruction ilInstruction, string operandString, Dictionary<int, int> targetLabels)
         {
-            _writer.WriteLine("IL_{0:x4}: {1,-10} {2}",
-                ilInstruction.Offset,
-                ilInstruction.OpCode.Name,
-                operandString);
-        }
-    }
-
-    public class RawILStringToTextWriter : ReadableILStringToTextWriter
-    {
-        public RawILStringToTextWriter(TextWriter writer)
-            : base(writer)
-        {
-        }
-
-        public override void Process(ILInstruction ilInstruction, string operandString)
-        {
-            _writer.WriteLine("IL_{0:x4}: {1,-4}| {2, -8}",
-                ilInstruction.Offset,
-                ilInstruction.OpCode.Value.ToString("x2"),
-                operandString);
+            if (targetLabels.TryGetValue(ilInstruction.Offset, out int label))
+            {
+                _writer.WriteLine(
+                    "Label_{0:x2}: {1,-10} {2}", label, ilInstruction.OpCode.Name, operandString);
+            }
+            else
+            {
+                _writer.WriteLine(
+                    "{0,-10} {1}", ilInstruction.OpCode.Name, operandString);
+            }
         }
     }
 
@@ -64,8 +55,7 @@ namespace System.Linq.Expressions.Tests
         {
             foreach (var e in exceptions)
             {
-                int startCount = 0;
-                if (!_startCounts.TryGetValue(e.StartAddress, out startCount))
+                if (!_startCounts.TryGetValue(e.StartAddress, out int startCount))
                 {
                     _startCounts.Add(e.StartAddress, startCount);
                 }
@@ -91,9 +81,7 @@ namespace System.Linq.Expressions.Tests
                         _startCatch.Add(c.StartAddress, c.Type);
                     }
 
-                    int endCount = 0;
-
-                    if (!_endCounts.TryGetValue(c.EndAddress, out endCount))
+                    if (!_endCounts.TryGetValue(c.EndAddress, out int endCount))
                     {
                         _endCounts.Add(c.EndAddress, endCount);
                     }
@@ -103,10 +91,9 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        public override void Process(ILInstruction instruction, string operandString)
+        public override void Process(ILInstruction instruction, string operandString, Dictionary<int, int> targetLabels)
         {
-            int endCount = 0;
-            if (_endCounts.TryGetValue(instruction.Offset, out endCount))
+            if (_endCounts.TryGetValue(instruction.Offset, out int endCount))
             {
                 for (var i = 0; i < endCount; i++)
                 {
@@ -115,8 +102,7 @@ namespace System.Linq.Expressions.Tests
                 }
             }
 
-            int startCount = 0;
-            if (_startCounts.TryGetValue(instruction.Offset, out startCount))
+            if (_startCounts.TryGetValue(instruction.Offset, out int startCount))
             {
                 for (var i = 0; i < startCount; i++)
                 {
@@ -126,8 +112,7 @@ namespace System.Linq.Expressions.Tests
                 }
             }
 
-            var t = default(Type);
-            if (_startCatch.TryGetValue(instruction.Offset, out t))
+            if (_startCatch.TryGetValue(instruction.Offset, out Type t))
             {
                 Dedent();
                 _writer.WriteLine(_indent + "}");
@@ -163,11 +148,10 @@ namespace System.Linq.Expressions.Tests
                 Indent();
             }
 
-            _writer.WriteLine(string.Format("{3}IL_{0:x4}: {1,-10} {2}",
-                instruction.Offset,
-                instruction.OpCode.Name,
-                operandString,
-                _indent));
+            _writer.WriteLine(
+                targetLabels.TryGetValue(instruction.Offset, out int label)
+                    ? $"{_indent}Label_{label:x2}: {instruction.OpCode.Name,-10} {operandString}"
+                    : $"{_indent}{instruction.OpCode.Name,-10} {operandString}");
         }
 
         public void Indent()
@@ -183,23 +167,23 @@ namespace System.Linq.Expressions.Tests
 
     public abstract class ILInstructionVisitor
     {
-        public virtual void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction) { }
-        public virtual void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction) { }
-        public virtual void VisitInlineIInstruction(InlineIInstruction inlineIInstruction) { }
-        public virtual void VisitInlineI8Instruction(InlineI8Instruction inlineI8Instruction) { }
-        public virtual void VisitInlineMethodInstruction(InlineMethodInstruction inlineMethodInstruction) { }
-        public virtual void VisitInlineNoneInstruction(InlineNoneInstruction inlineNoneInstruction) { }
-        public virtual void VisitInlineRInstruction(InlineRInstruction inlineRInstruction) { }
-        public virtual void VisitInlineSigInstruction(InlineSigInstruction inlineSigInstruction) { }
-        public virtual void VisitInlineStringInstruction(InlineStringInstruction inlineStringInstruction) { }
-        public virtual void VisitInlineSwitchInstruction(InlineSwitchInstruction inlineSwitchInstruction) { }
-        public virtual void VisitInlineTokInstruction(InlineTokInstruction inlineTokInstruction) { }
-        public virtual void VisitInlineTypeInstruction(InlineTypeInstruction inlineTypeInstruction) { }
-        public virtual void VisitInlineVarInstruction(InlineVarInstruction inlineVarInstruction) { }
-        public virtual void VisitShortInlineBrTargetInstruction(ShortInlineBrTargetInstruction shortInlineBrTargetInstruction) { }
-        public virtual void VisitShortInlineIInstruction(ShortInlineIInstruction shortInlineIInstruction) { }
-        public virtual void VisitShortInlineRInstruction(ShortInlineRInstruction shortInlineRInstruction) { }
-        public virtual void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction) { }
+        public virtual void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineIInstruction(InlineIInstruction inlineIInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineI8Instruction(InlineI8Instruction inlineI8Instruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineMethodInstruction(InlineMethodInstruction inlineMethodInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineNoneInstruction(InlineNoneInstruction inlineNoneInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineRInstruction(InlineRInstruction inlineRInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineSigInstruction(InlineSigInstruction inlineSigInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineStringInstruction(InlineStringInstruction inlineStringInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineSwitchInstruction(InlineSwitchInstruction inlineSwitchInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineTokInstruction(InlineTokInstruction inlineTokInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineTypeInstruction(InlineTypeInstruction inlineTypeInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitInlineVarInstruction(InlineVarInstruction inlineVarInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitShortInlineBrTargetInstruction(ShortInlineBrTargetInstruction shortInlineBrTargetInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitShortInlineIInstruction(ShortInlineIInstruction shortInlineIInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitShortInlineRInstruction(ShortInlineRInstruction shortInlineRInstruction, Dictionary<int, int> targetLabels) { }
+        public virtual void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction, Dictionary<int, int> targetLabels) { }
     }
 
     public class ReadableILStringVisitor : ILInstructionVisitor
@@ -212,18 +196,18 @@ namespace System.Linq.Expressions.Tests
         {
         }
 
-        public ReadableILStringVisitor(IILStringCollector collector, IFormatProvider formatProvider)
+        private ReadableILStringVisitor(IILStringCollector collector, IFormatProvider formatProvider)
         {
             this.formatProvider = formatProvider;
             this.collector = collector;
         }
 
-        public override void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction)
+        public override void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineBrTargetInstruction, formatProvider.Label(inlineBrTargetInstruction.TargetOffset));
+            collector.Process(inlineBrTargetInstruction, formatProvider.Label(inlineBrTargetInstruction.TargetOffset, targetLabels), targetLabels);
         }
 
-        public override void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction)
+        public override void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction, Dictionary<int, int> targetLabels)
         {
             string field;
             try
@@ -234,20 +218,20 @@ namespace System.Linq.Expressions.Tests
             {
                 field = "!" + ex.Message + "!";
             }
-            collector.Process(inlineFieldInstruction, field);
+            collector.Process(inlineFieldInstruction, field, targetLabels);
         }
 
-        public override void VisitInlineIInstruction(InlineIInstruction inlineIInstruction)
+        public override void VisitInlineIInstruction(InlineIInstruction inlineIInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineIInstruction, inlineIInstruction.Value.ToString());
+            collector.Process(inlineIInstruction, inlineIInstruction.Value.ToString(), targetLabels);
         }
 
-        public override void VisitInlineI8Instruction(InlineI8Instruction inlineI8Instruction)
+        public override void VisitInlineI8Instruction(InlineI8Instruction inlineI8Instruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineI8Instruction, inlineI8Instruction.Value.ToString());
+            collector.Process(inlineI8Instruction, inlineI8Instruction.Value.ToString(), targetLabels);
         }
 
-        public override void VisitInlineMethodInstruction(InlineMethodInstruction inlineMethodInstruction)
+        public override void VisitInlineMethodInstruction(InlineMethodInstruction inlineMethodInstruction, Dictionary<int, int> targetLabels)
         {
             string method;
             try
@@ -258,41 +242,41 @@ namespace System.Linq.Expressions.Tests
             {
                 method = "!" + ex.Message + "!";
             }
-            collector.Process(inlineMethodInstruction, method);
+            collector.Process(inlineMethodInstruction, method, targetLabels);
         }
 
-        public override void VisitInlineNoneInstruction(InlineNoneInstruction inlineNoneInstruction)
+        public override void VisitInlineNoneInstruction(InlineNoneInstruction inlineNoneInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineNoneInstruction, string.Empty);
+            collector.Process(inlineNoneInstruction, string.Empty, targetLabels);
         }
 
-        public override void VisitInlineRInstruction(InlineRInstruction inlineRInstruction)
+        public override void VisitInlineRInstruction(InlineRInstruction inlineRInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineRInstruction, inlineRInstruction.Value.ToString());
+            collector.Process(inlineRInstruction, inlineRInstruction.Value.ToString(CultureInfo.InvariantCulture), targetLabels);
         }
 
-        public override void VisitInlineSigInstruction(InlineSigInstruction inlineSigInstruction)
+        public override void VisitInlineSigInstruction(InlineSigInstruction inlineSigInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineSigInstruction, formatProvider.SigByteArrayToString(inlineSigInstruction.Signature));
+            collector.Process(inlineSigInstruction, formatProvider.SigByteArrayToString(inlineSigInstruction.Signature), targetLabels);
         }
 
-        public override void VisitInlineStringInstruction(InlineStringInstruction inlineStringInstruction)
+        public override void VisitInlineStringInstruction(InlineStringInstruction inlineStringInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineStringInstruction, formatProvider.EscapedString(inlineStringInstruction.String));
+            collector.Process(inlineStringInstruction, formatProvider.EscapedString(inlineStringInstruction.String), targetLabels);
         }
 
-        public override void VisitInlineSwitchInstruction(InlineSwitchInstruction inlineSwitchInstruction)
+        public override void VisitInlineSwitchInstruction(InlineSwitchInstruction inlineSwitchInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineSwitchInstruction, formatProvider.MultipleLabels(inlineSwitchInstruction.TargetOffsets));
+            collector.Process(inlineSwitchInstruction, formatProvider.MultipleLabels(inlineSwitchInstruction.TargetOffsets, targetLabels), targetLabels);
         }
 
-        public override void VisitInlineTokInstruction(InlineTokInstruction inlineTokInstruction)
+        public override void VisitInlineTokInstruction(InlineTokInstruction inlineTokInstruction, Dictionary<int, int> targetLabels)
         {
             string member;
             try
             {
                 string prefix = "";
-                string token = "";
+                string token;
                 switch (inlineTokInstruction.Member.MemberType)
                 {
                     case MemberTypes.Method:
@@ -315,10 +299,10 @@ namespace System.Linq.Expressions.Tests
             {
                 member = "!" + ex.Message + "!";
             }
-            collector.Process(inlineTokInstruction, member);
+            collector.Process(inlineTokInstruction, member, targetLabels);
         }
 
-        public override void VisitInlineTypeInstruction(InlineTypeInstruction inlineTypeInstruction)
+        public override void VisitInlineTypeInstruction(InlineTypeInstruction inlineTypeInstruction, Dictionary<int, int> targetLabels)
         {
             string type;
             try
@@ -329,100 +313,32 @@ namespace System.Linq.Expressions.Tests
             {
                 type = "!" + ex.Message + "!";
             }
-            collector.Process(inlineTypeInstruction, type);
+            collector.Process(inlineTypeInstruction, type, targetLabels);
         }
 
-        public override void VisitInlineVarInstruction(InlineVarInstruction inlineVarInstruction)
+        public override void VisitInlineVarInstruction(InlineVarInstruction inlineVarInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(inlineVarInstruction, formatProvider.Argument(inlineVarInstruction.Ordinal));
+            collector.Process(inlineVarInstruction, formatProvider.Argument(inlineVarInstruction.Ordinal), targetLabels);
         }
 
-        public override void VisitShortInlineBrTargetInstruction(ShortInlineBrTargetInstruction shortInlineBrTargetInstruction)
+        public override void VisitShortInlineBrTargetInstruction(ShortInlineBrTargetInstruction shortInlineBrTargetInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(shortInlineBrTargetInstruction, formatProvider.Label(shortInlineBrTargetInstruction.TargetOffset));
+            collector.Process(shortInlineBrTargetInstruction, formatProvider.Label(shortInlineBrTargetInstruction.TargetOffset, targetLabels), targetLabels);
         }
 
-        public override void VisitShortInlineIInstruction(ShortInlineIInstruction shortInlineIInstruction)
+        public override void VisitShortInlineIInstruction(ShortInlineIInstruction shortInlineIInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(shortInlineIInstruction, shortInlineIInstruction.Value.ToString());
+            collector.Process(shortInlineIInstruction, shortInlineIInstruction.Value.ToString(), targetLabels);
         }
 
-        public override void VisitShortInlineRInstruction(ShortInlineRInstruction shortInlineRInstruction)
+        public override void VisitShortInlineRInstruction(ShortInlineRInstruction shortInlineRInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(shortInlineRInstruction, shortInlineRInstruction.Value.ToString());
+            collector.Process(shortInlineRInstruction, shortInlineRInstruction.Value.ToString(CultureInfo.InvariantCulture), targetLabels);
         }
 
-        public override void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction)
+        public override void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction, Dictionary<int, int> targetLabels)
         {
-            collector.Process(shortInlineVarInstruction, formatProvider.Argument(shortInlineVarInstruction.Ordinal));
-        }
-    }
-
-    public sealed class RawILStringVisitor : ReadableILStringVisitor
-    {
-        public RawILStringVisitor(IILStringCollector collector)
-            : this(collector, DefaultFormatProvider.Instance)
-        {
-        }
-
-        public RawILStringVisitor(IILStringCollector collector, IFormatProvider formatProvider)
-            : base(collector, formatProvider)
-        {
-        }
-
-        public override void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction)
-        {
-            collector.Process(inlineBrTargetInstruction, formatProvider.Int32ToHex(inlineBrTargetInstruction.Delta));
-        }
-
-        public override void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction)
-        {
-            collector.Process(inlineFieldInstruction, formatProvider.Int32ToHex(inlineFieldInstruction.Token));
-        }
-
-        public override void VisitInlineMethodInstruction(InlineMethodInstruction inlineMethodInstruction)
-        {
-            collector.Process(inlineMethodInstruction, formatProvider.Int32ToHex(inlineMethodInstruction.Token));
-        }
-
-        public override void VisitInlineSigInstruction(InlineSigInstruction inlineSigInstruction)
-        {
-            collector.Process(inlineSigInstruction, formatProvider.Int32ToHex(inlineSigInstruction.Token));
-        }
-
-        public override void VisitInlineStringInstruction(InlineStringInstruction inlineStringInstruction)
-        {
-            collector.Process(inlineStringInstruction, formatProvider.Int32ToHex(inlineStringInstruction.Token));
-        }
-
-        public override void VisitInlineSwitchInstruction(InlineSwitchInstruction inlineSwitchInstruction)
-        {
-            collector.Process(inlineSwitchInstruction, "...");
-        }
-
-        public override void VisitInlineTokInstruction(InlineTokInstruction inlineTokInstruction)
-        {
-            collector.Process(inlineTokInstruction, formatProvider.Int32ToHex(inlineTokInstruction.Token));
-        }
-
-        public override void VisitInlineTypeInstruction(InlineTypeInstruction inlineTypeInstruction)
-        {
-            collector.Process(inlineTypeInstruction, formatProvider.Int32ToHex(inlineTypeInstruction.Token));
-        }
-
-        public override void VisitInlineVarInstruction(InlineVarInstruction inlineVarInstruction)
-        {
-            collector.Process(inlineVarInstruction, formatProvider.Int16ToHex(inlineVarInstruction.Ordinal));
-        }
-
-        public override void VisitShortInlineBrTargetInstruction(ShortInlineBrTargetInstruction shortInlineBrTargetInstruction)
-        {
-            collector.Process(shortInlineBrTargetInstruction, formatProvider.Int8ToHex(shortInlineBrTargetInstruction.Delta));
-        }
-
-        public override void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction)
-        {
-            collector.Process(shortInlineVarInstruction, formatProvider.Int8ToHex(shortInlineVarInstruction.Ordinal));
+            collector.Process(shortInlineVarInstruction, formatProvider.Argument(shortInlineVarInstruction.Ordinal), targetLabels);
         }
     }
 
@@ -465,8 +381,7 @@ namespace System.Linq.Expressions.Tests
             }
             else
             {
-                var res = default(string);
-                if (!s_primitives.TryGetValue(type, out res))
+                if (!s_primitives.TryGetValue(type, out string res))
                 {
                     res = "[" + type.Assembly.GetName().Name + "]" + type.FullName;
 

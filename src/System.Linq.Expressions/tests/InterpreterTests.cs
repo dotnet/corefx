@@ -4,8 +4,10 @@
 
 #if FEATURE_INTERPRET
 
+using System.IO;
 using System.Linq.Expressions.Interpreter;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
@@ -13,6 +15,8 @@ namespace System.Linq.Expressions.Tests
     public static class InterpreterTests
     {
         private static readonly PropertyInfo s_debugView = typeof(LightLambda).GetPropertyAssert("DebugView");
+
+        private static readonly Regex InstructionNumberStrip = new Regex(@"IP_\d{4}: ", RegexOptions.Compiled);
 
         [Fact]
         public static void VerifyInstructions_Simple()
@@ -27,21 +31,21 @@ namespace System.Linq.Expressions.Tests
                     .maxstack 2
                     .maxcontinuation 0
 
-                    IP_0000: InitParameter(0)
-                    IP_0001: LoadLocal(0)
-                    IP_0002: LoadObject(null)
-                    IP_0003: Call(Boolean op_Inequality(System.String, System.String))
-                    IP_0004: BranchFalse(10) -> 14
-                    IP_0005: LoadLocal(0)
-                    IP_0006: LoadObject(1)
-                    IP_0007: Call(System.String Substring(Int32))
-                    IP_0008: Call(Int32 get_Length())
-                    IP_0009: LoadObject(2)
-                    IP_0010: Mul()
-                    IP_0011: LoadObject(0)
-                    IP_0012: GreaterThan()
-                    IP_0013: Branch(2) -> 15
-                    IP_0014: LoadObject(False)
+                    InitParameter(0)
+                    LoadLocal(0)
+                    LoadObject(null)
+                    Call(Boolean op_Inequality(System.String, System.String))
+                    BranchFalse(10) -> 14
+                    LoadLocal(0)
+                    LoadObject(1)
+                    Call(System.String Substring(Int32))
+                    Call(Int32 get_Length())
+                    LoadObject(2)
+                    Mul()
+                    LoadObject(0)
+                    GreaterThan()
+                    Branch(2) -> 15
+                    LoadObject(False)
                   }");
         }
 
@@ -75,27 +79,27 @@ namespace System.Linq.Expressions.Tests
                     .maxstack 3
                     .maxcontinuation 1
 
-                    IP_0000: InitParameter(0)
+                    InitParameter(0)
                     .try
                     {
-                      IP_0001: EnterTryFinally[0] -> 11
-                      IP_0002: LoadObject(42)
-                      IP_0003: LoadLocal(0)
-                      IP_0004: Div()
-                      IP_0005: Call(Int32 Abs(Int32))
-                      IP_0006: Goto[1] -> 13
+                      EnterTryFinally[0] -> 11
+                      LoadObject(42)
+                      LoadLocal(0)
+                      Div()
+                      Call(Int32 Abs(Int32))
+                      Goto[1] -> 13
                     }
                     catch(DivideByZeroException) [8->11]
                     {
-                      IP_0007: EnterExceptionHandler()
-                      IP_0008: StoreLocal(1)
-                      IP_0009: LoadObject(-1)
-                      IP_0010: LeaveExceptionHandler[3] -> 6
+                      EnterExceptionHandler()
+                      StoreLocal(1)
+                      LoadObject(-1)
+                      LeaveExceptionHandler[3] -> 6
                     }
                     finally
                     {
-                      IP_0011: EnterFinally[0] -> 11
-                      IP_0012: LeaveFinally()
+                      EnterFinally[0] -> 11
+                      LeaveFinally()
                     }
                   }");
         }
@@ -173,13 +177,24 @@ namespace System.Linq.Expressions.Tests
             return string.Join("\n", lines);
         }
 
+        private static string StripInstructionNumbers(string instructionDump)
+        {
+            StringWriter output = new StringWriter();
+            StringReader input = new StringReader(instructionDump);
+            for (string line = input.ReadLine(); line != null; line = input.ReadLine())
+            {
+                output.WriteLine(InstructionNumberStrip.Replace(line, "", 1));
+            }
+
+            return output.ToString();
+        }
+
         private static string GetInstructions(this LambdaExpression expression)
         {
             Delegate d = expression.Compile(true);
             var thunk = (Func<object[], object>)d.Target;
             var lambda = (LightLambda)thunk.Target;
-            var debugView = (string)s_debugView.GetValue(lambda);
-            return debugView;
+            return StripInstructionNumbers((string)s_debugView.GetValue(lambda));
         }
 
         private static void AssertStackTrace(Action a, string searchTerm)

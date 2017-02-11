@@ -11,18 +11,15 @@ using System.Reflection.Emit;
 
 namespace System.Linq.Expressions.Tests
 {
-    public sealed class ILReader : IEnumerable<ILInstruction>, IEnumerable
+    public sealed class ILReader : IEnumerable<ILInstruction>
     {
-        private static readonly Type s_runtimeMethodInfoType = Type.GetType("System.Reflection.RuntimeMethodInfo");
-        private static readonly Type s_runtimeConstructorInfoType = Type.GetType("System.Reflection.RuntimeConstructorInfo");
-
-        private static readonly OpCode[] s_OneByteOpCodes;
-        private static readonly OpCode[] s_TwoByteOpCodes;
+        private static readonly OpCode[] OneByteOpCodes;
+        private static readonly OpCode[] TwoByteOpCodes;
 
         static ILReader()
         {
-            s_OneByteOpCodes = new OpCode[0x100];
-            s_TwoByteOpCodes = new OpCode[0x100];
+            OneByteOpCodes = new OpCode[0x100];
+            TwoByteOpCodes = new OpCode[0x100];
 
             foreach (FieldInfo fi in typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static))
             {
@@ -30,11 +27,11 @@ namespace System.Linq.Expressions.Tests
                 ushort value = unchecked((ushort)opCode.Value);
                 if (value < 0x100)
                 {
-                    s_OneByteOpCodes[value] = opCode;
+                    OneByteOpCodes[value] = opCode;
                 }
                 else if ((value & 0xff00) == 0xfe00)
                 {
-                    s_TwoByteOpCodes[value & 0xff] = opCode;
+                    TwoByteOpCodes[value & 0xff] = opCode;
                 }
             }
         }
@@ -56,6 +53,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         public IILProvider ILProvider { get; }
+
         public ITokenResolver Resolver { get; }
 
         public IEnumerator<ILInstruction> GetEnumerator()
@@ -64,7 +62,6 @@ namespace System.Linq.Expressions.Tests
                 yield return Next();
 
             _position = 0;
-            yield break;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -72,19 +69,19 @@ namespace System.Linq.Expressions.Tests
         private ILInstruction Next()
         {
             int offset = _position;
-            OpCode opCode = OpCodes.Nop;
-            int token = 0;
+            OpCode opCode;
+            int token;
 
             // read first 1 or 2 bytes as opCode
             byte code = ReadByte();
             if (code != 0xFE)
             {
-                opCode = s_OneByteOpCodes[code];
+                opCode = OneByteOpCodes[code];
             }
             else
             {
                 code = ReadByte();
-                opCode = s_TwoByteOpCodes[code];
+                opCode = TwoByteOpCodes[code];
             }
 
             switch (opCode.OperandType)
@@ -183,11 +180,34 @@ namespace System.Linq.Expressions.Tests
         public void Accept(ILInstructionVisitor visitor)
         {
             if (visitor == null)
-                throw new ArgumentNullException("argument 'visitor' can not be null");
+                throw new ArgumentNullException(nameof(visitor));
+
+            HashSet<int> targets = new HashSet<int>();
 
             foreach (ILInstruction instruction in this)
             {
-                instruction.Accept(visitor);
+                int target = instruction.TargetOffset;
+                if (target == -1)
+                {
+                    foreach (int t in instruction.TargetOffsets)
+                    {
+                        targets.Add(t);
+                    }
+                }
+                else
+                {
+                    targets.Add(target);
+                }
+            }
+
+            Dictionary<int, int> targetLabels =
+                targets.OrderBy(i => i)
+                    .Select((offset, index) => new {offset, index})
+                    .ToDictionary(o => o.offset, o => o.index);
+
+            foreach (ILInstruction instruction in this)
+            {
+                instruction.Accept(visitor, targetLabels);
             }
         }
 
@@ -199,20 +219,6 @@ namespace System.Linq.Expressions.Tests
             int pos = _position;
             _position += 2;
             return BitConverter.ToUInt16(_byteArray, pos);
-        }
-
-        private uint ReadUInt32()
-        {
-            int pos = _position;
-            _position += 4;
-            return BitConverter.ToUInt32(_byteArray, pos);
-        }
-
-        private ulong ReadUInt64()
-        {
-            int pos = _position;
-            _position += 8;
-            return BitConverter.ToUInt64(_byteArray, pos);
         }
 
         private int ReadInt32()

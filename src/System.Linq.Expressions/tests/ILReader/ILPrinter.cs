@@ -75,7 +75,7 @@ namespace System.Linq.Expressions.Tests
 
             byte[] sig = reader.ILProvider.GetLocalSignature();
             var lsp = new LocalsSignatureParser(reader.Resolver, typeFactory);
-            var locals = default(Type[]);
+            Type[] locals;
             if (lsp.Parse(sig, out locals) && locals.Length > 0)
             {
                 sw.WriteLine("  .locals init (");
@@ -100,7 +100,7 @@ namespace System.Linq.Expressions.Tests
 
     class CachedTypeFactory : DefaultTypeFactory
     {
-        private static readonly PropertyInfo s_RuntimeTypeHandle_Value = typeof(RuntimeTypeHandle).GetProperty("Value");
+        private static readonly PropertyInfo RuntimeTypeHandle_Value = typeof(RuntimeTypeHandle).GetProperty("Value");
 
         private readonly Dictionary<IntPtr, Type> _cache = new Dictionary<IntPtr, Type>();
 
@@ -116,7 +116,7 @@ namespace System.Linq.Expressions.Tests
 
         public void AddType(Type type)
         {
-            var handle = (IntPtr)s_RuntimeTypeHandle_Value.GetValue(type.TypeHandle);
+            var handle = (IntPtr)RuntimeTypeHandle_Value.GetValue(type.TypeHandle);
 
             lock (_cache)
             {
