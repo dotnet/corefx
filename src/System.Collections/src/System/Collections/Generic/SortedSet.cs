@@ -23,7 +23,7 @@ namespace System.Collections.Generic
     //
     // For a detailed description of the algorithm, take a look at "Algorithm" by Rebert Sedgewick.
 
-    internal delegate bool TreeWalkPredicate<T>(Node node);
+    internal delegate bool TreeWalkPredicate<T>(SortedSet<T>.Node node);
 
     internal enum TreeRotation
     {
@@ -97,48 +97,14 @@ namespace System.Collections.Generic
             SortedSet<T> sortedSet = collection as SortedSet<T>;
             if (sortedSet != null && !(sortedSet is TreeSubSet) && HasEqualComparer(sortedSet))
             {
-                // breadth first traversal to recreate nodes
                 if (sortedSet.Count == 0)
                 {
                     return;
                 }
 
-                // pre order way to replicate nodes
-                Stack<Node> theirStack = new Stack<Node>(2 * Log2(sortedSet.Count) + 2);
-                Stack<Node> myStack = new Stack<Node>(2 * Log2(sortedSet.Count) + 2);
-                Node theirCurrent = sortedSet._root;
-                Node myCurrent = (theirCurrent != null ? new Node(theirCurrent.Item, theirCurrent.IsRed) : null);
-                _root = myCurrent;
-                while (theirCurrent != null)
-                {
-                    theirStack.Push(theirCurrent);
-                    myStack.Push(myCurrent);
-                    myCurrent.Left = (theirCurrent.Left != null ? new Node(theirCurrent.Left.Item, theirCurrent.Left.IsRed) : null);
-                    theirCurrent = theirCurrent.Left;
-                    myCurrent = myCurrent.Left;
-                }
-                while (theirStack.Count != 0)
-                {
-                    theirCurrent = theirStack.Pop();
-                    myCurrent = myStack.Pop();
-                    Node theirRight = theirCurrent.Right;
-                    Node myRight = null;
-                    if (theirRight != null)
-                    {
-                        myRight = new Node(theirRight.Item, theirRight.IsRed);
-                    }
-                    myCurrent.Right = myRight;
-
-                    while (theirRight != null)
-                    {
-                        theirStack.Push(theirRight);
-                        myStack.Push(myRight);
-                        myRight.Left = (theirRight.Left != null ? new Node(theirRight.Left.Item, theirRight.Left.IsRed) : null);
-                        theirRight = theirRight.Left;
-                        myRight = myRight.Left;
-                    }
-                }
+                Debug.Assert(sortedSet._root != null);
                 _count = sortedSet._count;
+                _root = sortedSet._root.DeepClone(_count);
             }
             else
             {
@@ -1796,6 +1762,53 @@ namespace System.Collections.Generic
             public Node Right { get; set; }
 
             public bool IsRed { get; set; }
+
+            public Node DeepClone(int count)
+            {
+                Debug.Assert(count == GetCount());
+
+                // Do a breadth-first preorder traversal to clone nodes.
+                var originalNodes = new Stack<Node>(2 * Log2(count) + 2);
+                var newNodes = new Stack<Node>(2 * Log2(count) + 2);
+                Node newRoot = ShallowClone();
+
+                Node originalCurrent = this;
+                Node newCurrent = newRoot;
+
+                while (originalCurrent != null)
+                {
+                    originalNodes.Push(originalCurrent);
+                    newNodes.Push(newCurrent);
+                    newCurrent.Left = originalCurrent.Left?.ShallowClone();
+                    originalCurrent = originalCurrent.Left;
+                    newCurrent = newCurrent.Left;
+                }
+
+                while (originalNodes.Count > 0)
+                {
+                    originalCurrent = originalNodes.Pop();
+                    newCurrent = newNodes.Pop();
+
+                    Node originalRight = originalCurrent.Right;
+                    Node newRight = originalRight?.ShallowClone();
+                    newCurrent.Right = newRight;
+
+                    while (originalRight != null)
+                    {
+                        originalNodes.Push(originalRight);
+                        newNodes.Push(newRight);
+                        newRight.Left = originalRight.Left?.ShallowClone();
+                        originalRight = originalRight.Left;
+                        newRight = newRight.Left;
+                    }
+                }
+
+                return newRoot;
+            }
+
+            public int GetCount() => 1 + (Left?.GetCount() ?? 0) + (Right?.GetCount() ?? 0);
+
+            public Node ShallowClone() => new Node(Item, IsRed);
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
