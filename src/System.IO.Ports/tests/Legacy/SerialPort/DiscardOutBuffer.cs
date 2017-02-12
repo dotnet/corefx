@@ -22,7 +22,6 @@ public class DiscardOutBuffer : PortsTest
 
     #region Test Cases
 
-    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OutBufferFilled_Discard_Once()
     {
@@ -45,7 +44,6 @@ public class DiscardOutBuffer : PortsTest
         }
     }
 
-    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OutBufferFilled_Discard_Multiple()
     {
@@ -71,7 +69,6 @@ public class DiscardOutBuffer : PortsTest
         }
     }
 
-    [ActiveIssue(15752)]
     [ConditionalFact(nameof(HasOneSerialPort))]
     public void OutBufferFilled_Discard_Cycle()
     {
