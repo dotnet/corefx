@@ -114,6 +114,7 @@
     <Compile Include="Legacy\Support\TCSupport.cs" />
     <Compile Include="Legacy\Support\TestDelegate.cs" />
     <Compile Include="Legacy\Support\PortsTest.cs" />
+    <Compile Include="Legacy\Support\TestEventHandler.cs" />
     <Compile Include="System\IO\Ports\SmokeTest.cs" />
   </ItemGroup>
   <ItemGroup>
