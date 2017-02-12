@@ -50,8 +50,8 @@ namespace System.Collections.Immutable
         /// <param name="backwards">The backwards stack.</param>
         internal ImmutableQueue(ImmutableStack<T> forwards, ImmutableStack<T> backwards)
         {
-            Requires.NotNull(forwards, nameof(forwards));
-            Requires.NotNull(backwards, nameof(backwards));
+            Debug.Assert(forwards != null);
+            Debug.Assert(backwards != null);
 
             _forwards = forwards;
             _backwards = backwards;

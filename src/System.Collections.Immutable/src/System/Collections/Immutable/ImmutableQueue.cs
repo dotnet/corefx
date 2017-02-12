@@ -33,10 +33,7 @@ namespace System.Collections.Immutable
         /// <param name="item">The item to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
         [Pure]
-        public static ImmutableQueue<T> Create<T>(T item)
-        {
-            return new ImmutableQueue<T>(ImmutableStack.Create(item), ImmutableStack<T>.Empty);
-        }
+        public static ImmutableQueue<T> Create<T>(T item) => ImmutableQueue<T>.Empty.Enqueue(item);
 
         /// <summary>
         /// Creates a new immutable queue from the specified items.
