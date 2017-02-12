@@ -343,8 +343,22 @@ namespace System.Collections.Tests
             SortedSet<T> set = new SortedSet<T> { value };
             T equalValue = CreateT(1);
             T actualValue;
-            bool contains = set.TryGetValue(equalValue, out actualValue);
-            Assert.True(contains);
+            Assert.True(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(value, actualValue);
+            if (!typeof(T).IsValueType)
+            {
+                Assert.Same(value, actualValue);
+            }
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_Contains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(1);
+            T actualValue = CreateT(2);
+            Assert.True(set.TryGetValue(equalValue, out actualValue));
             Assert.Equal(value, actualValue);
             if (!typeof(T).IsValueType)
             {
@@ -360,6 +374,18 @@ namespace System.Collections.Tests
             T equalValue = CreateT(2);
             T actualValue;
             Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_NotContains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(2);
+            T actualValue = equalValue;
+            Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
         }
 
         #endregion

@@ -353,6 +353,21 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        public void HashSet_Generic_TryGetValue_Contains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            HashSet<T> set = new HashSet<T> { value };
+            T equalValue = CreateT(1);
+            T actualValue = CreateT(2);
+            Assert.True(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(value, actualValue);
+            if (!typeof(T).IsValueType)
+            {
+                Assert.Same(value, actualValue);
+            }
+        }
+
+        [Fact]
         public void HashSet_Generic_TryGetValue_NotContains()
         {
             T value = CreateT(1);
@@ -360,6 +375,18 @@ namespace System.Collections.Tests
             T equalValue = CreateT(2);
             T actualValue;
             Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
+        }
+
+        [Fact]
+        public void HashSet_Generic_TryGetValue_NotContains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            HashSet<T> set = new HashSet<T> { value };
+            T equalValue = CreateT(2);
+            T actualValue = equalValue;
+            Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
         }
 
         #endregion
