@@ -19,7 +19,10 @@ public class ReadChar : PortsTest
     public static int maxRandomTimeout = 2000;
 
     //The number of random bytes to receive for large input buffer testing
-    public static readonly int largeNumRndBytesToRead = 4096;
+    // This was 4096, but the largest buffer setting on FTDI USB-Serial devices is "4096", which actually only allows a read of 4094 or 4095 bytes
+    // The test code assumes that we will be able to do this transfer as a single read, so 4000 is safer and would seem to be about 
+    // as rigourous a test
+    public static readonly int largeNumRndBytesToRead = 4000;
 
     //The number of random characters to receive
     public static int numRndChar = 8;
