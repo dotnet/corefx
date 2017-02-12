@@ -245,19 +245,7 @@ public class Write_str_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-
-            while (STRING_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if (STRING_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE,
-                    com.BytesToWrite);
-            }
+            TCSupport.WaitForWriteBufferToLoad(com, STRING_SIZE_BYTES_TO_WRITE);
 
             //Write a random string asynchronously so we can verify some things while the write call is blocking
             t2.Start();
@@ -270,20 +258,8 @@ public class Write_str_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-
-            while (STRING_SIZE_BYTES_TO_WRITE * 2 > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if (STRING_SIZE_BYTES_TO_WRITE * 2 != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after second write", STRING_SIZE_BYTES_TO_WRITE * 2,
-                    com.BytesToWrite);
-            }
-
+            TCSupport.WaitForWriteBufferToLoad(com, STRING_SIZE_BYTES_TO_WRITE*2);
+            
             //Wait for both write methods to timeout
             while (t1.IsAlive || t2.IsAlive)
                 Thread.Sleep(100);

@@ -227,35 +227,35 @@ public class WriteTimeout_Property : PortsTest
             TCSupport.WaitForTaskCompletion(task);
 
             com1.DiscardOutBuffer();
-            // If we're looped-back, then there will be data queud on the receive side which we need to discard
+            // If we're looped-back, then there will be data queued on the receive side which we need to discard
             com1.DiscardInBuffer();
             serPortProp.VerifyPropertiesAndPrint(com1);
         }
     }
 
-    private void Verify1TimeoutBeforeOpen(WriteMethodDelegate readMethod)
+    private void Verify1TimeoutBeforeOpen(WriteMethodDelegate writeMethod)
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
             com.WriteTimeout = 1;
             com.Open();
 
-            Verify1Timeout(com, readMethod);
+            Verify1Timeout(com, writeMethod);
         }
     }
 
-    private void Verify1TimeoutAfterOpen(WriteMethodDelegate readMethod)
+    private void Verify1TimeoutAfterOpen(WriteMethodDelegate writeMethod)
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         {
             com.Open();
             com.WriteTimeout = 1;
 
-            Verify1Timeout(com, readMethod);
+            Verify1Timeout(com, writeMethod);
         }
     }
 
-    private void Verify1Timeout(SerialPort com, WriteMethodDelegate readMethod)
+    private void Verify1Timeout(SerialPort com, WriteMethodDelegate writeMethod)
     {
         SerialPortProperties serPortProp = new SerialPortProperties();
         Stopwatch sw = new Stopwatch();
@@ -274,19 +274,19 @@ public class WriteTimeout_Property : PortsTest
 
         System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
         sw.Start();
-        readMethod(com);
+        writeMethod(com);
         sw.Stop();
 
         if (MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT < sw.ElapsedMilliseconds)
         {
-            Fail("Err_2570ajdlkj!!! Write Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, sw.ElapsedMilliseconds, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT);
+            Fail("Err_2570ajdlkj!!! Write Method {0} timed out in {1}ms expected something less then {2}ms", writeMethod.Method.Name, sw.ElapsedMilliseconds, MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT);
         }
         sw.Reset();
 
         for (int i = 0; i < NUM_TRYS; i++)
         {
             sw.Start();
-            readMethod(com);
+            writeMethod(com);
             sw.Stop();
 
             actualTime += (int)sw.ElapsedMilliseconds;
@@ -298,7 +298,7 @@ public class WriteTimeout_Property : PortsTest
 
         if (MAX_ACCEPTABLE_ZERO_TIMEOUT < actualTime)
         {
-            Fail("ERROR!!! Write Method {0} timed out in {1}ms expected something less then {2}ms", readMethod.Method.Name, actualTime, MAX_ACCEPTABLE_ZERO_TIMEOUT);
+            Fail("ERROR!!! Write Method {0} timed out in {1}ms expected something less then {2}ms", writeMethod.Method.Name, actualTime, MAX_ACCEPTABLE_ZERO_TIMEOUT);
         }
 
         serPortProp.VerifyPropertiesAndPrint(com);
