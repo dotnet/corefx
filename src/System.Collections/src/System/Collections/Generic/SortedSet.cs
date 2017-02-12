@@ -92,7 +92,7 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(collection));
             }
 
-            // These are explicit type checks in the mould of HashSet. It would have worked better with
+            // These are explicit type checks in the mold of HashSet. It would have worked better with
             // something like an ISorted<T> interface. (We could make this work for SortedList.Keys, etc.)
             SortedSet<T> sortedSet = collection as SortedSet<T>;
             if (sortedSet != null && !(sortedSet is TreeSubSet) && HasEqualComparer(sortedSet))
@@ -110,6 +110,9 @@ namespace System.Collections.Generic
             T[] elements = EnumerableHelpers.ToArray(collection, out count);
             if (count > 0)
             {
+                // If `comparer` is null, sets it to Comparer<T>.Default. We checked for this condition in the IComparer<T> constructor.
+                // Array.Sort handles null comparers, but we need this later when we use `comparer.Compare` directly.
+                comparer = _comparer;
                 Array.Sort(elements, 0, count, comparer);
 
                 // Overwrite duplicates while shifting the distinct elements towards
@@ -204,7 +207,7 @@ namespace System.Collections.Generic
                 current = current.Left;
             }
 
-            while (stack.Count > 0)
+            while (stack.Count != 0)
             {
                 current = stack.Pop();
                 if (!action(current))
@@ -1804,7 +1807,7 @@ namespace System.Collections.Generic
                     newCurrent = newCurrent.Left;
                 }
 
-                while (originalNodes.Count > 0)
+                while (originalNodes.Count != 0)
                 {
                     originalCurrent = originalNodes.Pop();
                     newCurrent = newNodes.Pop();
@@ -1826,7 +1829,14 @@ namespace System.Collections.Generic
                 return newRoot;
             }
 
-            public int GetCount() => 1 + (Left?.GetCount() ?? 0) + (Right?.GetCount() ?? 0);
+            public int GetCount()
+            {
+#if !DEBUG
+                throw new InvalidOperationException($"Do not call {nameof(GetCount)} in Release builds.");
+#else
+                return 1 + (Left?.GetCount() ?? 0) + (Right?.GetCount() ?? 0);
+#endif
+            }
 
             public Node ShallowClone() => new Node(Item, IsRed);
         }
