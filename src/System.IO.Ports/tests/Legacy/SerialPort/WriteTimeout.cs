@@ -30,7 +30,7 @@ public class WriteTimeout_Property : PortsTest
     public static readonly int MAX_ACCEPTABLE_WARMUP_ZERO_TIMEOUT = 5000;
 
     //The default string to write with when testing timeout with Write(str)
-    public static readonly string DEFAULT_STRING_TO_WRITE = string.Concat(Enumerable.Repeat("TEST", TCSupport.MinimumBlockingByteCount/4));
+    public static readonly string DEFAULT_STRING_TO_WRITE = new string('H', TCSupport.MinimumBlockingByteCount);
     public static readonly int NUM_TRYS = 5;
 
     public delegate void WriteMethodDelegate(SerialPort com);

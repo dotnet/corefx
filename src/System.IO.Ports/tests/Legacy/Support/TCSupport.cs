@@ -256,7 +256,7 @@ namespace Legacy.Support
         /// </summary>
         public static bool RunShortStressTests { get; set; } = true;
 
-        public static int MinimumBlockingByteCount { get; private set; } = 256;
+        public static int MinimumBlockingByteCount { get; private set; } = 128;
         public static int HardwareTransmitBufferSize { get; private set; } = 128;
 
         public delegate bool Predicate();
@@ -657,6 +657,23 @@ namespace Legacy.Support
                 }
             }
         }
+
+        /// <summary>
+        /// Wait for the data to arrive into the read buffer
+        /// </summary>
+        public static void WaitForReadBufferToLoad(SerialPort com, int bufferLength)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            while (com.BytesToRead < bufferLength)
+            {
+                Thread.Sleep(50);
+                if (sw.ElapsedMilliseconds > 3000)
+                {
+                    Assert.True(false, $"Timeout while waiting for data to be arrive at port (expected {bufferLength}, available {com.BytesToRead})");
+                }
+            }
+        }
+
 
         public static void WaitForTaskToStart(Task task)
         {

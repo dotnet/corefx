@@ -14,11 +14,11 @@ using Xunit;
 public class DiscardOutBuffer : PortsTest
 {
     //The string used with Write(str) to fill the input buffer
-    public static readonly string DEFAULT_STRING = "Hello World";
+    private static readonly string DEFAULT_STRING = new string('H', TCSupport.MinimumBlockingByteCount);
 
     //The buffer length used whe filling the output buffer
     // This was set to 8, but the TX Fifo on a UART can swallow that completely, so you can't then tell if the data has been sent or not.
-    public static readonly int DEFAULT_BUFFER_LENGTH = TCSupport.MinimumBlockingByteCount;
+    private static readonly int DEFAULT_BUFFER_LENGTH = TCSupport.MinimumBlockingByteCount;
 
     #region Test Cases
 
@@ -118,7 +118,8 @@ public class DiscardOutBuffer : PortsTest
             com1.Handshake = Handshake.RequestToSend;
             com2.Write(DEFAULT_STRING);
 
-            TCSupport.WaitForWriteBufferToLoad(com2, DEFAULT_STRING.Length);
+            // Wait for the data to pass from COM2 to com1
+            TCSupport.WaitForReadBufferToLoad(com1, DEFAULT_STRING.Length);
 
             Task task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
             int origBytesToRead = com1.BytesToRead;
