@@ -21,9 +21,9 @@ namespace System.Data.SqlClient.SNI
     /// </summary>
     internal class SNIProxy
     {
-        private static readonly char SemicolonSeparator = ';';
-        private static readonly char CommaSeparator = ',';
-        private static readonly char BackSlashSeparator = '\\';
+        private const char SemicolonSeparator = ';';
+        private const char CommaSeparator = ',';
+        private const char BackSlashSeparator = '\\';
         private const int SqlServerBrowserPort = 1434;
         private const int DefaultSqlServerPort = 1433;
         private const string DefaultHostName = "localhost";
