@@ -281,6 +281,16 @@ namespace System.Data.SqlClient.SNI
             return serverNameWithOutProtocol;
         }
 
+        private static bool IsOccursOnce(string s, char c)
+        {
+            Debug.Assert(!String.IsNullOrEmpty(s));
+            Debug.Assert(c != '\0');
+
+            int pos = s.IndexOf(c);
+            int nextIndex = pos + 1;
+            return pos >= 0 && (s.Length == nextIndex || s.IndexOf(c, pos + 1) == -1);
+        }
+
         /// <summary>
         /// Create a SNI connection handle
         /// </summary>
@@ -336,16 +346,12 @@ namespace System.Data.SqlClient.SNI
                     else
                     {
                         // when invalid protocol is specified
-                        if (fullServerName.Split(':').Length == 2)
+                        if (IsOccursOnce(fullServerName, ':'))
                         {
-                            if (parallel)
-                            {
-                                SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
-                            }
-                            else
-                            {
-                                SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.ProtocolNotSupportedError, string.Empty);
-                            }
+                            SNICommon.ReportSNIError(
+                                SNIProviders.INVALID_PROV, 0,
+                                (uint)(parallel ? SNICommon.MultiSubnetFailoverWithNonTcpProtocol : SNICommon.ProtocolNotSupportedError),
+                                string.Empty);
                         }
                         // when fullServerName is in invalid format
                         else
@@ -362,7 +368,7 @@ namespace System.Data.SqlClient.SNI
         private static byte[] MakeMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
         {
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + port;
-            return Encoding.ASCII.GetBytes(serverSpn);
+            return Encoding.UTF8.GetBytes(serverSpn);
         }
 
         private static string GetFullyQualifiedDomainName(string hostNameOrAddress)
