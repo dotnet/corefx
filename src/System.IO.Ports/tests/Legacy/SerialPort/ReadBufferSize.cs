@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.IO;
 using System.IO.PortsTests;
+using System.Linq;
 using Legacy.Support;
 using Xunit;
 
@@ -81,7 +82,6 @@ public class ReadBufferSize_Property : PortsTest
     public void ReadBufferSize_1()
     {
         Debug.WriteLine("Verifying setting ReadBufferSize=1");
-
         VerifyException(1, typeof(IOException), typeof(InvalidOperationException), true);
     }
 
@@ -89,7 +89,6 @@ public class ReadBufferSize_Property : PortsTest
     public void ReadBufferSize_2()
     {
         Debug.WriteLine("Verifying setting ReadBufferSize=");
-
         VerifyReadBufferSize(2);
     }
 
@@ -276,7 +275,7 @@ public class ReadBufferSize_Property : PortsTest
 
                 com1.Read(rcvBytes, 0, newBytesToRead);
 
-                Assert.Equal(xmitBytes, rcvBytes);
+                Assert.Equal(xmitBytes.Take(newReadBufferSize), rcvBytes.Take(newReadBufferSize));
 
                 Debug.WriteLine("Verifying properties after bytes have been read");
                 serPortProp.SetProperty("BytesToRead", 0);
