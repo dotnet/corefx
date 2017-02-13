@@ -91,6 +91,13 @@ namespace Internal.Cryptography.Pal
             IntPtr[] policies = new IntPtr[checkRevocation ? 2 : 1];
 
             SafeHandle defaultPolicy = Interop.AppleCrypto.X509ChainCreateDefaultPolicy();
+
+            if (defaultPolicy.IsInvalid)
+            {
+                defaultPolicy.Dispose();
+                throw new PlatformNotSupportedException(nameof(X509Chain));
+            }
+
             _extraHandles.Push(defaultPolicy);
             policies[0] = defaultPolicy.DangerousGetHandle();
 
