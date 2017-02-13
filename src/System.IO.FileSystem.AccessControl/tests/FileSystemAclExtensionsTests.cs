@@ -18,11 +18,17 @@ namespace System.IO
         [Fact]
         public void GetAccessControl_DirectoryInfo_ReturnsValidObject()
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
+            string directory = Path.GetTempPath() + Guid.NewGuid();
 
-            DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo);
+            using (new TempDirectory(directory))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
 
-            Assert.NotNull(directorySecurity);
+                DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo);
+
+                Assert.NotNull(directorySecurity);
+                Assert.Equal(typeof(FileSystemRights), directorySecurity.AccessRightType);
+            }
         }
 
         [Fact]
@@ -34,12 +40,18 @@ namespace System.IO
         [Fact]
         public void GetAccessControl_DirectoryInfo_AccessControlSections_ReturnsValidObject()
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
-            AccessControlSections accessControlSections = new AccessControlSections();
+            string directory = Path.GetTempPath() + Guid.NewGuid();
 
-            DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo, accessControlSections);
+            using (new TempDirectory(directory))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+                AccessControlSections accessControlSections = new AccessControlSections();
 
-            Assert.NotNull(directorySecurity);
+                DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo, accessControlSections);
+
+                Assert.NotNull(directorySecurity);
+                Assert.Equal(typeof(FileSystemRights), directorySecurity.AccessRightType);
+            }
         }
 
         [Fact]
@@ -51,11 +63,21 @@ namespace System.IO
         [Fact]
         public void GetAccessControl_FileInfo_ReturnsValidObject()
         {
-            FileInfo fileInfo = new FileInfo("\\");
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+            string file = Path.Combine(directory, Guid.NewGuid() + ".txt");
 
-            FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo);
+            using (new TempDirectory(directory))
+            {
+                using (new TempFile(file))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
 
-            Assert.NotNull(fileSecurity);
+                    FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo);
+
+                    Assert.NotNull(fileSecurity);
+                    Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
+                }
+            }
         }
 
         [Fact]
@@ -67,12 +89,22 @@ namespace System.IO
         [Fact]
         public void GetAccessControl_FileInfo_AccessControlSections_ReturnsValidObject()
         {
-            FileInfo fileInfo = new FileInfo("\\");
-            AccessControlSections accessControlSections = new AccessControlSections();
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+            string file = Path.Combine(directory, Guid.NewGuid() + ".txt");
 
-            FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo, accessControlSections);
+            using (new TempDirectory(directory))
+            {
+                using (new TempFile(file))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    AccessControlSections accessControlSections = new AccessControlSections();
 
-            Assert.NotNull(fileSecurity);
+                    FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo, accessControlSections);
+
+                    Assert.NotNull(fileSecurity);
+                    Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
+                }
+            }
         }
 
         [Fact]
@@ -84,15 +116,61 @@ namespace System.IO
         [Fact]
         public void SetAccessControl_DirectoryInfo_DirectorySecurity_InvalidArguments()
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo("\\");
-            Assert.Throws<ArgumentNullException>("directorySecurity", () => FileSystemAclExtensions.SetAccessControl(directoryInfo, (DirectorySecurity)null));
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+
+            using (new TempDirectory(directory))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+                Assert.Throws<ArgumentNullException>("directorySecurity", () => FileSystemAclExtensions.SetAccessControl(directoryInfo, (DirectorySecurity) null));
+            }
+        }
+
+        [Fact]
+        public void SetAccessControl_DirectoryInfo_DirectorySecurity_Success()
+        {
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+
+            using (new TempDirectory(directory))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+                DirectorySecurity directorySecurity = new DirectorySecurity();
+
+                FileSystemAclExtensions.SetAccessControl(directoryInfo, directorySecurity);
+            }
         }
 
         [Fact]
         public void SetAccessControl_FileInfo_FileSecurity_InvalidArguments()
         {
-            FileInfo fileInfo = new FileInfo("\\");
-            Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity)null));
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+            string file = Path.Combine(directory, Guid.NewGuid() + ".txt");
+
+            using (new TempDirectory(directory))
+            {
+                using (new TempFile(file))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity) null));
+                }
+            }
+        }
+
+        [Fact]
+        public void SetAccessControl_FileInfo_FileSecurity_Success()
+        {
+            string directory = Path.GetTempPath() + Guid.NewGuid();
+            string file = Path.Combine(directory, Guid.NewGuid() + ".txt");
+
+            using (new TempDirectory(directory))
+            {
+                using (new TempFile(file))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    FileSecurity fileSecurity = new FileSecurity();
+
+                    FileSystemAclExtensions.SetAccessControl(fileInfo, fileSecurity);
+                }
+            }
         }
 
         [Fact]
