@@ -256,7 +256,7 @@ internal static partial class Interop
             if (cert.IsInvalid)
             {
                 cert.Dispose();
-                throw new CryptographicException(SR.Arg_InvalidHandle);
+                throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
             }
 
             return cert;
@@ -278,7 +278,7 @@ internal static partial class Interop
             if (key.IsInvalid)
             {
                 key.Dispose();
-                throw new CryptographicException(SR.Arg_InvalidHandle);
+                throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
             }
 
             return key;
