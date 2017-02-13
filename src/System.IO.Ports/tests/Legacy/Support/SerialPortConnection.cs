@@ -107,8 +107,9 @@ namespace Legacy.Support
         /// <returns>The smallest probe </returns>
         public static int MeasureTransmitBufferSize(string portName)
         {
+            bool probeSucceeded = false;
             int bufferSize = 0;
-            for (int probeBase = 1; probeBase <= 8192; probeBase *= 2)
+            for (int probeBase = 1; probeBase <= 65536; probeBase *= 2)
             {
                 // We always probe one over the powers of two to make sure we just exceed common buffer sizes
                 int probeLength;
@@ -117,8 +118,13 @@ namespace Legacy.Support
                 if (bufferSize < probeLength)
                 {
                     Console.WriteLine("{0}: Found blocking packet of length {1}, hardware buffer {2}", portName, probeLength, bufferSize);
+                    probeSucceeded = true;
                     break;
                 }
+            }
+            if (!probeSucceeded)
+            {
+                Console.WriteLine("Failed to achieve write blocking on serial port - subsequent tests will fail");
             }
             return bufferSize;
         }

@@ -121,8 +121,9 @@ namespace Legacy.Support
                 // Measure how big a packet we need to write to be sure to see blocking behaviour at a port
                 HardwareTransmitBufferSize = SerialPortConnection.MeasureTransmitBufferSize(portName1);
                 MinimumBlockingByteCount = Math.Max(128, HardwareTransmitBufferSize*2);
-            }
 
+                Console.WriteLine("{0}: Running with Min block buffer size {1}, HW buffer {2}", portName1, MinimumBlockingByteCount, HardwareTransmitBufferSize);
+            }
         }
 
         private static IList<string> CheckPortsCanBeOpened(IEnumerable<string> installedPortNames)
