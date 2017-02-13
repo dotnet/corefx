@@ -335,8 +335,8 @@ namespace System.Collections.Generic
             Node grandParent = null;
             Node greatGrandParent = null;
 
-            // even if we don't actually add to the set, we may be altering its structure (by doing rotations
-            // and such). so update version to disable any enumerators/subsets working on it
+            // Even if we don't actually add to the set, we may be altering its structure (by doing rotations and such).
+            // So update `_version` to disable any instances of Enumerator/TreeSubSet from working on it.
             _version++;
 
             int order = 0;
@@ -351,16 +351,17 @@ namespace System.Collections.Generic
                     return false;
                 }
 
-                // split a 4-node into two 2-nodes
-                if (Is4Node(current))
+                // Split a 4-node into two 2-nodes.
+                if (current.Is4Node)
                 {
-                    Split4Node(current);
+                    current.Split4Node();
                     // We could have introduced two consecutive red nodes after split. Fix that by rotation.
-                    if (IsRed(parent))
+                    if (Node.IsNonNullRed(parent))
                     {
                         InsertionBalance(current, ref parent, grandParent, greatGrandParent);
                     }
                 }
+
                 greatGrandParent = grandParent;
                 grandParent = parent;
                 parent = current;
@@ -369,7 +370,7 @@ namespace System.Collections.Generic
 
             Debug.Assert(parent != null);
             // ready to insert the new node
-            Node node = new Node(item);
+            Node node = new Node(item, isRed: true);
             if (order > 0)
             {
                 parent.Right = node;
@@ -420,7 +421,7 @@ namespace System.Collections.Generic
             bool foundMatch = false;
             while (current != null)
             {
-                if (Is2Node(current))
+                if (current.Is2Node)
                 {
                     // fix up 2-Node
                     if (parent == null)
@@ -436,14 +437,14 @@ namespace System.Collections.Generic
                             // If parent is a 3-node, flip the orientation of the red link.
                             // We can achieve this by a single rotation
                             // This case is converted to one of other cased below.
-                            Debug.Assert(!parent.IsRed);
+                            Debug.Assert(parent.IsBlack);
                             if (parent.Right == sibling)
                             {
-                                RotateLeft(parent);
+                                parent.RotateLeft();
                             }
                             else
                             {
-                                RotateRight(parent);
+                                parent.RotateRight();
                             }
 
                             parent.IsRed = true;
@@ -460,9 +461,10 @@ namespace System.Collections.Generic
                             // update sibling, this is necessary for following processing
                             sibling = (parent.Left == current) ? parent.Right : parent.Left;
                         }
-                        Debug.Assert(sibling != null && !sibling.IsRed);
 
-                        if (Is2Node(sibling))
+                        Debug.Assert(Node.IsNonNullBlack(sibling));
+
+                        if (sibling.Is2Node)
                         {
                             Merge2Nodes(parent, current, sibling);
                         }
@@ -478,25 +480,26 @@ namespace System.Collections.Generic
                                     Debug.Assert(parent.Left == sibling);
                                     Debug.Assert(sibling.Left.IsRed);
                                     sibling.Left.IsRed = false;
-                                    newGrandParent = RotateRight(parent);
+                                    newGrandParent = parent.RotateRight();
                                     break;
+
                                 case TreeRotation.Left:
                                     Debug.Assert(parent.Right == sibling);
                                     Debug.Assert(sibling.Right.IsRed);
                                     sibling.Right.IsRed = false;
-                                    newGrandParent = RotateLeft(parent);
+                                    newGrandParent = parent.RotateLeft();
                                     break;
 
                                 case TreeRotation.RightLeft:
                                     Debug.Assert(parent.Right == sibling);
                                     Debug.Assert(sibling.Left.IsRed);
-                                    newGrandParent = RotateRightLeft(parent);
+                                    newGrandParent = parent.RotateRightLeft();
                                     break;
 
                                 case TreeRotation.LeftRight:
                                     Debug.Assert(parent.Left == sibling);
                                     Debug.Assert(sibling.Right.IsRed);
-                                    newGrandParent = RotateLeftRight(parent);
+                                    newGrandParent = parent.RotateLeftRight();
                                     break;
                             }
 
@@ -575,20 +578,16 @@ namespace System.Collections.Generic
                 throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            // will array, starting at arrayIndex, be able to hold elements? Note: not
-            // checking arrayIndex >= array.Length (consistency with list of allowing
-            // count of 0; subsequent check takes care of the rest)
-            if (index > array.Length || count > array.Length - index)
+            if (count > array.Length - index)
             {
                 throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
             }
 
-            // upper bound
-            count += index;
+            count += index; // Make `count` the upper bound.
 
             InOrderTreeWalk(node =>
             {
-                if (index >= count)
+                if (index == count)
                 {
                     return false;
                 }
@@ -665,53 +664,42 @@ namespace System.Collections.Generic
 
         private static Node GetSibling(Node node, Node parent) => parent.Left == node ? parent.Right : parent.Left;
 
-        // After calling InsertionBalance, we need to make sure current and parent up-to-date.
-        // It doesn't matter if we keep grandParent and greatGrantParent up-to-date
-        // because we won't need to split again in the next node.
+        // After calling InsertionBalance, we need to make sure `current` and `parent` are up-to-date.
+        // It doesn't matter if we keep `grandParent` and `greatGrandParent` up-to-date, because we won't
+        // need to split again in the next node.
         // By the time we need to split again, everything will be correctly set.
         private void InsertionBalance(Node current, ref Node parent, Node grandParent, Node greatGrandParent)
         {
+            Debug.Assert(parent != null);
             Debug.Assert(grandParent != null);
-            bool parentIsOnRight = (grandParent.Right == parent);
-            bool currentIsOnRight = (parent.Right == current);
+
+            bool parentIsRightChild = (grandParent.Right == parent);
+            bool currentIsRightChild = (parent.Right == current);
 
             Node newChildOfGreatGrandParent;
-            if (parentIsOnRight == currentIsOnRight)
+            if (parentIsRightChild == currentIsRightChild)
             {
-                // same orientation, single rotation
-                newChildOfGreatGrandParent = currentIsOnRight ? RotateLeft(grandParent) : RotateRight(grandParent);
+                // Same orientation, single rotation
+                newChildOfGreatGrandParent = currentIsRightChild ? grandParent.RotateLeft() : grandParent.RotateRight();
             }
             else
             {
-                // different orientation, double rotation
-                newChildOfGreatGrandParent = currentIsOnRight ? RotateLeftRight(grandParent) : RotateRightLeft(grandParent);
-                // current node now becomes the child of greatgrandparent
+                // Different orientation, double rotation
+                newChildOfGreatGrandParent = currentIsRightChild ? grandParent.RotateLeftRight() : grandParent.RotateRightLeft();
+                // Current node now becomes the child of `greatGrandParent`
                 parent = greatGrandParent;
             }
-            // grand parent will become a child of either parent of current.
+
+            // `grandParent` will become a child of either `parent` of `current`.
             grandParent.IsRed = true;
             newChildOfGreatGrandParent.IsRed = false;
 
             ReplaceChildOfNodeOrRoot(greatGrandParent, grandParent, newChildOfGreatGrandParent);
         }
 
-        private static bool Is2Node(Node node)
-        {
-            Debug.Assert(node != null);
-            return IsBlack(node) && IsNullOrBlack(node.Left) && IsNullOrBlack(node.Right);
-        }
-
-        private static bool Is4Node(Node node) => IsRed(node.Left) && IsRed(node.Right);
-
-        private static bool IsBlack(Node node) => node != null && !node.IsRed;
-
-        private static bool IsNullOrBlack(Node node) => node == null || !node.IsRed;
-
-        private static bool IsRed(Node node) => node != null && node.IsRed;
-
         private static void Merge2Nodes(Node parent, Node child1, Node child2)
         {
-            Debug.Assert(IsRed(parent));
+            Debug.Assert(Node.IsNonNullRed(parent));
             // Combine two 2-nodes into a 4-node
             parent.IsRed = false;
             child1.IsRed = true;
@@ -752,7 +740,7 @@ namespace System.Collections.Generic
             {
                 Debug.Assert(parentOfSuccessor != null);
                 Debug.Assert(successor.Left == null);
-                Debug.Assert((successor.Right == null && successor.IsRed) || (successor.Right.IsRed && !successor.IsRed));
+                Debug.Assert((successor.Right == null && successor.IsRed) || (successor.Right.IsRed && successor.IsBlack));
 
                 if (successor.Right != null)
                 {
@@ -845,56 +833,17 @@ namespace System.Collections.Generic
 
         internal void UpdateVersion() => ++_version;
 
-        private static Node RotateLeft(Node node)
-        {
-            Node x = node.Right;
-            node.Right = x.Left;
-            x.Left = node;
-            return x;
-        }
-
-        private static Node RotateLeftRight(Node node)
-        {
-            Node child = node.Left;
-            Node grandChild = child.Right;
-
-            node.Left = grandChild.Right;
-            grandChild.Right = node;
-            child.Right = grandChild.Left;
-            grandChild.Left = child;
-            return grandChild;
-        }
-
-        private static Node RotateRight(Node node)
-        {
-            Node x = node.Left;
-            node.Left = x.Right;
-            x.Right = node;
-            return x;
-        }
-
-        private static Node RotateRightLeft(Node node)
-        {
-            Node child = node.Right;
-            Node grandChild = child.Left;
-
-            node.Right = grandChild.Left;
-            grandChild.Left = node;
-            child.Left = grandChild.Right;
-            grandChild.Right = child;
-            return grandChild;
-        }
-
         /// <summary>
         /// Testing counter that can track rotations.
         /// </summary>
         private static TreeRotation RotationNeeded(Node parent, Node current, Node sibling)
         {
-            Debug.Assert(IsRed(sibling.Left) || IsRed(sibling.Right));
-            bool currentIsLeft = parent.Left == current;
-            return IsRed(sibling.Left) ?
-                (currentIsLeft ? TreeRotation.RightLeft : TreeRotation.Right) :
-                (currentIsLeft ? TreeRotation.Left : TreeRotation.LeftRight);
+            Debug.Assert(Node.IsNonNullRed(sibling.Left) || Node.IsNonNullRed(sibling.Right));
+
+            bool currentIsLeftChild = parent.Left == current;
+            return Node.IsNonNullRed(sibling.Left) ?
+                (currentIsLeftChild ? TreeRotation.RightLeft : TreeRotation.Right) :
+                (currentIsLeftChild ? TreeRotation.Left : TreeRotation.LeftRight);
         }
 
         /// <summary>
@@ -913,46 +862,48 @@ namespace System.Collections.Generic
         /// <summary>
         /// Decides whether two sets have equal contents, using a fallback comparer if the sets do not have equivalent equality comparers.
         /// </summary>
+        /// <param name="set1">The first set.</param>
+        /// <param name="set2">The second set.</param>
+        /// <param name="comparer">The fallback comparer to use if the sets do not have equal comparers.</param>
+        /// <returns><c>true</c> if the sets have equal contents; otherwise, <c>false</c>.</returns>
         internal static bool SortedSetEquals(SortedSet<T> set1, SortedSet<T> set2, IComparer<T> comparer)
         {
-            // handle null cases first
+            // Handle null cases first.
             if (set1 == null)
             {
-                return (set2 == null);
+                return set2 == null;
             }
-            else if (set2 == null)
+
+            if (set2 == null)
             {
-                // set1 != null
+                Debug.Assert(set1 != null);
                 return false;
             }
 
             if (set1.HasEqualComparer(set2))
             {
-                if (set1.Count != set2.Count)
-                    return false;
-
-                return set1.SetEquals(set2);
+                return set1.Count == set2.Count && set1.SetEquals(set2);
             }
-            else
+            
+            bool found = false;
+            foreach (T item1 in set1)
             {
-                bool found = false;
-                foreach (T item1 in set1)
+                found = false;
+                foreach (T item2 in set2)
                 {
-                    found = false;
-                    foreach (T item2 in set2)
+                    if (comparer.Compare(item1, item2) == 0)
                     {
-                        if (comparer.Compare(item1, item2) == 0)
-                        {
-                            found = true;
-                            break;
-                        }
+                        found = true;
+                        break;
                     }
-                    if (!found)
-                        return false;
                 }
-                return true;
+                if (!found)
+                {
+                    return false;
+                }
             }
 
+            return true;
         }
 
         private bool HasEqualComparer(SortedSet<T> other)
@@ -960,13 +911,6 @@ namespace System.Collections.Generic
             // Both comparers will most commonly be the default comparer.
             // Avoid a virtual method call to Equals() in that case.
             return Comparer == other.Comparer || Comparer.Equals(other.Comparer);
-        }
-
-        private static void Split4Node(Node node)
-        {
-            node.IsRed = true;
-            node.Left.IsRed = false;
-            node.Right.IsRed = false;
         }
 
         #endregion
@@ -1110,7 +1054,7 @@ namespace System.Collections.Generic
                 root = new Node(arr[midpt], isRed: false);
                 root.Left = ConstructRootFromSortedArray(arr, startIndex, midpt - 1, redNode);
                 root.Right = size % 2 == 0 ?
-                    ConstructRootFromSortedArray(arr, midpt + 2, endIndex, new Node(arr[midpt + 1])) :
+                    ConstructRootFromSortedArray(arr, midpt + 2, endIndex, new Node(arr[midpt + 1], isRed: true)) :
                     ConstructRootFromSortedArray(arr, midpt + 1, endIndex, null);
             }
             return root;
@@ -1770,7 +1714,7 @@ namespace System.Collections.Generic
         [Serializable]
         internal sealed class Node
         {
-            public Node(T item, bool isRed = true)
+            public Node(T item, bool isRed)
             {
                 // The default color is red since we usually don't need to create a black node directly.
                 Item = item;
@@ -1784,6 +1728,12 @@ namespace System.Collections.Generic
             public Node Right { get; set; }
 
             public bool IsRed { get; set; }
+
+            public bool IsBlack => !IsRed;
+
+            public bool Is2Node => IsBlack && IsNullOrBlack(Left) && IsNullOrBlack(Right);
+
+            public bool Is4Node => IsNonNullRed(Left) && IsNonNullRed(Right);
 
             public Node DeepClone(int count)
             {
@@ -1839,13 +1789,68 @@ namespace System.Collections.Generic
             }
 
             public Node ShallowClone() => new Node(Item, IsRed);
+
+            public static bool IsNonNullBlack(Node node) => node != null && node.IsBlack;
+
+            public static bool IsNonNullRed(Node node) => node != null && node.IsRed;
+
+            public static bool IsNullOrBlack(Node node) => node == null || node.IsBlack;
+
+            public void Split4Node()
+            {
+                Debug.Assert(Left != null);
+                Debug.Assert(Right != null);
+
+                IsRed = true;
+                Left.IsRed = Right.IsRed = false;
+            }
+
+            public Node RotateLeft()
+            {
+                Node child = Right;
+                Right = child.Left;
+                child.Left = this;
+                return child;
+            }
+
+            public Node RotateLeftRight()
+            {
+                Node child = Left;
+                Node grandChild = child.Right;
+
+                Left = grandChild.Right;
+                grandChild.Right = this;
+                child.Right = grandChild.Left;
+                grandChild.Left = child;
+                return grandChild;
+            }
+
+            public Node RotateRight()
+            {
+                Node child = Left;
+                Left = child.Right;
+                child.Right = this;
+                return child;
+            }
+
+            public Node RotateRightLeft()
+            {
+                Node child = Right;
+                Node grandChild = child.Left;
+
+                Right = grandChild.Left;
+                grandChild.Left = this;
+                child.Left = grandChild.Right;
+                grandChild.Right = child;
+                return grandChild;
+            }
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
         [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
-            private static Node s_dummyNode = new Node(default(T));
+            private static Node s_dummyNode = new Node(default(T), isRed: true);
 
             private SortedSet<T> _tree;
             private int _version;
