@@ -31,11 +31,6 @@ namespace System.Linq.Expressions.Compiler
                 EmitConstant(_scope.NearestHoistedLocals, typeof(object));
                 _scope.EmitGet(_scope.NearestHoistedLocals.SelfVariable);
                 _ilg.Emit(OpCodes.Call, RuntimeOps_Quote);
-
-                if (quote.Type != typeof(Expression))
-                {
-                    _ilg.Emit(OpCodes.Castclass, quote.Type);
-                }
             }
         }
 

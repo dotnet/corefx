@@ -1016,14 +1016,13 @@ namespace System.Linq.Expressions.Tests
                       IL_000f: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
                       IL_0014: ldc.i4.0   
                       IL_0015: ldelem.ref 
-                      IL_0016: castclass  class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign
-                      IL_001b: ldloc.0    
-                      IL_001c: ldloc.1    
-                      IL_001d: callvirt   instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign::Invoke(int32&,int32)
+                      IL_0016: ldloc.0    
+                      IL_0017: ldloc.1    
+                      IL_0018: callvirt   instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign::Invoke(int32&,int32)
 
                       // return x
-                      IL_0022: ldloc.2    
-                      IL_0023: ret        
+                      IL_001d: ldloc.2    
+                      IL_001e: ret        
                     }",
                 instructions: @"
                     object lambda_method(object[])
@@ -2014,16 +2013,15 @@ namespace System.Linq.Expressions.Tests
                   IL_001f: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
                   IL_0024: ldc.i4.0
                   IL_0025: ldelem.ref
-                  IL_0026: castclass  int64[]
-                  IL_002b: call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables(object[],int64[])
+                  IL_0026: call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables(object[],int64[])
 
                   // Load arg1 from V_2
-                  IL_0030: ldloc.2
+                  IL_002b: ldloc.2
 
                   // Evaluate `target(arg0, arg1)` delegate invocation
-                  IL_0031: callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
+                  IL_002c: callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
 
-                  IL_0036: ret
+                  IL_0031: ret
                 }"
             );
         }

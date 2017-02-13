@@ -206,28 +206,16 @@ namespace System.Linq.Expressions.Compiler
         private void EmitReferenceCoalesceWithoutConversion(BinaryExpression b)
         {
             Label labEnd = _ilg.DefineLabel();
-            Label labCast = _ilg.DefineLabel();
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Dup);
             _ilg.Emit(OpCodes.Ldnull);
             _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brfalse, labCast);
+            _ilg.Emit(OpCodes.Brfalse, labEnd);
             _ilg.Emit(OpCodes.Pop);
             EmitExpression(b.Right);
-            if (!TypeUtils.AreEquivalent(b.Right.Type, b.Type))
+            if (b.Right.Type.GetTypeInfo().IsValueType)
             {
-                if (b.Right.Type.GetTypeInfo().IsValueType)
-                {
-                    _ilg.Emit(OpCodes.Box, b.Right.Type);
-                }
-                _ilg.Emit(OpCodes.Castclass, b.Type);
-            }
-            _ilg.Emit(OpCodes.Br_S, labEnd);
-            _ilg.MarkLabel(labCast);
-            if (!TypeUtils.AreEquivalent(b.Left.Type, b.Type))
-            {
-                Debug.Assert(!b.Left.Type.GetTypeInfo().IsValueType);
-                _ilg.Emit(OpCodes.Castclass, b.Type);
+                _ilg.Emit(OpCodes.Box, b.Right.Type);
             }
             _ilg.MarkLabel(labEnd);
         }
