@@ -83,13 +83,18 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void SortedSet_Generic_MaxAndMin(int setLength)
         {
+            SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
             if (setLength > 0)
             {
-                SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
                 List<T> expected = set.ToList();
                 expected.Sort(GetIComparer());
                 Assert.Equal(expected[0], set.Min);
                 Assert.Equal(expected[setLength - 1], set.Max);
+            }
+            else
+            {
+                Assert.Equal(default(T), set.Min);
+                Assert.Equal(default(T), set.Max);
             }
         }
 
@@ -197,6 +202,13 @@ namespace System.Collections.Tests
             Assert.Equal(setLength, set.Count);
         }
 
+        [Fact]
+        public void SortedSet_Generic_RemoveWhere_NullPredicate_ThrowsArgumentNullException()
+        {
+            SortedSet<T> set = (SortedSet<T>)GenericISetFactory();
+            Assert.Throws<ArgumentNullException>("match", () => set.RemoveWhere(null));
+        }
+
         #endregion
 
         #region Enumeration and Ordering
@@ -285,7 +297,6 @@ namespace System.Collections.Tests
 
         #region CreateSetComparer
 
-#if netstandard17
         [Fact]
         public void SetComparer_SetEqualsTests()
         {
@@ -319,7 +330,6 @@ namespace System.Collections.Tests
             Assert.True(comparerSet1.SetEquals(set));
             Assert.True(comparerSet2.SetEquals(set));
         }
-#endif
         #endregion
     }
 }

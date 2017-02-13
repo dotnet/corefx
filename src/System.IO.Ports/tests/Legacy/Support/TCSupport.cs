@@ -3,8 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
+using System.Text;
+using Xunit;
 
 namespace Legacy.Support
 {
@@ -26,6 +30,7 @@ namespace Legacy.Support
 
         static TCSupport()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             InitializeSerialInfo();
         }
 
@@ -47,50 +52,82 @@ namespace Legacy.Support
 
         private static void GenerateSerialInfo()
         {
-            string[] availablePortNames = PortHelper.GetPorts();
-            Debug.WriteLine("total ports : " + availablePortNames.Length);
+            string[] installedPortNames = PortHelper.GetPorts();
             bool nullModemPresent = false;
-
             string portName1 = null, portName2 = null, loopbackPortName = null;
 
-            for (int i = 0; i < availablePortNames.Length; ++i)
+            Array.Sort(installedPortNames);
+            Console.WriteLine("Installed ports : " + string.Join(",", installedPortNames));
+
+            IList<string> openablePortNames = CheckPortsCanBeOpened(installedPortNames);
+
+            Console.WriteLine("Openable ports  : " + string.Join(",", openablePortNames));
+
+            // Find any pair of ports which are null-modem connected
+            // If there is a pair like this, then they take precedence over any other way of identifying two available ports
+            for (var firstIndex = 0; firstIndex < openablePortNames.Count && !nullModemPresent; firstIndex++)
             {
-                SerialPort com = new SerialPort(availablePortNames[i]);
-
-                try
+                for (var secondIndex = firstIndex+1; secondIndex < openablePortNames.Count && !nullModemPresent; secondIndex++)
                 {
-                    com.Open();
-                    com.Close();
+                    var firstPortName = openablePortNames[firstIndex];
+                    var secondPortName = openablePortNames[secondIndex];
 
-                    if (null == portName1)
+                    if (SerialPortConnection.VerifyConnection(firstPortName, secondPortName))
                     {
-                        portName1 = availablePortNames[i];
+                        // We have a null modem port
+                        portName1 = firstPortName;
+                        portName2 = secondPortName;
+                        nullModemPresent = true;
+
+                        Console.WriteLine("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
                     }
-                    else if (null == portName2)
+                }
+            }
+
+            if (!nullModemPresent)
+            {
+                // If we don't have a null-modem connection - check for a loopback connection
+                foreach (var portName in openablePortNames)
+                {
+                    if (SerialPortConnection.VerifyLoopback(portName))
                     {
-                        portName2 = availablePortNames[i];
+                        portName1 = loopbackPortName = portName;
                         break;
                     }
                 }
-                catch (Exception) { }
-            }
 
-            if (null != portName1 && SerialPortConnection.VerifyLoopback(portName1))
-            {
-                loopbackPortName = portName1;
-            }
-
-            if (null != portName2)
-            {
-                if (null == loopbackPortName && SerialPortConnection.VerifyLoopback(portName2))
+                if (portName1 == null)
                 {
-                    loopbackPortName = portName2;
+                    portName1 = openablePortNames.FirstOrDefault();
                 }
 
-                nullModemPresent = SerialPortConnection.VerifyConnection(portName1, portName2);
+                portName2 = openablePortNames.FirstOrDefault(name => name != portName1);
             }
 
             s_localMachineSerialInfo = new LocalMachineSerialInfo(portName1, portName2, loopbackPortName, nullModemPresent);
+
+        }
+
+        private static IList<string> CheckPortsCanBeOpened(IEnumerable<string> installedPortNames)
+        {
+            List<string> openablePortNames = new List<string>();
+            foreach (string portName in installedPortNames)
+            {
+                using (SerialPort com = new SerialPort(portName))
+                {
+                    try
+                    {
+                        com.Open();
+                        com.Close();
+
+                        openablePortNames.Add(portName);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+            return openablePortNames;
         }
 
         public static bool SufficientHardwareRequirements(SerialPortRequirements serialPortRequirements)
@@ -107,7 +144,6 @@ namespace Legacy.Support
                         s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
                 case SerialPortRequirements.TwoSerialPorts:
                     return s_localMachineSerialPortRequirements == SerialPortRequirements.TwoSerialPorts ||
-                        s_localMachineSerialPortRequirements == SerialPortRequirements.Loopback ||
                         s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
                 case SerialPortRequirements.NullModem:
                     return s_localMachineSerialPortRequirements == SerialPortRequirements.NullModem;
@@ -198,20 +234,23 @@ namespace Legacy.Support
             }
         }
 
+        /// <summary>
+        /// Set this true to shorten the very long-running stress tests
+        /// </summary>
+        public static bool RunShortStressTests { get; set; } = true;
+
         public delegate bool Predicate();
 
         public delegate T ValueGenerator<T>();
 
-        public static bool WaitForPredicate(Predicate predicate, int maxWait, string errorMessageFormat, params object[] formatArgs)
+        public static void WaitForPredicate(Predicate predicate, int maxWait, string errorMessageFormat, params object[] formatArgs)
         {
-            return WaitForPredicate(predicate, maxWait, string.Format(errorMessageFormat, formatArgs));
+            WaitForPredicate(predicate, maxWait, string.Format(errorMessageFormat, formatArgs));
         }
-        public static bool WaitForPredicate(Predicate predicate, int maxWait, string errorMessage)
+        public static void WaitForPredicate(Predicate predicate, int maxWait, string errorMessage)
         {
-            Stopwatch stopWatch = new Stopwatch();
+            Stopwatch stopWatch = Stopwatch.StartNew();
             bool predicateValue = false;
-
-            stopWatch.Start();
 
             while (!predicateValue && stopWatch.ElapsedMilliseconds < maxWait)
             {
@@ -219,13 +258,10 @@ namespace Legacy.Support
                 System.Threading.Thread.Sleep(10);
             }
 
-            if (!predicateValue)
-                Debug.WriteLine(errorMessage);
-
-            return predicateValue;
+            Assert.True(predicateValue, errorMessage);
         }
 
-        public static bool WaitForExpected<T>(ValueGenerator<T> actualValueGenerator, T expectedValue, int maxWait, string errorMessage)
+        public static void WaitForExpected<T>(ValueGenerator<T> actualValueGenerator, T expectedValue, int maxWait, string errorMessage)
         {
             Stopwatch stopWatch = new Stopwatch();
             bool result = false;
@@ -245,12 +281,10 @@ namespace Legacy.Support
 
             if (!result)
             {
-                Debug.WriteLine(errorMessage +
+                Assert.True(false, errorMessage +
                     " Expected:" + (null == expectedValue ? "<null>" : expectedValue.ToString()) +
                     " Actual:" + (null == actualValue ? "<null>" : actualValue.ToString()));
             }
-
-            return result;
         }
 
         private const int MIN_RANDOM_CHAR = 0;
@@ -540,17 +574,10 @@ namespace Legacy.Support
         /// <param name="expectedArray">The expected items in the array.</param>
         /// <param name="actualArray">The actual array.</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
-        public static bool VerifyArray<T>(T[] expectedArray, T[] actualArray)
+        public static void VerifyArray<T>(T[] expectedArray, T[] actualArray)
         {
-            if (expectedArray.Length != actualArray.Length)
-            {
-                Debug.WriteLine("Err_29289ahieadb Array Length");
-                return false;
-            }
-            else
-            {
-                return VerifyArray<T>(expectedArray, actualArray, 0, expectedArray.Length);
-            }
+            Assert.Equal(expectedArray.Length, actualArray.Length);
+            VerifyArray(expectedArray, actualArray, 0, expectedArray.Length);
         }
 
         /// <summary>
@@ -562,10 +589,8 @@ namespace Legacy.Support
         /// <param name="index">The index to start verifying the items at.</param>
         /// <param name="length">The number of item to verify</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
-        /// <summary>
-        public static bool VerifyArray<T>(T[] expectedArray, T[] actualArray, int index, int length)
+        public static void VerifyArray<T>(T[] expectedArray, T[] actualArray, int index, int length)
         {
-            bool retValue = true;
             bool result;
             int tempLength;
 
@@ -576,12 +601,9 @@ namespace Legacy.Support
 
                 if (!result)
                 {
-                    retValue = false;
-                    Debug.WriteLine("Err_55808aoped Items differ at {0} expected {1} actual {2}", i, expectedArray[i], actualArray[i]);
+                    Assert.True(false, string.Format("Err_55808aoped Items differ at {0} expected {1} actual {2}", i, expectedArray[i], actualArray[i]));
                 }
             }
-
-            return retValue;
         }
     }
 }

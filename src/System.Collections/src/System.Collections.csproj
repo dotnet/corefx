@@ -6,8 +6,6 @@
     <AssemblyName>System.Collections</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <!-- 436 is thrown because BitArray conflict with corelib -->
-    <NoWarn>0436</NoWarn>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -21,19 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.2corert'">
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
-      <TargetGroup>netcoreapp1.2corert</TargetGroup>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
-      <TargetGroup>uapaot</TargetGroup>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Resources.ResourceManager\src\System.Resources.ResourceManager.csproj">
-      <TargetGroup>uapaot</TargetGroup>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Collections\BitArray.cs" />

@@ -4,12 +4,10 @@
   <PropertyGroup>
     <ProjectGuid>{43841228-2A2B-4215-B97F-33006995E486}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.3-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard1.3-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerableTest.cs">
       <Link>Common\System\CollectionsIEnumerableTest.cs</Link>
@@ -44,8 +42,10 @@
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
     <Compile Include="KeyedCollection\TestMethods.netcoreapp.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="KeyedCollection\Serialization.netstandard.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ConstructorAndPropertyTests.netstandard.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_Serialization.netstandard.cs" />
