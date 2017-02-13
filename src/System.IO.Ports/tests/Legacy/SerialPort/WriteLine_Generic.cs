@@ -6,6 +6,7 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Legacy.Support;
@@ -104,7 +105,7 @@ public class WriteLine_Generic : PortsTest
     }
 
     [OuterLoop("Slow test")]
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void SuccessiveReadTimeout()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -130,7 +131,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void SuccessiveReadTimeoutWithWriteSucceeding()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -175,7 +176,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void BytesToWrite()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -212,7 +213,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void BytesToWriteSuccessive()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -290,7 +291,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSend()
     {
         Debug.WriteLine("Case Handshake_RequestToSend : Verifying Handshake=RequestToSend");
@@ -304,7 +305,7 @@ public class WriteLine_Generic : PortsTest
         Verify_Handshake(Handshake.XOnXOff);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSendXOnXOff()
     {
         Debug.WriteLine("Case Handshake_RequestToSendXOnXOff : Verifying Handshake=RequestToSendXOnXOff");

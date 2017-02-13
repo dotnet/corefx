@@ -107,6 +107,7 @@
     <Compile Include="Legacy\SerialStream\WriteTimeout.cs" />
     <Compile Include="Legacy\SerialStream\Write_byte_int_int.cs" />
     <Compile Include="Legacy\SerialStream\Write_byte_int_int_Generic.cs" />
+    <Compile Include="Legacy\Support\FlowControlCapabilities.cs" />
     <Compile Include="Legacy\Support\LocalMachineSerialInfo.cs" />
     <Compile Include="Legacy\Support\PortHelper.cs" />
     <Compile Include="Legacy\Support\SerialPortConnection.cs" />

@@ -75,7 +75,7 @@ namespace Legacy.SerialStream
             }
         }
 
-        [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
         public void Timeout()
         {
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -103,7 +103,7 @@ namespace Legacy.SerialStream
         }
 
         [OuterLoop("Slow Test")]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
         public void SuccessiveWriteTimeout()
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -130,7 +130,7 @@ namespace Legacy.SerialStream
             }
         }
 
-        [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
         public void SuccessiveWriteTimeoutWithWriteSucceeding()
         {
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -177,7 +177,7 @@ namespace Legacy.SerialStream
             }
         }
 
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
         public void BytesToWrite()
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -212,7 +212,7 @@ namespace Legacy.SerialStream
         }
 
         [OuterLoop("Slow Test")]
-        [ConditionalFact(nameof(HasOneSerialPort))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
         public void BytesToWriteSuccessive()
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -305,7 +305,7 @@ namespace Legacy.SerialStream
             }
         }
 
-        [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
         public void Handshake_RequestToSend()
         {
             Verify_Handshake(Handshake.RequestToSend);
@@ -317,7 +317,7 @@ namespace Legacy.SerialStream
             Verify_Handshake(Handshake.XOnXOff);
         }
 
-        [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
         public void Handshake_RequestToSendXOnXOff()
         {
             Verify_Handshake(Handshake.RequestToSendXOnXOff);

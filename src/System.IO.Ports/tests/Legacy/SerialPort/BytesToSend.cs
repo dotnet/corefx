@@ -44,28 +44,28 @@ public class BytesToWrite_Property : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void BytesToWrite_Write_byte_int_int()
     {
         Debug.WriteLine("Verifying BytesToWrite with Write(byte[] buffer, int offset, int count)");
         VerifyBytesToWrite(Write_byte_int_int, DEFAULT_NUM_RND_BYTES, false);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void BytesToWrite_Write_char_int_int()
     {
         Debug.WriteLine("Verifying BytesToWrite with Write(char[] buffer, int offset, int count)");
         VerifyBytesToWrite(Write_char_int_int, DEFAULT_NUM_RND_BYTES, false);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void BytesToWrite_Write_str()
     {
         Debug.WriteLine("Verifying BytesToWrite with WriteChar()");
         VerifyBytesToWrite(Write_str, 1, false);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void BytesToWrite_WriteLine()
     {
         Debug.WriteLine("Verifying BytesToWrite with WriteLine()");

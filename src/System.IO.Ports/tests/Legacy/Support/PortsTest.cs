@@ -25,6 +25,12 @@ namespace System.IO.PortsTests
         /// </summary>
         public static bool HasSingleByteTransmitBlocking => TCSupport.HardwareTransmitBufferSize == 0;
 
+        /// <summary>
+        /// Shows that we can inhibit transmission using hardware flow control
+        /// Some kinds of virtual port or RS485 adaptor can't do this
+        /// </summary>
+        public static bool HasHardwareFlowControl => TCSupport.HardwareWriteBlockingAvailable;
+
         public static void Fail(string format, params object[] args)
         {
             Assert.True(false, string.Format(format, args));

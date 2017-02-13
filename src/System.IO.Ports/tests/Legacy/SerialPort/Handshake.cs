@@ -67,14 +67,14 @@ public class Handshake_Property : PortsTest
     }
 
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSend_BeforeOpen()
     {
         Debug.WriteLine("Verifying RequestToSend Handshake before open");
         VerifyHandshakeBeforeOpen((int)Handshake.RequestToSend);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSendXOnXOff_BeforeOpen()
     {
         Debug.WriteLine("Verifying RequestToSendXOnXOff Handshake before open");
@@ -95,14 +95,14 @@ public class Handshake_Property : PortsTest
         VerifyHandshakeAfterOpen((int)Handshake.XOnXOff);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSend_AfterOpen()
     {
         Debug.WriteLine("Verifying RequestToSend Handshake after open");
         VerifyHandshakeAfterOpen((int)Handshake.RequestToSend);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSendXOnXOff_AfterOpen()
     {
         Debug.WriteLine("Verifying RequestToSendXOnXOff Handshake after open");

@@ -16,6 +16,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace Legacy.Support
 {
@@ -105,28 +106,23 @@ namespace Legacy.Support
         /// they block
         /// </summary>
         /// <returns>The smallest probe </returns>
-        public static int MeasureTransmitBufferSize(string portName)
+        public static FlowControlCapabilities MeasureFlowControlCapabilities(string portName)
         {
-            bool probeSucceeded = false;
-            int bufferSize = 0;
             for (int probeBase = 1; probeBase <= 65536; probeBase *= 2)
             {
                 // We always probe one over the powers of two to make sure we just exceed common buffer sizes
                 int probeLength;
                 probeLength = probeBase + 1;
-                bufferSize = MeasureTransmitBufferSize(portName, probeLength);
+                int bufferSize = MeasureTransmitBufferSize(portName, probeLength);
                 if (bufferSize < probeLength)
                 {
                     Console.WriteLine("{0}: Found blocking packet of length {1}, hardware buffer {2}", portName, probeLength, bufferSize);
-                    probeSucceeded = true;
-                    break;
+                    return new FlowControlCapabilities(probeLength, bufferSize, true);
                 }
             }
-            if (!probeSucceeded)
-            {
-                Console.WriteLine("Failed to achieve write blocking on serial port - subsequent tests will fail");
-            }
-            return bufferSize;
+
+            Console.WriteLine("Failed to achieve write blocking on serial port - no hardware flow-control available");
+            return new FlowControlCapabilities(0, -1, false);
         }
 
         /// <summary>

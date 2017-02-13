@@ -5,7 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
+using System.IO.PortsTests;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -119,10 +121,9 @@ namespace Legacy.Support
             if (portName1 != null)
             {
                 // Measure how big a packet we need to write to be sure to see blocking behaviour at a port
-                HardwareTransmitBufferSize = SerialPortConnection.MeasureTransmitBufferSize(portName1);
-                MinimumBlockingByteCount = Math.Max(128, HardwareTransmitBufferSize*2);
+                s_flowControlCapabilities = SerialPortConnection.MeasureFlowControlCapabilities(portName1);
 
-                Console.WriteLine("{0}: Running with Min block buffer size {1}, HW buffer {2}", portName1, MinimumBlockingByteCount, HardwareTransmitBufferSize);
+                Console.WriteLine("{0}: Flow capabilities {1}", portName1, s_flowControlCapabilities);
             }
         }
 
@@ -257,8 +258,9 @@ namespace Legacy.Support
         /// </summary>
         public static bool RunShortStressTests { get; set; } = true;
 
-        public static int MinimumBlockingByteCount { get; private set; } = 128;
-        public static int HardwareTransmitBufferSize { get; private set; } = 128;
+        public static int MinimumBlockingByteCount => s_flowControlCapabilities.MinimumBlockingByteCount;
+        public static int HardwareTransmitBufferSize => s_flowControlCapabilities.HardwareTransmitBufferSize;
+        public static bool HardwareWriteBlockingAvailable => s_flowControlCapabilities.HardwareWriteBlockingAvailable;
 
         public delegate bool Predicate();
 
@@ -320,6 +322,7 @@ namespace Legacy.Support
         public const int MAX_RANDOM_ASCII_CHAR = 127;
 
         private static Random s_random = new Random(-55);
+        private static FlowControlCapabilities s_flowControlCapabilities = new FlowControlCapabilities(0,0,false);
 
         public enum CharacterOptions { None, Surrogates, ASCII };
 
