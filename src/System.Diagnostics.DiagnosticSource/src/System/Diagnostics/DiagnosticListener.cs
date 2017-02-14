@@ -176,11 +176,12 @@ namespace System.Diagnostics
         // NotificationSource implementation
 
         /// <summary>
-        /// Optional: If there is an expensive setup for the notification,
-        /// you may call IsEnabled() as the first and most efficient check before doing this setup. 
-        /// Producers may use this check before IsEnabled(string) in the most performance-critical parts of the system
-        /// to ensure somebody listens to the DiagnosticListener at all.
+        /// Determines whether there are any registered subscribers
         /// </summary>
+        /// <remarks> If there is an expensive setup for the notification,
+        /// you may call IsEnabled() as the first and most efficient check before doing this setup. 
+        /// Producers may optionally use this check before IsEnabled(string) in the most performance-critical parts of the system
+        /// to ensure somebody listens to the DiagnosticListener at all.</remarks>
         public bool IsEnabled()
         {
             return _subscriptions != null;
