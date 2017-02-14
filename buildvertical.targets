@@ -12,7 +12,7 @@
 
   <!-- Runs during traversal when BuildAllConfigurations is set to expand each project
        to a seperate instance for each of its BuildConfigurations -->
-  <Target Name="ExpandAllBuildConfigurations" 
+  <Target Name="ExpandAllBuildConfigurations"
           Condition="'$(BuildAllConfigurations)' == 'true'">
     <MSBuild Targets="GetBuildConfigurations"
              Projects="@(Project)"
@@ -22,19 +22,23 @@
     </MSBuild>
 
     <ItemGroup>
+      <!-- assign configuration as a seperate step to prevent batching during the transform which can reorder the list.
+           order or projects matters here since this applies to traversal projects which build projects serially. -->
+      <_projectBuildConfigurations>
+        <AdditionalProperties>Configuration=%(Identity);%(_projectBuildConfigurations.AdditionalProperties)</AdditionalProperties>
+      </_projectBuildConfigurations>
+
       <!-- transform back to project -->
-      <_ProjectWithConfiguration Include="@(_projectBuildConfigurations->'%(OriginalItemSpec)')">
-        <AdditionalProperties>Configuration=%(Identity);%(_ProjectBestConfigurations.AdditionalProperties)</AdditionalProperties>
-      </_ProjectWithConfiguration>
+      <_projectWithConfiguration Include="@(_projectBuildConfigurations->'%(OriginalItemSpec)')" />
     </ItemGroup>
 
     <ItemGroup>
       <Project Remove="@(Project)" />
-      <Project Include="@(_ProjectWithConfiguration)" />
+      <Project Include="@(_projectWithConfiguration)" />
     </ItemGroup>
   </Target>
 
-  <!-- Runs during traversal to select which projects and configurations of those projects to build 
+  <!-- Runs during traversal to select which projects and configurations of those projects to build
        Batches over the projects because we need to treat BuildConfigurations as a Property
        as well as copy the Project based on results of FindBestConfigurations. -->
   <Target Name="FilterBuildConfiguration"
@@ -79,7 +83,7 @@
 
   <!-- Runs in a leaf project (csproj) to determine best configuration for ProjectReferences -->
   <Target Name="AnnotateProjectReference"
-          BeforeTargets="BeforeResolveReferences"
+          BeforeTargets="AssignProjectConfiguration"
           Condition="'@(ProjectReference)' != ''"
           Inputs="%(ProjectReference.Identity)"
           Outputs="unused">
@@ -88,6 +92,15 @@
              Projects="@(ProjectReference)">
       <Output TaskParameter="TargetOutputs" PropertyName="_projectReferenceBuildConfigurations" />
     </MSBuild>
+
+    <PropertyGroup>
+      <!--
+        When building in VS or using the solution file Configuration for some projects is set to Debug/Release
+        in such cases we should treat it as an empty configuration and set it to be $BuildConfiguration for the
+        purposes of annotating project references.
+      -->
+      <Configuration Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release'">$(BuildConfiguration)</Configuration>
+    </PropertyGroup>
 
     <!-- Find the best configuration for the current Project's Configuration -->
     <FindBestConfigurations Properties="@(Property)"
@@ -102,6 +115,11 @@
     <ItemGroup>
       <ProjectReference>
         <AdditionalProperties>Configuration=$(_projectReferenceConfiguration);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
+      </ProjectReference>
+
+      <!-- Project references for non-test assemblies should never be copied to the output. -->
+      <ProjectReference Condition="'$(IsTestProject)' != 'true'">
+        <Private>false</Private>
       </ProjectReference>
     </ItemGroup>
   </Target>

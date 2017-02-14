@@ -22,7 +22,6 @@ namespace System.Net.Security.Tests
         private const uint SEC_E_CERT_UNKNOWN = 0x80090327;
 
         [Fact]
-        [ActiveIssue(12706, TestPlatforms.Windows)]
         [ActiveIssue(12319, TestPlatforms.AnyUnix)]
         public async Task SslStream_StreamToStream_HandshakeAlert_Ok()
         {
@@ -48,7 +47,7 @@ namespace System.Net.Security.Tests
 
                 // The Schannel HResults for each alert are documented here: 
                 // https://msdn.microsoft.com/en-us/library/windows/desktop/dd721886(v=vs.85).aspx
-                Assert.Equal(SEC_E_CERT_UNKNOWN, (uint)win32ex.NativeErrorCode);
+                Assert.Equal(SEC_E_CERT_UNKNOWN, unchecked((uint)win32ex.NativeErrorCode));
 
                 await Assert.ThrowsAsync<AuthenticationException>(() => serverAuth);
 
@@ -58,7 +57,6 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [ActiveIssue(12683, TestPlatforms.Windows)]
         [ActiveIssue(12319, TestPlatforms.AnyUnix)]
         public async Task SslStream_StreamToStream_ServerInitiatedCloseNotify_Ok()
         {
@@ -125,7 +123,6 @@ namespace System.Net.Security.Tests
         }
         
         [Fact]
-        [ActiveIssue(12706, TestPlatforms.Windows)]
         [ActiveIssue(12319, TestPlatforms.AnyUnix)]
         public async Task SslStream_StreamToStream_DataAfterShutdown_Fail()
         {

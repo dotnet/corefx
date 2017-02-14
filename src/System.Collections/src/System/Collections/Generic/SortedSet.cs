@@ -210,11 +210,7 @@ namespace System.Collections.Generic
         // If the action delegate returns false, stop the walk.
         // Return true if the entire tree has been walked.
         // Otherwise returns false.
-
-        internal bool InOrderTreeWalk(TreeWalkPredicate<T> action) => InOrderTreeWalk(action, reverse: false);
-
-        // Allows for the change in traversal direction. Reverse visits nodes in descending order
-        internal virtual bool InOrderTreeWalk(TreeWalkPredicate<T> action, bool reverse)
+        internal virtual bool InOrderTreeWalk(TreeWalkPredicate<T> action)
         {
             if (_root == null)
             {
@@ -230,7 +226,7 @@ namespace System.Collections.Generic
             while (current != null)
             {
                 stack.Push(current);
-                current = (reverse ? current.Right : current.Left);
+                current = current.Left;
             }
             while (stack.Count != 0)
             {
@@ -240,11 +236,11 @@ namespace System.Collections.Generic
                     return false;
                 }
 
-                Node node = (reverse ? current.Left : current.Right);
+                Node node = current.Right;
                 while (node != null)
                 {
                     stack.Push(node);
-                    node = (reverse ? node.Right : node.Left);
+                    node = node.Left;
                 }
             }
             return true;
@@ -2028,6 +2024,30 @@ namespace System.Collections.Generic
         #endregion
 
         #region Miscellaneous
+
+        /// <summary>
+        /// Searches the set for a given value and returns the equal value it finds, if any.
+        /// </summary>
+        /// <param name="equalValue">The value to search for.</param>
+        /// <param name="actualValue">The value from the set that the search found, or the original value if the search yielded no match.</param>
+        /// <returns>A value indicating whether the search was successful.</returns>
+        /// <remarks>
+        /// This can be useful when you want to reuse a previously stored reference instead of 
+        /// a newly constructed one (so that more sharing of references can occur) or to look up
+        /// a value that has more complete data than the value you currently have, although their
+        /// comparer functions indicate they are equal.
+        /// </remarks>
+        public bool TryGetValue(T equalValue, out T actualValue)
+        {
+            Node node = FindNode(equalValue);
+            if (node != null)
+            {
+                actualValue = node.Item;
+                return true;
+            }
+            actualValue = default(T);
+            return false;
+        }
 
         // Used for set checking operations (using enumerables) that rely on counting
         private static int Log2(int value)

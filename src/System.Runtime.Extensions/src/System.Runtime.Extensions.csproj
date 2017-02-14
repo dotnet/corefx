@@ -7,29 +7,22 @@
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
     <!-- System.IO.Path conflicts between type in partial facade and in mscorlib -->
     <NoWarn>0436</NoWarn>
-    <TargetsWindowsUap Condition="'$(TargetGroup)'=='uap101aot'">true</TargetsWindowsUap>
+    <TargetsWindowsUap Condition="'$(TargetGroup)'=='uapaot'">true</TargetsWindowsUap>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp1.2corert-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp1.2corert-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp1.2corert-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp1.2corert-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(TargetGroup)' == 'uap101aot' or '$(TargetGroup)' == 'netcoreapp1.2corert'">
-    <SkipCommonResourcesIncludes>true</SkipCommonResourcesIncludes>
-    <ExcludeAssemblyInfoPartialFile>true</ExcludeAssemblyInfoPartialFile>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\AppDomain.cs" Condition="'$(TargetGroup)' != 'uap101aot' and '$(TargetGroup)' != 'netcoreapp1.2corert'" />
+    <Compile Include="System\AppDomain.cs" Condition="'$(TargetGroup)' != 'uapaot' and '$(TargetGroup)' != 'netcoreapp1.2corert'" />
     <Compile Include="System\Context.cs" />
     <Compile Include="System\AppDomainUnloadedException.cs" />
     <Compile Include="System\ApplicationId.cs" />
@@ -157,12 +150,8 @@
       <Link>Common\System\IO\PathInternal.Windows.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Win32 or Unix -->
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true' or ('$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap101aot')">
-    <Compile Include="System\Environment.Win32.Unix.cs" />
-  </ItemGroup>
   <!-- WINDOWS: Win32 -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap101aot'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uapaot'">
     <Compile Include="System\Environment.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnvironmentVariables.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.EnvironmentVariables.cs</Link>
@@ -277,7 +266,7 @@
     </Compile>
   </ItemGroup>
   <!-- WINDOWS: UAP -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap101aot'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <Compile Include="System\Environment.Uap.cs" />
     <Compile Include="System\IO\FileStreamHelpers.Uap.cs" />
     <Compile Include="System\IO\Path.Uap.cs" />
@@ -307,11 +296,8 @@
       <Link>Common\System\Runtime\InteropServices\StringBuffer.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap101aot' or '$(TargetGroup)' == 'netcoreapp1.2corert'">
-    <Compile Include="System\IO\BinaryReader.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'netcoreapp1.2corert'">
     <Compile Include="System\IO\BinaryWriter.cs" />
-    <Compile Include="System\IO\MemoryStream.cs" />
-    <Compile Include="$(CommonPath)\System\SR.Core.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\StringNormalizationExtensions.cs" />
@@ -325,8 +311,10 @@
     </ProjectReference>
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap101aot'">
-    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
+    <ReferenceFromRuntime Include="System.Private.Interop" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
   </ItemGroup>

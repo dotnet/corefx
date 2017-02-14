@@ -568,7 +568,7 @@ namespace System.Linq.Expressions.Compiler
             // Try to emit the constant directly into IL
             if (ILGen.CanEmitConstant(value, type))
             {
-                _ilg.EmitConstant(value, type);
+                _ilg.EmitConstant(value, type, this);
                 return;
             }
 
@@ -655,7 +655,7 @@ namespace System.Linq.Expressions.Compiler
                 // Result is known statically, so just emit the expression for
                 // its side effects and return the result
                 EmitExpressionAsVoid(node.Expression);
-                _ilg.EmitBoolean(result == AnalyzeTypeIsResult.KnownTrue);
+                _ilg.EmitPrimitive(result == AnalyzeTypeIsResult.KnownTrue);
                 return;
             }
 
@@ -673,9 +673,7 @@ namespace System.Linq.Expressions.Compiler
                 Debug.Assert(!type.GetTypeInfo().IsValueType);
                 EmitExpression(node.Expression);
                 _ilg.Emit(OpCodes.Ldnull);
-                _ilg.Emit(OpCodes.Ceq);
-                _ilg.Emit(OpCodes.Ldc_I4_0);
-                _ilg.Emit(OpCodes.Ceq);
+                _ilg.Emit(OpCodes.Cgt_Un);
                 return;
             }
 
@@ -903,7 +901,7 @@ namespace System.Linq.Expressions.Compiler
                 for (int i = 0; i < n; i++)
                 {
                     _ilg.Emit(OpCodes.Dup);
-                    _ilg.EmitInt(i);
+                    _ilg.EmitPrimitive(i);
                     EmitExpression(expressions[i]);
                     _ilg.EmitStoreElement(elementType);
                 }
@@ -914,7 +912,7 @@ namespace System.Linq.Expressions.Compiler
                 {
                     Expression x = expressions[i];
                     EmitExpression(x);
-                    _ilg.EmitConvertToType(x.Type, typeof(int), isChecked: true);
+                    _ilg.EmitConvertToType(x.Type, typeof(int), isChecked: true, locals: this);
                 }
                 _ilg.EmitArray(node.Type);
             }
@@ -1025,7 +1023,7 @@ namespace System.Linq.Expressions.Compiler
             LocalBuilder loc = null;
             if (init.NewExpression.Type.GetTypeInfo().IsValueType && init.Bindings.Count > 0)
             {
-                loc = _ilg.DeclareLocal(init.NewExpression.Type);
+                loc = GetLocal(init.NewExpression.Type);
                 _ilg.Emit(OpCodes.Stloc, loc);
                 _ilg.Emit(OpCodes.Ldloca, loc);
             }
@@ -1033,6 +1031,7 @@ namespace System.Linq.Expressions.Compiler
             if (loc != null)
             {
                 _ilg.Emit(OpCodes.Ldloc, loc);
+                FreeLocal(loc);
             }
         }
 
@@ -1068,7 +1067,7 @@ namespace System.Linq.Expressions.Compiler
             LocalBuilder loc = null;
             if (init.NewExpression.Type.GetTypeInfo().IsValueType)
             {
-                loc = _ilg.DeclareLocal(init.NewExpression.Type);
+                loc = GetLocal(init.NewExpression.Type);
                 _ilg.Emit(OpCodes.Stloc, loc);
                 _ilg.Emit(OpCodes.Ldloca, loc);
             }
@@ -1076,6 +1075,7 @@ namespace System.Linq.Expressions.Compiler
             if (loc != null)
             {
                 _ilg.Emit(OpCodes.Ldloc, loc);
+                FreeLocal(loc);
             }
         }
 
@@ -1158,7 +1158,7 @@ namespace System.Linq.Expressions.Compiler
                     {
                         Label exit = _ilg.DefineLabel();
                         Label exitNull = _ilg.DefineLabel();
-                        LocalBuilder anyNull = _ilg.DeclareLocal(typeof(bool));
+                        LocalBuilder anyNull = GetLocal(typeof(bool));
                         for (int i = 0, n = paramList.Length; i < n; i++)
                         {
                             ParameterExpression v = paramList[i];
@@ -1229,6 +1229,7 @@ namespace System.Linq.Expressions.Compiler
                             }
                         }
                         _ilg.MarkLabel(exit);
+                        FreeLocal(anyNull);
                         return;
                     }
                 case ExpressionType.Equal:
@@ -1242,8 +1243,8 @@ namespace System.Linq.Expressions.Compiler
                         Label exitAllNull = _ilg.DefineLabel();
                         Label exitAnyNull = _ilg.DefineLabel();
 
-                        LocalBuilder anyNull = _ilg.DeclareLocal(typeof(bool));
-                        LocalBuilder allNull = _ilg.DeclareLocal(typeof(bool));
+                        LocalBuilder anyNull = GetLocal(typeof(bool));
+                        LocalBuilder allNull = GetLocal(typeof(bool));
                         _ilg.Emit(OpCodes.Ldc_I4_0);
                         _ilg.Emit(OpCodes.Stloc, anyNull);
                         _ilg.Emit(OpCodes.Ldc_I4_1);
@@ -1308,13 +1309,15 @@ namespace System.Linq.Expressions.Compiler
                         _ilg.Emit(OpCodes.Br_S, exit);
 
                         _ilg.MarkLabel(exitAllNull);
-                        _ilg.EmitBoolean(nodeType == ExpressionType.Equal);
+                        _ilg.EmitPrimitive(nodeType == ExpressionType.Equal);
                         _ilg.Emit(OpCodes.Br_S, exit);
 
                         _ilg.MarkLabel(exitAnyNull);
-                        _ilg.EmitBoolean(nodeType == ExpressionType.NotEqual);
+                        _ilg.EmitPrimitive(nodeType == ExpressionType.NotEqual);
 
                         _ilg.MarkLabel(exit);
+                        FreeLocal(anyNull);
+                        FreeLocal(allNull);
                         return;
                     }
             }
