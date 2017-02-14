@@ -50,11 +50,11 @@ namespace Legacy.Support
             string portName1 = null, portName2 = null, loopbackPortName = null;
 
             Array.Sort(installedPortNames);
-            Console.WriteLine("Installed ports : " + string.Join(",", installedPortNames));
+            Debug.WriteLine("Installed ports : " + string.Join(",", installedPortNames));
 
             IList<string> openablePortNames = CheckPortsCanBeOpened(installedPortNames);
 
-            Console.WriteLine("Openable ports  : " + string.Join(",", openablePortNames));
+            Debug.WriteLine("Openable ports  : " + string.Join(",", openablePortNames));
 
             // Find any pair of ports which are null-modem connected
             // If there is a pair like this, then they take precedence over any other way of identifying two available ports
@@ -72,7 +72,7 @@ namespace Legacy.Support
                         portName2 = secondPortName;
                         nullModemPresent = true;
 
-                        Console.WriteLine("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
+                        Debug.WriteLine("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
                     }
                 }
             }
@@ -101,7 +101,7 @@ namespace Legacy.Support
             if (loopbackPortName == null && !nullModemPresent)
             {
                 // We don't have any supporting hardware - disable all the tests which would use just an open port
-                Console.WriteLine("No support hardware - not using serial ports");
+                Debug.WriteLine("No support hardware - not using serial ports");
                 portName1 = portName2 = null;
             }
 
@@ -112,7 +112,7 @@ namespace Legacy.Support
                 // Measure how big a packet we need to write to be sure to see blocking behaviour at a port
                 s_flowControlCapabilities = SerialPortConnection.MeasureFlowControlCapabilities(portName1);
 
-                Console.WriteLine("{0}: Flow capabilities {1}", portName1, s_flowControlCapabilities);
+                Debug.WriteLine("{0}: Flow capabilities {1}", portName1, s_flowControlCapabilities);
             }
         }
 

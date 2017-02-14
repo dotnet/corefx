@@ -12,6 +12,7 @@
 // a null modem connection - i.e. TX/RX and CTS/RTS are crossed between the ports.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
@@ -116,12 +117,12 @@ namespace Legacy.Support
                 int bufferSize = MeasureTransmitBufferSize(portName, probeLength);
                 if (bufferSize < probeLength)
                 {
-                    Console.WriteLine("{0}: Found blocking packet of length {1}, hardware buffer {2}", portName, probeLength, bufferSize);
+                    Debug.WriteLine("{0}: Found blocking packet of length {1}, hardware buffer {2}", portName, probeLength, bufferSize);
                     return new FlowControlCapabilities(probeLength, bufferSize, true);
                 }
             }
 
-            Console.WriteLine("Failed to achieve write blocking on serial port - no hardware flow-control available");
+            Debug.WriteLine("Failed to achieve write blocking on serial port - no hardware flow-control available");
             return new FlowControlCapabilities(0, -1, false);
         }
 
