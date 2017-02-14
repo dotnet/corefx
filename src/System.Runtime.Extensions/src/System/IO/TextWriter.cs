@@ -21,7 +21,11 @@ namespace System.IO
     {
         public static readonly TextWriter Null = new NullTextWriter();
 
-        protected char[] CoreNewLine = Environment.NewLine.ToCharArray();
+        // We don't want to allocate on every TextWriter creation, so cache the char array.  
+        private static readonly char[] CoreNewLineStatic = Environment.NewLine.ToCharArray();
+
+        // Clients get to override this. 
+        protected char[] CoreNewLine = CoreNewLineStatic;
         private string CoreNewLineStr = Environment.NewLine;
 
         // Can be null - if so, ask for the Thread's CurrentCulture every time.
