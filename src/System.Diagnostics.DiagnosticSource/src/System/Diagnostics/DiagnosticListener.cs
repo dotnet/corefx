@@ -174,10 +174,22 @@ namespace System.Diagnostics
         #region private
 
         // NotificationSource implementation
+
+        /// <summary>
+        /// Optional: If there is an expensive setup for the notification,
+        /// you may call IsEnabled() as the first and most efficient check before doing this setup. 
+        /// Producers may use this check before IsEnabled(string) in the most performance-critical parts of the system
+        /// to ensure somebody listens to the DiagnosticListener at all.
+        /// </summary>
+        public bool IsEnabled()
+        {
+            return _subscriptions != null;
+        }
+
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public override bool IsEnabled(string name)
+        public sealed override bool IsEnabled(string name)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
@@ -191,7 +203,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public override bool IsEnabled(string name, object arg1, object arg2 = null)
+        public sealed override bool IsEnabled(string name, object arg1, object arg2 = null)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
@@ -204,7 +216,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public override void Write(string name, object value)
+        public sealed override void Write(string name, object value)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
