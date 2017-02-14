@@ -169,6 +169,9 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
     <Compile Include="AssemblyInfo.Net46.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.Net46.cs" />
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
