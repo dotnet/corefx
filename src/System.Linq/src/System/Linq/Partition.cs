@@ -77,40 +77,36 @@ namespace System.Linq
         TElement TryGetLast(out bool found);
     }
 
+    /// <summary>
+    /// Represents an enumerable with zero elements.
+    /// </summary>
+    /// <typeparam name="TElement">The element type.</typeparam>
+    /// <remarks>
+    /// Returning an instance of this type is useful to quickly handle scenarios where it is known
+    /// that an operation will result in zero elements.
+    /// </remarks>
     internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
     {
+        /// <summary>
+        /// A cached, immutable instance of an empty enumerable.
+        /// </summary>
         public static readonly IPartition<TElement> Instance = new EmptyPartition<TElement>();
 
         private EmptyPartition()
         {
         }
 
-        public IEnumerator<TElement> GetEnumerator()
-        {
-            return this;
-        }
+        public IEnumerator<TElement> GetEnumerator() => this;
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this;
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this;
 
-        public bool MoveNext()
-        {
-            return false;
-        }
+        public bool MoveNext() => false;
 
         [ExcludeFromCodeCoverage] // Shouldn't be called, and as undefined can return or throw anything anyway.
-        public TElement Current
-        {
-            get { return default(TElement); }
-        }
+        public TElement Current => default(TElement);
 
         [ExcludeFromCodeCoverage] // Shouldn't be called, and as undefined can return or throw anything anyway.
-        object IEnumerator.Current
-        {
-            get { return default(TElement); }
-        }
+        object IEnumerator.Current => default(TElement);
 
         void IEnumerator.Reset()
         {
@@ -122,15 +118,9 @@ namespace System.Linq
             // Do nothing.
         }
 
-        public IPartition<TElement> Skip(int count)
-        {
-            return this;
-        }
+        public IPartition<TElement> Skip(int count) => this;
 
-        public IPartition<TElement> Take(int count)
-        {
-            return this;
-        }
+        public IPartition<TElement> Take(int count) => this;
 
         public TElement TryGetElementAt(int index, out bool found)
         {
@@ -150,20 +140,11 @@ namespace System.Linq
             return default(TElement);
         }
 
-        public TElement[] ToArray()
-        {
-            return Array.Empty<TElement>();
-        }
+        public TElement[] ToArray() => Array.Empty<TElement>();
 
-        public List<TElement> ToList()
-        {
-            return new List<TElement>();
-        }
+        public List<TElement> ToList() => new List<TElement>();
 
-        public int GetCount(bool onlyIfCheap)
-        {
-            return 0;
-        }
+        public int GetCount(bool onlyIfCheap) => 0;
     }
 
     internal sealed class OrderedPartition<TElement> : IPartition<TElement>
@@ -191,14 +172,14 @@ namespace System.Linq
 
         public IPartition<TElement> Skip(int count)
         {
-            int minIndex = _minIndexInclusive + count;
-            return (uint)minIndex > (uint)_maxIndexInclusive ? EmptyPartition<TElement>.Instance : new OrderedPartition<TElement>(_source, minIndex, _maxIndexInclusive);
+            int minIndex = unchecked(_minIndexInclusive + count);
+            return unchecked((uint)minIndex > (uint)_maxIndexInclusive) ? EmptyPartition<TElement>.Instance : new OrderedPartition<TElement>(_source, minIndex, _maxIndexInclusive);
         }
 
         public IPartition<TElement> Take(int count)
         {
-            int maxIndex = _minIndexInclusive + count - 1;
-            if ((uint)maxIndex >= (uint)_maxIndexInclusive)
+            int maxIndex = unchecked(_minIndexInclusive + count - 1);
+            if (unchecked((uint)maxIndex >= (uint)_maxIndexInclusive))
             {
                 return this;
             }
@@ -208,7 +189,7 @@ namespace System.Linq
 
         public TElement TryGetElementAt(int index, out bool found)
         {
-            if ((uint)index <= (uint)(_maxIndexInclusive - _minIndexInclusive))
+            if (unchecked((uint)index <= (uint)(_maxIndexInclusive - _minIndexInclusive)))
             {
                 return _source.TryGetElementAt(index + _minIndexInclusive, out found);
             }
@@ -245,12 +226,15 @@ namespace System.Linq
 
     public static partial class Enumerable
     {
+        /// <summary>
+        /// An iterator that yields the items of part of an <see cref="IList{TSource}"/>.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source list.</typeparam>
         private sealed class ListPartition<TSource> : Iterator<TSource>, IPartition<TSource>
         {
             private readonly IList<TSource> _source;
             private readonly int _minIndexInclusive;
             private readonly int _maxIndexInclusive;
-            private int _index;
 
             public ListPartition(IList<TSource> source, int minIndexInclusive, int maxIndexInclusive)
             {
@@ -260,7 +244,6 @@ namespace System.Linq
                 _source = source;
                 _minIndexInclusive = minIndexInclusive;
                 _maxIndexInclusive = maxIndexInclusive;
-                _index = minIndexInclusive;
             }
 
             public override Iterator<TSource> Clone()
@@ -270,10 +253,14 @@ namespace System.Linq
 
             public override bool MoveNext()
             {
-                if ((_state == 1 & _index <= _maxIndexInclusive) && _index < _source.Count)
+                // _state - 1 represents the zero-based index into the list.
+                // Having a separate field for the index would be more readable. However, we save it
+                // into _state with a bias to minimize field size of the iterator.
+                int index = _state - 1;
+                if (unchecked((uint)index <= (uint)(_maxIndexInclusive - _minIndexInclusive) && index < _source.Count - _minIndexInclusive))
                 {
-                    _current = _source[_index];
-                    ++_index;
+                    _current = _source[_minIndexInclusive + index];
+                    ++_state;
                     return true;
                 }
 
@@ -294,13 +281,13 @@ namespace System.Linq
 
             public IPartition<TSource> Take(int count)
             {
-                int maxIndex = _minIndexInclusive + count - 1;
-                return (uint)maxIndex >= (uint)_maxIndexInclusive ? this : new ListPartition<TSource>(_source, _minIndexInclusive, maxIndex);
+                int maxIndex = unchecked(_minIndexInclusive + count - 1);
+                return unchecked((uint)maxIndex >= (uint)_maxIndexInclusive) ? this : new ListPartition<TSource>(_source, _minIndexInclusive, maxIndex);
             }
 
             public TSource TryGetElementAt(int index, out bool found)
             {
-                if ((uint)index <= (uint)(_maxIndexInclusive - _minIndexInclusive) && index < _source.Count - _minIndexInclusive)
+                if (unchecked((uint)index <= (uint)(_maxIndexInclusive - _minIndexInclusive) && index < _source.Count - _minIndexInclusive))
                 {
                     found = true;
                     return _source[_minIndexInclusive + index];
@@ -390,6 +377,10 @@ namespace System.Linq
             }
         }
 
+        /// <summary>
+        /// An iterator that yields the items of part of an <see cref="IEnumerable{TSource}"/>.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         private sealed class EnumerablePartition<TSource> : Iterator<TSource>, IPartition<TSource>
         {
             private readonly IEnumerable<TSource> _source;
@@ -419,11 +410,22 @@ namespace System.Linq
             // on how many elements we can have.
             private bool HasLimit => _maxIndexInclusive != -1;
 
-            private int Limit => (_maxIndexInclusive + 1) - _minIndexInclusive; // This is that upper bound.
+            private int Limit => unchecked((_maxIndexInclusive + 1) - _minIndexInclusive); // This is that upper bound.
 
             public override Iterator<TSource> Clone()
             {
                 return new EnumerablePartition<TSource>(_source, _minIndexInclusive, _maxIndexInclusive);
+            }
+
+            public override void Dispose()
+            {
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
+
+                base.Dispose();
             }
 
             public int GetCount(bool onlyIfCheap)
@@ -512,7 +514,8 @@ namespace System.Linq
 
             public IPartition<TSource> Skip(int count)
             {
-                int minIndex = _minIndexInclusive + count;
+                int minIndex = unchecked(_minIndexInclusive + count);
+
                 if (!HasLimit)
                 {
                     if (minIndex < 0)
@@ -537,7 +540,7 @@ namespace System.Linq
 
             public IPartition<TSource> Take(int count)
             {
-                int maxIndex = _minIndexInclusive + count - 1;
+                int maxIndex = unchecked(_minIndexInclusive + count - 1);
                 if (!HasLimit)
                 {
                     if (maxIndex < 0)
@@ -551,7 +554,7 @@ namespace System.Linq
                         return new EnumerablePartition<TSource>(this, 0, count - 1);
                     }
                 }
-                else if ((uint)maxIndex >= (uint)_maxIndexInclusive)
+                else if (unchecked((uint)maxIndex >= (uint)_maxIndexInclusive))
                 {
                     // If we don't know our max count, we can't go down this branch.
                     // It's always possible for us to contain more than count items, as the rest

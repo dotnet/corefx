@@ -55,7 +55,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
         {
             ProcessPriorityClass originalPriority = _process.PriorityClass;
@@ -80,7 +80,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact] 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior varies on Windows and Unix
         [OuterLoop]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestBasePriorityOnUnix()
@@ -149,7 +149,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests UseShellExecute with ProcessStartInfo
         [Fact]
         public void TestUseShellExecute_Unix_Succeeds()
         {
@@ -181,7 +181,7 @@ namespace System.Diagnostics.Tests
             }
             else
             {
-                IEnumerable<int> testProcessIds = Process.GetProcessesByName(HostRunner).Select(p => p.Id);
+                IEnumerable<int> testProcessIds = Process.GetProcessesByName(HostRunnerName).Select(p => p.Id);
                 Assert.Contains(_process.Id, testProcessIds);
             }
         }
@@ -223,9 +223,9 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMainModuleOnNonOSX()
         {
-            string fileName = "corerun";
+            string fileName = "dotnet";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                fileName = "CoreRun.exe";
+                fileName = "dotnet.exe";
 
             Process p = Process.GetCurrentProcess();
             Assert.True(p.Modules.Count > 0);
@@ -453,7 +453,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact] 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior varies on Windows and Unix
         [OuterLoop]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestPriorityClassUnix()
@@ -473,7 +473,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(TestPlatforms.Windows)]
+        [Fact, PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestPriorityClassWindows()
         {
             ProcessPriorityClass priorityClass = _process.PriorityClass;
@@ -548,7 +548,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to get process Id
         public void TestRootGetProcessById()
         {
             Process p = Process.GetProcessById(1);
@@ -595,8 +595,13 @@ namespace System.Diagnostics.Tests
         {
             try
             {
-                int? value = (int?)Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance", "Disable Performance Counters", null);
-                return !value.HasValue || value.Value == 0;
+                using (Microsoft.Win32.RegistryKey perfKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\PerfProc\Performance"))
+                {
+                    if (perfKey == null)
+                        return false;
+                    int? value = (int?)perfKey.GetValue("Disable Performance Counters", null);
+                    return !value.HasValue || value.Value == 0;
+                }
             }
             catch (Exception)
             {
@@ -606,7 +611,7 @@ namespace System.Diagnostics.Tests
             return true;
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
         [ConditionalTheory(nameof(ProcessPeformanceCounterEnabled))]
         [MemberData(nameof(GetTestProcess))]
         public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)
@@ -619,7 +624,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<NotSupportedException>(() => remoteProcess.MainModule);
         }
 
-        [Fact, PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Fact, PlatformSpecific(TestPlatforms.AnyUnix)]  // Behavior differs on Windows and Unix
         public void TestProcessOnRemoteMachineUnix()
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -734,7 +739,7 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Needs permissions on Unix
         // NativeErrorCode not 193 on Windows Nano for ERROR_BAD_EXE_FORMAT, issue #10290
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void TestStartOnWindowsWithBadFileFormat()
@@ -746,7 +751,7 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         [Fact]
         public void TestStartOnUnixWithBadPermissions()
         {
@@ -758,7 +763,7 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         [Fact]
         public void TestStartOnUnixWithBadFormat()
         {

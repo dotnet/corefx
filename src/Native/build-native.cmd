@@ -9,6 +9,7 @@ set __rootDir=%~dp0..\..
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
+set __TargetGroup=netcoreapp
 set __appContainer=""
 set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Debug
@@ -31,6 +32,7 @@ if /i [%1] == [amd64]       ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&
 if /i [%1] == [arm64]       ( set __BuildArch=arm64&&set __VCBuildArch=arm64&&shift&goto Arg_Loop)
 
 if /i [%1] == [toolsetDir]  ( set "__ToolsetDir=%2"&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [--TargetGroup]  ( set "__TargetGroup=%2"&&shift&&shift&goto Arg_Loop)
 
 shift
 goto :Arg_Loop
@@ -40,24 +42,24 @@ goto :Arg_Loop
 if not defined VisualStudioVersion (
     if defined VS140COMNTOOLS (
         goto :VS2015
-    ) 
+    )
     goto :MissingVersion
-) 
+)
 if "%VisualStudioVersion%"=="14.0" (
     goto :VS2015
-) 
+)
 
 :MissingVersion
-:: Can't find VS 2013+
+:: Can't find VS 2015
 echo Error: Visual Studio 2015 required  
-echo        Please see https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md for build instructions.
+echo        Please see https://github.com/dotnet/corefx/tree/master/Documentation for build instructions.
 exit /b 1
 
 :VS2015
 :: Setup vars for VS2015
 set __VSVersion=vs2015
 set __PlatformToolset=v140
-if NOT "%__BuildArch%" == "arm64" ( 
+if NOT "%__BuildArch%" == "arm64" (
     :: Set the environment for the native build
     call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %__VCBuildArch%
 )
@@ -69,13 +71,15 @@ echo Commencing build of native components
 echo.
 
 if %__CMakeBinDir% == "" (
-    set "__CMakeBinDir=%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\Native"
+    set "__CMakeBinDir=%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native"
 )
 if %__IntermediatesDir% == "" (
-    set "__IntermediatesDir=%__binDir%\obj\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\Native"
+    set "__IntermediatesDir=%__binDir%\obj\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native"
 )
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
+set "__RuntimePath=%__binDir%\runtime\%__TargetGroup%-Windows_NT-%CMAKE_BUILD_TYPE%-%__BuildArch%\"
+set "__TestSharedFrameworkPath=%__binDir%\%__TargetGroup%-Windows_NT-%CMAKE_BUILD_TYPE%-%__BuildArch%\testhost\shared\Microsoft.NETCore.App\9.9.9\"
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
@@ -95,7 +99,7 @@ exit /b 1
 :GenVSSolution
 :: Regenerate the VS solution
 
-if /i "%__BuildArch%" == "arm64" ( 
+if /i "%__BuildArch%" == "arm64" (
     REM arm64 builds currently use private toolset which has not been released yet
     REM TODO, remove once the toolset is open.
     call :PrivateToolSet
@@ -122,11 +126,16 @@ call %__rootDir%/run.cmd build-managed -project="%__IntermediatesDir%\install.vc
 IF ERRORLEVEL 1 (
     goto :Failure
 )
+
+:: Copy to vertical runtime directory
+xcopy /yqs "%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native\*" "%__RuntimePath%"
+xcopy /yqs "%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native\*" "%__TestSharedFrameworkPath%"
+
 echo Done building Native components
 
 :BuildNativeAOT
-set "__CMakeBinDir=%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\Native_aot"
-set "__IntermediatesDir=%__binDir%\obj\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\Native_aot"
+set "__CMakeBinDir=%__binDir%\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native_aot"
+set "__IntermediatesDir=%__binDir%\obj\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\native_aot"
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"

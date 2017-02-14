@@ -3656,26 +3656,6 @@ public class Line
     }
 }
 
-public class Transportation
-{
-    // The SoapElementAttribute specifies that the
-    // generated XML element name will be "Wheels"
-    // instead of "Vehicle".
-    [SoapElement("Wheels")]
-    public string Vehicle;
-    [SoapElement(DataType = "dateTime")]
-    public DateTime CreationDate;
-    [SoapElement(IsNullable = true)]
-    public Thing thing;
-
-}
-
-public class Thing
-{
-    [SoapElement(IsNullable = true)]
-    public string ThingName;
-}
-
 public class MyReader : XmlSerializationReader
 {
     protected override void InitCallbacks() { }
@@ -4159,4 +4139,90 @@ public class SampleTextWriter : IXmlTextWriterInitializer
 public class MycodeGenerator : XmlSerializationGeneratedCode
 {
 
+}
+
+public class SoapEncodedTestType1
+{
+    public int IntValue;
+    public double DoubleValue;
+    public string StringValue;
+    public DateTime DateTimeValue;
+}
+
+public enum SoapEncodedTestEnum
+{
+    [SoapEnum("Small")]
+    A,
+    [SoapEnum("Large")]
+    B
+}
+
+public class SoapEncodedTestType2
+{
+    [SoapElement(IsNullable = true)]
+    public SoapEncodedTestType3 TestType3;
+
+}
+
+public class SoapEncodedTestType3
+{
+    [SoapElement(IsNullable = true)]
+    public string StringValue;
+}
+
+public class SoapEncodedTestType5
+{
+    public string Name;
+
+    [SoapElement(DataType = "nonNegativeInteger", ElementName = "PosInt")]
+    public string PostitiveInt;
+
+    public DateTime Today;
+}
+
+public class MyCircularLink
+{
+    public MyCircularLink Link;
+    public int IntValue;
+
+    public MyCircularLink() { }
+    public MyCircularLink(bool init)
+    {
+        Link = new MyCircularLink() { IntValue = 1 };
+        Link.Link = new MyCircularLink() { IntValue = 2 };
+        Link.Link.Link = this;
+    }
+}
+public class MyGroup
+{
+    public string GroupName;
+    public MyItem[] MyItems;
+}
+
+public class MyGroup2
+{
+    public string GroupName;
+    public List<MyItem> MyItems;
+}
+
+public class MyGroup3
+{
+    public string GroupName;
+    public Dictionary<int, MyItem> MyItems;
+}
+
+public class MyItem
+{
+    public string ItemName;
+}
+
+public class MyOrder
+{
+    public int ID;
+    public string Name;
+}
+
+public class MySpecialOrder : MyOrder
+{
+    public int SecondaryID;
 }

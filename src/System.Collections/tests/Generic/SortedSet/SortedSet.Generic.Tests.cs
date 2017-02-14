@@ -83,13 +83,18 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void SortedSet_Generic_MaxAndMin(int setLength)
         {
+            SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
             if (setLength > 0)
             {
-                SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
                 List<T> expected = set.ToList();
                 expected.Sort(GetIComparer());
                 Assert.Equal(expected[0], set.Min);
                 Assert.Equal(expected[setLength - 1], set.Max);
+            }
+            else
+            {
+                Assert.Equal(default(T), set.Min);
+                Assert.Equal(default(T), set.Max);
             }
         }
 
@@ -197,6 +202,13 @@ namespace System.Collections.Tests
             Assert.Equal(setLength, set.Count);
         }
 
+        [Fact]
+        public void SortedSet_Generic_RemoveWhere_NullPredicate_ThrowsArgumentNullException()
+        {
+            SortedSet<T> set = (SortedSet<T>)GenericISetFactory();
+            Assert.Throws<ArgumentNullException>("match", () => set.RemoveWhere(null));
+        }
+
         #endregion
 
         #region Enumeration and Ordering
@@ -285,7 +297,6 @@ namespace System.Collections.Tests
 
         #region CreateSetComparer
 
-#if netstandard17
         [Fact]
         public void SetComparer_SetEqualsTests()
         {
@@ -319,7 +330,62 @@ namespace System.Collections.Tests
             Assert.True(comparerSet1.SetEquals(set));
             Assert.True(comparerSet2.SetEquals(set));
         }
-#endif
+        #endregion
+
+        #region TryGetValue
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_Contains()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(1);
+            T actualValue;
+            Assert.True(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(value, actualValue);
+            if (!typeof(T).IsValueType)
+            {
+                Assert.Same(value, actualValue);
+            }
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_Contains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(1);
+            T actualValue = CreateT(2);
+            Assert.True(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(value, actualValue);
+            if (!typeof(T).IsValueType)
+            {
+                Assert.Same(value, actualValue);
+            }
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_NotContains()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(2);
+            T actualValue;
+            Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
+        }
+
+        [Fact]
+        public void SortedSet_Generic_TryGetValue_NotContains_OverwriteOutputParam()
+        {
+            T value = CreateT(1);
+            SortedSet<T> set = new SortedSet<T> { value };
+            T equalValue = CreateT(2);
+            T actualValue = equalValue;
+            Assert.False(set.TryGetValue(equalValue, out actualValue));
+            Assert.Equal(default(T), actualValue);
+        }
+
         #endregion
     }
 }

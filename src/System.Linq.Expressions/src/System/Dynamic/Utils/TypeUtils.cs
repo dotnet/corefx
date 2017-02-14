@@ -180,6 +180,10 @@ namespace System.Dynamic.Utils
             {
                 return true;
             }
+            if (targetType == null)
+            {
+                return false;
+            }
             if (instanceType.GetTypeInfo().IsValueType)
             {
                 if (AreReferenceAssignable(targetType, typeof(object)))
@@ -232,12 +236,12 @@ namespace System.Dynamic.Utils
             // Primitive runtime conversions
             // All conversions amongst enum, bool, char, integer and float types
             // (and their corresponding nullable types) are legal except for
-            // nonbool==>bool and nonbool==>bool?
-            // Since we have already covered bool==>bool, bool==>bool?, etc, above,
-            // we can just disallow having a bool or bool? destination type here.
-            if (IsConvertible(source) && IsConvertible(dest) && GetNonNullableType(dest) != typeof(bool))
+            // nonbool==>bool and nonbool==>bool? which are only legal from
+            // bool-backed enums.
+            if (IsConvertible(source) && IsConvertible(dest))
             {
-                return true;
+                return GetNonNullableType(dest) != typeof(bool)
+                       || source.IsEnum && source.GetEnumUnderlyingType() == typeof(bool);
             }
             return false;
         }

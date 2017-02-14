@@ -4,7 +4,6 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
 using System.Collections;
 using System.Xml.Schema;
@@ -12,7 +11,7 @@ using System.Xml.Schema;
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_Remove", Desc = "")]
-    public class TC_SchemaSet_Remove
+    public class TC_SchemaSet_Remove : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 

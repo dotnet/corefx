@@ -21,6 +21,14 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Fact]
+        public static void CheckCallFactoryOptimisedInstanceNullArgumentList()
+        {
+            var instance = Expression.Constant(new MS());
+            var expr = Expression.Call(instance, typeof(MS).GetMethod(nameof(MS.I0)), default(Expression[]));
+            AssertInstanceMethodCall(0, expr);
+        }
+
+        [Fact]
         public static void CheckCallFactoryOptimizationInstance2()
         {
             MethodCallExpression expr = Expression.Call(Expression.Parameter(typeof(MS)), typeof(MS).GetMethod("I2"), Expression.Constant(0), Expression.Constant(1));
@@ -65,7 +73,7 @@ namespace System.Linq.Expressions.Tests
                 Assert.Same(args[i], arguments[i]);
             }
 
-            MethodCallExpression updated = expr.Update(obj, arguments);
+            MethodCallExpression updated = expr.Update(obj, arguments.ToList());
             Assert.Same(expr, updated);
 
             var visited = (MethodCallExpression)new NopVisitor().Visit(expr);
@@ -93,6 +101,10 @@ namespace System.Linq.Expressions.Tests
         {
             AssertCallIsOptimizedStatic(arity);
         }
+
+        [Fact]
+        public static void CheckCallFactoryOptimisedStaticNullArgumentList() =>
+            AssertStaticMethodCall(0, Expression.Call(typeof(MS).GetMethod(nameof(MS.S0)), default(Expression[])));
 
         [Fact]
         public static void CheckCallFactoryOptimizationStatic1()
@@ -316,9 +328,112 @@ namespace System.Linq.Expressions.Tests
 
             MethodCallExpression res = node.Update(node.Object, node.Arguments.ToArray());
 
-            Assert.NotSame(node, res);
+            Assert.Same(node, res);
 
             return res;
+        }
+
+        [Fact]
+        public static void UpdateStaticNull()
+        {
+            MethodCallExpression expr = Expression.Call(typeof(MS).GetMethod(nameof(MS.S0)));
+            Assert.Same(expr, expr.Update(null, null));
+
+            for (int argNum = 1; argNum != 7; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                expr = Expression.Call(typeof(MS).GetMethod("S" + argNum), args);
+
+                // Should attempt to create new expression, and fail due to incorrect arguments.
+                Assert.Throws<ArgumentException>("method", () => expr.Update(null, null));
+            }
+        }
+
+        [Fact]
+        public static void UpdateInstanceNull()
+        {
+            ConstantExpression instance = Expression.Constant(new MS());
+            MethodCallExpression expr = Expression.Call(instance, typeof(MS).GetMethod(nameof(MS.I0)));
+            Assert.Same(expr, expr.Update(instance, null));
+
+            for (int argNum = 1; argNum != 6; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                expr = Expression.Call(instance, typeof(MS).GetMethod("I" + argNum), args);
+
+                // Should attempt to create new expression, and fail due to incorrect arguments.
+                Assert.Throws<ArgumentException>("method", () => expr.Update(instance, null));
+            }
+        }
+
+        [Fact]
+        public static void UpdateStaticExtraArguments()
+        {
+            for (int argNum = 0; argNum != 7; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                MethodCallExpression expr = Expression.Call(typeof(MS).GetMethod("S" + argNum), args);
+
+                // Should attempt to create new expression, and fail due to incorrect arguments.
+                Assert.Throws<ArgumentException>("method", () => expr.Update(null, args.Append(Expression.Constant(-1))));
+            }
+        }
+
+        [Fact]
+        public static void UpdateInstanceExtraArguments()
+        {
+            ConstantExpression instance = Expression.Constant(new MS());
+            for (int argNum = 0; argNum != 6; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                MethodCallExpression expr = Expression.Call(instance, typeof(MS).GetMethod("I" + argNum), args);
+
+                // Should attempt to create new expression, and fail due to incorrect arguments.
+                Assert.Throws<ArgumentException>("method", () => expr.Update(instance, args.Append(Expression.Constant(-1))));
+            }
+        }
+
+        [Fact]
+        public static void UpdateStaticDifferentArguments()
+        {
+            for (int argNum = 1; argNum != 7; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                MethodCallExpression expr = Expression.Call(typeof(MS).GetMethod("S" + argNum), args);
+
+                ConstantExpression[] newArgs = new ConstantExpression[argNum];
+                for (int i = 0; i != argNum; ++i)
+                {
+                    args.CopyTo(newArgs, 0);
+                    newArgs[i] = Expression.Constant(i);
+                    Assert.NotSame(expr, expr.Update(null, newArgs));
+                }
+            }
+        }
+
+        [Fact]
+        public static void UpdateInstanceDifferentArguments()
+        {
+            ConstantExpression instance = Expression.Constant(new MS());
+            for (int argNum = 1; argNum != 6; ++argNum)
+            {
+                ConstantExpression[] args = Enumerable.Range(0, argNum).Select(i => Expression.Constant(i)).ToArray();
+
+                MethodCallExpression expr = Expression.Call(instance, typeof(MS).GetMethod("I" + argNum), args);
+
+                ConstantExpression[] newArgs = new ConstantExpression[argNum];
+                for (int i = 0; i != argNum; ++i)
+                {
+                    args.CopyTo(newArgs, 0);
+                    newArgs[i] = Expression.Constant(i);
+                    Assert.NotSame(expr, expr.Update(instance, newArgs));
+                }
+            }
         }
 
         private static MethodCallExpression UpdateObj(MethodCallExpression node)

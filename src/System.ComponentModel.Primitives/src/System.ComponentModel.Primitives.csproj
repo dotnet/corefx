@@ -5,18 +5,17 @@
     <ProjectGuid>{F620F382-30D1-451E-B125-2A612F92068B}</ProjectGuid>
     <RootNamespace>System.ComponentModel.Primitives</RootNamespace>
     <AssemblyName>System.ComponentModel.Primitives</AssemblyName>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net463'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)'==''">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
     <Compile Include="System\ComponentModel\ISynchronizeInvoke.cs" />
     <Compile Include="System\ComponentModel\BrowsableAttribute.cs" />
     <Compile Include="System\ComponentModel\CategoryAttribute.cs" />
+    <Compile Include="System\ComponentModel\Component.cs" />
     <Compile Include="System\ComponentModel\ComponentCollection.cs" />
     <Compile Include="System\ComponentModel\DescriptionAttribute.cs" />
     <Compile Include="System\ComponentModel\DesignerCategoryAttribute.cs" />
@@ -30,6 +29,7 @@
     <Compile Include="System\ComponentModel\ImmutableObjectAttribute.cs" />
     <Compile Include="System\ComponentModel\InitializationEventAttribute.cs" />
     <Compile Include="System\ComponentModel\ISite.cs" />
+    <Compile Include="System\ComponentModel\ISupportInitialize.cs" />
     <Compile Include="System\ComponentModel\LocalizableAttribute.cs" />
     <Compile Include="System\ComponentModel\MergablePropertyAttribute.cs" />
     <Compile Include="System\ComponentModel\NotifyParentPropertyAttribute.cs" />
@@ -39,17 +39,16 @@
     <Compile Include="System\ComponentModel\RefreshPropertiesAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FxCopBaseline.cs"/>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'==''">
-    <Compile Include="System\ComponentModel\Component.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='net463'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
+    <Compile Include="FxCopBaseline.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

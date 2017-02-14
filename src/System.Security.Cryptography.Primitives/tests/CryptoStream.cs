@@ -159,7 +159,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
             }
         }
 
-#if netstandard17
         [Fact]
         public static void Clear()
         {
@@ -203,7 +202,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.True(encryptStream.FlushCalled);
             }
         }
-#endif
 
         [Fact]
         public static void MultipleDispose()
@@ -220,7 +218,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Equal(false, output.CanRead);
             }
 
-#if netcoreapp11
+#if netcoreapp
             using (MemoryStream output = new MemoryStream())
             {
                 using (CryptoStream encryptStream = new CryptoStream(output, encryptor, CryptoStreamMode.Write, leaveOpen: false))
@@ -257,6 +255,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
         {
             private readonly int _inputBlockSize, _outputBlockSize;
             private readonly bool _canTransformMultipleBlocks;
+            private readonly object _lock = new object();
 
             private long _writePos, _readPos;
             private MemoryStream _stream;
@@ -281,31 +280,36 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
 
             public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
             {
-                _stream.Position = _writePos;
-                _stream.Write(inputBuffer, inputOffset, inputCount);
-                _writePos = _stream.Position;
+                lock (_lock)
+                {
+                    _stream.Position = _writePos;
+                    _stream.Write(inputBuffer, inputOffset, inputCount);
+                    _writePos = _stream.Position;
 
-                _stream.Position = _readPos;
-                int copied = _stream.Read(outputBuffer, outputOffset, outputBuffer.Length - outputOffset);
-                _readPos = _stream.Position;
-
-                return copied;
+                    _stream.Position = _readPos;
+                    int copied = _stream.Read(outputBuffer, outputOffset, outputBuffer.Length - outputOffset);
+                    _readPos = _stream.Position;
+                    return copied;
+                }
             }
 
             public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
             {
-                _stream.Position = _writePos;
-                _stream.Write(inputBuffer, inputOffset, inputCount);
+                lock (_lock)
+                {
+                    _stream.Position = _writePos;
+                    _stream.Write(inputBuffer, inputOffset, inputCount);
 
-                _stream.Position = _readPos;
-                long len = _stream.Length - _stream.Position;
-                byte[] outputBuffer = new byte[len];
-                _stream.Read(outputBuffer, 0, outputBuffer.Length);
+                    _stream.Position = _readPos;
+                    long len = _stream.Length - _stream.Position;
+                    byte[] outputBuffer = new byte[len];
+                    _stream.Read(outputBuffer, 0, outputBuffer.Length);
 
-                _stream = new MemoryStream();
-                _writePos = 0;
-                _readPos = 0;
-                return outputBuffer;
+                    _stream = new MemoryStream();
+                    _writePos = 0;
+                    _readPos = 0;
+                    return outputBuffer;
+                }
             }
         }
 

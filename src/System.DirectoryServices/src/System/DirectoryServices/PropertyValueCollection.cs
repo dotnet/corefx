@@ -15,7 +15,6 @@ namespace System.DirectoryServices
     /// <devdoc>
     ///    <para>Holds a collection of values for a multi-valued property.</para>
     /// </devdoc>
-    [DirectoryServicesPermission(SecurityAction.LinkDemand, Unrestricted = true)]
     public class PropertyValueCollection : CollectionBase
     {
         internal enum UpdateType
@@ -79,7 +78,6 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        [ComVisible(false)]
         public string PropertyName
         {
             get
@@ -294,7 +292,7 @@ namespace System.DirectoryServices
         {
             if (_needNewBehavior && !_allowMultipleChange && _updateType != UpdateType.None && _updateType != UpdateType.Update)
             {
-                throw new InvalidOperationException(Res.GetString(Res.DSPropertyValueSupportOneOperation));
+                throw new InvalidOperationException(SR.DSPropertyValueSupportOneOperation);
             }
             _entry.AdsObject.PutEx((int)AdsPropertyOperation.Clear, _propertyName, null);
             _updateType = UpdateType.Update;
@@ -321,7 +319,7 @@ namespace System.DirectoryServices
                 {
                     if (_updateType != UpdateType.None && _updateType != UpdateType.Add)
                     {
-                        throw new InvalidOperationException(Res.GetString(Res.DSPropertyValueSupportOneOperation));
+                        throw new InvalidOperationException(SR.DSPropertyValueSupportOneOperation);
                     }
 
                     _changeList.Add(value);
@@ -356,7 +354,7 @@ namespace System.DirectoryServices
                 {
                     if (_updateType != UpdateType.None && _updateType != UpdateType.Delete)
                     {
-                        throw new InvalidOperationException(Res.GetString(Res.DSPropertyValueSupportOneOperation));
+                        throw new InvalidOperationException(SR.DSPropertyValueSupportOneOperation);
                     }
 
                     _changeList.Add(value);

@@ -94,7 +94,7 @@ namespace System.Xml.Serialization
 
             if (mapping.IsSoap)
             {
-                throw new PlatformNotSupportedException();
+                WriteReferencedElements();
             }
         }
 
@@ -258,7 +258,6 @@ namespace System.Xml.Serialization
                 if (text.Mapping is EnumMapping)
                 {
                     stringValue = WriteEnumMethod((EnumMapping)mapping, o);
-
                 }
                 else
                 {
@@ -351,7 +350,9 @@ namespace System.Xml.Serialization
             {
                 if (element.Mapping.IsSoap)
                 {
-                    throw new PlatformNotSupportedException();
+                    Writer.WriteStartElement(name, ns);
+                    WriteEnumMethod((EnumMapping)element.Mapping, o);
+                    WriteEndElement();
                 }
                 else
                 {
@@ -367,14 +368,10 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    if (mapping.IsSoap)
-                    {
-                        throw new PlatformNotSupportedException();
-                    }
-
+                    WritePrimitiveMethodRequirement suffixNullable = mapping.IsSoap ? WritePrimitiveMethodRequirement.Encoded : WritePrimitiveMethodRequirement.None;
                     WritePrimitiveMethodRequirement suffixRaw = mapping.TypeDesc.XmlEncodingNotRequired ? WritePrimitiveMethodRequirement.Raw : WritePrimitiveMethodRequirement.None;
                     WritePrimitive(element.IsNullable
-                        ? WritePrimitiveMethodRequirement.WriteNullableStringLiteral | suffixRaw
+                        ? WritePrimitiveMethodRequirement.WriteNullableStringLiteral | suffixNullable | suffixRaw
                         : WritePrimitiveMethodRequirement.WriteElementString | suffixRaw,
                         name, ns, element.Default, o, mapping, mapping.IsSoap, true, element.IsNullable);
                 }
@@ -384,10 +381,13 @@ namespace System.Xml.Serialization
                 var mapping = (StructMapping)element.Mapping;
                 if (mapping.IsSoap)
                 {
-                    throw new PlatformNotSupportedException();
+                    EnsureXmlSerializationWriteCallbackForMapping(mapping, name, ns, element.IsNullable, needType: false, parentMapping: parentMapping);
+                    WritePotentiallyReferencingElement(name, ns, o, !writeAccessor ? mapping.TypeDesc.Type : null, !writeAccessor, element.IsNullable);
                 }
-
-                WriteStructMethod(mapping, name, ns, o, mapping.TypeDesc.IsNullable, needType: false, parentMapping: parentMapping);
+                else
+                {
+                    WriteStructMethod(mapping, name, ns, o, element.IsNullable, needType: false, parentMapping: parentMapping);
+                }
             }
             else if (element.Mapping is SpecialMapping)
             {
@@ -413,6 +413,26 @@ namespace System.Xml.Serialization
             {
                 throw new InvalidOperationException(SR.XmlInternalError);
             }
+        }
+
+        private void EnsureXmlSerializationWriteCallbackForMapping(StructMapping mapping, string name, string ns, bool isNullable, bool needType, XmlMapping parentMapping)
+        {
+            if (!ExistTypeEntry(mapping.TypeDesc.Type))
+            {
+                AddWriteCallback(
+                    mapping.TypeDesc.Type,
+                    mapping.TypeName,
+                    mapping.Namespace,
+                    CreateXmlSerializationWriteCallback(mapping, name, ns, isNullable, needType, parentMapping));
+            }
+        }
+
+        private XmlSerializationWriteCallback CreateXmlSerializationWriteCallback(StructMapping mapping, string name, string ns, bool isNullable, bool needType, XmlMapping parentMapping)
+        {
+            return (o) =>
+            {
+                WriteStructMethod(mapping, name, ns, o, isNullable, needType: false, parentMapping: parentMapping);
+            };
         }
 
         private void WriteQualifiedNameElement(string name, string ns, object defaultValue, XmlQualifiedName o, bool nullable, bool isSoap, PrimitiveMapping mapping)
@@ -442,42 +462,43 @@ namespace System.Xml.Serialization
 
             if (mapping.IsSoap)
             {
-                throw new PlatformNotSupportedException();
             }
-
-            if (o == null)
-            {
-                if (isNullable) WriteNullTagLiteral(n, ns);
-                return;
-            }
-
-            if (!needType
-             && o.GetType() != mapping.TypeDesc.Type)
-            {
-                if (WriteDerivedTypes(mapping, n, ns, o, isNullable))
+            else
+            { 
+                if (o == null)
                 {
+                    if (isNullable) WriteNullTagLiteral(n, ns);
                     return;
                 }
 
-                if (mapping.TypeDesc.IsRoot)
+                if (!needType
+                 && o.GetType() != mapping.TypeDesc.Type)
                 {
-                    if (WriteEnumAndArrayTypes(mapping, o, n, ns, parentMapping))
+                    if (WriteDerivedTypes(mapping, n, ns, o, isNullable))
                     {
                         return;
                     }
 
-                    WriteTypedPrimitive(n, ns, o, true);
-                    return;
-                }
+                    if (mapping.TypeDesc.IsRoot)
+                    {
+                        if (WriteEnumAndArrayTypes(mapping, o, n, ns, parentMapping))
+                        {
+                            return;
+                        }
 
-                throw CreateUnknownTypeException(o);
+                        WriteTypedPrimitive(n, ns, o, true);
+                        return;
+                    }
+
+                    throw CreateUnknownTypeException(o);
+                }
             }
 
             if (!mapping.TypeDesc.IsAbstract)
             {
                 if (mapping.TypeDesc.Type != null && typeof(XmlSchemaObject).IsAssignableFrom(mapping.TypeDesc.Type))
                 {
-                    throw new PlatformNotSupportedException(typeof(XmlSchemaObject).ToString());
+                    EscapeName = false;
                 }
 
                 XmlSerializerNamespaces xmlnsSource = null;
@@ -489,19 +510,22 @@ namespace System.Xml.Serialization
                     xmlnsSource = (XmlSerializerNamespaces)GetMemberValue(o, member.Name);
                 }
 
-                if (mapping.IsSoap)
+                if (!mapping.IsSoap)
                 {
-                    throw new PlatformNotSupportedException();
-                }
 
-                WriteStartElement(n, ns, o, false, xmlnsSource);
+                    WriteStartElement(n, ns, o, false, xmlnsSource);
 
-                if (!mapping.TypeDesc.IsRoot)
-                {
-                    if (needType)
+                    if (!mapping.TypeDesc.IsRoot)
                     {
-                        WriteXsiType(mapping.TypeName, mapping.Namespace);
+                        if (needType)
+                        {
+                            WriteXsiType(mapping.TypeName, mapping.Namespace);
+                        }
                     }
+                }
+                else if (xmlnsSource != null)
+                {
+                    WriteNamespaceDeclarations(xmlnsSource);
                 }
 
                 for (int i = 0; i < members.Length; i++)
@@ -653,28 +677,62 @@ namespace System.Xml.Serialization
 
         private string WriteEnumMethod(EnumMapping mapping, object v)
         {
-            if (mapping != null && mapping.IsSoap)
+            string returnString = null;
+            if (mapping != null)
             {
-                throw new PlatformNotSupportedException();
-            }
-
-            if (mapping != null && mapping.IsFlags)
-            {
-                Type type = mapping.TypeDesc.Type;
-
-                List<string> valueStrings = new List<string>();
-                List<long> valueIds = new List<long>();
-                foreach (var value in Enum.GetValues(type))
+                ConstantMapping[] constants = mapping.Constants;
+                if (constants.Length > 0)
                 {
-                    valueStrings.Add(value.ToString());
-                    valueIds.Add(Convert.ToInt64(value));
-                }
+                    bool foundValue = false;
+                    var enumValue = Convert.ToInt64(v);
+                    for (int i = 0; i < constants.Length; i++)
+                    {
+                        ConstantMapping c = constants[i];
+                        if (enumValue == c.Value)
+                        {
+                            returnString = c.XmlName;
+                            foundValue = true;
+                            break;
+                        }
+                    }
 
-                return FromEnum(Convert.ToInt64(v), valueStrings.ToArray(), valueIds.ToArray());
+                    if (!foundValue)
+                    {
+                        if (mapping.IsFlags)
+                        {
+                            string[] xmlNames = new string[constants.Length];
+                            long[] valueIds = new long[constants.Length];
+
+                            for (int i = 0; i < constants.Length; i++)
+                            {
+                                xmlNames[i] = constants[i].XmlName;
+                                valueIds[i] = constants[i].Value;
+                            }
+
+                            returnString = FromEnum(enumValue, xmlNames, valueIds);
+
+                        }
+                        else
+                        {
+                            throw CreateInvalidEnumValueException(v, mapping.TypeDesc.FullName);
+                        }
+                    }
+                }
             }
             else
             {
-                return v.ToString();
+                returnString = v.ToString();
+            }
+
+            if (mapping.IsSoap)
+            {
+                WriteXsiType(mapping.TypeName, mapping.Namespace);
+                Writer.WriteString(returnString);
+                return null;
+            }
+            else
+            {
+                return returnString;
             }
         }
 
@@ -711,83 +769,82 @@ namespace System.Xml.Serialization
                     }
                 }
 
-                var a = memberValue as IEnumerable;
-
-                // #10593: Add More Tests for Serialization Code
-                Debug.Assert(a != null);
-
-                var e = a.GetEnumerator();
-                bool shouldAppendWhitespace = false;
-                if (e != null)
+                if (memberValue != null)
                 {
-                    while (e.MoveNext())
+                    var a = (IEnumerable) memberValue;
+                    IEnumerator e = a.GetEnumerator();
+                    bool shouldAppendWhitespace = false;
+                    if (e != null)
                     {
-                        object ai = e.Current;
-
-                        if (attribute.IsList)
+                        while (e.MoveNext())
                         {
-                            string stringValue;
-                            if (attribute.Mapping is EnumMapping)
-                            {
-                                stringValue = WriteEnumMethod((EnumMapping)attribute.Mapping, ai);
-                            }
-                            else
-                            {
-                                if (!WritePrimitiveValue(arrayElementTypeDesc, ai, true, out stringValue))
-                                {
-                                    // #10593: Add More Tests for Serialization Code
-                                    Debug.Assert(ai is byte[]);
-                                }
-                            }
+                            object ai = e.Current;
 
-                            // check to see if we can write values of the attribute sequentially
-                            if (canOptimizeWriteListSequence)
+                            if (attribute.IsList)
                             {
-                                if (shouldAppendWhitespace)
+                                string stringValue;
+                                if (attribute.Mapping is EnumMapping)
                                 {
-                                    Writer.WriteString(" ");
-                                }
-
-                                if (ai is byte[])
-                                {
-                                    WriteValue((byte[])ai);
+                                    stringValue = WriteEnumMethod((EnumMapping)attribute.Mapping, ai);
                                 }
                                 else
                                 {
-                                    WriteValue(stringValue);
+                                    if (!WritePrimitiveValue(arrayElementTypeDesc, ai, true, out stringValue))
+                                    {
+                                        // #10593: Add More Tests for Serialization Code
+                                        Debug.Assert(ai is byte[]);
+                                    }
+                                }
+
+                                // check to see if we can write values of the attribute sequentially
+                                if (canOptimizeWriteListSequence)
+                                {
+                                    if (shouldAppendWhitespace)
+                                    {
+                                        Writer.WriteString(" ");
+                                    }
+
+                                    if (ai is byte[])
+                                    {
+                                        WriteValue((byte[])ai);
+                                    }
+                                    else
+                                    {
+                                        WriteValue(stringValue);
+                                    }
+                                }
+                                else
+                                {
+                                    if (shouldAppendWhitespace)
+                                    {
+                                        sb.Append(" ");
+                                    }
+
+                                    sb.Append(stringValue);
                                 }
                             }
                             else
                             {
-                                if (shouldAppendWhitespace)
-                                {
-                                    sb.Append(" ");
-                                }
-
-                                sb.Append(stringValue);
+                                WriteAttribute(ai, attribute, parent);
                             }
-                        }
-                        else
-                        {
-                            WriteAttribute(ai, attribute, parent);
+
+                            shouldAppendWhitespace = true;
                         }
 
-                        shouldAppendWhitespace = true;
-                    }
-
-                    if (attribute.IsList)
-                    {
-                        // check to see if we can write values of the attribute sequentially
-                        if (canOptimizeWriteListSequence)
+                        if (attribute.IsList)
                         {
-                            Writer.WriteEndAttribute();
-                        }
-                        else
-                        {
-                            if (sb.Length != 0)
+                            // check to see if we can write values of the attribute sequentially
+                            if (canOptimizeWriteListSequence)
                             {
-                                string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
-                                WriteAttribute(attribute.Name, ns, sb.ToString());
+                                Writer.WriteEndAttribute();
+                            }
+                            else
+                            {
+                                if (sb.Length != 0)
+                                {
+                                    string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
+                                    WriteAttribute(attribute.Name, ns, sb.ToString());
+                                }
                             }
                         }
                     }
@@ -922,13 +979,27 @@ namespace System.Xml.Serialization
 
                 else if (hasRequirement(method, WritePrimitiveMethodRequirement.WriteNullableStringLiteral))
                 {
-                    if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
+                    if (hasRequirement(method, WritePrimitiveMethodRequirement.Encoded))
                     {
-                        WriteNullableStringLiteral(name, ns, stringValue);
+                        if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
+                        {
+                            WriteNullableStringEncoded(name, ns, stringValue, xmlQualifiedName);
+                        }
+                        else
+                        {
+                            WriteNullableStringEncodedRaw(name, ns, stringValue, xmlQualifiedName);
+                        }
                     }
                     else
                     {
-                        WriteNullableStringLiteralRaw(name, ns, stringValue);
+                        if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
+                        {
+                            WriteNullableStringLiteral(name, ns, stringValue);
+                        }
+                        else
+                        {
+                            WriteNullableStringLiteralRaw(name, ns, stringValue);
+                        }
                     }
                 }
                 else if (hasRequirement(method, WritePrimitiveMethodRequirement.WriteAttribute))
@@ -1154,6 +1225,7 @@ namespace System.Xml.Serialization
             WriteAttribute = 2,
             WriteElementString = 4,
             WriteNullableStringLiteral = 8,
+            Encoded = 16
         }
     }
 }

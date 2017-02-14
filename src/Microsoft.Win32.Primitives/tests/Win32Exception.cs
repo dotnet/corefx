@@ -16,7 +16,7 @@ namespace System.ComponentModel.Tests
         private const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
         private const int FirstPassBufferSize = 256;
 
-        [DllImport("api-ms-win-core-localization-l1-2-0.dll", CharSet = CharSet.Unicode, EntryPoint = "FormatMessageW", SetLastError = true, BestFitMapping = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "FormatMessageW", SetLastError = true, BestFitMapping = true)]
         private static extern int FormatMessage(
             int dwFlags,
             IntPtr lpSource_mustBeNull,
@@ -77,7 +77,7 @@ namespace System.ComponentModel.Tests
         private const int E_FAIL = unchecked((int)0x80004005);
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to check whether the exception resource length >256 chars
         public static void InstantiateExceptionWithLongErrorString()
         {
             // This test checks that Win32Exception supports error strings greater than 256 characters.

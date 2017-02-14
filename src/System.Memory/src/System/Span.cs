@@ -111,7 +111,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
-            if (!SpanHelpers.IsReferenceFree<T>())
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
@@ -230,6 +230,109 @@ namespace System
                 unsafe { return ref Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index); }
             else
                 return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
+        }
+
+        /// <summary>
+        /// Clears the contents of this span.
+        /// </summary>
+        public unsafe void Clear()
+        {
+            int length = _length;
+
+            if (length == 0)
+                return;
+
+            var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
+
+            if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
+            {
+                if (_pinnable == null)
+                {
+                    var ptr = (byte*)_byteOffset.ToPointer();
+                    
+                    SpanHelpers.ClearLessThanPointerSized(ptr, byteLength);
+                }
+                else
+                {
+                    ref byte b = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+
+                    SpanHelpers.ClearLessThanPointerSized(ref b, byteLength);
+                }
+            }
+            else
+            {
+                if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+                {
+                    UIntPtr pointerSizedLength = (UIntPtr)((length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
+
+                    ref IntPtr ip = ref Unsafe.As<T, IntPtr>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithReferences(ref ip, pointerSizedLength);
+                }
+                else
+                {
+                    ref byte b = ref Unsafe.As<T, byte>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithoutReferences(ref b, byteLength);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fills the contents of this span with the given value.
+        /// </summary>
+        public unsafe void Fill(T value)
+        {
+            int length = _length;
+
+            if (length == 0)
+                return;
+
+            if (Unsafe.SizeOf<T>() == 1)
+            {
+                byte fill = Unsafe.As<T, byte>(ref value);
+                if (_pinnable == null)
+                {
+                    Unsafe.InitBlockUnaligned(_byteOffset.ToPointer(), fill, (uint)length);
+                }
+                else
+                {
+                    ref byte r = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+                    Unsafe.InitBlockUnaligned(ref r, fill, (uint)length);
+                }
+            }
+            else
+            {
+                ref T r = ref DangerousGetPinnableReference();
+
+                // TODO: Create block fill for value types of power of two sizes e.g. 2,4,8,16
+
+                // Simple loop unrolling
+                int i = 0;
+                for (; i < (length & ~7); i += 8)
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    Unsafe.Add<T>(ref r, i + 4) = value;
+                    Unsafe.Add<T>(ref r, i + 5) = value;
+                    Unsafe.Add<T>(ref r, i + 6) = value;
+                    Unsafe.Add<T>(ref r, i + 7) = value;
+                }
+                if (i < (length & ~3))
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    i += 4;
+                }
+                for (; i < length; i++)
+                {
+                    Unsafe.Add<T>(ref r, i) = value;
+                }
+            }
         }
 
         /// <summary>
@@ -436,5 +539,193 @@ namespace System
         private readonly Pinnable<T> _pinnable;
         private readonly IntPtr _byteOffset;
         private readonly int _length;
+    }
+
+    /// <summary>
+    /// Span represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
+    /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
+    /// </summary>
+    public static class Span
+    {
+        /// <summary>
+        /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
+        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// </summary>
+        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <typeparamref name="T"/> contains pointers.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<byte> AsBytes<T>(this Span<T> source)
+            where T : struct
+        {
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+
+            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
+            return new Span<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
+        }
+
+        /// <summary>
+        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="T"/> to ReadOnlySpan of bytes.
+        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// </summary>
+        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <typeparamref name="T"/> contains pointers.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
+            where T : struct
+        {
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+
+            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
+            return new ReadOnlySpan<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
+        }
+
+        /// <summary>
+        /// Casts a Span of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
+        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// </summary>
+        /// <remarks>
+        /// Supported only for platforms that support misaligned memory access.
+        /// </remarks>
+        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source)
+            where TFrom : struct
+            where TTo : struct
+        {
+            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
+
+            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
+
+            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
+            return new Span<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
+        }
+
+        /// <summary>
+        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
+        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// </summary>
+        /// <remarks>
+        /// Supported only for platforms that support misaligned memory access.
+        /// </remarks>
+        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source)
+            where TFrom : struct
+            where TTo : struct
+        {
+            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
+
+            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
+
+            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
+            return new ReadOnlySpan<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
+        }
+
+        /// <summary>
+        /// Creates a new readonly span over the portion of the target string.
+        /// </summary>
+        /// <param name="text">The target string.</param>
+        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<char> Slice(this string text)
+        {
+            if (text == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+
+            return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), StringAdjustment, text.Length);
+        }
+
+        /// <summary>
+        /// Creates a new readonly span over the portion of the target string, beginning at 'start'.
+        /// </summary>
+        /// <param name="text">The target string.</param>
+        /// <param name="start">The index at which to begin this slice.</param>
+        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;Length).
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<char> Slice(this string text, int start)
+        {
+            if (text == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            int textLength = text.Length;
+            if ((uint)start > (uint)textLength)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+
+            unsafe
+            {
+                byte* byteOffset = ((byte*)StringAdjustment) + (uint)(start * sizeof(char));
+                return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), (IntPtr)byteOffset, textLength - start);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new readonly span over the portion of the target string, beginning at <paramref name="start"/>, of given <paramref name="length"/>.
+        /// </summary>
+        /// <param name="text">The target string.</param>
+        /// <param name="start">The index at which to begin this slice.</param>
+        /// <param name="length">The number of items in the span.</param>
+        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="start"/> or end index is not in range (&lt;0 or &gt;=Length).
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<char> Slice(this string text, int start, int length)
+        {
+            if (text == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            int textLength = text.Length;
+            if ((uint)start > (uint)textLength || (uint)length > (uint)(textLength - start))
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+
+            unsafe
+            {
+                byte* byteOffset = ((byte*)StringAdjustment) + (uint)(start * sizeof(char));
+                return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), (IntPtr)byteOffset, length);
+            }
+        }
+
+        private static readonly IntPtr StringAdjustment = MeasureStringAdjustment();
+
+        private static IntPtr MeasureStringAdjustment()
+        {
+            string sampleString = "a";
+            unsafe
+            {
+                fixed (char* pSampleString = sampleString)
+                {
+                    return Unsafe.ByteOffset<char>(ref Unsafe.As<Pinnable<char>>(sampleString).Data, ref Unsafe.AsRef<char>(pSampleString));
+                }
+            }
+        }
     }
 }

@@ -830,16 +830,11 @@ namespace System.Linq.Expressions.Interpreter
                             _instructions.EmitEqual(typeof(object));
                             _instructions.EmitBranchFalse(callMethod);
 
-                            if (node.NodeType == ExpressionType.Equal)
-                            {
-                                // right null, left not, false
-                                _instructions.EmitLoad(AstUtils.BoxedFalse, typeof(bool));
-                            }
-                            else
-                            {
-                                // right null, left not, true
-                                _instructions.EmitLoad(AstUtils.BoxedTrue, typeof(bool));
-                            }
+                            // right null, left not, false
+                            // right null, left not, true
+                            _instructions.EmitLoad(
+                                node.NodeType == ExpressionType.Equal ? AstUtils.BoxedFalse : AstUtils.BoxedTrue,
+                                typeof(bool));
                             _instructions.EmitBranch(end, hasResult: false, hasValue: true);
 
                             // both are not null
@@ -1126,7 +1121,7 @@ namespace System.Linq.Expressions.Interpreter
 
             // use numeric conversions for both numeric types and enums
             if ((nonNullableFrom.IsNumericOrBool() || nonNullableFrom.GetTypeInfo().IsEnum)
-                 && (nonNullableTo.IsNumeric() || nonNullableTo.GetTypeInfo().IsEnum || nonNullableTo == typeof(decimal)))
+                 && (nonNullableTo.IsNumericOrBool() || nonNullableTo.GetTypeInfo().IsEnum || nonNullableTo == typeof(decimal)))
             {
                 Type enumTypeTo = null;
 
@@ -1143,13 +1138,28 @@ namespace System.Linq.Expressions.Interpreter
                 TypeCode from = nonNullableFrom.GetTypeCode();
                 TypeCode to = nonNullableTo.GetTypeCode();
 
-                if (isChecked)
+                if (from == to && (object)enumTypeTo != null)
                 {
-                    _instructions.EmitNumericConvertChecked(from, to, isLiftedToNull);
+                    // If casting between enums of the same underlying type or to enum from the underlying
+                    // type, there's no need for the numeric conversion, so just include a null-check if
+                    // appropriate.
+                    // Casting to the underlying check still needs a numeric conversion to force the type
+                    // change that EmitCastToEnum provides for enums.
+                    if (typeFrom.IsNullableType() && !typeTo.IsNullableType())
+                    {
+                        _instructions.Emit(NullableMethodCallInstruction.CreateGetValue());
+                    }
                 }
                 else
                 {
-                    _instructions.EmitNumericConvertUnchecked(from, to, isLiftedToNull);
+                    if (isChecked)
+                    {
+                        _instructions.EmitNumericConvertChecked(from, to, isLiftedToNull);
+                    }
+                    else
+                    {
+                        _instructions.EmitNumericConvertUnchecked(from, to, isLiftedToNull);
+                    }
                 }
 
                 if ((object)enumTypeTo != null)
@@ -2261,7 +2271,7 @@ namespace System.Linq.Expressions.Interpreter
                                 objTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Object.Type), _instructions.Count);
                                 EmitThisForMethodCall(indexNode.Object);
                                 _instructions.EmitDup();
-                                _instructions.EmitStoreLocal(objTmp.Value.Index);
+                                _instructions.EmitStoreLocal(objTmp.GetValueOrDefault().Index);
                             }
 
                             int count = indexNode.ArgumentCount;
@@ -2299,7 +2309,7 @@ namespace System.Linq.Expressions.Interpreter
                             memberTemp = _locals.DefineLocal(Expression.Parameter(member.Expression.Type, "member"), _instructions.Count);
                             EmitThisForMethodCall(member.Expression);
                             _instructions.EmitDup();
-                            _instructions.EmitStoreLocal(memberTemp.Value.Index);
+                            _instructions.EmitStoreLocal(memberTemp.GetValueOrDefault().Index);
                         }
 
                         var field = member.Member as FieldInfo;
@@ -3162,7 +3172,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override void Update(InterpretedFrame frame, object value)
         {
-            object obj = _object == null ? null : frame.Data[_object.Value.Index];
+            object obj = _object == null ? null : frame.Data[_object.GetValueOrDefault().Index];
             _field.SetValue(obj, value);
         }
 
@@ -3170,7 +3180,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_object != null)
             {
-                locals.UndefineLocal(_object.Value, instructions.Count);
+                locals.UndefineLocal(_object.GetValueOrDefault(), instructions.Count);
             }
         }
     }
@@ -3189,7 +3199,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override void Update(InterpretedFrame frame, object value)
         {
-            object obj = _object == null ? null : frame.Data[_object.Value.Index];
+            object obj = _object == null ? null : frame.Data[_object.GetValueOrDefault().Index];
 
             try
             {
@@ -3206,7 +3216,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_object != null)
             {
-                locals.UndefineLocal(_object.Value, instructions.Count);
+                locals.UndefineLocal(_object.GetValueOrDefault(), instructions.Count);
             }
         }
     }
@@ -3234,7 +3244,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             args[args.Length - 1] = value;
 
-            object instance = _obj == null ? null : frame.Data[_obj.Value.Index];
+            object instance = _obj == null ? null : frame.Data[_obj.GetValueOrDefault().Index];
 
             try
             {
@@ -3251,7 +3261,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_obj != null)
             {
-                locals.UndefineLocal(_obj.Value, instructions.Count);
+                locals.UndefineLocal(_obj.GetValueOrDefault(), instructions.Count);
             }
 
             for (int i = 0; i < _args.Length; i++)

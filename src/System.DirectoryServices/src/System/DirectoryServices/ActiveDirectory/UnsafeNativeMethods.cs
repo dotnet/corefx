@@ -27,6 +27,7 @@
 
 namespace System.DirectoryServices.ActiveDirectory
 {
+#pragma warning disable BCL0015 // CoreFxPort
     using System;
     using System.Runtime.InteropServices;
     using System.Security;
@@ -627,7 +628,6 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     [
-    ComVisible(false),
     SuppressUnmanagedCodeSecurityAttribute()
     ]
     internal class UnsafeNativeMethods

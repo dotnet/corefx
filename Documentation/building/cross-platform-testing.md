@@ -27,7 +27,7 @@ instructions assume you are building for Linux, but are easily modifiable for OS
    CoreFX on Linux via `build.sh`. 
    The other option is:
 
-   * Build the managed parts of CoreFX on Windows. To do so run `build-managed.cmd -os=Linux -target-os=Linux`. It is okay to build a Debug version of CoreFX and run it
+   * Build the managed parts of CoreFX on Windows. To do so run `build-managed.cmd -os=Linux`. It is okay to build a Debug version of CoreFX and run it
    on top of a release CoreCLR (which is exactly what we do in Jenkins).
 
    * Build the native parts of CoreFX on Linux. To do so run `./build-native.sh` from the root of your CoreFX enlistment.
@@ -61,12 +61,10 @@ If needed, copy mscorlib:
 # rsync -v -r  ~/mnt/matell3/d/git/coreclr/bin/Product/ ~/git/coreclr/bin/Product/
 ```
 
-Then, run the tests. We need to pass an explict path to the location of CoreCLR
-and mscorlib.dll.
+Then, run the tests. We need to pass an explict path to the location of CoreCLR.
 
 ```
-# ./run-test.sh --coreclr-bins ~/git/coreclr/bin/Product/Linux.x64.Release \
---mscorlib-bins ~/git/coreclr/bin/Product/Linux.x64.Release \
+# ./run-test.sh --coreclr-bins ~/git/coreclr/bin/Product/Linux.x64.Release
 ```
 
 run-test.sh should now invoke all the managed tests.

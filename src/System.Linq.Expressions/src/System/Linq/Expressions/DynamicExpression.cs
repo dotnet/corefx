@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic.Utils;
 using System.Linq.Expressions.Compiler;
 using System.Reflection;
@@ -134,6 +135,7 @@ namespace System.Linq.Expressions
         /// </summary>
         public ReadOnlyCollection<Expression> Arguments => GetOrMakeArguments();
 
+        [ExcludeFromCodeCoverage]
         internal virtual ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
             throw ContractUtils.Unreachable;
@@ -160,6 +162,7 @@ namespace System.Linq.Expressions
         /// This helper is provided to allow re-writing of nodes to not depend on the specific optimized
         /// subclass of DynamicExpression which is being used.
         /// </summary>
+        [ExcludeFromCodeCoverage]
         internal virtual DynamicExpression Rewrite(Expression[] args)
         {
             throw ContractUtils.Unreachable;
@@ -174,7 +177,21 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public DynamicExpression Update(IEnumerable<Expression> arguments)
         {
-            if (arguments == Arguments)
+            ICollection<Expression> args;
+            if (arguments == null)
+            {
+                args = null;
+            }
+            else
+            {
+                args = arguments as ICollection<Expression>;
+                if (args == null)
+                {
+                    arguments = args = arguments.ToReadOnly();
+                }
+            }
+
+            if (SameArguments(args))
             {
                 return this;
             }
@@ -182,13 +199,21 @@ namespace System.Linq.Expressions
             return ExpressionExtension.MakeDynamic(DelegateType, Binder, arguments);
         }
 
+        [ExcludeFromCodeCoverage] // Unreachable
+        internal virtual bool SameArguments(ICollection<Expression> arguments)
+        {
+            throw ContractUtils.Unreachable;
+        }
+
         #region IArgumentProvider Members
 
+        [ExcludeFromCodeCoverage]
         Expression IArgumentProvider.GetArgument(int index)
         {
             throw ContractUtils.Unreachable;
         }
 
+        [ExcludeFromCodeCoverage]
         int IArgumentProvider.ArgumentCount
         {
             get { throw ContractUtils.Unreachable; }
@@ -468,6 +493,9 @@ namespace System.Linq.Expressions
 
         Expression IArgumentProvider.GetArgument(int index) => _arguments[index];
 
+        internal override bool SameArguments(ICollection<Expression> arguments) =>
+            ExpressionUtils.SameElements(arguments, _arguments);
+
         int IArgumentProvider.ArgumentCount => _arguments.Count;
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
@@ -516,6 +544,20 @@ namespace System.Linq.Expressions
 
         int IArgumentProvider.ArgumentCount => 1;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 1)
+            {
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    return en.Current == ReturnObject<Expression>(_arg0);
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
             return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
@@ -563,6 +605,30 @@ namespace System.Linq.Expressions
         }
 
         int IArgumentProvider.ArgumentCount => 2;
+
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 2)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        return en.Current == _arg1;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
@@ -613,6 +679,34 @@ namespace System.Linq.Expressions
         }
 
         int IArgumentProvider.ArgumentCount => 3;
+
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 3)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            return en.Current == _arg2;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
@@ -665,6 +759,38 @@ namespace System.Linq.Expressions
         }
 
         int IArgumentProvider.ArgumentCount => 4;
+
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 4)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            if (en.Current == _arg2)
+                            {
+                                en.MoveNext();
+                                return en.Current == _arg3;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
@@ -727,13 +853,26 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, IEnumerable<Expression> arguments)
         {
+            IReadOnlyList<Expression> argumentList = arguments as IReadOnlyList<Expression> ?? arguments.ToReadOnly();
+            switch (argumentList.Count)
+            {
+                case 1:
+                    return MakeDynamic(delegateType, binder, argumentList[0]);
+                case 2:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1]);
+                case 3:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1], argumentList[2]);
+                case 4:
+                    return MakeDynamic(delegateType, binder, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
+            }
+
             ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
             ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
 
-            var args = arguments.ToReadOnly();
+            var args = arguments.ToReadOnly(); // Ensure is TrueReadOnlyCollection when count > 4. Returns fast if it already is.
             ExpressionUtils.ValidateArgumentTypes(method, ExpressionType.Dynamic, ref args, nameof(delegateType));
 
             return DynamicExpression.Make(method.GetReturnType(), delegateType, binder, args);

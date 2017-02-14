@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using Xunit;
 
@@ -447,30 +449,111 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void UpdateSameReturnsSame()
         {
-            ParameterExpression param = Expression.Parameter(typeof(int));
-            Expression<Func<int, int>> identExp = Expression.Lambda<Func<int, int>>(param, param);
-            Assert.Same(identExp, identExp.Update(param, identExp.Parameters));
+            Expression body = Expression.Empty();
+            ParameterExpression[] pars = Array.Empty<ParameterExpression>();
+            Expression<Action> lambda0 = Expression.Lambda<Action>(body, pars);
+            Assert.Same(lambda0, lambda0.Update(body, null));
+            Assert.Same(lambda0, lambda0.Update(body, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int>> lambda1 = Expression.Lambda<Action<int>>(body, pars);
+            Assert.Same(lambda1, lambda1.Update(body, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int>> lambda2 = Expression.Lambda<Action<int, int>>(body, pars);
+            Assert.Same(lambda2, lambda2.Update(body, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int>> lambda3 = Expression.Lambda<Action<int, int, int>>(body, pars);
+            Assert.Same(lambda3, lambda3.Update(body, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int, int>> lambda4 = Expression.Lambda<Action<int, int, int, int>>(body, pars);
+            Assert.Same(lambda4, lambda4.Update(body, pars));
+        }
+
+        [Fact]
+        public void UpdateDoesntRepeatEnumeration()
+        {
+            Expression body = Expression.Empty();
+            ParameterExpression[] pars = Array.Empty<ParameterExpression>();
+            Expression<Action> lambda0 = Expression.Lambda<Action>(body, pars);
+            Assert.Same(lambda0, lambda0.Update(body, new RunOnceEnumerable<ParameterExpression>(pars)));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int>> lambda1 = Expression.Lambda<Action<int>>(body, pars);
+            Assert.Same(lambda1, lambda1.Update(body, new RunOnceEnumerable<ParameterExpression>(pars)));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int>> lambda2 = Expression.Lambda<Action<int, int>>(body, pars);
+            Assert.Same(lambda2, lambda2.Update(body, new RunOnceEnumerable<ParameterExpression>(pars)));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int>> lambda3 = Expression.Lambda<Action<int, int, int>>(body, pars);
+            Assert.Same(lambda3, lambda3.Update(body, new RunOnceEnumerable<ParameterExpression>(pars)));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int, int>> lambda4 = Expression.Lambda<Action<int, int, int, int>>(body, pars);
+            Assert.Same(lambda4, lambda4.Update(body, new RunOnceEnumerable<ParameterExpression>(pars)));
         }
 
         [Fact]
         public void UpdateDifferentBodyReturnsDifferent()
         {
-            ParameterExpression param = Expression.Parameter(typeof(int));
-            Expression<Func<int, int>> identExp = Expression.Lambda<Func<int, int>>(param, param);
-            Assert.NotSame(identExp, identExp.Update(Expression.UnaryPlus(param), identExp.Parameters));
+            Expression body = Expression.Empty();
+            Expression newBody = Expression.Empty();
+            ParameterExpression[] pars = Array.Empty<ParameterExpression>();
+            Expression<Action> lambda0 = Expression.Lambda<Action>(body, pars);
+            Assert.NotSame(lambda0, lambda0.Update(newBody, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int>> lambda1 = Expression.Lambda<Action<int>>(body, pars);
+            Assert.NotSame(lambda1, lambda1.Update(newBody, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int>> lambda2 = Expression.Lambda<Action<int, int>>(body, pars);
+            Assert.NotSame(lambda2, lambda2.Update(newBody, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int>> lambda3 = Expression.Lambda<Action<int, int, int>>(body, pars);
+            Assert.NotSame(lambda3, lambda3.Update(newBody, pars));
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int, int>> lambda4 = Expression.Lambda<Action<int, int, int, int>>(body, pars);
+            Assert.NotSame(lambda4, lambda4.Update(newBody, pars));
         }
 
         [Fact]
         public void UpdateDifferentParamsReturnsDifferent()
         {
-            ParameterExpression param0 = Expression.Parameter(typeof(int));
-            ParameterExpression param1 = Expression.Parameter(typeof(int));
-            Expression<Func<int, int, int>> add = Expression.Lambda<Func<int, int, int>>(
-                Expression.Add(param0, param1),
-                param0,
-                param1
-                );
-            Assert.NotSame(add, add.Update(add.Body, new[] {param1, param0}));
+            Expression body = Expression.Empty();
+            ParameterExpression[] pars = Array.Empty<ParameterExpression>();
+            Expression<Action> lambda0 = Expression.Lambda<Action>(body, pars);
+            VerifyUpdateDifferentParamsReturnsDifferent(lambda0, pars);
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int>> lambda1 = Expression.Lambda<Action<int>>(body, pars);
+            VerifyUpdateDifferentParamsReturnsDifferent(lambda1, pars);
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int>> lambda2 = Expression.Lambda<Action<int, int>>(body, pars);
+            VerifyUpdateDifferentParamsReturnsDifferent(lambda2, pars);
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int>> lambda3 = Expression.Lambda<Action<int, int, int>>(body, pars);
+            VerifyUpdateDifferentParamsReturnsDifferent(lambda3, pars);
+            pars = pars.Append(Expression.Parameter(typeof(int))).ToArray();
+            Expression<Action<int, int, int, int>> lambda4 = Expression.Lambda<Action<int, int, int, int>>(body, pars);
+            VerifyUpdateDifferentParamsReturnsDifferent(lambda4, pars);
+        }
+
+        private static void VerifyUpdateDifferentParamsReturnsDifferent<TDelegate>(Expression<TDelegate> lamda, ParameterExpression[] pars)
+        {
+            // Should try to create new lambda, but should fail as should have wrong number of arguments.
+            Assert.Throws<ArgumentException>(() => lamda.Update(lamda.Body, pars.Append(Expression.Parameter(typeof(int)))));
+
+            if (pars.Length != 0)
+            {
+                Assert.Throws<ArgumentException>(() => lamda.Update(lamda.Body, null));
+                for (int i = 0; i != pars.Length; ++i)
+                {
+                    ParameterExpression[] newPars = new ParameterExpression[pars.Length];
+                    pars.CopyTo(newPars, 0);
+                    newPars[i] = Expression.Parameter(typeof(int));
+                    Assert.NotSame(lamda, lamda.Update(lamda.Body, newPars));
+                }
+
+                IEnumerable<ParameterExpression> diffPars = new RunOnceEnumerable<ParameterExpression>(
+                    Enumerable.Range(0, lamda.Parameters.Count) // Trigger Parameters collection build.
+                    .Select(_ => Expression.Parameter(typeof(int))));
+
+                Assert.NotSame(lamda, lamda.Update(lamda.Body, diffPars));
+            }
         }
 
         [Fact]
@@ -647,6 +730,55 @@ namespace System.Linq.Expressions.Tests
 
             Assert.Equal(42, i());
             Assert.Equal(84, i());
+        }
+
+        private static IEnumerable<object[]> LambdaTypes() =>
+            from parCount in Enumerable.Range(0, 6)
+            from name in new[] {null, "Lambda"}
+            from tailCall in new[] {false, true}
+            select new object[] {parCount, name, tailCall};
+
+        [Theory, MemberData(nameof(LambdaTypes))]
+        public void ParameterListBehavior(int parCount, string name, bool tailCall)
+        {
+            // This method contains a lot of assertions, which amount to one large assertion that
+            // the result of the Parameters property behaves correctly.
+            ParameterExpression[] pars =
+                Enumerable.Range(0, parCount).Select(_ => Expression.Parameter(typeof(int))).ToArray();
+            LambdaExpression lamda = Expression.Lambda(Expression.Empty(), name, tailCall, pars);
+            ReadOnlyCollection<ParameterExpression> parameters = lamda.Parameters;
+            Assert.Equal(parCount, parameters.Count);
+            using (var en = parameters.GetEnumerator())
+            {
+                IEnumerator nonGenEn = ((IEnumerable)parameters).GetEnumerator();
+                for (int i = 0; i != parCount; ++i)
+                {
+                    Assert.True(en.MoveNext());
+                    Assert.True(nonGenEn.MoveNext());
+                    Assert.Same(pars[i], parameters[i]);
+                    Assert.Same(pars[i], en.Current);
+                    Assert.Same(pars[i], nonGenEn.Current);
+                    Assert.Equal(i, parameters.IndexOf(pars[i]));
+                    Assert.True(parameters.Contains(pars[i]));
+                }
+
+                Assert.False(en.MoveNext());
+                Assert.False(nonGenEn.MoveNext());
+                (nonGenEn as IDisposable)?.Dispose();
+            }
+
+            ParameterExpression[] copyToTest = new ParameterExpression[parCount + 1];
+            Assert.Throws<ArgumentNullException>(() => parameters.CopyTo(null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => parameters.CopyTo(copyToTest, -1));
+            Assert.All(copyToTest, Assert.Null); // assert partial copy didn't happen before exception
+            Assert.Throws<ArgumentException>(() => parameters.CopyTo(copyToTest, 2));
+            Assert.All(copyToTest, Assert.Null);
+            parameters.CopyTo(copyToTest, 1);
+            Assert.Equal(copyToTest, pars.Prepend(null));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => parameters[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => parameters[parCount]);
+            Assert.Equal(-1, parameters.IndexOf(Expression.Parameter(typeof(int))));
+            Assert.False(parameters.Contains(Expression.Parameter(typeof(int))));
         }
 
         private static int Add(ref int var, int val)

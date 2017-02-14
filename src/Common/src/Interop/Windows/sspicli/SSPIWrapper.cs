@@ -178,7 +178,7 @@ namespace System.Net
             int errorCode = secModule.InitializeSecurityContext(ref credential, ref context, targetName, inFlags, datarep, inputBuffer, outputBuffer, ref outFlags);
 
             if (NetEventSource.IsEnabled) NetEventSource.Log.SecurityContextInputBuffer(nameof(InitializeSecurityContext), inputBuffer?.size ?? 0, outputBuffer.size, (Interop.SECURITY_STATUS)errorCode);
-            
+
             return errorCode;
         }
 
@@ -378,7 +378,7 @@ namespace System.Net
                     }
 
                     if (NetEventSource.IsEnabled && errorCode != 0)
-                    {                         
+                    {
                         if (errorCode == Interop.SspiCli.SEC_I_RENEGOTIATE)
                         {
                             NetEventSource.Error(null, SR.Format(SR.event_OperationReturnedSomething, op, "SEC_I_RENEGOTIATE"));
@@ -514,7 +514,7 @@ namespace System.Net
                     case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NEGOTIATION_INFO:
                         unsafe
                         {
-                            fixed (void* ptr = nativeBuffer)
+                            fixed (void* ptr = &nativeBuffer[0])
                             {
                                 attribute = new NegotiationInfoClass(sspiHandle, Marshal.ReadInt32(new IntPtr(ptr), SecPkgContext_NegotiationInfoW.NegotiationStateOffest));
                             }

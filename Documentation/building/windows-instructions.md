@@ -19,8 +19,13 @@ We also require that [Visual Studio 2015 Update 1](https://www.visualstudio.com/
 ## Building From the Command Line
 
 Open a [Visual Studio Command Prompt](http://msdn.microsoft.com/en-us/library/ms229859(v=vs.110).aspx).
-From the root of the repository, type `build.cmd`. This will build everything and run
-the core tests for the project. 
+
+- `build.cmd` - Will cause basic tool initialization and build the default configuration for refs, libs, and packages.
+- `build-tests.cmd` - Will build and run tests for the default configuration.
+
+For information on different configurations see [project-guidelines](../coding-guidelines/project-guidelines.md).
+
+**Note**: Before working on individual projects or test projects you **must** run `build.cmd` from the root once before beginning that work. It is also a good idea to run `build.cmd` whenever you pull a large set of unknown changes into your branch.
 
 Visual Studio Solution (.sln) files exist for related groups of libraries. These can be loaded to build, debug and test inside
 the Visual Studio IDE.
@@ -29,6 +34,11 @@ Note that when calling the script `build.cmd` attempts to build both the native 
 Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native.cmd` and `build-managed.cmd` respectively.
 
 For more information about the different options when building, run `build.cmd -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
+
+### Running tests from the command line
+
+From the root, use `build-tests.cmd`.
+For more details, or to test an individual project, see the [developer guide topic](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md).
 
 ### Running tests from Visual Studio
 

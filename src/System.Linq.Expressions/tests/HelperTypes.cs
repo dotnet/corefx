@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using Xunit;
 
 namespace System.Linq.Expressions.Tests
 {
@@ -418,9 +419,9 @@ namespace System.Linq.Expressions.Tests
         public static readonly Number MinValue = new Number(int.MinValue);
         public static readonly Number MaxValue = new Number(int.MaxValue);
 
-        public static Number operator +(Number l, Number r) => new Number(l._value + r._value);
+        public static Number operator +(Number l, Number r) => new Number(unchecked(l._value + r._value));
         public static Number operator -(Number l, Number r) => new Number(l._value - r._value);
-        public static Number operator *(Number l, Number r) => new Number(l._value * r._value);
+        public static Number operator *(Number l, Number r) => new Number(unchecked(l._value * r._value));
         public static Number operator /(Number l, Number r) => new Number(l._value / r._value);
         public static Number operator %(Number l, Number r) => new Number(l._value % r._value);
 
@@ -452,5 +453,43 @@ namespace System.Linq.Expressions.Tests
             expression.VerifyInstructions(instructions);
 #endif
         }
+    }
+
+    public class RunOnceEnumerable<T> : IEnumerable<T>
+    {
+        private readonly IEnumerable<T> _source;
+        private bool _called;
+
+        public RunOnceEnumerable(IEnumerable<T> source)
+        {
+            _source = source;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            Assert.False(_called);
+            _called = true;
+            return _source.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class Truthiness
+    {
+        private bool Value { get; }
+
+        public Truthiness(bool value)
+        {
+            Value = value;
+        }
+
+        public static implicit operator bool(Truthiness truth) => truth.Value;
+
+        public static bool operator true(Truthiness truth) => truth.Value;
+
+        public static bool operator false(Truthiness truth) => !truth.Value;
+
+        public static Truthiness operator !(Truthiness truth) => new Truthiness(!truth.Value);
     }
 }

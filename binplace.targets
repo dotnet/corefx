@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <IsRuntimeAssembly Condition="'$(IsRuntimeAssembly)'=='' AND '$(IsReferenceAssembly)' != 'true' AND '$(BinPlaceRef)' != 'true' AND '$(IsTestProject)' != 'true'">true</IsRuntimeAssembly>
+    <!-- Try to determine if this is a simple library without a ref project.
+         https://github.com/dotnet/corefx/issues/14291 is tracking cleaning this up -->
+    <IsRuntimeAndReferenceAssembly Condition="'$(IsRuntimeAndReferenceAssembly)' == '' and '$(IsRuntimeAssembly)' == 'true' and Exists('$(SourceDir)/$(AssemblyName)') and !Exists('$(SourceDir)/$(AssemblyName)/ref') and !$(AssemblyName.StartsWith('System.Private'))">true</IsRuntimeAndReferenceAssembly>
+    <IsNETCoreAppRef Condition="'$(IsNETCoreAppRef)' == ''">$(IsNETCoreApp)</IsNETCoreAppRef>
+    <IsUAPRef Condition="'$(IsUAPRef)' == ''">$(IsUAP)</IsUAPRef>
+
+    <BuildingDesktopFacade Condition="'$(IsDesktopFacade)' == 'true' And ('$(TargetGroup)' == 'netfx' Or $(TargetGroup.StartsWith('net4')))" >true</BuildingDesktopFacade>
+
+    <!-- if building desktop facade, we don't bin place the refs -->
+    <BinPlaceRef Condition="'$(BinPlaceRef)' == '' And '$(BuildingDesktopFacade)' != 'true' And ('$(IsReferenceAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRef>
+    <BinPlaceRuntime Condition="'$(BinPlaceRuntime)' == '' And ('$(IsRuntimeAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRuntime>
+
+    <!-- if building desktop facade and bin placing the runtime, then we need to bin place the refs too -->
+    <BinPlaceRef Condition="'$(BuildingDesktopFacade)' == 'true' And '$(BinPlaceRuntime)' == 'true'">true</BinPlaceRef>
+
+    <BinPlaceStuffDependsOn Condition="'$(BinPlaceRef)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceReferenceAssembly</BinPlaceStuffDependsOn>
+    <BinPlaceStuffDependsOn Condition="'$(BinPlaceRuntime)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceRuntimeAssembly</BinPlaceStuffDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'@(BinplaceConfiguration)' == ''">
+    <!-- binplace to directories for the target vertical -->
+    <BinplaceConfiguration Include="$(BuildConfiguration)">
+      <RefPath>$(BuildConfigurationRefPath)</RefPath>
+      <RuntimePath>$(RuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+
+    <!-- binplace to directories for packages -->
+    <BinplaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(OSGroup)">
+      <RefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</RefPath>
+      <RuntimePath>$(NETCoreAppPackageRuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-$(OSGroup)">
+      <RefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</RefPath>
+      <RuntimePath>$(UAPPackageRuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPAOTVertical)' == 'true'" Include="uapaot-$(OSGroup)">
+      <RefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</RefPath>
+      <RuntimePath>$(UAPAOTPackageRuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+
+    <!-- Setup the shared framework directory for testing -->
+    <BinplaceConfiguration Condition="'$(BinplaceTestSharedFramework)' == 'true'" Include="netcoreapp-$(OSGroup)">
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
+    </BinplaceConfiguration>
+
+    <!-- binplace targeting packs which may be different from BuildConfiguration -->
+    <BinplaceConfiguration Include="netstandard-$(OSGroup)">
+      <RefPath>$(RefRootPath)netstandard/</RefPath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
+                           Include="netcoreapp-$(OSGroup)">
+      <RefPath>$(RefRootPath)netcoreapp/</RefPath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
+                           Include="uap-$(OSGroup)">
+      <RefPath>$(RefRootPath)uap/</RefPath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
+                           Include="netfx-$(OSGroup)">
+      <RefPath>$(RefRootPath)netfx/</RefPath>
+    </BinplaceConfiguration>
+  </ItemGroup>
+
+  <Target Name="BinPlaceStuff" DependsOnTargets="$(BinPlaceStuffDependsOn)" AfterTargets="CopyFilesToOutputDirectory">
+    <Message Importance="low" Text="IsRuntimeAssembly: $(IsRuntimeAssembly)" />
+    <Message Importance="low" Text="IsReferenceAssembly: $(IsReferenceAssembly)" />
+    <Message Importance="low" Text="IsRuntimeAndReferenceAssembly: $(IsRuntimeAndReferenceAssembly)" />
+  </Target>
+
+  <Target Name="BinPlaceReferenceAssembly" DependsOnTargets="GetBinplaceDirs;GetBinplaceItems">
+    <Message Importance="low" Text="TargetingPackDir: @(TargetingPackDir)" />
+    <Copy Condition="'@(TargetingPackDir)' != ''" SourceFiles="@(BinplaceItem)" DestinationFolder="%(TargetingPackDir.Identity)" SkipUnchangedFiles="true">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="BinPlaceRuntimeAssembly" DependsOnTargets="GetBinplaceDirs;GetBinplaceItems">
+    <Copy Condition="'@(RuntimeDir)' != ''" SourceFiles="@(BinplaceItem)" DestinationFolder="%(RuntimeDir.Identity)" SkipUnchangedFiles="true">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="GetBinplaceItems" DependsOnTargets="GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <BinplaceItem Condition="Exists('$(TargetPath)')" Include="$(TargetPath)" />
+      <BinplaceItem Condition="Exists('$(TargetDir)$(TargetName).pdb')" Include="$(TargetDir)$(TargetName).pdb" />
+      <BinplaceItem Condition="'$(BinplaceReferenceCopyLocalPaths)' != 'false'" Include="@(ReferenceCopyLocalPaths)" />
+      <BinplaceItem Condition="'$(BinplaceCopyToOutputDirectoryItems)' != 'false'" Include="@(AllItemsFullPathWithTargetPath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GetBinplaceDirs" DependsOnTargets="GetBuildConfigurations">
+    <!-- find which, if any, build configuration of this project is best
+         for each binplace configuration -->
+    <FindBestConfigurations Properties="@(Property)"
+                            PropertyValues="@(PropertyValue)"
+                            SupportedConfigurations="$(_AllBuildConfigurations)"
+                            Configurations="@(BinplaceConfiguration)">
+      <Output TaskParameter="BestConfigurations" ItemName="_bestBinlaceConfigurations" />
+    </FindBestConfigurations>
+
+    <ItemGroup>
+      <_currentBinplaceConfigurations Include="@(_bestBinlaceConfigurations)" Condition="'%(Identity)' == '$(Configuration)' OR '%(Identity)-$(ConfigurationGroup)' == '$(Configuration)'" />
+
+      <RuntimeDir Include="%(_currentBinplaceConfigurations.RuntimePath)" />
+      <TargetingPackDir Include="%(_currentBinplaceConfigurations.RefPath)" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <AdditionalCleanDirectories Include="$(BinDir)netcoreapp" />
+  </ItemGroup>
+
+  <!-- Incremental clean only cleans paths under Intermediate or OutDir, handle additional paths -->
+  <Target Name="_CleanGetCurrentAdditionalFileWrites" BeforeTargets="_CleanGetCurrentAndPriorFileWrites">
+    <!-- find files under paths we care about and add them to _CleanCurrentFileWrites to ensure they are written to the file list -->
+    <FindUnderPath Path="%(AdditionalCleanDirectories.Identity)" Files="@(FileWrites)" UpdateToAbsolutePaths="true">
+      <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWrites" />
+    </FindUnderPath>
+  </Target>
+
+  <Target Name="IncrementalCleanAdditionalDirectories" BeforeTargets="IncrementalClean">
+    <ItemGroup>
+      <_CleanOrphanAdditionalFileWrites Include="@(_CleanPriorFileWrites)" Exclude="@(_CleanCurrentFileWrites)" />
+    </ItemGroup>
+    <FindUnderPath Path="%(AdditionalCleanDirectories.Identity)" Files="@(_CleanOrphanAdditionalFileWrites)">
+      <Output TaskParameter="InPath" ItemName="_CleanOrphanFileWritesInAdditionalDirectories" />
+    </FindUnderPath>
+
+    <!-- Delete the orphaned files.  IncrementalClean will remove these from the file list -->
+    <Delete Files="@(_CleanOrphanFileWritesInAdditionalDirectories)" TreatErrorsAsWarnings="true">
+      <Output TaskParameter="DeletedFiles" ItemName="_CleanOrphanFilesDeleted" />
+    </Delete>
+  </Target>
+</Project>
