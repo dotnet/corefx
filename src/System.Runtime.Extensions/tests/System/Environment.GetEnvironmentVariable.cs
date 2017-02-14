@@ -180,7 +180,6 @@ namespace System.Tests
             }
         }
 
-        [OuterLoop] // manipulating environment variables broader in scope than the process
         [Theory]
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
@@ -196,18 +195,6 @@ namespace System.Tests
                 // Make sure the iterated value we got matches the one we get explicitly
                 Assert.NotNull(result.Key as string);
                 Assert.Equal(value, Environment.GetEnvironmentVariable(key, target));
-
-                try
-                {
-                    // Change it to something else.  Not all values can be changed and will silently
-                    // not change, so we don't re-check and assert for equality.
-                    Environment.SetEnvironmentVariable(key, value + "changed", target);
-                }
-                finally
-                {
-                    // Change it back
-                    Environment.SetEnvironmentVariable(key, value, target);
-                }
             }
         }
 
