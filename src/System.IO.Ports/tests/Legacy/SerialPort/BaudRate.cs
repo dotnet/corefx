@@ -24,8 +24,6 @@ public class BaudRate_Property : PortsTest
 
     private enum ThrowAt { Set, Open };
 
-    private int _exitValue = TCSupport.PassExitCode;
-
     #region Test Cases
     [ConditionalFact(nameof(HasNullModem))]
     public void BaudRate_Default()
