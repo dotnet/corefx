@@ -4,6 +4,9 @@
 using System.Security;
 using System.Security.Permissions;
 
+// Additional implementation to keep public API in Mono (it has a reference to this file)
+// https://github.com/dotnet/corefx/issues/16184
+
 namespace System.Data.Common
 {
     partial class DbProviderFactory
