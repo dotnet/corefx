@@ -205,25 +205,30 @@ namespace System.Xml.Serialization
                     collection = ReflectionCreateObject(collectionType);
                 }
 
-                if (typeof(IList).IsAssignableFrom(collectionType))
-                {
-                    foreach (var item in collectionMember)
-                    {
-                        ((IList)collection).Add(item);
-                    }
-                }
-                else
-                {
-                    foreach (var item in collectionMember)
-                    {
-                        MethodInfo addMethod = collectionType.GetMethod("Add");
-                        if (addMethod == null)
-                        {
-                            throw new InvalidOperationException("(addMethod == null)");
-                        }
+                AddObjectsIntoTargetCollection(collection, collectionMember, collectionType);
+            }
+        }
 
-                        addMethod.Invoke(collection, new object[] { item });
+        private static void AddObjectsIntoTargetCollection(object collection, List<object> collectionMember, Type collectionType)
+        {
+            if (typeof(IList).IsAssignableFrom(collectionType))
+            {
+                foreach (var item in collectionMember)
+                {
+                    ((IList)collection).Add(item);
+                }
+            }
+            else
+            {
+                foreach (var item in collectionMember)
+                {
+                    MethodInfo addMethod = collectionType.GetMethod("Add");
+                    if (addMethod == null)
+                    {
+                        throw new InvalidOperationException("(addMethod == null)");
                     }
+
+                    addMethod.Invoke(collection, new object[] { item });
                 }
             }
         }
@@ -672,7 +677,10 @@ namespace System.Xml.Serialization
                 TypeDesc td = arrayMapping.TypeDesc;
                 if (td.IsEnumerable || td.IsCollection)
                 {
-                    throw new NotImplementedException();
+                    if (rre != null)
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else
                 {
@@ -1047,7 +1055,7 @@ namespace System.Xml.Serialization
                             TypeDesc td = member.Mapping.TypeDesc;
                             if (td.IsCollection || td.IsEnumerable)
                             {
-                                throw new NotImplementedException();
+                                WriteAddCollectionFixup(o, member, memberValue);
                             }
                             else
                             {
@@ -1056,6 +1064,58 @@ namespace System.Xml.Serialization
                         }
                     }
                 }
+            };
+        }
+
+        private void WriteAddCollectionFixup(object o, Member member, object memberValue)
+        {
+            TypeDesc typeDesc = member.Mapping.TypeDesc;
+            bool readOnly = member.Mapping.ReadOnly;
+            object memberSource = GetMemberValue(o, member.Mapping.MemberInfo);
+            if (memberSource == null)
+            {
+                if (readOnly)
+                {
+                    throw CreateReadOnlyCollectionException(typeDesc.CSharpName);
+                }
+
+                memberSource = ReflectionCreateObject(typeDesc.Type);
+                SetMemberValue(o, memberSource, member.Mapping.MemberInfo);
+            }
+
+            var collectionFixup = new CollectionFixup(
+                memberSource,
+                new XmlSerializationCollectionFixupCallback(GetCreateCollectionOfObjectsCallback(typeDesc.Type)),
+                memberValue);
+
+            AddFixup(collectionFixup);
+        }
+
+        private XmlSerializationCollectionFixupCallback GetCreateCollectionOfObjectsCallback(Type collectionType)
+        {
+            return (collection, collectionItems) =>
+            {
+                if (collectionItems == null)
+                    return;
+
+                if (collection == null)
+                    return;
+
+                var listOfItems = new List<object>();
+                var enumerableItems = collectionItems as IEnumerable;
+                if (enumerableItems != null)
+                {
+                    foreach (var item in enumerableItems)
+                    {
+                        listOfItems.Add(item);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+
+                AddObjectsIntoTargetCollection(collection, listOfItems, collectionType);
             };
         }
 

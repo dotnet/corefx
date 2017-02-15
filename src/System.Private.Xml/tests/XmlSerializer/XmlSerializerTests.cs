@@ -2850,7 +2850,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    [ActiveIssue(15525)]
     [Fact]
     public static void SoapEncodedSerializationTest_List()
     {
@@ -2879,9 +2878,13 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             using (var reader = new XmlTextReader(ms))
             {
                 reader.ReadStartElement("wrapper");
-                var deserialized = (MyGroup2)ser.Deserialize(reader);
-                Assert.Equal(value.GroupName, deserialized.GroupName);
-                Assert.Equal(value.MyItems.Count(), deserialized.MyItems.Count());
+                var actual = (MyGroup2)ser.Deserialize(reader);
+                Assert.Equal(value.GroupName, actual.GroupName);
+                Assert.Equal(value.MyItems.Count(), actual.MyItems.Count());
+                for (int i = 0; i < value.MyItems.Count(); i++)
+                {
+                    Assert.Equal(value.MyItems[i].ItemName, actual.MyItems[i].ItemName);
+                }
             }
         }
     }
