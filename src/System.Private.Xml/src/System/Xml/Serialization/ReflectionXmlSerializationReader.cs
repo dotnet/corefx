@@ -209,26 +209,27 @@ namespace System.Xml.Serialization
             }
         }
 
-        private static void AddObjectsIntoTargetCollection(object collection, List<object> collectionMember, Type collectionType)
+        private static void AddObjectsIntoTargetCollection(object targetCollection, List<object> sourceCollection, Type targetCollectionType)
         {
-            if (typeof(IList).IsAssignableFrom(collectionType))
+            var targetList = targetCollection as IList;
+            if (targetList != null)
             {
-                foreach (var item in collectionMember)
+                foreach (var item in sourceCollection)
                 {
-                    ((IList)collection).Add(item);
+                    targetList.Add(item);
                 }
             }
             else
             {
-                foreach (var item in collectionMember)
+                foreach (var item in sourceCollection)
                 {
-                    MethodInfo addMethod = collectionType.GetMethod("Add");
+                    MethodInfo addMethod = targetCollectionType.GetMethod("Add");
                     if (addMethod == null)
                     {
-                        throw new InvalidOperationException("(addMethod == null)");
+                        throw new InvalidOperationException("addMethod == null");
                     }
 
-                    addMethod.Invoke(collection, new object[] { item });
+                    addMethod.Invoke(targetCollection, new object[] { item });
                 }
             }
         }
