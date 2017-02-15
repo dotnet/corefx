@@ -147,7 +147,7 @@ namespace System.Linq.Parallel.Tests
             int actual = query.Aggregate(
                 0,
                 (accumulator, x) => accumulator + x,
-                (left, right) => left + right,
+                (left, right) => unchecked(left + right),
                 result => result + ResultFuncModifier);
             Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, actual);
         }
@@ -216,7 +216,7 @@ namespace System.Linq.Parallel.Tests
             int actual = query.Aggregate(
                 () => 0,
                 (accumulator, x) => accumulator + x,
-                (left, right) => left + right,
+                (left, right) => unchecked(left + right),
                 result => result + ResultFuncModifier);
             Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, actual);
         }
