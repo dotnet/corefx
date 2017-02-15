@@ -200,13 +200,16 @@ run_test()
     dirName="$1/netstandard"
     if [ ! -d "$dirName" ]; then
         echo "Nothing to test in $testProject"
-        exit 0
+        return
     fi
   fi
 
-  pushd $dirName > /dev/null
+  if [ ! -e "$dirName/RunTests.sh" ]; then
+      echo "Cannot find $dirName/RunTests.sh"
+      return
+  fi
 
-  chmod +x ./RunTests.sh
+  pushd $dirName > /dev/null
 
   echo
   echo "Running tests in $dirName"
