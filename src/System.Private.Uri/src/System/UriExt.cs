@@ -518,10 +518,15 @@ namespace System
 
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
-                    char[] dest = new char[stringToUnescape.Length];
-                    dest = UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, dest, ref position,
+                    #if netcoreapp
+                        return UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
-                    return new string(dest, 0, position);
+                    #else
+                        char[] dest = new char[stringToUnescape.Length];
+                        dest = UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, dest, ref position,
+                        c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
+                        return new string(dest, 0, position);
+                    #endif
                 }
             }
         }

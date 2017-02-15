@@ -5,6 +5,7 @@
     <ProjectGuid>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</ProjectGuid>
     <AssemblyName>System.Private.Uri</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -47,6 +48,7 @@
     <Compile Include="System\UriPartial.cs" />
     <Compile Include="System\UriScheme.cs" />
     <Compile Include="System\UriSyntax.cs" />
+    <Compile Include="System\PooledCharArray.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and ('$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap')">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
