@@ -221,15 +221,17 @@ namespace System.Xml.Serialization
             }
             else
             {
+                MethodInfo addMethod = targetCollectionType.GetMethod("Add");
+                if (addMethod == null)
+                {
+                    throw new InvalidOperationException("addMethod == null");
+                }
+
+                var arguments = new object[1];
                 foreach (var item in sourceCollection)
                 {
-                    MethodInfo addMethod = targetCollectionType.GetMethod("Add");
-                    if (addMethod == null)
-                    {
-                        throw new InvalidOperationException("addMethod == null");
-                    }
-
-                    addMethod.Invoke(targetCollection, new object[] { item });
+                    arguments[0] = item;
+                    addMethod.Invoke(targetCollection, arguments);
                 }
             }
         }
