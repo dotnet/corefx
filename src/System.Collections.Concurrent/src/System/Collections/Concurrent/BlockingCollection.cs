@@ -987,7 +987,7 @@ nameof(boundedCapacity), boundedCapacity,
             uint startTime = 0;
             if (millisecondsTimeout != Timeout.Infinite)
             {
-                startTime = (uint)Environment.TickCount;
+                startTime = unchecked((uint)Environment.TickCount);
             }
 
             // Fast path for adding if there is at least one unbounded collection
