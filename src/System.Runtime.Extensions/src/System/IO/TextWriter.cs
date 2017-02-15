@@ -27,8 +27,8 @@ namespace System.IO
         /// <summary>
         /// This is the 'NewLine' property expresses as a char[].   
         /// It is exposed to subclasses as a protected field for read-only
-        /// purposes.  You should only modify it by using the 'NewLine' setter.  
-        /// In particular you shoudl never modify the elements of that array 
+        /// purposes.  You should only modify it by using the 'NewLine' property.  
+        /// In particular you should never modify the elements of the array 
         /// as they are shared among many instances of TextWriter.  
         /// </summary>
         protected char[] CoreNewLine = CoreNewLineStatic;
