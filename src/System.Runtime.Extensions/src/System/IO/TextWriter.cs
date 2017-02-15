@@ -22,7 +22,7 @@ namespace System.IO
         public static readonly TextWriter Null = new NullTextWriter();
 
         // We don't want to allocate on every TextWriter creation, so cache the char array.  
-        private static readonly char[] CoreNewLineStatic = Environment.NewLine.ToCharArray();
+        private static readonly char[] s_coreNewLineStatic = Environment.NewLine.ToCharArray();
 
         /// <summary>
         /// This is the 'NewLine' property expresses as a char[].   
@@ -31,7 +31,7 @@ namespace System.IO
         /// In particular you should never modify the elements of the array 
         /// as they are shared among many instances of TextWriter.  
         /// </summary>
-        protected char[] CoreNewLine = CoreNewLineStatic;
+        protected char[] CoreNewLine = s_coreNewLineStatic;
         private string CoreNewLineStr = Environment.NewLine;
 
         // Can be null - if so, ask for the Thread's CurrentCulture every time.
