@@ -276,8 +276,7 @@
     <NETCoreAppTestSharedFrameworkPath>$(NETCoreAppTestRootPath)shared/Microsoft.NETCore.App/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestSharedFrameworkPath>
 
     <!-- Constructed shared fx path for testing -->
-    <TestSharedFxDir Condition="'$(_bc_TargetGroup)' != 'netfx'">$(NETCoreAppTestRootPath)</TestSharedFxDir>
-    <TestSharedFxDir Condition="'$(_bc_TargetGroup)' == 'netfx'">$(RuntimePath)</TestSharedFxDir>
+    <TestSharedFxDir Condition="'$(BinplaceTestSharedFramework)' == 'true'">$(NETCoreAppTestRootPath)</TestSharedFxDir>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
