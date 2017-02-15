@@ -6,7 +6,9 @@ using System;
 using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Security;
 using System.Threading;
+using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -29,10 +31,10 @@ public class WriteLine_Generic : PortsTest
     public static readonly string DEFAULT_STRING = "DEFAULT_STRING";
 
     //The string size used when veryifying BytesToWrite 
-    public static readonly int STRING_SIZE_BYTES_TO_WRITE = 4;
+    public static readonly int STRING_SIZE_BYTES_TO_WRITE = TCSupport.MinimumBlockingByteCount;
 
     //The string size used when veryifying Handshake 
-    public static readonly int STRING_SIZE_HANDSHAKE = 8;
+    public static readonly int STRING_SIZE_HANDSHAKE = TCSupport.MinimumBlockingByteCount;
     public static readonly int NUM_TRYS = 5;
 
     #region Test Cases
@@ -102,9 +104,8 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15752)]
     [OuterLoop("Slow test")]
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void SuccessiveReadTimeout()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -130,7 +131,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void SuccessiveReadTimeoutWithWriteSucceeding()
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -175,8 +176,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15752)]
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void BytesToWrite()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -205,17 +205,7 @@ public class WriteLine_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-            while (STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if (STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expected BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
-            }
+            TCSupport.WaitForWriteBufferToLoad(com, STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes);
 
             //Wait for write method to timeout
             while (t.IsAlive)
@@ -223,8 +213,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ActiveIssue(15752)]
-    [ConditionalFact(nameof(HasOneSerialPort))]
+    [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
     public void BytesToWriteSuccessive()
     {
         using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -252,17 +241,7 @@ public class WriteLine_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-            while (STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if (STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", STRING_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
-            }
+            TCSupport.WaitForWriteBufferToLoad(com, STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes);
 
             //Write a random string asynchronously so we can verify some things while the write call is blocking
             t2.Start();
@@ -273,17 +252,7 @@ public class WriteLine_Generic : PortsTest
                 waitTime += 50;
             }
 
-            waitTime = 0;
-            while ((STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes) * 2 > com.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            if ((STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes) * 2 != com.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after second write", STRING_SIZE_BYTES_TO_WRITE * 2, com.BytesToWrite);
-            }
+            TCSupport.WaitForWriteBufferToLoad(com, (STRING_SIZE_BYTES_TO_WRITE + numNewLineBytes) * 2);
 
             //Wait for both write methods to timeout
             while (t1.IsAlive || t2.IsAlive)
@@ -322,7 +291,7 @@ public class WriteLine_Generic : PortsTest
         }
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSend()
     {
         Debug.WriteLine("Case Handshake_RequestToSend : Verifying Handshake=RequestToSend");
@@ -336,7 +305,7 @@ public class WriteLine_Generic : PortsTest
         Verify_Handshake(Handshake.XOnXOff);
     }
 
-    [ConditionalFact(nameof(HasNullModem))]
+    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
     public void Handshake_RequestToSendXOnXOff()
     {
         Debug.WriteLine("Case Handshake_RequestToSendXOnXOff : Verifying Handshake=RequestToSendXOnXOff");
@@ -457,14 +426,11 @@ public class WriteLine_Generic : PortsTest
     }
 
 
-    public void Verify_Handshake(Handshake handshake)
+    private void Verify_Handshake(Handshake handshake)
     {
         using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
         using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
         {
-            AsyncWriteRndStr asyncWriteRndStr = new AsyncWriteRndStr(com1, STRING_SIZE_HANDSHAKE);
-            Thread t = new Thread(asyncWriteRndStr.WriteRndStr);
-
             byte[] XOffBuffer = new byte[1];
             byte[] XOnBuffer = new byte[1];
 
@@ -472,17 +438,17 @@ public class WriteLine_Generic : PortsTest
             XOnBuffer[0] = 17;
 
             int numNewLineBytes;
-            int waitTime;
 
             Debug.WriteLine("Verifying Handshake={0}", handshake);
 
+            com1.WriteTimeout = 3000;
             com1.Handshake = handshake;
             com1.Open();
             com2.Open();
 
             numNewLineBytes = com1.Encoding.GetByteCount(com1.NewLine.ToCharArray());
 
-            //Setup to ensure write will bock with type of handshake method being used
+            //Setup to ensure write will block with type of handshake method being used
             if (Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake)
             {
                 com2.RtsEnable = false;
@@ -495,29 +461,13 @@ public class WriteLine_Generic : PortsTest
             }
 
             //Write a random string asynchronously so we can verify some things while the write call is blocking
-            t.Start();
-            waitTime = 0;
+            string randomLine = TCSupport.GetRandomString(STRING_SIZE_HANDSHAKE, TCSupport.CharacterOptions.Surrogates);
+            byte[] randomLineBytes = com1.Encoding.GetBytes(randomLine);
+            Task task = Task.Run(() => com1.WriteLine(randomLine));
 
-            while (t.ThreadState == System.Threading.ThreadState.Unstarted && waitTime < 2000)
-            {
-                //Wait for the thread to start
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            waitTime = 0;
-
-            while (STRING_SIZE_HANDSHAKE + numNewLineBytes > com1.BytesToWrite && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
-
-            //Verify that the correct number of bytes are in the buffer
-            if (STRING_SIZE_HANDSHAKE + numNewLineBytes != com1.BytesToWrite)
-            {
-                Fail("ERROR!!! Expcted BytesToWrite={0} actual {1}", STRING_SIZE_HANDSHAKE, com1.BytesToWrite);
-            }
+            TCSupport.WaitForTaskToStart(task);
+            
+            TCSupport.WaitForWriteBufferToLoad(com1, randomLineBytes.Length + numNewLineBytes);
 
             //Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
             if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) && com1.CtsHolding)
@@ -537,8 +487,7 @@ public class WriteLine_Generic : PortsTest
             }
 
             //Wait till write finishes
-            while (t.IsAlive)
-                Thread.Sleep(100);
+            TCSupport.WaitForTaskCompletion(task);
 
             Assert.Equal(0, com1.BytesToWrite);
 
@@ -546,7 +495,7 @@ public class WriteLine_Generic : PortsTest
             if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) &&
                 !com1.CtsHolding)
             {
-                Fail("ERROR!!! Expcted CtsHolding={0} actual {1}", true, com1.CtsHolding);
+                Fail("ERROR!!! Expected CtsHolding={0} actual {1}", true, com1.CtsHolding);
             }
         }
     }

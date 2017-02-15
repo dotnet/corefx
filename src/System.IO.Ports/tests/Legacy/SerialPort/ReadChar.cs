@@ -19,7 +19,10 @@ public class ReadChar : PortsTest
     public static int maxRandomTimeout = 2000;
 
     //The number of random bytes to receive for large input buffer testing
-    public static readonly int largeNumRndBytesToRead = 4096;
+    // This was 4096, but the largest buffer setting on FTDI USB-Serial devices is "4096", which actually only allows a read of 4094 or 4095 bytes
+    // The test code assumes that we will be able to do this transfer as a single read, so 4000 is safer and would seem to be about 
+    // as rigourous a test
+    public static readonly int largeNumRndBytesToRead = 4000;
 
     //The number of random characters to receive
     public static int numRndChar = 8;
@@ -206,6 +209,8 @@ public class ReadChar : PortsTest
             //when we read this later the buffer will have to be resized
             byteXmitBuffer[byteXmitBuffer.Length - 1] = utf32CharBytes[0];
 
+            TCSupport.SetHighSpeed(com1, com2);
+
             com1.Open();
 
             if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
@@ -336,28 +341,17 @@ public class ReadChar : PortsTest
             }
             else
             {
-                System.Threading.Thread.Sleep(1000); //We need to wait for all of the bytes to be received
                 charRcvBuffer[0] = (char)asyncRead.Result;
-                int readResult = com1.Read(charRcvBuffer, 1, charRcvBuffer.Length - 1);
 
-                if (readResult + 1 != charXmitBuffer.Length)
+                int receivedLength = 1;
+                while (receivedLength < charXmitBuffer.Length)
                 {
-                    Fail("Err_051884ajoedo Expected Read to read {0} characters actually read {1}",
-                        charXmitBuffer.Length - 1, readResult);
+                    receivedLength += com1.Read(charRcvBuffer, receivedLength, charRcvBuffer.Length - receivedLength);
                 }
-                else
-                {
-                    for (int i = 0; i < charXmitBuffer.Length; ++i)
-                    {
-                        if (charRcvBuffer[i] != charXmitBuffer[i])
-                        {
-                            Fail("Err_05188ahed Characters differ at {0} expected:{1}({1:X}) actual:{2}({2:X}) asyncRead.Result={3}",
-                                i, charXmitBuffer[i], charRcvBuffer[i], asyncRead.Result);
-                        }
-                    }
-                }
+
+                Assert.Equal(receivedLength, charXmitBuffer.Length);
+                Assert.Equal(charXmitBuffer, charRcvBuffer);
             }
-
         }
     }
 
@@ -458,7 +452,8 @@ public class ReadChar : PortsTest
             TCSupport.WaitForExpected(() => com1.BytesToRead, numBytes,
                 5000, "Err_91818aheid BytesToRead");
 
-            Assert.Throws<TimeoutException>(() => com1.ReadChar());
+            // We expect this to fail, because it can't read a surrogate
+            Assert.Throws<ArgumentException>(() => com1.ReadChar());
 
             int result = com1.Read(charRcvBuffer, 0, 2);
 
@@ -506,6 +501,8 @@ public class ReadChar : PortsTest
 
             com1.ReadTimeout = 500;
             com1.Encoding = encoding;
+
+            TCSupport.SetHighSpeed(com1,com2);
 
             com1.Open();
 

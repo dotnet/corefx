@@ -292,7 +292,10 @@ set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(CMAKE_REQUIRED_LIBRARIES rt)
+    if (NOT CLR_CMAKE_PLATFORM_ANDROID)
+        set(CMAKE_REQUIRED_LIBRARIES rt)
+    endif ()
+
     set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 1)
 
     if (CLR_CMAKE_PLATFORM_ANDROID)
@@ -467,16 +470,28 @@ check_cxx_source_compiles(
     HAVE_TCP_VAR_H
 )
 
+check_include_files(
+    sys/cdefs.h
+    HAVE_SYS_CDEFS_H)
+
+if (HAVE_SYS_CDEFS_H)
+    set(CMAKE_REQUIRED_DEFINITIONS "-DHAVE_SYS_CDEFS_H")
+endif()
+
 # If sys/cdefs is not included on Android, this check will fail because
 # __BEGIN_DECLS is not defined
 check_cxx_source_compiles(
     "
+#ifdef HAVE_SYS_CDEFS_H
     #include <sys/cdefs.h>
+#endif
     #include <netinet/tcp.h>
     int main() { int x = TCP_ESTABLISHED; return x; }
     "
     HAVE_TCP_H_TCPSTATE_ENUM
 )
+
+set(CMAKE_REQUIRED_DEFINITIONS)
 
 check_symbol_exists(
     TCPS_ESTABLISHED

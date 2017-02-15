@@ -210,9 +210,9 @@ public class WriteLine : PortsTest
         using (SerialPort com1 = TCSupport.InitFirstSerialPort())
         using (SerialPort com2 = TCSupport.InitSecondSerialPort(com1))
         {
-            Random rndGen = new Random(-55);
-            string stringToWrite = TCSupport.GetRandomString(NEWLINE_TESTING_STRING_SIZE,
-                TCSupport.CharacterOptions.None);
+            string stringToWrite = TCSupport.GetRandomString(NEWLINE_TESTING_STRING_SIZE,TCSupport.CharacterOptions.None);
+
+            TCSupport.SetHighSpeed(com1,com2);
 
             com1.Encoding = encoding;
             com1.Open();

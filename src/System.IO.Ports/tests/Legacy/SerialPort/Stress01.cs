@@ -16,7 +16,7 @@ public class Write_char_int_int_stress01 : PortsTest
     private const int TRANSMIT_BUFFER_SIZE = 4096;
     private const int MAX_BUFFER_SIZE = 4096;
 
-    private const int MAX_RUN_TIME = 1000 * 60 * 20;
+    private static readonly TimeSpan TestDuration = TCSupport.RunShortStressTests ? TimeSpan.FromSeconds(10) : TimeSpan.FromMinutes(20);
 
     [ConditionalFact(nameof(HasNullModem))]
     public void WriteChars()
@@ -42,7 +42,7 @@ public class Write_char_int_int_stress01 : PortsTest
                 com2.Open();
 
             sw.Start();
-            while (sw.ElapsedMilliseconds < MAX_RUN_TIME)
+            while (sw.ElapsedMilliseconds < TestDuration.TotalMilliseconds)
             {
                 switch (random.Next(0, 2))
                 {
@@ -134,10 +134,9 @@ public class Buffer<T>
         }
     }
 
-    public bool Compare(T[] data, int index, int count)
+    public void Compare(T[] data, int index, int count)
     {
         IEnumerator<T> enumerator = _queue.GetEnumerator();
-        bool result = true;
 
         count += index;
 
@@ -145,8 +144,7 @@ public class Buffer<T>
         {
             if (!_comparer.Equals(enumerator.Current, data[index]))
             {
-                Debug.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], enumerator.Current);
-                result = false;
+                PortsTest.Fail("Err_84264lked Expected {0} actual {1}", data[index], enumerator.Current);
             }
 
             ++index;
@@ -154,28 +152,21 @@ public class Buffer<T>
 
         if (index != count)
         {
-            Debug.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
-            result = false;
+            PortsTest.Fail("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
         }
-
-        return result;
     }
 
-    public bool CompareAndRemove(T[] data, int index, int count)
+    public void CompareAndRemove(T[] data, int index, int count)
     {
-        T currentItem;
-        bool result = true;
-
         count += index;
 
         while (0 < _queue.Count && index < count)
         {
-            currentItem = _queue.Dequeue();
+            T currentItem = _queue.Dequeue();
 
             if (!_comparer.Equals(currentItem, data[index]))
             {
-                Debug.WriteLine("Err_84264lked Expected {0} actual {1}", data[index], currentItem);
-                result = false;
+                PortsTest.Fail("Err_84264lked Expected {0} actual {1}", data[index], currentItem);
             }
 
             ++index;
@@ -183,10 +174,7 @@ public class Buffer<T>
 
         if (index != count)
         {
-            Debug.WriteLine("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
-            result = false;
+            PortsTest.Fail("Err_5587456jdivmeo Expected to iterate through {0} items actual {1}", count, index);
         }
-
-        return result;
     }
 }

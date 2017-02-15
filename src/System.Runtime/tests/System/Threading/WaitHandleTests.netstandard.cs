@@ -70,7 +70,7 @@ namespace System.Threading.Tests
             }
             else if (mutexWh != null)
             {
-                Assert.Throws<Exception>(() => mutexWh.ReleaseMutex());
+                Assert.Throws<ApplicationException>(() => mutexWh.ReleaseMutex());
             }
             else
             {
