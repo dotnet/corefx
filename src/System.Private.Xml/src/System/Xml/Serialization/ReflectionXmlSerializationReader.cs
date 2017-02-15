@@ -423,8 +423,15 @@ namespace System.Xml.Serialization
             object value = null;
             if (element.Mapping is ArrayMapping)
             {
-                WriteArray(ref o, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
-                value = o;
+                if (collectionMember != null)
+                {
+                    WriteArray(ref value, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
+                }
+                else
+                {
+                    WriteArray(ref o, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
+                    value = o;
+                }
             }
             else if (element.Mapping is NullableMapping)
             {
