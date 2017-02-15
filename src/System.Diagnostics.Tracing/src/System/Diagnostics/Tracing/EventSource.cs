@@ -192,6 +192,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
+using BindingFlags = Microsoft.Reflection.BindingFlags;
 
 #if ES_BUILD_STANDALONE
 using EventDescriptor = Microsoft.Diagnostics.Tracing.EventDescriptor;

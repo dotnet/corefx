@@ -67,12 +67,12 @@ namespace Microsoft.Win32
                         [In][Out]ref long registrationHandle
                         )
             {
-                Interop.Kernel32.EtwEnableCallback indirection = delegate(ref Guid sourceId,
+                Interop.Advapi32.EtwEnableCallback indirection = delegate(ref Guid sourceId,
                                                                          int isEnabled,
                                                                          byte level,
                                                                          ulong matchAnyKeywords,
                                                                          ulong matchAllKeywords,
-                                                                         Interop.Kernel32.EVENT_FILTER_DESCRIPTOR* filterData,
+                                                                         Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData,
                                                                          IntPtr cbContext)
                 {
                     enableCallback(ref sourceId,
@@ -84,7 +84,7 @@ namespace Microsoft.Win32
                                    (void*)cbContext);
                 };
                 ulong temp;
-                uint status = Interop.Kernel32.EventRegister(ref providerId, indirection, (IntPtr)callbackContext, out temp);
+                uint status = Interop.Advapi32.EventRegister(ref providerId, indirection, (IntPtr)callbackContext, out temp);
                 registrationHandle = (long)temp;
                 
                 return status;
@@ -95,7 +95,7 @@ namespace Microsoft.Win32
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
             internal static uint EventUnregister([In] long registrationHandle)
             {
-                return Interop.Kernel32.EventUnregister((ulong)registrationHandle);
+                return Interop.Advapi32.EventUnregister((ulong)registrationHandle);
             }
 
 
@@ -142,7 +142,7 @@ namespace Microsoft.Win32
             {
                 IntPtr descripPtr = Marshal.AllocHGlobal(Marshal.SizeOf(eventDescriptor));
                 Marshal.StructureToPtr(eventDescriptor, descripPtr, false);
-                int status = Interop.Kernel32.EventWriteTransfer((ulong)registrationHandle, 
+                int status = Interop.Advapi32.EventWriteTransfer((ulong)registrationHandle, 
                                                         (void*)descripPtr, 
                                                         activityId, 
                                                         relatedActivityId, 
@@ -176,7 +176,7 @@ namespace Microsoft.Win32
                 [In] void* eventInformation,
                 [In] int informationLength)
             {
-                return Interop.Kernel32.EventSetInformation((ulong)registrationHandle, (int)informationClass, (IntPtr)eventInformation, informationLength);
+                return Interop.Advapi32.EventSetInformation((ulong)registrationHandle, (int)informationClass, (IntPtr)eventInformation, informationLength);
             }
 
             // We want to not use this API for the Nuget package, as it is not an allowed API in the Store.  

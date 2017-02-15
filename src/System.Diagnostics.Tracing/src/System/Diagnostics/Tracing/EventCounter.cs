@@ -437,7 +437,7 @@ namespace System.Diagnostics.Tracing
     // point this class is no longer needed and can be removed.
     internal class EventListenerHelper : EventListener {
         public new static int EventSourceIndex(EventSource eventSource) { return EventListener.EventSourceIndex(eventSource); }
-        protected override void OnEventWritten(EventWrittenEventArgs eventData) { } // override abstact methods to keep compiler happy
+        protected internal override void OnEventWritten(EventWrittenEventArgs eventData) { } // override abstact methods to keep compiler happy
     }
 
     #endregion // internal supporting classes
