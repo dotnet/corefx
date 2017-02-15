@@ -7,6 +7,7 @@
          https://github.com/dotnet/corefx/issues/14291 is tracking cleaning this up -->
     <IsRuntimeAndReferenceAssembly Condition="'$(IsRuntimeAndReferenceAssembly)' == '' and '$(IsRuntimeAssembly)' == 'true' and Exists('$(SourceDir)/$(AssemblyName)') and !Exists('$(SourceDir)/$(AssemblyName)/ref') and !$(AssemblyName.StartsWith('System.Private'))">true</IsRuntimeAndReferenceAssembly>
     <IsNETCoreAppRef Condition="'$(IsNETCoreAppRef)' == ''">$(IsNETCoreApp)</IsNETCoreAppRef>
+    <IsUAPRef Condition="'$(IsUAPRef)' == ''">$(IsUAP)</IsUAPRef>
 
     <BuildingDesktopFacade Condition="'$(IsDesktopFacade)' == 'true' And ('$(TargetGroup)' == 'netfx' Or $(TargetGroup.StartsWith('net4')))" >true</BuildingDesktopFacade>
 
@@ -20,31 +21,48 @@
     <BinPlaceStuffDependsOn Condition="'$(BinPlaceRef)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceReferenceAssembly</BinPlaceStuffDependsOn>
     <BinPlaceStuffDependsOn Condition="'$(BinPlaceRuntime)' == 'true'">$(BinPlaceStuffDependsOn);BinPlaceRuntimeAssembly</BinPlaceStuffDependsOn>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'@(BinplaceConfiguration)' == ''">
+    <!-- binplace to directories for the target vertical -->
     <BinplaceConfiguration Include="$(BuildConfiguration)">
       <RefPath>$(BuildConfigurationRefPath)</RefPath>
       <RuntimePath>$(RuntimePath)</RuntimePath>
     </BinplaceConfiguration>
-    <BinplaceConfiguration Condition="'$(IsNETCoreApp)' == 'true'" Include="netcoreapp-$(OSGroup)">
+
+    <!-- binplace to directories for packages -->
+    <BinplaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(OSGroup)">
       <RefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</RefPath>
       <RuntimePath>$(NETCoreAppPackageRuntimePath)</RuntimePath>
     </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-$(OSGroup)">
+      <RefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</RefPath>
+      <RuntimePath>$(UAPPackageRuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+    <BinplaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPAOTVertical)' == 'true'" Include="uapaot-$(OSGroup)">
+      <RefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</RefPath>
+      <RuntimePath>$(UAPAOTPackageRuntimePath)</RuntimePath>
+    </BinplaceConfiguration>
+
+    <!-- Setup the shared framework directory for testing -->
+    <BinplaceConfiguration Condition="'$(BinplaceTestSharedFramework)' == 'true'" Include="netcoreapp-$(OSGroup)">
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
+    </BinplaceConfiguration>
+
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
     <BinplaceConfiguration Include="netstandard-$(OSGroup)">
-      <RefPath>$(RefRootPath)netstandard</RefPath>
+      <RefPath>$(RefRootPath)netstandard/</RefPath>
     </BinplaceConfiguration>
-    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true' AND '$(_bc_TargetGroup)' != 'netcoreapp'" 
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="netcoreapp-$(OSGroup)">
-      <RefPath>$(RefRootPath)netcoreapp</RefPath>
+      <RefPath>$(RefRootPath)netcoreapp/</RefPath>
     </BinplaceConfiguration>
-    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true' AND '$(_bc_TargetGroup)' != 'uap'" 
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="uap-$(OSGroup)">
-      <RefPath>$(RefRootPath)uap</RefPath>
+      <RefPath>$(RefRootPath)uap/</RefPath>
     </BinplaceConfiguration>
-    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true' AND '$(_bc_TargetGroup)' != 'netfx'" 
+    <BinplaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="netfx-$(OSGroup)">
-      <RefPath>$(RefRootPath)netfx</RefPath>
+      <RefPath>$(RefRootPath)netfx/</RefPath>
     </BinplaceConfiguration>
   </ItemGroup>
 
@@ -85,12 +103,12 @@
                             Configurations="@(BinplaceConfiguration)">
       <Output TaskParameter="BestConfigurations" ItemName="_bestBinlaceConfigurations" />
     </FindBestConfigurations>
-    
+
     <ItemGroup>
       <_currentBinplaceConfigurations Include="@(_bestBinlaceConfigurations)" Condition="'%(Identity)' == '$(Configuration)' OR '%(Identity)-$(ConfigurationGroup)' == '$(Configuration)'" />
 
-      <RuntimeDir Include="@(_currentBinplaceConfigurations->'%(RuntimePath)')"/>
-      <TargetingPackDir Include="@(_currentBinplaceConfigurations->'%(RefPath)')"/>
+      <RuntimeDir Include="%(_currentBinplaceConfigurations.RuntimePath)" />
+      <TargetingPackDir Include="%(_currentBinplaceConfigurations.RefPath)" />
     </ItemGroup>
   </Target>
 

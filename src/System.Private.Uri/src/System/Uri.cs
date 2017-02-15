@@ -6,20 +6,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Globalization;
 using System.Collections.Generic;
-#if netstandard10
 using System.Runtime.Serialization;
-#endif //netstandard10
 using System.Diagnostics.CodeAnalysis;
 
 namespace System
 {
-#if netstandard10
     [Serializable]
-#endif //netstandard10
-    public partial class Uri 
-#if netstandard10
-    : ISerializable
-#endif
+    public partial class Uri : ISerializable
     {
         public static readonly string UriSchemeFile = UriParser.FileUri.SchemeName;
         public static readonly string UriSchemeFtp = UriParser.FtpUri.SchemeName;
@@ -397,7 +390,7 @@ namespace System
 
             CreateUri(baseUri, relativeUri, false);
         }
-#if netstandard10
+
         //
         // Uri(SerializationInfo, StreamingContext)
         //
@@ -445,7 +438,6 @@ namespace System
                 serializationInfo.AddValue("RelativeUri", GetParts(UriComponents.SerializationInfoString, UriFormat.UriEscaped));
             }
         }
-#endif //netstandard10
 
         private void CreateUri(Uri baseUri, string relativeUri, bool dontEscape)
         {
@@ -2384,7 +2376,7 @@ namespace System
                         //Check on some non-canonical cases http://host:0324/, http://host:03, http://host:0, etc
                         if (++idx < info.Offset.End)
                         {
-                            port = (ushort)(userString[idx] - '0');
+                            port = unchecked((ushort)(userString[idx] - '0'));
                             if (!(port == unchecked((ushort)('/' - '0')) || port == (ushort)('?' - '0') ||
                                 port == unchecked((ushort)('#' - '0'))))
                             {
@@ -2395,7 +2387,7 @@ namespace System
                                 }
                                 for (++idx; idx < info.Offset.End; ++idx)
                                 {
-                                    ushort val = (ushort)((ushort)userString[idx] - (ushort)'0');
+                                    ushort val = unchecked((ushort)((ushort)userString[idx] - (ushort)'0'));
                                     if (val == unchecked((ushort)('/' - '0')) || val == (ushort)('?' - '0') ||
                                         val == unchecked((ushort)('#' - '0')))
                                     {
@@ -4193,7 +4185,7 @@ namespace System
                     int startPort = end;
                     for (idx = (ushort)(end + 1); idx < length; ++idx)
                     {
-                        ushort val = (ushort)((ushort)pString[idx] - (ushort)'0');
+                        ushort val = unchecked((ushort)((ushort)pString[idx] - (ushort)'0'));
                         if ((val >= 0) && (val <= 9))
                         {
                             if ((port = (port * 10 + val)) > 0xFFFF)

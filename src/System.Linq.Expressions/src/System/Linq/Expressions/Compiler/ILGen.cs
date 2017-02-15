@@ -97,27 +97,29 @@ namespace System.Linq.Expressions.Compiler
 
             switch (type.GetTypeCode())
             {
+                case TypeCode.Byte:
+                    il.Emit(OpCodes.Ldind_I1);
+                    break;
+                case TypeCode.Boolean:
+                case TypeCode.SByte:
+                    il.Emit(OpCodes.Ldind_U1);
+                    break;
+                case TypeCode.Int16:
+                    il.Emit(OpCodes.Ldind_I2);
+                    break;
+                case TypeCode.Char:
+                case TypeCode.UInt16:
+                    il.Emit(OpCodes.Ldind_U2);
+                    break;
                 case TypeCode.Int32:
                     il.Emit(OpCodes.Ldind_I4);
                     break;
                 case TypeCode.UInt32:
                     il.Emit(OpCodes.Ldind_U4);
                     break;
-                case TypeCode.Int16:
-                    il.Emit(OpCodes.Ldind_I2);
-                    break;
-                case TypeCode.UInt16:
-                    il.Emit(OpCodes.Ldind_U2);
-                    break;
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
                     il.Emit(OpCodes.Ldind_I8);
-                    break;
-                case TypeCode.Char:
-                    il.Emit(OpCodes.Ldind_I2);
-                    break;
-                case TypeCode.Boolean:
-                    il.Emit(OpCodes.Ldind_I1);
                     break;
                 case TypeCode.Single:
                     il.Emit(OpCodes.Ldind_R4);
@@ -148,21 +150,23 @@ namespace System.Linq.Expressions.Compiler
 
             switch (type.GetTypeCode())
             {
-                case TypeCode.Int32:
-                    il.Emit(OpCodes.Stind_I4);
+                case TypeCode.Boolean:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                    il.Emit(OpCodes.Stind_I1);
                     break;
+                case TypeCode.Char:
                 case TypeCode.Int16:
+                case TypeCode.UInt16:
                     il.Emit(OpCodes.Stind_I2);
+                    break;
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                    il.Emit(OpCodes.Stind_I4);
                     break;
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
                     il.Emit(OpCodes.Stind_I8);
-                    break;
-                case TypeCode.Char:
-                    il.Emit(OpCodes.Stind_I2);
-                    break;
-                case TypeCode.Boolean:
-                    il.Emit(OpCodes.Stind_I1);
                     break;
                 case TypeCode.Single:
                     il.Emit(OpCodes.Stind_R4);
@@ -338,49 +342,12 @@ namespace System.Linq.Expressions.Compiler
             il.Emit(OpCodes.Ldstr, value);
         }
 
-        internal static void EmitBoolean(this ILGenerator il, bool value)
+        internal static void EmitPrimitive(this ILGenerator il, bool value)
         {
-            if (value)
-            {
-                il.Emit(OpCodes.Ldc_I4_1);
-            }
-            else
-            {
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
+            il.Emit(value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
         }
 
-        internal static void EmitChar(this ILGenerator il, char value)
-        {
-            il.EmitInt(value);
-            il.Emit(OpCodes.Conv_U2);
-        }
-
-        internal static void EmitByte(this ILGenerator il, byte value)
-        {
-            il.EmitInt(value);
-            il.Emit(OpCodes.Conv_U1);
-        }
-
-        internal static void EmitSByte(this ILGenerator il, sbyte value)
-        {
-            il.EmitInt(value);
-            il.Emit(OpCodes.Conv_I1);
-        }
-
-        internal static void EmitShort(this ILGenerator il, short value)
-        {
-            il.EmitInt(value);
-            il.Emit(OpCodes.Conv_I2);
-        }
-
-        internal static void EmitUShort(this ILGenerator il, ushort value)
-        {
-            il.EmitInt(value);
-            il.Emit(OpCodes.Conv_U2);
-        }
-
-        internal static void EmitInt(this ILGenerator il, int value)
+        internal static void EmitPrimitive(this ILGenerator il, int value)
         {
             OpCode c;
             switch (value)
@@ -416,7 +383,7 @@ namespace System.Linq.Expressions.Compiler
                     c = OpCodes.Ldc_I4_8;
                     break;
                 default:
-                    if (value >= -128 && value <= 127)
+                    if (value >= sbyte.MinValue && value <= sbyte.MaxValue)
                     {
                         il.Emit(OpCodes.Ldc_I4_S, (sbyte)value);
                     }
@@ -429,37 +396,39 @@ namespace System.Linq.Expressions.Compiler
             il.Emit(c);
         }
 
-        internal static void EmitUInt(this ILGenerator il, uint value)
+        private static void EmitPrimitive(this ILGenerator il, uint value)
         {
-            il.EmitInt(unchecked((int)value));
-            il.Emit(OpCodes.Conv_U4);
+            il.EmitPrimitive(unchecked((int)value));
         }
 
-        internal static void EmitLong(this ILGenerator il, long value)
+        private static void EmitPrimitive(this ILGenerator il, long value)
         {
-            il.Emit(OpCodes.Ldc_I8, value);
-
-            //
-            // Now, emit convert to give the constant type information.
-            //
-            // Otherwise, it is treated as unsigned and overflow is not
-            // detected if it's used in checked ops.
-            //
-            il.Emit(OpCodes.Conv_I8);
+            if (int.MinValue <= value & value <= uint.MaxValue)
+            {
+                il.EmitPrimitive(unchecked((int)value));
+                // While often not of consequence depending on what follows, there are cases where this
+                // casting matters. Values [0, int.MaxValue] can use either safely, but negative values
+                // must use conv.i8 and those (int.MaxValue, uint.MaxValue] must use conv.u8, or else
+                // the higher bits will be wrong.
+                il.Emit(value > 0 ? OpCodes.Conv_U8 : OpCodes.Conv_I8);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldc_I8, value);
+            }
         }
 
-        internal static void EmitULong(this ILGenerator il, ulong value)
+        private static void EmitPrimitive(this ILGenerator il, ulong value)
         {
-            il.Emit(OpCodes.Ldc_I8, unchecked((long)value));
-            il.Emit(OpCodes.Conv_U8);
+            il.EmitPrimitive(unchecked((long)value));
         }
 
-        internal static void EmitDouble(this ILGenerator il, double value)
+        private static void EmitPrimitive(this ILGenerator il, double value)
         {
             il.Emit(OpCodes.Ldc_R8, value);
         }
 
-        internal static void EmitSingle(this ILGenerator il, float value)
+        private static void EmitPrimitive(this ILGenerator il, float value)
         {
             il.Emit(OpCodes.Ldc_R4, value);
         }
@@ -511,24 +480,24 @@ namespace System.Linq.Expressions.Compiler
             return false;
         }
 
-        internal static void EmitConstant(this ILGenerator il, object value)
+        internal static void EmitConstant(this ILGenerator il, object value, ILocalCache locals)
         {
             Debug.Assert(value != null);
-            EmitConstant(il, value, value.GetType());
+            EmitConstant(il, value, value.GetType(), locals);
         }
 
 
         //
         // Note: we support emitting more things as IL constants than
         // Linq does
-        internal static void EmitConstant(this ILGenerator il, object value, Type type)
+        internal static void EmitConstant(this ILGenerator il, object value, Type type, ILocalCache locals)
         {
             if (value == null)
             {
                 // Smarter than the Linq implementation which uses the initobj
                 // pattern for all value types (works, but requires a local and
                 // more IL)
-                il.EmitDefault(type);
+                il.EmitDefault(type, locals);
                 return;
             }
 
@@ -612,40 +581,40 @@ namespace System.Linq.Expressions.Compiler
             switch (type.GetTypeCode())
             {
                 case TypeCode.Boolean:
-                    il.EmitBoolean((bool)value);
+                    il.EmitPrimitive((bool)value);
                     return true;
                 case TypeCode.SByte:
-                    il.EmitSByte((sbyte)value);
+                    il.EmitPrimitive((sbyte)value);
                     return true;
                 case TypeCode.Int16:
-                    il.EmitShort((short)value);
+                    il.EmitPrimitive((short)value);
                     return true;
                 case TypeCode.Int32:
-                    il.EmitInt((int)value);
+                    il.EmitPrimitive((int)value);
                     return true;
                 case TypeCode.Int64:
-                    il.EmitLong((long)value);
+                    il.EmitPrimitive((long)value);
                     return true;
                 case TypeCode.Single:
-                    il.EmitSingle((float)value);
+                    il.EmitPrimitive((float)value);
                     return true;
                 case TypeCode.Double:
-                    il.EmitDouble((double)value);
+                    il.EmitPrimitive((double)value);
                     return true;
                 case TypeCode.Char:
-                    il.EmitChar((char)value);
+                    il.EmitPrimitive((char)value);
                     return true;
                 case TypeCode.Byte:
-                    il.EmitByte((byte)value);
+                    il.EmitPrimitive((byte)value);
                     return true;
                 case TypeCode.UInt16:
-                    il.EmitUShort((ushort)value);
+                    il.EmitPrimitive((ushort)value);
                     return true;
                 case TypeCode.UInt32:
-                    il.EmitUInt((uint)value);
+                    il.EmitPrimitive((uint)value);
                     return true;
                 case TypeCode.UInt64:
-                    il.EmitULong((ulong)value);
+                    il.EmitPrimitive((ulong)value);
                     return true;
                 case TypeCode.Decimal:
                     il.EmitDecimal((decimal)value);
@@ -662,7 +631,7 @@ namespace System.Linq.Expressions.Compiler
 
         #region Linq Conversions
 
-        internal static void EmitConvertToType(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        internal static void EmitConvertToType(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             if (TypeUtils.AreEquivalent(typeFrom, typeTo))
             {
@@ -692,7 +661,7 @@ namespace System.Linq.Expressions.Compiler
             }
             else if (isTypeFromNullable || isTypeToNullable)
             {
-                il.EmitNullableConversion(typeFrom, typeTo, isChecked);
+                il.EmitNullableConversion(typeFrom, typeTo, isChecked, locals);
             }
             else if (!(typeFrom.IsConvertible() && typeTo.IsConvertible()) // primitive runtime conversion
                      &&
@@ -789,6 +758,14 @@ namespace System.Linq.Expressions.Compiler
             else
             {
                 TypeCode tc = typeTo.GetTypeCode();
+                if (tc == typeFrom.GetTypeCode())
+                {
+                    // Between enums of same underlying type, or between such an enum and the underlying type itself.
+                    // Includes bool-backed enums, which is the only valid conversion to or from bool.
+                    // Just leave the value on the stack, and treat it as the wanted type.
+                    return;
+                }
+
                 if (isChecked)
                 {
                     // Overflow checking needs to know if the source value on the IL stack is unsigned or not.
@@ -895,10 +872,6 @@ namespace System.Linq.Expressions.Compiler
                                 il.Emit(OpCodes.Conv_I8);
                             }
                             break;
-                        case TypeCode.Boolean:
-                            il.Emit(OpCodes.Ldc_I4_0);
-                            il.Emit(OpCodes.Cgt_Un);
-                            break;
                         default:
                             throw Error.UnhandledConvert(typeTo);
                     }
@@ -906,25 +879,26 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        private static void EmitNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        private static void EmitNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             Debug.Assert(typeFrom.IsNullableType());
             Debug.Assert(typeTo.IsNullableType());
             Label labIfNull;
             Label labEnd;
-            LocalBuilder locFrom = il.DeclareLocal(typeFrom);
+            LocalBuilder locFrom = locals.GetLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
-            LocalBuilder locTo = il.DeclareLocal(typeTo);
+            LocalBuilder locTo = locals.GetLocal(typeTo);
             // test for null
             il.Emit(OpCodes.Ldloca, locFrom);
             il.EmitHasValue(typeFrom);
             labIfNull = il.DefineLabel();
             il.Emit(OpCodes.Brfalse_S, labIfNull);
             il.Emit(OpCodes.Ldloca, locFrom);
+            locals.FreeLocal(locFrom);
             il.EmitGetValueOrDefault(typeFrom);
             Type nnTypeFrom = typeFrom.GetNonNullableType();
             Type nnTypeTo = typeTo.GetNonNullableType();
-            il.EmitConvertToType(nnTypeFrom, nnTypeTo, isChecked);
+            il.EmitConvertToType(nnTypeFrom, nnTypeTo, isChecked, locals);
             // construct result type
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
             il.Emit(OpCodes.Newobj, ci);
@@ -937,45 +911,48 @@ namespace System.Linq.Expressions.Compiler
             il.Emit(OpCodes.Initobj, typeTo);
             il.MarkLabel(labEnd);
             il.Emit(OpCodes.Ldloc, locTo);
+            locals.FreeLocal(locTo);
         }
 
 
-        private static void EmitNonNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        private static void EmitNonNullableToNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             Debug.Assert(!typeFrom.IsNullableType());
             Debug.Assert(typeTo.IsNullableType());
-            LocalBuilder locTo = il.DeclareLocal(typeTo);
+            LocalBuilder locTo = locals.GetLocal(typeTo);
             Type nnTypeTo = typeTo.GetNonNullableType();
-            il.EmitConvertToType(typeFrom, nnTypeTo, isChecked);
+            il.EmitConvertToType(typeFrom, nnTypeTo, isChecked, locals);
             ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
             il.Emit(OpCodes.Newobj, ci);
             il.Emit(OpCodes.Stloc, locTo);
             il.Emit(OpCodes.Ldloc, locTo);
+            locals.FreeLocal(locTo);
         }
 
 
-        private static void EmitNullableToNonNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        private static void EmitNullableToNonNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             Debug.Assert(typeFrom.IsNullableType());
             Debug.Assert(!typeTo.IsNullableType());
             if (typeTo.GetTypeInfo().IsValueType)
-                il.EmitNullableToNonNullableStructConversion(typeFrom, typeTo, isChecked);
+                il.EmitNullableToNonNullableStructConversion(typeFrom, typeTo, isChecked, locals);
             else
                 il.EmitNullableToReferenceConversion(typeFrom);
         }
 
 
-        private static void EmitNullableToNonNullableStructConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        private static void EmitNullableToNonNullableStructConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             Debug.Assert(typeFrom.IsNullableType());
             Debug.Assert(!typeTo.IsNullableType());
             Debug.Assert(typeTo.GetTypeInfo().IsValueType);
-            LocalBuilder locFrom = il.DeclareLocal(typeFrom);
+            LocalBuilder locFrom = locals.GetLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
             il.Emit(OpCodes.Ldloca, locFrom);
+            locals.FreeLocal(locFrom);
             il.EmitGetValue(typeFrom);
             Type nnTypeFrom = typeFrom.GetNonNullableType();
-            il.EmitConvertToType(nnTypeFrom, typeTo, isChecked);
+            il.EmitConvertToType(nnTypeFrom, typeTo, isChecked, locals);
         }
 
 
@@ -988,17 +965,17 @@ namespace System.Linq.Expressions.Compiler
         }
 
 
-        private static void EmitNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        private static void EmitNullableConversion(this ILGenerator il, Type typeFrom, Type typeTo, bool isChecked, ILocalCache locals)
         {
             bool isTypeFromNullable = typeFrom.IsNullableType();
             bool isTypeToNullable = typeTo.IsNullableType();
             Debug.Assert(isTypeFromNullable || isTypeToNullable);
             if (isTypeFromNullable && isTypeToNullable)
-                il.EmitNullableToNullableConversion(typeFrom, typeTo, isChecked);
+                il.EmitNullableToNullableConversion(typeFrom, typeTo, isChecked, locals);
             else if (isTypeFromNullable)
-                il.EmitNullableToNonNullableConversion(typeFrom, typeTo, isChecked);
+                il.EmitNullableToNonNullableConversion(typeFrom, typeTo, isChecked, locals);
             else
-                il.EmitNonNullableToNullableConversion(typeFrom, typeTo, isChecked);
+                il.EmitNonNullableToNullableConversion(typeFrom, typeTo, isChecked, locals);
         }
 
 
@@ -1058,7 +1035,7 @@ namespace System.Linq.Expressions.Compiler
             Debug.Assert(elementType != null);
             Debug.Assert(count >= 0);
 
-            il.EmitInt(count);
+            il.EmitPrimitive(count);
             il.Emit(OpCodes.Newarr, elementType);
         }
 
@@ -1093,41 +1070,77 @@ namespace System.Linq.Expressions.Compiler
 
         #region Support for emitting constants
 
-        internal static void EmitDecimal(this ILGenerator il, decimal value)
-        {
-            if (decimal.Truncate(value) == value)
-            {
-                if (int.MinValue <= value && value <= int.MaxValue)
-                {
-                    int intValue = decimal.ToInt32(value);
-                    il.EmitInt(intValue);
-                    il.EmitNew(Decimal_Ctor_Int32);
-                }
-                else if (long.MinValue <= value && value <= long.MaxValue)
-                {
-                    long longValue = decimal.ToInt64(value);
-                    il.EmitLong(longValue);
-                    il.EmitNew(Decimal_Ctor_Int64);
-                }
-                else
-                {
-                    il.EmitDecimalBits(value);
-                }
-            }
-            else
-            {
-                il.EmitDecimalBits(value);
-            }
-        }
-
-        private static void EmitDecimalBits(this ILGenerator il, decimal value)
+        private static void EmitDecimal(this ILGenerator il, decimal value)
         {
             int[] bits = decimal.GetBits(value);
-            il.EmitInt(bits[0]);
-            il.EmitInt(bits[1]);
-            il.EmitInt(bits[2]);
-            il.EmitBoolean((bits[3] & 0x80000000) != 0);
-            il.EmitByte(unchecked((byte)(bits[3] >> 16)));
+            int scale = (bits[3] & int.MaxValue) >> 16;
+            if (scale == 0)
+            {
+                if (int.MinValue <= value)
+                {
+                    if (value <= int.MaxValue)
+                    {
+                        int intValue = decimal.ToInt32(value);
+                        switch (intValue)
+                        {
+                            case -1:
+                                il.Emit(OpCodes.Ldsfld, Decimal_MinusOne);
+                                return;
+                            case 0:
+                                il.EmitDefault(typeof(decimal), locals: null); // locals won't be used.
+                                return;
+                            case 1:
+                                il.Emit(OpCodes.Ldsfld, Decimal_One);
+                                return;
+                            default:
+                                il.EmitPrimitive(intValue);
+                                il.EmitNew(Decimal_Ctor_Int32);
+                                return;
+                        }
+                    }
+
+                    if (value <= uint.MaxValue)
+                    {
+                        il.EmitPrimitive(decimal.ToUInt32(value));
+                        il.EmitNew(Decimal_Ctor_UInt32);
+                        return;
+                    }
+                }
+
+                if (long.MinValue <= value)
+                {
+                    if (value <= long.MaxValue)
+                    {
+                        il.EmitPrimitive(decimal.ToInt64(value));
+                        il.EmitNew(Decimal_Ctor_Int64);
+                        return;
+                    }
+
+                    if (value <= ulong.MaxValue)
+                    {
+                        il.EmitPrimitive(decimal.ToUInt64(value));
+                        il.EmitNew(Decimal_Ctor_UInt64);
+                        return;
+                    }
+
+                    if (value == decimal.MaxValue)
+                    {
+                        il.Emit(OpCodes.Ldsfld, Decimal_MaxValue);
+                        return;
+                    }
+                }
+                else if (value == decimal.MinValue)
+                {
+                    il.Emit(OpCodes.Ldsfld, Decimal_MinValue);
+                    return;
+                }
+            }
+
+            il.EmitPrimitive(bits[0]);
+            il.EmitPrimitive(bits[1]);
+            il.EmitPrimitive(bits[2]);
+            il.EmitPrimitive((bits[3] & 0x80000000) != 0);
+            il.EmitPrimitive(unchecked((byte)scale));
             il.EmitNew(Decimal_Ctor_Int32_Int32_Int32_Bool_Byte);
         }
 
@@ -1135,12 +1148,15 @@ namespace System.Linq.Expressions.Compiler
         /// Emits default(T)
         /// Semantics match C# compiler behavior
         /// </summary>
-        internal static void EmitDefault(this ILGenerator il, Type type)
+        internal static void EmitDefault(this ILGenerator il, Type type, ILocalCache locals)
         {
             switch (type.GetTypeCode())
             {
-                case TypeCode.Object:
                 case TypeCode.DateTime:
+                    il.Emit(OpCodes.Ldsfld, DateTime_MinValue);
+                    break;
+
+                case TypeCode.Object:
                     if (type.GetTypeInfo().IsValueType)
                     {
                         // Type.GetTypeCode on an enum returns the underlying
@@ -1150,19 +1166,19 @@ namespace System.Linq.Expressions.Compiler
                         // This is the IL for default(T) if T is a generic type
                         // parameter, so it should work for any type. It's also
                         // the standard pattern for structs.
-                        LocalBuilder lb = il.DeclareLocal(type);
+                        LocalBuilder lb = locals.GetLocal(type);
                         il.Emit(OpCodes.Ldloca, lb);
                         il.Emit(OpCodes.Initobj, type);
                         il.Emit(OpCodes.Ldloc, lb);
+                        locals.FreeLocal(lb);
+                        break;
                     }
-                    else
-                    {
-                        il.Emit(OpCodes.Ldnull);
-                    }
-                    break;
+
+                    goto case TypeCode.Empty;
 
                 case TypeCode.Empty:
                 case TypeCode.String:
+                case TypeCode.DBNull:
                     il.Emit(OpCodes.Ldnull);
                     break;
 
@@ -1192,8 +1208,7 @@ namespace System.Linq.Expressions.Compiler
                     break;
 
                 case TypeCode.Decimal:
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Newobj, Decimal_Ctor_Int32);
+                    il.Emit(OpCodes.Ldsfld, Decimal_Zero);
                     break;
 
                 default:
