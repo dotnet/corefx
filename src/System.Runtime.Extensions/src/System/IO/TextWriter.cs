@@ -25,7 +25,7 @@ namespace System.IO
         private static readonly char[] s_coreNewLineStatic = Environment.NewLine.ToCharArray();
 
         /// <summary>
-        /// This is the 'NewLine' property expresses as a char[].   
+        /// This is the 'NewLine' property expressed as a char[].   
         /// It is exposed to subclasses as a protected field for read-only
         /// purposes.  You should only modify it by using the 'NewLine' property.  
         /// In particular you should never modify the elements of the array 
