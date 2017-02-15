@@ -246,10 +246,8 @@
     <Compile Include="Permanent\StrongBox.cs" />
     <Compile Include="Temporary\BitConverter.cs" />
     <Compile Include="Temporary\Path.cs" />
-    <Compile Include="Temporary\ResourceManager.cs" />
     <Compile Include="..\..\Common\src\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
     <Compile Include="..\..\Common\src\System\Runtime\Versioning\NonVersionableAttribute.cs" />
-    <Compile Include="..\..\Common\src\System\Resources\NeutralResourcesLanguageAttribute.cs" />
     <Compile Include="..\..\System.Collections.Immutable\src\Validation\ValidatedNotNullAttribute.cs" />
     <Compile Include="..\..\System.Collections.Immutable\src\Validation\Requires.cs" />
     <Compile Include="..\..\System.Collections.Immutable\src\System\Collections\Immutable\ImmutableExtensions.Minimal.cs" />
