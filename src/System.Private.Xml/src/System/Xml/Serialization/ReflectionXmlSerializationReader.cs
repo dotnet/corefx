@@ -417,7 +417,8 @@ namespace System.Xml.Serialization
             object value = null;
             if (element.Mapping is ArrayMapping)
             {
-                WriteArray(ref value, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace);
+                WriteArray(ref o, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
+                value = o;
             }
             else if (element.Mapping is NullableMapping)
             {
@@ -652,11 +653,36 @@ namespace System.Xml.Serialization
             return mapping.TypeDesc.CanBeElementValue;
         }
 
-        private void WriteArray(ref object o, ArrayMapping arrayMapping, bool readOnly, bool isNullable, string defaultNamespace)
+        private void WriteArray(ref object o, ArrayMapping arrayMapping, bool readOnly, bool isNullable, string defaultNamespace, int fixupIndex = -1, Fixup fixup = null, Member member = null)
         {
             if (arrayMapping.IsSoap)
             {
-                throw new PlatformNotSupportedException("arrayMapping.IsSoap");
+                EnsureXmlSerializationReadCallbackForMapping(arrayMapping.Elements[0].Mapping);
+                object rre;
+
+                if (fixupIndex >= 0)
+                {
+                    rre = ReadReferencingElement(arrayMapping.TypeName, arrayMapping.Namespace, out fixup.Ids[fixupIndex]);
+                }
+                else
+                {
+                    rre = ReadReferencedElement(arrayMapping.TypeName, arrayMapping.Namespace);
+                }
+
+                TypeDesc td = arrayMapping.TypeDesc;
+                if (td.IsEnumerable || td.IsCollection)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    if (member == null)
+                    {
+                        throw new InvalidOperationException("member == null");
+                    }
+
+                    SetMemberValue(o, rre, member.Mapping.Name);
+                }
             }
             else
             {
