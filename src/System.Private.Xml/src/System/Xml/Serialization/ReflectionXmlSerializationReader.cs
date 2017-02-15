@@ -602,6 +602,22 @@ namespace System.Xml.Serialization
                     mapping.Namespace,
                     mapping.TypeDesc.Type,
                     CreateXmlSerializationReadCallback(mapping));
+
+                var structMapping = mapping as StructMapping;
+                if (structMapping != null)
+                {
+                    var derivedMapping = structMapping.DerivedMappings;
+
+                    while(derivedMapping != null)
+                    {
+                        AddReadCallback(
+                            derivedMapping.TypeName,
+                            derivedMapping.Namespace,
+                            derivedMapping.TypeDesc.Type,
+                            CreateXmlSerializationReadCallback(derivedMapping));
+                        derivedMapping = derivedMapping.NextDerivedMapping;
+                    }
+                }
             }
         }
 

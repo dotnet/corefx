@@ -425,6 +425,21 @@ namespace System.Xml.Serialization
                     mapping.Namespace,
                     CreateXmlSerializationWriteCallback(mapping, name, ns, isNullable, needType, parentMapping));
             }
+
+            StructMapping derivedMapping = mapping.DerivedMappings;
+            while(derivedMapping != null)
+            {
+                if (!ExistTypeEntry(derivedMapping.TypeDesc.Type))
+                {
+                    AddWriteCallback(
+                        derivedMapping.TypeDesc.Type,
+                        derivedMapping.TypeName,
+                        derivedMapping.Namespace,
+                        CreateXmlSerializationWriteCallback(derivedMapping, derivedMapping.TypeName, derivedMapping.Namespace, derivedMapping.TypeDesc.IsNullable, needType, null));
+                }
+
+                derivedMapping = derivedMapping.NextDerivedMapping;
+            }
         }
 
         private XmlSerializationWriteCallback CreateXmlSerializationWriteCallback(StructMapping mapping, string name, string ns, bool isNullable, bool needType, XmlMapping parentMapping)
