@@ -143,6 +143,10 @@ namespace System.Data.SqlClient.SNI
             }
 
             sendBuff = outSecurityBuffer.token;
+            if (sendBuff == null)
+            {
+                sendBuff = new byte[0];
+            }
 
             sspiClientContextStatus.SecurityContext = securityContext;
             sspiClientContextStatus.ContextFlags = contextFlags;
@@ -150,8 +154,10 @@ namespace System.Data.SqlClient.SNI
 
             if (IsErrorStatus(statusCode.ErrorCode))
             {
-                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError &&
-                    statusCode.Exception is Interop.NetSecurityNative.GssApiException) // when unable to access Kerberos Ticket
+                // when unable to access Kerberos Ticket
+                // SecurityStatusPalErrorCode.InternalError only is occured in Unix, and it always comes with GssApiException
+                // Therefore GssApiException is not even need to be checked in this if-statement
+                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError) 
                 {
                     throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
                 }
