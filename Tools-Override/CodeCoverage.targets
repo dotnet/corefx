@@ -7,7 +7,6 @@
   <PropertyGroup>
     <OpenCoverVersion>4.6.519</OpenCoverVersion>
     <ReportGeneratorVersion>2.5.0</ReportGeneratorVersion>
-    <CoverallsUploaderVersion>1.4</CoverallsUploaderVersion>
   </PropertyGroup>
   
   <!-- Coverage options -->
@@ -104,16 +103,6 @@
 
     <Exec Command="start $(CoverageReportDir)index.htm"
           Condition="'$(PopCoverageReport)' == 'true'" />          
-
-    <PropertyGroup>
-      <CoverallsUploaderCommandLine>$(PackagesDir)coveralls.io.$(CoverallsUploaderVersion)\tools\coveralls.net.exe</CoverallsUploaderCommandLine>
-      <CoverallsUploaderOptions>--opencover $(CoverageReportDir)\*.coverage.xml --repo-token $(CoverallsToken)</CoverallsUploaderOptions>
-    </PropertyGroup>
-
-    <Exec Command="$(CoverallsUploaderCommandLine) $(CoverallsUploaderOptions)"
-          ContinueOnError="ErrorAndContinue"
-          WorkingDirectory="$(ProjectDir)"
-          Condition="'$(UploadCoverallsData)'=='true'" />
 
   </Target>
 
