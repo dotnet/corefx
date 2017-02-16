@@ -155,7 +155,7 @@ namespace System.Data.SqlClient.SNI
             if (IsErrorStatus(statusCode.ErrorCode))
             {
                 // when unable to access Kerberos Ticket
-                // SecurityStatusPalErrorCode.InternalError only is occured in Unix, and it always comes with GssApiException
+                // SecurityStatusPalErrorCode.InternalError is occured only in Unix, and it always comes with GssApiException
                 // Therefore GssApiException is not even need to be checked in this if-statement
                 if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError) 
                 {
