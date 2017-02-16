@@ -214,7 +214,7 @@ namespace System.Xml.Serialization
             var targetList = targetCollection as IList;
             if (targetList != null)
             {
-                foreach (var item in sourceCollection)
+                foreach (object item in sourceCollection)
                 {
                     targetList.Add(item);
                 }
@@ -228,7 +228,7 @@ namespace System.Xml.Serialization
                 }
 
                 var arguments = new object[1];
-                foreach (var item in sourceCollection)
+                foreach (object item in sourceCollection)
                 {
                     arguments[0] = item;
                     addMethod.Invoke(targetCollection, arguments);
