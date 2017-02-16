@@ -164,9 +164,7 @@ namespace System.Diagnostics
                 "httpContext.Request.Path;" +
                 "httpContext.Request.QueryString" +
             "\n" +
-            "Microsoft.AspNetCore/Microsoft.AspNetCore.Hosting.EndRequest@Activity1Stop:-" +
-                "httpContext.TraceIdentifier;" +
-                "httpContext.Response.StatusCode";
+            "Microsoft.AspNetCore/Microsoft.AspNetCore.Hosting.EndRequest@Activity1Stop:-";
 
         // Setting EntityFrameworkCoreCommands is like having this in the FilterAndPayloadSpecs string
         // It turns on basic SQL commands.
