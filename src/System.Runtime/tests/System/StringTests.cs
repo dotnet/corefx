@@ -819,7 +819,7 @@ namespace System.Tests
         [InlineData("Hello", 'o', true)]
         [InlineData("Hello", 'O', false)]
         [InlineData("o", 'o', true)]
-        [InlineData("o", 'O', true)]
+        [InlineData("o", 'O', false)]
         [InlineData("Hello", 'e', false)]
         [InlineData("Hello", '\0', false)]
         [InlineData("", '\0', false)]
