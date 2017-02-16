@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -95,82 +96,78 @@ namespace System
             return -1;
         }
 
-        public static bool SequenceEqual(ref char first, ref char second, int length)
+        public unsafe static bool SequenceEqual(ref char first, ref char second, int length)
         {
             Debug.Assert(length >= 0);
 
-            if (Unsafe.AreSame(ref first, ref second))
-                return true;
+            var isMatch = true;
 
-            int index = 0;
-            while (length >= 8)
+            if (length == 0)
             {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-
-                length -= 8;
+                goto exit;
             }
 
-            while (length >= 4)
+            length *= 2;
+
+            fixed (char* pFirst = &first)
+            fixed (char* pSecond = &second)
             {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
+                var a = (byte*)pFirst;
+                var b = (byte*)pSecond;
 
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
+                if (a == b)
+                {
+                    goto exitFixed;
+                }
 
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
+                var i = 0;
+                if (Vector.IsHardwareAccelerated)
+                {
+                    while (length - Vector<byte>.Count >= i)
+                    {
+                        var v0 = Unsafe.Read<Vector<byte>>(a + i);
+                        var v1 = Unsafe.Read<Vector<byte>>(b + i);
+                        i += Vector<byte>.Count;
 
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
+                        if (!v0.Equals(v1))
+                        {
+                            isMatch = false;
+                            goto exitFixed;
+                        }
+                    }
+                }
 
-                length -= 4;
+                while (length - sizeof(long) >= i)
+                {
+                    if (*(long*)(a + i) != *(long*)(b + i))
+                    {
+                        isMatch = false;
+                        goto exitFixed;
+                    }
+
+                    i += sizeof(long);
+                }
+
+                if (length - sizeof(int) >= i)
+                {
+                    if (*(int*)(a + i) != *(int*)(b + i))
+                    {
+                        isMatch = false;
+                        goto exitFixed;
+                    }
+
+                    i += sizeof(int);
+                }
+
+                if (length > i && *(short*)(a + i) != *(short*)(b + i))
+                {
+                    isMatch = false;
+                }
+        // Don't goto out of fixed block
+        exitFixed:;
             }
-
-            while (length > 0)
-            {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-                length--;
-            }
-
-            return true;
+        exit:
+            return isMatch;
         }
     }
 }

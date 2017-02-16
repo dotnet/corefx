@@ -31,6 +31,10 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this Span<byte> span, byte value)
         {
+            if (!BitConverter.IsLittleEndian)
+            {
+                return SpanHelpers.IndexOfBigEndian(ref span.DangerousGetPinnableReference(), value, span.Length);
+            }
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
@@ -130,6 +134,10 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this ReadOnlySpan<byte> span, byte value)
         {
+            if (!BitConverter.IsLittleEndian)
+            {
+                return SpanHelpers.IndexOfBigEndian(ref span.DangerousGetPinnableReference(), value, span.Length);
+            }
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
