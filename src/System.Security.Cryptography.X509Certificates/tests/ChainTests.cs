@@ -12,7 +12,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     public static class ChainTests
     {
         // #9293: Our Fedora and Ubuntu CI machines use NTFS for "tmphome", which causes our filesystem permissions checks to fail.
-        private static bool IsReliableInCI { get; } =
+        internal static bool IsReliableInCI { get; } =
             !PlatformDetection.IsFedora23 &&
             !PlatformDetection.IsFedora24 &&
             !PlatformDetection.IsUbuntu1604 &&
