@@ -2,17 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using System.Threading;
 using Legacy.Support;
 using Xunit;
 
-namespace Legacy.SerialStream
+namespace System.IO.Ports.Tests
 {
-    public class Read_byte_int_int : PortsTest
+    public class SerialStream_Read_byte_int_int : PortsTest
     {
         // The number of random bytes to receive for read method testing
         private static readonly int numRndBytesToRead = 16;

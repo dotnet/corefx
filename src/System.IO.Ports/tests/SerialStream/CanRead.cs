@@ -3,15 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using Legacy.Support;
 using Xunit;
 
-namespace Legacy.SerialStream
+namespace System.IO.Ports.Tests
 {
-    public class CanRead : PortsTest
+    public class SerialStream_CanRead : PortsTest
     {
         #region Test Cases
 

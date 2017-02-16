@@ -2,18 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
 using Legacy.Support;
 using Xunit;
 
-namespace Legacy.SerialStream
+namespace System.IO.Ports.Tests
 {
-    public class WriteByte : PortsTest
+    public class SerialStream_WriteByte : PortsTest
     {
         // The large number of times the write method is called when verifying write
         private static readonly int LARGE_NUM_WRITES = 2048;

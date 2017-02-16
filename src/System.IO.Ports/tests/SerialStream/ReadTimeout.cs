@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using System.Threading;
 using Legacy.Support;
 using Xunit;
 
-namespace Legacy.SerialStream
+namespace System.IO.Ports.Tests
 {
-    public class ReadTimeout_Property : PortsTest
+    public class SerialStream_ReadTimeout_Property : PortsTest
     {
         // The default number of bytes to write with when testing timeout with Read(byte[], int, int)
         private static readonly int DEFAULT_READ_BYTE_ARRAY_SIZE = 8;
