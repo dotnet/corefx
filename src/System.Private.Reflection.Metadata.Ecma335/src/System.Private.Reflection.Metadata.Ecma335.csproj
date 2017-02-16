@@ -240,12 +240,12 @@
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Permanent\Environment.cs" />
-    <Compile Include="Permanent\Marshal.cs" />
-    <Compile Include="Permanent\MiniLinq.cs" />
-    <Compile Include="Permanent\StrongBox.cs" />
-    <Compile Include="Temporary\BitConverter.cs" />
-    <Compile Include="Temporary\Path.cs" />
+    <Compile Include="Shims\Environment.cs" />
+    <Compile Include="Shims\Marshal.cs" />
+    <Compile Include="Shims\MiniLinq.cs" />
+    <Compile Include="Shims\StrongBox.cs" />
+    <Compile Include="TemporaryShims\BitConverter.cs" />
+    <Compile Include="TemporaryShims\Path.cs" />
     <Compile Include="..\..\Common\src\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
     <Compile Include="..\..\Common\src\System\Runtime\Versioning\NonVersionableAttribute.cs" />
     <Compile Include="..\..\System.Collections.Immutable\src\Validation\ValidatedNotNullAttribute.cs" />
