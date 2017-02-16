@@ -2,72 +2,73 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using Legacy.Support;
-using System.IO.Ports;
 using System.IO.PortsTests;
+using Legacy.Support;
 using Xunit;
 
-public class Open : PortsTest
+namespace System.IO.Ports.Tests
 {
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void OpenDefault()
+    public class Open : PortsTest
     {
-        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasOneSerialPort))]
+        public void OpenDefault()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            com.Open();
-            serPortProp.SetAllPropertiesToOpenDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                com.Open();
+                serPortProp.SetAllPropertiesToOpenDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            Debug.WriteLine("BytesToWrite={0}", com.BytesToWrite);
+                Debug.WriteLine("BytesToWrite={0}", com.BytesToWrite);
 
-            serPortProp.VerifyPropertiesAndPrint(com);
+                serPortProp.VerifyPropertiesAndPrint(com);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void OpenTwice()
-    {
-        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasOneSerialPort))]
+        public void OpenTwice()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            serPortProp.SetAllPropertiesToOpenDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                serPortProp.SetAllPropertiesToOpenDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            Debug.WriteLine("Verifying after calling Open() twice");
+                Debug.WriteLine("Verifying after calling Open() twice");
 
-            com.Open();
+                com.Open();
 
-            Assert.Throws<InvalidOperationException>(() => com.Open());
-            serPortProp.VerifyPropertiesAndPrint(com);
+                Assert.Throws<InvalidOperationException>(() => com.Open());
+                serPortProp.VerifyPropertiesAndPrint(com);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void OpenTwoInstances()
-    {
-        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
-        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasOneSerialPort))]
+        public void OpenTwoInstances()
         {
-            SerialPortProperties serPortProp1 = new SerialPortProperties();
-            SerialPortProperties serPortProp2 = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                SerialPortProperties serPortProp1 = new SerialPortProperties();
+                SerialPortProperties serPortProp2 = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying calling Open() on two instances of SerialPort");
-            serPortProp1.SetAllPropertiesToOpenDefaults();
-            serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                Debug.WriteLine("Verifying calling Open() on two instances of SerialPort");
+                serPortProp1.SetAllPropertiesToOpenDefaults();
+                serPortProp1.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            serPortProp2.SetAllPropertiesToDefaults();
-            serPortProp2.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                serPortProp2.SetAllPropertiesToDefaults();
+                serPortProp2.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            com1.Open();
-            Assert.Throws<UnauthorizedAccessException>(() => com2.Open());
+                com1.Open();
+                Assert.Throws<UnauthorizedAccessException>(() => com2.Open());
 
-            serPortProp1.VerifyPropertiesAndPrint(com1);
-            serPortProp2.VerifyPropertiesAndPrint(com2);
+                serPortProp1.VerifyPropertiesAndPrint(com1);
+                serPortProp2.VerifyPropertiesAndPrint(com2);
+            }
         }
     }
 }

@@ -3,73 +3,75 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using Legacy.Support;
 using Xunit;
 
-public class CDHolding_Property : PortsTest
+namespace System.IO.Ports.Tests
 {
-    #region Test Cases
-
-    [Fact]
-    public void CDHolding_Default()
+    public class CDHolding_Property : PortsTest
     {
-        using (SerialPort com1 = new SerialPort())
+        #region Test Cases
+
+        [Fact]
+        public void CDHolding_Default()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort())
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying default CDHolding before Open");
-            serPortProp.SetAllPropertiesToDefaults();
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                Debug.WriteLine("Verifying default CDHolding before Open");
+                serPortProp.SetAllPropertiesToDefaults();
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasNullModem))]
-    public void CDHolding_Default_AfterOpen()
-    {
-        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
-        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+        [ConditionalFact(nameof(HasNullModem))]
+        public void CDHolding_Default_AfterOpen()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying default CDHolding after Open");
-            serPortProp.SetAllPropertiesToOpenDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                Debug.WriteLine("Verifying default CDHolding after Open");
+                serPortProp.SetAllPropertiesToOpenDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            com1.Open();
-            com2.Open();
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                com1.Open();
+                com2.Open();
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasNullModem))]
-    public void CDHolding_Default_AfterClose()
-    {
-        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
-        using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+        [ConditionalFact(nameof(HasNullModem))]
+        public void CDHolding_Default_AfterClose()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            using (SerialPort com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying default CDHolding after Close");
-            serPortProp.SetAllPropertiesToDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                Debug.WriteLine("Verifying default CDHolding after Close");
+                serPortProp.SetAllPropertiesToDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
 
-            com1.Open();
-            com2.Open();
+                com1.Open();
+                com2.Open();
 
-            if (com1.IsOpen)
-                com1.Close();
+                if (com1.IsOpen)
+                    com1.Close();
 
-            if (com2.IsOpen)
-                com2.Close();
+                if (com2.IsOpen)
+                    com2.Close();
 
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
+        #endregion
+
+        #region Verification for Test Cases
+
+        #endregion
     }
-    #endregion
-
-    #region Verification for Test Cases
-
-    #endregion
 }

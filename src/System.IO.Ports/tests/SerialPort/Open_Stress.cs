@@ -2,111 +2,49 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using System.Threading;
 using Legacy.Support;
 using Xunit;
 
-public class Open_stress : PortsTest
+namespace System.IO.Ports.Tests
 {
-    [ConditionalFact(nameof(HasNullModem))]
-    public void OpenReceiveData()
+    public class Open_stress : PortsTest
     {
-        Thread workerThread = new Thread(OpenReceiveData_WorkerThread);
-        using (CancellationTokenSource cts = new CancellationTokenSource())
-        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasNullModem))]
+        public void OpenReceiveData()
         {
-            Debug.WriteLine("Open and Close port while the port is receiving data");
-
-            workerThread.Start(cts.Token);
-
-            try
+            Thread workerThread = new Thread(OpenReceiveData_WorkerThread);
+            using (CancellationTokenSource cts = new CancellationTokenSource())
+            using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {
-                int iterationCount = TCSupport.RunShortStressTests ? 10 : 1000;
-                for (int i = 0; i < iterationCount; ++i)
+                Debug.WriteLine("Open and Close port while the port is receiving data");
+
+                workerThread.Start(cts.Token);
+
+                try
                 {
-                    com.RtsEnable = true;
-                    com.Open();
-                    com.Close();
+                    int iterationCount = TCSupport.RunShortStressTests ? 10 : 1000;
+                    for (int i = 0; i < iterationCount; ++i)
+                    {
+                        com.RtsEnable = true;
+                        com.Open();
+                        com.Close();
+                    }
+                }
+                finally
+                {
+                    cts.Cancel();
                 }
             }
-            finally
-            {
-                cts.Cancel();
-            }
+
+            workerThread.Join();
         }
 
-        workerThread.Join();
-    }
-
-    private void OpenReceiveData_WorkerThread(object token)
-    {
-        CancellationToken ct = (CancellationToken)token;
-        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+        private void OpenReceiveData_WorkerThread(object token)
         {
-            byte[] xmitBytes = new byte[16];
-
-            for (int i = 0; i < xmitBytes.Length; ++i)
-                xmitBytes[i] = (byte)i;
-
-            com.Open();
-
-            while (!ct.IsCancellationRequested)
-            {
-                com.Write(xmitBytes, 0, xmitBytes.Length);
-            }
-        }
-    }
-
-    [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
-    public void OpenReceiveDataAndRTS()
-    {
-        Thread workerThread = new Thread(OpenReceiveDataAndRTS_WorkerThread);
-        using (CancellationTokenSource cts = new CancellationTokenSource())
-        using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
-        {
-            Debug.WriteLine("Open and Close port while the port is recieving data and the RTS pin is changing states");
-
-            workerThread.Start(cts.Token);
-
-            byte[] xmitBytes = new byte[16];
-
-            for (int i = 0; i < xmitBytes.Length; ++i)
-                xmitBytes[i] = (byte)i;
-            
-            try
-            {
-                int iterationCount = TCSupport.RunShortStressTests ? 10 : 1000;
-                for (int i = 0; i < iterationCount; ++i)
-                {
-                    com.Open();
-                    com.Handshake = Handshake.RequestToSend;
-                    com.Write(xmitBytes, 0, xmitBytes.Length);
-                    com.Close();
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Thread1 threw the following exception:\n{0}", e);
-            }
-            finally
-            {
-                cts.Cancel();
-            }
-        }
-
-        workerThread.Join();
-    }
-
-
-    void OpenReceiveDataAndRTS_WorkerThread(object token)
-    {
-        CancellationToken ct = (CancellationToken)token;
-        try
-        {
+            CancellationToken ct = (CancellationToken)token;
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
             {
                 byte[] xmitBytes = new byte[16];
@@ -119,13 +57,76 @@ public class Open_stress : PortsTest
                 while (!ct.IsCancellationRequested)
                 {
                     com.Write(xmitBytes, 0, xmitBytes.Length);
-                    com.RtsEnable = !com.RtsEnable;
                 }
             }
         }
-        catch (Exception e)
+
+        [ConditionalFact(nameof(HasNullModem), nameof(HasHardwareFlowControl))]
+        public void OpenReceiveDataAndRTS()
         {
-            Debug.WriteLine("Thread1 threw the following exception:\n{0}", e);
+            Thread workerThread = new Thread(OpenReceiveDataAndRTS_WorkerThread);
+            using (CancellationTokenSource cts = new CancellationTokenSource())
+            using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                Debug.WriteLine("Open and Close port while the port is recieving data and the RTS pin is changing states");
+
+                workerThread.Start(cts.Token);
+
+                byte[] xmitBytes = new byte[16];
+
+                for (int i = 0; i < xmitBytes.Length; ++i)
+                    xmitBytes[i] = (byte)i;
+            
+                try
+                {
+                    int iterationCount = TCSupport.RunShortStressTests ? 10 : 1000;
+                    for (int i = 0; i < iterationCount; ++i)
+                    {
+                        com.Open();
+                        com.Handshake = Handshake.RequestToSend;
+                        com.Write(xmitBytes, 0, xmitBytes.Length);
+                        com.Close();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("Thread1 threw the following exception:\n{0}", e);
+                }
+                finally
+                {
+                    cts.Cancel();
+                }
+            }
+
+            workerThread.Join();
+        }
+
+
+        void OpenReceiveDataAndRTS_WorkerThread(object token)
+        {
+            CancellationToken ct = (CancellationToken)token;
+            try
+            {
+                using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
+                {
+                    byte[] xmitBytes = new byte[16];
+
+                    for (int i = 0; i < xmitBytes.Length; ++i)
+                        xmitBytes[i] = (byte)i;
+
+                    com.Open();
+
+                    while (!ct.IsCancellationRequested)
+                    {
+                        com.Write(xmitBytes, 0, xmitBytes.Length);
+                        com.RtsEnable = !com.RtsEnable;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Thread1 threw the following exception:\n{0}", e);
+            }
         }
     }
 }

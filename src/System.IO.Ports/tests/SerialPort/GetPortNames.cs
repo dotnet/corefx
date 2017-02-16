@@ -2,49 +2,50 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using Legacy.Support;
 using Xunit;
 
-public class GetPortNames : PortsTest
+namespace System.IO.Ports.Tests
 {
-    #region Test Cases
-
-    [Fact]
-    private void  OpenEveryPortName()
+    public class GetPortNames : PortsTest
     {
-        string[] portNames = SerialPort.GetPortNames();
+        #region Test Cases
 
-        for (int i = 0; i < portNames.Length; ++i)
+        [Fact]
+        private void  OpenEveryPortName()
         {
-            Debug.WriteLine("Opening port " + portNames[i]);
-            bool portExists = false;
-            foreach (string str in PortHelper.GetPorts())
+            string[] portNames = SerialPort.GetPortNames();
+
+            for (int i = 0; i < portNames.Length; ++i)
             {
-                if (str == portNames[i])
+                Debug.WriteLine("Opening port " + portNames[i]);
+                bool portExists = false;
+                foreach (string str in PortHelper.GetPorts())
                 {
-                    portExists = true;
-                    break;
+                    if (str == portNames[i])
+                    {
+                        portExists = true;
+                        break;
+                    }
                 }
-            }
-            if (!portExists)
-            {
-                Debug.WriteLine("Real Port does not exist. Ignore the output from SerialPort.GetPortNames()");
-                continue;
-            }
-            using (SerialPort serialPort = new SerialPort(portNames[i]))
-            {
-                try
+                if (!portExists)
                 {
-                    serialPort.Open();
+                    Debug.WriteLine("Real Port does not exist. Ignore the output from SerialPort.GetPortNames()");
+                    continue;
                 }
-                catch (UnauthorizedAccessException) { }
+                using (SerialPort serialPort = new SerialPort(portNames[i]))
+                {
+                    try
+                    {
+                        serialPort.Open();
+                    }
+                    catch (UnauthorizedAccessException) { }
+                }
             }
         }
+        #endregion
     }
-    #endregion
 }
 

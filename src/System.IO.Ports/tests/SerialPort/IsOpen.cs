@@ -3,66 +3,68 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
 using Legacy.Support;
 using Xunit;
 
-public class IsOpen_Property : PortsTest
+namespace System.IO.Ports.Tests
 {
-    #region Test Cases
-
-    [Fact]
-    public void IsOpen_Default()
+    public class IsOpen_Property : PortsTest
     {
-        using (SerialPort com1 = new SerialPort())
+        #region Test Cases
+
+        [Fact]
+        public void IsOpen_Default()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort())
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying default IsOpen");
+                Debug.WriteLine("Verifying default IsOpen");
 
-            serPortProp.SetAllPropertiesToDefaults();
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                serPortProp.SetAllPropertiesToDefaults();
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void IsOpen_Open()
-    {
-        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasOneSerialPort))]
+        public void IsOpen_Open()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying IsOpen after Open() has been called");
+                Debug.WriteLine("Verifying IsOpen after Open() has been called");
 
-            serPortProp.SetAllPropertiesToOpenDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-            com1.Open();
+                serPortProp.SetAllPropertiesToOpenDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                com1.Open();
 
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
-    }
 
-    [ConditionalFact(nameof(HasOneSerialPort))]
-    public void IsOpen_Open_Close()
-    {
-        using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+        [ConditionalFact(nameof(HasOneSerialPort))]
+        public void IsOpen_Open_Close()
         {
-            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
+            {
+                SerialPortProperties serPortProp = new SerialPortProperties();
 
-            Debug.WriteLine("Verifying IsOpen after Open() and Close have been called");
+                Debug.WriteLine("Verifying IsOpen after Open() and Close have been called");
 
-            serPortProp.SetAllPropertiesToDefaults();
-            serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
-            com1.Open();
-            com1.Close();
+                serPortProp.SetAllPropertiesToDefaults();
+                serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
+                com1.Open();
+                com1.Close();
 
-            serPortProp.VerifyPropertiesAndPrint(com1);
+                serPortProp.VerifyPropertiesAndPrint(com1);
+            }
         }
+        #endregion
+
+        #region Verification for Test Cases
+
+        #endregion
     }
-    #endregion
-
-    #region Verification for Test Cases
-
-    #endregion
 }

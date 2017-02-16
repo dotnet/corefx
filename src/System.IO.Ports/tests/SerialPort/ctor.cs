@@ -2,24 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Legacy.Support;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.IO.PortsTests;
+using Legacy.Support;
 using Xunit;
 
-
-public class ctor : PortsTest
+namespace System.IO.Ports.Tests
 {
-    [Fact]
-    public void Verify()
+    public class ctor : PortsTest
     {
-        SerialPortProperties serPortProp = new SerialPortProperties();
-        using (SerialPort com = new SerialPort())
+        [Fact]
+        public void Verify()
         {
-            serPortProp.SetAllPropertiesToDefaults();
-            Debug.WriteLine("Verifying properties is called");
-            serPortProp.VerifyPropertiesAndPrint(com);
+            SerialPortProperties serPortProp = new SerialPortProperties();
+            using (SerialPort com = new SerialPort())
+            {
+                serPortProp.SetAllPropertiesToDefaults();
+                Debug.WriteLine("Verifying properties is called");
+                serPortProp.VerifyPropertiesAndPrint(com);
+            }
         }
     }
 }
