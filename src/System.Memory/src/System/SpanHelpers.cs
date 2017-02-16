@@ -4,7 +4,6 @@
 
 using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -50,6 +49,8 @@ namespace System
         /// </summary>
         public static bool IsReferenceOrContainsReferences<T>() => PerTypeValues<T>.IsReferenceOrContainsReferences;
 
+        public static bool IsValueType<T>() => PerTypeValues<T>.IsValueType;
+
         private static bool IsReferenceOrContainsReferencesCore(Type type)
         {
             if (type.GetTypeInfo().IsPrimitive) // This is hopefully the common case. All types that return true for this are value types w/out embedded references.
@@ -83,6 +84,8 @@ namespace System
             // only once per type.
             //
             public static readonly bool IsReferenceOrContainsReferences = IsReferenceOrContainsReferencesCore(typeof(T));
+
+            public static readonly bool IsValueType = typeof(T).GetTypeInfo().IsValueType;
 
             public static readonly T[] EmptyArray = new T[0];
 
