@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Build.Tasks
             foreach (string file in filesInDir)
             {
                 AssemblyName result;
-                if (AssemblyNameReader.TryGetManagedAssemblyName(file, out result))
+                if (TryGetManagedAssemblyName(file, out result))
                 {
                     assemblyNames.Add(result);
                 }

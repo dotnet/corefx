@@ -7,9 +7,9 @@ using System.Reflection.PortableExecutable;
 
 namespace Microsoft.DotNet.Build.Tasks
 { 
-    public partial class AssemblyNameReader
+    public partial class GenerateDepsJson
     {
-        public static bool TryGetManagedAssemblyName(string file, out AssemblyName result)
+        public bool TryGetManagedAssemblyName(string file, out AssemblyName result)
         {
             result = null;
             try
