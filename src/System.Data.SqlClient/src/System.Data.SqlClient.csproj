@@ -139,7 +139,7 @@
     <Compile Include="System\Data\SqlClient\TdsParserSafeHandles.cs" />
   </ItemGroup>
 
-  <!-- Windows dependancies for Integrated Authentication for MANAGED_SNI build -->
+  <!-- Windows dependencies for Integrated Authentication for MANAGED_SNI build -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Windows.cs">
       <Link>Common\System\Net\Security\NegotiateStreamPal.Windows.cs</Link>
@@ -233,7 +233,7 @@
     </Compile>
   </ItemGroup>
 
-  <!-- Common (Windows and Unix) dependancies for MANAGED_SNI build -->
+  <!-- Common (Windows and Unix) dependencies for MANAGED_SNI build -->
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsPal.cs">
       <Link>Common\System\Net\ContextFlagsPal.cs</Link>
