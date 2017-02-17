@@ -161,6 +161,7 @@
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 14.04",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
@@ -174,6 +175,7 @@
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.04",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Release"
           }
@@ -542,6 +544,7 @@
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 14.04",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Debug"
           }
@@ -555,6 +558,7 @@
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.04",
+            "Platform": "arm",
             "Type": "build/product/",
             "ConfigurationGroup": "Debug"
           }
