@@ -360,7 +360,7 @@ void ZLIB_INTERNAL bi_windup OF((deflate_state *s));
 
 /* ===========================================================================
  * Update a hash value with the given input byte
- * IN  assertion: all calls to UPDATE_HASH are made with consecutive
+ * IN  assertion: all calls to to UPDATE_HASH are made with consecutive
  *    input characters, so that a running hash key can be computed from the
  *    previous key instead of complete recalculation each time.
  */
