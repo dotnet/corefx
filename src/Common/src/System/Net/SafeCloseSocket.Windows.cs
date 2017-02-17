@@ -98,12 +98,12 @@ namespace System.Net.Sockets
             return CreateSocket(InnerSafeCloseSocket.CreateWSASocket(addressFamily, socketType, protocolType));
         }
 
-        internal static SafeCloseSocket Accept(
+        internal static unsafe SafeCloseSocket Accept(
             SafeCloseSocket socketHandle,
-            byte[] socketAddress,
-            ref int socketAddressSize)
+            byte* socketAddress,
+            int* socketAddressSize)
         {
-            return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize));
+            return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, socketAddressSize));
         }
 
         private void InnerReleaseHandle()
@@ -248,9 +248,9 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            internal static InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressSize)
+            internal static unsafe InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte* socketAddress, int* socketAddressSize)
             {
-                InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle.DangerousGetHandle(), socketAddress, ref socketAddressSize);
+                InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle.DangerousGetHandle(), socketAddress, socketAddressSize);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();

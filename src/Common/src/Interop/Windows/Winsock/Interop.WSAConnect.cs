@@ -12,13 +12,13 @@ internal static partial class Interop
     {
         // This function is always potentially blocking so it uses an IntPtr.
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSAConnect(
-            [In] IntPtr socketHandle,
-            [In] byte[] socketAddress,
-            [In] int socketAddressSize,
-            [In] IntPtr inBuffer,
-            [In] IntPtr outBuffer,
-            [In] IntPtr sQOS,
-            [In] IntPtr gQOS);
+        internal static unsafe extern int WSAConnect(
+            IntPtr socketHandle,
+            byte* socketAddress,
+            int socketAddressSize,
+            void* inBuffer,
+            void* outBuffer,
+            void* sQOS,
+            void* gQOS);
     }
 }

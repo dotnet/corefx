@@ -18,22 +18,21 @@ namespace System.Net.Sockets
     // from the BeginSend, BeginSendTo, BeginReceive, BeginReceiveFrom calls.
     internal partial class OverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        internal WSABuffer _singleBuffer;
-        internal WSABuffer[] _wsaBuffers;
-
-        internal IntPtr GetSocketAddressPtr()
+        internal unsafe byte* GetSocketAddressPtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
+            Debug.Assert(_socketAddress != null);
+            return (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
         }
 
-        internal IntPtr GetSocketAddressSizePtr()
+        internal unsafe int* GetSocketAddressSizePtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, _socketAddress.GetAddressSizeOffset());
+            Debug.Assert(_socketAddress != null);
+            return (int*) Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, _socketAddress.GetAddressSizeOffset());
         }
 
         internal unsafe int GetSocketAddressSize()
         {
-            return *(int*)GetSocketAddressSizePtr();
+            return *(GetSocketAddressSizePtr());
         }
 
         // SetUnmanagedStructures
@@ -42,11 +41,11 @@ namespace System.Net.Sockets
         // These calls are outside the runtime and are unmanaged code, so we need
         // to prepare specific structures and ints that lie in unmanaged memory
         // since the overlapped calls may complete asynchronously.
-        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, Internals.SocketAddress socketAddress, bool pinSocketAddress)
+        internal void SetUnmanagedStructures(byte[] buffer, Internals.SocketAddress socketAddress)
         {
             // Fill in Buffer Array structure that will be used for our send/recv Buffer
             _socketAddress = socketAddress;
-            if (pinSocketAddress && _socketAddress != null)
+            if (_socketAddress != null)
             {
                 object[] objectsToPin = null;
                 objectsToPin = new object[2];
@@ -61,9 +60,6 @@ namespace System.Net.Sockets
             {
                 base.SetUnmanagedStructures(buffer);
             }
-
-            _singleBuffer.Length = size;
-            _singleBuffer.Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
         }
 
         internal void SetUnmanagedStructures(IList<ArraySegment<byte>> buffers)
@@ -80,8 +76,6 @@ namespace System.Net.Sockets
                 RangeValidationHelpers.ValidateSegment(buffersCopy[i]);
             }
 
-            _wsaBuffers = new WSABuffer[count];
-
             object[] objectsToPin = new object[count];
             for (int i = 0; i < count; i++)
             {
@@ -89,54 +83,6 @@ namespace System.Net.Sockets
             }
 
             base.SetUnmanagedStructures(objectsToPin);
-
-            for (int i = 0; i < count; i++)
-            {
-                _wsaBuffers[i].Length = buffersCopy[i].Count;
-                _wsaBuffers[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffersCopy[i].Array, buffersCopy[i].Offset);
-            }
-        }
-
-        // This method is called after an asynchronous call is made for the user.
-        // It checks and acts accordingly if the IO:
-        // 1) completed synchronously.
-        // 2) was pended.
-        // 3) failed.
-        internal override object PostCompletion(int numBytes)
-        {
-            if (ErrorCode == 0 && NetEventSource.IsEnabled)
-            {
-                LogBuffer(numBytes);
-            }
-
-            return base.PostCompletion(numBytes);
-        }
-
-        private void LogBuffer(int size)
-        {
-            if (!NetEventSource.IsEnabled)
-            {
-                return;
-            }
-
-            if (size > -1)
-            {
-                if (_wsaBuffers != null)
-                {
-                    foreach (WSABuffer wsaBuffer in _wsaBuffers)
-                    {
-                        if (NetEventSource.IsEnabled) NetEventSource.DumpBuffer(this, wsaBuffer.Pointer, Math.Min(wsaBuffer.Length, size));
-                        if ((size -= wsaBuffer.Length) <= 0)
-                        {
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (NetEventSource.IsEnabled) NetEventSource.DumpBuffer(this, _singleBuffer.Pointer, Math.Min(_singleBuffer.Length, size));
-                }
-            }
         }
     }
 }

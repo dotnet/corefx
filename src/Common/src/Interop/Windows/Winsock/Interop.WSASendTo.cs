@@ -11,27 +11,15 @@ internal static partial class Interop
     internal static partial class Winsock
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASendTo(
-            [In] SafeCloseSocket socketHandle,
-            [In] ref WSABuffer buffer,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] IntPtr socketAddress,
-            [In] int socketAddressSize,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
-
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASendTo(
-            [In] SafeCloseSocket socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] IntPtr socketAddress,
-            [In] int socketAddressSize,
-            [In] SafeNativeOverlapped overlapped,
-            [In] IntPtr completionRoutine);
+        internal static extern unsafe int WSASendTo(
+            SafeCloseSocket socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            int* bytesTransferred,
+            SocketFlags socketFlags,
+            byte* socketAddress,
+            int socketAddressSize,
+            SafeNativeOverlapped overlapped,
+            void* completionRoutine);
     }
 }
