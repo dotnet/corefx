@@ -153,6 +153,7 @@ namespace System.Tests
             Assert.IsType<Hashtable>(Environment.GetEnvironmentVariables());
         }
 
+        [Theory]
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
         [InlineData(EnvironmentVariableTarget.User)]
@@ -162,6 +163,7 @@ namespace System.Tests
             Assert.IsType<Hashtable>(Environment.GetEnvironmentVariables(target));
         }
 
+        [Theory]
         [InlineData(EnvironmentVariableTarget.Process)]
         [InlineData(EnvironmentVariableTarget.Machine)]
         [InlineData(EnvironmentVariableTarget.User)]
