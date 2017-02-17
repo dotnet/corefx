@@ -145,7 +145,7 @@ namespace System.Data.SqlClient.SNI
             sendBuff = outSecurityBuffer.token;
             if (sendBuff == null)
             {
-                sendBuff = new byte[0];
+                sendBuff = Array.Empty<byte>();
             }
 
             sspiClientContextStatus.SecurityContext = securityContext;
