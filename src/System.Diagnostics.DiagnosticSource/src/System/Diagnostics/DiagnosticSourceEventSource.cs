@@ -96,7 +96,7 @@ namespace System.Diagnostics
     /// 
     /// * How data is logged in the EventSource 
     /// 
-    /// By default all data from Diagnostic sources is logged to the DiagnosticEventSouce event called 'Event' 
+    /// By default all data from DiagnosticSources is logged to the DiagnosticEventSouce event called 'Event' 
     /// which has three fields  
     /// 
     ///     string SourceName, 
