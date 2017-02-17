@@ -10,10 +10,6 @@ using System.Reflection.Metadata;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 
-#if !CORERT
-using System.IO.Compression;
-#endif
-
 namespace System.Reflection.PortableExecutable
 {
     /// <summary>
