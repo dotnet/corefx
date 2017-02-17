@@ -266,10 +266,8 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Reset a packet
         /// </summary>
-        /// <param name="handle">SNI handle</param>
-        /// <param name="write">true if packet is for write</param>
         /// <param name="packet">SNI packet</param>
-        public void PacketReset(SNIHandle handle, bool write, SNIPacket packet)
+        public void PacketReset(SNIPacket packet)
         {
             packet.Reset();
         }

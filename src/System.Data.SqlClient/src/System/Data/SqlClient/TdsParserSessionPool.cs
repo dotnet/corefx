@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -89,11 +85,7 @@ namespace System.Data.SqlClient
                 TdsParserStateObject session = _cache[i];
                 if (null != session)
                 {
-                    var sessionHandle = session.Handle;
-                    if (sessionHandle != null)
-                    {
-                        sessionHandle.Dispose();
-                    }
+                    session.DisposeHandle();
                 }
             }
         }
