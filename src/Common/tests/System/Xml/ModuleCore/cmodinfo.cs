@@ -71,7 +71,7 @@ namespace OLEDB.Test.ModuleCore
         {
             get
             {
-                //Defered Parsing
+                //Deferred Parsing
                 if (s_hashOptions == null)
                 {
                     CKeywordParser.Tokens tokens = new CKeywordParser.Tokens();

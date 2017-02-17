@@ -392,7 +392,7 @@ namespace System.Xml.Serialization
             {
                 StructMapping baseMapping = ImportStructLikeMapping((StructModel)_modelScope.GetTypeModel(model.Type.GetTypeInfo().BaseType, false), limiter);
 
-                // check to see if the import of the baseMapping was defered
+                // check to see if the import of the baseMapping was deferred
                 int baseIndex = limiter.DeferredWorkItems.IndexOf(mapping.BaseMapping);
                 if (baseIndex < 0)
                 {
@@ -400,7 +400,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    // the import of the baseMapping was defered, make sure that the derived mappings is defered as well
+                    // the import of the baseMapping was deferred, make sure that the derived mappings is deferred as well
                     if (!limiter.DeferredWorkItems.Contains(mapping))
                     {
                         limiter.DeferredWorkItems.Add(new ImportStructWorkItem(model, mapping));
