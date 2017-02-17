@@ -139,12 +139,7 @@
     <Compile Include="System\Data\SqlClient\TdsParserSafeHandles.cs" />
   </ItemGroup>
 
-  <!--
-  Windows dependancies for Integrated Authentication for MANAGED_SNI build.
-  These dependancies are commented about due to missing dependancy errors, which
-  requires Managed SNI objects in build path to be resolved.
-  -->
-  <!--
+  <!-- Windows dependancies for Integrated Authentication for MANAGED_SNI build -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Windows.cs">
       <Link>Common\System\Net\Security\NegotiateStreamPal.Windows.cs</Link>
@@ -237,28 +232,9 @@
       <Link>Common\System\Collections\Generic\BidirectionalDictionary.cs</Link>
     </Compile>
   </ItemGroup>
-  -->
 
-  <!--
-  Common (Windows and Unix) dependancies for MANAGED_SNI build.
-  These dependancies need to be shared with Windows for Windows MANAGED_SNI build.
-  -->
-  <!--
+  <!-- Common (Windows and Unix) dependancies for MANAGED_SNI build -->
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
-    <Compile Include="System\Data\SqlClient\SNI\SNIError.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIHandle.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNILoadHandle.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIMarsConnection.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIMarsHandle.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIMarsManager.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIMarsQueuedPacket.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNINpHandle.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIPacket.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNIProxy.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNITcpHandle.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SslOverTdsStream.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SNICommon.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\SspiClientContextStatus.cs" />
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsPal.cs">
       <Link>Common\System\Net\ContextFlagsPal.cs</Link>
     </Compile>
@@ -290,7 +266,6 @@
       <Link>Common\System\Net\NegotiationInfoClass.cs</Link>
     </Compile>
   </ItemGroup>
-  -->
   
   <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="$(CommonPath)\System\Data\Locale\LocaleMapper.Unix.cs">
@@ -315,26 +290,11 @@
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Unix.cs">
       <Link>Common\System\Net\Security\NegotiateStreamPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\ContextFlagsPal.cs">
-      <Link>Common\System\Net\ContextFlagsPal.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SecurityStatusPal.cs">
-      <Link>Common\System\Net\SecurityStatusPal.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeDeleteContext.cs">
       <Link>Common\System\Net\Security\Unix\SafeDeleteContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeFreeCredentials.cs">
       <Link>Common\System\Net\Security\Unix\SafeFreeCredentials.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBufferType.cs">
-      <Link>Common\System\Net\Security\SecurityBufferType.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBuffer.cs">
-      <Link>Common\System\Net\Security\SecurityBuffer.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
-      <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\GssSafeHandles.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\GssSafeHandles.cs</Link>
@@ -351,29 +311,14 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssBuffer.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssBuffer.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\DebugCriticalHandleMinusOneIsInvalid.cs">
-      <Link>Common\System\Net\DebugCriticalHandleMinusOneIsInvalid.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeDeleteNegoContext.cs">
       <Link>Common\System\Net\Security\Unix\SafeDeleteNegoContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
-      <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\DebugThreadTracking.cs">
-      <Link>Common\System\Net\Logging\DebugThreadTracking.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsAdapterPal.Unix.cs">
       <Link>Common\System\Net\ContextFlagsAdapterPal.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-      <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NegotiationInfoClass.cs">
-      <Link>Common\System\Net\NegotiationInfoClass.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
@@ -407,24 +352,7 @@
     <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Threading.Timer" />
     <Reference Include="System.Xml.ReaderWriter" />
-  </ItemGroup>
-  
-  <!-- Common (Windows and Unix) dependancies for MANAGED_SNI -->
-  <!--
-  <ItemGroup>
     <Reference Include="System.IO.Pipes" />
-    <Reference Include="System.Security.Cryptography.X509Certificates" />
-    <Reference Include="System.Net.Sockets" />
-    <Reference Include="System.Net.Security" />
-    <Reference Include="System.Net.Primitives" />
-    <Reference Include="System.Net.NameResolution" />
-    <Reference Include="System.Diagnostics.Tracing" />
-  </ItemGroup>
-  -->
-  
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
-    <Reference Include="System.IO.Pipes" />
-    <Reference Include="System.Security.Principal" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Net.Sockets" />
     <Reference Include="System.Net.Security" />
