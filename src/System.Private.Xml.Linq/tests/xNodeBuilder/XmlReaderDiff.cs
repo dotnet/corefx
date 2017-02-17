@@ -126,7 +126,7 @@ namespace CoreXml.Test.XLinq
                         }
                     }
 
-                    // does not under-reach the index
+                    // does not underreach the index
                     {
                         try
                         {
