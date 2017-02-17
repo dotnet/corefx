@@ -76,10 +76,14 @@ namespace System
                     // We could catch this here, being friendly with older portable surface area should we
                     // desire to use this method elsewhere.
                     if (e.GetType().FullName.Equals("System.EntryPointNotFoundException", StringComparison.Ordinal))
+                    {
                         // API doesn't exist, likely pre Win8
                         s_isWinRT = 0;
+                    }
                     else
+                    {
                         throw;
+                    }
                 }
 
                 return s_isWinRT == 1;
@@ -318,7 +322,7 @@ namespace System
             uint DesiredAccesss,
             out IntPtr TokenHandle);
 
-        // The process handle does NOT need closed
+        // The process handle does NOT need closing
         [DllImport("kernel32.dll", ExactSpelling = true)]
         public static extern IntPtr GetCurrentProcess();
 
