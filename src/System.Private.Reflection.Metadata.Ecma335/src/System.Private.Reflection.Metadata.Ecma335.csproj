@@ -244,8 +244,8 @@
     <Compile Include="Shims\Marshal.cs" />
     <Compile Include="Shims\MiniLinq.cs" />
     <Compile Include="Shims\StrongBox.cs" />
-    <Compile Include="TemporaryShims\BitConverter.cs" />
-    <Compile Include="TemporaryShims\Path.cs" />
+    <Compile Include="Shims\BitConverter.cs" />
+    <Compile Include="Shims\Path.cs" />
     <Compile Include="..\..\Common\src\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
     <Compile Include="..\..\Common\src\System\Runtime\Versioning\NonVersionableAttribute.cs" />
     <Compile Include="..\..\System.Collections.Immutable\src\Validation\ValidatedNotNullAttribute.cs" />
