@@ -377,7 +377,7 @@
     <value>&lt;location&gt; sections are allowed only within &lt;configuration&gt; sections.</value>
   </data>
   <data name="Config_location_path_invalid_character" xml:space="preserve">
-    <value>&lt;location&gt; path attribute must be a relative virtual path.  It cannot contain any of '?' ':' '\\' '*' '"' '&lt;' '>' or '|'.</value>
+    <value>&lt;location&gt; path attribute must be a relative virtual path.  It cannot contain any of '?' ':' '\\' '*' '"' '&lt;' '&gt;' or '|'.</value>
   </data>
   <data name="Config_location_path_invalid_first_character" xml:space="preserve">
     <value>&lt;location&gt; path attribute must be a relative virtual path.  It cannot start with any of ' ' '.' '/' or '\\'.</value>

@@ -244,7 +244,7 @@
     <value>The server returned a status code outside the valid range of 100-599.</value>
   </data>
   <data name="net_io_timeout_use_gt_zero" xml:space="preserve">
-    <value>Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0.</value>
+    <value>Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value &gt; 0.</value>
   </data>
   <data name="net_ftp_servererror" xml:space="preserve">
     <value>The remote server returned an error: {0}.</value>
