@@ -133,4 +133,4 @@
   <data name="UnauthorizedAccess_RegistryNoWrite" xml:space="preserve">
     <value>Cannot write to the registry key.</value>
   </data>
-  </root>
+</root>

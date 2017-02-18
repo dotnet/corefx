@@ -61,4 +61,4 @@
   <data name="OrderCannotBeNegative" xml:space="preserve">
     <value>Property 'Order' in DataMemberAttribute attribute cannot be a negative number.</value>
   </data>
-  </root>
+</root>

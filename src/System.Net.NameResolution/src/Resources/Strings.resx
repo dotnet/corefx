@@ -73,4 +73,4 @@
   <data name="net_invalid_ip_addr" xml:space="preserve">
     <value>IPv4 address 0.0.0.0 and IPv6 address ::0 are unspecified addresses that cannot be used as a target address.</value>
   </data>
-  </root>
+</root>

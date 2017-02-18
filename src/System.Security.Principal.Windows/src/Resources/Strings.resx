@@ -118,4 +118,4 @@
   <data name="IdentityReference_NotAWindowsDomain" xml:space="preserve">
     <value>The domainSid parameter is not a valid Windows domain SID.</value>
   </data>
-  </root>
+</root>

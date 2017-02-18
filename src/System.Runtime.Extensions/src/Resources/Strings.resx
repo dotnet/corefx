@@ -367,4 +367,4 @@
   <data name="Arg_SurrogatesNotAllowedAsSingleChar" xml:space="preserve">
     <value>Unicode surrogate characters must be written out as pairs together in the same call, not individually. Consider passing in a character array instead.</value>
   </data>
-  </root>
+</root>
