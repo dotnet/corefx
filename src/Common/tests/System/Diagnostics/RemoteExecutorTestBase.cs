@@ -25,9 +25,7 @@ namespace System.Diagnostics
         /// <summary>The exit code returned when the test process exits successfully.</summary>
         internal const int SuccessExitCode = 42;
 
-        internal static bool IsFullFramework => 
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && 
-            typeof(String).Assembly.Location.StartsWith($"{Environment.GetEnvironmentVariable("windir")}\\Microsoft.NET\\Framework", StringComparison.OrdinalIgnoreCase);
+        internal static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
