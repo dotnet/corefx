@@ -178,6 +178,12 @@
   <data name="CantSetProcessStartInfo" xml:space="preserve">
     <value>Process is already associated with a real process, so the requested operation cannot be performed.</value>
   </data>
+  <data name="CantGetAllPids" xml:space="preserve">
+    <value>Could not get all running Process IDs.</value>
+  </data>
+  <data name="NegativePidNotSupported" xml:space="preserve">
+    <value>Process IDs cannot be negative.</value>
+  </data>
   <data name="ProcessorAffinityNotSupported" xml:space="preserve">
     <value>Processor affinity for processes or threads is not supported.</value>
   </data>
