@@ -59,6 +59,12 @@
     <EnableDotnetAnalyzers Condition="'$(EnableDotnetAnalyzers)'==''">true</EnableDotnetAnalyzers>
   </PropertyGroup>
 
+  <!-- Default properties for CI builds -->
+  <PropertyGroup Condition="'$(IsCIBuild)' == 'true'">
+    <WithoutCategories>IgnoreForCI</WithoutCategories>
+    <EnableDumpling Condition="'$(RunningOnUnix)' == 'true'">true</EnableDumpling>
+  </PropertyGroup>
+
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
@@ -71,9 +77,6 @@
     <SupportsUWP>true</SupportsUWP>
     <BlockReflectionAttribute>true</BlockReflectionAttribute>
   </PropertyGroup>
-
-  <!-- Import packaging props -->
-  <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
 
   <!-- list of nuget package sources passed to dnu -->
   <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
@@ -152,11 +155,25 @@
     <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">$(TargetGroup)-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</BuildConfiguration>
     <BuildConfigurationImportFile>$(ToolsDir)/configuration/configuration.props</BuildConfigurationImportFile>
 
+    <!-- if PKGPROJ doesn't set BuildConfigurations, make sure it only builds for TargetGroup=package or BuildAllConfigurations -->
+    <BuildConfigurations Condition="'$(MSBuildProjectExtension)' == '.pkgproj' AND '$(BuildConfigurations)' == ''">package</BuildConfigurations>
+
     <!-- Need to try and keep the same logic as the native builds as we need this for packaging -->
     <NativeBinDir>$(BinDir)$(OSGroup).$(ArchGroup).$(ConfigurationGroup)/native</NativeBinDir>
   </PropertyGroup>
 
   <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
+
+  <!-- Import packaging props -->
+  <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
+
+  <!-- set properties for each vertical -->
+  <PropertyGroup>
+    <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
+    <BuildingNETFxVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netfx' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETFxVertical>
+    <BuildingUAPVertical Condition="'$(BuildingUAPVertical)' == '' AND ('$(_bc_TargetGroup)'=='uap' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPVertical>
+    <BuildingUAPAOTVertical Condition="'$(BuildingUAPAOTVertical)' == '' AND ('$(_bc_TargetGroup)'=='uapaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPAOTVertical>
+  </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
   <Choose>
@@ -166,6 +183,7 @@
         <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
         <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
         <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants>
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
       </PropertyGroup>
     </When>
     <When Condition="'$(ConfigurationGroup)' == 'Release'">
@@ -177,14 +195,6 @@
       </PropertyGroup>
     </When>
   </Choose>
-
-  <!-- Default Test platform to deploy the netstandard compiled tests to -->
-  <PropertyGroup>
-    <DefaultTestTFM>netcoreapp1.1</DefaultTestTFM>
-    <TestTFM Condition="'$(TestTFM)'==''">$(DefaultTestTFM)</TestTFM>
-    <!-- we default FilterToTestTFM to DefaultTestTFM if it is not explicity defined -->
-    <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">$(DefaultTestTFM)</FilterToTestTFM>
-  </PropertyGroup>
 
   <PropertyGroup>
     <IsRedistAssembly Condition="'$(IsRedistAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\redist\')) OR $(MSBuildProjectFullPath.Contains('/redist/')))">true</IsRedistAssembly>
@@ -229,8 +239,6 @@
   <PropertyGroup>
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
-    <TestTargetOutputRelPath Condition="'$(TestTargetOutputRelPath)'=='' And '$(TargetGroup)'!='' And '$(TestTFM)'!=''">$(TargetGroup).$(TestTFM)/</TestTargetOutputRelPath>
-    <TestTargetOutputRelPath Condition="'$(TestTargetOutputRelPath)'=='' And '$(TargetGroup)'=='' And '$(TestTFM)'!=''">default.$(TestTFM)/</TestTargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
 
@@ -268,7 +276,7 @@
     <NETCoreAppTestSharedFrameworkPath>$(NETCoreAppTestRootPath)shared/Microsoft.NETCore.App/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestSharedFrameworkPath>
 
     <!-- Constructed shared fx path for testing -->
-    <TestSharedFxDir>$(NETCoreAppTestRootPath)</TestSharedFxDir>
+    <TestSharedFxDir Condition="'$(BinplaceTestSharedFramework)' == 'true'">$(NETCoreAppTestRootPath)</TestSharedFxDir>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>

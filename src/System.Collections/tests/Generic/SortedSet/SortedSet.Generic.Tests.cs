@@ -11,7 +11,7 @@ namespace System.Collections.Tests
     /// <summary>
     /// Contains tests that ensure the correctness of the SortedSet class.
     /// </summary>
-    public abstract class SortedSet_Generic_Tests<T> : ISet_Generic_Tests<T>
+    public abstract partial class SortedSet_Generic_Tests<T> : ISet_Generic_Tests<T>
     {
         #region ISet<T> Helper Methods
 

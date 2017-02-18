@@ -92,7 +92,7 @@ namespace System
             Contract.Ensures(Contract.Result<byte[]>() != null);
             Contract.Ensures(Contract.Result<byte[]>().Length == 2);
 
-            return GetBytes((short)value);
+            return GetBytes(unchecked((short)value));
         }
 
         // Converts an uint into an array of bytes with
@@ -103,7 +103,7 @@ namespace System
             Contract.Ensures(Contract.Result<byte[]>() != null);
             Contract.Ensures(Contract.Result<byte[]>().Length == 4);
 
-            return GetBytes((int)value);
+            return GetBytes(unchecked((int)value));
         }
 
         // Converts an unsigned long into an array of bytes with
@@ -114,7 +114,7 @@ namespace System
             Contract.Ensures(Contract.Result<byte[]>() != null);
             Contract.Ensures(Contract.Result<byte[]>().Length == 8);
 
-            return GetBytes((long)value);
+            return GetBytes(unchecked((long)value));
         }
 
         // Converts a float into an array of bytes with length 
@@ -144,13 +144,13 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 2)
                 ThrowValueArgumentTooSmall();
             Contract.EndContractBlock();
 
-            return (char)ToInt16(value, startIndex);
+            return unchecked((char)ToInt16(value, startIndex));
         }
 
         // Converts an array of bytes into a short.  
@@ -159,7 +159,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 2)
                 ThrowValueArgumentTooSmall();
@@ -189,7 +189,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 4)
                 ThrowValueArgumentTooSmall();
@@ -219,7 +219,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 8)
                 ThrowValueArgumentTooSmall();
@@ -255,13 +255,13 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 2)
                 ThrowValueArgumentTooSmall();
             Contract.EndContractBlock();
 
-            return (ushort)ToInt16(value, startIndex);
+            return unchecked((ushort)ToInt16(value, startIndex));
         }
 
         // Converts an array of bytes into an uint.
@@ -271,13 +271,13 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 4)
                 ThrowValueArgumentTooSmall();
             Contract.EndContractBlock();
 
-            return (uint)ToInt32(value, startIndex);
+            return unchecked((uint)ToInt32(value, startIndex));
         }
 
         // Converts an array of bytes into an unsigned long.
@@ -287,13 +287,13 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 8)
                 ThrowValueArgumentTooSmall();
             Contract.EndContractBlock();
 
-            return (ulong)ToInt64(value, startIndex);
+            return unchecked((ulong)ToInt64(value, startIndex));
         }
 
         // Converts an array of bytes into a float.  
@@ -302,7 +302,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 4)
                 ThrowValueArgumentTooSmall();
@@ -318,7 +318,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if ((uint)startIndex >= value.Length)
+            if (unchecked((uint)startIndex) >= value.Length)
                 ThrowStartIndexArgumentOutOfRange();
             if (startIndex > value.Length - 8)
                 ThrowValueArgumentTooSmall();

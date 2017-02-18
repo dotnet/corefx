@@ -1827,7 +1827,7 @@ namespace System.Collections.Generic
 
                 _siInfo = null;
 
-                Intialize();
+                Initialize();
             }
 
             internal Enumerator(SortedSet<T> set, bool reverse)
@@ -1843,7 +1843,7 @@ namespace System.Collections.Generic
 
                 _siInfo = null;
 
-                Intialize();
+                Initialize();
             }
 
             private Enumerator(SerializationInfo info, StreamingContext context)
@@ -1896,7 +1896,7 @@ namespace System.Collections.Generic
                 if (EnumStarted)
                 {
                     T item = (T)_siInfo.GetValue(NodeValueName, typeof(T));
-                    Intialize();
+                    Initialize();
 
                     // go until it reaches the value we want
                     while (this.MoveNext())
@@ -1907,7 +1907,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            private void Intialize()
+            private void Initialize()
             {
                 _current = null;
                 SortedSet<T>.Node node = _tree._root;
@@ -2009,7 +2009,7 @@ namespace System.Collections.Generic
                 }
 
                 _stack.Clear();
-                Intialize();
+                Initialize();
             }
 
             void IEnumerator.Reset() => Reset();
@@ -2024,6 +2024,30 @@ namespace System.Collections.Generic
         #endregion
 
         #region Miscellaneous
+
+        /// <summary>
+        /// Searches the set for a given value and returns the equal value it finds, if any.
+        /// </summary>
+        /// <param name="equalValue">The value to search for.</param>
+        /// <param name="actualValue">The value from the set that the search found, or the original value if the search yielded no match.</param>
+        /// <returns>A value indicating whether the search was successful.</returns>
+        /// <remarks>
+        /// This can be useful when you want to reuse a previously stored reference instead of 
+        /// a newly constructed one (so that more sharing of references can occur) or to look up
+        /// a value that has more complete data than the value you currently have, although their
+        /// comparer functions indicate they are equal.
+        /// </remarks>
+        public bool TryGetValue(T equalValue, out T actualValue)
+        {
+            Node node = FindNode(equalValue);
+            if (node != null)
+            {
+                actualValue = node.Item;
+                return true;
+            }
+            actualValue = default(T);
+            return false;
+        }
 
         // Used for set checking operations (using enumerables) that rely on counting
         private static int Log2(int value)
