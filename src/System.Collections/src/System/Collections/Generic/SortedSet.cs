@@ -587,7 +587,7 @@ namespace System.Collections.Generic
 
             InOrderTreeWalk(node =>
             {
-                if (index == count)
+                if (index >= count)
                 {
                     return false;
                 }
@@ -673,19 +673,19 @@ namespace System.Collections.Generic
             Debug.Assert(parent != null);
             Debug.Assert(grandParent != null);
 
-            bool parentIsRightChild = (grandParent.Right == parent);
-            bool currentIsRightChild = (parent.Right == current);
+            bool parentIsOnRight = (grandParent.Right == parent);
+            bool currentIsOnRight = (parent.Right == current);
 
             Node newChildOfGreatGrandParent;
-            if (parentIsRightChild == currentIsRightChild)
+            if (parentIsOnRight == currentIsOnRight)
             {
                 // Same orientation, single rotation
-                newChildOfGreatGrandParent = currentIsRightChild ? grandParent.RotateLeft() : grandParent.RotateRight();
+                newChildOfGreatGrandParent = currentIsOnRight ? grandParent.RotateLeft() : grandParent.RotateRight();
             }
             else
             {
                 // Different orientation, double rotation
-                newChildOfGreatGrandParent = currentIsRightChild ? grandParent.RotateLeftRight() : grandParent.RotateRightLeft();
+                newChildOfGreatGrandParent = currentIsOnRight ? grandParent.RotateLeftRight() : grandParent.RotateRightLeft();
                 // Current node now becomes the child of `greatGrandParent`
                 parent = greatGrandParent;
             }
@@ -1737,7 +1737,9 @@ namespace System.Collections.Generic
 
             public Node DeepClone(int count)
             {
+#if DEBUG
                 Debug.Assert(count == GetCount());
+#endif
                 
                 // Breadth-first traversal to recreate nodes, preorder traversal to replicate nodes.
 
@@ -1779,14 +1781,9 @@ namespace System.Collections.Generic
                 return newRoot;
             }
 
-            public int GetCount()
-            {
-#if !DEBUG
-                throw new InvalidOperationException($"Do not call {nameof(GetCount)} in Release builds.");
-#else
-                return 1 + (Left?.GetCount() ?? 0) + (Right?.GetCount() ?? 0);
+#if DEBUG
+            public int GetCount() => 1 + (Left?.GetCount() ?? 0) + (Right?.GetCount() ?? 0);
 #endif
-            }
 
             public Node ShallowClone() => new Node(Item, IsRed);
 
@@ -1850,7 +1847,7 @@ namespace System.Collections.Generic
         [Serializable]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
-            private static Node s_dummyNode = new Node(default(T), isRed: true);
+            private static readonly Node s_dummyNode = new Node(default(T), isRed: true);
 
             private SortedSet<T> _tree;
             private int _version;
