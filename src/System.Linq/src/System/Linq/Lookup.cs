@@ -237,8 +237,10 @@ namespace System.Linq
 
         internal HashSet<TResult> ToHashSet<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TResult> comparer)
         {
-            HashSet<TResult> hashSet = new HashSet<TResult>(_count, comparer);
+            HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
             Grouping<TKey, TElement> g = _lastGrouping;
+
             if (g != null)
             {
                 do

@@ -16,13 +16,6 @@ namespace System.Linq.Tests
             public int GetHashCode(T obj) => EqualityComparer<T>.Default.GetHashCode(obj);
         }
 
-        private class NeverEqualsComparer<T> : IEqualityComparer<T>
-        {
-            public bool Equals(T x, T y) => false;
-
-            public int GetHashCode(T obj) => EqualityComparer<T>.Default.GetHashCode(obj);
-        }
-
         [Fact]
         public void NoExplicitComparer()
         {
@@ -250,22 +243,23 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void WithRange_CustomComparer()
+        {
+            CustomComparer<int> customComparer = new CustomComparer<int>();
+
+            HashSet<int> result = Enumerable.Range(0, 50).ToHashSet(customComparer);
+
+            Assert.NotNull(result);
+            Assert.Equal(50, result.Count);
+        }
+
+        [Fact]
         public void WithRepeat()
         {
             HashSet<int> result = Enumerable.Repeat(1, 50).ToHashSet();
 
             Assert.NotNull(result);
             Assert.Equal(1, result.Count);
-        }
-
-        [Fact]
-        public void WithRepeat_NeverEqualsComparer()
-        {
-            var neverEqualsComparer = new NeverEqualsComparer<int>();
-            HashSet<int> result = Enumerable.Repeat(1, 50).ToHashSet(neverEqualsComparer);
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
         }
 
         [Fact]

@@ -247,19 +247,9 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
 
-                if (!_appending)
-                {
-                    hashSet.Add(_item);
-                }
-
-                hashSet.UnionWith(_source);
-
-                if (_appending)
-                {
-                    hashSet.Add(_item);
-                }
+                hashSet.Add(_item);
 
                 return hashSet;
             }
@@ -547,23 +537,16 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
 
                 for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
                 {
                     hashSet.Add(node.Item);
                 }
 
-                hashSet.UnionWith(_source);
-
-                if (_appended != null)
+                for (SingleLinkedNode<TSource> node = _appended; node != null; node = node.Linked)
                 {
-                    IEnumerator<TSource> e = _appended.GetEnumerator();
-
-                    while (e.MoveNext())
-                    {
-                        hashSet.Add(e.Current);
-                    }
+                    hashSet.Add(node.Item);
                 }
 
                 return hashSet;

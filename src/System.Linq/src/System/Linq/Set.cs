@@ -191,38 +191,6 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Converts this set to a <see cref="HashSet{T}"/>.
-        /// </summary>
-        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{T}"/>.</param>
-        /// <returns>A <see cref="HashSet{T}"/> of the items in this set.</returns>
-        internal HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
-        {
-#if DEBUG
-            Debug.Assert(!_haveRemoved, "Optimised ToHashSet cannot be called if Remove has been called.");
-#endif
-            int count = _count;
-
-            HashSet<TElement> hashSet;
-
-            // Pre-allocate only when default comparer is used
-            if (Utilities.AreEqualityComparersEqual(comparer, EqualityComparer<TElement>.Default))
-            {
-                hashSet = new HashSet<TElement>(count, comparer);
-            }
-            else
-            {
-                hashSet = new HashSet<TElement>(comparer);
-            }
-
-            for (int i = 0; i != count; ++i)
-            {
-                hashSet.Add(_slots[i]._value);
-            }
-
-            return hashSet;
-        }
-
-        /// <summary>
         /// The number of items in this set.
         /// </summary>
         internal int Count => _count;

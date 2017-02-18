@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using static System.Linq.Utilities;
 
 namespace System.Linq
 {
@@ -103,17 +104,9 @@ namespace System.Linq
 
             public HashSet<int> ToHashSet(IEqualityComparer<int> comparer)
             {
-                HashSet<int> hashSet;
-
-                // Pre-allocate only when default comparer is used
-                if (Utilities.AreEqualityComparersEqual(comparer, EqualityComparer<int>.Default))
-                {
-                    hashSet = new HashSet<int>(_end - _start, comparer);
-                }
-                else
-                {
-                    hashSet = new HashSet<int>(comparer);
-                }
+                HashSet<int> hashSet = AreEqualityComparersEqual(comparer, null) ?
+                                       new HashSet<int>(_end - _start, comparer) :
+                                       new HashSet<int>(comparer);
 
                 for (int cur = _start; cur != _end; cur++)
                 {

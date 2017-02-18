@@ -29,7 +29,7 @@ namespace System.Linq
         /// <summary>
         /// Produce a <see cref="HashSet{TElement}"/> of the sequence through an optimized path.
         /// </summary>
-        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{T}"/>.</param>
+        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{TElement}"/>.</param>
         /// <returns>The <see cref="HashSet{TElement}"/>.</returns>
         HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer);
 
@@ -229,7 +229,7 @@ namespace System.Linq
 
         public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
         {
-            return _source.ToHashSet(comparer);
+            return _source.ToHashSet(_minIndexInclusive, _maxIndexInclusive, comparer);
         }
 
         public int GetCount(bool onlyIfCheap)

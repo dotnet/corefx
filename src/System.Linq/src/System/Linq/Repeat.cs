@@ -101,12 +101,9 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+                HashSet<TResult> hashSet = new HashSet<TResult>(1, comparer);
 
-                for (int i = 0; i != _count; ++i)
-                {
-                    hashSet.Add(_current);
-                }
+                hashSet.Add(_current);
 
                 return hashSet;
             }
