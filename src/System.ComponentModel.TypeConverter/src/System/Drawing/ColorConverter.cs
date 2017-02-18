@@ -17,7 +17,6 @@ namespace System.Drawing
 {
     public class ColorConverter : TypeConverter
     {
-        private static object s_valuesLock = new object();
         private static readonly Lazy<StandardValuesCollection> s_valuesLazy = new Lazy<StandardValuesCollection>(() => {
             // We must take the value from each hashtable and combine them.
             //

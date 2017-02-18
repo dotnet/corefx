@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder
     {
         #region Singleton Implementation
 
-        private static Lazy<RuntimeBinder> s_lazyInstance = new Lazy<RuntimeBinder>(() => new RuntimeBinder());
+        private static readonly Lazy<RuntimeBinder> s_lazyInstance = new Lazy<RuntimeBinder>(() => new RuntimeBinder());
 
         public static RuntimeBinder GetInstance()
         {
