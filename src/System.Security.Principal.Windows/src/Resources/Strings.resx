@@ -88,9 +88,6 @@
   <data name="Argument_StringZeroLength" xml:space="preserve">
     <value>String cannot be of zero length.</value>
   </data>
-  <data name="ExecutionEngine_MissingSecurityDescriptor" xml:space="preserve">
-    <value>Unable to retrieve security descriptor for this frame.</value>
-  </data>
   <data name="IdentityReference_AccountNameTooLong" xml:space="preserve">
     <value>Account name is too long.</value>
   </data>
@@ -121,13 +118,4 @@
   <data name="IdentityReference_NotAWindowsDomain" xml:space="preserve">
     <value>The domainSid parameter is not a valid Windows domain SID.</value>
   </data>
-  <data name="InvalidOperation_AnonymousCannotImpersonate" xml:space="preserve">
-    <value>An anonymous identity cannot perform an impersonation.</value>
-  </data>
-  <data name="PlatformNotSupported_RequiresW2kSP3" xml:space="preserve">
-    <value>This operation is only supported on Windows 2000 SP3 or later operating systems.</value>
-  </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error \"{0}\".</value>
-  </data>
-</root>
+  </root>

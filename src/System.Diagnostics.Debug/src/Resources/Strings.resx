@@ -67,12 +67,6 @@
   <data name="DebugAssertShortMessage" xml:space="preserve">
     <value>---- Assert Short Message ----</value>
   </data>
-  <data name="DebugAssertTitle" xml:space="preserve">
-    <value>Assertion Failed: Cancel=Debug, OK=Continue</value>
-  </data>
-  <data name="DebugAssertTitleShort" xml:space="preserve">
-    <value>Assertion Failed</value>
-  </data>
   <data name="IO_FileNotFound" xml:space="preserve">
     <value>Unable to find the specified file.</value>
   </data>
@@ -96,9 +90,6 @@
   </data>
   <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
     <value>Access to the path '{0}' is denied.</value>
-  </data>
-  <data name="RTL" xml:space="preserve">
-    <value>RTL_False</value>
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>

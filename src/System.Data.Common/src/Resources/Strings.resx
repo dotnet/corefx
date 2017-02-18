@@ -76,7 +76,6 @@
   <data name="ADP_InvalidEnumerationValue" xml:space="preserve"><value>The {0} enumeration value, {1}, is invalid.</value></data>
   <data name="ADP_InvalidKey" xml:space="preserve"><value>Invalid keyword, contain one or more of 'no characters', 'control characters', 'leading or trailing whitespace' or 'leading semicolons'.</value></data>
   <data name="ADP_InvalidValue" xml:space="preserve"><value>The value contains embedded nulls (\\u0000).</value></data>
-  <data name="ADP_InvalidXMLBadVersion" xml:space="preserve"><value>Invalid Xml; can only parse elements of version one.</value></data>
   <data name="Xml_SimpleTypeNotSupported" xml:space="preserve"><value>DataSet doesn't support 'union' or 'list' as simpleType.</value></data>
   <data name="Xml_MissingAttribute" xml:space="preserve"><value>Invalid {0} syntax: missing required '{1}' attribute.</value></data>
   <data name="Xml_ValueOutOfRange" xml:space="preserve"><value>Value '{1}' is invalid for attribute '{0}'.</value></data>
@@ -411,17 +410,6 @@
   <data name="DataDom_NotSupport_GetElementById" xml:space="preserve"><value>GetElementById() is not supported on DataDocument.</value></data>
   <data name="DataDom_NotSupport_EntRef" xml:space="preserve"><value>Cannot create entity references on DataDocument.</value></data>
   <data name="DataDom_NotSupport_Clear" xml:space="preserve"><value>Clear function on DateSet and DataTable is not supported on XmlDataDocument.</value></data>
-  <data name="ConfigProviderNotFound" xml:space="preserve"><value>Unable to find the requested .Net Framework Data Provider.  It may not be installed.</value></data>
-  <data name="ConfigProviderInvalid" xml:space="preserve"><value>The requested .Net Framework Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.</value></data>
-  <data name="ConfigProviderNotInstalled" xml:space="preserve"><value>Failed to find or load the registered .Net Framework Data Provider.</value></data>
-  <data name="ConfigProviderMissing" xml:space="preserve"><value>The missing .Net Framework Data Provider's assembly qualified name is required.</value></data>
-  <data name="ConfigBaseElementsOnly" xml:space="preserve"><value>Only elements allowed.</value></data>
-  <data name="ConfigBaseNoChildNodes" xml:space="preserve"><value>Child nodes not allowed.</value></data>
-  <data name="ConfigUnrecognizedAttributes" xml:space="preserve"><value>Unrecognized attribute '{0}'.</value></data>
-  <data name="ConfigUnrecognizedElement" xml:space="preserve"><value>Unrecognized element.</value></data>
-  <data name="ConfigSectionsUnique" xml:space="preserve"><value>The '{0}' section can only appear once per config file.</value></data>
-  <data name="ConfigRequiredAttributeMissing" xml:space="preserve"><value>Required attribute '{0}' not found.</value></data>
-  <data name="ConfigRequiredAttributeEmpty" xml:space="preserve"><value>Required attribute '{0}' cannot be empty.</value></data>
   <data name="ADP_EmptyArray" xml:space="preserve"><value>Expecting non-empty array for '{0}' parameter.</value></data>
   <data name="SQL_WrongType" xml:space="preserve"><value>Expecting argument of type {1}, but received type {0}.</value></data>
   <data name="ADP_InvalidConnectionOptionValue" xml:space="preserve"><value>Invalid value for key '{0}'.</value></data>
@@ -443,8 +431,6 @@
   <data name="ADP_MissingTableSchema" xml:space="preserve"><value>Missing the '{0}' DataTable for the '{1}' SourceTable.</value></data>
   <data name="ADP_InvalidSourceTable" xml:space="preserve"><value>SourceTable is required to be a non-empty string</value></data>
   <data name="ADP_MissingTableMapping" xml:space="preserve"><value>Missing SourceTable mapping: '{0}'</value></data>
-  <data name="ADP_ConnectionRequired" xml:space="preserve"><value>{0}: Connection property has not been initialized.</value></data>
-  <data name="ADP_OpenConnectionRequired" xml:space="preserve"><value>{0} requires an open and available Connection. {1}</value></data>
   <data name="ADP_ConnectionRequired_Insert" xml:space="preserve"><value>Update requires the InsertCommand to have a connection object. The Connection property of the InsertCommand has not been initialized.</value></data>
   <data name="ADP_ConnectionRequired_Update" xml:space="preserve"><value>Update requires the UpdateCommand to have a connection object. The Connection property of the UpdateCommand has not been initialized.</value></data>
   <data name="ADP_ConnectionRequired_Delete" xml:space="preserve"><value>Update requires the DeleteCommand to have a connection object. The Connection property of the DeleteCommand has not been initialized.</value></data>
@@ -518,8 +504,6 @@
   <data name="SqlMisc_InvalidOpStreamNonReadable" xml:space="preserve"><value>Invalid attempt to call {0} when the stream non-readable.</value></data>
   <data name="SqlMisc_InvalidOpStreamNonSeekable" xml:space="preserve"><value>Invalid attempt to call {0} when the stream is non-seekable.</value></data>
   <data name="ADP_DBConcurrencyExceptionMessage" xml:space="preserve"><value>DB concurrency violation.</value></data>
-  <data name="ADP_OperationAborted" xml:space="preserve"><value>Operation aborted.</value></data>
-  <data name="ADP_OperationAbortedExceptionMessage" xml:space="preserve"><value>Operation aborted due to an exception (see InnerException for details).</value></data>
   <data name="ADP_InvalidMaxRecords" xml:space="preserve"><value>The MaxRecords value of {0} is invalid; the value must be &gt;= 0.</value></data>
   <data name="ADP_CollectionIndexInt32" xml:space="preserve"><value>Invalid index {0} for this {1} with Count={2}.</value></data>
   <data name="ADP_MissingTableMappingDestination" xml:space="preserve"><value>Missing TableMapping when TableMapping.DataSetTable='{0}'.</value></data>

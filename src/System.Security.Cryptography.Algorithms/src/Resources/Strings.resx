@@ -187,12 +187,6 @@
   <data name="Cryptography_PasswordDerivedBytes_FewBytesSalt" xml:space="preserve">
     <value>Salt is not at least eight bytes.</value>
   </data>
-  <data name="Cryptography_PasswordDerivedBytes_InvalidAlgorithm" xml:space="preserve">
-    <value>Algorithm is unavailable or is not supported for this operation.</value>
-  </data>
-  <data name="Cryptography_PasswordDerivedBytes_InvalidIV" xml:space="preserve">
-    <value>The Initialization vector should have the same length as the algorithm block size in bytes.</value>
-  </data>
   <data name="Cryptography_RC2_EKS40" xml:space="preserve">
     <value>EffectiveKeySize value must be at least 40 bits.</value>
   </data>
@@ -219,9 +213,6 @@
   </data>
   <data name="Cryptography_UnexpectedTransformTruncation" xml:space="preserve">
     <value>CNG provider unexpectedly terminated encryption or decryption prematurely.</value>
-  </data>
-  <data name="Cryptography_Unmapped_System_Typed_Error" xml:space="preserve">
-    <value>The system cryptographic library returned error '{0}' of type '{1}'</value>
   </data>
   <data name="Cryptography_UnsupportedPaddingMode" xml:space="preserve">
     <value>The specified PaddingMode is not supported.</value>

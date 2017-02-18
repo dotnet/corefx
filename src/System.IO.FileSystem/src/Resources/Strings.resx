@@ -58,9 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Arg_DevicesNotSupported" xml:space="preserve">
-    <value>FileStream will not open Win32 devices such as disk partitions and tape drives. Avoid use of '\\\\.\\' in the path.</value>
-  </data>
   <data name="Arg_FileIsDirectory_Name" xml:space="preserve">
     <value>The target file '{0}' is a directory, not a file.</value>
   </data>
@@ -100,9 +97,6 @@
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
   </data>
-  <data name="ArgumentOutOfRange_NeedNonNegInt32Range" xml:space="preserve">
-    <value>Specified handle value was out of range for the file system.</value>
-  </data>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
   </data>
@@ -138,9 +132,6 @@
   </data>
   <data name="Argument_PathEmpty" xml:space="preserve">
     <value>Path cannot be the empty string or all whitespace.</value>
-  </data>
-  <data name="Argument_PathFormatNotSupported" xml:space="preserve">
-    <value>The given path's format is not supported.</value>
   </data>
   <data name="IO_AlreadyExists_Name" xml:space="preserve">
     <value>Cannot create '{0}' because a file or directory with the same name already exists.</value>
@@ -228,9 +219,6 @@
   </data>
   <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
     <value>Access to the path '{0}' is denied.</value>
-  </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
     <value>Cannot access a closed Stream.</value>

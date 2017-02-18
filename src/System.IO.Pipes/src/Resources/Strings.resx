@@ -79,9 +79,6 @@
   <data name="ArgumentNull_ServerName" xml:space="preserve">
     <value>serverName cannot be null. Use \".\" for current machine.</value>
   </data>
-  <data name="ArgumentOutOfRange_AdditionalAccessLimited" xml:space="preserve">
-    <value>additionalAccessRights is limited to the PipeAccessRights.ChangePermissions, PipeAccessRights.TakeOwnership, and PipeAccessRights.AccessSystemSecurity flags when creating NamedPipeServerStreams.</value>
-  </data>
   <data name="ArgumentOutOfRange_AnonymousReserved" xml:space="preserve">
     <value>The pipeName \"anonymous\" is reserved.</value>
   </data>
@@ -99,9 +96,6 @@
   </data>
   <data name="ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable" xml:space="preserve">
     <value>HandleInheritability.None or HandleInheritability.Inheritable required.</value>
-  </data>
-  <data name="ArgumentOutOfRange_InvalidPipeAccessRights" xml:space="preserve">
-    <value>Invalid PipeAccessRights flag.</value>
   </data>
   <data name="ArgumentOutOfRange_InvalidTimeout" xml:space="preserve">
     <value>Timeout must be non-negative or equal to -1 (Timeout.Infinite)</value>
@@ -148,14 +142,8 @@
   <data name="IO_AlreadyExists_Name" xml:space="preserve">
     <value>Cannot create \"{0}\" because a file or directory with the same name already exists.</value>
   </data>
-  <data name="IO_BindHandleFailed" xml:space="preserve">
-    <value>BindHandle for ThreadPool failed on this handle.</value>
-  </data>
   <data name="IO_FileExists_Name" xml:space="preserve">
     <value>The file '{0}' already exists.</value>
-  </data>
-  <data name="IO_NoPermissionToDirectoryName" xml:space="preserve">
-    <value>&lt;Path discovery permission to the specified directory was denied.&gt;</value>
   </data>
   <data name="IO_OperationAborted" xml:space="preserve">
     <value>IO operation was aborted unexpectedly.</value>
@@ -204,9 +192,6 @@
   </data>
   <data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
     <value>Access to the path is denied.</value>
-  </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>

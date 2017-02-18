@@ -61,9 +61,6 @@
   <data name="MustAddListener" xml:space="preserve">
     <value>Only TraceListeners can be added to a TraceListenerCollection.</value>
   </data>
-  <data name="IndentSize" xml:space="preserve">
-    <value>The IndentSize property must be non-negative.</value>
-  </data>
   <data name="TraceListenerFail" xml:space="preserve">
     <value>Fail:</value>
   </data>
@@ -79,9 +76,6 @@
   <data name="DebugAssertLongMessage" xml:space="preserve">
     <value>---- Assert Long Message ----</value>
   </data>
-  <data name="ExceptionOccurred" xml:space="preserve">
-    <value>An exception occurred writing trace output to log file '{0}'. {1}</value>
-  </data>
   <data name="TraceSwitchLevelTooLow" xml:space="preserve">
     <value>Attempted to set {0} to a value that is too low.  Setting level to TraceLevel.Off</value>
   </data>
@@ -94,10 +88,4 @@
   <data name="InvalidNullEmptyArgument" xml:space="preserve">
     <value>Argument {0} cannot be null or zero-length.</value>
   </data>
-  <data name="DebugAssertTitle" xml:space="preserve">
-    <value>Assertion Failed: Cancel=Debug, OK=Continue</value>
-  </data>
-  <data name="RTL" xml:space="preserve">
-    <value>RTL_False</value>
-  </data>
-</root>
+  </root>

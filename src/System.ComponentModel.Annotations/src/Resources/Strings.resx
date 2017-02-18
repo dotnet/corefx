@@ -61,20 +61,8 @@
   <data name="ArgumentIsNullOrWhitespace" xml:space="preserve">
     <value>The argument '{0}' cannot be null, empty or contain only whitespace.</value>
   </data>
-  <data name="AssociatedMetadataTypeTypeDescriptor_MetadataTypeContainsUnknownProperties" xml:space="preserve">
-    <value>The associated metadata type for type '{0}' contains the following unknown properties or fields: {1}. Please make sure that the names of these members match the names of the properties on the main type.</value>
-  </data>
-  <data name="AttributeStore_Type_Must_Be_Public" xml:space="preserve">
-    <value>The type '{0}' must be public.</value>
-  </data>
-  <data name="AttributeStore_Unknown_Method" xml:space="preserve">
-    <value>The type '{0}' does not contain a public method named '{1}'.</value>
-  </data>
   <data name="AttributeStore_Unknown_Property" xml:space="preserve">
     <value>The type '{0}' does not contain a public property named '{1}'.</value>
-  </data>
-  <data name="Common_NullOrEmpty" xml:space="preserve">
-    <value>Value cannot be null or empty.</value>
   </data>
   <data name="Common_PropertyNotFound" xml:space="preserve">
     <value>The property {0}.{1} could not be found.</value>
@@ -138,9 +126,6 @@
   </data>
   <data name="MaxLengthAttribute_ValidationError" xml:space="preserve">
     <value>The field {0} must be a string or array type with a maximum length of '{1}'.</value>
-  </data>
-  <data name="MetadataTypeAttribute_TypeCannotBeNull" xml:space="preserve">
-    <value>MetadataClassType cannot be null.</value>
   </data>
   <data name="MinLengthAttribute_InvalidMinLength" xml:space="preserve">
     <value>MinLengthAttribute must have a Length value that is zero or greater.</value>
@@ -216,12 +201,6 @@
   </data>
   <data name="ValidationAttribute_ValidationError" xml:space="preserve">
     <value>The field {0} is invalid.</value>
-  </data>
-  <data name="ValidationContext_Must_Be_Method" xml:space="preserve">
-    <value>The ValidationContext for the type '{0}', member name '{1}' must provide the MethodInfo.</value>
-  </data>
-  <data name="ValidationContextServiceContainer_ItemAlreadyExists" xml:space="preserve">
-    <value>A service of type '{0}' already exists in the container.</value>
   </data>
   <data name="Validator_InstanceMustMatchValidationContextInstance" xml:space="preserve">
     <value>The instance provided must match the ObjectInstance on the ValidationContext supplied.</value>

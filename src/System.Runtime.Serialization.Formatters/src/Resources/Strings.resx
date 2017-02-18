@@ -58,18 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Serialization_OptionalFieldVersionValue" xml:space="preserve">
-    <value>Version value must be positive.</value>
-  </data>
-  <data name="Serialization_SameNameTwice" xml:space="preserve">
-    <value>Cannot add the same member twice to a SerializationInfo object.</value>
-  </data>
- <data name="Serialization_NotFound" xml:space="preserve">
-    <value>Member '{0}' was not found.</value>
-  </data>
-  <data name="InvalidOperation_EnumOpCantHappen" xml:space="preserve">
-    <value>Enumeration has either not started or has already finished.</value>
-  </data>
   <data name="Serialization_NonSerType" xml:space="preserve">
     <value>Type '{0}' in Assembly '{1}' is not marked as serializable.</value>
   </data>
@@ -151,9 +139,6 @@
   <data name="Serialization_InvalidType" xml:space="preserve">
     <value>Only system-provided types can be passed to the GetUninitializedObject method. '{0}' is not a valid instance of a type.</value>
   </data>
-  <data name="Arg_ArrayZeroError" xml:space="preserve">
-    <value>Array must not be of length zero.</value>
-  </data>
   <data name="Argument_MustSupplyParent" xml:space="preserve">
     <value>When supplying the ID of a containing object, the FieldInfo that identifies the current field within that object must also be supplied.</value>
   </data>
@@ -162,9 +147,6 @@
   </data>
   <data name="Serialization_CorruptedStream" xml:space="preserve">
     <value>Invalid BinaryFormatter stream.</value>
-  </data>
-  <data name="Serialization_HeaderReflection" xml:space="preserve">
-    <value>Header reflection error: number of value members: {0}.</value>
   </data>
   <data name="Serialization_Stream" xml:space="preserve">
     <value>Attempting to deserialize an empty stream.</value>
@@ -252,9 +234,6 @@
   </data>
   <data name="Serialization_NoMemberInfo" xml:space="preserve">
     <value>No MemberInfo for Object {0}.</value>
-  </data>
-  <data name="Serialization_TypeSecurity" xml:space="preserve">
-    <value>Selector is already on the list of checked selectors.</value>
   </data>
   <data name="Serialization_DuplicateSelector" xml:space="preserve">
     <value>Type {0} and the types derived from it (such as {1}) are not permitted to be deserialized at this security level.</value>

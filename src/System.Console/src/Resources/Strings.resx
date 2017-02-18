@@ -127,17 +127,11 @@
   <data name="IndexOutOfRange_IORaceCondition" xml:space="preserve">
     <value>Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader.</value>
   </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
-  </data>
   <data name="Arg_InvalidConsoleColor" xml:space="preserve">
     <value>The ConsoleColor enum value was not defined on that enum. Please use a defined color from the enum.</value>
   </data>
   <data name="IO_NoConsole" xml:space="preserve">
     <value>There is no console.</value>
-  </data>
-  <data name="InvalidOperation_EmptyStack" xml:space="preserve">
-    <value>Stack empty</value>
   </data>
   <data name="IO_TermInfoInvalid" xml:space="preserve">
     <value>The terminfo database is invalid.</value>

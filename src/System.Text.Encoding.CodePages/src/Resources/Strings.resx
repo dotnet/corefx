@@ -73,9 +73,6 @@
   <data name="NotSupported_NoCodepageData" xml:space="preserve">
     <value>No data is available for encoding {0}.</value>
   </data>
-  <data name="Arg_OutOfMemoryException" xml:space="preserve">
-    <value>Insufficient memory to continue the execution of the program.</value>
-  </data>
   <data name="Argument_EncodingConversionOverflowBytes" xml:space="preserve">
     <value>The output byte buffer is too small to contain the encoded data, encoding '{0}' fallback '{1}'.</value>
   </data>

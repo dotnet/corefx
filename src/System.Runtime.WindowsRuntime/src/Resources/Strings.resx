@@ -208,9 +208,6 @@
   <data name="WinRtCOM_Error" xml:space="preserve">
     <value>An error has occurred.</value>
   </data>
-  <data name="ArgumentOutOfRange_MustBePositive" xml:space="preserve">
-    <value>'{0}' must be greater than zero.</value>
-  </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
     <value>Cannot access a closed Stream.</value>
   </data>

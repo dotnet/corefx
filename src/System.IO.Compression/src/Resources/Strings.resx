@@ -121,18 +121,6 @@
   <data name="ZLibErrorUnexpected" xml:space="preserve">
     <value>The underlying compression routine returned an unexpected error code.</value>
   </data>
-  <data name="CorruptedGZipHeader" xml:space="preserve">
-    <value>The magic number in GZip header is not correct. Make sure you are passing in a GZip stream.</value>
-  </data>
-  <data name="UnknownCompressionMode" xml:space="preserve">
-    <value>The compression mode specified in GZip header is unknown.</value>
-  </data>
-  <data name="InvalidCRC" xml:space="preserve">
-    <value>The CRC in GZip footer does not match the CRC calculated from the decompressed data.</value>
-  </data>
-  <data name="InvalidStreamSize" xml:space="preserve">
-    <value>The stream size in GZip footer does not match the real stream size.</value>
-  </data>
   <data name="ArgumentNeedNonNegative" xml:space="preserve">
     <value>The argument must be non-negative.</value>
   </data>
@@ -265,7 +253,4 @@
   <data name="Argument_InvalidPathChars" xml:space="preserve">
     <value>Illegal characters in path.</value>
   </data>
-  <data name="FileNameContainsInvalidCharacters" xml:space="preserve">
-    <value>An entry in the ZipArchive has a path that contains invalid characters.</value>
-  </data>
-</root>
+  </root>

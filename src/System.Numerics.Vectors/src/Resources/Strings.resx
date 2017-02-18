@@ -64,19 +64,10 @@
   <data name="Arg_ElementsInSourceIsGreaterThanDestination" xml:space="preserve">
     <value>Number of elements in source vector is greater than the destination array</value>
   </data>
-  <data name="Arg_MultiDimArrayNotSupported" xml:space="preserve">
-    <value>Only one-dimensional arrays are supported</value>
-  </data>
   <data name="Arg_NullArgumentNullRef" xml:space="preserve">
     <value>The method was called with a null array argument.</value>
-  </data>
-  <data name="Arg_RegisterLengthOfRangeException" xml:space="preserve">
-    <value>length must be less than</value>
   </data>
   <data name="Arg_TypeNotSupported" xml:space="preserve">
     <value>Specified type is not supported</value>
   </data>
-  <data name="Reflection_MethodNotSupported" xml:space="preserve">
-    <value>Vector&lt;T&gt;.Count cannot be called via reflection when intrinsics are enabled.</value>
-  </data>
-</root>
+  </root>

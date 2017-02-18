@@ -61,12 +61,6 @@
   <data name="InvalidOperation_HCCountOverflow" xml:space="preserve">
     <value>Handle collector count overflows or underflows.</value>
   </data>
-  <data name="ArgumentOutOfRange_NeedNonNegNumRequired" xml:space="preserve">
-    <value>Non-negative number required.</value>
-  </data>
-  <data name="Argument_InvalidThreshold" xml:space="preserve">
-    <value>maximumThreshold cannot be less than initialThreshold.</value>
-  </data>
   <data name="Arg_NeedNonNegNumRequired" xml:space="preserve">
     <value>Non-negative number required.</value>
   </data>

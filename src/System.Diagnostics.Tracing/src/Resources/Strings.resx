@@ -58,52 +58,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>TDB</value>
-  </data>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
-  </data>
-  <data name="ArgumentOutOfRange_MaxArgExceeded" xml:space="preserve">
-    <value>The total number of parameters must not exceed {0}.</value>
-  </data>
-  <data name="ArgumentOutOfRange_MaxStringsExceeded" xml:space="preserve">
-    <value>The number of String parameters must not exceed {0}.</value>
-  </data>
-  <data name="ArgumentOutOfRange_NeedValidId" xml:space="preserve">
-    <value>The ID parameter must be in the range {0} through {1}.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
     <value>Positive number required.</value>
   </data>
-  <data name="EventSource_ListenerNotFound" xml:space="preserve">
-    <value>Listener not found.</value>
-  </data>
-  <data name="EventSource_ToString" xml:space="preserve">
-    <value>EventSource({0}, {1})</value>
-  </data>
-  <data name="EventSource_ImplementGetMetadata" xml:space="preserve">
-    <value>Please implement the GetMetadata method in your derived class</value>
-  </data>
-  <data name="EventSource_NeedGuid" xml:space="preserve">
-    <value>The Guid of an EventSource must be non zero.</value>
-  </data>
-  <data name="EventSource_NeedName" xml:space="preserve">
-    <value>The name of an EventSource must not be null.</value>
-  </data>
-  <data name="EventSource_NeedDescriptors" xml:space="preserve">
-    <value>The descriptor of an EventSource must be non-null.</value>
-  </data>
-  <data name="EventSource_NeedManifest" xml:space="preserve">
-    <value>The manifest of an EventSource must be non-null.</value>
-  </data>
-  <data name="EventSource_EventSourceGuidInUse" xml:space="preserve">
-    <value>An instance of EventSource with Guid {0} already exists.</value>
-  </data>
-  <data name="EventSource_ListenerWriteFailure" xml:space="preserve">
-    <value>An error occurred when writing to a listener.</value>
-  </data>
-  <data name="EventSource_NoManifest" xml:space="preserve">
-    <value>A manifest could not be generated for this EventSource because it contains one or more ill-formed event methods.</value>
-  </data>
-</root>
+  </root>

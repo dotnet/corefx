@@ -58,9 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="net_log_exception" xml:space="preserve">
-    <value>Exception in {0}::{1} - {2}.</value>
-  </data>
   <data name="net_webstatus_ConnectFailure" xml:space="preserve">
     <value>Unable to connect to the remote server</value>
   </data>
@@ -87,9 +84,6 @@
   </data>
   <data name="net_WebSockets_InvalidState" xml:space="preserve">
     <value>The WebSocket is in an invalid state ('{0}') for this operation. Valid states are: '{1}'</value>
-  </data>
-  <data name="net_WebSockets_InvalidMessageType" xml:space="preserve">
-    <value>The received message type '{2}' is invalid after calling {0}. {0} should only be used if no more data is expected from the remote endpoint. Use '{1}' instead to keep being able to receive data but close the output channel.</value>
   </data>
   <data name="net_WebSockets_Argument_InvalidMessageType" xml:space="preserve">
     <value>The message type '{0}' is not allowed for the '{1}' operation. Valid message types are: '{2}, {3}'. To close the WebSocket, use the '{4}' operation instead. </value>
@@ -127,7 +121,4 @@
   <data name="net_securityprotocolnotsupported" xml:space="preserve">
     <value>The requested security protocol is not supported.</value>
   </data>
-  <data name="net_WebSockets_ArgumentOutOfRange_TooBig" xml:space="preserve">
-    <value>The value of the '{0}' parameter ({1}) must be less than or equal to {2}.</value>
-  </data>
-</root>
+  </root>

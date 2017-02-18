@@ -70,29 +70,8 @@
   <data name="Argument_AddingDuplicate" xml:space="preserve">
     <value>An item with the same key has already been added. Key: {0}</value>
   </data>
-  <data name="Argument_IdnBadLabelSize" xml:space="preserve">
-    <value>IDN labels must be between 1 and 63 characters long.</value>
-  </data>
-  <data name="Argument_IdnBadPunycode" xml:space="preserve">
-    <value>Invalid IDN encoded string.</value>
-  </data>
-  <data name="Argument_IdnIllegalName" xml:space="preserve">
-    <value>Decoded string is not a valid IDN name.</value>
-  </data>
-  <data name="Argument_InvalidCharSequence" xml:space="preserve">
-    <value>Invalid Unicode code point found at index {0}.</value>
-  </data>
   <data name="Argument_InvalidCharSequenceNoIndex" xml:space="preserve">
     <value>String contains invalid Unicode code points.</value>
-  </data>
-  <data name="Argument_InvalidNormalizationForm" xml:space="preserve">
-    <value>Invalid normalization form.</value>
-  </data>
-  <data name="Arg_OutOfMemoryException" xml:space="preserve">
-    <value>Insufficient memory to continue the execution of the program.</value>
-  </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
   </data>
   <data name="net_uri_BadAuthority" xml:space="preserve">
     <value>Invalid URI: The Authority/Host could not be parsed.</value>
@@ -156,12 +135,6 @@
   </data>
   <data name="net_uri_BadUnicodeHostForIdn" xml:space="preserve">
     <value>An invalid Unicode character by IDN standards was specified in the host.</value>
-  </data>
-  <data name="AssertionFailed" xml:space="preserve">
-    <value>Assertion failed.</value>
-  </data>
-  <data name="Debug_Fail" xml:space="preserve">
-    <value>Fail: {0}</value>
   </data>
   <data name="DebugAssertBanner" xml:space="preserve">
     <value>---- DEBUG ASSERTION FAILED ----</value>

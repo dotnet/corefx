@@ -58,20 +58,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotSupported" xml:space="preserve">
-    <value>This operation is not supported.</value>
-  </data>
   <data name="net_unknown_prefix" xml:space="preserve">
     <value>The URI prefix is not recognized.</value>
-  </data>
-  <data name="net_headers_toolong" xml:space="preserve">
-    <value>Header values cannot be longer than {0} characters.</value>
-  </data>
-  <data name="net_emptystringcall" xml:space="preserve">
-    <value>The parameter '{0}' cannot be an empty string.</value>
-  </data>
-  <data name="net_headers_req" xml:space="preserve">
-    <value> This collection holds response headers and cannot contain the specified request header.</value>
   </data>
   <data name="net_reqsubmitted" xml:space="preserve">
     <value>This operation cannot be performed after the request has been submitted.</value>
@@ -124,9 +112,6 @@
   <data name="net_webstatus_Timeout" xml:space="preserve">
     <value>The operation has timed out.</value>
   </data>
-  <data name="net_proxyschemenotsupported" xml:space="preserve">
-    <value>The ServicePointManager does not support proxies with the {0} scheme.</value>
-  </data>
   <data name="net_baddate" xml:space="preserve">
     <value>The value of the date string in the header is invalid.</value>
   </data>
@@ -168,9 +153,6 @@
   </data>
   <data name="net_WebHeaderInvalidHeaderChars" xml:space="preserve">
     <value>Specified value has invalid HTTP Header characters.</value>
-  </data>
-  <data name="net_WebHeaderInvalidNonAsciiChars" xml:space="preserve">
-    <value>Specified value has invalid non-ASCII characters.</value>
   </data>
   <data name="net_timeout" xml:space="preserve">
     <value>The operation has timed out.</value>

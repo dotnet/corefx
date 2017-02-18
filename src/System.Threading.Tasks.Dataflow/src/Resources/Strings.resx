@@ -79,26 +79,8 @@
   <data name="Argument_InvalidMessageId" xml:space="preserve">
     <value>To construct a DataflowMessageHeader instance, either pass a non-zero value or use the parameterless constructor.</value>
   </data>
-  <data name="Argument_InvalidSourceForFilteredLink" xml:space="preserve">
-    <value>This block must only be used with the source from which it was created.</value>
-  </data>
   <data name="Argument_NonGreedyNotSupported" xml:space="preserve">
     <value>Greedy must be true for this dataflow block.</value>
-  </data>
-  <data name="event_DataflowBlockCompleted" xml:space="preserve">
-    <value>Block {0} completed as {1}. {2}</value>
-  </data>
-  <data name="event_DataflowBlockCreated" xml:space="preserve">
-    <value>Block of type {0} instantiated with Id {1}.</value>
-  </data>
-  <data name="event_DataflowBlockLinking" xml:space="preserve">
-    <value>Source {0} linked to target {1}.</value>
-  </data>
-  <data name="event_DataflowBlockUnlinking" xml:space="preserve">
-    <value>Source {0} unlinked from target {1}.</value>
-  </data>
-  <data name="event_TaskLaunchedForMessageHandling" xml:space="preserve">
-    <value>{1} task launched from block {0} with {2} message(s) pending.</value>
   </data>
   <data name="InvalidOperation_DataNotAvailableForReceive" xml:space="preserve">
     <value>The source completed without providing data to receive.</value>

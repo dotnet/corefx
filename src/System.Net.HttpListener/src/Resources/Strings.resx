@@ -58,9 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="net_log_listener_create_valid_identity_failed" xml:space="preserve">
-    <value>Failed to create a valid Identity for an incoming request.</value>
-  </data>
   <data name="net_log_listener_delegate_exception" xml:space="preserve">
     <value>Sending 500 response, AuthenticationSchemeSelectorDelegate threw an exception: {0}.</value>
   </data>
@@ -103,9 +100,6 @@
   <data name="net_log_listener_no_cbt_http" xml:space="preserve">
     <value>No channel binding check for requests without a secure channel.</value>
   </data>
-  <data name="net_log_listener_no_cbt_platform" xml:space="preserve">
-    <value>No channel binding check because the underlying platform does not support extended protection.</value>
-  </data>
   <data name="net_log_listener_no_cbt_trustedproxy" xml:space="preserve">
     <value>No channel binding check for the trusted proxy scenario.</value>
   </data>
@@ -120,9 +114,6 @@
   </data>
   <data name="net_log_listener_no_spn_cbt" xml:space="preserve">
     <value>No service name check because the channel binding was already checked.</value>
-  </data>
-  <data name="net_log_listener_no_spn_platform" xml:space="preserve">
-    <value>No service name check because the underlying platform does not support extended protection.</value>
   </data>
   <data name="net_log_listener_no_spn_whensupported" xml:space="preserve">
     <value>No service name check because the client did not provide a service name and the server was configured for PolicyEnforcement.WhenSupported.</value>

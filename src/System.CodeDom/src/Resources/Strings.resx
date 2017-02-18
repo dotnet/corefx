@@ -128,7 +128,4 @@
   <data name="AutoGen_Comment_Line5" xml:space="preserve">
     <value>the code is regenerated.</value>
   </data>
-  <data name="NullOrEmpty_Value_in_Property" xml:space="preserve">
-    <value>The '{0}' property cannot contain null or empty strings.</value>
-  </data>
-</root>
+  </root>

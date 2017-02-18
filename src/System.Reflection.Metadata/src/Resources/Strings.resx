@@ -127,9 +127,6 @@
   <data name="MetadataTableNotSorted" xml:space="preserve">
     <value>Metadata table {0} not sorted.</value>
   </data>
-  <data name="AssemblyTableInvalidNumberOfRows" xml:space="preserve">
-    <value>Invalid number of rows of Assembly table: {0}.</value>
-  </data>
   <data name="ModuleTableInvalidNumberOfRows" xml:space="preserve">
     <value>Invalid number of rows of Module table: {0}.</value>
   </data>
@@ -187,9 +184,6 @@
   <data name="WinMDMissingMscorlibRef" xml:space="preserve">
     <value>Missing mscorlib reference in AssemblyRef table.</value>
   </data>
-  <data name="UnableToReadMetadataFile" xml:space="preserve">
-    <value>Unable to read metadata file.</value>
-  </data>
   <data name="UnexpectedStreamEnd" xml:space="preserve">
     <value>Unexpected stream end.</value>
   </data>
@@ -198,9 +192,6 @@
   </data>
   <data name="CantGetOffsetForVirtualHeapHandle" xml:space="preserve">
     <value>Can't get a heap offset for a virtual heap handle</value>
-  </data>
-  <data name="InvalidSectionName" xml:space="preserve">
-    <value>Invalid section name</value>
   </data>
   <data name="InvalidNumberOfSections" xml:space="preserve">
     <value>Invalid number of sections in declared in PE header.</value>
@@ -231,9 +222,6 @@
   </data>
   <data name="StreamTooLarge" xml:space="preserve">
     <value>Stream length minus starting position is too large to hold a PEImage.</value>
-  </data>
-  <data name="NegativeByteCountOrOffset" xml:space="preserve">
-    <value>Negative byte count or offset.</value>
   </data>
   <data name="ImageTooSmallOrContainsInvalidOffsetOrCount" xml:space="preserve">
     <value>Image is either too small or contains an invalid byte offset or count.</value>

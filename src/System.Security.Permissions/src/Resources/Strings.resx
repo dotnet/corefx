@@ -58,12 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Argument_ImproperType" xml:space="preserve">
-    <value>Improper types in collection.</value>
-  </data>
-  <data name="Arg_EmptyCollection" xml:space="preserve">
-    <value>Collection must not be empty.</value>
-  </data>
   <data name="Argument_InvalidPermissionState" xml:space="preserve">
     <value>Invalid permission state.</value>
   </data>
@@ -79,28 +73,4 @@
   <data name="Security_PrincipalPermission" xml:space="preserve">
     <value>Request for principal permission failed.</value>
   </data>
-  <data name="IdentityReference_InvalidNumberOfSubauthorities" xml:space="preserve">
-    <value>The number of sub-authorities must not exceed {0}.</value>
-  </data>
-  <data name="IdentityReference_InvalidSidRevision" xml:space="preserve">
-    <value>SIDs with revision other than '1' are not supported.</value>
-  </data>
-  <data name="Argument_InvalidElementTag" xml:space="preserve">
-    <value>Invalid element tag '{0}'.</value>
-  </data>
-  <data name="Argument_InvalidElementText" xml:space="preserve">
-    <value>Invalid element text '{0}'.</value>
-  </data>
-  <data name="Argument_InvalidElementName" xml:space="preserve">
-    <value>Invalid element name '{0}'.</value>
-  </data>
-  <data name="Argument_InvalidElementValue" xml:space="preserve">
-    <value>Invalid element value '{0}'.</value>
-  </data>
-  <data name="ArgumentNull_Child" xml:space="preserve">
-    <value>Cannot have a null child.</value>
-  </data>
-  <data name="Argument_AttributeNamesMustBeUnique" xml:space="preserve">
-    <value>Attribute names must be unique.</value>
-  </data>
-</root>
+  </root>

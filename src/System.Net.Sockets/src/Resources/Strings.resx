@@ -196,21 +196,6 @@
   <data name="net_value_cannot_be_negative" xml:space="preserve">
     <value>The specified value cannot be negative.</value>
   </data>
-  <data name="net_log_exception" xml:space="preserve">
-    <value>Exception in {0}::{1} - {2}.</value>
-  </data>
-  <data name="net_log_socket_connected" xml:space="preserve">
-    <value>Created connection from {0} to {1}.</value>
-  </data>
-  <data name="event_Accepted" xml:space="preserve">
-    <value>Accepted connection from {0} to {1}.</value>
-  </data>
-  <data name="event_NotLoggedFile" xml:space="preserve">
-    <value>Not logging data from file: {0}.</value>
-  </data>
-  <data name="event_ConnectedAsyncDns" xml:space="preserve">
-    <value>Connecting to a DnsEndPoint.</value>
-  </data>
   <data name="ArgumentOutOfRange_Bounds_Lower_Upper" xml:space="preserve">
     <value>Argument must be between {0} and {1}.</value>
   </data>

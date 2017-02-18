@@ -58,17 +58,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MoreThanOneElement" xml:space="preserve">
-    <value>Sequence contains more than one element</value>
-  </data>
   <data name="MoreThanOneMatch" xml:space="preserve">
     <value>Sequence contains more than one matching element</value>
   </data>
   <data name="NoElements" xml:space="preserve">
     <value>Sequence contains no elements</value>
-  </data>
-  <data name="NoMatch" xml:space="preserve">
-    <value>Sequence contains no matching element</value>
   </data>
   <data name="ParallelPartitionable_NullReturn" xml:space="preserve">
     <value>The return value must not be null.</value>

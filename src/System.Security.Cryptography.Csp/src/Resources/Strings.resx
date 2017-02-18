@@ -58,9 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Arg_CryptographyException" xml:space="preserve">
-    <value>Error occurred during a cryptographic operation.</value>
-  </data>
   <data name="Arg_EnumIllegalVal" xml:space="preserve">
     <value>Enum value was invalid</value>
   </data>
@@ -69,12 +66,6 @@
   </data>
   <data name="Argument_InvalidValue" xml:space="preserve">
     <value>Value was invalid.</value>
-  </data>
-  <data name="Argument_StreamNotReadable" xml:space="preserve">
-    <value>Stream was not readable.</value>
-  </data>
-  <data name="Argument_StreamNotWritable" xml:space="preserve">
-    <value>Stream was not writable.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
@@ -106,9 +97,6 @@
   <data name="CryptGetUserKey_Failed" xml:space="preserve">
     <value>CryptGetUserKey failed with error code  </value>
   </data>
-  <data name="Cryptography_CryptoStream_FlushFinalBlockTwice" xml:space="preserve">
-    <value>FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once.</value>
-  </data>
   <data name="Cryptography_CSP_NoPrivateKey" xml:space="preserve">
     <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
   </data>
@@ -121,17 +109,8 @@
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
   </data>
-  <data name="Cryptography_InvalidBlockSize" xml:space="preserve">
-    <value>Specified block size is not valid for this algorithm.</value>
-  </data>
-  <data name="Cryptography_InvalidCipherMode" xml:space="preserve">
-    <value>Specified cipher mode is not valid for this algorithm.</value>
-  </data>
   <data name="Cryptography_InvalidDSASignatureSize" xml:space="preserve">
     <value>Length of the DSA signature was not 40 bytes.</value>
-  </data>
-  <data name="Cryptography_InvalidFeedbackSize" xml:space="preserve">
-    <value>Specified feedback size is invalid.</value>
   </data>
   <data name="Cryptography_InvalidHashSize" xml:space="preserve">
     <value>{0} algorithm hash size is {1} bytes.</value>
@@ -204,9 +183,6 @@
   </data>
   <data name="NotSupported_UnreadableStream" xml:space="preserve">
     <value>Stream does not support reading.</value>
-  </data>
-  <data name="NotSupported_UnseekableStream" xml:space="preserve">
-    <value>Stream does not support seeking.</value>
   </data>
   <data name="NotSupported_UnwritableStream" xml:space="preserve">
     <value>Stream does not support writing.</value>

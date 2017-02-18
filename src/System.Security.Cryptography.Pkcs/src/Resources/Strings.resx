@@ -70,9 +70,6 @@
   <data name="ArgumentOutOfRange_Index" xml:space="preserve">
     <value>Index was out of range.  Must be non-negative and less than the size of the collection.</value>
   </data>
-  <data name="Cryptography_Cms_Envelope_Empty_Content" xml:space="preserve">
-    <value>Cannot create CMS enveloped for empty content.</value>
-  </data>
   <data name="Cryptography_Cms_Invalid_Originator_Identifier_Choice" xml:space="preserve">
     <value>Invalid originator identifier choice {0} found in decoded CMS.</value>
   </data>
@@ -103,7 +100,4 @@
   <data name="InvalidOperation_WrongOidInAsnCollection" xml:space="preserve">
     <value>AsnEncodedData element in the collection has wrong Oid value: expected = '{0}', actual = '{1}'.</value>
   </data>
-  <data name="WorkInProgress" xml:space="preserve">
-    <value>Not implemented: Work in progress.</value>
-  </data>
-</root>
+  </root>
