@@ -7,6 +7,7 @@ using System.Threading;
 using System.Reflection;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace System.Tests
@@ -110,7 +111,7 @@ namespace System.Tests
         private static void Value_Invalid_Impl<T>(ref Lazy<T> x, Lazy<T> lazy)
         {
             x = lazy;
-            Assert.Throws<InvalidOperationException>(() => { var dummy = lazy.Value; });
+            Assert.Throws<InvalidOperationException>(() => lazy.Value);
         }
 
         [Fact]
@@ -160,24 +161,21 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Ctor_ExceptionRecovery_MemberData))]
-        public static void Ctor_ExceptionRecovery(Lazy<InitiallyExceptionThrowingCtor> lazy, int? expected)
+        public static void Ctor_ExceptionRecovery(Lazy<InitiallyExceptionThrowingCtor> lazy, int expected)
         {
             InitiallyExceptionThrowingCtor.counter = 0;
-            var result = default(InitiallyExceptionThrowingCtor);
+            InitiallyExceptionThrowingCtor result = null;
             for (var i = 0; i < 10; ++i)
             {
                 try { result = lazy.Value; } catch (Exception) { }
             }
-            if (expected == null)
-                Assert.Null(result);
-            else
-                Assert.Equal(result.Value, expected.Value);
+            Assert.Equal(result.Value, expected);
         }
 
         private static void Value_ExceptionRecovery_IntImpl(Lazy<int> lazy, ref int counter, int expected)
         {
             counter = 0;
-            var result = 0;
+            int result = 0;
             for (var i = 0; i < 10; ++i)
             {
                 try { result = lazy.Value; } catch (Exception) { }
@@ -193,16 +191,13 @@ namespace System.Tests
             {
                 try { result = lazy.Value; } catch (Exception) { }
             }
-            if (expected == null)
-                Assert.Null(result);
-            else
-                Assert.Equal(result, expected);
+            Assert.Equal(expected, result);
         }
 
         [Fact]
         public static void Value_ExceptionRecovery()
         {
-            var counter = default(int); // set in test function
+            int counter = 0; // set in test function
 
             var fint = new Func<int>   (() => { if (++counter < 5) throw new Exception(); else return counter; });
             var fobj = new Func<string>(() => { if (++counter < 5) throw new Exception(); else return counter.ToString(); });
