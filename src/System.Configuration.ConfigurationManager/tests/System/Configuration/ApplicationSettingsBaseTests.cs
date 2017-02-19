@@ -46,9 +46,9 @@ namespace System.ConfigurationTests
             InlineData(true)
             InlineData(false)
             ]
-        public void Context_SimpleSettings_InNotNull(bool isSyncronized)
+        public void Context_SimpleSettings_InNotNull(bool isSynchronized)
         {
-            SimpleSettings settings = isSyncronized
+            SimpleSettings settings = isSynchronized
                 ? (SimpleSettings)SettingsBase.Synchronized(new SimpleSettings())
                 : new SimpleSettings();
 
@@ -59,9 +59,9 @@ namespace System.ConfigurationTests
             InlineData(true)
             InlineData(false)
             ]
-        public void Providers_SimpleSettings_Empty(bool isSyncronized)
+        public void Providers_SimpleSettings_Empty(bool isSynchronized)
         {
-            SimpleSettings settings = isSyncronized
+            SimpleSettings settings = isSynchronized
                 ? (SimpleSettings)SettingsBase.Synchronized(new SimpleSettings())
                 : new SimpleSettings();
 
@@ -73,9 +73,9 @@ namespace System.ConfigurationTests
             InlineData(true)
             InlineData(false)
             ]
-        public void GetSetStringProperty_SimpleSettings_Ok(bool isSyncronized)
+        public void GetSetStringProperty_SimpleSettings_Ok(bool isSynchronized)
         {
-            SimpleSettings settings = isSyncronized 
+            SimpleSettings settings = isSynchronized 
                 ? (SimpleSettings)SettingsBase.Synchronized(new SimpleSettings()) 
                 : new SimpleSettings();
 
@@ -88,9 +88,9 @@ namespace System.ConfigurationTests
             InlineData(true)
             InlineData(false)
             ]
-        public void GetSetIntProperty_SimpleSettings_Ok(bool isSyncronized)
+        public void GetSetIntProperty_SimpleSettings_Ok(bool isSynchronized)
         {
-            SimpleSettings settings = isSyncronized
+            SimpleSettings settings = isSynchronized
                 ? (SimpleSettings)SettingsBase.Synchronized(new SimpleSettings())
                 : new SimpleSettings();
 
