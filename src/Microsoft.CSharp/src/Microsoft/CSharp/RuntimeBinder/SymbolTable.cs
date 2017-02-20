@@ -1044,7 +1044,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             agg.SetTypeVars(BSYMMGR.EmptyTypeArray());
 
             ACCESS access;
-            if (type.GetTypeInfo().IsPublic)
+            if (type.IsPublic)
             {
                 access = ACCESS.ACC_PUBLIC;
             }
@@ -1071,7 +1071,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else
                 {
-                    Debug.Assert(type.GetTypeInfo().IsPublic || type.IsNestedPublic);
+                    Debug.Assert(type.IsPublic || type.IsNestedPublic);
                     access = ACCESS.ACC_PUBLIC;
                 }
             }
