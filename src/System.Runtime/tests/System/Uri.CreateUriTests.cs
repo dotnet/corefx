@@ -34,28 +34,25 @@ namespace System.Tests
             yield return new object[] { "http://host/", "path1/page?query=value#fragment", UriKind.RelativeOrAbsolute, "http://host/path1/page?query=value#fragment" };
             yield return new object[] { "http://host/", "C:/x", UriKind.Relative, "http://host/C:/x" };
 
-            if (s_isWindowsSystem)
-            {
-                // Explicit windows drive file
-                yield return new object[] { "file:///D:/abc", "C:/x", UriKind.Relative, "file:///C:/x" };
-                yield return new object[] { "D:/abc", "C:/x", UriKind.Relative, "file:///C:/x" };
-                yield return new object[] { "file:///C:/", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "file:///C:/", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "file:///C:/pathold", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "file:///C:/pathold", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "file:///C:/pathold", "path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "file:///C:/", "/", UriKind.RelativeOrAbsolute, "file:///C:/" };
-                yield return new object[] { "file:///C:/", @"\", UriKind.RelativeOrAbsolute, "file:///C:/" };
+            // Explicit windows drive file
+            yield return new object[] { "file:///D:/abc", "C:/x", UriKind.Relative, "file:///C:/x" };
+            yield return new object[] { "D:/abc", "C:/x", UriKind.Relative, "file:///C:/x" };
+            yield return new object[] { "file:///C:/", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "file:///C:/", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "file:///C:/pathold", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "file:///C:/pathold", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "file:///C:/pathold", "path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "file:///C:/", "/", UriKind.RelativeOrAbsolute, "file:///C:/" };
+            yield return new object[] { "file:///C:/", @"\", UriKind.RelativeOrAbsolute, "file:///C:/" };
 
-                // Implicit windows drive file
-                yield return new object[] { "C:/", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "C:/", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "C:/pathold", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "C:/pathold", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "C:/pathold", "path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
-                yield return new object[] { "C:/", "/", UriKind.RelativeOrAbsolute, "file:///C:/" };
-                yield return new object[] { "C:/", @"\", UriKind.RelativeOrAbsolute, "file:///C:/" };
-            }
+            // Implicit windows drive file
+            yield return new object[] { "C:/", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "C:/", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "C:/pathold", "/path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "C:/pathold", @"\path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "C:/pathold", "path", UriKind.RelativeOrAbsolute, "file:///C:/path" };
+            yield return new object[] { "C:/", "/", UriKind.RelativeOrAbsolute, "file:///C:/" };
+            yield return new object[] { "C:/", @"\", UriKind.RelativeOrAbsolute, "file:///C:/" };
 
             // Unix style path
             yield return new object[] { "file:///pathold/", "/path", UriKind.RelativeOrAbsolute, "file:///path" };
@@ -63,25 +60,26 @@ namespace System.Tests
             yield return new object[] { "file:///", "/path", UriKind.RelativeOrAbsolute, "file:///path" };
             yield return new object[] { "file:///", "path", UriKind.RelativeOrAbsolute, "file:///path" };
 
-            if (s_isWindowsSystem)
+            // UNC
+            if (s_isWindowsSystem) // Unc can only start with '/' on Windows
             {
-                // UNC
                 yield return new object[] { @"\\servernameold\path1", "//servername", UriKind.Relative, @"\\servername" };
-                yield return new object[] { @"\\servernameold\path1", @"\\servername", UriKind.Relative, @"\\servername" };
-                yield return new object[] { @"\\servername\path1", "/path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
-                yield return new object[] { @"\\servername\path1", @"\path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
-                yield return new object[] { @"\\servername\path1\path2", @"\path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
-                yield return new object[] { @"\\servername\pathold", "path", UriKind.RelativeOrAbsolute, @"\\servername\path" };
-                yield return new object[] { @"file://\\servername/path1", "/path", UriKind.RelativeOrAbsolute, "file://servername/path1/path" };
-                yield return new object[] { @"\\servername\path1", "?query", UriKind.RelativeOrAbsolute, @"\\servername/?query" };
             }
-            else
+            yield return new object[] { @"\\servernameold\path1", @"\\servername", UriKind.Relative, @"\\servername" };
+            yield return new object[] { @"\\servername\path1", "/path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
+            yield return new object[] { @"\\servername\path1", @"\path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
+            yield return new object[] { @"\\servername\path1\path2", @"\path", UriKind.RelativeOrAbsolute, @"\\servername\path1\path" };
+            yield return new object[] { @"\\servername\pathold", "path", UriKind.RelativeOrAbsolute, @"\\servername\path" };
+            yield return new object[] { @"file://\\servername/path1", "/path", UriKind.RelativeOrAbsolute, "file://servername/path1/path" };
+            yield return new object[] { @"\\servername\path1", "?query", UriKind.RelativeOrAbsolute, @"\\servername/?query" };
+
+            // Unix path
+            if (!s_isWindowsSystem)
             {
                 // Implicit file
                 yield return new object[] {"/path1", "/path", UriKind.RelativeOrAbsolute,"/path" };
                 yield return new object[] {"/path1/path2", "/path", UriKind.RelativeOrAbsolute,"/path" };
                 yield return new object[] {"/pathold", "path", UriKind.RelativeOrAbsolute,"/path" };
-                yield return new object[] { "file://servername/path1", "/path", UriKind.RelativeOrAbsolute, "file:///path" };
             }
 
             // IPv6
@@ -89,10 +87,7 @@ namespace System.Tests
             yield return new object[] { "http://[::1]", @"\path", UriKind.RelativeOrAbsolute, "http://[::1]/path" };
             yield return new object[] { "http://[::1]",@"path", UriKind.RelativeOrAbsolute, "http://[::1]/path" };
             yield return new object[] { "http://[::1]:90", "/path", UriKind.RelativeOrAbsolute, "http://[::1]:90/path" };
-            if (s_isWindowsSystem)
-            {
-                yield return new object[] { @"\\[::1]/", "path", UriKind.RelativeOrAbsolute, @"\\[::1]/path" };
-            }
+            yield return new object[] { @"\\[::1]/", "path", UriKind.RelativeOrAbsolute, @"\\[::1]/path" };
 
             // Unknown
             yield return new object[] { "unknown:", "C:/x", UriKind.Relative, "unknown:/C:/x" };
@@ -104,10 +99,7 @@ namespace System.Tests
             yield return new object[] { "telnet://username:password@host:10", "path", UriKind.RelativeOrAbsolute, "telnet://username:password@host:10/path" };
 
             // Absolute Uri
-            if (s_isWindowsSystem)
-            {
-                yield return new object[] { "http://host/", "C:/x", UriKind.Absolute, "file:///C:/x" };
-            }
+            yield return new object[] { "http://host/", "C:/x", UriKind.Absolute, "file:///C:/x" };
             yield return new object[] { "http://hostold/", "http://host/path/page", UriKind.Absolute, "http://host/path/page" };
         }
         

@@ -2069,14 +2069,8 @@ namespace System
                         {
                             _flags |= Flags.AuthorityFound;
                         }
-                        //Unix: Unix path?
-                        if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx > 2) && pUriString[i] == '/')
-                        {
-                            idx += 2;
-                            _flags |= Flags.UnixPath;
-                        }
                         //Windows: Dos path?
-                        else if (i + 1 < (ushort)length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
+                        if (i + 1 < (ushort)length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
                             UriHelper.IsAsciiLetter(pUriString[i]))
                         {
                             if (i + 2 >= (ushort)length || ((c = pUriString[i + 2]) != '\\' && c != '/'))
@@ -2105,6 +2099,12 @@ namespace System
                                     idx = i;
                                 }
                             }
+                        }
+                        // Unix: Unix path?
+                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx == 3) && pUriString[idx + 2] == '/')
+                        {
+                            idx += 2;
+                            _flags |= Flags.UnixPath;
                         }
                         //Windows: UNC path?
                         else if (_syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2 && i - idx != 3 &&

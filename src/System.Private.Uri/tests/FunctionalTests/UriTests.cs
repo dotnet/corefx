@@ -734,16 +734,13 @@ namespace System.PrivateUri.Tests
             b = uri.IsWellFormedOriginalString();
             Assert.False(b);
 
-            if (s_isWindowsSystem)
-            {
-                uri = new Uri(@"c:\\directory\filename");
-                b = uri.IsWellFormedOriginalString();
-                Assert.False(b);
+            uri = new Uri(@"c:\\directory\filename");
+            b = uri.IsWellFormedOriginalString();
+            Assert.False(b);
 
-                uri = new Uri(@"file://c:/directory/filename");
-                b = uri.IsWellFormedOriginalString();
-                Assert.False(b);
-            }
+            uri = new Uri(@"file://c:/directory/filename");
+            b = uri.IsWellFormedOriginalString();
+            Assert.False(b);
 
             uri = new Uri(@"http:\\host/path/file");
             b = uri.IsWellFormedOriginalString();

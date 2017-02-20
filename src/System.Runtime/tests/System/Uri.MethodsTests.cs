@@ -68,12 +68,10 @@ namespace System.Tests
 
             // Only UNC or DOS uris are case insensitive
             yield return new object[] { new Uri("http://domain.com/PATH1/path2/PATH3"), new Uri("http://domain.com/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
-            if (s_isWindowsSystem)
-            {
-                yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
-                yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
-            }
-            else
+            yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
+            yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
+            // Unix paths are case sensitive
+            if (!s_isWindowsSystem) // Unix path
             {
                 yield return new object[] { new Uri("file:///PATH1/path2/PATH3"), new Uri("file:///path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
                 yield return new object[] { new Uri("/PATH1/path2/PATH3"), new Uri("/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
@@ -193,14 +191,11 @@ namespace System.Tests
             yield return new object[] { new Uri("http://host/path/path/file?query"), new Uri("path/path/file?query", UriKind.Relative), true }; // Uri2 is relative
             yield return new object[] { new Uri("http://host/path/path/file?query"), new Uri("path/path/file", UriKind.Relative), true }; // Uri2 is relative
 
-            if (s_isWindowsSystem)
-            {
-                // Uri1 is a file
-                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://C:/path/path/path"), true };
-                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://D:/path/path/path"), false };
-                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("http://host/path/path/file"), false };
-                yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("path/path/file", UriKind.Relative), true };
-            }
+            // Uri1 is a file
+            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://C:/path/path/path"), true };
+            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("file://D:/path/path/path"), false };
+            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("http://host/path/path/file"), false };
+            yield return new object[] { new Uri("file://C:/path/path/file"), new Uri("path/path/file", UriKind.Relative), true };
         }
 
         [Theory]
@@ -228,15 +223,13 @@ namespace System.Tests
             yield return new object[] { "file:////", true  };
             yield return new object[] { @"http:\\host/path/file", false  };
             yield return new object[] { "http://host/path\file", false  };
-            if (s_isWindowsSystem)
-            {
-                yield return new object[] { @"c:\directory\filename", false  };
-                yield return new object[] { @"\\unchost", false  };
-                yield return new object[] { "file://C:/directory/filename", false  };
-                yield return new object[] { "file:///c|/dir", false  };
-                yield return new object[] { @"file:\\\c:\path", false  };
-            }
-            else
+            yield return new object[] { @"c:\directory\filename", false  };
+            yield return new object[] { @"\\unchost", false  };
+            yield return new object[] { "file://C:/directory/filename", false  };
+            yield return new object[] { "file:///c|/dir", false  };
+            yield return new object[] { @"file:\\\c:\path", false  };
+             // Unix path
+            if (!s_isWindowsSystem)
             {
                 yield return new object[] { @"/directory/filename", false  };
             }
@@ -273,11 +266,8 @@ namespace System.Tests
             yield return new object[] { "http://www.domain.com/path???/file name", UriKind.RelativeOrAbsolute, false };
             yield return new object[] { "http:\\host/path/file", UriKind.RelativeOrAbsolute, false };
             yield return new object[] { null, UriKind.RelativeOrAbsolute, false };
-            if (s_isWindowsSystem)
-            {
-                yield return new object[] { "c:\\directory\filename", UriKind.RelativeOrAbsolute, false };
-                yield return new object[] { "file://C:/directory/filename", UriKind.RelativeOrAbsolute, false };
-            }
+            yield return new object[] { "c:\\directory\filename", UriKind.RelativeOrAbsolute, false };
+            yield return new object[] { "file://C:/directory/filename", UriKind.RelativeOrAbsolute, false };
         }
 
         [Theory]
@@ -347,26 +337,25 @@ namespace System.Tests
             yield return new object[] { new Uri("http://www.domain.com:100/path?name#fragment"), new Uri("http://www.domain.com:800/path?name#fragment"), false }; // Different port
             yield return new object[] { new Uri("http://www.domain.com:100/path?name#fragment"), new Uri("http://www.domain.com:80/path?name#fragment"), false }; // Different port
 
-            if (s_isWindowsSystem)
-            {
-                // File paths
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file"), true };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/Path2/File"), true };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://D:/path1/path2/file"), false };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path2/path2/file"), false };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path1/file"), false };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file!"), false };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("http://domain.com"), false };
-                yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri(@"\\server\path1\path2\file"), false };
+            // File paths
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file"), true };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/Path2/File"), true };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://D:/path1/path2/file"), false };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path2/path2/file"), false };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path1/file"), false };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("file://C:/path1/path2/file!"), false };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri("http://domain.com"), false };
+            yield return new object[] { new Uri("file://C:/path1/path2/file"), new Uri(@"\\server\path1\path2\file"), false };
 
-                // UNC share paths
-                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file"), true };
-                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server1\sharepath\path\file"), false };
-                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepata\path\file"), false };
-                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\pata\file"), false };
-                yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file!"), false };
-            }
-            else
+            // UNC share paths
+            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file"), true };
+            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server1\sharepath\path\file"), false };
+            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepata\path\file"), false };
+            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\pata\file"), false };
+            yield return new object[] { new Uri(@"\\server\sharepath\path\file"), new Uri(@"\\server\sharepath\path\file!"), false };
+
+            // Unix path
+            if (!s_isWindowsSystem)
             {
                 // Implicit file
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file"), true };
@@ -382,8 +371,6 @@ namespace System.Tests
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepata/path/file"), false };
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/pata/file"), false };
                 yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file!"), false };
-                yield return new object[] { new Uri("file://host1/sharepath/path/file"), new Uri("file://host2/sharepath/path/file"), false };
-                yield return new object[] { new Uri("file://host1/sharepath/path/file"), new Uri("file:///sharepath/path/file"), false };
             }
 
             // Relative paths
@@ -563,15 +550,12 @@ namespace System.Tests
             // IPv6
             yield return new object[] { new Uri("http://[1111:2222:3333::431%16]"), UriComponents.SerializationInfoString, "http://[1111:2222:3333::431%16]/" }; // With scope id
 
-            if (s_isWindowsSystem)
-            {
-                // File
-                yield return new object[] { new Uri("file:///C|/path1/path2/file"), UriComponents.AbsoluteUri, "file:///C:/path1/path2/file" }; // Non canonical
+            // File
+            yield return new object[] { new Uri("file:///C|/path1/path2/file"), UriComponents.AbsoluteUri, "file:///C:/path1/path2/file" }; // Non canonical
 
-                Uri uncUri = new Uri("\\\\\u1234\u2345");
-                yield return new object[] { uncUri, UriComponents.Host, "\u1234\u2345" };
-                yield return new object[] { uncUri, UriComponents.NormalizedHost, "\u1234\u2345" };
-            }
+            Uri uncUri = new Uri("\\\\\u1234\u2345");
+            yield return new object[] { uncUri, UriComponents.Host, "\u1234\u2345" };
+            yield return new object[] { uncUri, UriComponents.NormalizedHost, "\u1234\u2345" };
 
             // Unknown
             Uri unknownUri = new Uri("unknownscheme:");
