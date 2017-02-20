@@ -304,7 +304,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             List<Type> list = new List<Type>();
             list.Insert(0, type);
-            for (Type parent = type.GetTypeInfo().BaseType; parent != null; parent = parent.GetTypeInfo().BaseType)
+            for (Type parent = type.BaseType; parent != null; parent = parent.BaseType)
             {
                 // Load it in the symbol table.
                 LoadSymbolsFromType(parent);
@@ -1019,7 +1019,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 kind = AggKindEnum.Enum;
                 agg.SetUnderlyingType(GetCTypeFromType(Enum.GetUnderlyingType(type)).AsAggregateType());
             }
-            else if (type.GetTypeInfo().IsValueType)
+            else if (type.IsValueType)
             {
                 kind = AggKindEnum.Struct;
             }
@@ -1028,9 +1028,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // If it derives from Delegate or MulticastDelegate, then its
                 // a delegate type. However, MuticastDelegate itself is not a 
                 // delegate type.
-                if (type.GetTypeInfo().BaseType != null &&
-                    (type.GetTypeInfo().BaseType.FullName == "System.MulticastDelegate" ||
-                    type.GetTypeInfo().BaseType.FullName == "System.Delegate") &&
+                if (type.BaseType != null &&
+                    (type.BaseType.FullName == "System.MulticastDelegate" ||
+                    type.BaseType.FullName == "System.Delegate") &&
                     type.FullName != "System.MulticastDelegate")
                 {
                     kind = AggKindEnum.Delegate;
@@ -1128,10 +1128,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             agg.SetComImport(type.GetTypeInfo().IsImport);
 
             AggregateType baseAggType = agg.getThisType();
-            if (type.GetTypeInfo().BaseType != null)
+            if (type.BaseType != null)
             {
-                // type.GetTypeInfo().BaseType can be null for Object or for interface types.
-                Type t = type.GetTypeInfo().BaseType;
+                // type.BaseType can be null for Object or for interface types.
+                Type t = type.BaseType;
                 if (t.GetTypeInfo().IsGenericType)
                 {
                     t = t.GetTypeInfo().GetGenericTypeDefinition();
@@ -2029,7 +2029,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         internal void AddConversionsForType(Type type)
         {
-            for (Type t = type; t.GetTypeInfo().BaseType != null; t = t.GetTypeInfo().BaseType)
+            for (Type t = type; t.BaseType != null; t = t.BaseType)
             {
                 AddConversionsForOneType(t);
             }

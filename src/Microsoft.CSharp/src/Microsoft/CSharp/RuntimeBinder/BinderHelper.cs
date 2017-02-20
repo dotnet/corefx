@@ -293,7 +293,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            if (binding.Type.GetTypeInfo().IsValueType && !action.ReturnType.GetTypeInfo().IsValueType)
+            if (binding.Type.IsValueType && !action.ReturnType.IsValueType)
             {
                 Debug.Assert(action.ReturnType == typeof(object));
                 return Expression.Convert(binding, action.ReturnType);
