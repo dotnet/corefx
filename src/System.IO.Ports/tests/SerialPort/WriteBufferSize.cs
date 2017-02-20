@@ -257,8 +257,7 @@ namespace System.IO.Ports.Tests
 
                 com1.Write(xmitBytes, 0, xmitBytes.Length);
 
-                while (xmitBytes.Length > com2.BytesToRead)
-                    System.Threading.Thread.Sleep(50);
+                TCSupport.WaitForReadBufferToLoad(com2, xmitBytes.Length);
 
                 Debug.WriteLine("Verifying properties after changing WriteBufferSize");
                 serPortProp.VerifyPropertiesAndPrint(com1);

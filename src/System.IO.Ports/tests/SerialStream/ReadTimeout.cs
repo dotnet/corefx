@@ -286,10 +286,7 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(new byte[] {50}, 0, 1);
 
-                while (com1.BytesToRead == 0)
-                {
-                    Thread.Sleep(50);
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, 1);
 
                 Assert.True(1 == (bytesRead = com1.Read(rcvBytes, 0, rcvBytes.Length)),
                     string.Format("Err_31597ahpba, Expected to Read to return 1 actual={0}", bytesRead));
@@ -317,14 +314,10 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(new byte[] {50}, 0, 1);
 
-                while (com1.BytesToRead == 0)
-                {
-                    Thread.Sleep(50);
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, 1);
 
                 Assert.True(50 == (byteRead = com1.ReadByte()),
                     string.Format("Err_05949aypa, Expected to Read to return 50 actual={0}", byteRead));
-
             }
         }
 

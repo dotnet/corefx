@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Legacy.Support
@@ -21,10 +22,6 @@ namespace Legacy.Support
             _secondAvailablePortName = secondAvailablePortName;
             _loopbackPortName = loopBackPortName;
             _nullModemPresent = nullModemPresent;
-            Debug.WriteLine("First available port name  : " + firstAvailablePortName);
-            Debug.WriteLine("Second available port name : " + secondAvailablePortName);
-            Debug.WriteLine("Loopback port name         : " + loopBackPortName);
-            Debug.WriteLine("NullModem present          : " + nullModemPresent);
         }
 
         public string FirstAvailablePortName

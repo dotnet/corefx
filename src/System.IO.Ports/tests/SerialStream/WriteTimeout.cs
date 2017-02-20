@@ -240,7 +240,7 @@ namespace System.IO.Ports.Tests
         }
 
         [OuterLoop("Slow test")]
-        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasHardwareFlowControl))]
+        [ConditionalFact(nameof(HasOneSerialPort), nameof(HasSingleByteTransmitBlocking))]
         public void SuccessiveWriteTimeoutNoData_WriteByte()
         {
             using (SerialPort com = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))

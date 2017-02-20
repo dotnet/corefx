@@ -21,6 +21,9 @@ namespace Legacy.Support
         private static LocalMachineSerialInfo s_localMachineSerialInfo;
         private static SerialPortRequirements s_localMachineSerialPortRequirements;
 
+        // Set this true to display port info to the console rather than Debug.WriteLine
+        private static bool _displayPortInfoOnConsole = false;
+
         static TCSupport()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -50,11 +53,11 @@ namespace Legacy.Support
             string portName1 = null, portName2 = null, loopbackPortName = null;
 
             Array.Sort(installedPortNames);
-            Debug.WriteLine("Installed ports : " + string.Join(",", installedPortNames));
+            PrintInfo("Installed ports : " + string.Join(",", installedPortNames));
 
             IList<string> openablePortNames = CheckPortsCanBeOpened(installedPortNames);
 
-            Debug.WriteLine("Openable ports  : " + string.Join(",", openablePortNames));
+            PrintInfo("Openable ports  : " + string.Join(",", openablePortNames));
 
             // Find any pair of ports which are null-modem connected
             // If there is a pair like this, then they take precedence over any other way of identifying two available ports
@@ -72,7 +75,7 @@ namespace Legacy.Support
                         portName2 = secondPortName;
                         nullModemPresent = true;
 
-                        Debug.WriteLine("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
+                        PrintInfo("Null-modem connection from {0} to {1}", firstPortName, secondPortName);
                     }
                 }
             }
@@ -101,9 +104,14 @@ namespace Legacy.Support
             if (loopbackPortName == null && !nullModemPresent)
             {
                 // We don't have any supporting hardware - disable all the tests which would use just an open port
-                Debug.WriteLine("No support hardware - not using serial ports");
+                PrintInfo("No support hardware - not using serial ports");
                 portName1 = portName2 = null;
             }
+
+            PrintInfo("First available port name  : " + portName1);
+            PrintInfo("Second available port name : " + portName2);
+            PrintInfo("Loopback port name         : " + loopbackPortName);
+            PrintInfo("NullModem present          : " + nullModemPresent);
 
             s_localMachineSerialInfo = new LocalMachineSerialInfo(portName1, portName2, loopbackPortName, nullModemPresent);
 
@@ -112,7 +120,19 @@ namespace Legacy.Support
                 // Measure how big a packet we need to write to be sure to see blocking behaviour at a port
                 s_flowControlCapabilities = SerialPortConnection.MeasureFlowControlCapabilities(portName1);
 
-                Debug.WriteLine("{0}: Flow capabilities {1}", portName1, s_flowControlCapabilities);
+                PrintInfo("{0}: Flow capabilities {1}", portName1, s_flowControlCapabilities);
+            }
+        }
+
+        private static void PrintInfo(string format, params object[] args)
+        {
+            if (_displayPortInfoOnConsole)
+            {
+                Console.WriteLine(format, args);
+            }
+            else
+            {
+                Debug.WriteLine(format, args);
             }
         }
 
@@ -589,7 +609,7 @@ namespace Legacy.Support
 
 
         /// <summary>
-        /// Wait for the write data to be written into a blocked (by adverse flow control) port
+        /// Wait for write data to be written into a blocked (by adverse flow control) port
         /// </summary>
         public static void WaitForWriteBufferToLoad(SerialPort com, int bufferLength)
         {
@@ -599,6 +619,16 @@ namespace Legacy.Support
                 Thread.Sleep(50);
                 Assert.True(sw.ElapsedMilliseconds < 3000, $"Timeout while waiting for data to be written to port (wrote {bufferLength}, queued {com.BytesToWrite}, bufSize {HardwareTransmitBufferSize})");
             }
+        }
+
+        /// <summary>
+        /// Wait for write data to be written into a blocked (by adverse flow control) port,
+        /// then check that exactly the expected quantity is present
+        /// </summary>
+        public static void WaitForExactWriteBufferLoad(SerialPort com, int bufferLength)
+        {
+            WaitForWriteBufferToLoad(com, bufferLength);
+            Assert.Equal(bufferLength, com.BytesToWrite + HardwareTransmitBufferSize);
         }
 
         /// <summary>

@@ -473,18 +473,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-                while (STRING_SIZE_HANDSHAKE > com1.BytesToWrite && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                //Verify that the correct number of bytes are in the buffer
-                if (STRING_SIZE_HANDSHAKE != com1.BytesToWrite)
-                {
-                    Fail("ERROR!!! Expcted BytesToWrite={0} actual {1}", STRING_SIZE_HANDSHAKE, com1.BytesToWrite);
-                }
+                TCSupport.WaitForExactWriteBufferLoad(com1, STRING_SIZE_HANDSHAKE);
 
                 //Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) && com1.CtsHolding)

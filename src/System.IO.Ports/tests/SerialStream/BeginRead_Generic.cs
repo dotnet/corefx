@@ -144,7 +144,6 @@ namespace System.IO.Ports.Tests
                 var expectedBytes = new byte[numRndBytesPairty];
                 var actualBytes = new byte[numRndBytesPairty + 1];
 
-                int waitTime;
                 IAsyncResult readAsyncResult;
 
                 /* 1 Additional character gets added to the input buffer when the parity error occurs on the last byte of a stream
@@ -175,13 +174,7 @@ namespace System.IO.Ports.Tests
                 readAsyncResult = com2.BaseStream.BeginWrite(bytesToWrite, 0, bytesToWrite.Length, null, null);
                 readAsyncResult.AsyncWaitHandle.WaitOne();
 
-                waitTime = 0;
-
-                while (bytesToWrite.Length + 1 > com1.BytesToRead && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length + 1);
 
                 com1.Read(actualBytes, 0, actualBytes.Length);
 
@@ -432,15 +425,11 @@ namespace System.IO.Ports.Tests
             var buffer = new byte[bytesToWrite.Length];
             int totalBytesRead;
             int bytesToRead;
-            var waitTime = 0;
 
             com2.Write(bytesToWrite, 0, bytesToWrite.Length);
             com1.ReadTimeout = 250;
-            while (com1.BytesToRead < bytesToWrite.Length && waitTime < 500)
-            {
-                Thread.Sleep(50);
-                waitTime += 50;
-            }
+
+            TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length);
 
             totalBytesRead = 0;
             bytesToRead = com1.BytesToRead;

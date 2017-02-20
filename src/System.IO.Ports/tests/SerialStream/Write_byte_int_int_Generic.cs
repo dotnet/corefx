@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Configuration;
 using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
@@ -235,15 +236,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-
-                while (BYTE_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                Assert.Equal(BYTE_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
+                TCSupport.WaitForExactWriteBufferLoad(com, BYTE_SIZE_BYTES_TO_WRITE);
 
                 // Write a random byte[] asynchronously so we can verify some things while the write call is blocking
                 t2.Start();
@@ -256,15 +249,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-
-                while (BYTE_SIZE_BYTES_TO_WRITE * 2 > com.BytesToWrite && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                Assert.Equal(BYTE_SIZE_BYTES_TO_WRITE*2, com.BytesToWrite);
+                TCSupport.WaitForExactWriteBufferLoad(com, BYTE_SIZE_BYTES_TO_WRITE * 2);
 
                 // Wait for both write methods to timeout
                 while (t1.IsAlive || t2.IsAlive)
@@ -492,15 +477,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-                while (BYTE_SIZE_HANDSHAKE > com1.BytesToWrite && waitTime < 500)
-                {
-                    Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                // Verify that the correct number of bytes are in the buffer
-                Assert.Equal(BYTE_SIZE_HANDSHAKE, com1.BytesToWrite);
+                TCSupport.WaitForWriteBufferToLoad(com1, BYTE_SIZE_HANDSHAKE);
 
                 // Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) &&

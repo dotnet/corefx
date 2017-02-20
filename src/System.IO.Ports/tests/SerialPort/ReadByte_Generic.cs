@@ -193,8 +193,6 @@ namespace System.IO.Ports.Tests
                 byte[] actualBytes = new byte[numRndByte + 1];
                 int actualByteIndex = 0;
 
-                int waitTime;
-
                 /* 1 Additional character gets added to the input buffer when the parity error occurs on the last byte of a stream
                  We are verifying that besides this everything gets read in correctly. See NDP Whidbey: 24216 for more info on this */
                 Debug.WriteLine("Verifying default ParityReplace byte with a parity error on the last byte");
@@ -221,13 +219,8 @@ namespace System.IO.Ports.Tests
                 com2.Open();
 
                 com2.Write(bytesToWrite, 0, bytesToWrite.Length);
-                waitTime = 0;
 
-                while (bytesToWrite.Length + 1 > com1.BytesToRead && waitTime < 500)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    waitTime += 50;
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length + 1);
 
                 while (true)
                 {
@@ -375,17 +368,12 @@ namespace System.IO.Ports.Tests
             byte[] byteRcvBuffer = new byte[expectedBytes.Length];
             int rcvBufferSize = 0;
             int i;
-            int waitTime = 0;
 
             com2.Write(bytesToWrite, 0, bytesToWrite.Length);
             com1.ReadTimeout = 250;
             com1.Encoding = encoding;
 
-            while (com1.BytesToRead < bytesToWrite.Length && waitTime < 500)
-            {
-                System.Threading.Thread.Sleep(50);
-                waitTime += 50;
-            }
+            TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length);
 
             i = 0;
             while (true)

@@ -30,8 +30,8 @@ namespace System.IO.Ports.Tests
                 com1.Open();
                 com2.Open();
                 com2.Write(DEFAULT_STRING);
-                while (com1.BytesToRead < DEFAULT_STRING.Length)
-                    System.Threading.Thread.Sleep(50);
+
+                TCSupport.WaitForReadBufferToLoad(com1, DEFAULT_STRING.Length);
 
                 VerifyDiscard(com1);
             }
@@ -47,8 +47,7 @@ namespace System.IO.Ports.Tests
                 com1.Open();
                 com2.Open();
                 com2.Write(DEFAULT_STRING);
-                while (com1.BytesToRead < DEFAULT_STRING.Length)
-                    System.Threading.Thread.Sleep(50);
+                TCSupport.WaitForReadBufferToLoad(com1, DEFAULT_STRING.Length);
 
                 VerifyDiscard(com1);
                 VerifyDiscard(com1);
@@ -72,13 +71,13 @@ namespace System.IO.Ports.Tests
                 com1.Open();
                 com2.Open();
                 com2.Write(DEFAULT_STRING);
-                while (com1.BytesToRead < DEFAULT_STRING.Length)
-                    System.Threading.Thread.Sleep(50);
+
+                TCSupport.WaitForReadBufferToLoad(com1, DEFAULT_STRING.Length);
 
                 VerifyDiscard(com1);
                 com2.Write(DEFAULT_STRING);
-                while (com1.BytesToRead < DEFAULT_STRING.Length)
-                    System.Threading.Thread.Sleep(50);
+
+                TCSupport.WaitForReadBufferToLoad(com1, DEFAULT_STRING.Length);
 
                 VerifyDiscard(com1);
             }

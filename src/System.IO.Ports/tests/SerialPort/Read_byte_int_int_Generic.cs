@@ -412,16 +412,11 @@ namespace System.IO.Ports.Tests
             byte[] buffer = new byte[bytesToWrite.Length];
             int totalBytesRead;
             int bytesToRead;
-            int waitTime = 0;
 
             com2.Write(bytesToWrite, 0, bytesToWrite.Length);
             com1.ReadTimeout = 250;
 
-            while (com1.BytesToRead < bytesToWrite.Length && waitTime < 500)
-            {
-                System.Threading.Thread.Sleep(50);
-                waitTime += 50;
-            }
+            TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length);
 
             totalBytesRead = 0;
             bytesToRead = com1.BytesToRead;

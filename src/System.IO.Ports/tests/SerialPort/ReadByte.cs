@@ -212,10 +212,7 @@ namespace System.IO.Ports.Tests
             com2.Write(bytesToWrite, 0, 1); // Write one byte at the begining because we are going to read this to buffer the rest of the data
             com2.Write(bytesToWrite, 0, bytesToWrite.Length);
 
-            while (com1.BytesToRead < bytesToWrite.Length)
-            {
-                System.Threading.Thread.Sleep(50);
-            }
+            TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length);
 
             com1.Read(new char[1], 0, 1); // This should put the rest of the bytes in SerialPorts own internal buffer
 

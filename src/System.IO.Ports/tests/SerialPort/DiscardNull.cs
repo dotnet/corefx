@@ -363,13 +363,7 @@ namespace System.IO.Ports.Tests
                 com2.Open();
                 com2.Write(xmitBytes, 0, xmitBytes.Length);
 
-                int timeElapsed = 0;
-
-                while (expectedBytes.Length > com1.BytesToRead && timeElapsed < MAX_WAIT_TIME)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    timeElapsed += 50;
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, expectedBytes.Length);
 
                 if (sendNewLine)
                     com2.WriteLine("");

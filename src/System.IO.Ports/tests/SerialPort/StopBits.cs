@@ -320,7 +320,7 @@ namespace System.IO.Ports.Tests
                     { }
 
                     sw.Start();
-                    while (numBytesToSend > com2.BytesToRead) ; //Wait for all of the bytes to reach the input buffer of com2
+                    TCSupport.WaitForReadBufferToLoad(com2, numBytesToSend);
                     sw.Stop();
 
                     actualTime += sw.ElapsedMilliseconds;

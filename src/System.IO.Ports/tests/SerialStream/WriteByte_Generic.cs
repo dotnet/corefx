@@ -78,7 +78,7 @@ namespace System.IO.Ports.Tests
                 com1.Open();
                 com2.Open();
 
-                com2.BaseStream.WriteByte(19);
+                com2.BaseStream.WriteByte(XOnOff.XOFF);
                 Thread.Sleep(250);
                 com2.Close();
 
@@ -372,7 +372,7 @@ namespace System.IO.Ports.Tests
 
                 if (Handshake.XOnXOff == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
-                    com2.BaseStream.WriteByte(19);
+                    com2.BaseStream.WriteByte(XOnOff.XOFF);
                     Thread.Sleep(250);
                 }
 
@@ -398,7 +398,7 @@ namespace System.IO.Ports.Tests
 
                 if (Handshake.XOnXOff == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
-                    com2.BaseStream.WriteByte(17);
+                    com2.BaseStream.WriteByte(XOnOff.XON);
                 }
 
                 // Wait till write finishes

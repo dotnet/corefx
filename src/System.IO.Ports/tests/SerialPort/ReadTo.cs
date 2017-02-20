@@ -272,8 +272,7 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(byteXmitBuffer, 0, byteXmitBuffer.Length);
 
-                while (com1.BytesToRead < byteXmitBuffer.Length)
-                    System.Threading.Thread.Sleep(50);
+                TCSupport.WaitForReadBufferToLoad(com1, byteXmitBuffer.Length);
 
                 //Read Every Byte except the last one. The last bye should be left in the last position of SerialPort's
                 //internal buffer. When we try to read this char as UTF32 the buffer should have to be resized so 
@@ -298,10 +297,7 @@ namespace System.IO.Ports.Tests
 
                 Encoding.UTF32.GetChars(byteBuffer, 0, byteBuffer.Length, expectedChars, 1);
 
-                while (com1.BytesToRead < 4 + numBytes)
-                {
-                    System.Threading.Thread.Sleep(50);
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, 4 + numBytes);
 
                 string rcvString = com1.ReadTo(com2.NewLine);
                 Assert.NotNull(rcvString);

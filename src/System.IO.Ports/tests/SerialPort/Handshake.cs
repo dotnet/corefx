@@ -23,9 +23,6 @@ namespace System.IO.Ports.Tests
         //The default time to wait after writing some bytes
         private const int DEFAULT_WAIT_AFTER_READ_OR_WRITE = 500;
 
-        private const byte XOFF_BYTE = 19;
-        private const byte XON_BYTE = 17;
-
         private enum ThrowAt { Set, Open };
 
         #region Test Cases
@@ -743,7 +740,7 @@ namespace System.IO.Ports.Tests
                     {
                         Fail("Err_12558aoed Expected XOff to be sent and nothing was sent");
                     }
-                    else if (XOFF_BYTE != (byteRead = com2.ReadByte()))
+                    else if (XOnOff.XOFF != (byteRead = com2.ReadByte()))
                     {
                         Fail("Err_0188598aoepad Expected XOff to be sent actually sent={0}", byteRead);
                     }
@@ -786,7 +783,7 @@ namespace System.IO.Ports.Tests
                     {
                         Fail("Err_6887518adizpa Expected XOn to be sent and nothing was sent");
                     }
-                    else if (XON_BYTE != (byteRead = com2.ReadByte()))
+                    else if (XOnOff.XON != (byteRead = com2.ReadByte()))
                     {
                         Fail("Err_58145auead Expected XOn to be sent actually sent={0}", byteRead);
                     }

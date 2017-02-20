@@ -152,8 +152,7 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
-                while (com1.BytesToRead < receivedBytesThreshold)
-                    System.Threading.Thread.Sleep(100);
+                TCSupport.WaitForReadBufferToLoad(com1, receivedBytesThreshold);
 
                 if (0 != rcvEventHandler.NumEventsHandled)
                 {
@@ -200,8 +199,7 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
-                while (com1.BytesToRead < receivedBytesThreshold)
-                    System.Threading.Thread.Sleep(100);
+                TCSupport.WaitForReadBufferToLoad(com1, receivedBytesThreshold);
 
                 if (0 != rcvEventHandler.NumEventsHandled)
                 {
@@ -247,8 +245,7 @@ namespace System.IO.Ports.Tests
 
                 com2.Write(new byte[receivedBytesThreshold], 0, receivedBytesThreshold);
 
-                while (com1.BytesToRead < receivedBytesThreshold)
-                    System.Threading.Thread.Sleep(100);
+                TCSupport.WaitForReadBufferToLoad(com1, receivedBytesThreshold);
 
                 if (0 != rcvEventHandler.NumEventsHandled)
                 {

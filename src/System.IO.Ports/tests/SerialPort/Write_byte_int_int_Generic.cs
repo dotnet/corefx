@@ -204,18 +204,8 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-                while (BYTE_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                if (BYTE_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
-                {
-                    Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", BYTE_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
-                }
-
+                TCSupport.WaitForExactWriteBufferLoad(com, BYTE_SIZE_BYTES_TO_WRITE);
+                
                 //Wait for write method to timeout
                 while (t.IsAlive)
                     System.Threading.Thread.Sleep(100);
@@ -249,17 +239,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-                while (BYTE_SIZE_BYTES_TO_WRITE > com.BytesToWrite && waitTime < 500)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                if (BYTE_SIZE_BYTES_TO_WRITE != com.BytesToWrite)
-                {
-                    Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after first write", BYTE_SIZE_BYTES_TO_WRITE, com.BytesToWrite);
-                }
+                TCSupport.WaitForExactWriteBufferLoad(com, BYTE_SIZE_BYTES_TO_WRITE);
 
                 //Write a random byte[] asynchronously so we can verify some things while the write call is blocking
                 t2.Start();
@@ -270,17 +250,7 @@ namespace System.IO.Ports.Tests
                     waitTime += 50;
                 }
 
-                waitTime = 0;
-                while (BYTE_SIZE_BYTES_TO_WRITE * 2 > com.BytesToWrite && waitTime < 500)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    waitTime += 50;
-                }
-
-                if (BYTE_SIZE_BYTES_TO_WRITE * 2 != com.BytesToWrite)
-                {
-                    Fail("ERROR!!! Expcted BytesToWrite={0} actual {1} after second write", BYTE_SIZE_BYTES_TO_WRITE * 2, com.BytesToWrite);
-                }
+                TCSupport.WaitForExactWriteBufferLoad(com, BYTE_SIZE_BYTES_TO_WRITE * 2);
 
                 //Wait for both write methods to timeout
                 while (t1.IsAlive || t2.IsAlive)
@@ -500,17 +470,8 @@ namespace System.IO.Ports.Tests
                 }
 
                 waitTime = 0;
-                while (BYTE_SIZE_HANDSHAKE > com1.BytesToWrite && waitTime < 500)
-                {
-                    System.Threading.Thread.Sleep(50);
-                    waitTime += 50;
-                }
 
-                //Verify that the correct number of bytes are in the buffer
-                if (BYTE_SIZE_HANDSHAKE != com1.BytesToWrite)
-                {
-                    Fail("ERROR!!! Expcted BytesToWrite={0} actual {1}", BYTE_SIZE_HANDSHAKE, com1.BytesToWrite);
-                }
+                TCSupport.WaitForExactWriteBufferLoad(com1, BYTE_SIZE_HANDSHAKE);
 
                 //Verify that CtsHolding is false if the RequestToSend or RequestToSendXOnXOff handshake method is used
                 if ((Handshake.RequestToSend == handshake || Handshake.RequestToSendXOnXOff == handshake) && com1.CtsHolding)

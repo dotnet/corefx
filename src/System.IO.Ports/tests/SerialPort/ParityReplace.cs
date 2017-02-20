@@ -269,9 +269,7 @@ namespace System.IO.Ports.Tests
             }
             else
             {
-                while (bytesToWrite.Length > com1.BytesToRead)
-                {
-                }
+                TCSupport.WaitForReadBufferToLoad(com1, bytesToWrite.Length);
             }
 
             char[] actualChars = readMethod(com1);
