@@ -50,13 +50,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsCollectionType()
         {
             if ((AssociatedSystemType.IsGenericType &&
-                 (AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IList<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
+                 (AssociatedSystemType.GetGenericTypeDefinition() == typeof(IList<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(ICollection<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
                 AssociatedSystemType == typeof(System.Collections.IList) ||
                 AssociatedSystemType == typeof(System.Collections.ICollection) ||
                 AssociatedSystemType == typeof(System.Collections.IEnumerable) ||
