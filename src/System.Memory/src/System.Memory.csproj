@@ -38,9 +38,11 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Condition="'$(TargetGroup)' != 'netstandard1.0'" Include="System.Runtime.CompilerServices.Unsafe" />
-    <Reference Condition="'$(TargetGroup)' != 'netstandard1.0'" Include="System.Numerics.Vectors" />
+    <Reference Condition="'$(TargetGroup)' != 'netcoreapp' and '$(TargetGroup)' != 'netfx' and '$(TargetGroup)' != 'uap'" Include="System.Numerics.Vectors" />
     <ProjectReference Condition="'$(TargetGroup)' == 'netstandard1.0'" Include="..\..\System.Runtime.CompilerServices.Unsafe\ref\System.Runtime.CompilerServices.Unsafe.csproj" />
-    <ProjectReference Condition="'$(TargetGroup)' == 'netstandard1.0'" Include="..\..\System.Numerics.Vectors\ref\System.Numerics.Vectors.csproj" />
+    <ProjectReference Condition="'$(TargetGroup)' == 'netcoreapp'" Include="..\..\System.Numerics.Vectors\ref\System.Numerics.Vectors.csproj" />
+    <ProjectReference Condition="'$(TargetGroup)' == 'netfx'" Include="..\..\System.Numerics.Vectors\ref\System.Numerics.Vectors.csproj" />
+    <ProjectReference Condition="'$(TargetGroup)' == 'uap'" Include="..\..\System.Numerics.Vectors\ref\System.Numerics.Vectors.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
