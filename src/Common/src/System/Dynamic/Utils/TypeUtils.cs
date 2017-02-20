@@ -20,7 +20,7 @@ namespace System.Dynamic.Utils
             {
                 return true;
             }
-            if (!dest.IsValueType && !src.IsValueType && dest.IsAssignableFrom(src.GetTypeInfo()))
+            if (!dest.IsValueType && !src.IsValueType && dest.IsAssignableFrom(src))
             {
                 return true;
             }
@@ -57,7 +57,7 @@ namespace System.Dynamic.Utils
             {
                 if (s_mscorlib == null)
                 {
-                    s_mscorlib = typeof(object).GetTypeInfo().Assembly;
+                    s_mscorlib = typeof(object).Assembly;
                 }
 
                 return s_mscorlib;
@@ -79,7 +79,7 @@ namespace System.Dynamic.Utils
             // that allows mscorlib types to be specialized by types in other
             // assemblies.
 
-            Assembly asm = t.GetTypeInfo().Assembly;
+            Assembly asm = t.Assembly;
             if (asm != _mscorlib)
             {
                 // Not in mscorlib or our assembly

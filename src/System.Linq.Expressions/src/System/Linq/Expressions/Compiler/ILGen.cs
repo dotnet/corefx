@@ -544,7 +544,7 @@ namespace System.Linq.Expressions.Compiler
         {
             // If CompileToMethod is re-enabled, t is TypeBuilder should also return
             // true when not compiling to a DynamicMethod
-            return t.IsGenericParameter || t.GetTypeInfo().IsVisible;
+            return t.IsGenericParameter || t.IsVisible;
         }
 
         internal static bool ShouldLdtoken(MethodBase mb)

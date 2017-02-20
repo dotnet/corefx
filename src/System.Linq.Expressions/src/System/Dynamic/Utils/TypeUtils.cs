@@ -262,12 +262,12 @@ namespace System.Dynamic.Utils
             Type nnDestType = GetNonNullableType(dest);
 
             // Down conversion
-            if (nnSourceType.IsAssignableFrom(nnDestType.GetTypeInfo()))
+            if (nnSourceType.IsAssignableFrom(nnDestType))
             {
                 return true;
             }
             // Up conversion
-            if (nnDestType.IsAssignableFrom(nnSourceType.GetTypeInfo()))
+            if (nnDestType.IsAssignableFrom(nnSourceType))
             {
                 return true;
             }
@@ -291,19 +291,19 @@ namespace System.Dynamic.Utils
         private static bool IsCovariant(Type t)
         {
             Debug.Assert(t != null);
-            return 0 != (t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.Covariant);
+            return 0 != (t.GenericParameterAttributes & GenericParameterAttributes.Covariant);
         }
 
         private static bool IsContravariant(Type t)
         {
             Debug.Assert(t != null);
-            return 0 != (t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.Contravariant);
+            return 0 != (t.GenericParameterAttributes & GenericParameterAttributes.Contravariant);
         }
 
         private static bool IsInvariant(Type t)
         {
             Debug.Assert(t != null);
-            return 0 == (t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.VarianceMask);
+            return 0 == (t.GenericParameterAttributes & GenericParameterAttributes.VarianceMask);
         }
 
         private static bool IsDelegate(Type t)
@@ -644,7 +644,7 @@ namespace System.Dynamic.Utils
 
         private static bool IsImplicitReferenceConversion(Type source, Type destination)
         {
-            return destination.IsAssignableFrom(source.GetTypeInfo());
+            return destination.IsAssignableFrom(source);
         }
 
         private static bool IsImplicitBoxingConversion(Type source, Type destination)
@@ -680,7 +680,7 @@ namespace System.Dynamic.Utils
                             return found;
                     }
                 }
-                type = type.GetTypeInfo().BaseType;
+                type = type.BaseType;
             }
             return null;
         }
@@ -703,7 +703,7 @@ namespace System.Dynamic.Utils
                 {
                     return result;
                 }
-                type = type.GetTypeInfo().BaseType;
+                type = type.BaseType;
             } while (type != null);
             return null;
         }
