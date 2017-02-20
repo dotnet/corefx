@@ -1136,7 +1136,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     throw Error.InternalCompilerError();
                 }
 
-                callingObject = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(t), null, t.GetTypeInfo().ContainsGenericParameters ?
+                callingObject = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(t), null, t.ContainsGenericParameters ?
                         _exprFactory.CreateTypeArguments(SymbolLoader.getBSymmgr().AllocParams(_symbolTable.GetCTypeArrayFromTypes(t.GetGenericArguments())), null) : null);
             }
             else
