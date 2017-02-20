@@ -3,14 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System.IO;
 
 namespace System.PrivateUri.Tests
 {
     public static class UriTests
     {
-        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
-
         [Fact]
         public static void TestCtor_String()
         {

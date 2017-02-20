@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -232,6 +231,7 @@ namespace System.Tests
             if (!s_isWindowsSystem)
             {
                 yield return new object[] { @"/directory/filename", false  };
+                yield return new object[] { @"file:///directory/filename", true  };
             }
         }
 

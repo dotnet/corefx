@@ -3717,13 +3717,6 @@ namespace System
                 return 0;
             }
 
-            if (end == length)
-            {
-                err = ParsingError.BadFormat;
-                return 0;
-            }
-
-
             // Here could be a possibly valid, and not well-known scheme
             // Finds the scheme delimiter
             // we don;t work with the schemes names > c_MaxUriSchemeName (should be ~1k)

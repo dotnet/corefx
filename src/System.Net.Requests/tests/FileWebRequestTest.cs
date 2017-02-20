@@ -214,7 +214,7 @@ namespace System.Net.Tests
         [InlineData(true)]
         public async Task BeginGetResponse_OnNonexistentFile_ShouldNotCrashApplication(bool? abortWithDelay)
         {
-            FileWebRequest request = (FileWebRequest)WebRequest.Create("file://" + Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
+            FileWebRequest request = (FileWebRequest)WebRequest.Create("file://" + Path.GetRandomFileName());
             Task<WebResponse> responseTask = GetResponseAsync(request);
             if (abortWithDelay.HasValue)
             {

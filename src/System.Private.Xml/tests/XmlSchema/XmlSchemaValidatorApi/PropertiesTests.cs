@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Schema;
 using Xunit;
@@ -344,18 +343,13 @@ namespace System.Xml.Tests
             _output = output;
         }
 
-        public static IEnumerable<object[]> Default_Empty_RelativeUri_NetworkFolder_HTTP_FILE_ForSourceURI_TestData()
-        {
-            yield return new object[] { "default" };
-            yield return new object[] { "" };
-            yield return new object[] { "urn:tempuri" };
-            yield return new object[] { "http://tempuri.com/schemas" };
-            yield return new object[] { "file://tempuri.com/schemas" };
-            yield return new object[] { "\\\\wddata\\some\\path" };
-        }
-
         [Theory]
-        [MemberData(nameof(Default_Empty_RelativeUri_NetworkFolder_HTTP_FILE_ForSourceURI_TestData))]
+        [InlineData("default")]
+        [InlineData("")]
+        [InlineData("urn:tempuri")]
+        [InlineData("\\\\wddata\\some\\path")]
+        [InlineData("http://tempuri.com/schemas")]
+        [InlineData("file://tempuri.com/schemas")]
         public void Default_Empty_RelativeUri_NetworkFolder_HTTP_FILE_ForSourceURI(String sourceUri)
         {
             string xmlSrc = "<root>foo</root>";

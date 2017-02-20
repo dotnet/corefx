@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -188,7 +187,6 @@ namespace System.Tests
                 yield return new object[] { @"file:///\192.168.0.1", "file", "", "192.168.0.1", UriHostNameType.IPv4, -1, true, false };
             }
             yield return new object[] { @"file://\/192.168.0.1", "file", "", "192.168.0.1", UriHostNameType.IPv4, -1, true, false };
-
 
             // IPv4 host - other
             yield return new object[] { "file://192.168.0.1", "file", "", "192.168.0.1", UriHostNameType.IPv4, -1, true, false };
@@ -428,7 +426,6 @@ namespace System.Tests
             yield return new object[] { "file:////loopback", "file", "", "localhost", UriHostNameType.Dns, -1, true, true };
             yield return new object[] { @"file:///\loopback", "file", "", "localhost", UriHostNameType.Dns, -1, true, true };
             yield return new object[] { @"file://\/loopback", "file", "", "localhost", UriHostNameType.Dns, -1, true, true };
-
             // Loopback - IpV4
             yield return new object[] { "http://127.0.0.1/", "http", "", "127.0.0.1", UriHostNameType.IPv4, 80, true, true };
             // Loopback - IpV6
@@ -544,7 +541,6 @@ namespace System.Tests
             // File with empty path
             yield return new object[] { "file:///", "/", "", "" };
             yield return new object[] { @"file://\", "/", "", "" };
-
             // File with windows drive
             yield return new object[] { "file://C:/", "C:/", "", "" };
             yield return new object[] { "file://C|/", "C:/", "", "" };
@@ -565,13 +561,11 @@ namespace System.Tests
             yield return new object[] { @"file://C|/path1\path2/path3\path4\", "C:/path1/path2/path3/path4/", "", "" };
             yield return new object[] { @"file://C:\path1\path2/path3\path4\", "C:/path1/path2/path3/path4/", "", "" };
             yield return new object[] { @"file://C|\path1\path2/path3\path4\", "C:/path1/path2/path3/path4/", "", "" };
-
             // File with host
             yield return new object[] { "file://path1/path2", "/path2", "", "" };
             yield return new object[] { "file:///path1/path2", "/path1/path2", "", "" };
             yield return new object[] { @"file:///path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
             yield return new object[] { @"file:///path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
-            
             // Implicit file with empty path
             yield return new object[] { "C:/", "C:/", "", "" };
             yield return new object[] { "C|/", "C:/", "", "" };
@@ -681,6 +675,7 @@ namespace System.Tests
             yield return new object[] { @"file://\/C:/path1/path2", "C:/path1/path2", "", "" };
             // Other
             yield return new object[] { "C|/path|path/path2", "C:/path%7Cpath/path2", "", "" };
+            yield return new object[] { "file://host/path?query#fragment", "/path", "?query", "#fragment" };
 
             // Unix path
             if (!s_isWindowsSystem)
@@ -700,9 +695,6 @@ namespace System.Tests
                 // Explicit with empty host and fragment
                 yield return new object[] { "file:///#fragment", "/", "", "#fragment" };
             }
-
-            // Other
-            yield return new object[] { "file://host/path?query#fragment", "/path", "?query", "#fragment" };
 
             // Mailto
             yield return new object[] { "mailto:someone@example.com", "", "", "" };
