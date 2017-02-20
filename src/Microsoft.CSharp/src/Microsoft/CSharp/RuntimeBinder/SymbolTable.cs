@@ -1010,7 +1010,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // We have to set the TypeVars, access, and the AggKind before we can set the aggState
             // because of the assertion checking the compiler does.
             AggKindEnum kind;
-            if (type.GetTypeInfo().IsInterface)
+            if (type.IsInterface)
             {
                 kind = AggKindEnum.Interface;
             }
