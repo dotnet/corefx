@@ -1125,7 +1125,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             agg.SetManagedStruct(false);
             agg.SetHasExternReference(false);
 
-            agg.SetComImport(type.GetTypeInfo().IsImport);
+            agg.SetComImport(type.IsImport);
 
             AggregateType baseAggType = agg.getThisType();
             if (type.BaseType != null)
