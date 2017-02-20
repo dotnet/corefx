@@ -167,9 +167,10 @@ namespace System.ComponentModel
 
             lock (s_internalSyncObject)
             {
-                if (!EditorTables.ContainsKey(editorBaseType))
+                Hashtable editorTables = EditorTables;
+                if (!editorTables.ContainsKey(editorBaseType))
                 {
-                    EditorTables[editorBaseType] = table;
+                    editorTables[editorBaseType] = table;
                 }
             }
         }
@@ -322,7 +323,8 @@ namespace System.ComponentModel
         /// </summary> 
         private static Hashtable GetEditorTable(Type editorBaseType)
         {
-            object table = EditorTables[editorBaseType];
+            Hashtable editorTables = EditorTables;
+            object table = editorTables[editorBaseType];
 
             if (table == null)
             {
@@ -331,7 +333,7 @@ namespace System.ComponentModel
                 // actually run.
                 //
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(editorBaseType.TypeHandle);
-                table = EditorTables[editorBaseType];
+                table = editorTables[editorBaseType];
 
                 // If the table is still null, then throw a
                 // sentinel in there so we don't
@@ -341,10 +343,10 @@ namespace System.ComponentModel
                 {
                     lock (s_internalSyncObject)
                     {
-                        table = EditorTables[editorBaseType];
+                        table = editorTables[editorBaseType];
                         if (table == null)
                         {
-                            EditorTables[editorBaseType] = EditorTables;
+                            editorTables[editorBaseType] = editorTables;
                         }
                     }
                 }
@@ -354,7 +356,7 @@ namespace System.ComponentModel
             // we have already tried and failed to get
             // a table.
             //
-            if (table == EditorTables)
+            if (table == editorTables)
             {
                 table = null;
             }
@@ -898,7 +900,8 @@ namespace System.ComponentModel
         /// </summary>
         internal static Attribute[] ReflectGetAttributes(Type type)
         {
-            Attribute[] attrs = (Attribute[])AttributeCache[type];
+            Hashtable attributeCache = AttributeCache;
+            Attribute[] attrs = (Attribute[])attributeCache[type];
             if (attrs != null)
             {
                 return attrs;
@@ -906,13 +909,13 @@ namespace System.ComponentModel
 
             lock (s_internalSyncObject)
             {
-                attrs = (Attribute[])AttributeCache[type];
+                attrs = (Attribute[])attributeCache[type];
                 if (attrs == null)
                 {
                     // Get the type's attributes.
                     //
                     attrs = type.GetTypeInfo().GetCustomAttributes(typeof(Attribute), false).OfType<Attribute>().ToArray();
-                    AttributeCache[type] = attrs;
+                    attributeCache[type] = attrs;
                 }
             }
 
@@ -925,7 +928,8 @@ namespace System.ComponentModel
         /// </summary>
         internal static Attribute[] ReflectGetAttributes(MemberInfo member)
         {
-            Attribute[] attrs = (Attribute[])AttributeCache[member];
+            Hashtable attributeCache = AttributeCache;
+            Attribute[] attrs = (Attribute[])attributeCache[member];
             if (attrs != null)
             {
                 return attrs;
@@ -933,13 +937,13 @@ namespace System.ComponentModel
 
             lock (s_internalSyncObject)
             {
-                attrs = (Attribute[])AttributeCache[member];
+                attrs = (Attribute[])attributeCache[member];
                 if (attrs == null)
                 {
                     // Get the member's attributes.
                     //
                     attrs = member.GetCustomAttributes(typeof(Attribute), false).OfType<Attribute>().ToArray();
-                    AttributeCache[member] = attrs;
+                    attributeCache[member] = attrs;
                 }
             }
 
@@ -952,7 +956,8 @@ namespace System.ComponentModel
         /// </summary>
         private static EventDescriptor[] ReflectGetEvents(Type type)
         {
-            EventDescriptor[] events = (EventDescriptor[])EventCache[type];
+            Hashtable eventCache = EventCache;
+            EventDescriptor[] events = (EventDescriptor[])eventCache[type];
             if (events != null)
             {
                 return events;
@@ -960,7 +965,7 @@ namespace System.ComponentModel
 
             lock (s_internalSyncObject)
             {
-                events = (EventDescriptor[])EventCache[type];
+                events = (EventDescriptor[])eventCache[type];
                 if (events == null)
                 {
                     BindingFlags bindingFlags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance;
@@ -1008,7 +1013,7 @@ namespace System.ComponentModel
                         Debug.Assert(dbgEvent != null, "Holes in event array for type " + type);
                     }
 #endif
-                    EventCache[type] = events;
+                    eventCache[type] = events;
                 }
             }
 
@@ -1050,12 +1055,13 @@ namespace System.ComponentModel
             // property store.
             //
             Type providerType = provider.GetType();
-            ReflectPropertyDescriptor[] extendedProperties = (ReflectPropertyDescriptor[])ExtendedPropertyCache[providerType];
+            Hashtable extendedPropertyCache = ExtendedPropertyCache;
+            ReflectPropertyDescriptor[] extendedProperties = (ReflectPropertyDescriptor[])extendedPropertyCache[providerType];
             if (extendedProperties == null)
             {
                 lock (s_internalSyncObject)
                 {
-                    extendedProperties = (ReflectPropertyDescriptor[])ExtendedPropertyCache[providerType];
+                    extendedProperties = (ReflectPropertyDescriptor[])extendedPropertyCache[providerType];
 
                     // Our class-based property store failed as well, so we need to build up the set of
                     // extended properties here.
@@ -1094,7 +1100,7 @@ namespace System.ComponentModel
 
                         extendedProperties = new ReflectPropertyDescriptor[extendedList.Count];
                         extendedList.CopyTo(extendedProperties, 0);
-                        ExtendedPropertyCache[providerType] = extendedProperties;
+                        extendedPropertyCache[providerType] = extendedProperties;
                     }
                 }
             }
@@ -1124,7 +1130,8 @@ namespace System.ComponentModel
         /// </summary>
         private static PropertyDescriptor[] ReflectGetProperties(Type type)
         {
-            PropertyDescriptor[] properties = (PropertyDescriptor[])PropertyCache[type];
+            Hashtable propertyCache = PropertyCache;
+            PropertyDescriptor[] properties = (PropertyDescriptor[])propertyCache[type];
             if (properties != null)
             {
                 return properties;
@@ -1132,7 +1139,7 @@ namespace System.ComponentModel
 
             lock (s_internalSyncObject)
             {
-                properties = (PropertyDescriptor[])PropertyCache[type];
+                properties = (PropertyDescriptor[])propertyCache[type];
 
                 if (properties == null)
                 {
@@ -1191,7 +1198,7 @@ namespace System.ComponentModel
 
                     Debug.Assert(!properties.Any(dbgProp => dbgProp == null), $"Holes in property array for type {type}");
 
-                    PropertyCache[type] = properties;
+                    propertyCache[type] = properties;
                 }
             }
 
