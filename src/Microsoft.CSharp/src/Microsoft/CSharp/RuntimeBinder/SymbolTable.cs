@@ -1120,7 +1120,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
             agg.SetLayoutError(false);
-            agg.SetSealed(type.GetTypeInfo().IsSealed);
+            agg.SetSealed(type.IsSealed);
             agg.SetUnmanagedStruct(false);
             agg.SetManagedStruct(false);
             agg.SetHasExternReference(false);
