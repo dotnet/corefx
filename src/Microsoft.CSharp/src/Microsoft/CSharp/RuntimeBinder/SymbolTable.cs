@@ -616,26 +616,26 @@ namespace Microsoft.CSharp.RuntimeBinder
                     t.GenericParameterPosition);
             }
 
-            if ((t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.Covariant) != 0)
+            if ((t.GenericParameterAttributes & GenericParameterAttributes.Covariant) != 0)
             {
                 typeParam.Covariant = true;
             }
-            if ((t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.Contravariant) != 0)
+            if ((t.GenericParameterAttributes & GenericParameterAttributes.Contravariant) != 0)
             {
                 typeParam.Contravariant = true;
             }
 
             SpecCons cons = SpecCons.None;
 
-            if ((t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) != 0)
+            if ((t.GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) != 0)
             {
                 cons |= SpecCons.New;
             }
-            if ((t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
+            if ((t.GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
             {
                 cons |= SpecCons.Ref;
             }
-            if ((t.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
+            if ((t.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
             {
                 cons |= SpecCons.Val;
             }
