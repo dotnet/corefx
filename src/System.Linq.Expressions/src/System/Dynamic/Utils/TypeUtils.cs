@@ -22,7 +22,7 @@ namespace System.Dynamic.Utils
         public static Type GetNullableType(this Type type)
         {
             Debug.Assert(type != null, "type cannot be null");
-            if (type.GetTypeInfo().IsValueType && !IsNullableType(type))
+            if (type.IsValueType && !IsNullableType(type))
             {
                 return typeof(Nullable<>).MakeGenericType(type);
             }
@@ -36,7 +36,7 @@ namespace System.Dynamic.Utils
 
         public static bool IsNullableOrReferenceType(this Type type)
         {
-            return !type.GetTypeInfo().IsValueType || IsNullableType(type);
+            return !type.IsValueType || IsNullableType(type);
         }
 
         public static bool IsBool(this Type type)
@@ -184,7 +184,7 @@ namespace System.Dynamic.Utils
             {
                 return false;
             }
-            if (instanceType.GetTypeInfo().IsValueType)
+            if (instanceType.IsValueType)
             {
                 if (AreReferenceAssignable(targetType, typeof(object)))
                 {
@@ -375,7 +375,7 @@ namespace System.Dynamic.Utils
                 }
                 else if (IsContravariant(genericParameter))
                 {
-                    if (sourceArgument.GetTypeInfo().IsValueType || destArgument.GetTypeInfo().IsValueType)
+                    if (sourceArgument.IsValueType || destArgument.IsValueType)
                     {
                         return false;
                     }
@@ -413,7 +413,7 @@ namespace System.Dynamic.Utils
 
         public static bool HasReferenceEquality(Type left, Type right)
         {
-            if (left.GetTypeInfo().IsValueType || right.GetTypeInfo().IsValueType)
+            if (left.IsValueType || right.IsValueType)
             {
                 return false;
             }
@@ -433,17 +433,17 @@ namespace System.Dynamic.Utils
         {
             // If we have an interface and a reference type then we can do
             // reference equality.
-            if (left.GetTypeInfo().IsInterface && !right.GetTypeInfo().IsValueType)
+            if (left.GetTypeInfo().IsInterface && !right.IsValueType)
             {
                 return true;
             }
-            if (right.GetTypeInfo().IsInterface && !left.GetTypeInfo().IsValueType)
+            if (right.GetTypeInfo().IsInterface && !left.IsValueType)
             {
                 return true;
             }
             // If we have two reference types and one is assignable to the
             // other then we can do reference equality.
-            if (!left.GetTypeInfo().IsValueType && !right.GetTypeInfo().IsValueType)
+            if (!left.IsValueType && !right.IsValueType)
             {
                 if (AreReferenceAssignable(left, right) || AreReferenceAssignable(right, left))
                 {
@@ -458,7 +458,7 @@ namespace System.Dynamic.Utils
             }
             // We have two identical value types, modulo nullability.  (If they were both the
             // same reference type then we would have returned true earlier.)
-            Debug.Assert(left.GetTypeInfo().IsValueType);
+            Debug.Assert(left.IsValueType);
             // Equality between struct types is only defined for numerics, bools, enums,
             // and their nullable equivalents.
             Type nnType = GetNonNullableType(left);
@@ -649,7 +649,7 @@ namespace System.Dynamic.Utils
 
         private static bool IsImplicitBoxingConversion(Type source, Type destination)
         {
-            if (source.GetTypeInfo().IsValueType && (destination == typeof(object) || destination == typeof(ValueType)))
+            if (source.IsValueType && (destination == typeof(object) || destination == typeof(ValueType)))
                 return true;
             if (source.GetTypeInfo().IsEnum && destination == typeof(Enum))
                 return true;

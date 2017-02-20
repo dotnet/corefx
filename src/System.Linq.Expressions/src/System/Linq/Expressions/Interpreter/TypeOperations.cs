@@ -280,7 +280,7 @@ namespace System.Linq.Expressions.Interpreter
 
             public new static CastInstruction Create(Type t)
             {
-                if (t.GetTypeInfo().IsValueType && !t.IsNullableType())
+                if (t.IsValueType && !t.IsNullableType())
                 {
                     return new Value(t);
                 }

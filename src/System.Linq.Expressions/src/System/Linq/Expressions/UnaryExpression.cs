@@ -391,7 +391,7 @@ namespace System.Linq.Expressions
             {
                 types[0] = nnOperandType;
                 method = nnOperandType.GetAnyStaticMethodValidated(name, types);
-                if (method != null && method.ReturnType.GetTypeInfo().IsValueType && !method.ReturnType.IsNullableType())
+                if (method != null && method.ReturnType.IsValueType && !method.ReturnType.IsNullableType())
                 {
                     return new UnaryExpression(unaryType, operand, method.ReturnType.GetNullableType(), method);
                 }
@@ -414,7 +414,7 @@ namespace System.Linq.Expressions
             // check for lifted call
             if (operand.Type.IsNullableType() &&
                 ParameterIsAssignable(pms[0], operand.Type.GetNonNullableType()) &&
-                method.ReturnType.GetTypeInfo().IsValueType && !method.ReturnType.IsNullableType())
+                method.ReturnType.IsValueType && !method.ReturnType.IsNullableType())
             {
                 return new UnaryExpression(unaryType, operand, method.ReturnType.GetNullableType(), method);
             }
@@ -724,7 +724,7 @@ namespace System.Linq.Expressions
                 throw Error.TypeMustNotBePointer(nameof(type));
             }
 
-            if (type.GetTypeInfo().IsValueType && !type.IsNullableType())
+            if (type.IsValueType && !type.IsNullableType())
             {
                 throw Error.IncorrectTypeForTypeAs(type, nameof(type));
             }
@@ -746,7 +746,7 @@ namespace System.Linq.Expressions
             {
                 throw Error.InvalidUnboxType(nameof(expression));
             }
-            if (!type.GetTypeInfo().IsValueType) throw Error.InvalidUnboxType(nameof(type));
+            if (!type.IsValueType) throw Error.InvalidUnboxType(nameof(type));
             TypeUtils.ValidateType(type, nameof(type));
             return new UnaryExpression(ExpressionType.Unbox, expression, type, null);
         }
@@ -944,7 +944,7 @@ namespace System.Linq.Expressions
             if (value != null)
             {
                 RequiresCanRead(value, nameof(value));
-                if (value.Type.GetTypeInfo().IsValueType) throw Error.ArgumentMustNotHaveValueType(nameof(value));
+                if (value.Type.IsValueType) throw Error.ArgumentMustNotHaveValueType(nameof(value));
             }
             return new UnaryExpression(ExpressionType.Throw, value, type, null);
         }

@@ -47,7 +47,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 case TypeCode.Object:
                     {
-                        if (t != typeof(object) && (IndexIsNotReturnType(0, target, pi) || t.GetTypeInfo().IsValueType))
+                        if (t != typeof(object) && (IndexIsNotReturnType(0, target, pi) || t.IsValueType))
                         {
                             // if we're on the return type relaxed delegates makes it ok to use object
                             goto default;
@@ -90,7 +90,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 case TypeCode.Object:
                     {
-                        if (t != typeof(object) && (IndexIsNotReturnType(1, target, pi) || t.GetTypeInfo().IsValueType))
+                        if (t != typeof(object) && (IndexIsNotReturnType(1, target, pi) || t.IsValueType))
                         {
                             // if we're on the return type relaxed delegates makes it ok to use object
                             goto default;
@@ -134,7 +134,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Object:
                     {
                         Debug.Assert(pi.Length == 2);
-                        if (t.GetTypeInfo().IsValueType) goto default;
+                        if (t.IsValueType) goto default;
 
                         return new FuncCallInstruction<T0, T1, Object>(target);
                     }

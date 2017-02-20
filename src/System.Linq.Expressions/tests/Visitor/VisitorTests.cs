@@ -34,7 +34,7 @@ namespace System.Linq.Expressions.Tests
 
             public override Expression Reduce()
             {
-                if (Disposable.Type.GetTypeInfo().IsValueType)
+                if (Disposable.Type.IsValueType)
                 {
                     return TryFinally(
                         Body,
