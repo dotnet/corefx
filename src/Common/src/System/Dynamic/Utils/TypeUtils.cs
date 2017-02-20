@@ -29,7 +29,7 @@ namespace System.Dynamic.Utils
 
         public static bool IsSameOrSubclass(Type type, Type subType)
         {
-            return AreEquivalent(type, subType) || subType.GetTypeInfo().IsSubclassOf(type);
+            return AreEquivalent(type, subType) || subType.IsSubclassOf(type);
         }
 
         public static void ValidateType(Type type, string paramName)
