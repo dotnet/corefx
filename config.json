@@ -24,6 +24,12 @@
       "values": ["x64", "x86", "arm", "arm64"],
       "defaultValue": "x64"
     },
+    "BuildAllConfigurations": {
+      "description": "Builds projects for all BuildConfigurations rather than determining best configuration for TargetGroup/OSGroup.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": false
+    },
     "RuntimeOS": {
       "description": "The RuntimeOS used for building and restoring native OS dependent assets (i.e. RID specific binaries)",
       "valueType": "property",
@@ -38,12 +44,6 @@
     },
     "TestWithLocalLibraries": {
       "description": "Enables/Disables building and running tests against local libraries.",
-      "valueType": "property",
-      "values": ["True", "False"],
-      "defaultValue": true
-    },
-    "RestoreDuringBuild": {
-      "description": "Enables/Disables the restoration of packages.",
       "valueType": "property",
       "values": ["True", "False"],
       "defaultValue": true
@@ -256,9 +256,14 @@
           "settings": { }
         },
         "tests": {
-          "description": "Builds the tests that are in the repository, doesn't restore packages.",
+          "description": "Builds src and then builds and runs the tests for the given configuration.",
           "settings": {
-            "RestoreDuringBuild": "false",
+            "BuildTests": true
+          }
+        },
+        "testsOnly": {
+          "description": "Builds and runs the tests for the given configuration.",
+          "settings": {
             "Project": "src/tests.builds",
             "MsBuildLogging":"/flp:v=normal;LogFile=build-tests.log"
           }
@@ -273,6 +278,12 @@
           "description": "Sets optimization level to release for managed build configuration. (/p:ConfigurationGroup=Release)",
           "settings": {
             "ConfigurationGroup": "Release"
+          }
+        },
+        "allConfigurations": {
+          "description": "Builds all configurations instead of only those specified by framework/os.",
+          "settings": {
+            "BuildAllConfigurations":"true"
           }
         },
         "framework": {
@@ -343,6 +354,12 @@
             "CmakeBuildType": "Release"
           }
         },
+        "allConfigurations": {
+          "description": "Builds all configurations instead of only those specified by framework/os.",
+          "settings": {
+            "BuildAllConfigurations":"true"
+          }
+        },
         "framework": {
           "description": "Sets target framework for native build configuration which is used for copying to the common shared runtime folder.",
           "settings": {
@@ -378,7 +395,11 @@
           "settings": {
             "StripSymbolsAdditionalArg": "stripSymbols"
           }
-        }
+        },
+        "tests": {
+          "description": "No-op for build-native, included just to enable easy combination with build-managed",
+          "settings": { }
+        },
       },
       "defaultValues": {
         "toolName": "terminal",
@@ -471,7 +492,6 @@
         "p": {
           "description": "Restores all NuGet packages for repository.",
           "settings": {
-            "RestoreDuringBuild":  true,
             "Sync": "default"
           }
         },
@@ -484,7 +504,6 @@
         "t": {
           "description": "Deprecated, use sync /p instead.",
           "settings": {
-            "RestoreDuringBuild":  true,
             "Sync": "default"
           }
         },
