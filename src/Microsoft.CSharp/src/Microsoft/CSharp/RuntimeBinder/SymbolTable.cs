@@ -538,9 +538,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 parentType = parentType.GetGenericTypeDefinition();
             }
 
-            if (t.GetTypeInfo().DeclaringMethod != null)
+            if (t.DeclaringMethod != null)
             {
-                MethodBase parentMethod = t.GetTypeInfo().DeclaringMethod;
+                MethodBase parentMethod = t.DeclaringMethod;
 
                 if (parentType.GetGenericArguments() == null || pos >= parentType.GetGenericArguments().Length)
                 {
@@ -892,9 +892,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 callChain.Add(t);
 
-                if (t.IsGenericParameter && t.GetTypeInfo().DeclaringMethod != null)
+                if (t.IsGenericParameter && t.DeclaringMethod != null)
                 {
-                    MethodBase methodBase = t.GetTypeInfo().DeclaringMethod;
+                    MethodBase methodBase = t.DeclaringMethod;
                     ParameterInfo[] parameters = methodBase.GetParameters();
 
                     bool bAdded = false;
@@ -1920,7 +1920,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Type t = p.ParameterType;
             CType ctype;
-            if (t.IsGenericParameter && t.GetTypeInfo().DeclaringMethod != null && t.GetTypeInfo().DeclaringMethod == m)
+            if (t.IsGenericParameter && t.DeclaringMethod != null && t.DeclaringMethod == m)
             {
                 // If its a method type parameter from ourselves, just find it.
                 ctype = LoadMethodTypeParameter(FindMethodFromMemberInfo(m), t);
