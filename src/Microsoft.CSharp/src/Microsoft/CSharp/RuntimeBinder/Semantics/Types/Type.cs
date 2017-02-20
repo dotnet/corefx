@@ -44,7 +44,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsWindowsRuntimeType()
         {
-            return (AssociatedSystemType.GetTypeInfo().Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
+            return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
         }
 
         public bool IsCollectionType()
