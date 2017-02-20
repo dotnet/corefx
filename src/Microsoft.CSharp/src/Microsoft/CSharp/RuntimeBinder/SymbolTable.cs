@@ -99,7 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type callingType)
         {
             // The first argument is the object that we're calling off of.
-            if (callingType.GetTypeInfo().IsGenericType)
+            if (callingType.IsGenericType)
             {
                 callingType = callingType.GetTypeInfo().GetGenericTypeDefinition();
             }
@@ -221,7 +221,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             foreach (Type t in inheritance)
             {
                 Type type = t;
-                if (type.GetTypeInfo().IsGenericType)
+                if (type.IsGenericType)
                 {
                     type = type.GetTypeInfo().GetGenericTypeDefinition();
                 }
@@ -350,7 +350,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private Name GetName(Type type)
         {
             string name = type.Name;
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 // Trim the name to remove the ` at the end.
                 name = name.Split('`')[0];
@@ -403,7 +403,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private TypeArray GetAggregateTypeParameters(Type type, AggregateSymbol agg)
         {
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 Type genericDefinition = type.GetTypeInfo().GetGenericTypeDefinition();
                 Type[] genericArguments = genericDefinition.GetGenericArguments();
@@ -533,7 +533,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             int pos = t.GenericParameterPosition;
 
             Type parentType = t.DeclaringType;
-            if (parentType != null && parentType.GetTypeInfo().IsGenericType)
+            if (parentType != null && parentType.IsGenericType)
             {
                 parentType = parentType.GetTypeInfo().GetGenericTypeDefinition();
             }
@@ -551,7 +551,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             while (parentType.GetGenericArguments().Length > pos)
             {
                 Type nextParent = parentType.DeclaringType;
-                if (nextParent != null && nextParent.GetTypeInfo().IsGenericType)
+                if (nextParent != null && nextParent.IsGenericType)
                 {
                     nextParent = nextParent.GetTypeInfo().GetGenericTypeDefinition();
                 }
@@ -706,7 +706,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     if (next != null)
                     {
                         Type existingType = (next as AggregateSymbol).AssociatedSystemType;
-                        Type newType = t.GetTypeInfo().IsGenericType ? t.GetTypeInfo().GetGenericTypeDefinition() : t;
+                        Type newType = t.IsGenericType ? t.GetTypeInfo().GetGenericTypeDefinition() : t;
 
                         // We use "IsEquivalentTo" so that unified local types for NoPIA do
                         // not trigger a reset. There are other mechanisms to make those sorts
@@ -798,7 +798,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private CType GetConstructedType(Type type, AggregateSymbol agg)
         {
             // We've found the one we want, so return it.
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 // If we're a generic type, then we need to add the type arguments.
                 List<CType> types = new List<CType>();
@@ -1004,7 +1004,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type type)
         {
             AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _infile, _typeManager);
-            agg.AssociatedSystemType = type.GetTypeInfo().IsGenericType ? type.GetTypeInfo().GetGenericTypeDefinition() : type;
+            agg.AssociatedSystemType = type.IsGenericType ? type.GetTypeInfo().GetGenericTypeDefinition() : type;
             agg.AssociatedAssembly = type.GetTypeInfo().Assembly;
 
             // We have to set the TypeVars, access, and the AggKind before we can set the aggState
@@ -1087,7 +1087,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 agg.SetTypeVars(GetAggregateTypeParameters(type, agg));
             }
 
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 Type genericDefinition = type.GetTypeInfo().GetGenericTypeDefinition();
                 Type[] genericArguments = genericDefinition.GetGenericArguments();
@@ -1110,7 +1110,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             {
                 string typeName = type.FullName;
-                if (type.GetTypeInfo().IsGenericType)
+                if (type.IsGenericType)
                 {
                     typeName = type.GetTypeInfo().GetGenericTypeDefinition().FullName;
                 }
@@ -1132,7 +1132,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 // type.BaseType can be null for Object or for interface types.
                 Type t = type.BaseType;
-                if (t.GetTypeInfo().IsGenericType)
+                if (t.IsGenericType)
                 {
                     t = t.GetTypeInfo().GetGenericTypeDefinition();
                 }
@@ -1157,7 +1157,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void SetInterfacesOnAggregate(AggregateSymbol aggregate, Type type)
         {
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 type = type.GetTypeInfo().GetGenericTypeDefinition();
             }
@@ -2039,7 +2039,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void AddConversionsForOneType(Type type)
         {
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 type = type.GetTypeInfo().GetGenericTypeDefinition();
             }

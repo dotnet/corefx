@@ -185,7 +185,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             // Recurse in for generic types arrays, byref and pointer types.
-            if (t1.GetTypeInfo().IsGenericType && t2.GetTypeInfo().IsGenericType)
+            if (t1.IsGenericType && t2.IsGenericType)
             {
                 var args1 = t1.GetGenericArguments();
                 var args2 = t2.GetGenericArguments();

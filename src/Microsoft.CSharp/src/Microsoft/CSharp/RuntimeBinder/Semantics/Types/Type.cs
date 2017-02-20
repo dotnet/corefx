@@ -49,7 +49,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsCollectionType()
         {
-            if ((AssociatedSystemType.GetTypeInfo().IsGenericType &&
+            if ((AssociatedSystemType.IsGenericType &&
                  (AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IList<>) ||
                   AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>) ||
                   AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
@@ -182,7 +182,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Type[] systemTypeArgs = list.ToArray();
             Type uninstantiatedType = agg.AssociatedSystemType;
 
-            if (uninstantiatedType.GetTypeInfo().IsGenericType)
+            if (uninstantiatedType.IsGenericType)
             {
                 try
                 {
