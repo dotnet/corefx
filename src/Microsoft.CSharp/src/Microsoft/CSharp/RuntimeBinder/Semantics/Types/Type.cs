@@ -139,7 +139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     else
                     {
                         Type parentType = t.GetOwningSymbol().AsAggregateSymbol().AssociatedSystemType;
-                        result = parentType.GetTypeInfo().GenericTypeParameters[t.GetIndexInOwnParameters()];
+                        result = parentType.GetGenericArguments()[t.GetIndexInOwnParameters()];
                     }
                     break;
 
