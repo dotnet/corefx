@@ -3784,7 +3784,7 @@ namespace System
             if (nChars == 2)
             {
                 // This is the only known scheme of length 2
-                if ((((int)*lptr) | _INT_LOWERCASE_Mask) == _WS_Mask)
+                if ((unchecked((int)*lptr) | _INT_LOWERCASE_Mask) == _WS_Mask)
                 {
                     syntax = UriParser.WsUri;
                     return true;
@@ -5393,7 +5393,7 @@ namespace System
         protected virtual void Canonicalize()
         {
             // this method if suppressed by the derived class
-            // would lead to supressing of a path compression
+            // would lead to suppressing of a path compression
             // It does not make much sense and violates Fxcop on calling a virtual method in the ctor.
             // Should be deprecated and removed asap.
         }

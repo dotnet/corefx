@@ -154,7 +154,14 @@
 
     <Message Text="Full, Unfiltered Test Archive Collection :: @(UnfilteredTestArchives)" Importance="Low" />
 
-    <!-- If we wish to filter tests that we upload, then altering the FilterToTestTFM and FilterToOSGroup is where to do it at. -->
+    <!-- If we wish to filter tests that we upload, then altering the FilterToTestTFM and FilterToOSGroup is where to do it at. 
+    
+    Disabled for now; We most likely no longer need this, but with the removal of the FilterToTestTFM and FilterTOOSGroup variables, 
+    this is breaking build.  For now, the old method of including the zips for upload should work.
+    
+    In the near future, this specific knowledge (for instance that the files for upload come from three folders, Regular, AnyOS, and Unix
+    Needs to be in CoreFX specific code, and CloudTest should just take a list of files generated in an external task.
+   
     <FilterForUpload UnfilteredUploadItems="@(UnfilteredTestArchives)"
              FilterToTestTFM="$(FilterToTestTFM)"
              FilterToOSGroup="$(FilterToOSGroup)" 
@@ -165,12 +172,22 @@
     <CreateItem Include="$(ForUploadList)">
       <Output TaskParameter="Include" ItemName="ForUpload"/>
     </CreateItem>
+    -->
+    <ItemGroup>
+       <ForUpload Include="@(UnfilteredTestArchives)" />
+    </ItemGroup>
+    <!-- To work around the removal of the build task, also need to turn the list of test archives to a property 
+         like the previous build task would have output --> 
+    <PropertyGroup>
+      <ForUploadList>@(UnfilteredTestArchives)</ForUploadList>
+    </PropertyGroup>
 
     <Message Condition="'$(FilterToTestTFM)' != ''" Text="Using test archives for TFM: $(FilterToTestTFM)" />
     <Message Text="Using OS-Specific test archives from: $(TestArchivesRoot)" />
     <Message Text="Using AnyOS test archives from: $(AnyOSTestArchivesRoot)" />
     <Message Condition="'$(TargetsUnix)' == 'true'"  Text="Using Unix test archives from: $(UnixTestArchivesRoot)" />
 
+    <!-- Deprecated property, should clean up / remove when refactoring CloudTest-->
     <PropertyGroup>
       <RelativeBlobPathFolderContainingTests Condition="'$(FilterToTestTFM)' != ''" >Tests/$(FilterToTestTFM)</RelativeBlobPathFolderContainingTests>
       <RelativeBlobPathFolderContainingTests Condition="'$(FilterToTestTFM)' == ''" >Tests</RelativeBlobPathFolderContainingTests>
@@ -262,10 +279,17 @@
   <Target Name="CreateFuncTestListJson"
           DependsOnTargets="CreateAzureStorage"
           Condition="'$(Performance)' != 'true' or '$(FuncTestsDisabled)' != 'true'">
-    <!-- create item group of functional tests -->
-    <CreateItem Include="$(ForUploadList)">
-      <Output TaskParameter="Include" ItemName="FunctionalTest"/>
-    </CreateItem>
+    <!-- create item group of functional tests 
+         Due to recent refactoring, calculating the right paths for Uris is challenging, so just reuse the previous
+         include approach to get a full list. 
+         This allows us to use RecursiveDir as the path to the zip instead of guessing and generating it again.
+    -->
+    <ItemGroup>
+      <FunctionalTest Include="$(TestArchivesRoot)**/*.zip" />
+      <FunctionalTest Include="$(AnyOSTestArchivesRoot)**/*.zip" />
+      <!-- Only include Unix folders if supported by the current target OS -->
+      <FunctionalTest Condition="'$(TargetsUnix)' == 'true'" Include="$(UnixTestArchivesRoot)**/*.zip" />
+    </ItemGroup>
 
     <PropertyGroup>
       <OtherRunnerScriptArgs Condition="'$(FilterToTargetGroup)' == 'net46'">$(OtherRunnerScriptArgs) --xunit-test-type=desktop </OtherRunnerScriptArgs>
@@ -283,6 +307,7 @@
       </FunctionalTest>
     </ItemGroup>
     <WriteItemsToJson JsonFileName="$(FuncTestListFile)" Items="@(FunctionalTest)" />
+          
     <!-- add test lists to the list of items for upload -->
     <ItemGroup>
       <ForUpload Include="$(FuncTestListFile)">

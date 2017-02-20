@@ -24,8 +24,6 @@ using System.Net;
 
 namespace System.Data.SqlClient
 {
-    using Res = System.SR;
-
     sealed internal class LastIOTimer
     {
         internal long _value;
@@ -250,27 +248,6 @@ namespace System.Data.SqlClient
 #if MANAGED_SNI
 
         internal SspiClientContextStatus sspiClientContextStatus = new SspiClientContextStatus();
-
-        internal class SspiClientContextStatus
-        {
-            public SafeFreeCredentials CredentialsHandle
-            {
-                get;
-                set;
-            }
-
-            public SafeDeleteContext SecurityContext
-            {
-                get;
-                set;
-            }
-
-            public ContextFlagsPal ContextFlags
-            {
-                get;
-                set;
-            }
-        }
 #endif
 
         //////////////////
@@ -1285,7 +1262,7 @@ namespace System.Data.SqlClient
                         int remainingData = _inBytesRead - _inBytesUsed;
                         if ((temp.Length < _inBytesUsed + remainingData) || (_inBuff.Length < remainingData))
                         {
-                            string errormessage = Res.GetString(Res.SQL_InvalidInternalPacketSize) + ' ' + temp.Length + ", " + _inBytesUsed + ", " + remainingData + ", " + _inBuff.Length;
+                            string errormessage = SR.GetString(SR.SQL_InvalidInternalPacketSize) + ' ' + temp.Length + ", " + _inBytesUsed + ", " + remainingData + ", " + _inBuff.Length;
                             throw SQL.InvalidInternalPacketSize(errormessage);
                         }
                         Buffer.BlockCopy(temp, _inBytesUsed, _inBuff, 0, remainingData);
@@ -2834,7 +2811,7 @@ namespace System.Data.SqlClient
                     if (_inBuff.Length < dataSize)
                     {
                         Debug.Assert(true, "Unexpected dataSize on Read");
-                        throw SQL.InvalidInternalPacketSize(Res.GetString(Res.SqlMisc_InvalidArraySizeMessage));
+                        throw SQL.InvalidInternalPacketSize(SR.GetString(SR.SqlMisc_InvalidArraySizeMessage));
                     }
 
                     _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
