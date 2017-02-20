@@ -18,13 +18,13 @@ namespace System.PrivateUri.Tests
     /// </summary>
     public class IriRelativeFileResolutionTest
     {
-        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
 
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndExplicitFileWithNoUnicode_AllPropertiesTheSame()
         {
-            string nonUnicodeImplicitTestFile = s_IsWindowsSystem ? @"c:\path\path3\test.txt" : "/path/path3/test.txt";
-            string nonUnicodeImplicitFileBase = s_IsWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
+            string nonUnicodeImplicitTestFile = s_isWindowsSystem ? @"c:\path\path3\test.txt" : "/path/path3/test.txt";
+            string nonUnicodeImplicitFileBase = s_isWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
 
             string testResults;
             int errorCount = RelatavizeRestoreCompareImplicitVsExplicitFiles(nonUnicodeImplicitTestFile,
@@ -35,8 +35,8 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndExplicitFileWithReservedChar_AllPropertiesTheSame()
         {
-            string nonUnicodeImplicitTestFile = s_IsWindowsSystem ? @"c:\path\path3\test.txt%25%" : "/path/path3/test.txt%25%";
-            string nonUnicodeImplicitFileBase = s_IsWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
+            string nonUnicodeImplicitTestFile = s_isWindowsSystem ? @"c:\path\path3\test.txt%25%" : "/path/path3/test.txt%25%";
+            string nonUnicodeImplicitFileBase = s_isWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
 
             string testResults;
             int errorCount = RelatavizeRestoreCompareImplicitVsExplicitFiles(nonUnicodeImplicitTestFile,
@@ -48,8 +48,8 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndExplicitFileWithUnicodeIriOn_AllPropertiesTheSame()
         {
-            string unicodeImplicitTestFile = s_IsWindowsSystem ? @"c:\path\\u30AF\path3\\u30EB\u30DE.text" : "/path//u30AF/path3//u30EB/u30DE.text";
-            string nonUnicodeImplicitFileBase = s_IsWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
+            string unicodeImplicitTestFile = s_isWindowsSystem ? @"c:\path\\u30AF\path3\\u30EB\u30DE.text" : "/path//u30AF/path3//u30EB/u30DE.text";
+            string nonUnicodeImplicitFileBase = s_isWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
 
             string testResults;
             int errorCount = RelatavizeRestoreCompareImplicitVsExplicitFiles(unicodeImplicitTestFile,
@@ -60,13 +60,13 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndExplicitFileWithUnicodeAndReservedCharIriOn_AllPropertiesTheSame()
         {
-            string unicodeImplicitTestFile = s_IsWindowsSystem ? @"c:\path\\u30AF\path3\\u30EB\u30DE.text%25%" : "/path//u30AF/path3//u30EB/u30DE.text%25%";
-            string nonUnicodeImplicitFileBase = s_IsWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
+            string unicodeImplicitTestFile = s_isWindowsSystem ? @"c:\path\\u30AF\path3\\u30EB\u30DE.text%25%" : "/path//u30AF/path3//u30EB/u30DE.text%25%";
+            string nonUnicodeImplicitFileBase = s_isWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
 
             string testResults;
             int errorCount = RelatavizeRestoreCompareImplicitVsExplicitFiles(unicodeImplicitTestFile,
                 nonUnicodeImplicitFileBase, out testResults);
-            Assert.True((errorCount == (s_IsWindowsSystem ? 4 : 0)), testResults);
+            Assert.True((errorCount == (s_isWindowsSystem ? 4 : 0)), testResults);
             // AbsolutePath, AbsoluteUri, LocalPath, PathAndQuery
         }
 
@@ -115,7 +115,7 @@ namespace System.PrivateUri.Tests
         public static int RelatavizeRestoreCompareImplicitVsExplicitFiles(string original,
             string baseString, out string errors)
         {
-            string fileSchemePrefix = s_IsWindowsSystem ? "file:///" : "file://";
+            string fileSchemePrefix = s_isWindowsSystem ? "file:///" : "file://";
             Uri implicitTestUri = new Uri(original);
             Uri implicitBaseUri = new Uri(baseString);
             Uri explicitBaseUri = new Uri(fileSchemePrefix + baseString);
@@ -156,14 +156,14 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void IriRelativeResolution_CompareImplcitAndOriginalFileWithNoUnicode_AllPropertiesTheSame()
         {
-            string nonUnicodeImplicitTestFile = s_IsWindowsSystem ? @"c:\path\path3\test.txt" : "/path/path3/test.txt";
-            string nonUnicodeImplicitFileBase = s_IsWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
+            string nonUnicodeImplicitTestFile = s_isWindowsSystem ? @"c:\path\path3\test.txt" : "/path/path3/test.txt";
+            string nonUnicodeImplicitFileBase = s_isWindowsSystem ? @"c:\path\file.txt" : "/path/file.txt";
 
             string testResults;
             int errorCount = RelatavizeRestoreCompareVsOriginal(nonUnicodeImplicitTestFile,
                 nonUnicodeImplicitFileBase, out testResults);
-            Assert.True((errorCount == (s_IsWindowsSystem ? 1 : 0)), testResults);
-            if (s_IsWindowsSystem)
+            Assert.True((errorCount == (s_isWindowsSystem ? 1 : 0)), testResults);
+            if (s_isWindowsSystem)
             {
                 Assert.True(IsOriginalString(testResults), testResults);
             }

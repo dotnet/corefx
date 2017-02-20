@@ -10,7 +10,7 @@ namespace System.Tests
 {
     public class UriCreateUriTests
     {
-        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
 
         public static IEnumerable<object[]> Create_Uri_TestData()
         {
@@ -34,7 +34,7 @@ namespace System.Tests
             yield return new object[] { "http://host/", "path1/page?query=value#fragment", UriKind.RelativeOrAbsolute, "http://host/path1/page?query=value#fragment" };
             yield return new object[] { "http://host/", "C:/x", UriKind.Relative, "http://host/C:/x" };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Explicit windows drive file
                 yield return new object[] { "file:///D:/abc", "C:/x", UriKind.Relative, "file:///C:/x" };
@@ -63,7 +63,7 @@ namespace System.Tests
             yield return new object[] { "file:///", "/path", UriKind.RelativeOrAbsolute, "file:///path" };
             yield return new object[] { "file:///", "path", UriKind.RelativeOrAbsolute, "file:///path" };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // UNC
                 yield return new object[] { @"\\servernameold\path1", "//servername", UriKind.Relative, @"\\servername" };
@@ -89,7 +89,7 @@ namespace System.Tests
             yield return new object[] { "http://[::1]", @"\path", UriKind.RelativeOrAbsolute, "http://[::1]/path" };
             yield return new object[] { "http://[::1]",@"path", UriKind.RelativeOrAbsolute, "http://[::1]/path" };
             yield return new object[] { "http://[::1]:90", "/path", UriKind.RelativeOrAbsolute, "http://[::1]:90/path" };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { @"\\[::1]/", "path", UriKind.RelativeOrAbsolute, @"\\[::1]/path" };
             }
@@ -104,7 +104,7 @@ namespace System.Tests
             yield return new object[] { "telnet://username:password@host:10", "path", UriKind.RelativeOrAbsolute, "telnet://username:password@host:10/path" };
 
             // Absolute Uri
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { "http://host/", "C:/x", UriKind.Absolute, "file:///C:/x" };
             }

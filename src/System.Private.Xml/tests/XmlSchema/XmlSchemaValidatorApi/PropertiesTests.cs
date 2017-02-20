@@ -338,7 +338,7 @@ namespace System.Xml.Tests
 
     public class TCSourceUri : CXmlSchemaValidatorTestCase
     {
-        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
 
         private ITestOutputHelper _output;
         public TCSourceUri(ITestOutputHelper output): base(output)
@@ -353,7 +353,7 @@ namespace System.Xml.Tests
             yield return new object[] { "urn:tempuri" };
             yield return new object[] { "http://tempuri.com/schemas" };
             yield return new object[] { "file://tempuri.com/schemas" };
-            yield return new object[] { s_IsWindowsSystem ? "\\\\wddata\\some\\path" : "/some/path" };
+            yield return new object[] { s_isWindowsSystem ? "\\\\wddata\\some\\path" : "/some/path" };
         }
 
         [Theory]

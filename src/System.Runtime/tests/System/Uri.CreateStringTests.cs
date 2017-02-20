@@ -12,7 +12,7 @@ namespace System.Tests
 {
     public class UriCreateStringTests
     {
-        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
         public static readonly string s_longString = new string('a', 65520 + 1);
 
         public static IEnumerable<object[]> OriginalString_AbsoluteUri_ToString_TestData()
@@ -38,7 +38,7 @@ namespace System.Tests
             yield return new object[] { "http://[::1]", "http://[::1]/", "http://[::1]/" };
             yield return new object[] { "http://[::1]/", "http://[::1]/", "http://[::1]/" };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Implicit UNC
                 yield return new object[] { @"\\unchost", "file://unchost/", "file://unchost/" };
@@ -176,7 +176,7 @@ namespace System.Tests
             // IPv4 host - octet
             yield return new object[] { "http://192.0123.0.10", "http", "", "192.83.0.10", UriHostNameType.IPv4, 80, true, false };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // IPv4 host - implicit UNC
                 yield return new object[] { @"\\192.168.0.1", "file", "", "192.168.0.1", UriHostNameType.IPv4, -1, true, false };
@@ -217,7 +217,7 @@ namespace System.Tests
             yield return new object[] { "http://[fe80::0000:5efe:192.168.0.1]/", "http", "", "[fe80::5efe:192.168.0.1]", UriHostNameType.IPv6, 80, true, false }; // ISATAP
             yield return new object[] { "http://[1111:2222:3333::431/20]", "http", "", "[1111:2222:3333::431]", UriHostNameType.IPv6, 80, true, false }; // Prefix
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // IPv6 Host - implicit UNC
                 yield return new object[] { "//[2001:0db8:0000:0000:0000:ff00:0042:8329]", "file", "", "[2001:db8::ff00:42:8329]", UriHostNameType.IPv6, -1, true, false };
@@ -245,7 +245,7 @@ namespace System.Tests
             
             // File - empty path
             yield return new object[] { "file:///", "file", "", "", UriHostNameType.Basic, -1, true, true };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { @"file://\", "file", "", "", UriHostNameType.Basic, -1, true, true };
             }
@@ -254,7 +254,7 @@ namespace System.Tests
             yield return new object[] { "file://path1/path2", "file", "", "path1", UriHostNameType.Dns, -1, true, false };
             yield return new object[] { "file:///path1/path2", "file", "", "", UriHostNameType.Basic, -1, true, true };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // File - explicit with windows drive with empty path
                 yield return new object[] { "file://C:/", "file", "", "", UriHostNameType.Basic, -1, true, true };
@@ -419,7 +419,7 @@ namespace System.Tests
             yield return new object[] { "http://localhost/", "http", "", "localhost", UriHostNameType.Dns, 80, true, true };
             yield return new object[] { "http://loopback/", "http", "", "localhost", UriHostNameType.Dns, 80, true, true };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Loopback - implicit UNC with localhost
                 yield return new object[] { @"\\localhost", "file", "", "localhost", UriHostNameType.Dns, -1, true, true };
@@ -568,12 +568,12 @@ namespace System.Tests
 
             // File with empty path
             yield return new object[] { "file:///", "/", "", "" };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { @"file://\", "/", "", "" };
             }
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // File with windows drive
                 yield return new object[] { "file://C:/", "C:/", "", "" };
@@ -603,7 +603,7 @@ namespace System.Tests
             yield return new object[] { @"file:///path1\path2/path3\path4", "/path1/path2/path3/path4", "", "" };
             yield return new object[] { @"file:///path1\path2/path3\path4\", "/path1/path2/path3/path4/", "", "" };
             
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Implicit file with empty path
                 yield return new object[] { "C:/", "C:/", "", "" };
@@ -773,7 +773,7 @@ namespace System.Tests
             yield return new object[] { "unknown://./", "/", "", "" };
             yield return new object[] { "unknown://../", "/", "", "" };
             yield return new object[] { "unknown://////", "////", "", "" };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { "unknown:///C:/", "C:/", "", "" };
             }
@@ -846,7 +846,7 @@ namespace System.Tests
             yield return new object[] { "http://host/x../", "/x../", "", "" };
             yield return new object[] { "http://host/..x/", "/..x/", "", "" };
             yield return new object[] { "http://host/path//", "/path//", "", "" };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { "file://C:/abc/def/../ghi", "C:/abc/ghi", "", "" };
             }
@@ -1184,7 +1184,7 @@ namespace System.Tests
             yield return new object[] { @"\\unchost:90/path1/path2", UriKind.Absolute };
 
             // Explicit UNC has port
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { @"file://\\unchost:90", UriKind.Absolute };
                 yield return new object[] { @"file://\\unchost:90/path1/path2", UriKind.Absolute };
@@ -1198,7 +1198,7 @@ namespace System.Tests
             yield return new object[] { @"\\userinfo@host", UriKind.Absolute };
             yield return new object[] { @"\\userinfo@host/path1/path2", UriKind.Absolute };
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Explicit UNC has userinfo
                 yield return new object[] { @"file://\\userinfo@host", UriKind.Absolute };
@@ -1212,20 +1212,20 @@ namespace System.Tests
             // Implicit UNC with windows drive
             yield return new object[] { @"\\C:/", UriKind.Absolute };
             yield return new object[] { @"\\C|/", UriKind.Absolute };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { "//C:/", UriKind.Absolute };
                 yield return new object[] { "//C|/", UriKind.Absolute };
             }
             yield return new object[] { @"\/C:/", UriKind.Absolute };
             yield return new object[] { @"\/C|/", UriKind.Absolute };
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 yield return new object[] { @"/\C:/", UriKind.Absolute };
                 yield return new object[] { @"/\C|/", UriKind.Absolute };
             }
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 // Explicit UNC with invalid windows drive
                 yield return new object[] { @"file://\\1:/", UriKind.Absolute };
@@ -1292,7 +1292,7 @@ namespace System.Tests
             yield return new object[] { "http://\uD800", UriKind.Absolute };
             yield return new object[] { "http://\uDC00", UriKind.Absolute };
 
-            if (!s_IsWindowsSystem)
+            if (!s_isWindowsSystem)
             {
                 // Implicit Windows drive 
                 yield return new object[] { @"c:\", UriKind.Absolute };

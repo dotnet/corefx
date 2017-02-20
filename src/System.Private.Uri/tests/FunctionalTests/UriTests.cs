@@ -9,7 +9,7 @@ namespace System.PrivateUri.Tests
 {
     public static class UriTests
     {
-        private static readonly bool s_IsWindowsSystem = PlatformDetection.IsWindows;
+        private static readonly bool s_isWindowsSystem = PlatformDetection.IsWindows;
 
         [Fact]
         public static void TestCtor_String()
@@ -734,7 +734,7 @@ namespace System.PrivateUri.Tests
             b = uri.IsWellFormedOriginalString();
             Assert.False(b);
 
-            if (s_IsWindowsSystem)
+            if (s_isWindowsSystem)
             {
                 uri = new Uri(@"c:\\directory\filename");
                 b = uri.IsWellFormedOriginalString();
