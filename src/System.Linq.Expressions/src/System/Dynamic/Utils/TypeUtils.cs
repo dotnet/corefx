@@ -326,7 +326,7 @@ namespace System.Dynamic.Utils
             //   o If type parameter Xi is declared to be contravariant ("in") then either Si must be identical to Ti,
             //     or Si and Ti must both be reference types.
 
-            if (!IsDelegate(source) || !IsDelegate(dest) || !source.GetTypeInfo().IsGenericType || !dest.GetTypeInfo().IsGenericType)
+            if (!IsDelegate(source) || !IsDelegate(dest) || !source.IsGenericType || !dest.IsGenericType)
                 return false;
 
             Type genericDelegate = source.GetGenericTypeDefinition();
