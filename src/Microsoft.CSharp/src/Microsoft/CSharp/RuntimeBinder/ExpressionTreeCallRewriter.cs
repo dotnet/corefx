@@ -405,7 +405,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // This is to ensure that for embedded nopia types, we have the
             // appropriate local type from the member itself; this is possible
             // because nopia types are not generic or nested.
-            if (!t.IsGenericType && !t.GetTypeInfo().IsNested)
+            if (!t.IsGenericType && !t.IsNested)
             {
                 t = f.DeclaringType;
             }

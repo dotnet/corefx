@@ -1048,30 +1048,30 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 access = ACCESS.ACC_PUBLIC;
             }
-            else if (type.GetTypeInfo().IsNested)
+            else if (type.IsNested)
             {
                 // If its nested, we may have other accessibility options.
-                if (type.GetTypeInfo().IsNestedAssembly || type.GetTypeInfo().IsNestedFamANDAssem)
+                if (type.IsNestedAssembly || type.IsNestedFamANDAssem)
                 {
                     // Note that we don't directly support NestedFamANDAssem, but we're just
                     // going to default to internal.
                     access = ACCESS.ACC_INTERNAL;
                 }
-                else if (type.GetTypeInfo().IsNestedFamORAssem)
+                else if (type.IsNestedFamORAssem)
                 {
                     access = ACCESS.ACC_INTERNALPROTECTED;
                 }
-                else if (type.GetTypeInfo().IsNestedPrivate)
+                else if (type.IsNestedPrivate)
                 {
                     access = ACCESS.ACC_PRIVATE;
                 }
-                else if (type.GetTypeInfo().IsNestedFamily)
+                else if (type.IsNestedFamily)
                 {
                     access = ACCESS.ACC_PROTECTED;
                 }
                 else
                 {
-                    Debug.Assert(type.GetTypeInfo().IsPublic || type.GetTypeInfo().IsNestedPublic);
+                    Debug.Assert(type.GetTypeInfo().IsPublic || type.IsNestedPublic);
                     access = ACCESS.ACC_PUBLIC;
                 }
             }
