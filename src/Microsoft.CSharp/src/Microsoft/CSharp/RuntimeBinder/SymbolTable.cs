@@ -1005,7 +1005,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             AggregateSymbol agg = _symFactory.CreateAggregate(GetName(type), parent, _infile, _typeManager);
             agg.AssociatedSystemType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-            agg.AssociatedAssembly = type.GetTypeInfo().Assembly;
+            agg.AssociatedAssembly = type.Assembly;
 
             // We have to set the TypeVars, access, and the AggKind before we can set the aggState
             // because of the assertion checking the compiler does.
