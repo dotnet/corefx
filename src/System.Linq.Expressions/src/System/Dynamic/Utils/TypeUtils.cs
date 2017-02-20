@@ -200,7 +200,7 @@ namespace System.Dynamic.Utils
                 }
                 // A call to an interface implemented by a struct is legal whether the struct has
                 // been boxed or not.
-                if (targetType.GetTypeInfo().IsInterface)
+                if (targetType.IsInterface)
                 {
                     foreach (Type interfaceType in instanceType.GetTypeInfo().ImplementedInterfaces)
                     {
@@ -272,7 +272,7 @@ namespace System.Dynamic.Utils
                 return true;
             }
             // Interface conversion
-            if (source.GetTypeInfo().IsInterface || dest.GetTypeInfo().IsInterface)
+            if (source.IsInterface || dest.IsInterface)
             {
                 return true;
             }
@@ -424,7 +424,7 @@ namespace System.Dynamic.Utils
             // If we have two reference types and one is assignable to the
             // other then we can do reference equality.
 
-            return left.GetTypeInfo().IsInterface || right.GetTypeInfo().IsInterface ||
+            return left.IsInterface || right.IsInterface ||
                 AreReferenceAssignable(left, right) ||
                 AreReferenceAssignable(right, left);
         }
@@ -433,11 +433,11 @@ namespace System.Dynamic.Utils
         {
             // If we have an interface and a reference type then we can do
             // reference equality.
-            if (left.GetTypeInfo().IsInterface && !right.IsValueType)
+            if (left.IsInterface && !right.IsValueType)
             {
                 return true;
             }
-            if (right.GetTypeInfo().IsInterface && !left.IsValueType)
+            if (right.IsInterface && !left.IsValueType)
             {
                 return true;
             }
@@ -671,7 +671,7 @@ namespace System.Dynamic.Utils
                 {
                     return type;
                 }
-                if (definition.GetTypeInfo().IsInterface)
+                if (definition.IsInterface)
                 {
                     foreach (Type itype in type.GetTypeInfo().ImplementedInterfaces)
                     {

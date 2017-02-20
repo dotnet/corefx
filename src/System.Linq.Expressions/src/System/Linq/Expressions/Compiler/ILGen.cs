@@ -519,7 +519,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 il.Emit(OpCodes.Ldtoken, mb);
                 Type dt = mb.DeclaringType;
-                if (dt != null && dt.GetTypeInfo().IsGenericType)
+                if (dt != null && dt.IsGenericType)
                 {
                     il.Emit(OpCodes.Ldtoken, dt);
                     il.Emit(OpCodes.Call, MethodBase_GetMethodFromHandle_RuntimeMethodHandle_RuntimeTypeHandle);
@@ -647,8 +647,8 @@ namespace System.Linq.Expressions.Compiler
             Type nnExprType = typeFrom.GetNonNullableType();
             Type nnType = typeTo.GetNonNullableType();
 
-            if (typeFrom.GetTypeInfo().IsInterface || // interface cast
-               typeTo.GetTypeInfo().IsInterface ||
+            if (typeFrom.IsInterface || // interface cast
+               typeTo.IsInterface ||
                typeFrom == typeof(object) || // boxing cast
                typeTo == typeof(object) ||
                typeFrom == typeof(System.Enum) ||

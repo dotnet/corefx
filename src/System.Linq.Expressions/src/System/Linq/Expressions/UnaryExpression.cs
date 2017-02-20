@@ -742,7 +742,7 @@ namespace System.Linq.Expressions
         {
             RequiresCanRead(expression, nameof(expression));
             ContractUtils.RequiresNotNull(type, nameof(type));
-            if (!expression.Type.GetTypeInfo().IsInterface && expression.Type != typeof(object))
+            if (!expression.Type.IsInterface && expression.Type != typeof(object))
             {
                 throw Error.InvalidUnboxType(nameof(expression));
             }

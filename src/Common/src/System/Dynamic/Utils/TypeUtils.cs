@@ -44,7 +44,7 @@ namespace System.Dynamic.Utils
                 // A check to avoid a bunch of reflection (currently not supported) during cctor
                 if (type.GetTypeInfo().ContainsGenericParameters)
                 {
-                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
+                    throw type.IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace System.Dynamic.Utils
                 return false;
             }
 
-            if (t.GetTypeInfo().IsGenericType)
+            if (t.IsGenericType)
             {
                 foreach (Type g in t.GetGenericArguments())
                 {
