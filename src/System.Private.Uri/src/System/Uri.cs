@@ -2069,8 +2069,14 @@ namespace System
                         {
                             _flags |= Flags.AuthorityFound;
                         }
+                        //Unix: Unix path?
+                        if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx > 2) && pUriString[i] == '/')
+                        {
+                            idx += 2;
+                            _flags |= Flags.UnixPath;
+                        }
                         //Windows: Dos path?
-                        if (IsWindowsSystem && i + 1 < (ushort)length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
+                        else if (i + 1 < (ushort)length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
                             UriHelper.IsAsciiLetter(pUriString[i]))
                         {
                             if (i + 2 >= (ushort)length || ((c = pUriString[i + 2]) != '\\' && c != '/'))
@@ -2100,14 +2106,8 @@ namespace System
                                 }
                             }
                         }
-                        //Unix: Unix path?
-                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2))
-                        {
-                            idx += 2;
-                            _flags |= Flags.UnixPath;
-                        }
                         //Windows: UNC path?
-                        else if (IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2 && i - idx != 3 &&
+                        else if (_syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2 && i - idx != 3 &&
                             i < length && pUriString[i] != '?' && pUriString[i] != '#'))
                         {
                             // V1.0 did not support file:///, fixing it with minimal behavior change impact
@@ -3639,6 +3639,14 @@ namespace System
                 ++idx;
             }
 
+            //Unix: Unix path?
+            if (!IsWindowsSystem && idx < length && uriString[idx] == '/')
+            {
+                flags |= (Flags.UnixPath | Flags.ImplicitFile | Flags.AuthorityFound);
+                syntax = UriParser.UnixFileUri;
+                return idx;
+            }
+
             // sets the recognizer for well known registered schemes
             // file, ftp, http, https, uuid, etc
             // Note that we don't support one-letter schemes that will be put into a DOS path bucket
@@ -3661,9 +3669,8 @@ namespace System
                 }
             }
 
-            //NB: A Uri must have at least 3 characters, except when it's an implicit unix path
-            //    and at least one before ':'
-            if ((idx + (IsWindowsSystem ? 2 : 0)) >= length || end == idx)
+            //NB: A string must have at least 3 characters and at least 1 before ':'
+            if (idx + 2 >= length || end == idx)
             {
                 err = ParsingError.BadFormat;
                 return 0;
@@ -3675,8 +3682,8 @@ namespace System
                 char c;
                 if ((c = uriString[idx + 1]) == ':' || c == '|')
                 {
-                    //Windows: DOS-like path?
-                    if (IsWindowsSystem && UriHelper.IsAsciiLetter(uriString[idx]))
+                    //DOS-like path?
+                    if (UriHelper.IsAsciiLetter(uriString[idx]))
                     {
                         if ((c = uriString[idx + 2]) == '\\' || c == '/')
                         {
@@ -3693,17 +3700,11 @@ namespace System
                         err = ParsingError.BadFormat;
                     return 0;
                 }
-                //Unix: Unix path?
-                else if (!IsWindowsSystem && uriString[idx] == '/')
-                {
-                    flags |= (Flags.UnixPath | Flags.ImplicitFile | Flags.AuthorityFound);
-                    syntax = UriParser.UnixFileUri;
-                    return idx;
-                }
                 else if ((c = uriString[idx]) == '/' || c == '\\')
                 {
-                    //Windows: UNC share?
-                    if (IsWindowsSystem && ((c = uriString[idx + 1]) == '\\' || c == '/')) {
+                    //UNC share ?
+                    if ((c = uriString[idx + 1]) == '\\' || c == '/')
+                    {
                         flags |= (Flags.UncPath | Flags.ImplicitFile | Flags.AuthorityFound);
                         syntax = UriParser.FileUri;
                         idx += 2;
@@ -3718,13 +3719,18 @@ namespace System
                 }
             }
 
-            //NB: A Uri must have at least 3 characters on Unix too
-            //    and contain a ':'
-            if ((!IsWindowsSystem && idx + 2 >= length) || end == length)
+            if (end == length)
             {
                 err = ParsingError.BadFormat;
                 return 0;
             }
+
+            if (end == length)
+            {
+                err = ParsingError.BadFormat;
+                return 0;
+            }
+
 
             // Here could be a possibly valid, and not well-known scheme
             // Finds the scheme delimiter
