@@ -160,14 +160,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (t2.IsGenericParameter)
                 {
                     // If member's declaring type is not type parameter's declaring type, we assume that it is used as a type argument
-                    if (t1.DeclaringMethod == null && member1.DeclaringType.Equals(t1.GetTypeInfo().DeclaringType))
+                    if (t1.DeclaringMethod == null && member1.DeclaringType.Equals(t1.DeclaringType))
                     {
-                        if (!(t2.DeclaringMethod == null && member2.DeclaringType.Equals(t2.GetTypeInfo().DeclaringType)))
+                        if (!(t2.DeclaringMethod == null && member2.DeclaringType.Equals(t2.DeclaringType)))
                         {
                             return t1.IsTypeParameterEquivalentToTypeInst(t2, member2);
                         }
                     }
-                    else if (t2.DeclaringMethod == null && member2.DeclaringType.Equals(t2.GetTypeInfo().DeclaringType))
+                    else if (t2.DeclaringMethod == null && member2.DeclaringType.Equals(t2.DeclaringType))
                     {
                         return t2.IsTypeParameterEquivalentToTypeInst(t1, member1);
                     }
