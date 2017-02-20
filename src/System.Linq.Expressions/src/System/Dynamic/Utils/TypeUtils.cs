@@ -262,12 +262,12 @@ namespace System.Dynamic.Utils
             Type nnDestType = GetNonNullableType(dest);
 
             // Down conversion
-            if (nnSourceType.GetTypeInfo().IsAssignableFrom(nnDestType.GetTypeInfo()))
+            if (nnSourceType.IsAssignableFrom(nnDestType.GetTypeInfo()))
             {
                 return true;
             }
             // Up conversion
-            if (nnDestType.GetTypeInfo().IsAssignableFrom(nnSourceType.GetTypeInfo()))
+            if (nnDestType.IsAssignableFrom(nnSourceType.GetTypeInfo()))
             {
                 return true;
             }
@@ -644,7 +644,7 @@ namespace System.Dynamic.Utils
 
         private static bool IsImplicitReferenceConversion(Type source, Type destination)
         {
-            return destination.GetTypeInfo().IsAssignableFrom(source.GetTypeInfo());
+            return destination.IsAssignableFrom(source.GetTypeInfo());
         }
 
         private static bool IsImplicitBoxingConversion(Type source, Type destination)

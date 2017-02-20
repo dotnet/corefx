@@ -128,7 +128,7 @@ namespace System.Linq.Expressions.Compiler
                     il.Emit(OpCodes.Ldind_R8);
                     break;
                 default:
-                    if (type.GetTypeInfo().IsValueType)
+                    if (type.IsValueType)
                     {
                         il.Emit(OpCodes.Ldobj, type);
                     }
@@ -175,7 +175,7 @@ namespace System.Linq.Expressions.Compiler
                     il.Emit(OpCodes.Stind_R8);
                     break;
                 default:
-                    if (type.GetTypeInfo().IsValueType)
+                    if (type.IsValueType)
                     {
                         il.Emit(OpCodes.Stobj, type);
                     }
@@ -193,7 +193,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(type != null);
 
-            if (!type.GetTypeInfo().IsValueType)
+            if (!type.IsValueType)
             {
                 il.Emit(OpCodes.Ldelem_Ref);
             }
@@ -272,7 +272,7 @@ namespace System.Linq.Expressions.Compiler
                     il.Emit(OpCodes.Stelem_R8);
                     break;
                 default:
-                    if (type.GetTypeInfo().IsValueType)
+                    if (type.IsValueType)
                     {
                         il.Emit(OpCodes.Stelem, type);
                     }
@@ -682,11 +682,11 @@ namespace System.Linq.Expressions.Compiler
 
         private static void EmitCastToType(this ILGenerator il, Type typeFrom, Type typeTo)
         {
-            if (!typeFrom.GetTypeInfo().IsValueType && typeTo.GetTypeInfo().IsValueType)
+            if (!typeFrom.IsValueType && typeTo.IsValueType)
             {
                 il.Emit(OpCodes.Unbox_Any, typeTo);
             }
-            else if (typeFrom.GetTypeInfo().IsValueType && !typeTo.GetTypeInfo().IsValueType)
+            else if (typeFrom.IsValueType && !typeTo.IsValueType)
             {
                 il.Emit(OpCodes.Box, typeFrom);
                 if (typeTo != typeof(object))
@@ -694,7 +694,7 @@ namespace System.Linq.Expressions.Compiler
                     il.Emit(OpCodes.Castclass, typeTo);
                 }
             }
-            else if (!typeFrom.GetTypeInfo().IsValueType && !typeTo.GetTypeInfo().IsValueType)
+            else if (!typeFrom.IsValueType && !typeTo.IsValueType)
             {
                 il.Emit(OpCodes.Castclass, typeTo);
             }
@@ -932,7 +932,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(typeFrom.IsNullableType());
             Debug.Assert(!typeTo.IsNullableType());
-            if (typeTo.GetTypeInfo().IsValueType)
+            if (typeTo.IsValueType)
                 il.EmitNullableToNonNullableStructConversion(typeFrom, typeTo, isChecked, locals);
             else
                 il.EmitNullableToReferenceConversion(typeFrom);
@@ -943,7 +943,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Debug.Assert(typeFrom.IsNullableType());
             Debug.Assert(!typeTo.IsNullableType());
-            Debug.Assert(typeTo.GetTypeInfo().IsValueType);
+            Debug.Assert(typeTo.IsValueType);
             LocalBuilder locFrom = locals.GetLocal(typeFrom);
             il.Emit(OpCodes.Stloc, locFrom);
             il.Emit(OpCodes.Ldloca, locFrom);
@@ -980,7 +980,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitHasValue(this ILGenerator il, Type nullableType)
         {
             MethodInfo mi = nullableType.GetMethod("get_HasValue", BindingFlags.Instance | BindingFlags.Public);
-            Debug.Assert(nullableType.GetTypeInfo().IsValueType);
+            Debug.Assert(nullableType.IsValueType);
             il.Emit(OpCodes.Call, mi);
         }
 
@@ -988,7 +988,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitGetValue(this ILGenerator il, Type nullableType)
         {
             MethodInfo mi = nullableType.GetMethod("get_Value", BindingFlags.Instance | BindingFlags.Public);
-            Debug.Assert(nullableType.GetTypeInfo().IsValueType);
+            Debug.Assert(nullableType.IsValueType);
             il.Emit(OpCodes.Call, mi);
         }
 
@@ -996,7 +996,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitGetValueOrDefault(this ILGenerator il, Type nullableType)
         {
             MethodInfo mi = nullableType.GetMethod("GetValueOrDefault", System.Type.EmptyTypes);
-            Debug.Assert(nullableType.GetTypeInfo().IsValueType);
+            Debug.Assert(nullableType.IsValueType);
             il.Emit(OpCodes.Call, mi);
         }
 
@@ -1155,7 +1155,7 @@ namespace System.Linq.Expressions.Compiler
                     break;
 
                 case TypeCode.Object:
-                    if (type.GetTypeInfo().IsValueType)
+                    if (type.IsValueType)
                     {
                         // Type.GetTypeCode on an enum returns the underlying
                         // integer TypeCode, so we won't get here.

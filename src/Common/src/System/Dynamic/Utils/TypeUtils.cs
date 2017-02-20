@@ -20,7 +20,7 @@ namespace System.Dynamic.Utils
             {
                 return true;
             }
-            if (!dest.GetTypeInfo().IsValueType && !src.GetTypeInfo().IsValueType && dest.GetTypeInfo().IsAssignableFrom(src.GetTypeInfo()))
+            if (!dest.IsValueType && !src.IsValueType && dest.IsAssignableFrom(src.GetTypeInfo()))
             {
                 return true;
             }
