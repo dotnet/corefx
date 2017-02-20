@@ -226,7 +226,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
 
                 MethodBase method = (MethodBase)member;
-                int position = typeParam.GetTypeInfo().GenericParameterPosition;
+                int position = typeParam.GenericParameterPosition;
                 Type[] args = method.IsGenericMethod ? method.GetGenericArguments() : null;
 
                 return args != null &&
@@ -235,7 +235,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                return member.DeclaringType.GetGenericArguments()[typeParam.GetTypeInfo().GenericParameterPosition].Equals(typeInst);
+                return member.DeclaringType.GetGenericArguments()[typeParam.GenericParameterPosition].Equals(typeInst);
             }
         }
 
