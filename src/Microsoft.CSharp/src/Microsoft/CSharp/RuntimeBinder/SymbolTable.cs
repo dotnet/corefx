@@ -1014,7 +1014,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 kind = AggKindEnum.Interface;
             }
-            else if (type.GetTypeInfo().IsEnum)
+            else if (type.IsEnum)
             {
                 kind = AggKindEnum.Enum;
                 agg.SetUnderlyingType(GetCTypeFromType(Enum.GetUnderlyingType(type)).AsAggregateType());
