@@ -47,7 +47,7 @@ namespace System.Dynamic.Utils
         public static bool IsNumeric(this Type type)
         {
             type = GetNonNullableType(type);
-            if (!type.GetTypeInfo().IsEnum)
+            if (!type.IsEnum)
             {
                 switch (type.GetTypeCode())
                 {
@@ -71,7 +71,7 @@ namespace System.Dynamic.Utils
         public static bool IsInteger(this Type type)
         {
             type = GetNonNullableType(type);
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 return false;
             }
@@ -94,7 +94,7 @@ namespace System.Dynamic.Utils
         public static bool IsInteger64(this Type type)
         {
             type = GetNonNullableType(type);
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 return false;
             }
@@ -111,7 +111,7 @@ namespace System.Dynamic.Utils
         public static bool IsArithmetic(this Type type)
         {
             type = GetNonNullableType(type);
-            if (!type.GetTypeInfo().IsEnum)
+            if (!type.IsEnum)
             {
                 switch (type.GetTypeCode())
                 {
@@ -132,7 +132,7 @@ namespace System.Dynamic.Utils
         public static bool IsUnsignedInt(this Type type)
         {
             type = GetNonNullableType(type);
-            if (!type.GetTypeInfo().IsEnum)
+            if (!type.IsEnum)
             {
                 switch (type.GetTypeCode())
                 {
@@ -148,7 +148,7 @@ namespace System.Dynamic.Utils
         public static bool IsIntegerOrBool(this Type type)
         {
             type = GetNonNullableType(type);
-            if (!type.GetTypeInfo().IsEnum)
+            if (!type.IsEnum)
             {
                 switch (type.GetTypeCode())
                 {
@@ -194,7 +194,7 @@ namespace System.Dynamic.Utils
                 {
                     return true;
                 }
-                if (instanceType.GetTypeInfo().IsEnum && AreReferenceAssignable(targetType, typeof(Enum)))
+                if (instanceType.IsEnum && AreReferenceAssignable(targetType, typeof(Enum)))
                 {
                     return true;
                 }
@@ -387,7 +387,7 @@ namespace System.Dynamic.Utils
         public static bool IsConvertible(this Type type)
         {
             type = GetNonNullableType(type);
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 return true;
             }
@@ -462,7 +462,7 @@ namespace System.Dynamic.Utils
             // Equality between struct types is only defined for numerics, bools, enums,
             // and their nullable equivalents.
             Type nnType = GetNonNullableType(left);
-            if (nnType == typeof(bool) || IsNumeric(nnType) || nnType.GetTypeInfo().IsEnum)
+            if (nnType == typeof(bool) || IsNumeric(nnType) || nnType.IsEnum)
             {
                 return true;
             }
@@ -651,7 +651,7 @@ namespace System.Dynamic.Utils
         {
             if (source.IsValueType && (destination == typeof(object) || destination == typeof(ValueType)))
                 return true;
-            if (source.GetTypeInfo().IsEnum && destination == typeof(Enum))
+            if (source.IsEnum && destination == typeof(Enum))
                 return true;
             return false;
         }

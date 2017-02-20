@@ -1159,7 +1159,7 @@ namespace System.Linq.Expressions.Compiler
                     {
                         // Type.GetTypeCode on an enum returns the underlying
                         // integer TypeCode, so we won't get here.
-                        Debug.Assert(!type.GetTypeInfo().IsEnum);
+                        Debug.Assert(!type.IsEnum);
 
                         // This is the IL for default(T) if T is a generic type
                         // parameter, so it should work for any type. It's also

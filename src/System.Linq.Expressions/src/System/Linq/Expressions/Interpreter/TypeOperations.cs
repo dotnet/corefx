@@ -348,7 +348,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public static Instruction Create(Type t)
         {
-            Debug.Assert(!t.GetTypeInfo().IsEnum);
+            Debug.Assert(!t.IsEnum);
             switch (t.GetTypeCode())
             {
                 case TypeCode.Boolean: return s_Boolean ?? (s_Boolean = new CastInstructionT<bool>());
@@ -378,7 +378,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public CastToEnumInstruction(Type t)
         {
-            Debug.Assert(t.GetTypeInfo().IsEnum);
+            Debug.Assert(t.IsEnum);
             _t = t;
         }
 
@@ -402,7 +402,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public CastReferenceToEnumInstruction(Type t)
         {
-            Debug.Assert(t.GetTypeInfo().IsEnum);
+            Debug.Assert(t.IsEnum);
             _t = t;
         }
 

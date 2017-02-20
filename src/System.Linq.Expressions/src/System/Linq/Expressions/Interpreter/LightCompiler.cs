@@ -453,7 +453,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private bool MaybeMutableValueType(Type type)
         {
-            return type.IsValueType && !type.GetTypeInfo().IsEnum && !type.GetTypeInfo().IsPrimitive;
+            return type.IsValueType && !type.IsEnum && !type.GetTypeInfo().IsPrimitive;
         }
 
         private void CompileGetBoxedVariable(ParameterExpression variable)
@@ -1120,16 +1120,16 @@ namespace System.Linq.Expressions.Interpreter
             Type nonNullableTo = typeTo.GetNonNullableType();
 
             // use numeric conversions for both numeric types and enums
-            if ((nonNullableFrom.IsNumericOrBool() || nonNullableFrom.GetTypeInfo().IsEnum)
-                 && (nonNullableTo.IsNumericOrBool() || nonNullableTo.GetTypeInfo().IsEnum || nonNullableTo == typeof(decimal)))
+            if ((nonNullableFrom.IsNumericOrBool() || nonNullableFrom.IsEnum)
+                 && (nonNullableTo.IsNumericOrBool() || nonNullableTo.IsEnum || nonNullableTo == typeof(decimal)))
             {
                 Type enumTypeTo = null;
 
-                if (nonNullableFrom.GetTypeInfo().IsEnum)
+                if (nonNullableFrom.IsEnum)
                 {
                     nonNullableFrom = Enum.GetUnderlyingType(nonNullableFrom);
                 }
-                if (nonNullableTo.GetTypeInfo().IsEnum)
+                if (nonNullableTo.IsEnum)
                 {
                     enumTypeTo = nonNullableTo;
                     nonNullableTo = Enum.GetUnderlyingType(nonNullableTo);
@@ -1179,7 +1179,7 @@ namespace System.Linq.Expressions.Interpreter
                 return;
             }
 
-            if (typeTo.GetTypeInfo().IsEnum)
+            if (typeTo.IsEnum)
             {
                 _instructions.Emit(NullCheckInstruction.Instance);
                 _instructions.EmitCastReferenceToEnum(typeTo);

@@ -1097,7 +1097,7 @@ namespace System.Linq.Expressions
             if (left.Type == right.Type && (left.Type.IsNumeric() ||
                 left.Type == typeof(object) ||
                 left.Type.IsBool() ||
-                left.Type.GetNonNullableType().GetTypeInfo().IsEnum))
+                left.Type.GetNonNullableType().IsEnum))
             {
                 if (left.Type.IsNullableType() && liftToNull)
                 {
