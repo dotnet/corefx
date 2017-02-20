@@ -149,7 +149,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void IsAbstract()
         {
-            Assert.True(typeof(ExpressionVisitor).GetTypeInfo().IsAbstract);
+            Assert.True(typeof(ExpressionVisitor).IsAbstract);
         }
 
         [Fact]

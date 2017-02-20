@@ -42,7 +42,7 @@ namespace System.Dynamic.Utils
             if (type != typeof(void))
             {
                 // A check to avoid a bunch of reflection (currently not supported) during cctor
-                if (type.GetTypeInfo().ContainsGenericParameters)
+                if (type.ContainsGenericParameters)
                 {
                     throw type.IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
                 }

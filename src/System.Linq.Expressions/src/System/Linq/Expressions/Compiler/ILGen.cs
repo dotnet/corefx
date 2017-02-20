@@ -321,7 +321,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitNew(this ILGenerator il, ConstructorInfo ci)
         {
             Debug.Assert(ci != null);
-            Debug.Assert(!ci.DeclaringType.GetTypeInfo().ContainsGenericParameters);
+            Debug.Assert(!ci.DeclaringType.ContainsGenericParameters);
 
             il.Emit(OpCodes.Newobj, ci);
         }

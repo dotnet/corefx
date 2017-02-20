@@ -618,7 +618,7 @@ namespace System.Linq.Expressions.Compiler
 
             if (node.Constructor != null)
             {
-                if (node.Constructor.DeclaringType.GetTypeInfo().IsAbstract)
+                if (node.Constructor.DeclaringType.IsAbstract)
                     throw Error.NonAbstractConstructorRequired();
 
                 List<WriteBack> wb = EmitArguments(node.Constructor, node);
