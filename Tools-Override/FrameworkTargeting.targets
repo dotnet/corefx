@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Condition="'$(IncludeDefaultReferences)' == ''">
-    <IncludeDefaultReferences Condition="'$(MSBuildProjectExtension)' == '.csproj'">true</IncludeDefaultReferences>
-    <IncludeDefaultReferences Condition="'$(MSBuildProjectExtension)' == '.vbproj'">true</IncludeDefaultReferences>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!-- netstandard is a default reference whenever building for NETStandard or building an implementation assembly -->
-    <DefaultReference Condition="$(NuGetTargetMoniker.StartsWith('.NETStandard')) OR '$(IsReferenceAssembly)' != 'true'"
-                      Include="netstandard" />
-  </ItemGroup>
-
   <ItemGroup>
     <TargetingPackDirs Include="$(RefPath)" />
     <AdditionalReferencePaths Include="@(TargetingPackDirs)" />
@@ -21,6 +10,8 @@
     <ContractOutputPath>$(RefPath)</ContractOutputPath>
     <FrameworkPathOverride>$(ContractOutputPath)</FrameworkPathOverride>
     <AssemblySearchPaths>$(AssemblySearchPaths);$(ContractOutputPath);{RawFileName}</AssemblySearchPaths>
+    <!-- Disable RAR from transitively discovering depdencies for References -->
+    <_FindDependencies>false</_FindDependencies>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFrameworkIdentifier)' == ''
@@ -62,20 +53,30 @@
     <ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>true</ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
   </PropertyGroup>
-  
-  <Target Name="AddDefaultReferences"
-          Condition="'$(IncludeDefaultReferences)' =='true'"
-          BeforeTargets="BeforeResolveReferences">
-    <ItemGroup>
-      <!-- Include default references when specified and they exist -->
-      <Reference Condition="Exists('$(RefPath)%(Identity).dll')" Include="@(DefaultReference)" />
+
+  <PropertyGroup Condition="'$(IncludeDefaultReferences)' == ''">
+    <IncludeDefaultReferences Condition="'$(MSBuildProjectExtension)' == '.csproj'">true</IncludeDefaultReferences>
+    <IncludeDefaultReferences Condition="'$(MSBuildProjectExtension)' == '.vbproj'">true</IncludeDefaultReferences>
+  </PropertyGroup>
+
+  <Target Name="SetupDefaultReferences">
+    <ItemGroup Condition="'$(IncludeDefaultReferences)' =='true'">
+      <!-- netstandard is a default reference whenever building for NETStandard or building an implementation assembly -->
+      <DefaultReference Condition="($(NuGetTargetMoniker.StartsWith('.NETStandard')) OR '$(IsReferenceAssembly)' != 'true') AND Exists('$(RefPath)netstandard.dll')"
+                        Include="netstandard" />
     </ItemGroup>
   </Target>
 
-  <Target Name="MarkReferencePrivateFalse"
-          BeforeTargets="ResolveAssemblyReferences">
+  <Target Name="UpdateReferenceItems"
+          DependsOnTargets="SetupDefaultReferences"
+          BeforeTargets="BeforeResolveReferences"
+  >
     <ItemGroup>
-      <!-- Simple name references will be resolved from the targeting pack folders and should never be copied to outpu -->
+      <Reference Include="@(DefaultReference)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- Simple name references will be resolved from the targeting pack folders and should never be copied to output -->
       <Reference Condition="'%(Reference.Extension)' != '.dll'">
         <Private>false</Private>
       </Reference>
@@ -99,6 +100,11 @@
     </ItemGroup>
   </Target>
 
+  <PropertyGroup>
+    <!-- Disable WindowsAppContainer property to prevent importing AppX targets which we don't need -->
+    <WindowsAppContainer Condition="'$(WindowsAppContainer)'==''">false</WindowsAppContainer>
+  </PropertyGroup>
+
   <Import Project="depProj.targets"
           Condition="'$(MSBuildProjectExtension)' == '.depproj'" />
 
@@ -116,6 +122,28 @@
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets"
           Condition="'$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(MSBuildProjectExtension)' == '.vbproj'" />
+
+  <PropertyGroup>
+    <ResolveReferencesDependsOn>
+      AddProjectReferencesDynamically;
+      $(ResolveReferencesDependsOn);
+    </ResolveReferencesDependsOn>
+    <CleanDependsOn>
+      AddProjectReferencesDynamically;
+      $(CleanDependsOn);
+    </CleanDependsOn>
+  </PropertyGroup>
+  <!--
+    Common targets don't provide a good place to enable adding new ProjectReference items in targets that work
+    with both clean, build, and rebuild entry point targets. We cannot hook off of AssignProjectConfigurations
+    because it is conditioned on "'@(ProjectReference)'!=''" which gets evalulated before the BeforeTargets run
+    so adding ProjectReference as part of a BeforeTarget make still have the AssignProjectConfiguration skipped.
+    To help with this problem we are creating a new target and correctly hooking it up in the resolve and clean
+    depends on target chains.
+
+    For information on evaulation of targets ordering see https://msdn.microsoft.com/en-us/library/ee216359.aspx.
+  -->
+  <Target Name="AddProjectReferencesDynamically" DependsOnTargets="$(AddProjectReferencesDynamicallyDependsOn)" />
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' and '$(OutputType)' == 'exe'">
     <!-- RAR thinks all EXEs require binding redirects.  That's not the case for CoreCLR -->
@@ -167,7 +195,7 @@
     <!-- list each append as a seperate item to force re-evaluation of AdditionalProperties metadata -->
     <ItemGroup>
 
-     <!-- Configuration property shortcuts --> 
+     <!-- Configuration property shortcuts -->
      <ProjectReference>
        <AdditionalProperties Condition="'%(ProjectReference.Configuration)' != ''">Configuration=%(ProjectReference.Configuration);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
      </ProjectReference>
