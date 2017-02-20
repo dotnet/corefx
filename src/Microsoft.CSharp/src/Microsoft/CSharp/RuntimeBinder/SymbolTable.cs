@@ -1106,7 +1106,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             agg.SetAnonymousType(false);
-            agg.SetAbstract(type.GetTypeInfo().IsAbstract);
+            agg.SetAbstract(type.IsAbstract);
 
             {
                 string typeName = type.FullName;
