@@ -22,7 +22,7 @@ namespace System.IO
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory.Path);
 
-                DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo);
+                DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
 
                 Assert.NotNull(directorySecurity);
                 Assert.Equal(typeof(FileSystemRights), directorySecurity.AccessRightType);
@@ -43,7 +43,7 @@ namespace System.IO
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory.Path);
                 AccessControlSections accessControlSections = new AccessControlSections();
 
-                DirectorySecurity directorySecurity = FileSystemAclExtensions.GetAccessControl(directoryInfo, accessControlSections);
+                DirectorySecurity directorySecurity = directoryInfo.GetAccessControl(accessControlSections);
 
                 Assert.NotNull(directorySecurity);
                 Assert.Equal(typeof(FileSystemRights), directorySecurity.AccessRightType);
@@ -64,7 +64,7 @@ namespace System.IO
             {
                 FileInfo fileInfo = new FileInfo(file.Path);
 
-                FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo);
+                FileSecurity fileSecurity = fileInfo.GetAccessControl();
 
                 Assert.NotNull(fileSecurity);
                 Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
@@ -86,7 +86,7 @@ namespace System.IO
                 FileInfo fileInfo = new FileInfo(file.Path);
                 AccessControlSections accessControlSections = new AccessControlSections();
 
-                FileSecurity fileSecurity = FileSystemAclExtensions.GetAccessControl(fileInfo, accessControlSections);
+                FileSecurity fileSecurity = fileInfo.GetAccessControl(accessControlSections);
 
                 Assert.NotNull(fileSecurity);
                 Assert.Equal(typeof(FileSystemRights), fileSecurity.AccessRightType);
@@ -105,7 +105,7 @@ namespace System.IO
             using (var directory = new TempDirectory())
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory.Path);
-                Assert.Throws<ArgumentNullException>("directorySecurity", () => FileSystemAclExtensions.SetAccessControl(directoryInfo, (DirectorySecurity) null));
+                Assert.Throws<ArgumentNullException>("directorySecurity", () => directoryInfo.SetAccessControl((DirectorySecurity) null));
             }
         }
 
@@ -117,7 +117,7 @@ namespace System.IO
                 DirectoryInfo directoryInfo = new DirectoryInfo(directory.Path);
                 DirectorySecurity directorySecurity = new DirectorySecurity();
 
-                FileSystemAclExtensions.SetAccessControl(directoryInfo, directorySecurity);
+                directoryInfo.SetAccessControl(directorySecurity);
             }
         }
 
@@ -128,7 +128,7 @@ namespace System.IO
             using (var file = new TempFile(Path.Combine(directory.Path, "file.txt")))
             {
                 FileInfo fileInfo = new FileInfo(file.Path);
-                Assert.Throws<ArgumentNullException>("fileSecurity", () => FileSystemAclExtensions.SetAccessControl(fileInfo, (FileSecurity) null));
+                Assert.Throws<ArgumentNullException>("fileSecurity", () => fileInfo.SetAccessControl((FileSecurity) null));
             }
         }
 
@@ -141,7 +141,7 @@ namespace System.IO
                 FileInfo fileInfo = new FileInfo(file.Path);
                 FileSecurity fileSecurity = new FileSecurity();
 
-                FileSystemAclExtensions.SetAccessControl(fileInfo, fileSecurity);
+                fileInfo.SetAccessControl(fileSecurity);
             }
         }
 
