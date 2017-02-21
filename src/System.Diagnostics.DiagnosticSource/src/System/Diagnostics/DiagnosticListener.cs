@@ -190,7 +190,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public sealed override bool IsEnabled(string name)
+        public override bool IsEnabled(string name)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
@@ -204,7 +204,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public sealed override bool IsEnabled(string name, object arg1, object arg2 = null)
+        public override bool IsEnabled(string name, object arg1, object arg2 = null)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
@@ -217,7 +217,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public sealed override void Write(string name, object value)
+        public override void Write(string name, object value)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
