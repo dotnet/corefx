@@ -75,10 +75,6 @@ namespace System.Tests
                 // Implicit File
                 yield return new object[] { @"/", "file:///", "file:///" };
                 yield return new object[] { @"/path/filename", "file:///path/filename", "file:///path/filename" };
-
-                // Explicit File
-                yield return new object[] { @"file:///", "file:///", "file:///" };
-                yield return new object[] { @"file:///path/filename", "file:///path/filename", "file:///path/filename" };
             }
 
             // Compressed
@@ -341,18 +337,6 @@ namespace System.Tests
                 // Implicit with path
                 yield return new object[] { "/path1/path2", "file", "", "", UriHostNameType.Basic, -1, true, true };
                 yield return new object[] { "/", "file", "", "", UriHostNameType.Basic, -1, true, true };
-
-                // Explicit with empty host and non empty path
-                yield return new object[] { "file:///", "file", "", "", UriHostNameType.Basic, -1, true, true };
-
-                // Explicit with empty host and query
-                yield return new object[] { "file:///?query", "file", "", "", UriHostNameType.Basic, -1, true, true };
-
-                // Explicit with empty host and fragment
-                yield return new object[] { "file:///#fragment", "file", "", "", UriHostNameType.Basic, -1, true, true };
-
-                // Explicit with path
-                yield return new object[] { "file:///path/", "file", "", "", UriHostNameType.Basic, -1, true, true };
             }
 
             // File - with host
@@ -688,13 +672,6 @@ namespace System.Tests
                 yield return new object[] { @"/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
                 // Implicit file ending with backlash
                 yield return new object[] { @"/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
-                // Explicit with empty host and non-empty path
-                yield return new object[] { "file:///", "/", "", "" };
-                yield return new object[] { @"file:///path1\path2/path3\path4\", @"/path1/path2/path3/path4/", "", "" };
-                // Explicit with empty host and query
-                yield return new object[] { "file:///?query", "/", "?query", "" };
-                // Explicit with empty host and fragment
-                yield return new object[] { "file:///#fragment", "/", "", "#fragment" };
             }
 
             // Mailto
@@ -800,12 +777,6 @@ namespace System.Tests
             yield return new object[] { "http://host/..x/", "/..x/", "", "" };
             yield return new object[] { "http://host/path//", "/path//", "", "" };
             yield return new object[] { "file://C:/abc/def/../ghi", "C:/abc/ghi", "", "" };
-
-            // Unix Path
-            if (!s_isWindowsSystem)
-            {
-                yield return new object[] { "file:///abc/def/../ghi", "/abc/ghi", "", "" };
-            }
         }
 
         [Theory]

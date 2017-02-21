@@ -70,9 +70,9 @@ namespace System.Tests
             yield return new object[] { new Uri(@"\\servername\PATH1\path2\PATH3"), new Uri(@"\\servername\path1\path2\path3"), new Uri("", UriKind.Relative) };
             yield return new object[] { new Uri("file://C:/PATH1/path2/PATH3"), new Uri("file://C:/path1/path2/path3"), new Uri("", UriKind.Relative) };
             // Unix paths are case sensitive
+            yield return new object[] { new Uri("file:///PATH1/path2/PATH3"), new Uri("file:///path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
             if (!s_isWindowsSystem) // Unix path
             {
-                yield return new object[] { new Uri("file:///PATH1/path2/PATH3"), new Uri("file:///path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
                 yield return new object[] { new Uri("/PATH1/path2/PATH3"), new Uri("/path1/path2/path3"), new Uri("../../path1/path2/path3", UriKind.Relative) };
             }
 
@@ -231,7 +231,6 @@ namespace System.Tests
             if (!s_isWindowsSystem)
             {
                 yield return new object[] { "/directory/filename", false  };
-                yield return new object[] { "file:///directory/filename", true  };
             }
         }
 
@@ -359,13 +358,6 @@ namespace System.Tests
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/pata/file"), false };
                 yield return new object[] { new Uri("/sharepath/path/file"), new Uri("/sharepath/path/file!"), false };
                 yield return new object[] { new Uri(@"/shar\path/path/file"), new Uri("/shar/path/path/file"), false };
-
-                // Explicit file
-                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file"), true };
-                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/File"), false };
-                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepata/path/file"), false };
-                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/pata/file"), false };
-                yield return new object[] { new Uri("file:///sharepath/path/file"), new Uri("file:///sharepath/path/file!"), false };
             }
 
             // Relative paths

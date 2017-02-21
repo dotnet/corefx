@@ -2092,12 +2092,6 @@ namespace System
                                 }
                             }
                         }
-                        // Unix: Unix path?
-                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx == 3) && pUriString[idx + 2] == '/')
-                        {
-                            idx += 2;
-                            _flags |= Flags.UnixPath;
-                        }
                         // UNC share?
                         else if (_syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2 && i - idx != 3 &&
                             i < length && pUriString[i] != '?' && pUriString[i] != '#'))
