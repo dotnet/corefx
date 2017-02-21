@@ -164,7 +164,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(15844)]
+        [ActiveIssue(15844, TestPlatforms.AnyUnix)]
         public void WaitChain()
         {
             Process root = CreateProcess(() =>
