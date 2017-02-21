@@ -194,7 +194,8 @@ namespace Microsoft.DotNet.Build.Tasks
 
                 PropertyValue propertyValue;
 
-                if (!AllPropertyValues.TryGetValue(value, out propertyValue))
+                if (!AllPropertyValues.TryGetValue(value, out propertyValue) && 
+                    !AllPropertyValues.TryGetValue(value.ToLowerInvariant(), out propertyValue))
                 {
                     if (permitUnknownValues)
                     {
