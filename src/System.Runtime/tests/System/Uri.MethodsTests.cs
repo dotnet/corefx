@@ -230,8 +230,8 @@ namespace System.Tests
              // Unix path
             if (!s_isWindowsSystem)
             {
-                yield return new object[] { @"/directory/filename", false  };
-                yield return new object[] { @"file:///directory/filename", true  };
+                yield return new object[] { "/directory/filename", false  };
+                yield return new object[] { "file:///directory/filename", true  };
             }
         }
 
@@ -243,35 +243,30 @@ namespace System.Tests
             Assert.Equal(expected, uri.IsWellFormedOriginalString());
         }
 
-        public static IEnumerable<object[]> IsWellFormedOriginalUriString_TestData()
-        {
-            yield return new object[] { "http://www.domain.com/path?name", UriKind.Absolute, true };
-            yield return new object[] { "http://www.domain.com/path?name", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "http://www.domain.com/path?name", UriKind.Relative, false };
-            yield return new object[] { "/path1/path2", UriKind.Absolute, false };
-            yield return new object[] { "/path1/path2", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "/path1/path2", UriKind.Relative, true };
-            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.Absolute, true };
-            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "http://192.168.0.1/path1/page?query#fragment", UriKind.Relative, false };
-            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.Absolute, true };
-            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "http://192.168.0.1:50/path1/page?query#fragment", UriKind.Relative, false };
-            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.Absolute, true };
-            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "http://[::1]/path1/page?query#fragment", UriKind.Relative, false };
-            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.Absolute, true };
-            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true };
-            yield return new object[] { "http://[::1]:50/path1/page?query#fragment", UriKind.Relative, false };
-            yield return new object[] { "http://www.domain.com/path???/file name", UriKind.RelativeOrAbsolute, false };
-            yield return new object[] { "http:\\host/path/file", UriKind.RelativeOrAbsolute, false };
-            yield return new object[] { null, UriKind.RelativeOrAbsolute, false };
-            yield return new object[] { "c:\\directory\filename", UriKind.RelativeOrAbsolute, false };
-            yield return new object[] { "file://C:/directory/filename", UriKind.RelativeOrAbsolute, false };
-        }
-
         [Theory]
-        [MemberData(nameof(IsWellFormedOriginalUriString_TestData))]
+        [InlineData("http://www.domain.com/path?name", UriKind.Absolute, true)]
+        [InlineData("http://www.domain.com/path?name", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://www.domain.com/path?name", UriKind.Relative, false)]
+        [InlineData("/path1/path2", UriKind.Absolute, false)]
+        [InlineData("/path1/path2", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("/path1/path2", UriKind.Relative, true)]
+        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.Absolute, true)]
+        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://192.168.0.1/path1/page?query#fragment", UriKind.Relative, false)]
+        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.Absolute, true)]
+        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://192.168.0.1:50/path1/page?query#fragment", UriKind.Relative, false)]
+        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.Absolute, true)]
+        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://[::1]/path1/page?query#fragment", UriKind.Relative, false)]
+        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.Absolute, true)]
+        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://[::1]:50/path1/page?query#fragment", UriKind.Relative, false)]
+        [InlineData("http://www.domain.com/path???/file name", UriKind.RelativeOrAbsolute, false)]
+        [InlineData("c:\\directory\filename", UriKind.RelativeOrAbsolute, false)]
+        [InlineData("file://C:/directory/filename", UriKind.RelativeOrAbsolute, false)]
+        [InlineData("http:\\host/path/file", UriKind.RelativeOrAbsolute, false)]
+        [InlineData(null, UriKind.RelativeOrAbsolute, false)]
         public void IsWellFormedUriString(string uriString, UriKind uriKind, bool expected)
         {
             Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, uriKind));

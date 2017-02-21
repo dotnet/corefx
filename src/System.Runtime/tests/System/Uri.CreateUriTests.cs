@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.IO;
 using Xunit;
 
 namespace System.Tests
@@ -77,9 +76,9 @@ namespace System.Tests
             if (!s_isWindowsSystem)
             {
                 // Implicit file
-                yield return new object[] {"/path1", "/path", UriKind.RelativeOrAbsolute,"/path" };
-                yield return new object[] {"/path1/path2", "/path", UriKind.RelativeOrAbsolute,"/path" };
-                yield return new object[] {"/pathold", "path", UriKind.RelativeOrAbsolute,"/path" };
+                yield return new object[] {"/path1", "/path", UriKind.RelativeOrAbsolute, "/path" };
+                yield return new object[] {"/path1/path2", "/path", UriKind.RelativeOrAbsolute, "/path" };
+                yield return new object[] {"/pathold", "path", UriKind.RelativeOrAbsolute, "/path" };
             }
 
             // IPv6

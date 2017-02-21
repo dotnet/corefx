@@ -77,6 +77,7 @@ namespace System.Tests
                 yield return new object[] { @"/path/filename", "file:///path/filename", "file:///path/filename" };
 
                 // Explicit File
+                yield return new object[] { @"file:///", "file:///", "file:///" };
                 yield return new object[] { @"file:///path/filename", "file:///path/filename", "file:///path/filename" };
             }
 
@@ -351,7 +352,7 @@ namespace System.Tests
                 yield return new object[] { "file:///#fragment", "file", "", "", UriHostNameType.Basic, -1, true, true };
 
                 // Explicit with path
-                yield return new object[] { "file:///host/", "file", "", "", UriHostNameType.Basic, -1, true, true };
+                yield return new object[] { "file:///path/", "file", "", "", UriHostNameType.Basic, -1, true, true };
             }
 
             // File - with host
