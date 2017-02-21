@@ -25,6 +25,6 @@
   </ItemGroup>
 
   <PropertyGroup>
-  	<GenFacadesOutputPath>$(IntermediateOutputPath)facades/</GenFacadesOutputPath>
+  	<GenFacadesOutputPath>$(BaseIntermediateOutputPath)/shims/facades/</GenFacadesOutputPath>
   </PropertyGroup>
 </Project>

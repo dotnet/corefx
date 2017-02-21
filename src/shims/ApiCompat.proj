@@ -27,6 +27,7 @@
     <WriteLinesToFile File="$(ApiCompatResponseFile)" Lines="$(ApiCompatArgs)" Overwrite="true" />
 
     <Exec Command="$(ApiCompatCmd) &quot;@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatBaselineFile)"
+          Condition="'$(TargetGroup)'=='netcoreapp'"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"
