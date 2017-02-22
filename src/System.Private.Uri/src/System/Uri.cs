@@ -2034,6 +2034,14 @@ namespace System
                     ++length;
                 }
 
+                // Unix Path
+                if (!IsWindowsSystem && InFact(Flags.UnixPath))
+                {
+                    _flags |= Flags.BasicHostType;
+                    _flags |= (Flags)idx;
+                    return ParsingError.None;
+                }
+
                 // Old Uri parser tries to figure out on a DosPath in all cases.
                 // Hence http://c:/ is treated as DosPath without the host while it should be a host "c", port 80
                 //
@@ -2106,7 +2114,7 @@ namespace System
                 //
                 //STEP 1.5 decide on the Authority component
                 //
-                if ((_flags & (Flags.UncPath | Flags.DosPath | Flags.UnixPath)) != 0)
+                if ((_flags & (Flags.UncPath | Flags.DosPath)) != 0)
                 {
                 }
                 else if ((idx + 2) <= length)
@@ -4021,8 +4029,7 @@ namespace System
                 if (syntax.InFact(UriSyntaxFlags.AllowEmptyHost))
                 {
                     flags &= ~Flags.UncPath;    //UNC cannot have an empty hostname
-                    if (StaticInFact(flags, Flags.ImplicitFile)
-                        && (IsWindowsSystem || !StaticInFact(flags, Flags.UnixPath)))
+                    if (StaticInFact(flags, Flags.ImplicitFile))
                         err = ParsingError.BadHostName;
                     else
                         flags |= Flags.BasicHostType;

@@ -73,8 +73,8 @@ namespace System.Tests
             if (!s_isWindowsSystem)
             {
                 // Implicit File
-                yield return new object[] { @"/", "file:///", "file:///" };
-                yield return new object[] { @"/path/filename", "file:///path/filename", "file:///path/filename" };
+                yield return new object[] { "/", "file:///", "file:///" };
+                yield return new object[] { "/path/filename", "file:///path/filename", "file:///path/filename" };
             }
 
             // Compressed
@@ -669,9 +669,9 @@ namespace System.Tests
                 yield return new object[] { "/", "/", "", "" };
                 yield return new object[] { "/path1/path2", "/path1/path2", "", "" };
                 // Implicit file with backslash in path
-                yield return new object[] { @"/path1\path2/path3\path4", @"/path1%5Cpath2/path3%5Cpath4", "", "" };
+                yield return new object[] { @"/path1\path2/path3\path4", "/path1%5Cpath2/path3%5Cpath4", "", "" };
                 // Implicit file ending with backlash
-                yield return new object[] { @"/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
+                yield return new object[] { @"/path1\path2/path3\path4\", "/path1%5Cpath2/path3%5Cpath4%5C", "", "" };
             }
 
             // Mailto

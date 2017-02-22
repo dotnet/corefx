@@ -486,7 +486,7 @@ namespace System.PrivateUri.Tests
             Uri testUri = new Uri(input);
             Assert.Equal("file:///path/path%3Fquery", testUri.AbsoluteUri);
             Assert.Equal("/path/path%3Fquery", testUri.AbsolutePath);
-            Assert.Equal(@"/path/path?query", testUri.LocalPath);
+            Assert.Equal("/path/path?query", testUri.LocalPath);
             Assert.Equal(String.Empty, testUri.Query);
             Assert.Equal(String.Empty, testUri.Fragment);
         }
