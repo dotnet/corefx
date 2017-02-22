@@ -95,31 +95,37 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+
         public static async Task<List<string>> AcceptSocketAsync(Socket server, Func<Socket, Stream, StreamReader, StreamWriter, Task<List<string>>> funcAsync, Options options = null)
         {
-            options = options ?? new Options();
             using (Socket s = await server.AcceptAsync().ConfigureAwait(false))
             {
-                Stream stream = new NetworkStream(s, ownsSocket: false);
-                if (options.UseSsl)
-                {
-                    var sslStream = new SslStream(stream, false, delegate { return true; });
-                    using (var cert = Configuration.Certificates.GetServerCertificate())
-                    {
-                        await sslStream.AuthenticateAsServerAsync(
-                            cert, 
-                            clientCertificateRequired: true, // allowed but not required
-                            enabledSslProtocols: options.SslProtocols, 
-                            checkCertificateRevocation: false).ConfigureAwait(false);
-                    }
-                    stream = sslStream;
-                }
+                return await ProcessSocketAsync(s, funcAsync, options);
+            }
+        }
 
-                using (var reader = new StreamReader(stream, Encoding.ASCII))
-                using (var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
+        public static async Task<List<string>> ProcessSocketAsync(Socket server, Func<Socket, Stream, StreamReader, StreamWriter, Task<List<string>>> funcAsync, Options options = null)
+        {
+            options = options ?? new Options();
+            Stream stream = new NetworkStream(server, ownsSocket: false);
+            if (options.UseSsl)
+            {
+                var sslStream = new SslStream(stream, false, delegate { return true; });
+                using (var cert = Configuration.Certificates.GetServerCertificate())
                 {
-                    return await funcAsync(s, stream, reader, writer).ConfigureAwait(false);
+                    await sslStream.AuthenticateAsServerAsync(
+                        cert,
+                        clientCertificateRequired: true, // allowed but not required
+                        enabledSslProtocols: options.SslProtocols,
+                        checkCertificateRevocation: false).ConfigureAwait(false);
                 }
+                stream = sslStream;
+            }
+
+            using (var reader = new StreamReader(stream, Encoding.ASCII))
+            using (var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
+            {
+                return await funcAsync(server, stream, reader, writer).ConfigureAwait(false);
             }
         }
 

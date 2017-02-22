@@ -91,25 +91,27 @@ namespace System.Net.Http.Functional.Tests
             Func<HttpClient, Socket, Uri, X509Certificate2, Task> makeAndValidateRequest = async (client, server, url, cert) =>
             {
                 Task<string> clientTask = client.GetStringAsync(url);
-                Task<List<string>> serverTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+
+                // Don't dispose socket until clientTask has been completed to avoid sporadic exceptions:
+                // 'WinHttpException : The server returned an invalid or unrecognized response' or
+                // 'TaskCanceledException : A task was canceled'
+                using (Socket listeningSocket = await server.AcceptAsync().ConfigureAwait(false))
                 {
-                    SslStream sslStream = Assert.IsType<SslStream>(stream);
-                    Assert.Equal(cert, sslStream.RemoteCertificate);
-                    socket.NoDelay = true;
-                    var result = await LoopbackServer.ReadWriteAcceptedAsync(socket, reader, writer);
+                    Task<List<string>> serverTask = LoopbackServer.ProcessSocketAsync(listeningSocket, async (socket, stream, reader, writer) =>
+                    {
+                        SslStream sslStream = Assert.IsType<SslStream>(stream);
+                        Assert.Equal(cert, sslStream.RemoteCertificate);
+                        var result = await LoopbackServer.ReadWriteAcceptedAsync(socket, reader, writer);
+                        return result;
+                    }, options);
 
-                    // Wait for a bit so client can process response before server goes down.
-                    await Task.Delay(100);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(clientTask, serverTask);
 
-                    return result;
-                }, options);
-
-                await TestHelper.WhenAllCompletedOrAnyFailed(clientTask, serverTask);
-
-                Assert.Equal(string.Empty, clientTask.Result);
-                Assert.NotNull(serverTask.Result);
-                Assert.True(serverTask.Result.Count > 0);
-                Assert.False(string.IsNullOrEmpty(serverTask.Result[0]));
+                    Assert.Equal(string.Empty, clientTask.Result);
+                    Assert.NotNull(serverTask.Result);
+                    Assert.True(serverTask.Result.Count > 0);
+                    Assert.False(string.IsNullOrEmpty(serverTask.Result[0]));
+                }
             };
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
