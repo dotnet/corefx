@@ -37,6 +37,25 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
+  <!-- Retrieve the UAP Tools to the TestHost folder -->
+  <Target Name="CopyUAPToolsToTestHost" 
+          AfterTargets="RestorePackages"
+          Condition="'$(BuildingUAPVertical)'=='true' and '$(UAPToolsFolder)'!=''" >
+
+    <ItemGroup>
+      <RunnerFolderContents Include="$(UAPToolsFolder)\Runner\**\*" />
+      <LauncherFolderContents Include="$(UAPToolsFolder)\Launcher\**\*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(RunnerFolderContents)" 
+          DestinationFiles="$(NETCoreAppTestRootPath)\Runner\%(RunnerFolderContents.RecursiveDir)%(RunnerFolderContents.Filename)%(RunnerFolderContents.Extension)" 
+          SkipUnchangedFiles="true"/>
+
+    <Copy SourceFiles="@(LauncherFolderContents)" 
+          DestinationFiles="$(NETCoreAppTestRootPath)\Launcher\%(LauncherFolderContents.RecursiveDir)%(LauncherFolderContents.Filename)%(LauncherFolderContents.Extension)" 
+          SkipUnchangedFiles="true"/>
+  </Target>
+
   <Target Name="AddXunitConsoleRunner" BeforeTargets="ResolveReferences" Condition="'$(TargetGroup)' == 'netfx'">
     <Error Condition="!Exists('$(PackagesDir)$(XUnitRunnerPackageId)\$(XUnitPackageVersion)\tools\xunit.console.exe')"
             Text="Error: looks the package $(PackagesDir)$(XUnitRunnerPackageId)\$(XUnitPackageVersion) not restored or missing xunit.console.exe."
