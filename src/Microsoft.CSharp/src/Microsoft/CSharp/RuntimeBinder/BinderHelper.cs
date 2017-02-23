@@ -162,6 +162,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return obj != null && Marshal.IsComObject(obj);
         }
 
+#if ENABLECOMBINDER
         /////////////////////////////////////////////////////////////////////////////////
 
         // Try to determine if this object represents a WindowsRuntime object - i.e. it either
@@ -169,28 +170,27 @@ namespace Microsoft.CSharp.RuntimeBinder
         // The logic here matches the CLR's logic of finding a WinRT object.
         internal static bool IsWindowsRuntimeObject(DynamicMetaObject obj)
         {
-            if (obj != null && obj.RuntimeType != null)
+            Type curType = obj?.RuntimeType;
+            while (curType != null)
             {
-                Type curType = obj.RuntimeType;
-                while (curType != null)
+                TypeAttributes attributes = curType.Attributes;
+                if ((attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime)
                 {
-                    if ((curType.GetTypeInfo().Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime)
-                    {
-                        // Found a WinRT COM object
-                        return true;
-                    }
-                    if ((curType.GetTypeInfo().Attributes & TypeAttributes.Import) == TypeAttributes.Import)
-                    {
-                        // Found a class that is actually imported from COM but not WinRT
-                        // this is definitely a non-WinRT COM object
-                        return false;
-                    }
-                    curType = curType.GetTypeInfo().BaseType;
+                    // Found a WinRT COM object
+                    return true;
                 }
+                if ((attributes & TypeAttributes.Import) == TypeAttributes.Import)
+                {
+                    // Found a class that is actually imported from COM but not WinRT
+                    // this is definitely a non-WinRT COM object
+                    return false;
+                }
+                curType = curType.BaseType;
             }
+
             return false;
         }
-
+#endif
         /////////////////////////////////////////////////////////////////////////////////
 
         private static bool IsTransparentProxy(object obj)
@@ -293,7 +293,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            if (binding.Type.GetTypeInfo().IsValueType && !action.ReturnType.GetTypeInfo().IsValueType)
+            if (binding.Type.IsValueType && !action.ReturnType.IsValueType)
             {
                 Debug.Assert(action.ReturnType == typeof(object));
                 return Expression.Convert(binding, action.ReturnType);
@@ -311,13 +311,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             var invokeConstructor = action as CSharpInvokeConstructorBinder;
             if (invokeConstructor != null)
             {
-                if (arg0 == null || !(arg0.Value is Type))
+                Type result = arg0.Value as Type;
+                if (result == null)
                 {
                     Debug.Assert(false);
                     return typeof(object);
                 }
-
-                Type result = arg0.Value as Type;
 
                 return result;
             }
