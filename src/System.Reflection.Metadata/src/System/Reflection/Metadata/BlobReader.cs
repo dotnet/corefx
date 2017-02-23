@@ -41,7 +41,7 @@ namespace System.Reflection.Metadata
 
         internal BlobReader(MemoryBlock block)
         {
-            Debug.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.Pointer != null || block.Length == 0));
+            Debug.Assert(block.Length >= 0 && (block.Pointer != null || block.Length == 0));
             _block = block;
             _currentPointer = block.Pointer;
             _endPointer = block.Pointer + block.Length;
@@ -242,37 +242,46 @@ namespace System.Reflection.Metadata
 
         public char ReadChar()
         {
-            return *(char*)GetCurrentPointerAndAdvance(sizeof(char));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(char));
+            return (char)(ptr[0] + (ptr[1] << 8));
         }
 
         public short ReadInt16()
         {
-            return *(short*)GetCurrentPointerAndAdvance(sizeof(short));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(short));
+            return (short)(ptr[0] + (ptr[1] << 8));
         }
 
         public ushort ReadUInt16()
         {
-            return *(ushort*)GetCurrentPointerAndAdvance(sizeof(ushort));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
+            return (ushort)(ptr[0] + (ptr[1] << 8));
         }
 
         public int ReadInt32()
         {
-            return *(int*)GetCurrentPointerAndAdvance(sizeof(int));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
+            return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 32));
         }
 
         public uint ReadUInt32()
         {
-            return *(uint*)GetCurrentPointerAndAdvance(sizeof(uint));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(uint));
+            return (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 32));
         }
 
         public long ReadInt64()
         {
-            return *(long*)GetCurrentPointerAndAdvance(sizeof(long));
+            uint lo = ReadUInt32();
+            uint hi = ReadUInt32();
+            return (long)(lo + ((ulong)hi << 32));
         }
 
         public ulong ReadUInt64()
         {
-            return *(ulong*)GetCurrentPointerAndAdvance(sizeof(ulong));
+            uint lo = ReadUInt32();
+            uint hi = ReadUInt32();
+            return lo + ((ulong)hi << 32);
         }
 
         public float ReadSingle()
@@ -290,7 +299,19 @@ namespace System.Reflection.Metadata
         public Guid ReadGuid()
         {
             const int size = 16;
-            return *(Guid*)GetCurrentPointerAndAdvance(size);
+            byte * ptr = GetCurrentPointerAndAdvance(size);
+            if (BitConverter.IsLittleEndian)
+            {
+                return *(Guid*)ptr;
+            }
+            else
+            {
+                return new Guid(
+                    (uint)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
+                    (ushort)(ptr[4] | (ptr[5] << 8)),
+                    (ushort)(ptr[6] | (ptr[7] << 8)),
+                    ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+            }
         }
 
         /// <summary>
@@ -313,9 +334,9 @@ namespace System.Reflection.Metadata
             }
 
             return new decimal(
-                *(int*)(ptr + 1),
-                *(int*)(ptr + 5),
-                *(int*)(ptr + 9),
+                (int)(ptr[1] | (ptr[2] << 8) | (ptr[3] << 16) | (ptr[4] << 24)),
+                (int)(ptr[5] | (ptr[6] << 8) | (ptr[7] << 16) | (ptr[8] << 24)),
+                (int)(ptr[9] | (ptr[10] << 8) | (ptr[11] << 16) | (ptr[12] << 24)),
                 isNegative: (*ptr & 0x80) != 0,
                 scale: scale);
         }
