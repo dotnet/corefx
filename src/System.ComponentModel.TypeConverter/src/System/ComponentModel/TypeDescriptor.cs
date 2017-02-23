@@ -26,9 +26,7 @@ namespace System.ComponentModel
         // class load anyway.
         private static readonly WeakHashtable s_providerTable = new WeakHashtable();     // mapping of type or object hash to a provider list
         private static readonly Hashtable s_providerTypeTable = new Hashtable();         // A direct mapping from type to provider.
-
-        // A table of type -> default provider to track DefaultTypeDescriptionProviderAttributes.
-        private static readonly Lazy<Hashtable> s_defaultProvidersLazy = new Lazy<Collections.Hashtable>(() => new Hashtable());
+        private static readonly Hashtable s_defaultProviders = new Hashtable(); // A table of type -> default provider to track DefaultTypeDescriptionProviderAttributes.
         private static readonly Lazy<WeakHashtable> s_associationTableLazy = new Lazy<WeakHashtable>(() => new WeakHashtable());
         private static int s_metadataVersion;                          // a version stamp for our metadata.  Used by property descriptors to know when to rebuild attributes.
 
@@ -311,14 +309,14 @@ namespace System.ComponentModel
         /// </summary>
         private static void CheckDefaultProvider(Type type)
         {
-            if (s_defaultProvidersLazy.Value.ContainsKey(type))
+            if (s_defaultProviders.ContainsKey(type))
             {
                 return;
             }
 
             lock (s_internalSyncObject)
             {
-                if (s_defaultProvidersLazy.Value.ContainsKey(type))
+                if (s_defaultProviders.ContainsKey(type))
                 {
                     return;
                 }
@@ -327,7 +325,7 @@ namespace System.ComponentModel
                 // and it starts messing around with type information, 
                 // this could infinitely recurse.
                 //
-                s_defaultProvidersLazy.Value[type] = null;
+                s_defaultProviders[type] = null;
             }
 
             // Always use core reflection when checking for
@@ -388,17 +386,18 @@ namespace System.ComponentModel
                 throw new ArgumentException(SR.TypeDescriptorSameAssociation);
             }
 
-            IList associations = (IList)s_associationTableLazy.Value[primary];
+            WeakHashtable associationTable = s_associationTableLazy.Value;
+            IList associations = (IList)associationTable[primary];
 
             if (associations == null)
             {
-                lock (s_associationTableLazy)
+                lock (associationTable)
                 {
-                    associations = (IList)s_associationTableLazy.Value[primary];
+                    associations = (IList)associationTable[primary];
                     if (associations == null)
                     {
                         associations = new ArrayList(4);
-                        s_associationTableLazy.Value.SetWeak(primary, associations);
+                        associationTable.SetWeak(primary, associations);
                     }
                 }
             }
