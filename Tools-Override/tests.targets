@@ -3,6 +3,7 @@
 
   <!-- This is the target that copies the test assets to the test output -->
   <Import Project="$(MSBuildThisFileDirectory)publishtest.targets" />
+  <Import Project="$(ToolsDir)PerfTesting.targets" Condition="Exists('$(ToolsDir)PerfTesting.targets') and '$(Performance)' == 'true'"/>
   <UsingTask TaskName="GenerateTestExecutionScripts" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
   <UsingTask TaskName="GetTargetMachineInfo" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
@@ -67,6 +68,11 @@
     <TestArguments Condition="'$(TestHostExecutablePath)'==''">$(XunitArguments)</TestArguments>
 
     <TestCommandLine Condition="'$(Performance)'!='true'">$(TestProgram) $(TestArguments) {XunitTraitOptions}</TestCommandLine>
+
+    <!-- set $(TestDebugger) to eg c:\debuggers\windbg.exe to run tests under a debugger -->
+    <TestCommandLine Condition="'$(TestDebugger)' != '' and !$(TestDebugger.Contains('devenv'))">$(TestDebugger) $(TestCommandLine)</TestCommandLine>
+    <TestCommandLine Condition="'$(TestDebugger)' != '' and  $(TestDebugger.Contains('devenv'))">$(TestDebugger) /debugexe $(TestCommandLine)</TestCommandLine>
+    
   </PropertyGroup>
 
   <!-- The Code Coverage targets will override TestHost and TestCommandLine if coverage is enabled -->
@@ -110,6 +116,7 @@
       <ReferenceFromRuntime Include="xunit.assert" />
       <ReferenceFromRuntime Include="xunit.abstractions" />
       <ReferenceFromRuntime Include="xunit.performance.core" />
+      <ReferenceFromRuntime Include="xunit.performance.api" />
 
       <!-- Reference everything in the targeting pack directory -->
       <TargetingPackItems Include="%(TargetingPackDirs.Identity)/*.dll" />
@@ -207,6 +214,9 @@
       <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="$(TestCommandLine)"/>
     </ItemGroup>
 
+    <ItemGroup Condition ="'$(Performance)'=='true'">
+      <TestCommandLines Include="@(PerfTestCommandLines)" />
+    </ItemGroup>
     <!-- Currently all netcore50 implementations of System.Console actually write to a noop stream -->
     <!-- Workaround is to have the exe detect this and use Console.SetOut to write to a text file. -->
     <ItemGroup Condition="'$(UseDotNetNativeToolchain)' == 'true' AND '$(Performance)'!='true'" >
