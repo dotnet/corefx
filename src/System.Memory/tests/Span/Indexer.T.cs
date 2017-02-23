@@ -11,7 +11,7 @@ namespace System.SpanTests
         [Fact]
         public static void ZeroLengthInvalidIndex()
         {
-            int dummy;
+            int dummy = 0;
             Span<int> sp = new Span<int>(Array.Empty<int>());
 
             for (int i = -2; i <= 2; i++)
@@ -19,6 +19,16 @@ namespace System.SpanTests
                 try
                 {
                     dummy = sp[i];
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    if (ex.GetType() != typeof(IndexOutOfRangeException))
+                        throw;
+                }
+
+                try
+                {
+                    sp[i] = dummy;
                 }
                 catch (IndexOutOfRangeException ex)
                 {
