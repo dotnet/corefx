@@ -6,6 +6,7 @@
   builds, we should remove this project. -->
   <PropertyGroup>
     <NugetRuntimeIdentifier>win10-x64-aot</NugetRuntimeIdentifier>
+    <NuGetTargetMoniker>.NETCore,Version=v5.0</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
     <FileToInclude Include="System.Diagnostics.Tracing" />
