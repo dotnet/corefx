@@ -100,12 +100,6 @@
   <data name="Argument_InvalidOffLen" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
-  <data name="ArgumentNull_Array" xml:space="preserve">
-    <value>Array cannot be null.</value>
-  </data>
-  <data name="ArgumentNull_Buffer" xml:space="preserve">
-    <value>Buffer cannot be null.</value>
-  </data>
   <data name="ArgumentOutOfRange_Bounds_Lower_Upper" xml:space="preserve">
     <value>Argument must be between {0} and {1}.</value>
   </data>
@@ -116,16 +110,13 @@
     <value>Non-negative number required.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
-    <value>Positive number required."</value>
+    <value>Positive number required.</value>
   </data>
   <data name="ArgumentOutOfRange_Timeout" xml:space="preserve">
     <value>The timeout must be greater than or equal to -1.</value>
   </data>
   <data name="ArgumentOutOfRange_WriteTimeout" xml:space="preserve">
     <value>The timeout must be either a positive number or -1.</value>
-  </data>
-  <data name="ArgumentOutOfRange_OffsetOut" xml:space="preserve">
-    <value>Either offset did not refer to a position in the string, or there is an insufficient length of destination character array."</value>
   </data>
   <data name="IndexOutOfRange_IORaceCondition" xml:space="preserve">
     <value>Probable I/O race condition detected while copying memory.  The I/O package is not thread safe by default.  In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods.  This also applies to classes like StreamWriter and StreamReader.</value>
@@ -143,10 +134,10 @@
     <value>Unable to read beyond the end of the stream.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Can not access a closed Stream."</value>
+    <value>Can not access a closed Stream.</value>
   </data>
   <data name="InvalidNullEmptyArgument" xml:space="preserve">
-    <value>Argument {0} cannot be null or zero-length."</value>
+    <value>Argument {0} cannot be null or zero-length.</value>
   </data>
   <data name="Arg_WrongAsyncResult" xml:space="preserve">
     <value>IAsyncResult object did not come from the corresponding async method on this type.</value>
@@ -155,7 +146,7 @@
     <value>EndRead can only be called once for each asynchronous operation.</value>
   </data>
   <data name="InvalidOperation_EndWriteCalledMultiple" xml:space="preserve">
-    <value>EndWrite can only be called once for each asynchronous operation."</value>
+    <value>EndWrite can only be called once for each asynchronous operation.</value>
   </data>
   <data name="IO_PortNotFound" xml:space="preserve">
     <value>The specified port does not exist.</value>
@@ -173,9 +164,9 @@
     <value>The process cannot access the port because it is being used by another process.</value>
   </data>
   <data name="IO_SharingViolation_File" xml:space="preserve">
-    <value>The process cannot access the port '{0}' because it is being used by another process."</value>
+    <value>The process cannot access the port '{0}' because it is being used by another process.</value>
   </data>
   <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
-    <value>Access to the port '{0}' is denied."</value>
+    <value>Access to the port '{0}' is denied.</value>
   </data>
 </root>

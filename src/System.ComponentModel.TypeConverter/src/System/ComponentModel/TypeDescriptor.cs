@@ -337,13 +337,13 @@ namespace System.ComponentModel
             // more than one of these, but walk anyway.  Walk in 
             // reverse order so that the most derived takes precidence.
             //
-            object[] attrs = type.GetTypeInfo().GetCustomAttributes(typeof(TypeDescriptionProviderAttribute), false).ToArray();
+            object[] attrs = type.GetCustomAttributes(typeof(TypeDescriptionProviderAttribute), false).ToArray();
             bool providerAdded = false;
             for (int idx = attrs.Length - 1; idx >= 0; idx--)
             {
                 TypeDescriptionProviderAttribute pa = (TypeDescriptionProviderAttribute)attrs[idx];
                 Type providerType = Type.GetType(pa.TypeName);
-                if (providerType != null && typeof(TypeDescriptionProvider).GetTypeInfo().IsAssignableFrom(providerType))
+                if (providerType != null && typeof(TypeDescriptionProvider).IsAssignableFrom(providerType))
                 {
                     TypeDescriptionProvider prov = (TypeDescriptionProvider)Activator.CreateInstance(providerType);
                     AddProvider(prov, type);
@@ -354,7 +354,7 @@ namespace System.ComponentModel
             // If we did not add a provider, check the base class.  
             if (!providerAdded)
             {
-                Type baseType = type.GetTypeInfo().BaseType;
+                Type baseType = type.BaseType;
                 if (baseType != null && baseType != type)
                 {
                     CheckDefaultProvider(baseType);
@@ -580,7 +580,7 @@ namespace System.ComponentModel
 
             object associatedObject = primary;
 
-            if (!type.GetTypeInfo().IsInstanceOfType(primary))
+            if (!type.IsInstanceOfType(primary))
             {
                 // Check our association table for a match.
                 //
@@ -601,7 +601,7 @@ namespace System.ComponentModel
                             {
                                 associations.RemoveAt(idx);
                             }
-                            else if (type.GetTypeInfo().IsInstanceOfType(secondary))
+                            else if (type.IsInstanceOfType(secondary))
                             {
                                 associatedObject = secondary;
                             }
@@ -632,7 +632,7 @@ namespace System.ComponentModel
                                 // an object that this PropertyDescriptor can't munch on, but it's
                                 // clearer to use that object instance instead of it's designer.
                                 //
-                                if (designer != null && type.GetTypeInfo().IsInstanceOfType(designer))
+                                if (designer != null && type.IsInstanceOfType(designer))
                                 {
                                     associatedObject = designer;
                                 }
@@ -1204,8 +1204,7 @@ namespace System.ComponentModel
 
         private static Type GetNodeForBaseType(Type searchType)
         {
-            var typeInfo = searchType.GetTypeInfo();
-            if (typeInfo.IsInterface)
+            if (searchType.IsInterface)
             {
                 return InterfaceType;
             }
@@ -1213,7 +1212,7 @@ namespace System.ComponentModel
             {
                 return null;
             }
-            return typeInfo.BaseType;
+            return searchType.BaseType;
         }
 
         /// <summary>
@@ -1673,7 +1672,7 @@ namespace System.ComponentModel
 
                         Type keyType = key as Type ?? key.GetType();
 
-                        target.Provider = new DelegatingTypeDescriptionProvider(keyType.GetTypeInfo().BaseType);
+                        target.Provider = new DelegatingTypeDescriptionProvider(keyType.BaseType);
                     }
                     else
                     {
@@ -2163,7 +2162,7 @@ namespace System.ComponentModel
                     {
                         DictionaryEntry de = e.Entry;
                         Type nodeType = de.Key as Type;
-                        if (nodeType != null && type.GetTypeInfo().IsAssignableFrom(nodeType) || nodeType == typeof(object))
+                        if (nodeType != null && type.IsAssignableFrom(nodeType) || nodeType == typeof(object))
                         {
                             TypeDescriptionNode node = (TypeDescriptionNode)de.Value;
                             while (node != null && !(node.Provider is ReflectTypeDescriptionProvider))
@@ -2249,7 +2248,7 @@ namespace System.ComponentModel
                 {
                     DictionaryEntry de = e.Entry;
                     Type nodeType = de.Key as Type;
-                    if (nodeType != null && type.GetTypeInfo().IsAssignableFrom(nodeType) || nodeType == typeof(object))
+                    if (nodeType != null && type.IsAssignableFrom(nodeType) || nodeType == typeof(object))
                     {
                         TypeDescriptionNode node = (TypeDescriptionNode)de.Value;
                         while (node != null && !(node.Provider is ReflectTypeDescriptionProvider))
@@ -2312,7 +2311,7 @@ namespace System.ComponentModel
                 {
                     DictionaryEntry de = e.Entry;
                     Type nodeType = de.Key as Type;
-                    if (nodeType != null && nodeType.GetTypeInfo().Module.Equals(module) || nodeType == typeof(object))
+                    if (nodeType != null && nodeType.Module.Equals(module) || nodeType == typeof(object))
                     {
                         TypeDescriptionNode node = (TypeDescriptionNode)de.Value;
                         while (node != null && !(node.Provider is ReflectTypeDescriptionProvider))
@@ -3252,7 +3251,7 @@ namespace System.ComponentModel
                     throw new ArgumentNullException(nameof(objectType));
                 }
 
-                if (instance != null && !objectType.GetTypeInfo().IsInstanceOfType(instance))
+                if (instance != null && !objectType.IsInstanceOfType(instance))
                 {
                     throw new ArgumentException(nameof(instance));
                 }
