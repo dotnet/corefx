@@ -344,8 +344,6 @@ namespace Microsoft.Reflection
 #if ES_BUILD_PCL || PROJECTN
 namespace System.Security
 {
-    class SuppressUnmanagedCodeSecurityAttribute : Attribute { }
-
     enum SecurityAction { Demand }
 }
 namespace System.Security.Permissions
@@ -356,18 +354,5 @@ namespace System.Security.Permissions
         public PermissionSetAttribute(System.Security.SecurityAction action) { }
         public bool Unrestricted { get; set; }
     }
-}
-#endif
-
-#if PROJECTN
-namespace System
-{
-    public static class AppDomain
-    {
-        public static int GetCurrentThreadId()
-        {
-            return (int)Interop.Kernel32.GetCurrentThreadId();
-        }
-    }    
 }
 #endif

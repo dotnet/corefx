@@ -18,7 +18,7 @@ internal static partial class Interop
             byte level,
             ulong matchAnyKeywords,
             ulong matchAllKeywords,
-            Interop.Kernel32.EVENT_FILTER_DESCRIPTOR* filterData,
+            Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData,
             IntPtr callbackContext
             );
 
