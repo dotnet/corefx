@@ -898,11 +898,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     ParameterInfo[] parameters = methodBase.GetParameters();
 
                     bool bAdded = false;
-#if UNSUPPORTEDAPI
-                    foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetRuntimeMethods(), m => m.MetadataToken == methodBase.MetadataToken))
-#else
                     foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetRuntimeMethods(), m => m.HasSameMetadataDefinitionAs(methodBase)))
-#endif
                     {
                         if (!methinfo.IsGenericMethod)
                         {
@@ -1553,9 +1549,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ConstructorInfo ctor = member as ConstructorInfo;
 
             Debug.Assert(method != null || ctor != null);
-#if UNSUPPORTEDAPI
             Debug.Assert(member.DeclaringType == member.ReflectedType);
-#endif
             // If we are trying to add an actual method via MethodKindEnum.Actual, and 
             // the memberinfo is a special name, and its not static, then return null. 
             // We'll re-add the thing later with some other method kind.
@@ -1772,15 +1766,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
 
                 // We need to use RawDefaultValue, because DefaultValue is too clever.
-#if UNSUPPORTEDAPI
                 if (parameters[i].RawDefaultValue != null)
                 {
                     object defValue = parameters[i].RawDefaultValue;
-#else
-                if (parameters[i].DefaultValue != null)
-                {
-                    object defValue = parameters[i].DefaultValue;
-#endif
                     Type defType = defValue.GetType();
 
                     if (defType == typeof(Byte))
@@ -1881,7 +1869,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private uint GetCountOfModOpts(ParameterInfo[] parameters)
         {
             uint count = 0;
-#if UNSUPPORTEDAPI
             foreach (ParameterInfo p in parameters)
             {
                 if (p.GetOptionalCustomModifiers() != null)
@@ -1889,7 +1876,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     count += (uint)p.GetOptionalCustomModifiers().Length;
                 }
             }
-#endif
             return count;
         }
 

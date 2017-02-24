@@ -1007,11 +1007,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // We need to find the associated methodinfo on the instantiated type.
             foreach (MethodInfo m in type.GetRuntimeMethods())
             {
-#if UNSUPPORTEDAPI
-                if ((m.MetadataToken != methodInfo.MetadataToken) || (m.Module != methodInfo.Module))
-#else
                 if (!m.HasSameMetadataDefinitionAs(methodInfo))
-#endif
                 {
                     continue;
                 }
@@ -1078,11 +1074,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             foreach (ConstructorInfo c in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
             {
-#if UNSUPPORTEDAPI
-                if ((c.MetadataToken != ctorInfo.MetadataToken) || (c.Module != ctorInfo.Module))
-#else
                 if (!c.HasSameMetadataDefinitionAs(ctorInfo))
-#endif
                 {
                     continue;
                 }
@@ -1134,12 +1126,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             foreach (PropertyInfo p in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
             {
-#if UNSUPPORTEDAPI
-                if ((p.MetadataToken != propertyInfo.MetadataToken) || (p.Module != propertyInfo.Module))
-#else
                 if (!p.HasSameMetadataDefinitionAs(propertyInfo))
                 {
-#endif
                     continue;
                 }
                 Debug.Assert((p.Name == propertyInfo.Name) &&
