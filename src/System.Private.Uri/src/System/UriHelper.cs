@@ -247,7 +247,8 @@ namespace System
                 dest[destPos++] = pStr[prevInputPos++];
             return dest;
         }
-        #region toDelete
+
+#region OldCode
         internal static unsafe char[] UnescapeString(string input, int start, int end, char[] dest,
             ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax,
             bool isQuery)
@@ -491,7 +492,120 @@ namespace System
 
         done: return dest;
         }
-        #endregion
+
+        internal static unsafe void MatchUTF8Sequence(char* pDest, char[] dest, ref int destOffset, char[] unescapedChars,
+            int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
+        {
+            int count = 0;
+            fixed (char* unescapedCharsPtr = unescapedChars)
+            {
+                for (int j = 0; j < charCount; ++j)
+                {
+                    bool isHighSurr = char.IsHighSurrogate(unescapedCharsPtr[j]);
+
+                    byte[] encodedBytes = Encoding.UTF8.GetBytes(unescapedChars, j, isHighSurr ? 2 : 1);
+                    int encodedBytesLength = encodedBytes.Length;
+
+                    // we have to keep unicode chars outside Iri range escaped
+                    bool inIriRange = false;
+                    if (iriParsing)
+                    {
+                        if (!isHighSurr)
+                            inIriRange = IriHelper.CheckIriUnicodeRange(unescapedChars[j], isQuery);
+                        else
+                        {
+                            bool surrPair = false;
+                            inIriRange = IriHelper.CheckIriUnicodeRange(unescapedChars[j], unescapedChars[j + 1],
+                                                                   ref surrPair, isQuery);
+                        }
+                    }
+
+                    while (true)
+                    {
+                        // Escape any invalid bytes that were before this character
+                        while (bytes[count] != encodedBytes[0])
+                        {
+                            Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                            EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+                        }
+
+                        // check if all bytes match
+                        bool allBytesMatch = true;
+                        int k = 0;
+                        for (; k < encodedBytesLength; ++k)
+                        {
+                            if (bytes[count + k] != encodedBytes[k])
+                            {
+                                allBytesMatch = false;
+                                break;
+                            }
+                        }
+
+                        if (allBytesMatch)
+                        {
+                            count += encodedBytesLength;
+                            if (iriParsing)
+                            {
+                                if (!inIriRange)
+                                {
+                                    // need to keep chars not allowed as escaped
+                                    for (int l = 0; l < encodedBytes.Length; ++l)
+                                    {
+                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                        EscapeAsciiChar((char)encodedBytes[l], dest, ref destOffset);
+                                    }
+                                }
+                                else if (!UriHelper.IsBidiControlCharacter(unescapedCharsPtr[j]))
+                                {
+                                    //copy chars
+                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                    pDest[destOffset++] = unescapedCharsPtr[j];
+                                    if (isHighSurr)
+                                    {
+                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                        pDest[destOffset++] = unescapedCharsPtr[j + 1];
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //copy chars
+                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                pDest[destOffset++] = unescapedCharsPtr[j];
+
+                                if (isHighSurr)
+                                {
+                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                    pDest[destOffset++] = unescapedCharsPtr[j + 1];
+                                }
+                            }
+
+                            break; // break out of while (true) since we've matched this char bytes
+                        }
+                        else
+                        {
+                            // copy bytes till place where bytes don't match
+                            for (int l = 0; l < k; ++l)
+                            {
+                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+                            }
+                        }
+                    }
+
+                    if (isHighSurr) j++;
+                }
+            }
+
+            // Include any trailing invalid sequences
+            while (count < byteCount)
+            {
+                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
+                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+            }
+        }
+
+#endregion
 
         //
         // This method will assume that any good Escaped Sequence will be unescaped in the output
@@ -504,19 +618,18 @@ namespace System
         // - It is a RARE case when Unescape actually needs escaping some characters mentioned above.
         //   For this reason it returns a char[] that is usually the same ref as the input "dest" value.
         //
-        #if netcoreapp
-        internal static unsafe string UnescapeString(string input, int start, int end,
+        internal static unsafe void UnescapeString(string input, int start, int end, PooledCharArray pooledArray,
             ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax,
             bool isQuery)
         {
             fixed (char* pStr = input)
             {
-                return UnescapeString(pStr, start, end, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
+                UnescapeString(pStr, start, end, pooledArray, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
             }
         }
 
-        internal static unsafe string UnescapeString(char* pStr, int start, int end, ref int destPosition,
+        internal static unsafe void UnescapeString(char* pStr, int start, int end, PooledCharArray pooledArray, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax, bool isQuery)
         {
             byte[] bytes = null;
@@ -525,7 +638,6 @@ namespace System
             int next = start;
             bool iriParsing = Uri.IriParsingStatic(syntax)
                                 && ((unescapeMode & UnescapeMode.EscapeUnescape) == UnescapeMode.EscapeUnescape);
-            PooledCharArray pooledArray = new PooledCharArray(end - start);
 
             while (true)
             {
@@ -534,7 +646,6 @@ namespace System
                 {
                     while (start < end)
                         pooledArray[destPosition++] = pStr[start++];
-                    return pooledArray.GetStringAndRelease(destPosition);
                 }
 
                 while (true)
@@ -727,17 +838,15 @@ namespace System
                         // Do not unescape chars not allowed by Iri
                         // need to check for invalid utf sequences that may not have given any chars
 
-                        MatchUTF8Sequence(pooledArray, ref destPosition, unescapedChars, charCount, bytes,
+                        MatchUTF8SequenceFastPath(pooledArray, ref destPosition, unescapedChars, charCount, bytes,
                             byteCount, isQuery, iriParsing);
                     }
 
                     if (next == end)
-                        goto done;
+                        return;
                 dest_fixed_loop_break:;
                 }
             }
-
-        done: return pooledArray.GetStringAndRelease(destPosition);
         }
 
         //
@@ -745,7 +854,7 @@ namespace System
         // We got the unescaped chars, we then re-encode them and match off the bytes
         // to get the invalid sequence bytes that we just copy off
         //
-        internal static unsafe void MatchUTF8Sequence(PooledCharArray dest, ref int destOffset, char[] unescapedChars,
+        internal static unsafe void MatchUTF8SequenceFastPath(PooledCharArray dest, ref int destOffset, char[] unescapedChars,
             int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
         {
             int count = 0;
@@ -856,119 +965,8 @@ namespace System
                 EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
             }
         }
-        #endif
 
-        internal static unsafe void MatchUTF8Sequence(char* pDest, char[] dest, ref int destOffset, char[] unescapedChars,
-            int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
-        {
-            int count = 0;
-            fixed (char* unescapedCharsPtr = unescapedChars)
-            {
-                for (int j = 0; j < charCount; ++j)
-                {
-                    bool isHighSurr = char.IsHighSurrogate(unescapedCharsPtr[j]);
 
-                    byte[] encodedBytes = Encoding.UTF8.GetBytes(unescapedChars, j, isHighSurr ? 2 : 1);
-                    int encodedBytesLength = encodedBytes.Length;
-
-                    // we have to keep unicode chars outside Iri range escaped
-                    bool inIriRange = false;
-                    if (iriParsing)
-                    {
-                        if (!isHighSurr)
-                            inIriRange = IriHelper.CheckIriUnicodeRange(unescapedChars[j], isQuery);
-                        else
-                        {
-                            bool surrPair = false;
-                            inIriRange = IriHelper.CheckIriUnicodeRange(unescapedChars[j], unescapedChars[j + 1],
-                                                                   ref surrPair, isQuery);
-                        }
-                    }
-
-                    while (true)
-                    {
-                        // Escape any invalid bytes that were before this character
-                        while (bytes[count] != encodedBytes[0])
-                        {
-                            Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
-                        }
-
-                        // check if all bytes match
-                        bool allBytesMatch = true;
-                        int k = 0;
-                        for (; k < encodedBytesLength; ++k)
-                        {
-                            if (bytes[count + k] != encodedBytes[k])
-                            {
-                                allBytesMatch = false;
-                                break;
-                            }
-                        }
-
-                        if (allBytesMatch)
-                        {
-                            count += encodedBytesLength;
-                            if (iriParsing)
-                            {
-                                if (!inIriRange)
-                                {
-                                    // need to keep chars not allowed as escaped
-                                    for (int l = 0; l < encodedBytes.Length; ++l)
-                                    {
-                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                        EscapeAsciiChar((char)encodedBytes[l], dest, ref destOffset);
-                                    }
-                                }
-                                else if (!UriHelper.IsBidiControlCharacter(unescapedCharsPtr[j]))
-                                {
-                                    //copy chars
-                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                    pDest[destOffset++] = unescapedCharsPtr[j];
-                                    if (isHighSurr)
-                                    {
-                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                        pDest[destOffset++] = unescapedCharsPtr[j + 1];
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                //copy chars
-                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                pDest[destOffset++] = unescapedCharsPtr[j];
-
-                                if (isHighSurr)
-                                {
-                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                    pDest[destOffset++] = unescapedCharsPtr[j + 1];
-                                }
-                            }
-
-                            break; // break out of while (true) since we've matched this char bytes
-                        }
-                        else
-                        {
-                            // copy bytes till place where bytes don't match
-                            for (int l = 0; l < k; ++l)
-                            {
-                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
-                            }
-                        }
-                    }
-
-                    if (isHighSurr) j++;
-                }
-            }
-
-            // Include any trailing invalid sequences
-            while (count < byteCount)
-            {
-                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
-            }
-        }
 
         internal static void EscapeAsciiChar(char ch, char[] to, ref int pos)
         {
@@ -976,14 +974,13 @@ namespace System
             to[pos++] = s_hexUpperChars[(ch & 0xf0) >> 4];
             to[pos++] = s_hexUpperChars[ch & 0xf];
         }
-        #if netcoreapp
+        
         internal static void EscapeAsciiChar(char ch, PooledCharArray to, ref int pos)
         {
             to[pos++] = '%';
             to[pos++] = s_hexUpperChars[(ch & 0xf0) >> 4];
             to[pos++] = s_hexUpperChars[ch & 0xf];
         }
-        #endif
 
         internal static char EscapedAscii(char digit, char next)
         {

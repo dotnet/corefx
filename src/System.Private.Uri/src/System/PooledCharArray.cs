@@ -46,6 +46,19 @@ namespace System
     		}
     	}
 
+        public unsafe bool IsSameString(char* ptrStr, int start, int end)
+        {
+            while (start <= end)
+            {
+                if (ptrStr[start] != _buffer[start])
+                {
+                    return false;
+                }
+                start++;
+            }
+            return true;
+        }
+
     	public void GrowAndCopy(int extraSpace)
     	{
     		char[] oldBuffer = _buffer;

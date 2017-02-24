@@ -499,10 +499,14 @@ namespace System
         public static string UnescapeDataString(string stringToUnescape)
         {
             if ((object)stringToUnescape == null)
+            {
                 throw new ArgumentNullException(nameof(stringToUnescape));
+            }
 
             if (stringToUnescape.Length == 0)
+            {
                 return string.Empty;
+            }
 
             unsafe
             {
@@ -510,23 +514,31 @@ namespace System
                 {
                     int position;
                     for (position = 0; position < stringToUnescape.Length; ++position)
+                    {
                         if (pStr[position] == '%')
+                        {
                             break;
+                        }
+                    }
 
                     if (position == stringToUnescape.Length)
+                    {
                         return stringToUnescape;
+                    }
 
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
-                    #if netcoreapp
-                        return UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref position,
-                        c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
-                    #else
-                        char[] dest = new char[stringToUnescape.Length];
-                        dest = UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, dest, ref position,
-                        c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
-                        return new string(dest, 0, position);
-                    #endif
+                    PooledCharArray pooledArray = new PooledCharArray(stringToUnescape.Length);
+                    UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, pooledArray, ref position,
+                    c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
+
+                    if(pooledArray.IsSameString(pStr, 0, position))
+                    {
+                        pooledArray.Release();
+                        return stringToUnescape;
+                    }
+
+                    return pooledArray.GetStringAndRelease(position);
                 }
             }
         }
