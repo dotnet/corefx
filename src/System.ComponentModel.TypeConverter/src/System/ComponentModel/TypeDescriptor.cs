@@ -27,7 +27,7 @@ namespace System.ComponentModel
         private static readonly WeakHashtable s_providerTable = new WeakHashtable();     // mapping of type or object hash to a provider list
         private static readonly Hashtable s_providerTypeTable = new Hashtable();         // A direct mapping from type to provider.
         private static readonly Hashtable s_defaultProviders = new Hashtable(); // A table of type -> default provider to track DefaultTypeDescriptionProviderAttributes.
-        private static readonly Lazy<WeakHashtable> s_associationTableLazy = new Lazy<WeakHashtable>(() => new WeakHashtable());
+        private static WeakHashtable s_associationTable;
         private static int s_metadataVersion;                          // a version stamp for our metadata.  Used by property descriptors to know when to rebuild attributes.
 
         // This is an index that we use to create a unique name for a property in the
@@ -90,6 +90,8 @@ namespace System.ComponentModel
         ///     This value increments each time someone refreshes or changes metadata.
         /// </summary>
         internal static int MetadataVersion => s_metadataVersion;
+
+        private static WeakHashtable AssociationTable => LazyInitializer.EnsureInitialized(ref s_associationTable, () => new WeakHashtable());
 
         /// <summary>
         ///    Occurs when Refreshed is raised for a component.
@@ -386,7 +388,7 @@ namespace System.ComponentModel
                 throw new ArgumentException(SR.TypeDescriptorSameAssociation);
             }
 
-            WeakHashtable associationTable = s_associationTableLazy.Value;
+            WeakHashtable associationTable = AssociationTable;
             IList associations = (IList)associationTable[primary];
 
             if (associations == null)
@@ -583,7 +585,7 @@ namespace System.ComponentModel
             {
                 // Check our association table for a match.
                 //
-                Hashtable assocTable = s_associationTableLazy.Value;
+                Hashtable assocTable = AssociationTable;
                 IList associations = (IList) assocTable?[primary];
                 if (associations != null)
                 {
@@ -2461,7 +2463,7 @@ namespace System.ComponentModel
                 throw new ArgumentNullException(nameof(secondary));
             }
 
-            Hashtable assocTable = s_associationTableLazy.Value;
+            Hashtable assocTable = AssociationTable;
             IList associations = (IList) assocTable?[primary];
             if (associations != null)
             {
@@ -2494,7 +2496,7 @@ namespace System.ComponentModel
                 throw new ArgumentNullException(nameof(primary));
             }
 
-            Hashtable assocTable = s_associationTableLazy.Value;
+            Hashtable assocTable = AssociationTable;
             assocTable?.Remove(primary);
         }
 
