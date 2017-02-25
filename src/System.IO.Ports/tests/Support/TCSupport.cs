@@ -22,7 +22,7 @@ namespace Legacy.Support
         private static SerialPortRequirements s_localMachineSerialPortRequirements;
 
         // Set this true to display port info to the console rather than Debug.WriteLine
-        private static bool _displayPortInfoOnConsole = false;
+        private static bool s_displayPortInfoOnConsole = false;
 
         static TCSupport()
         {
@@ -63,7 +63,7 @@ namespace Legacy.Support
             // If there is a pair like this, then they take precedence over any other way of identifying two available ports
             for (int firstIndex = 0; firstIndex < openablePortNames.Count && !nullModemPresent; firstIndex++)
             {
-                for (int secondIndex = firstIndex+1; secondIndex < openablePortNames.Count && !nullModemPresent; secondIndex++)
+                for (int secondIndex = firstIndex + 1; secondIndex < openablePortNames.Count && !nullModemPresent; secondIndex++)
                 {
                     string firstPortName = openablePortNames[firstIndex];
                     string secondPortName = openablePortNames[secondIndex];
@@ -126,7 +126,7 @@ namespace Legacy.Support
 
         private static void PrintInfo(string format, params object[] args)
         {
-            if (_displayPortInfoOnConsole)
+            if (s_displayPortInfoOnConsole)
             {
                 Console.WriteLine(format, args);
             }
@@ -290,7 +290,7 @@ namespace Legacy.Support
         private const int MAX_RANDOM_ASCII_CHAR = 127;
 
         private static readonly Random s_random = new Random(-55);
-        private static FlowControlCapabilities s_flowControlCapabilities = new FlowControlCapabilities(0,0,false);
+        private static FlowControlCapabilities s_flowControlCapabilities = new FlowControlCapabilities(0, 0, false);
 
         [Flags]
         public enum CharacterOptions { None, Surrogates, ASCII };
@@ -481,7 +481,7 @@ namespace Legacy.Support
         {
             for (int i = 0; i < count; ++i)
             {
-                bytes[i+index] = (byte)s_random.Next(0, 256);
+                bytes[i + index] = (byte)s_random.Next(0, 256);
             }
         }
 
@@ -510,7 +510,7 @@ namespace Legacy.Support
             return OrdinalIndexOf(input, startIndex, input.Length - startIndex, search);
         }
 
-        public static int OrdinalIndexOf(string input, int startIndex, int count, string search)
+        private static int OrdinalIndexOf(string input, int startIndex, int count, string search)
         {
             int lastSearchIndex = (count + startIndex) - search.Length;
             if (lastSearchIndex >= input.Length)
@@ -660,6 +660,5 @@ namespace Legacy.Support
         {
             Assert.True(task.Wait(5000), "Timeout waiting for task completion");
         }
-
     }
 }

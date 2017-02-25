@@ -14,11 +14,11 @@ namespace System.IO.Ports.Tests
     {
         //The default number of bytes to read/write to verify the speed of the port
         //and that the bytes were transfered successfully
-        private static readonly int DEFAULT_BYTE_SIZE = TCSupport.MinimumBlockingByteCount;
+        private static readonly int s_DEFAULT_BYTE_SIZE = TCSupport.MinimumBlockingByteCount;
 
         //The number of bytes to send when send XOn or XOff, the actual XOn/XOff char will be inserted somewhere
         //in the array of bytes
-        private static readonly int DEFAULT_BYTE_SIZE_XON_XOFF = TCSupport.MinimumBlockingByteCount*2;
+        private static readonly int s_DEFAULT_BYTE_SIZE_XON_XOFF = TCSupport.MinimumBlockingByteCount * 2;
 
         //The default time to wait after writing some bytes
         private const int DEFAULT_WAIT_AFTER_READ_OR_WRITE = 500;
@@ -153,7 +153,7 @@ namespace System.IO.Ports.Tests
         private void VerifyExceptionAtOpen(SerialPort com, int handshake, ThrowAt throwAt, Type expectedException)
         {
             int origHandshake = (int)com.Handshake;
-        
+
             SerialPortProperties serPortProp = new SerialPortProperties();
 
             serPortProp.SetAllPropertiesToDefaults();
@@ -291,7 +291,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                 }
                 catch (TimeoutException)
                 {
@@ -302,7 +302,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                     if (Handshake.RequestToSend == com1.Handshake || Handshake.RequestToSendXOnXOff == com1.Handshake)
                     {
                         Fail("Err_15397lkjh!!! TimeoutException NOT thrown when CtsHolding={0} with Handshake={1}", com1.CtsHolding, com1.Handshake);
@@ -320,7 +320,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                 }
                 catch (TimeoutException)
                 {
@@ -339,8 +339,8 @@ namespace System.IO.Ports.Tests
         {
             bool origRtsEnable = com2.RtsEnable;
             Random rndGen = new Random();
-            byte[] xmitXOnBytes = new byte[DEFAULT_BYTE_SIZE_XON_XOFF];
-            byte[] xmitXOffBytes = new byte[DEFAULT_BYTE_SIZE_XON_XOFF];
+            byte[] xmitXOnBytes = new byte[s_DEFAULT_BYTE_SIZE_XON_XOFF];
+            byte[] xmitXOffBytes = new byte[s_DEFAULT_BYTE_SIZE_XON_XOFF];
 
             try
             {
@@ -389,7 +389,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                     if (Handshake.RequestToSend == com1.Handshake || Handshake.RequestToSendXOnXOff == com1.Handshake)
                     {
                         Fail("Err_1253aasyo!!! TimeoutException NOT thrown after XOff and XOn char sent when CtsHolding={0} with Handshake={1}", com1.CtsHolding, com1.Handshake);
@@ -420,7 +420,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                     if (Handshake.XOnXOff == com1.Handshake || Handshake.RequestToSendXOnXOff == com1.Handshake)
                     {
                         Fail("Err_2457awez!!! TimeoutException NOT thrown after RTSEnable set to false then true when CtsHolding={0} with Handshake={1}", com1.CtsHolding, com1.Handshake);
@@ -459,8 +459,8 @@ namespace System.IO.Ports.Tests
         {
             bool origRtsEnable = com2.RtsEnable;
             Random rndGen = new Random();
-            byte[] xmitXOnBytes = new byte[DEFAULT_BYTE_SIZE_XON_XOFF];
-            byte[] xmitXOffBytes = new byte[DEFAULT_BYTE_SIZE_XON_XOFF];
+            byte[] xmitXOnBytes = new byte[s_DEFAULT_BYTE_SIZE_XON_XOFF];
+            byte[] xmitXOffBytes = new byte[s_DEFAULT_BYTE_SIZE_XON_XOFF];
 
             try
             {
@@ -514,7 +514,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                 }
                 catch (TimeoutException)
                 {
@@ -536,7 +536,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
 
                     if (Handshake.XOnXOff == com1.Handshake || Handshake.RequestToSendXOnXOff == com1.Handshake)
                     {
@@ -566,7 +566,7 @@ namespace System.IO.Ports.Tests
 
                 try
                 {
-                    com1.Write(new byte[DEFAULT_BYTE_SIZE], 0, DEFAULT_BYTE_SIZE);
+                    com1.Write(new byte[s_DEFAULT_BYTE_SIZE], 0, s_DEFAULT_BYTE_SIZE);
                 }
                 catch (TimeoutException)
                 {

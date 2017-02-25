@@ -15,19 +15,19 @@ namespace System.IO.Ports.Tests
     {
         // Set bounds fore random timeout values.
         // If the min is to low read will not timeout accurately and the testcase will fail
-        private static int minRandomTimeout = 250;
+        private const int minRandomTimeout = 250;
 
         // If the max is to large then the testcase will take forever to run
-        private static int maxRandomTimeout = 2000;
+        private const int maxRandomTimeout = 2000;
 
         // If the percentage difference between the expected timeout and the actual timeout
         // found through Stopwatch is greater then 10% then the timeout value was not correctly
         // to the read method and the testcase fails.
-        private static double maxPercentageDifference = .15;
+        private const double maxPercentageDifference = .15;
 
         // The number of random bytes to receive
-        private static int numRndByte = 8;
-        private static readonly int NUM_TRYS = 5;
+        private const int numRndByte = 8;
+        private const int NUM_TRYS = 5;
 
         #region Test Cases
 
@@ -301,8 +301,6 @@ namespace System.IO.Ports.Tests
 
             if (com.IsOpen)
                 com.Close();
-
-
         }
 
 

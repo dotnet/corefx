@@ -11,13 +11,13 @@ namespace System.IO.Ports.Tests
 {
     public class WriteBufferSize_Property : PortsTest
     {
-        public static readonly int MAX_RANDMOM_BUFFER_SIZE = 1024 * 16;
-        public static readonly int LARGE_BUFFER_SIZE = 1024 * 128;
+        private const int MAX_RANDMOM_BUFFER_SIZE = 1024 * 16;
+        private const int LARGE_BUFFER_SIZE = 1024 * 128;
 
         #region Test Cases
 
         [ConditionalFact(nameof(HasOneSerialPort))]
-        void WriteBufferSize_Default()
+        private void WriteBufferSize_Default()
         {
             using (SerialPort com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {

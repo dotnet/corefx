@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Threading;
 using Legacy.Support;
 using Xunit;
 
@@ -13,13 +14,13 @@ namespace System.IO.Ports.Tests
     public class ReceivedBytesThreshold_Property : PortsTest
     {
         //Maximum random value to use for ReceivedBytesThreshold
-        public static readonly int MAX_RND_THRESHOLD = 16;
+        private const int MAX_RND_THRESHOLD = 16;
 
         //Minimum random value to use for ReceivedBytesThreshold
-        public static readonly int MIN_RND_THRESHOLD = 2;
+        private const int MIN_RND_THRESHOLD = 2;
 
         //Maximum time to wait for all of the expected events to be firered
-        public static readonly int MAX_TIME_WAIT = 2000;
+        private const int MAX_TIME_WAIT = 2000;
 
         #region Test Cases
 
@@ -117,7 +118,7 @@ namespace System.IO.Ports.Tests
                     (int)Math.Ceiling(com1.ReceivedBytesThreshold / 2.0));
 
                 rcvEventHandler.WaitForEvent(SerialData.Chars, MAX_TIME_WAIT);
-            
+
                 com1.DiscardInBuffer();
 
                 serPortProp.VerifyPropertiesAndPrint(com1);
@@ -304,7 +305,7 @@ namespace System.IO.Ports.Tests
         private void VerifyExceptionAtOpen(SerialPort com, int receivedBytesThreshold, Type expectedException)
         {
             int origReceivedBytesThreshold = com.ReceivedBytesThreshold;
-        
+
             SerialPortProperties serPortProp = new SerialPortProperties();
 
             serPortProp.SetAllPropertiesToDefaults();
@@ -381,7 +382,7 @@ namespace System.IO.Ports.Tests
                 _com = com;
                 NumEventsHandled = 0;
             }
-        
+
             public void HandleEvent(object source, SerialDataReceivedEventArgs e)
             {
                 lock (this)
@@ -399,7 +400,7 @@ namespace System.IO.Ports.Tests
                         Debug.WriteLine(exp);
                         Debug.WriteLine(exp.StackTrace);
                     }
-                    System.Threading.Monitor.Pulse(this);
+                    Monitor.Pulse(this);
                 }
             }
 
@@ -445,7 +446,7 @@ namespace System.IO.Ports.Tests
                     sw.Start();
                     do
                     {
-                        System.Threading.Monitor.Wait(this, (int)(timeout - sw.ElapsedMilliseconds));
+                        Monitor.Wait(this, (int)(timeout - sw.ElapsedMilliseconds));
 
                         if (EventExists(eventType, numEvents))
                         {

@@ -14,7 +14,7 @@ namespace System.IO.Ports.Tests
     {
         #region Test Cases
 
-       [ConditionalFact(nameof(HasNullModem))]
+        [ConditionalFact(nameof(HasNullModem))]
         public void EndReadAfterClose()
         {
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -173,7 +173,6 @@ namespace System.IO.Ports.Tests
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             using (var com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
             {
-
                 int endReadReturnValue;
                 int numBytesToRead1 = 8, numBytesToRead2 = 16, numBytesToRead3 = 10;
                 int totalBytesToRead = numBytesToRead1 + numBytesToRead2 + numBytesToRead3;

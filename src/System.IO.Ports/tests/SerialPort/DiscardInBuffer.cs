@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO.PortsTests;
+using System.Threading;
 using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
@@ -13,10 +14,10 @@ namespace System.IO.Ports.Tests
     public class DiscardInBuffer : PortsTest
     {
         //The string used with Write(str) to fill the input buffer
-        public static readonly string DEFAULT_STRING = "Hello World";
+        private const string DEFAULT_STRING = "Hello World";
 
         //The buffer lenght used whe filling the ouput buffer
-        public static readonly int DEFAULT_BUFFER_LENGTH = 8;
+        private const int DEFAULT_BUFFER_LENGTH = 8;
 
         #region Test Cases
 
@@ -96,11 +97,11 @@ namespace System.IO.Ports.Tests
                 com2.Open();
                 com1.WriteTimeout = 500;
                 var task = Task.Run(() => WriteRndByteArray(com1, DEFAULT_BUFFER_LENGTH));
-                System.Threading.Thread.Sleep(100);
+                Thread.Sleep(100);
                 origBytesToWrite = com1.BytesToWrite;
                 VerifyDiscard(com1);
                 Assert.Equal(com1.BytesToWrite, origBytesToWrite);
-            
+
                 //Wait for write method to timeout
                 TCSupport.WaitForTaskCompletion(task);
             }

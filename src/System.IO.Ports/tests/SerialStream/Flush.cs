@@ -13,12 +13,12 @@ namespace System.IO.Ports.Tests
     public class SerialStream_Flush : PortsTest
     {
         // The string used with Write(str) to fill the input buffer
-        private static readonly int DEFAULT_BUFFER_SIZE = 32;
-        private static readonly int MAX_WAIT_TIME = 500;
+        private const int DEFAULT_BUFFER_SIZE = 32;
+        private const int MAX_WAIT_TIME = 500;
 
         // The buffer lenght used whe filling the ouput buffer
-        private static readonly int DEFAULT_BUFFER_LENGTH = 8;
-        
+        private const int DEFAULT_BUFFER_LENGTH = 8;
+
         #region Test Cases
 
         [ConditionalFact(nameof(HasOneSerialPort))]
@@ -168,7 +168,7 @@ namespace System.IO.Ports.Tests
                 com1.Handshake = Handshake.RequestToSend;
 
                 t.Start();
-                
+
                 TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
                 VerifyFlush(com1);
@@ -219,7 +219,7 @@ namespace System.IO.Ports.Tests
                 TCSupport.WaitForWriteBufferToLoad(com1, DEFAULT_BUFFER_LENGTH);
 
                 VerifyFlush(com1);
-                
+
                 // Wait for write method to timeout
                 while (t2.IsAlive)
                     Thread.Sleep(100);
