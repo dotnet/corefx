@@ -356,3 +356,4 @@ fi
 clean_env
 
 (set +x; echo 'Build complete')
+(set +x; echo 'Finish generating binary for coreclr')
