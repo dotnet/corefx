@@ -52,7 +52,7 @@
       "description": "Enables/Disables building packages.",
       "valueType": "property",
       "values": ["True", "False"],
-      "defaultValue": true
+      "defaultValue": false
     },
     "BuildPackageLibraryReferences": {
       "description": "Enables/Disables building libraries referenced by packages.",
@@ -198,12 +198,6 @@
       "values": [],
       "defaultValue": ""
     },
-    "RestoreForTestsAgainstPackagesOnly": {
-      "description": "MsBuild target that restores the packages.",
-      "valueType": "property",
-      "values": ["true", "false"],
-      "defaultValue": "true"
-    },
     "GenerateVersionHeader": {
       "description": "MsBuild target that generates the version header.",
       "valueType": "target",
@@ -242,6 +236,7 @@
           "description": "Builds the NuGet packages.",
           "settings": {
             "Project": "src/packages.builds",
+            "BuildPackages": "true",
             "MsBuildLogging":"/flp:v=normal;LogFile=build-packages.log"
           }
         },
@@ -333,6 +328,7 @@
       "defaultValues": {
         "toolName": "msbuild",
         "settings": {
+          "BuildPackages": "default",
           "ConfigurationGroup": "default",
           "MsBuildLogging":"default",
           "MsBuildWarning":"default",
