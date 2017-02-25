@@ -190,18 +190,6 @@ namespace System
                 else
                     return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
             }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                if ((uint) index >= ((uint) _length))
-                    ThrowHelper.ThrowIndexOutOfRangeException();
-
-                if (_pinnable == null)
-                    unsafe { Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index) = value; }
-                else
-                    Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index) = value;
-            }
         }
 
         /// <summary>
