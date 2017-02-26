@@ -127,7 +127,6 @@ namespace System.DirectoryServices.Interop
         [ComImport(), Guid("00020404-0000-0000-C000-000000000046"), System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
         public interface IEnumVariant
         {
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Next(
                     [In, MarshalAs(UnmanagedType.U4)]
                      int celt,
@@ -136,15 +135,12 @@ namespace System.DirectoryServices.Interop
                     [Out, MarshalAs(UnmanagedType.LPArray)]
                       int[] pceltFetched);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Skip(
                     [In, MarshalAs(UnmanagedType.U4)]
                      int celt);
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Reset();
 
-            [SuppressUnmanagedCodeSecurityAttribute()]
             void Clone(
                     [Out, MarshalAs(UnmanagedType.LPArray)]
                        IEnumVariant[] ppenum);

@@ -2564,9 +2564,7 @@ namespace System
         public static readonly System.Reflection.MemberFilter FilterNameIgnoreCase;
         public static readonly object Missing;
         protected Type() { }
-        [System.Security.SecuritySafeCriticalAttribute]
         public static bool operator ==(System.Type left, System.Type right) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public static bool operator !=(System.Type left, System.Type right) { throw null; }
         public abstract System.Reflection.Assembly Assembly { get; }
         public abstract string AssemblyQualifiedName { get; }
@@ -2598,7 +2596,7 @@ namespace System
         public virtual bool IsGenericType { get { throw null; } }
         public virtual bool IsGenericTypeDefinition { get { throw null; } }
         public bool IsImport { get { throw null; } }
-        public bool IsInterface { [System.Security.SecuritySafeCriticalAttribute]get { throw null; } }
+        public bool IsInterface { get { throw null; } }
         public bool IsLayoutSequential { get { throw null; } }
         public bool IsMarshalByRef { get { throw null; } }
         public bool IsNested { get { throw null; } }
@@ -2701,11 +2699,11 @@ namespace System
         public static System.Type[] GetTypeArray(System.Object[] args) { throw null; }
         public static System.TypeCode GetTypeCode(System.Type type) { throw null; }
         protected virtual System.TypeCode GetTypeCodeImpl() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, bool throwOnError) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, string server) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, string server, bool throwOnError) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromHandle(System.RuntimeTypeHandle handle) { throw null; }
+        public static System.Type GetTypeFromCLSID(System.Guid clsid) { throw null; }
+        public static System.Type GetTypeFromCLSID(System.Guid clsid, bool throwOnError) { throw null; }
+        public static System.Type GetTypeFromCLSID(System.Guid clsid, string server) { throw null; }
+        public static System.Type GetTypeFromCLSID(System.Guid clsid, string server, bool throwOnError) { throw null; }
+        public static System.Type GetTypeFromHandle(System.RuntimeTypeHandle handle) { throw null; }
         [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID) { throw null; }
         [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID, bool throwOnError) { throw null; }
         [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID, string server) { throw null; }
@@ -3462,7 +3460,6 @@ namespace System.Runtime.ConstrainedExecution
 {
     public abstract partial class CriticalFinalizerObject
     {
-        [System.Security.SecuritySafeCriticalAttribute]
         protected CriticalFinalizerObject() { }
         ~CriticalFinalizerObject() { }
     }
@@ -3534,7 +3531,6 @@ namespace System.Runtime.InteropServices
         public System.IntPtr DangerousGetHandle() { throw null; }
         [System.Security.SecurityCriticalAttribute]
         public void DangerousRelease() { }
-        [System.Security.SecuritySafeCriticalAttribute]
         public void Dispose() { }
         [System.Security.SecurityCriticalAttribute]
         protected virtual void Dispose(bool disposing) { }
@@ -5714,7 +5710,6 @@ namespace System.Reflection
         public static System.Reflection.MethodBase GetCurrentMethod() { throw null; }
         public virtual System.Type[] GetGenericArguments() { throw null; }
         public override int GetHashCode() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public virtual System.Reflection.MethodBody GetMethodBody() { throw null; }
         public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle) { throw null; }
         public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle, System.RuntimeTypeHandle declaringType) { throw null; }
@@ -6072,7 +6067,6 @@ namespace System.Reflection
     {
         protected System.Type typeImpl;
         public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         protected TypeDelegator() { }
         public TypeDelegator(System.Type delegatingType) { }
         public override System.Guid GUID { get { throw null; } }
@@ -6148,7 +6142,7 @@ namespace System.Reflection
         public StrongNameKeyPair(System.IO.FileStream keyPairFile) { }
         protected StrongNameKeyPair(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public StrongNameKeyPair(string keyPairContainer) { }
-        public byte[] PublicKey { [System.Security.SecuritySafeCriticalAttribute]get { throw null; } }
+        public byte[] PublicKey { get { throw null; } }
         void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
@@ -7009,7 +7003,6 @@ namespace System.Text
         public override bool Fallback(byte[] bytesUnknown, int index) { throw null; }
         public override char GetNextChar() { throw null; }
         public override bool MovePrevious() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public override void Reset() { }
     }
     public abstract partial class Encoder
@@ -7092,7 +7085,6 @@ namespace System.Text
         public override bool Fallback(char charUnknown, int index) { throw null; }
         public override char GetNextChar() { throw null; }
         public override bool MovePrevious() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
         public override void Reset() { }
     }
     public abstract partial class Encoding : System.ICloneable
@@ -7248,7 +7240,7 @@ namespace System.Threading
         public void Dispose() { }
         protected virtual void Dispose(bool explicitDisposing) { }
         [System.ObsoleteAttribute("Use the SafeWaitHandle property instead.")]
-        public virtual System.IntPtr Handle { [System.Security.SecuritySafeCriticalAttribute]get { throw null; } [System.Security.SecurityCriticalAttribute]set { } }
+        public virtual System.IntPtr Handle { get { throw null; } [System.Security.SecurityCriticalAttribute]set { } }
         public Microsoft.Win32.SafeHandles.SafeWaitHandle SafeWaitHandle { [System.Security.SecurityCriticalAttribute]get { throw null; } [System.Security.SecurityCriticalAttribute]set { } }
         public static bool SignalAndWait(System.Threading.WaitHandle toSignal, System.Threading.WaitHandle toWaitOn) { throw null; }
         public static bool SignalAndWait(System.Threading.WaitHandle toSignal, System.Threading.WaitHandle toWaitOn, int millisecondsTimeout, bool exitContext) { throw null; }

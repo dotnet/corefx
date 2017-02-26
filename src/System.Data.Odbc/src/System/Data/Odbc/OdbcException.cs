@@ -59,7 +59,6 @@ namespace System.Data.Odbc
             }
         }
 
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags = System.Security.Permissions.SecurityPermissionFlag.SerializationFormatter)]
         override public void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             // MDAC 72003

@@ -17,8 +17,6 @@ namespace System.DirectoryServices
 
         private static bool s_targetsAtLeast_Desktop_V4_5_3 = RunningOnCheck("TargetsAtLeast_Desktop_V4_5_3");
 
-        [SecuritySafeCritical]
-        [ReflectionPermission(SecurityAction.Assert, Unrestricted = true)]
         private static bool RunningOnCheck(string propertyName)
         {
             Type binaryCompatabilityType;

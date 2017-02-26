@@ -28,7 +28,6 @@ namespace System.Xml.Serialization
 
     internal class CodeGenerator
     {
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Method does validation only without any user input")]
         internal static bool IsValidLanguageIndependentIdentifier(string ident) { return CSharpHelpers.IsValidLanguageIndependentIdentifier(ident); }
         internal static BindingFlags InstancePublicBindingFlags = BindingFlags.Instance | BindingFlags.Public;
         internal static BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;

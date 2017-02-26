@@ -13,8 +13,6 @@ using System.Collections;
 
 namespace System.DirectoryServices.AccountManagement
 {
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Unrestricted = true)]
     public class AdvancedFilters
     {
         internal protected AdvancedFilters(Principal p)
@@ -155,7 +153,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         protected void AdvancedFilterSet(string attribute, object value, Type objectType, MatchType mt)
         {
             _p.AdvancedFilterSet(attribute, value, objectType, mt);

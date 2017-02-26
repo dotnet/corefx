@@ -9,14 +9,12 @@ using System.Diagnostics;
 
 namespace System.DirectoryServices.AccountManagement
 {
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
     public class PrincipalSearchResult<T> : IEnumerable<T>, IEnumerable, IDisposable
     {
         //
         // Public methods
         //
 
-        [System.Security.SecurityCritical]
         public IEnumerator<T> GetEnumerator()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "PrincipalSearchResult", "Entering GetEnumerator");
@@ -26,7 +24,6 @@ namespace System.DirectoryServices.AccountManagement
             return new FindResultEnumerator<T>(_resultSet);
         }
 
-        [System.Security.SecurityCritical]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)GetEnumerator();

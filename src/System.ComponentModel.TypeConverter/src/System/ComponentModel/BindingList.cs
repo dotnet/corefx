@@ -350,7 +350,6 @@ namespace System.ComponentModel
         ///     supply a custom item to add to the list. Otherwise an item of type T is created.
         ///     The new item is then added to the end of the list.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods")]
         protected virtual object AddNewCore()
         {
             // Allow event handler to supply the new item for us

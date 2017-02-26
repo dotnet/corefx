@@ -53,7 +53,6 @@ namespace System.IO.Pipes
                 _threadPoolBinding.Dispose();
         }
 
-        [SecurityCritical]
         private unsafe int ReadCore(byte[] buffer, int offset, int count)
         {
             int errorCode = 0;
@@ -80,7 +79,6 @@ namespace System.IO.Pipes
             return r;
         }
 
-        [SecuritySafeCritical]
         private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: false);
@@ -135,7 +133,6 @@ namespace System.IO.Pipes
             return completionSource.Task;
         }
 
-        [SecurityCritical]
         private unsafe void WriteCore(byte[] buffer, int offset, int count)
         {
             int errorCode = 0;
@@ -148,7 +145,6 @@ namespace System.IO.Pipes
             Debug.Assert(r >= 0, "PipeStream's WriteCore is likely broken.");
         }
 
-        [SecuritySafeCritical]
         private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: true);
@@ -182,7 +178,6 @@ namespace System.IO.Pipes
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
-        [SecurityCritical]
         public void WaitForPipeDrain()
         {
             CheckWriteOperations();
@@ -202,8 +197,6 @@ namespace System.IO.Pipes
         // override this in cases where only one mode is legal (such as anonymous pipes)
         public virtual PipeTransmissionMode TransmissionMode
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -236,8 +229,6 @@ namespace System.IO.Pipes
         // access. If that passes, call to GetNamedPipeInfo will succeed.
         public virtual int InBufferSize
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -262,8 +253,6 @@ namespace System.IO.Pipes
         // the ctor.
         public virtual int OutBufferSize
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -291,7 +280,6 @@ namespace System.IO.Pipes
 
         public virtual PipeTransmissionMode ReadMode
         {
-            [SecurityCritical]
             get
             {
                 CheckPipePropertyOperations();
@@ -303,8 +291,6 @@ namespace System.IO.Pipes
                 }
                 return _readMode;
             }
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             set
             {
                 // Nothing fancy here.  This is just a wrapper around the Win32 API.  Note, that NamedPipeServerStream
@@ -335,7 +321,6 @@ namespace System.IO.Pipes
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        [SecurityCritical]
         private unsafe int ReadFileNative(SafePipeHandle handle, byte[] buffer, int offset, int count,
                 NativeOverlapped* overlapped, out int errorCode)
         {
@@ -385,7 +370,6 @@ namespace System.IO.Pipes
             return numBytesRead;
         }
 
-        [SecurityCritical]
         private unsafe int WriteFileNative(SafePipeHandle handle, byte[] buffer, int offset, int count,
                 NativeOverlapped* overlapped, out int errorCode)
         {
@@ -428,7 +412,6 @@ namespace System.IO.Pipes
             return numBytesWritten;
         }
 
-        [SecurityCritical]
         internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
@@ -444,7 +427,6 @@ namespace System.IO.Pipes
         /// <summary>
         /// Determine pipe read mode from Win32 
         /// </summary>
-        [SecurityCritical]
         private void UpdateReadMode()
         {
             int flags;
@@ -468,7 +450,6 @@ namespace System.IO.Pipes
         /// Filter out all pipe related errors and do some cleanup before calling Error.WinIOError.
         /// </summary>
         /// <param name="errorCode"></param>
-        [SecurityCritical]
         internal Exception WinIOError(int errorCode)
         {
             switch (errorCode)

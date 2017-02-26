@@ -77,7 +77,6 @@ namespace System.IO.Pipes
 
         /// <summary>Initializes the handle to be used asynchronously.</summary>
         /// <param name="handle">The handle.</param>
-        [SecurityCritical]
         private void InitializeAsyncHandle(SafePipeHandle handle)
         {
             // nop
@@ -235,7 +234,6 @@ namespace System.IO.Pipes
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
-        [SecurityCritical]
         public void WaitForPipeDrain()
         {
             CheckWriteOperations();
@@ -255,8 +253,6 @@ namespace System.IO.Pipes
         // override this in cases where only one mode is legal (such as anonymous pipes)
         public virtual PipeTransmissionMode TransmissionMode
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -268,8 +264,6 @@ namespace System.IO.Pipes
         // access. If that passes, call to GetNamedPipeInfo will succeed.
         public virtual int InBufferSize
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -287,8 +281,6 @@ namespace System.IO.Pipes
         // the ctor.
         public virtual int OutBufferSize
         {
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
                 CheckPipePropertyOperations();
@@ -302,14 +294,11 @@ namespace System.IO.Pipes
 
         public virtual PipeTransmissionMode ReadMode
         {
-            [SecurityCritical]
             get
             {
                 CheckPipePropertyOperations();
                 return PipeTransmissionMode.Byte; // Unix pipes are only byte-based, not message-based
             }
-            [SecurityCritical]
-            [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             set
             {
                 CheckPipePropertyOperations();

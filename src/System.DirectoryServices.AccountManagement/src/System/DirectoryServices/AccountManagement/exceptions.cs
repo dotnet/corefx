@@ -127,8 +127,6 @@ namespace System.DirectoryServices.AccountManagement
             _serverName = (string)info.GetValue("serverName", typeof(String));
         }
 
-        [System.Security.SecurityCritical]
-        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("errorCode", _errorCode);
@@ -165,8 +163,6 @@ namespace System.DirectoryServices.AccountManagement
             _errorCode = info.GetInt32("errorCode");
         }
 
-        [System.Security.SecurityCritical]
-        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("errorCode", _errorCode);
@@ -284,13 +280,11 @@ namespace System.DirectoryServices.AccountManagement
             return exception;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static Exception GetExceptionFromErrorCode(int errorCode)
         {
             return GetExceptionFromErrorCode(errorCode, null);
         }
 
-        [System.Security.SecurityCritical]
         internal static Exception GetExceptionFromErrorCode(int errorCode, string targetName)
         {
             string errorMsg = GetErrorMessage(errorCode, false);
@@ -313,7 +307,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        [System.Security.SecurityCritical]
         internal static string GetErrorMessage(int errorCode, bool hresult)
         {
             uint temp = (uint)errorCode;

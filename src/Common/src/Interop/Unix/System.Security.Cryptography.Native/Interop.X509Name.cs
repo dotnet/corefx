@@ -90,7 +90,9 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
+#if NET46
     [SecurityCritical]
+#endif // NET46
     internal sealed class SafeX509NameStackHandle : SafeHandle
     {
         private SafeX509NameStackHandle() :

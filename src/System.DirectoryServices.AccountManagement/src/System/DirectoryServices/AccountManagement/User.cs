@@ -10,19 +10,12 @@ using System.Security.Principal;
 
 namespace System.DirectoryServices.AccountManagement
 {
-#pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [System.Security.SecurityCritical(System.Security.SecurityCriticalScope.Everything)]
-#pragma warning restore 618
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
-    [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Unrestricted = true)]
     [DirectoryRdnPrefix("CN")]
     public class UserPrincipal : AuthenticablePrincipal
     {
         //
         // Public constructors
         //
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Unrestricted = true)]
         public UserPrincipal(PrincipalContext context) : base(context)
         {
             if (context == null)
@@ -32,8 +25,6 @@ namespace System.DirectoryServices.AccountManagement
             this.unpersisted = true;
         }
 
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.LinkDemand, Unrestricted = true)]
-        [DirectoryServicesPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Unrestricted = true)]
         public UserPrincipal(PrincipalContext context, string samAccountName, string password, bool enabled) : this(context)
         {
             if (samAccountName == null || password == null)
@@ -181,7 +172,6 @@ namespace System.DirectoryServices.AccountManagement
 
         public static UserPrincipal Current
         {
-            [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.UnmanagedCode)]
             get
             {
                 // We have to do this inline because declarative CAS is not allowed on properties.

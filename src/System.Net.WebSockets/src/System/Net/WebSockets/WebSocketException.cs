@@ -14,44 +14,32 @@ namespace System.Net.WebSockets
     {
         private readonly WebSocketError _webSocketErrorCode;
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-           Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException()
             : this(Marshal.GetLastWin32Error())
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error)
             : this(error, GetErrorMessage(error))
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, string message) : base(message)
         {
             _webSocketErrorCode = error;
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, Exception innerException)
             : this(error, GetErrorMessage(error), innerException)
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, string message, Exception innerException)
             : base(message, innerException)
         {
             _webSocketErrorCode = error;
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(int nativeError)
             : base(nativeError)
         {
@@ -59,8 +47,6 @@ namespace System.Net.WebSockets
             SetErrorCodeOnError(nativeError);
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(int nativeError, string message)
             : base(nativeError, message)
         {
@@ -68,8 +54,6 @@ namespace System.Net.WebSockets
             SetErrorCodeOnError(nativeError);
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(int nativeError, Exception innerException)
             : base(SR.net_WebSockets_Generic, innerException)
         {
@@ -77,15 +61,11 @@ namespace System.Net.WebSockets
             SetErrorCodeOnError(nativeError);
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, int nativeError)
             : this(error, nativeError, GetErrorMessage(error))
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, int nativeError, string message)
             : base(message)
         {
@@ -93,15 +73,11 @@ namespace System.Net.WebSockets
             SetErrorCodeOnError(nativeError);
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, int nativeError, Exception innerException)
             : this(error, nativeError, GetErrorMessage(error), innerException)
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(WebSocketError error, int nativeError, string message, Exception innerException)
             : base(message, innerException)
         {
@@ -109,15 +85,11 @@ namespace System.Net.WebSockets
             SetErrorCodeOnError(nativeError);
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(string message)
             : base(message)
         {
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
-            Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
         public WebSocketException(string message, Exception innerException)
             : base(message, innerException)
         {

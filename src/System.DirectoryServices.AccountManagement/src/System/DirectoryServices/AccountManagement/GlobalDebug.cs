@@ -18,7 +18,6 @@ namespace System.DirectoryServices.AccountManagement
 
     internal static class GlobalDebug
     {
-        [System.Security.SecurityCritical]
         static GlobalDebug()
         {
             GlobalDebug.s_debugLevel = GlobalConfig.DebugLevel;
@@ -60,7 +59,6 @@ namespace System.DirectoryServices.AccountManagement
             get { return DebugLevel.Info >= GlobalDebug.s_debugLevel; }
         }
 
-        [System.Security.SecuritySafeCritical]
         [ConditionalAttribute("DEBUG")]
         static public void WriteLineIf(bool f, string category, string message, params object[] args)
         {
@@ -75,7 +73,6 @@ namespace System.DirectoryServices.AccountManagement
                             category);
         }
 
-        [System.Security.SecuritySafeCritical]
         [ConditionalAttribute("DEBUG")]
         static public void WriteLineIf(bool f, string category, string message)
         {

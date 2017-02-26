@@ -5,7 +5,6 @@
 using System.Reflection;
 using System.Collections;
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.AttributeCollection")]
 
 namespace System.ComponentModel
 {

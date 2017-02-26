@@ -304,7 +304,9 @@ namespace System.Net.Http
                 return _proxy;
             }
 
+#if NET46
             [SecuritySafeCritical]
+#endif // NET46
             set
             {
                 if (!UseProxy && value != null)

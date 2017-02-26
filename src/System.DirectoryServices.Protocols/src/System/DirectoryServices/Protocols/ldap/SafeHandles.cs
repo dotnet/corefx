@@ -12,7 +12,6 @@ namespace System.DirectoryServices.Protocols
     using System.Diagnostics;
     using System.Security;
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal sealed class BerSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal BerSafeHandle() : base(true)
@@ -36,7 +35,6 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     sealed internal class HGlobalMemHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal HGlobalMemHandle(IntPtr value) : base(true)
@@ -51,7 +49,6 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
-    [SuppressUnmanagedCodeSecurityAttribute()]
     sealed internal class ConnectionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal bool needDispose = false;
