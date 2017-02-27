@@ -601,7 +601,7 @@ namespace Internal.NativeCrypto
 
                     break;
                 default:
-                    Debug.Fail("Unkown param in SetKeyParameter");
+                    Debug.Fail("Unknown param in SetKeyParameter");
                     break;
             }
         }
@@ -626,7 +626,7 @@ namespace Internal.NativeCrypto
 
                     break;
                 default:
-                    Debug.Fail("Unkown param in SetKeyParameter");
+                    Debug.Fail("Unknown param in SetKeyParameter");
                     break;
             }
         }
@@ -820,9 +820,9 @@ namespace Internal.NativeCrypto
                 // that error does not relate to the padding.  Otherwise just throw a cryptographic exception based on
                 // the error code.
                 if ((uint)((uint)dwFlags & (uint)CryptDecryptFlags.CRYPT_OAEP) == (uint)CryptDecryptFlags.CRYPT_OAEP &&
-                                                                    (uint)ErrCode != (uint)CryptKeyError.NTE_BAD_KEY)
+                                                      unchecked((uint)ErrCode) != (uint)CryptKeyError.NTE_BAD_KEY)
                 {
-                    if ((uint)ErrCode == (uint)CryptKeyError.NTE_BAD_FLAGS)
+                    if (unchecked((uint)ErrCode) == (uint)CryptKeyError.NTE_BAD_FLAGS)
                     {
                         throw new CryptographicException("Cryptography_OAEP_XPPlus_Only");
                     }
@@ -1292,24 +1292,26 @@ namespace Internal.NativeCrypto
                 if (hashAlg is SHA512)
                     return CapiHelper.CALG_SHA_512;
             }
-            else if (hashAlg is Type)
+            else
             {
-                TypeInfo hashAlgTypeInfo = ((Type)hashAlg).GetTypeInfo();
+                Type hashAlgType = hashAlg as Type;
+                if ((object)hashAlgType != null)
+                {
+                    if (typeof(MD5).IsAssignableFrom(hashAlgType))
+                        return CapiHelper.CALG_MD5;
 
-                if (typeof(MD5).GetTypeInfo().IsAssignableFrom(hashAlgTypeInfo))
-                    return CapiHelper.CALG_MD5;
+                    if (typeof(SHA1).IsAssignableFrom(hashAlgType))
+                        return CapiHelper.CALG_SHA1;
 
-                if (typeof(SHA1).GetTypeInfo().IsAssignableFrom(hashAlgTypeInfo))
-                    return CapiHelper.CALG_SHA1;
+                    if (typeof(SHA256).IsAssignableFrom(hashAlgType))
+                        return CapiHelper.CALG_SHA_256;
 
-                if (typeof(SHA256).GetTypeInfo().IsAssignableFrom(hashAlgTypeInfo))
-                    return CapiHelper.CALG_SHA_256;
+                    if (typeof(SHA384).IsAssignableFrom(hashAlgType))
+                        return CapiHelper.CALG_SHA_384;
 
-                if (typeof(SHA384).GetTypeInfo().IsAssignableFrom(hashAlgTypeInfo))
-                    return CapiHelper.CALG_SHA_384;
-
-                if (typeof(SHA512).GetTypeInfo().IsAssignableFrom(hashAlgTypeInfo))
-                    return CapiHelper.CALG_SHA_512;
+                    if (typeof(SHA512).IsAssignableFrom(hashAlgType))
+                        return CapiHelper.CALG_SHA_512;
+                }
             }
 
             throw new ArgumentException(SR.Argument_InvalidValue);

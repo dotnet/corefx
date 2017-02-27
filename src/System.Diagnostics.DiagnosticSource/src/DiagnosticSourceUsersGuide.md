@@ -156,7 +156,7 @@ Thus the event names only need to be unique within a component.
    Short names make the 'IsEnabled' faster.  
 
  * DO - use the 'Start' and 'Stop' suffixes for events that define an interval of time.  For example   
-   naming one event 'RequestStart' and the another 'ReqeustStop' is good because tools can use the
+   naming one event 'RequestStart' and the another 'RequestStop' is good because tools can use the
    convention to determine that the time interval betweeen them is interesting.  
 
 ### payloads
@@ -173,23 +173,25 @@ Thus the event names only need to be unique within a component.
 
   * DO - use standard names for particular payload items.   (TODO: Put the list here as we define standard payload names).
   
-### Other Conventions 
-
+### Filtering
+ 
  * DO - always enclose the Write() call in a call to 'IsEnabled' for the same event name.  Otherwise
    a lot of setup logic will be called even if there is nothing listening for the event.
- 
- * DO NOT - make the DiagnosticListener public.   There is no need to as subscribers will 
-  use the AllListener property to hook up. 
+
+ * CONSIDER - enclosing IsEnabled(string, object, object) calls with pure IsEnabled(string) call to avoid
+  extra cost of creating context in case consumer is not interested in such events at all.
  
  * CONSIDER - passing public named types instances to 'IsEnabled' overloads with object parameters
   to keep IsEnabled as efficient as possible.
 
- * CONSIDER - enclosing IsEnabled(string, object, object) calls with pure IsEnabled(string) call to avoid
-  extra cost of creating context in case consumer is not interested in such events at all.
-
  * DO - when subscribing to DiagnosticSource with advanced filter for event name and extended context, 
   make sure filter returns true for null context properties if consumer is interested
   in at least some events with context
+
+### Other Conventions 
+
+  * DO NOT - make the DiagnosticListener public.   There is no need to as subscribers will 
+  use the AllListener property to hook up. 
 
  ----------------------------------------
 ## Consuming Data with DiagnosticListener. 
@@ -410,7 +412,7 @@ call for event name, so consumers must ensure that filter allows events without 
 to pass through.
 
 ----------------------------------------
-## Consuming DiagnosticSource Data with with EventListeners and ETW
+## Consuming DiagnosticSource Data with EventListeners and ETW
 
 The System.Diagnostic.DiagnosticSource Nuget package comes with a built in EventSource 
 called Microsoft-Diagnostics-DiagnosticSource.  This EventSource has the ability to 
