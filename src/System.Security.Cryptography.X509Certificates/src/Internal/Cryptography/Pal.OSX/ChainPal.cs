@@ -116,10 +116,11 @@ namespace Internal.Cryptography.Pal
         private SafeCreateHandle PrepareCertsArray(ICertificatePal cert, X509Certificate2Collection extraStore)
         {
             IntPtr[] ptrs = new IntPtr[1 + (extraStore?.Count ?? 0)];
+            SafeHandle[] safeHandles = new SafeHandle[ptrs.Length];
 
             AppleCertificatePal applePal = (AppleCertificatePal)cert;
 
-            ptrs[0] = applePal.CertificateHandle.DangerousGetHandle();
+            safeHandles[0] = applePal.CertificateHandle;
 
             if (extraStore != null)
             {
@@ -127,12 +128,44 @@ namespace Internal.Cryptography.Pal
                 {
                     AppleCertificatePal extraCertPal = (AppleCertificatePal)extraStore[i].Pal;
 
-                    ptrs[i + 1] = extraCertPal.CertificateHandle.DangerousGetHandle();
+                    safeHandles[i + 1] = extraCertPal.CertificateHandle;
                 }
             }
 
+            int idx = 0;
+            bool addedRef = false;
+
+            try
+            {
+                for (idx = 0; idx < safeHandles.Length; idx++)
+                {
+                    SafeHandle handle = safeHandles[idx];
+                    handle.DangerousAddRef(ref addedRef);
+                    ptrs[idx] = handle.DangerousGetHandle();
+                }
+            }
+            catch
+            {
+                // If any DangerousAddRef failed, idx will be on the one that failed, so we'll start off
+                // by subtracing one.
+                for (idx--; idx >= 0; idx--)
+                {
+                    safeHandles[idx].DangerousRelease();
+                }
+
+                throw;
+            }
+
+            // Creating the array has the effect of calling CFRetain() on all of the pointers, so the native
+            // resource is safe even if we DangerousRelease=>ReleaseHandle them.
             SafeCreateHandle certsArray = Interop.CoreFoundation.CFArrayCreate(ptrs, (UIntPtr)ptrs.Length);
             _extraHandles.Push(certsArray);
+
+            for (idx = 0; idx < safeHandles.Length; idx++)
+            {
+                safeHandles[idx].DangerousRelease();
+            }
+
             return certsArray;
         }
 

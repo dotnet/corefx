@@ -53,9 +53,21 @@ internal static partial class Interop
 
         internal static SafeKeychainHandle SecKeychainItemCopyKeychain(SafeKeychainItemHandle item)
         {
-            var handle = SecKeychainItemCopyKeychain(item.DangerousGetHandle());
-            GC.KeepAlive(item);
-            return handle;
+            bool addedRef = false;
+
+            try
+            {
+                item.DangerousAddRef(ref addedRef);
+                var handle = SecKeychainItemCopyKeychain(item.DangerousGetHandle());
+                return handle;
+            }
+            finally
+            {
+                if (addedRef)
+                {
+                    item.DangerousRelease();
+                }
+            }
         }
 
         internal static SafeKeychainHandle SecKeychainItemCopyKeychain(IntPtr item)
