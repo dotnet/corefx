@@ -618,18 +618,18 @@ namespace System
         // - It is a RARE case when Unescape actually needs escaping some characters mentioned above.
         //   For this reason it returns a char[] that is usually the same ref as the input "dest" value.
         //
-        internal static unsafe void UnescapeString(string input, int start, int end, PooledCharArray pooledArray,
+        internal static unsafe void UnescapeString(string input, int start, int end, ref PooledCharArray pooledArray,
             ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax,
             bool isQuery)
         {
             fixed (char* pStr = input)
             {
-                UnescapeString(pStr, start, end, pooledArray, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
+                UnescapeString(pStr, start, end, ref pooledArray, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
             }
         }
 
-        internal static unsafe void UnescapeString(char* pStr, int start, int end, PooledCharArray pooledArray, ref int destPosition,
+        internal static unsafe void UnescapeString(char* pStr, int start, int end, ref PooledCharArray pooledArray, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax, bool isQuery)
         {
             byte[] bytes = null;
@@ -774,7 +774,7 @@ namespace System
                             else
                             {
                                 --escapedReallocations;
-                                EscapeAsciiChar(pStr[next], pooledArray, ref destPosition);
+                                EscapeAsciiChar(pStr[next], ref pooledArray, ref destPosition);
                                 escapeReserved = false;
                                 start = ++next;
                                 continue;
@@ -838,7 +838,7 @@ namespace System
                         // Do not unescape chars not allowed by Iri
                         // need to check for invalid utf sequences that may not have given any chars
 
-                        MatchUTF8SequenceFastPath(pooledArray, ref destPosition, unescapedChars, charCount, bytes,
+                        MatchUTF8SequenceFastPath(ref pooledArray, ref destPosition, unescapedChars, charCount, bytes,
                             byteCount, isQuery, iriParsing);
                     }
 
@@ -854,7 +854,7 @@ namespace System
         // We got the unescaped chars, we then re-encode them and match off the bytes
         // to get the invalid sequence bytes that we just copy off
         //
-        internal static unsafe void MatchUTF8SequenceFastPath(PooledCharArray dest, ref int destOffset, char[] unescapedChars,
+        internal static unsafe void MatchUTF8SequenceFastPath(ref PooledCharArray dest, ref int destOffset, char[] unescapedChars,
             int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
         {
             int count = 0;
@@ -887,7 +887,7 @@ namespace System
                         while (bytes[count] != encodedBytes[0])
                         {
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+                            EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
                         }
 
                         // check if all bytes match
@@ -913,7 +913,7 @@ namespace System
                                     for (int l = 0; l < encodedBytes.Length; ++l)
                                     {
                                         Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                        EscapeAsciiChar((char)encodedBytes[l], dest, ref destOffset);
+                                        EscapeAsciiChar((char)encodedBytes[l], ref dest, ref destOffset);
                                     }
                                 }
                                 else if (!UriHelper.IsBidiControlCharacter(unescapedCharsPtr[j]))
@@ -949,7 +949,7 @@ namespace System
                             for (int l = 0; l < k; ++l)
                             {
                                 Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+                                EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
                             }
                         }
                     }
@@ -962,7 +962,7 @@ namespace System
             while (count < byteCount)
             {
                 Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                EscapeAsciiChar((char)bytes[count++], dest, ref destOffset);
+                EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
             }
         }
 
@@ -975,7 +975,7 @@ namespace System
             to[pos++] = s_hexUpperChars[ch & 0xf];
         }
         
-        internal static void EscapeAsciiChar(char ch, PooledCharArray to, ref int pos)
+        internal static void EscapeAsciiChar(char ch, ref PooledCharArray to, ref int pos)
         {
             to[pos++] = '%';
             to[pos++] = s_hexUpperChars[(ch & 0xf0) >> 4];
