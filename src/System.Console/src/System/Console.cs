@@ -75,6 +75,7 @@ namespace System
         {
             get
             {
+                //不知道是什么意思！
                 return Volatile.Read(ref s_outputEncoding) ?? EnsureInitialized(ref s_outputEncoding, () => ConsolePal.OutputEncoding);
             }
             set
