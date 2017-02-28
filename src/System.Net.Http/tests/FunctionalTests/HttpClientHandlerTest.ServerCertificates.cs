@@ -278,7 +278,7 @@ namespace System.Net.Http.Functional.Tests
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
         // For macOS the "custom handling" means that revocation can't be *disabled*. So this test does not apply.
-        [PlatformSpecific(TestPlatforms.Any & ~TestPlatforms.OSX)]
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public async Task SSLBackendNotSupported_Revocation_ThrowsPlatformNotSupportedException()
         {
             using (var client = new HttpClient(new HttpClientHandler() { CheckCertificateRevocationList = true }))
