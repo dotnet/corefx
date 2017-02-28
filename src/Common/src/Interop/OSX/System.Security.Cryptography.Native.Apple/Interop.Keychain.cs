@@ -211,7 +211,7 @@ namespace System.Security.Cryptography.Apple
 
         protected override bool ReleaseHandle()
         {
-            SafeTemporaryKeychainHandle.ReleaseItem(handle);
+            SafeTemporaryKeychainHandle.UntrackItem(handle);
             Interop.CoreFoundation.CFRelease(handle);
             SetHandle(IntPtr.Zero);
             return true;
@@ -315,7 +315,7 @@ namespace System.Security.Cryptography.Apple
             }
         }
 
-        internal static void ReleaseItem(IntPtr keychainItem)
+        internal static void UntrackItem(IntPtr keychainItem)
         {
             using (SafeKeychainHandle keychain = Interop.AppleCrypto.SecKeychainItemCopyKeychain(keychainItem))
             {
