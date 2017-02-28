@@ -31,6 +31,20 @@ namespace System.Xml.Serialization
 
         protected override void InitCallbacks()
         {
+            TypeScope scope = _mapping.Scope;
+            foreach (TypeMapping mapping in scope.TypeMappings)
+            {
+                if (mapping.IsSoap &&
+                        (mapping is StructMapping || mapping is EnumMapping || mapping is ArrayMapping || mapping is NullableMapping) &&
+                        !mapping.TypeDesc.IsRoot)
+                {
+                    AddReadCallback(
+                        mapping.TypeName,
+                        mapping.Namespace,
+                        mapping.TypeDesc.Type,
+                        CreateXmlSerializationReadCallback(mapping));
+                }
+            }
         }
 
         protected override void InitIDs()
@@ -470,7 +484,6 @@ namespace System.Xml.Serialization
                 TypeMapping mapping = element.Mapping;
                 if (mapping.IsSoap)
                 {
-                    EnsureXmlSerializationReadCallbackForMapping(mapping);
                     object rre = fixupIndex >= 0 ?
                           ReadReferencingElement(mapping.TypeName, mapping.Namespace, out fixup.Ids[fixupIndex])
                         : ReadReferencedElement(mapping.TypeName, mapping.Namespace);
@@ -587,37 +600,6 @@ namespace System.Xml.Serialization
             else
             {
                 o = value;
-            }
-        }
-
-        private void EnsureXmlSerializationReadCallbackForMapping(TypeMapping mapping)
-        {
-            EnsureCallbackTables();
-            if (mapping.IsSoap &&
-                        (mapping is StructMapping || mapping is EnumMapping || mapping is ArrayMapping || mapping is NullableMapping) &&
-                        !mapping.TypeDesc.IsRoot)
-            {
-                AddReadCallback(
-                    mapping.TypeName,
-                    mapping.Namespace,
-                    mapping.TypeDesc.Type,
-                    CreateXmlSerializationReadCallback(mapping));
-
-                var structMapping = mapping as StructMapping;
-                if (structMapping != null)
-                {
-                    var derivedMapping = structMapping.DerivedMappings;
-
-                    while(derivedMapping != null)
-                    {
-                        AddReadCallback(
-                            derivedMapping.TypeName,
-                            derivedMapping.Namespace,
-                            derivedMapping.TypeDesc.Type,
-                            CreateXmlSerializationReadCallback(derivedMapping));
-                        derivedMapping = derivedMapping.NextDerivedMapping;
-                    }
-                }
             }
         }
 
