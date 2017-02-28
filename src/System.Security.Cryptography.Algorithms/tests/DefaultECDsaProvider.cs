@@ -96,7 +96,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             return false;
         }
 
-        public bool SupportsKeyGeneration => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        public bool SupportsKeyGeneration => true;
     }
 
     public partial class ECDsaFactory

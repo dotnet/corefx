@@ -43,7 +43,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
         }
 
-        public bool SupportsKeyGeneration => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        public bool SupportsKeyGeneration => true;
     }
 
     public partial class RSAFactory
