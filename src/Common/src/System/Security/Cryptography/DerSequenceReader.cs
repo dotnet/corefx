@@ -97,10 +97,7 @@ namespace System.Security.Cryptography
 
         internal bool HasTag(byte expectedTag)
         {
-            if (!HasData)
-                return false;
-
-            return _data[_position] == expectedTag;
+            return HasData && _data[_position] == expectedTag;
         }
 
         internal void SkipValue()
