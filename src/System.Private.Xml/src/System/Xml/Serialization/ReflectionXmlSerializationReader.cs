@@ -629,14 +629,20 @@ namespace System.Xml.Serialization
             {
                 return () => WriteEnumMethodSoap((EnumMapping)mapping);
             }
-            else if (mapping is NullableMapping)
+            else if (mapping is ArrayMapping)
             {
-                throw new NotImplementedException();
+                return DummyReadArrayMethod;
             }
             else
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private object DummyReadArrayMethod()
+        {
+            UnknownNode(null);
+            return null;
         }
 
         private static Type GetMemberType(MemberInfo memberInfo)
@@ -670,7 +676,6 @@ namespace System.Xml.Serialization
         {
             if (arrayMapping.IsSoap)
             {
-                EnsureXmlSerializationReadCallbackForMapping(arrayMapping.Elements[0].Mapping);
                 object rre;
 
                 if (fixupIndex >= 0)

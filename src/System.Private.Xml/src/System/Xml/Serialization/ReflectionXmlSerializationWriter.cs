@@ -347,12 +347,6 @@ namespace System.Xml.Serialization
                     var itemMapping = itemElement.Mapping as StructMapping;
                     var itemName = writeAccessor ? itemElement.Name : itemMapping.TypeName;
                     var itemNamespace = itemElement.Any && itemElement.Name.Length == 0 ? null : (itemElement.Form == XmlSchemaForm.Qualified ? (writeAccessor ? itemElement.Namespace : itemMapping.Namespace) : "");
-                    EnsureXmlSerializationWriteCallbackForMapping(itemMapping,
-                        itemName,
-                        itemNamespace,
-                        itemElement.IsNullable, 
-                        needType: false, 
-                        parentMapping: parentMapping);
 
                     if (!writeAccessor)
                     {
