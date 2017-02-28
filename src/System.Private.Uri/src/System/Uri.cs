@@ -95,7 +95,6 @@ namespace System
                                                     // and Host values in case of a custom user Parser
             DosPath = 0x08000000,
             UncPath = 0x10000000,
-            UnixPath = 0x100000000000,
             ImplicitFile = 0x20000000,
             MinimalUriInfoSet = 0x40000000,
             AllUriInfoSet = unchecked(0x80000000),
@@ -112,6 +111,7 @@ namespace System
             QueryIriCanonical = 0x20000000000,
             FragmentIriCanonical = 0x40000000000,
             IriCanonical = 0x78000000000,
+            UnixPath = 0x100000000000,
         }
 
         private Flags _flags;
