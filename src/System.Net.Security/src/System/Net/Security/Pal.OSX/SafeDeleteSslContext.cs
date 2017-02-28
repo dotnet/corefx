@@ -291,53 +291,56 @@ namespace System.Net
                 certificate,
                 includeClientApplicationPolicy: false);
 
-            X509ChainElementCollection elements = chain.ChainElements;
-
-            // We need to leave off the EE (first) and root (last) certificate from the intermediates.
-            X509Certificate2[] intermediateCerts = elements.Count < 3 ?
-                Array.Empty<X509Certificate2>() :
-                new X509Certificate2[elements.Count - 2];
-
-            // Build an array which is [
-            //   SecIdentityRef for EE cert,
-            //   SecCertificateRef for intermed0,
-            //   SecCertificateREf for intermed1,
-            //   ...
-            // ]
-            IntPtr[] ptrs = new IntPtr[intermediateCerts.Length + 1];
-
-            for (int i = 0; i < intermediateCerts.Length; i++)
+            using (chain)
             {
-                X509Certificate2 intermediateCert = elements[i + 1].Certificate;
+                X509ChainElementCollection elements = chain.ChainElements;
 
-                if (intermediateCert.HasPrivateKey)
+                // We need to leave off the EE (first) and root (last) certificate from the intermediates.
+                X509Certificate2[] intermediateCerts = elements.Count < 3
+                    ? Array.Empty<X509Certificate2>()
+                    : new X509Certificate2[elements.Count - 2];
+
+                // Build an array which is [
+                //   SecIdentityRef for EE cert,
+                //   SecCertificateRef for intermed0,
+                //   SecCertificateREf for intermed1,
+                //   ...
+                // ]
+                IntPtr[] ptrs = new IntPtr[intermediateCerts.Length + 1];
+
+                for (int i = 0; i < intermediateCerts.Length; i++)
                 {
-                    // In the unlikely event that we get a certificate with a private key from
-                    // a chain, clear it to the certificate.
-                    //
-                    // The current value of intermediateCert is still in elements, which will
-                    // get Disposed at the end of this method.  The new value will be
-                    // in the intermediate certs array, which also gets serially Disposed.
-                    intermediateCert = new X509Certificate2(intermediateCert.RawData);
+                    X509Certificate2 intermediateCert = elements[i + 1].Certificate;
+
+                    if (intermediateCert.HasPrivateKey)
+                    {
+                        // In the unlikely event that we get a certificate with a private key from
+                        // a chain, clear it to the certificate.
+                        //
+                        // The current value of intermediateCert is still in elements, which will
+                        // get Disposed at the end of this method.  The new value will be
+                        // in the intermediate certs array, which also gets serially Disposed.
+                        intermediateCert = new X509Certificate2(intermediateCert.RawData);
+                    }
+
+                    intermediateCerts[i] = intermediateCert;
+                    ptrs[i + 1] = intermediateCert.Handle;
                 }
 
-                intermediateCerts[i] = intermediateCert;
-                ptrs[i + 1] = intermediateCert.Handle;
-            }
+                ptrs[0] = certificate.Handle;
 
-            ptrs[0] = certificate.Handle;
+                Interop.AppleCrypto.SslSetCertificate(sslContext, ptrs);
 
-            Interop.AppleCrypto.SslSetCertificate(sslContext, ptrs);
-
-            // The X509Chain created all new certs for us, so Dispose them.
-            // And since the intermediateCerts could have been new instances, Dispose them, too
-            for (int i = 0; i < elements.Count; i++)
-            {
-                elements[i].Certificate.Dispose();
-
-                if (i < intermediateCerts.Length)
+                // The X509Chain created all new certs for us, so Dispose them.
+                // And since the intermediateCerts could have been new instances, Dispose them, too
+                for (int i = 0; i < elements.Count; i++)
                 {
-                    intermediateCerts[i].Dispose();
+                    elements[i].Certificate.Dispose();
+
+                    if (i < intermediateCerts.Length)
+                    {
+                        intermediateCerts[i].Dispose();
+                    }
                 }
             }
         }
