@@ -11,7 +11,7 @@ namespace System.Collections.Tests
     /// <summary>
     /// Contains tests that ensure the correctness of the SortedSet class.
     /// </summary>
-    public abstract class SortedSet_Generic_Tests<T> : ISet_Generic_Tests<T>
+    public abstract partial class SortedSet_Generic_Tests<T> : ISet_Generic_Tests<T>
     {
         #region ISet<T> Helper Methods
 
@@ -36,18 +36,7 @@ namespace System.Collections.Tests
         {
             IComparer<T> comparer = GetIComparer();
             SortedSet<T> set = new SortedSet<T>(comparer);
-            if (comparer == null)
-                Assert.Equal(Comparer<T>.Default, set.Comparer);
-            else
-                Assert.Equal(comparer, set.Comparer);
-        }
-
-        [Fact]
-        public void SortedSet_Generic_Constructor_IComparer_Null()
-        {
-            IComparer<T> comparer = GetIComparer();
-            SortedSet<T> set = new SortedSet<T>((IComparer<T>)null);
-            Assert.Equal(Comparer<T>.Default, set.Comparer);
+            Assert.Equal(comparer ?? Comparer<T>.Default, set.Comparer);
         }
 
         [Theory]
@@ -72,6 +61,15 @@ namespace System.Collections.Tests
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
             SortedSet<T> set = new SortedSet<T>(enumerable, GetIComparer());
+            Assert.True(set.SetEquals(enumerable));
+        }
+
+        [Theory]
+        [MemberData(nameof(EnumerableTestData))]
+        public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
+        {
+            IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
+            SortedSet<T> set = new SortedSet<T>(enumerable, comparer: null);
             Assert.True(set.SetEquals(enumerable));
         }
 
@@ -123,9 +121,7 @@ namespace System.Collections.Tests
         {
             if (setLength >= 3)
             {
-                IComparer<T> comparer = GetIComparer();
-                if (comparer == null)
-                    comparer = Comparer<T>.Default;
+                IComparer<T> comparer = GetIComparer() ?? Comparer<T>.Default;
                 SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
                 T firstElement = set.ElementAt(1);
                 T lastElement = set.ElementAt(setLength - 2);
@@ -147,9 +143,7 @@ namespace System.Collections.Tests
         {
             if (setLength >= 2)
             {
-                IComparer<T> comparer = GetIComparer();
-                if (comparer == null)
-                    comparer = Comparer<T>.Default;
+                IComparer<T> comparer = GetIComparer() ?? Comparer<T>.Default;
                 SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
                 T firstElement = set.ElementAt(0);
                 T lastElement = set.ElementAt(setLength - 1);
@@ -165,9 +159,7 @@ namespace System.Collections.Tests
             if (setLength >= 3)
             {
                 SortedSet<T> set = (SortedSet<T>)GenericISetFactory(setLength);
-                IComparer<T> comparer = GetIComparer();
-                if (comparer == null)
-                    comparer = Comparer<T>.Default;
+                IComparer<T> comparer = GetIComparer() ?? Comparer<T>.Default;
                 T firstElement = set.ElementAt(0);
                 T middleElement = set.ElementAt(setLength / 2);
                 T lastElement = set.ElementAt(setLength - 1);
@@ -330,62 +322,6 @@ namespace System.Collections.Tests
             Assert.True(comparerSet1.SetEquals(set));
             Assert.True(comparerSet2.SetEquals(set));
         }
-        #endregion
-
-        #region TryGetValue
-
-        [Fact]
-        public void SortedSet_Generic_TryGetValue_Contains()
-        {
-            T value = CreateT(1);
-            SortedSet<T> set = new SortedSet<T> { value };
-            T equalValue = CreateT(1);
-            T actualValue;
-            Assert.True(set.TryGetValue(equalValue, out actualValue));
-            Assert.Equal(value, actualValue);
-            if (!typeof(T).IsValueType)
-            {
-                Assert.Same(value, actualValue);
-            }
-        }
-
-        [Fact]
-        public void SortedSet_Generic_TryGetValue_Contains_OverwriteOutputParam()
-        {
-            T value = CreateT(1);
-            SortedSet<T> set = new SortedSet<T> { value };
-            T equalValue = CreateT(1);
-            T actualValue = CreateT(2);
-            Assert.True(set.TryGetValue(equalValue, out actualValue));
-            Assert.Equal(value, actualValue);
-            if (!typeof(T).IsValueType)
-            {
-                Assert.Same(value, actualValue);
-            }
-        }
-
-        [Fact]
-        public void SortedSet_Generic_TryGetValue_NotContains()
-        {
-            T value = CreateT(1);
-            SortedSet<T> set = new SortedSet<T> { value };
-            T equalValue = CreateT(2);
-            T actualValue;
-            Assert.False(set.TryGetValue(equalValue, out actualValue));
-            Assert.Equal(default(T), actualValue);
-        }
-
-        [Fact]
-        public void SortedSet_Generic_TryGetValue_NotContains_OverwriteOutputParam()
-        {
-            T value = CreateT(1);
-            SortedSet<T> set = new SortedSet<T> { value };
-            T equalValue = CreateT(2);
-            T actualValue = equalValue;
-            Assert.False(set.TryGetValue(equalValue, out actualValue));
-            Assert.Equal(default(T), actualValue);
-        }
-
         #endregion
     }
 }

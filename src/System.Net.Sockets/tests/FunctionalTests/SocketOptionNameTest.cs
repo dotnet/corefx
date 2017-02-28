@@ -104,7 +104,6 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
             // On all platforms, index 0 means "any interface"

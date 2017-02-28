@@ -51,6 +51,8 @@ namespace System.Net.Http.Functional.Tests
                 Guid requestGuid = Guid.Empty;
                 bool responseLogged = false;
                 Guid responseGuid = Guid.Empty;
+
+                bool exceptionLogged = false;
                 var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
                 {
                     if (kvp.Key.Equals("System.Net.Http.Request"))
@@ -71,6 +73,10 @@ namespace System.Net.Http.Functional.Tests
 
                         responseLogged = true;
                     }
+                    else if (kvp.Key.Equals("System.Net.Http.Exception"))
+                    {
+                        exceptionLogged = true;
+                    }
                 });
 
                 using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
@@ -85,6 +91,7 @@ namespace System.Net.Http.Functional.Tests
                     // Poll with a timeout since logging response is not synchronized with returning a response.
                     WaitForTrue(() => responseLogged, TimeSpan.FromSeconds(1), "Response was not logged within 1 second timeout.");
                     Assert.Equal(requestGuid, responseGuid);
+                    Assert.False(exceptionLogged, "Exception was logged for successful request");
                     diagnosticListenerObserver.Disable();
                 }
 
@@ -154,7 +161,7 @@ namespace System.Net.Http.Functional.Tests
                             });
 
                             // Do a post to a remote server
-                            byte[] expectedData = Enumerable.Range(0, 20000).Select(i => (byte)i).ToArray();
+                            byte[] expectedData = Enumerable.Range(0, 20000).Select(i => unchecked((byte)i)).ToArray();
                             HttpContent content = new ByteArrayContent(expectedData);
                             content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(expectedData);
                             using (HttpResponseMessage response = await client.PostAsync(Configuration.Http.RemoteEchoServer, content))
@@ -182,14 +189,21 @@ namespace System.Net.Http.Functional.Tests
             RemoteInvoke(() =>
             {
                 bool exceptionLogged = false;
+                bool responseLogged = false;
                 var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
                 {
                     if (kvp.Key.Equals("System.Net.Http.Response"))
                     {
                         Assert.NotNull(kvp.Value);
-                        GetPropertyValueFromAnonymousTypeInstance<Exception>(kvp.Value, "Exception");
                         var requestStatus = GetPropertyValueFromAnonymousTypeInstance<TaskStatus>(kvp.Value, "RequestTaskStatus");
                         Assert.Equal(TaskStatus.Faulted, requestStatus);
+
+                        responseLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.Exception"))
+                    {
+                        Assert.NotNull(kvp.Value);
+                        GetPropertyValueFromAnonymousTypeInstance<Exception>(kvp.Value, "Exception");
 
                         exceptionLogged = true;
                     }
@@ -203,8 +217,9 @@ namespace System.Net.Http.Functional.Tests
                         Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync($"http://{Guid.NewGuid()}.com")).Wait();
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
-                    WaitForTrue(() => exceptionLogged, TimeSpan.FromSeconds(1),
-                        "Exception was not logged within 1 second timeout.");
+                    WaitForTrue(() => responseLogged, TimeSpan.FromSeconds(1),
+                        "Response with exception was not logged within 1 second timeout.");
+                    Assert.True(exceptionLogged, "Exception was not logged");
                     diagnosticListenerObserver.Disable();
                 }
 
@@ -213,7 +228,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(16098)]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledLogging()
         {
@@ -246,7 +260,7 @@ namespace System.Net.Http.Functional.Tests
                                     return LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
                                 });
                             Task response = client.GetAsync(url, tcs.Token);
-                            await Assert.ThrowsAsync<IOException>(() => Task.WhenAll(response, request));
+                            await Assert.ThrowsAnyAsync<Exception>(() => Task.WhenAll(response, request));
                         }).Wait();
                     }
                 }
