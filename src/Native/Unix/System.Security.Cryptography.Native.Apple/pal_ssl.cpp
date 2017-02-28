@@ -224,6 +224,14 @@ AppleCryptoNative_SslRead(SSLContextRef sslContext, uint8_t* buf, uint32_t bufLe
     size_t bufSize = static_cast<size_t>(bufLen);
 
     OSStatus status = SSLRead(sslContext, buf, bufSize, &writtenSize);
+
+    if (writtenSize > UINT_MAX)
+    {
+        // This shouldn't happen, because we passed a uint32_t as the initial buffer size.
+        // But, just in case it does, report back that we're no longer in a known state.
+        return PAL_TlsIo_Unknown;
+    }
+
     *written = static_cast<uint32_t>(writtenSize);
 
     if (writtenSize == 0 && status == errSSLWouldBlock)
