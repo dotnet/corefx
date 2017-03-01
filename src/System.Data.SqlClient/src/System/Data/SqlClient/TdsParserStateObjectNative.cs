@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient
 {
-    class TdsParserStateObjectNative : TdsParserStateObject
+    internal class TdsParserStateObjectNative : TdsParserStateObject
     {
         private SNIHandle _sessionHandle = null;              // the SNI handle we're to work on
 
@@ -27,7 +27,6 @@ namespace System.Data.SqlClient
         internal TdsParserStateObjectNative(TdsParser parser, TdsParserStateObject physicalConnection, bool async) :
             base(parser, physicalConnection, async)
         {
-
         }
 
         internal SNIHandle Handle => _sessionHandle;
@@ -36,14 +35,14 @@ namespace System.Data.SqlClient
 
         internal override object SessionHandle => _sessionHandle;
 
-        public override object HandleObject => _sessionHandle;
-
         protected override object EmptyReadPacket => IntPtr.Zero;
 
         protected override void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async)
         {
+            Debug.Assert(physicalConnection is TdsParserStateObjectNative, "Expected a stateObject of type " + this.GetType());
+            TdsParserStateObjectNative nativeSNIObject = physicalConnection as TdsParserStateObjectNative;
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);
-            _sessionHandle = new SNIHandle(myInfo, physicalConnection.HandleObject as SNIHandle);
+            _sessionHandle = new SNIHandle(myInfo, nativeSNIObject.Handle);
         }
 
         private SNINativeMethodWrapper.ConsumerInfo CreateConsumerInfo(bool async)
@@ -98,10 +97,7 @@ namespace System.Data.SqlClient
             _sessionHandle = new SNIHandle(myInfo, serverName, spnBuffer, ignoreSniOpenTimeout, checked((int)timeout), out instanceName, flushCache, !async, fParallel);
         }
 
-        protected override uint SNIPacketGetData<T>(T packet, byte[] _inBuff, ref uint dataSize)
-        {
-            return SNINativeMethodWrapper.SNIPacketGetData((IntPtr)(object)packet, _inBuff, ref dataSize);
-        }
+        protected override uint SNIPacketGetData(object packet, byte[] _inBuff, ref uint dataSize) => SNINativeMethodWrapper.SNIPacketGetData((IntPtr)packet, _inBuff, ref dataSize);
 
         protected override bool CheckPacket(object packet, TaskCompletionSource<object> source)
         {
@@ -109,19 +105,13 @@ namespace System.Data.SqlClient
             return IntPtr.Zero == ptr || IntPtr.Zero != ptr && source != null;
         }
 
-        public void ReadAsyncCallback(IntPtr key, IntPtr packet, UInt32 error)
-        {
-            ReadAsyncCallback(key, packet, error);
-        }
+        public void ReadAsyncCallback(IntPtr key, IntPtr packet, UInt32 error) => ReadAsyncCallback(key, packet, error);
 
-        public void WriteAsyncCallback(IntPtr key, IntPtr packet, UInt32 sniError)
-        {
-            WriteAsyncCallback(key, packet, sniError);
-        }
+        public void WriteAsyncCallback(IntPtr key, IntPtr packet, UInt32 sniError) => WriteAsyncCallback(key, packet, sniError);
 
-        protected override void RemovePacketFromPendingList<T>(T ptr)
+        protected override void RemovePacketFromPendingList(object ptr)
         {
-            IntPtr pointer = (IntPtr)(object)ptr;
+            IntPtr pointer = (IntPtr)ptr;
 
             SNIPacket recoveredPacket;
 
@@ -190,8 +180,12 @@ namespace System.Data.SqlClient
 
         internal override object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error)
         {
-            IntPtr readPacketPtr = IntPtr.Zero;
             SNIHandle handle = Handle;
+            if (handle == null)
+            {
+                throw ADP.ClosedConnectionError();
+            }
+            IntPtr readPacketPtr = IntPtr.Zero;
             error = SNINativeMethodWrapper.SNIReadSyncOverAsync(handle, ref readPacketPtr, GetTimeoutRemaining());
             return readPacketPtr;
         }
@@ -203,13 +197,12 @@ namespace System.Data.SqlClient
         internal override uint CheckConnection()
         {
             SNIHandle handle = Handle;
-            return SNINativeMethodWrapper.SNICheckConnection(handle);
+            return handle == null ? TdsEnums.SNI_SUCCESS : SNINativeMethodWrapper.SNICheckConnection(handle);
         }
 
-        internal override object ReadAsync(out uint error, out object handle)
+        internal override object ReadAsync(out uint error, ref object handle)
         {
             IntPtr readPacketPtr = IntPtr.Zero;
-            handle = Handle;
             error = SNINativeMethodWrapper.SNIReadAsync((SNIHandle)handle, ref readPacketPtr);
             return readPacketPtr;
         }
@@ -223,10 +216,7 @@ namespace System.Data.SqlClient
             return attnPacket;
         }
 
-        internal override uint WritePacket(object packet, bool sync)
-        {
-            return SNINativeMethodWrapper.SNIWritePacket(Handle, (SNIPacket)packet, sync);
-        }
+        internal override uint WritePacket(object packet, bool sync) => SNINativeMethodWrapper.SNIWritePacket(Handle, (SNIPacket)packet, sync);
 
         internal override object AddPacketToPendingList(object packetToAdd)
         {
@@ -275,26 +265,17 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal override void SetPacketData(object packet, byte[] buffer, int bytesUsed)
-        {
-            SNINativeMethodWrapper.SNIPacketSetData((SNIPacket)packet, buffer, bytesUsed);
-        }
+        internal override void SetPacketData(object packet, byte[] buffer, int bytesUsed) 
+            => SNINativeMethodWrapper.SNIPacketSetData((SNIPacket)packet, buffer, bytesUsed);
 
-        internal override uint SniGetConnectionId(ref Guid clientConnectionId)
-        {
-            return SNINativeMethodWrapper.SniGetConnectionId(Handle, ref clientConnectionId);
-        }
+        internal override uint SniGetConnectionId(ref Guid clientConnectionId) 
+            => SNINativeMethodWrapper.SniGetConnectionId(Handle, ref clientConnectionId);
 
-        internal override uint DisabeSsl()
-        {
-            return SNINativeMethodWrapper.SNIRemoveProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SSL_PROV);
-        }
+        internal override uint DisabeSsl() 
+            => SNINativeMethodWrapper.SNIRemoveProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SSL_PROV);
 
-
-        internal override uint EnableMars(ref uint info)
-        {
-            return SNINativeMethodWrapper.SNIAddProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SMUX_PROV, ref info);
-        }
+        internal override uint EnableMars(ref uint info) 
+            => SNINativeMethodWrapper.SNIAddProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SMUX_PROV, ref info);
 
         internal override uint EnableSsl(ref uint info)
         {
@@ -302,20 +283,15 @@ namespace System.Data.SqlClient
             return SNINativeMethodWrapper.SNIAddProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SSL_PROV, ref info);
         }
 
-        internal override uint SetConnectionBufferSize(ref uint unsignedPacketSize)
-        {
-            return SNINativeMethodWrapper.SNISetInfo(Handle, SNINativeMethodWrapper.QTypes.SNI_QUERY_CONN_BUFSIZE, ref unsignedPacketSize);
-        }
+        internal override uint SetConnectionBufferSize(ref uint unsignedPacketSize) 
+            => SNINativeMethodWrapper.SNISetInfo(Handle, SNINativeMethodWrapper.QTypes.SNI_QUERY_CONN_BUFSIZE, ref unsignedPacketSize);
 
-        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer)
-        {
-            return SNINativeMethodWrapper.SNISecGenClientContext(Handle, receivedBuff, receivedLength, sendBuff, ref sendLength, _sniSpnBuffer);
-        }
+        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer) 
+            => SNINativeMethodWrapper.SNISecGenClientContext(Handle, receivedBuff, receivedLength, sendBuff, ref sendLength, _sniSpnBuffer);
+        
 
-        internal override uint WaitForSSLHandShakeToComplete()
-        {
-            return SNINativeMethodWrapper.SNIWaitForSSLHandshakeToComplete(Handle, GetTimeoutRemaining());
-        }
+        internal override uint WaitForSSLHandShakeToComplete() 
+            => SNINativeMethodWrapper.SNIWaitForSSLHandshakeToComplete(Handle, GetTimeoutRemaining());
 
         internal override void DisposePacketCache()
         {
@@ -400,6 +376,5 @@ namespace System.Data.SqlClient
                 }
             }
         }
-
     }
 }

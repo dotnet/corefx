@@ -8,12 +8,23 @@ namespace System.Data.SqlClient
 {
     internal sealed class TdsParserStateObjectFactory
     {
-#if MANAGED_SNI
-        public static bool useManagedSni = true;
-#else
-        public static bool useManagedSni = true;
-#endif
+        public static bool useManagedSni = false;
+
         public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
+
+        public EncryptionOptions EncryptionOptions {
+            get
+            {
+                return useManagedSni ? SNI.SNILoadHandle.SingletonInstance.Options : SNILoadHandle.SingletonInstance.Options;
+            }
+        }
+
+        public uint SNIStatus {
+            get
+            {
+                return useManagedSni ? SNILoadHandle.SingletonInstance.Status : SNI.SNILoadHandle.SingletonInstance.Status;
+            }
+        }
 
         public TdsParserStateObject CreateTdsParserStateObject(TdsParser parser)
         {

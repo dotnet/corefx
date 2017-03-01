@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 namespace System.Data
 {
-    internal static class LocalDBAPI
+    internal static partial class LocalDBAPI
     {
         private const string const_localDbPrefix = @"(localdb)\";
 
@@ -48,45 +48,7 @@ namespace System.Data
         private static IntPtr s_userInstanceDLLHandle = IntPtr.Zero;
 
         private static object s_dllLock = new object();
-
-        private static IntPtr UserInstanceDLLHandle
-        {
-            get
-            {
-#if MANAGED_SNI
-                return IntPtr.Zero;
-#else
-                if (s_userInstanceDLLHandle == IntPtr.Zero)
-                {
-                    bool lockTaken = false;
-                    try
-                    {
-                        Monitor.Enter(s_dllLock, ref lockTaken);
-                        if (s_userInstanceDLLHandle == IntPtr.Zero)
-                        {
-                            SNINativeMethodWrapper.SNIQueryInfo(SNINativeMethodWrapper.QTypes.SNI_QUERY_LOCALDB_HMODULE, ref s_userInstanceDLLHandle);
-                            if (s_userInstanceDLLHandle != IntPtr.Zero)
-                            {
-                            }
-                            else
-                            {
-                                SNINativeMethodWrapper.SNI_Error sniError;
-                                SNINativeMethodWrapper.SNIGetLastError(out sniError);
-                                throw CreateLocalDBException(errorMessage: SR.GetString("LocalDB_FailedGetDLLHandle"), sniError: (int)sniError.sniError);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        if (lockTaken)
-                            Monitor.Exit(s_dllLock);
-                    }
-                }
-                return s_userInstanceDLLHandle;
-#endif // MANAGED_SNI
-            }
-        }
-
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private delegate int LocalDBFormatMessageDelegate(int hrLocalDB, UInt32 dwFlags, UInt32 dwLanguageId, StringBuilder buffer, ref UInt32 buflen);
 

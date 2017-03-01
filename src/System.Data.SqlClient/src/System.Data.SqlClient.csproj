@@ -140,6 +140,7 @@
     <Compile Include="System\Data\SqlClient\SNI\SspiClientContextStatus.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectManaged.cs" />
   </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Windows.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Windows.cs" />
@@ -147,7 +148,9 @@
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectNative.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.Windows.cs" />
+    <Compile Include="System\Data\SqlClient\LocalDBAPI.Windows.cs" />
   </ItemGroup>
+  
   <!-- Windows dependencies for Integrated Authentication for MANAGED_SNI build -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Windows.cs">
@@ -274,6 +277,7 @@
       <Link>Common\System\Net\NegotiationInfoClass.cs</Link>
     </Compile>
   </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Unix.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Unix.cs" />
@@ -312,6 +316,7 @@
     </Compile>
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Unix.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.Unix.cs" />
+    <Compile Include="System\Data\SqlClient\LocalDBAPI.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <Reference Include="mscorlib" />

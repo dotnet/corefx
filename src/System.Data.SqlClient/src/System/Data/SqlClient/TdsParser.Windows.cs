@@ -2,20 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
 using System.Data.SqlClient.SNI;
-
-
-using MSS = Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient
 {
@@ -39,13 +27,13 @@ namespace System.Data.SqlClient
             finally
             {
                 _pMarsPhysicalConObj.IncrementPendingCallbacks();
-
-                error = SNINativeMethodWrapper.SNIReadAsync((SNIHandle)_pMarsPhysicalConObj.HandleObject, ref temp);
+                object handle = _pMarsPhysicalConObj.SessionHandle;
+                temp = (IntPtr)_pMarsPhysicalConObj.ReadAsync(out error, ref handle);
 
                 if (temp != IntPtr.Zero)
                 {
                     // Be sure to release packet, otherwise it will be leaked by native.
-                    SNINativeMethodWrapper.SNIPacketRelease(temp);
+                    _pMarsPhysicalConObj.ReleasePacket(temp);
                 }
             }
             Debug.Assert(IntPtr.Zero == temp, "unexpected syncReadPacket without corresponding SNIPacketRelease");
@@ -55,11 +43,12 @@ namespace System.Data.SqlClient
                 _physicalStateObj.AddError(ProcessSNIError(_physicalStateObj));
                 ThrowExceptionAndWarning(_physicalStateObj);
             }
-                
         }
 
         private void LoadSSPILibrary()
         {
+            if (TdsParserStateObjectFactory.useManagedSni)
+                return;
             // Outer check so we don't acquire lock once it's loaded.
             if (!s_fSSPILoaded)
             {
@@ -86,6 +75,22 @@ namespace System.Data.SqlClient
             }
         }
 
+        private void WaitForSSLHandShakeToComplete(ref uint error)
+        {
+            if (TdsParserStateObjectFactory.useManagedSni)
+                return;
+            // in the case where an async connection is made, encryption is used and Windows Authentication is used, 
+            // wait for SSL handshake to complete, so that the SSL context is fully negotiated before we try to use its 
+            // Channel Bindings as part of the Windows Authentication context build (SSL handshake must complete 
+            // before calling SNISecGenClientContext).
+            error = _physicalStateObj.WaitForSSLHandShakeToComplete();
+            if (error != TdsEnums.SNI_SUCCESS)
+            {
+                _physicalStateObj.AddError(ProcessSNIError(_physicalStateObj));
+                ThrowExceptionAndWarning(_physicalStateObj);
+            }
+        }
+
         private SNIErrorDetails GetSniErrorDetails()
         {
             SNIErrorDetails details = new SNIErrorDetails();
@@ -95,7 +100,7 @@ namespace System.Data.SqlClient
                 SNIError sniError = SNIProxy.Singleton.GetLastError();
                 details.sniErrorNumber = sniError.sniError;
                 details.errorMessage = sniError.errorMessage;
-                details.win32ErrorCode = sniError.nativeError;
+                details.nativeError = sniError.nativeError;
                 details.provider = (int)sniError.provider;
                 details.lineNumber = sniError.lineNumber;
                 details.function = sniError.function;
@@ -107,13 +112,12 @@ namespace System.Data.SqlClient
                 SNINativeMethodWrapper.SNIGetLastError(out sniError);
                 details.sniErrorNumber = sniError.sniError;
                 details.errorMessage = sniError.errorMessage;
-                details.win32ErrorCode = sniError.nativeError;
+                details.nativeError = sniError.nativeError;
                 details.provider = (int)sniError.provider;
                 details.lineNumber = sniError.lineNumber;
                 details.function = sniError.function;
             }
             return details;
-
         }
 
     }    // tdsparser

@@ -7,16 +7,9 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
-
-#if MANAGED_SNI
-using System.Data.SqlClient.SNI;
-using System.Net.Security;
-using System.Net;
-#endif
 
 namespace System.Data.SqlClient
 {
@@ -284,11 +277,6 @@ namespace System.Data.SqlClient
             _lastSuccessfulIOTimer = parser._physicalStateObj._lastSuccessfulIOTimer;
         }
 
-        internal abstract uint SniGetConnectionId(ref Guid clientConnectionId);
-
-        internal abstract bool IsFailedHandle();
-
-        protected virtual void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async) { }
         ////////////////
         // Properties //
         ////////////////
@@ -751,6 +739,44 @@ namespace System.Data.SqlClient
 
         internal abstract void CreatePhysicalSNIHandle(string serverName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool fParallel, bool isIntegratedSecurity = false);
 
+        internal abstract uint SniGetConnectionId(ref Guid clientConnectionId);
+
+        internal abstract bool IsFailedHandle();
+
+        protected abstract void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async);
+
+        protected abstract void FreeGcHandle(int remaining, bool release);
+
+        internal abstract uint EnableSsl(ref uint info);
+
+        internal abstract uint WaitForSSLHandShakeToComplete();
+
+        internal abstract void Dispose();
+
+        internal abstract void DisposePacketCache();
+
+        internal abstract bool IsPacketEmpty(object readPacket);
+
+        internal abstract object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error);
+
+        internal abstract object ReadAsync(out uint error, ref object handle);
+
+        internal abstract uint CheckConnection();
+
+        internal abstract uint SetConnectionBufferSize(ref uint unsignedPacketSize);
+
+        internal abstract void ReleasePacket(object syncReadPacket);
+
+        protected abstract uint SNIPacketGetData(object packet, byte[] _inBuff, ref uint dataSize);
+
+        internal abstract object GetResetWritePacket();
+
+        internal abstract void ClearAllWritePackets();
+
+        internal abstract object AddPacketToPendingList(object packet);
+
+        protected abstract void RemovePacketFromPendingList(object pointer);
+
         internal bool Deactivate()
         {
             bool goodForReuse = false;
@@ -762,7 +788,7 @@ namespace System.Data.SqlClient
                 {
                     if (_pendingData)
                     {
-                        Parser.DrainData(this); // This may throw - taking us to catch block.
+                        Parser.DrainData(this); // This may throw - taking us to catch block.c
                     }
 
                     if (HasOpenResult)
@@ -812,10 +838,7 @@ namespace System.Data.SqlClient
             }
             _hasOpenResult = false;
         }
-
-        protected abstract void FreeGcHandle(int remaining, bool release);
-        internal abstract uint EnableSsl(ref uint info);
-
+        
         internal int DecrementPendingCallbacks(bool release)
         {
             int remaining = Interlocked.Decrement(ref _pendingCallbacks);
@@ -827,8 +850,6 @@ namespace System.Data.SqlClient
             Debug.Assert((remaining == -1 && SessionHandle == null) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
             return remaining;
         }
-
-        internal abstract uint WaitForSSLHandShakeToComplete();
 
         internal void DisposeCounters()
         {
@@ -852,10 +873,6 @@ namespace System.Data.SqlClient
                 SpinWait.SpinUntil(() => Volatile.Read(ref _readingCount) == 0);
             }
         }
-
-        internal abstract void Dispose();
-
-        internal abstract void DisposePacketCache();
 
         internal Int32 IncrementAndObtainOpenResultCount(SqlInternalTransaction transaction)
         {
@@ -2050,11 +2067,6 @@ namespace System.Data.SqlClient
                 Interlocked.Increment(ref _readingCount);
                 shouldDecrement = true;
 
-                object handle = HandleObject;
-                if (handle == null)
-                {
-                    throw ADP.ClosedConnectionError();
-                }
                 readPacket = ReadSyncOverAsync(GetTimeoutRemaining(), false, out error);
 
                 Interlocked.Decrement(ref _readingCount);
@@ -2104,10 +2116,6 @@ namespace System.Data.SqlClient
                 AssertValidState();
             }
         }
-
-        internal abstract bool IsPacketEmpty(object readPacket);
-
-        internal abstract object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error);
 
         internal void OnConnectionClosed()
         {
@@ -2300,12 +2308,12 @@ namespace System.Data.SqlClient
                 {
                     Interlocked.Increment(ref _readingCount);
 
-                    handle = HandleObject;
+                    handle = SessionHandle;
                     if (handle != null)
                     {
                         IncrementPendingCallbacks();
 
-                        readPacket = ReadAsync(out error, out handle);
+                        readPacket = ReadAsync(out error, ref handle);
 
                         if (!(TdsEnums.SNI_SUCCESS == error || TdsEnums.SNI_SUCCESS_IO_PENDING == error))
                         {
@@ -2366,8 +2374,6 @@ namespace System.Data.SqlClient
                 AssertValidState();
             }
         }
-
-        internal abstract object ReadAsync(out uint error, out object handle);
 
         /// <summary>
         /// Checks to see if the underlying connection is still alive (used by connection pool resiliency)
@@ -2461,11 +2467,7 @@ namespace System.Data.SqlClient
             try
             {
                 Interlocked.Increment(ref _readingCount);
-                object handle = HandleObject;
-                if (handle != null)
-                {
-                    error = CheckConnection();
-                }
+                error = CheckConnection();
             }
             finally
             {
@@ -2473,8 +2475,6 @@ namespace System.Data.SqlClient
             }
             return (error == TdsEnums.SNI_SUCCESS) || (error == TdsEnums.SNI_WAIT_TIMEOUT);
         }
-
-        internal abstract uint CheckConnection();
 
         // This method should only be called by ReadSni!  If not - it may have problems with timeouts!
         private void ReadSniError(TdsParserStateObject stateObj, UInt32 error)
@@ -2507,12 +2507,6 @@ namespace System.Data.SqlClient
                             {
                                 Interlocked.Increment(ref _readingCount);
                                 shouldDecrement = true;
-
-                                object handle = HandleObject;
-                                if (handle == null)
-                                {
-                                    throw ADP.ClosedConnectionError();
-                                }
 
                                 syncReadPacket = ReadSyncOverAsync(stateObj.GetTimeoutRemaining(), _parser.MARSOn, out error);
 
@@ -2578,21 +2572,7 @@ namespace System.Data.SqlClient
             AssertValidState();
         }
 
-        internal abstract uint SetConnectionBufferSize(ref uint unsignedPacketSize);
-
-        internal abstract void ReleasePacket(object syncReadPacket);
-
-        public void ProcessSniPacket(SNIPacket packet, UInt32 error)
-        {
-            ProcessSniPacket(packet, error);
-        }
-
-        public void ProcessSniPacket(IntPtr packet, UInt32 error)
-        {
-            ProcessSniPacket(packet, error);
-        }
-
-        public void ProcessSniPacket<T>(T packet, UInt32 error)
+        public void ProcessSniPacket(object packet, UInt32 error)
         {
             if (error != 0)
             {
@@ -2647,8 +2627,6 @@ namespace System.Data.SqlClient
                 }
             }
         }
-
-        protected abstract uint SNIPacketGetData<T>(T packet, byte[] _inBuff, ref uint dataSize);
 
         private void ChangeNetworkPacketTimeout(int dueTime, int period)
         {
@@ -3415,14 +3393,6 @@ namespace System.Data.SqlClient
             return task;
         }
 
-        internal abstract object GetResetWritePacket();
-
-        internal abstract void ClearAllWritePackets();
-
-        internal abstract object AddPacketToPendingList(object packet);
-
-        protected abstract void RemovePacketFromPendingList<T>(T pointer);
-
         //////////////////////////////////////////////
         // Statistics, Tracing, and related methods //
         //////////////////////////////////////////////
@@ -3579,8 +3549,6 @@ namespace System.Data.SqlClient
                 return count;
             }
         }
-
-        public abstract object HandleObject { get; }
 
         protected abstract object EmptyReadPacket { get; }
 

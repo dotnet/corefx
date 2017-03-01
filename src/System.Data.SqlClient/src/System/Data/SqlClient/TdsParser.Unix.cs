@@ -19,13 +19,19 @@ namespace System.Data.SqlClient
             // No - Op
         }
 
+        private void WaitForSSLHandShakeToComplete(ref uint error)
+        {
+            // No - Op
+            
+        }
+
         private SNIErrorDetails GetSniErrorDetails()
         {
             SNIErrorDetails details;
             SNIError sniError = SNIProxy.Singleton.GetLastError();
             details.sniErrorNumber = sniError.sniError;
             details.errorMessage = sniError.errorMessage;
-            details.win32ErrorCode = sniError.nativeError;
+            details.nativeError = sniError.nativeError;
             details.provider = (int)sniError.provider;
             details.lineNumber = sniError.lineNumber;
             details.function = sniError.function;
