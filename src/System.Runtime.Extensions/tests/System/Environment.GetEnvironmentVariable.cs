@@ -222,6 +222,7 @@ namespace System.Tests
                 if (lookForSetValue)
                 {
                     Environment.SetEnvironmentVariable(key, null, target);
+                    Assert.Null(Environment.GetEnvironmentVariable(key, target));
                 }
             }
         }
