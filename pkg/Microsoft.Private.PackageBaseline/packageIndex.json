@@ -2496,7 +2496,8 @@
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
-        "4.0.1.0": "4.3.0"
+        "4.0.1.0": "4.3.0",
+        "4.0.1.1": "4.3.1"
       }
     },
     "runtime.native.System.Security.Cryptography.Apple": {
