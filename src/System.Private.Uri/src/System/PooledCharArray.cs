@@ -16,6 +16,15 @@ namespace System
     		_buffer = ArrayPool<char>.Shared.Rent(size);
     	}
 
+		public PooledCharArray(char[] fromArray)
+		{
+			_buffer = ArrayPool<char>.Shared.Rent(fromArray.Length);
+			for (int i = 0; i < fromArray.Length; i++)
+			{
+				_buffer[i] = fromArray[i];
+			}
+		}
+
     	public void Release()
     	{
     		if (_buffer != null)
@@ -27,12 +36,24 @@ namespace System
 
     	public int Length => _buffer.Length;
 
+		public char[] Array => _buffer;
+
     	public string GetStringAndRelease(int stringLength)
     	{
     		string ret = new string(_buffer, 0, stringLength);
     		Release();
     		return ret;
     	}
+
+		public void CopyAndRelease(char[] dest, int offset, int count)
+		{
+			while (count > 0)
+			{
+				dest[offset] = _buffer[offset++];
+				count--;
+			}
+			Release();
+		}
 
     	public char this[int index]
     	{
