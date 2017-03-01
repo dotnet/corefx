@@ -362,7 +362,11 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (type != typeof(void))
             {
-                if (type.IsValueType)
+                if (type.IsNullableOrReferenceType())
+                {
+                    _instructions.EmitLoad(value: null);
+                }
+                else
                 {
                     object value = ScriptingRuntimeHelpers.GetPrimitiveDefaultValue(type);
                     if (value != null)
@@ -373,10 +377,6 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         _instructions.EmitDefaultValue(type);
                     }
-                }
-                else
-                {
-                    _instructions.EmitLoad(value: null);
                 }
             }
         }
@@ -2416,8 +2416,16 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                Debug.Assert(node.Type.IsValueType);
-                _instructions.EmitDefaultValue(node.Type);
+                Type type = node.Type;
+                Debug.Assert(type.IsValueType);
+                if (type.IsNullableType())
+                {
+                    _instructions.EmitLoad(value: null);
+                }
+                else
+                {
+                    _instructions.EmitDefaultValue(type);
+                }
             }
         }
 
