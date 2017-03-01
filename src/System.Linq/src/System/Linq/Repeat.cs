@@ -101,11 +101,7 @@ namespace System.Linq
 
             public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
             {
-                HashSet<TResult> hashSet = new HashSet<TResult>(1, comparer);
-
-                hashSet.Add(_current);
-
-                return hashSet;
+                return new HashSet<TResult>(1, comparer) { _current };
             }
 
             public int GetCount(bool onlyIfCheap)

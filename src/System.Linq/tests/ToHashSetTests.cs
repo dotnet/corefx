@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using Xunit;
+using static System.Linq.Enumerable;
 
 namespace System.Linq.Tests
 {
@@ -19,7 +20,7 @@ namespace System.Linq.Tests
         [Fact]
         public void NoExplicitComparer()
         {
-            var hs = Enumerable.Range(0, 50).ToHashSet();
+            var hs = Range(0, 50).ToHashSet();
             Assert.IsType<HashSet<int>>(hs);
             Assert.Equal(50, hs.Count);
             Assert.Equal(EqualityComparer<int>.Default, hs.Comparer);
@@ -29,7 +30,7 @@ namespace System.Linq.Tests
         public void ExplicitComparer()
         {
             var cmp = new CustomComparer<int>();
-            var hs = Enumerable.Range(0, 50).ToHashSet(cmp);
+            var hs = Range(0, 50).ToHashSet(cmp);
             Assert.IsType<HashSet<int>>(hs);
             Assert.Equal(50, hs.Count);
             Assert.Same(cmp, hs.Comparer);
@@ -38,7 +39,7 @@ namespace System.Linq.Tests
         [Fact]
         public void RunOnce()
         {
-            Enumerable.Range(0, 50).RunOnce().ToHashSet(new CustomComparer<int>());
+            Range(0, 50).RunOnce().ToHashSet(new CustomComparer<int>());
         }
 
         [Fact]
@@ -46,7 +47,7 @@ namespace System.Linq.Tests
         {
             // Unlike the keys of a dictionary, HashSet tolerates null items.
             Assert.False(new HashSet<string>().Contains(null));
-            var hs = new [] {"abc", null, "def"}.ToHashSet();
+            var hs = new[] { "abc", null, "def" }.ToHashSet();
             Assert.True(hs.Contains(null));
         }
 
@@ -58,11 +59,11 @@ namespace System.Linq.Tests
             // By the same token, since the normal behaviour of HashSet<T>.Add()
             // is to signal duplicates without an exception ToHashSet should
             // tolerate duplicates.
-            var hs = Enumerable.Range(0, 50).Select(i => i / 5).ToHashSet();
+            var hs = Range(0, 50).Select(i => i / 5).ToHashSet();
 
             // The OrderBy isn't strictly necessary, but that depends upon an
             // implementation detail of HashSet, so explicitly force ordering.
-            Assert.Equal(Enumerable.Range(0, 10), hs.OrderBy(i => i));
+            Assert.Equal(Range(0, 10), hs.OrderBy(i => i));
         }
 
         [Fact]
@@ -71,362 +72,171 @@ namespace System.Linq.Tests
             Assert.Throws<ArgumentNullException>(() => ((IEnumerable<object>)null).ToHashSet());
         }
 
-        [Fact]
-        public void WithConcat()
+        [Theory]
+        [MemberData(nameof(GetData))]
+        public void WorksAsExpected(IEnumerable<int> source, Func<IEnumerable<int>, IEnumerable<int>> action, IEqualityComparer<int> comparer)
         {
-            var first = Enumerable.Range(0, 50);
-            var second = Enumerable.Range(20, 50);
+            var result = action(source);
 
-            HashSet<int> result = first.Concat(second).ToHashSet();
+            var expected = new HashSet<int>(result, comparer);
 
-            Assert.NotNull(result);
-            Assert.Equal(70, result.Count);
+            var actual = result.ToHashSet(comparer);
+
+            Assert.Equal(expected, actual); // Implies they have equal Counts too
+            Assert.Equal(expected.Comparer, actual.Comparer);
         }
 
-        [Fact]
-        public void WithDefaultIfEmpty()
+        [Theory]
+        [MemberData(nameof(GetGroupingData))]
+        public void WorksAsExpectedForGrouping(IEnumerable<int> source, Func<IEnumerable<int>, IEnumerable<IGrouping<int, int>>> action, IEqualityComparer<IGrouping<int, int>> comparer)
         {
-            IEnumerable<int> source = Enumerable.Range(0, 0);
+            var result = action(source);
 
-            HashSet<int> result = source.DefaultIfEmpty().ToHashSet();
+            var expected = new HashSet<IGrouping<int, int>>(result, comparer);
 
-            Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
-            Assert.True(result.Contains(0));
+            var actual = result.ToHashSet(comparer);
+
+            AssertHashSetGroupingEqual(expected, actual);
+            Assert.Equal(expected.Comparer, actual.Comparer);
         }
 
-        [Fact]
-        public void WithAppend()
+        private static IEnumerable<object[]> GetData()
         {
-            var source = Enumerable.Range(0, 50);
+            var testData = new WorkAsExpectedData<int>();
 
-            HashSet<int> result = source.Append(100).ToHashSet();
+            testData.AddDefaultComparers();
 
-            Assert.NotNull(result);
-            Assert.Equal(51, result.Count);
-            Assert.True(result.Contains(100));
+            testData.AddActions(
+                source => source.Concat(Range(40, 50)), // ConcatIterator
+                source => source.DefaultIfEmpty(), // DefaultIfEmptyIterator
+                source => source.Append(100), // AppendPrependIterator, AppendPrepend1Iterator, AppendPrependN
+                source => source.Prepend(100), // AppendPrependIterator
+                source => source.Distinct(), // DistinctIterator
+                source => source.OrderBy(x => x), // OrderedEnumerable
+                source => source.Take(1), // EmptyPartition, EnumerablePartition, ListPartition, OrderedPartition
+                source => source.Reverse(), // ReverseIterator
+                source => source.SelectMany(x => new[] { x, 0 }), // SelectManySingleSelectorIterator
+                source => source.Union(Range(20, 50)), // UnionIterator
+                source => source.Select(x => x), // SelectArrayIterator, SelectEnumerableIterator, SelectListIterator, SelectIListIterator
+                source => source.Skip(1).Select(x => x), // SelectListPartitionIterator, SelectIPartitionIterator
+                source => source.Where(x => x < 40), // WhereArrayIterator, WhereEnumerableIterator, WhereListIterator
+                source => source.Where(x => x < 40).Select(x => x) // WhereSelectArrayIterator, WhereSelectEnumerableIterator, WhereSelectListIterator
+            );
+
+            testData.AddSources(GetSources());
+
+            return testData.GetData();
         }
 
-        [Fact]
-        public void WithPrepend()
+        private static IEnumerable<object[]> GetGroupingData()
         {
-            var source = Enumerable.Range(0, 50);
+            var testData = new WorkAsExpectedData<IGrouping<int, int>>();
 
-            HashSet<int> result = source.Prepend(100).ToHashSet();
+            testData.AddDefaultComparers();
 
-            Assert.NotNull(result);
-            Assert.Equal(51, result.Count);
-            Assert.True(result.Contains(100));
+            testData.AddActions(
+                source => source.GroupBy(x => x), // GroupedEnumerable<TSource, TKey>, GroupedEnumerable<TSource, TKey, TElement>
+                source => source.GroupBy(x => x, x => x), // GroupedResultEnumerable<TSource, TKey, TResult>, GroupedResultEnumerable<TSource, TKey, TElement, TResult>
+                source => source.ToLookup(i => i) // Lookup
+            );
+
+            testData.AddSources(GetSources());
+
+            return testData.GetData();
         }
 
-        [Fact]
-        public void WithDistinct()
+        /// <summary>
+        /// Assert.Equals -> HashSet.SetEquals not work for IGrouping
+        /// </summary>
+        /// <param name="expected">Expected set</param>
+        /// <param name="actual">Actual set</param>
+        private void AssertHashSetGroupingEqual(HashSet<IGrouping<int, int>> expected, HashSet<IGrouping<int, int>> actual)
         {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
+            // The Count should be equal
+            Assert.Equal(expected.Count, actual.Count);
 
-            HashSet<int> result = source.Distinct().ToHashSet();
+            // Get the group by key and check as IEnumerable
+            foreach (var expectedGroup in expected)
+            {
+                var group = actual.FirstOrDefault(x => x.Key == expectedGroup.Key);
 
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
+                Assert.NotNull(group);
+
+                Assert.Equal(expectedGroup.AsEnumerable(), group.AsEnumerable());
+            }
+        }
+        
+        private static IEnumerable<IEnumerable<int>> GetSources()
+        {
+            // Create empty, distinct and repeated sources
+            var sources = new[]
+            {
+                Array.Empty<int>(),
+                Range(0, 50),
+                Range(0, 50).Concat(Range(20, 50))
+            };
+
+            // Some methods have specific handling for Arrays, Lists and IEnumerables
+            foreach (var source in sources)
+            {
+                yield return source.ToArray();
+                yield return new List<int>(source);
+                yield return new SortedSet<int>(source);
+            }
+
+            // Return RepeatIterator and RangeIterator
+            yield return Repeat(0, 50);
+            yield return Range(0, 50);
         }
 
-        [Fact]
-        public void WithGroupBy()
+        /// <summary>
+        /// Responsible for combining Actions, Comparers and Sources
+        /// </summary>
+        /// <typeparam name="T">Result Type</typeparam>
+        private class WorkAsExpectedData<T>
         {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
-
-            HashSet<IGrouping<int, int>> result = source.GroupBy(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithGroupByAndSelector()
-        {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
-
-            HashSet<IGrouping<int, string>> result = source.GroupBy(x => x, x => x.ToString()).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithGroupByAndElementSelector()
-        {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
-
-            HashSet<IGrouping<int, string>> result = source.GroupBy(x => x, x => x.ToString()).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithGroupByAndElementAndResultSelector()
-        {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
-
-            HashSet<IEnumerable<int>> result = source.GroupBy(x => x, x => x, (x, group) => group).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithToLookup()
-        {
-            var source = new[] { 1, 2, 3, 1, 2, 3 };
-
-            HashSet<IGrouping<int, int>> result = source.ToLookup(i => i).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithTake_EmptyPartition()
-        {
-            var source = new int[0];
-
-            // Empty Partition
-            HashSet<int> result = source.Take(1).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(0, result.Count);
-        }
-
-        [Fact]
-        public void WithTake_ListPartition()
-        {
-            var source = new[] { 1, 2, 3 }.ToList();
-
-            // List Partition
-            HashSet<int> result = source.Take(1).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
-        }
-
-        [Fact]
-        public void WithTake_EnumerablePartition()
-        {
-            var source = new[] { 1, 2, 3 };
-
-            // Enumerable Partition
-            HashSet<int> result = source.Take(1).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
-        }
-
-        [Fact]
-        public void WithSkipThenTake_Partition()
-        {
-            var source = new[] { 1, 2, 3 };
-
-            // Ordered Partition
-            HashSet<int> result = source.Skip(1).Take(1).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
-        }
-
-        [Fact]
-        public void WithRange()
-        {
-            HashSet<int> result = Enumerable.Range(0, 50).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithRange_CustomComparer()
-        {
-            CustomComparer<int> customComparer = new CustomComparer<int>();
-
-            HashSet<int> result = Enumerable.Range(0, 50).ToHashSet(customComparer);
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithRepeat()
-        {
-            HashSet<int> result = Enumerable.Repeat(1, 50).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(1, result.Count);
-        }
-
-        [Fact]
-        public void WithReverse()
-        {
-            var source = Enumerable.Range(0, 50);
-
-            HashSet<int> result = source.Reverse().ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithSelectMany()
-        {
-            var source = Enumerable.Range(0, 50);
-
-            HashSet<int> result = source.SelectMany(x => new[] { x, 0 }).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithUnion()
-        {
-            var first = Enumerable.Range(0, 50);
-            var second = Enumerable.Range(20, 50);
-
-            HashSet<int> result = first.Union(second).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(70, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_Array()
-        {
-            int[] source = { 1, 2, 3 };
-
-            HashSet<int> result = source.Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_List()
-        {
-            List<int> source = new List<int> { 1, 2, 3 };
-
-            HashSet<int> result = source.Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_Iterator()
-        {
-            // RangeIterator
-            var source = Enumerable.Range(0, 50);
-
-            HashSet<int> result = source.Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_ListPartition()
-        {
-            List<int> source = new List<int> { 1, 2, 3 };
-
-            HashSet<int> result = source.Skip(1).Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_Partition()
-        {
-            var source = Enumerable.Range(0, 50);
-
-            HashSet<int> result = source.Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(50, result.Count);
-        }
-
-        [Fact]
-        public void WithSelect_IEnumerable()
-        {
-            IEnumerable<int> source = new HashSet<int> { 1, 2, 3 };
-
-            HashSet<int> result = source.Select(x => x).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(3, result.Count);
-        }
-
-        [Fact]
-        public void WithWhere_Array()
-        {
-            int[] source = { 1, 2, 3 };
-
-            HashSet<int> result = source.Where(x => x < 3).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithWhere_Enumerable()
-        {
-            HashSet<int> source = new HashSet<int> { 1, 2, 3, 2 };
-
-            HashSet<int> result = source.Where(x => x < 3).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithWhere_List()
-        {
-            List<int> source = new List<int> { 1, 2, 3 };
-
-            HashSet<int> result = source.Where(x => x < 3).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithWhereThenSelect_Array()
-        {
-            int[] source = { 1, 2, 3 };
-
-            HashSet<string> result = source.Where(x => x < 3).Select(x => x.ToString()).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithWhereThenSelect_Enumerable()
-        {
-            HashSet<int> source = new HashSet<int> { 1, 2, 3, 2 };
-
-            HashSet<string> result = source.Where(x => x < 3).Select(x => x.ToString()).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-        }
-
-        [Fact]
-        public void WithWhereThenSelect_List()
-        {
-            List<int> source = new List<int> { 1, 2, 3 };
-
-            HashSet<string> result = source.Where(x => x < 3).Select(x => x.ToString()).ToHashSet();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            private readonly List<Func<IEnumerable<int>, IEnumerable<T>>> actions;
+            private readonly List<IEqualityComparer<T>> comparers;
+            private readonly List<IEnumerable<int>> sources;
+
+            public WorkAsExpectedData()
+            {
+                actions = new List<Func<IEnumerable<int>, IEnumerable<T>>>();
+                comparers = new List<IEqualityComparer<T>>();
+                sources = new List<IEnumerable<int>>();
+            }
+
+            public void AddActions(params Func<IEnumerable<int>, IEnumerable<T>>[] actions)
+            {
+                this.actions.AddRange(actions);
+            }
+
+            public void AddDefaultComparers()
+            {
+                comparers.Add(null);
+                comparers.Add(EqualityComparer<T>.Default);
+                comparers.Add(new CustomComparer<T>());
+            }
+
+            public void AddSources(IEnumerable<IEnumerable<int>> sources)
+            {
+                this.sources.AddRange(sources);
+            }
+
+            public IEnumerable<object[]> GetData()
+            {
+                // Combine all and return one test of each combination
+                // Currently: 17 actions * 11 Sources * 3 Comparers = 561 tests
+                var tests = from action in actions
+                            from comparer in comparers
+                            from source in sources
+                            select new { action, comparer, source };
+
+                foreach (var test in tests)
+                {
+                    yield return new object[] { test.source, test.action, test.comparer };
+                }
+            }
         }
     }
 }

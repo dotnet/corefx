@@ -247,11 +247,7 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
-
-                hashSet.Add(_item);
-
-                return hashSet;
+                return new HashSet<TSource>(_source, comparer) { _item };
             }
 
             public override int GetCount(bool onlyIfCheap)

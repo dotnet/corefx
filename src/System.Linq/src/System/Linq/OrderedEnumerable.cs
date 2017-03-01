@@ -73,40 +73,6 @@ namespace System.Linq
 
         public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>(_source, comparer);
 
-        public HashSet<TElement> ToHashSet(int minIdx, int maxIdx, IEqualityComparer<TElement> comparer)
-        {
-            Buffer<TElement> buffer = new Buffer<TElement>(_source);
-
-            int count = buffer._count;
-
-            if (count <= minIdx)
-            {
-                return new HashSet<TElement>(comparer);
-            }
-
-            if (count <= maxIdx)
-            {
-                maxIdx = count - 1;
-            }
-
-            if (minIdx == maxIdx)
-            {
-                return new HashSet<TElement>(1, comparer) { GetEnumerableSorter().ElementAt(buffer._items, count, minIdx) };
-            }
-
-            int[] map = SortedMap(buffer, minIdx, maxIdx);
-
-            HashSet<TElement> hashSet = new HashSet<TElement>(comparer);
-
-            while (minIdx <= maxIdx)
-            {
-                hashSet.Add(buffer._items[map[minIdx]]);
-                ++minIdx;
-            }
-
-            return hashSet;
-        }
-
         public int GetCount(bool onlyIfCheap)
         {
             IIListProvider<TElement> listProv = _source as IIListProvider<TElement>;
@@ -205,6 +171,40 @@ namespace System.Linq
             }
 
             return list;
+        }
+
+        internal HashSet<TElement> ToHashSet(int minIdx, int maxIdx, IEqualityComparer<TElement> comparer)
+        {
+            Buffer<TElement> buffer = new Buffer<TElement>(_source);
+
+            int count = buffer._count;
+
+            if (count <= minIdx)
+            {
+                return new HashSet<TElement>(comparer);
+            }
+
+            if (count <= maxIdx)
+            {
+                maxIdx = count - 1;
+            }
+
+            if (minIdx == maxIdx)
+            {
+                return new HashSet<TElement>(1, comparer) { GetEnumerableSorter().ElementAt(buffer._items, count, minIdx) };
+            }
+
+            int[] map = SortedMap(buffer, minIdx, maxIdx);
+
+            HashSet<TElement> hashSet = new HashSet<TElement>(comparer);
+
+            while (minIdx <= maxIdx)
+            {
+                hashSet.Add(buffer._items[map[minIdx]]);
+                ++minIdx;
+            }
+
+            return hashSet;
         }
 
         internal int GetCount(int minIdx, int maxIdx, bool onlyIfCheap)
