@@ -399,6 +399,9 @@
     <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.Hmac.cs">
       <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.Hmac.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.Keychain.cs">
+      <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.Keychain.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.PAL_HashAlgorithm.cs">
       <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.PAL_HashAlgorithm.cs</Link>
     </Compile>
@@ -407,6 +410,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.RSA.cs">
       <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.RSA.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecErr.cs">
+      <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecErr.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecErrMessage.cs">
+      <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecErrMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecKeyRef.cs">
       <Link>Common\Interop\OSX\System.Security.Cryptography.Native.Apple\Interop.SecKeyRef.cs</Link>
@@ -469,6 +478,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Runtime.Numerics" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
