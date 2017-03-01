@@ -261,13 +261,13 @@ namespace System.Reflection.Metadata
         public int ReadInt32()
         {
             byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
-            return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 32));
+            return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
         }
 
         public uint ReadUInt32()
         {
             byte* ptr = GetCurrentPointerAndAdvance(sizeof(uint));
-            return (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 32));
+            return (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
         }
 
         public long ReadInt64()
@@ -307,9 +307,9 @@ namespace System.Reflection.Metadata
             else
             {
                 return new Guid(
-                    (uint)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
-                    (ushort)(ptr[4] | (ptr[5] << 8)),
-                    (ushort)(ptr[6] | (ptr[7] << 8)),
+                    (int)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
+                    (short)(ptr[4] | (ptr[5] << 8)),
+                    (short)(ptr[6] | (ptr[7] << 8)),
                     ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
             }
         }
