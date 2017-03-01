@@ -11,33 +11,23 @@ internal static partial class Interop
     internal static partial class Winsock
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASend(
-            [In] SafeCloseSocket socketHandle,
-            [In] ref WSABuffer buffer,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
-
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASend(
-            [In] SafeCloseSocket socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static extern unsafe int WSASend(
+            SafeCloseSocket socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            int* bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            void* completionRoutine);
 
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSASend")]
-        internal static extern SocketError WSASend_Blocking(
-            [In] IntPtr socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static extern unsafe int WSASend_Blocking(
+            IntPtr socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            int* bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            void* completionRoutine);
     }
 }

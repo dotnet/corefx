@@ -262,65 +262,64 @@ namespace System.Net.Sockets
         }
     }
 
-    internal delegate bool AcceptExDelegate(
+    internal unsafe delegate bool AcceptExDelegate(
                 SafeCloseSocket listenSocketHandle,
                 SafeCloseSocket acceptSocketHandle,
-                IntPtr buffer,
+                byte* buffer,
                 int len,
                 int localAddressLength,
                 int remoteAddressLength,
-                out int bytesReceived,
-                SafeHandle overlapped);
+                int* bytesReceived,
+                SafeNativeOverlapped overlapped);
 
-    internal delegate void GetAcceptExSockaddrsDelegate(
-                IntPtr buffer,
+    internal unsafe delegate void GetAcceptExSockaddrsDelegate(
+                byte* buffer,
                 int receiveDataLength,
                 int localAddressLength,
                 int remoteAddressLength,
-                out IntPtr localSocketAddress,
-                out int localSocketAddressLength,
-                out IntPtr remoteSocketAddress,
-                out int remoteSocketAddressLength);
+                byte** localSocketAddress,
+                int* localSocketAddressLength,
+                byte** remoteSocketAddress,
+                int* remoteSocketAddressLength);
 
-
-    internal delegate bool ConnectExDelegate(
+    internal unsafe delegate bool ConnectExDelegate(
                 SafeCloseSocket socketHandle,
-                IntPtr socketAddress,
+                byte* socketAddress,
                 int socketAddressSize,
-                IntPtr buffer,
+                byte* buffer,
                 int dataLength,
-                out int bytesSent,
-                SafeHandle overlapped);
+                int* bytesSent,
+                SafeNativeOverlapped overlapped);
 
     internal delegate bool DisconnectExDelegate(
-                SafeCloseSocket socketHandle, 
-                SafeHandle overlapped, 
-                int flags, 
-                int reserved);
-
-    internal delegate bool DisconnectExDelegateBlocking(
-                SafeCloseSocket socketHandle, 
-                IntPtr overlapped, 
-                int flags, 
-                int reserved);
-
-    internal delegate SocketError WSARecvMsgDelegate(
                 SafeCloseSocket socketHandle,
-                IntPtr msg,
-                out int bytesTransferred,
-                SafeHandle overlapped,
-                IntPtr completionRoutine);
+                SafeNativeOverlapped overlapped, 
+                int flags, 
+                int reserved);
 
-    internal delegate SocketError WSARecvMsgDelegateBlocking(
+    internal unsafe delegate bool DisconnectExDelegateBlocking(
+                SafeCloseSocket socketHandle, 
+                void* overlapped, 
+                int flags, 
+                int reserved);
+
+    internal unsafe delegate int WSARecvMsgDelegate(
+                SafeCloseSocket socketHandle,
+                Interop.Winsock.WSAMsg* msg,
+                int* bytesTransferred,
+                SafeNativeOverlapped overlapped,
+                void* completionRoutine);
+
+    internal unsafe delegate int WSARecvMsgDelegateBlocking(
                 IntPtr socketHandle,
-                IntPtr msg,
-                out int bytesTransferred,
-                IntPtr overlapped,
-                IntPtr completionRoutine);
+                Interop.Winsock.WSAMsg* msg,
+                int* bytesTransferred,
+                void* overlapped,
+                void* completionRoutine);
 
-    internal delegate bool TransmitPacketsDelegate(
+    internal unsafe delegate bool TransmitPacketsDelegate(
                 SafeCloseSocket socketHandle,
-                IntPtr packetArray,
+                Interop.Winsock.TransmitPacketsElement* packetArray,
                 int elementCount,
                 int sendSize,
                 SafeNativeOverlapped overlapped,

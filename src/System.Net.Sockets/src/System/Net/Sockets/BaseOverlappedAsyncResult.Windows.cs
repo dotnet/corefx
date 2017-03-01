@@ -107,17 +107,16 @@ namespace System.Net.Sockets
                             bool success = Interop.Winsock.WSAGetOverlappedResult(
                                 socket.SafeHandle,
                                 asyncResult._nativeOverlapped,
-                                out numBytes,
+                                &numBytes,
                                 false,
-                                out ignore);
-                            if (!success)
-                            {
-                                socketError = SocketPal.GetLastSocketError();
-                            }
+                                &ignore);
+
                             if (success)
                             {
-                                NetEventSource.Fail(asyncResult, $"Unexpectedly succeeded. errorCode:{errorCode} numBytes:{numBytes}");
+                                NetEventSource.Fail(asyncResult, $"WSAGetOverlappedResult unexpectedly succeeded. errorCode:{errorCode} numBytes:{numBytes}");
                             }
+
+                            socketError = SocketPal.GetLastSocketError();
                         }
                         catch (ObjectDisposedException)
                         {
@@ -143,9 +142,7 @@ namespace System.Net.Sockets
             InvokeCallback(PostCompletion(numBytes));
         }
 
-        // The following property returns the Win32 unsafe pointer to
-        // whichever Overlapped structure we're using for IO.
-        internal SafeHandle OverlappedHandle
+        internal SafeNativeOverlapped OverlappedHandle
         {
             get
             {

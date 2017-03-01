@@ -19,7 +19,7 @@ namespace System.Net.Sockets
 
         // This method will be called by us when the IO completes synchronously and
         // by the ThreadPool when the IO completes asynchronously. (only called on WinNT)
-        internal override object PostCompletion(int numBytes)
+        internal unsafe override object PostCompletion(int numBytes)
         {
             SocketError errorCode = (SocketError)ErrorCode;
 
@@ -32,24 +32,26 @@ namespace System.Net.Sockets
                 // get the endpoint
                 remoteSocketAddress = IPEndPointExtensions.Serialize(_listenSocket._rightEndPoint);
 
-                IntPtr localAddr;
+                byte* localAddr;
                 int localAddrLength;
-                IntPtr remoteAddr;
+                byte* remoteAddr;
+                int remoteAddrLength;
 
                 // set the socket context
                 try
                 {
                     _listenSocket.GetAcceptExSockaddrs(
-                        Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0),
+                        (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0),
                         _buffer.Length - (_addressBufferLength * 2),
                         _addressBufferLength,
                         _addressBufferLength,
-                        out localAddr,
-                        out localAddrLength,
-                        out remoteAddr,
-                        out remoteSocketAddress.InternalSize);
+                        &localAddr,
+                        &localAddrLength,
+                        &remoteAddr,
+                        &remoteAddrLength);
 
-                    Marshal.Copy(remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
+                    remoteSocketAddress.InternalSize = remoteAddrLength;
+                    Marshal.Copy((IntPtr)remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
 
                     IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
 

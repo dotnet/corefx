@@ -12,9 +12,9 @@ internal static partial class Interop
     {
         // Blocking call - requires IntPtr instead of SafeCloseSocket.
         [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
-        internal static extern SafeCloseSocket.InnerSafeCloseSocket accept(
-            [In] IntPtr socketHandle,
-            [Out] byte[] socketAddress,
-            [In, Out] ref int socketAddressSize);
+        internal static unsafe extern SafeCloseSocket.InnerSafeCloseSocket accept(
+            IntPtr socketHandle,
+            byte* socketAddress,
+            int* socketAddressSize);
     }
 }

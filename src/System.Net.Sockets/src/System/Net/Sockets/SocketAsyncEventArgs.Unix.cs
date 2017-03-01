@@ -20,7 +20,7 @@ namespace System.Net.Sockets
             // No-op for *nix.
         }
 
-        private void FreeInternals(bool calledFromFinalizer)
+        private void FreeInternals()
         {
             // No-op for *nix.
         }
@@ -139,9 +139,10 @@ namespace System.Net.Sockets
             _socketAddressSize = 0;
         }
 
-        internal unsafe SocketError DoOperationReceive(SafeCloseSocket handle, out SocketFlags flags)
+        internal unsafe SocketError DoOperationReceive(SafeCloseSocket handle)
         {
             int bytesReceived;
+            SocketFlags flags;
             SocketError errorCode;
             if (_buffer != null)
             {
@@ -167,8 +168,9 @@ namespace System.Net.Sockets
             _socketAddressSize = 0;
         }
 
-        internal unsafe SocketError DoOperationReceiveFrom(SafeCloseSocket handle, out SocketFlags flags)
+        internal unsafe SocketError DoOperationReceiveFrom(SafeCloseSocket handle)
         {
+            SocketFlags flags;
             SocketError errorCode;
             int bytesReceived = 0;
             int socketAddressLen = _socketAddress.Size;

@@ -107,73 +107,155 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError Accept(SafeCloseSocket handle, byte[] buffer, ref int nameLen, out SafeCloseSocket socket)
+        public static unsafe SocketError Accept(SafeCloseSocket handle, byte[] buffer, ref int nameLen, out SafeCloseSocket socket)
         {
-            socket = SafeCloseSocket.Accept(handle, buffer, ref nameLen);
-            return socket.IsInvalid ? GetLastSocketError() : SocketError.Success;
-        }
-
-        public static SocketError Connect(SafeCloseSocket handle, byte[] peerAddress, int peerAddressLen)
-        {
-            SocketError errorCode = Interop.Winsock.WSAConnect(
-                handle.DangerousGetHandle(),
-                peerAddress,
-                peerAddressLen,
-                IntPtr.Zero,
-                IntPtr.Zero,
-                IntPtr.Zero,
-                IntPtr.Zero);
-            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
-        }
-
-        public static SocketError Send(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out int bytesTransferred)
-        {
-            int count = buffers.Count;
-            WSABuffer[] WSABuffers = new WSABuffer[count];
-            GCHandle[] objectsToPin = null;
-
-            try
+            int localNameLen = nameLen;
+            fixed (byte* bufferPtr = buffer)
             {
-                objectsToPin = new GCHandle[count];
-                for (int i = 0; i < count; ++i)
-                {
-                    ArraySegment<byte> buffer = buffers[i];
-                    RangeValidationHelpers.ValidateSegment(buffer);
-                    objectsToPin[i] = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
-                    WSABuffers[i].Length = buffer.Count;
-                    WSABuffers[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer.Array, buffer.Offset);
-                }
-
-                // This may throw ObjectDisposedException.
-                SocketError errorCode = Interop.Winsock.WSASend_Blocking(
-                    handle.DangerousGetHandle(),
-                    WSABuffers,
-                    count,
-                    out bytesTransferred,
-                    socketFlags,
-                    SafeNativeOverlapped.Zero,
-                    IntPtr.Zero);
-
-                if ((SocketError)errorCode == SocketError.SocketError)
-                {
-                    errorCode = GetLastSocketError();
-                }
-
-                return errorCode;
+                socket = SafeCloseSocket.Accept(handle, bufferPtr, &localNameLen);
             }
-            finally
+
+            if (socket.IsInvalid)
             {
-                if (objectsToPin != null)
+                return GetLastSocketError();
+            }
+
+            nameLen = localNameLen;
+            return SocketError.Success;
+        }
+
+        public static unsafe SocketError Connect(SafeCloseSocket handle, byte[] peerAddress, int peerAddressLen)
+        {
+            int result;
+            fixed (byte* peerAddressPtr = peerAddress)
+            {
+                result = Interop.Winsock.WSAConnect(
+                    handle.DangerousGetHandle(),
+                    peerAddressPtr,
+                    peerAddressLen,
+                    null,
+                    null,
+                    null,
+                    null);
+            }
+
+            return result == 0 ? SocketError.Success : GetLastSocketError();
+        }
+
+        private static unsafe void ClearGCHandleArray(GCHandle* gcHandles, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                gcHandles[i] = default(GCHandle);
+            }
+        }
+
+        private static unsafe void PinBuffers(IList<ArraySegment<byte>> buffers, GCHandle *gcHandles, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                gcHandles[i] = GCHandle.Alloc(buffers[i].Array, GCHandleType.Pinned);
+            }
+        }
+
+        private static unsafe void UnpinBuffers(GCHandle *gcHandles, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (gcHandles[i].IsAllocated)
                 {
-                    for (int i = 0; i < objectsToPin.Length; ++i)
+                    gcHandles[i].Free();
+                }
+            }
+        }
+
+        private static unsafe byte* GetPinnedBufferPointer(byte[] buffer, int offset)
+        {
+            return (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
+        }
+
+        private static unsafe void PopulateWSABufferArray(WSABuffer* wsaBuffers, IList<ArraySegment<byte>> bufferList)
+        {
+            int bufferCount = bufferList.Count;
+            for (int i = 0; i < bufferCount; i++)
+            {
+                ArraySegment<byte> buffer = bufferList[i];
+                byte* bufferPtr = GetPinnedBufferPointer(buffer.Array, buffer.Offset);
+                wsaBuffers[i] = new WSABuffer(bufferPtr, buffer.Count);
+            }
+        }
+
+        public static unsafe SocketError Send(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out int bytesTransferred)
+        {
+            int bytesSent;
+            int result;
+
+            int count = buffers.Count;
+
+            if (count < WSABuffer.StackAllocLimit)
+            {
+                WSABuffer* wsaBuffers = stackalloc WSABuffer[count];
+                GCHandle* gcHandles = stackalloc GCHandle[count];
+                ClearGCHandleArray(gcHandles, count);
+
+                try
+                {
+                    PinBuffers(buffers, gcHandles, count);
+                    PopulateWSABufferArray(wsaBuffers, buffers);
+
+                    // This may throw ObjectDisposedException.
+                    result = Interop.Winsock.WSASend_Blocking(
+                        handle.DangerousGetHandle(),
+                        wsaBuffers,
+                        count,
+                        &bytesSent,
+                        socketFlags,
+                        SafeNativeOverlapped.Zero,
+                        null);
+                }
+                finally
+                {
+                    UnpinBuffers(gcHandles, count);
+                }
+            }
+            else
+            {
+                WSABuffer[] wsaBuffersHeap = new WSABuffer[count];
+                GCHandle[] gcHandlesHeap = new GCHandle[count];
+
+                fixed (WSABuffer* wsaBuffers = wsaBuffersHeap)
+                fixed (GCHandle* gcHandles = gcHandlesHeap)
+                {
+                    try
                     {
-                        if (objectsToPin[i].IsAllocated)
-                        {
-                            objectsToPin[i].Free();
-                        }
+                        PinBuffers(buffers, gcHandles, count);
+                        PopulateWSABufferArray(wsaBuffers, buffers);
+
+                        // This may throw ObjectDisposedException.
+                        result = Interop.Winsock.WSASend_Blocking(
+                            handle.DangerousGetHandle(),
+                            wsaBuffers,
+                            count,
+                            &bytesSent,
+                            socketFlags,
+                            SafeNativeOverlapped.Zero,
+                            null);
+                    }
+                    finally
+                    {
+                        UnpinBuffers(gcHandles, count);
                     }
                 }
             }
+
+            if (result != 0)
+            {
+                bytesTransferred = 0;
+                return GetLastSocketError();
+            }
+
+            bytesTransferred = bytesSent;
+            return SocketError.Success;
         }
 
         public static unsafe SocketError Send(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, out int bytesTransferred)
@@ -218,27 +300,30 @@ namespace System.Net.Sockets
         public static unsafe SocketError SendTo(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, byte[] peerAddress, int peerAddressSize, out int bytesTransferred)
         {
             int bytesSent;
-            if (buffer.Length == 0)
+            fixed (byte* peerAddressPtr = peerAddress)
             {
-                bytesSent = Interop.Winsock.sendto(
-                    handle.DangerousGetHandle(),
-                    null,
-                    0,
-                    socketFlags,
-                    peerAddress,
-                    peerAddressSize);
-            }
-            else
-            {
-                fixed (byte* pinnedBuffer = &buffer[0])
+                if (buffer.Length == 0)
                 {
                     bytesSent = Interop.Winsock.sendto(
                         handle.DangerousGetHandle(),
-                        pinnedBuffer + offset,
-                        size,
+                        null,
+                        0,
                         socketFlags,
-                        peerAddress,
+                        peerAddressPtr,
                         peerAddressSize);
+                }
+                else
+                {
+                    fixed (byte* pinnedBuffer = &buffer[0])
+                    {
+                        bytesSent = Interop.Winsock.sendto(
+                            handle.DangerousGetHandle(),
+                            pinnedBuffer + offset,
+                            size,
+                            socketFlags,
+                            peerAddressPtr,
+                            peerAddressSize);
+                    }
                 }
             }
 
@@ -252,54 +337,79 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static SocketError Receive(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, ref SocketFlags socketFlags, out int bytesTransferred)
+        public static unsafe SocketError Receive(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, ref SocketFlags socketFlags, out int bytesTransferred)
         {
+            int bytesReceived;
+            SocketFlags flags = socketFlags;
+            int result;
+
             int count = buffers.Count;
-            WSABuffer[] WSABuffers = new WSABuffer[count];
-            GCHandle[] objectsToPin = null;
 
-            try
+            if (count < WSABuffer.StackAllocLimit)
             {
-                objectsToPin = new GCHandle[count];
-                for (int i = 0; i < count; ++i)
+                WSABuffer* wsaBuffers = stackalloc WSABuffer[count];
+                GCHandle* gcHandles = stackalloc GCHandle[count];
+                ClearGCHandleArray(gcHandles, count);
+
+                try
                 {
-                    ArraySegment<byte> buffer = buffers[i];
-                    RangeValidationHelpers.ValidateSegment(buffer);
-                    objectsToPin[i] = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
-                    WSABuffers[i].Length = buffer.Count;
-                    WSABuffers[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer.Array, buffer.Offset);
+                    PinBuffers(buffers, gcHandles, count);
+                    PopulateWSABufferArray(wsaBuffers, buffers);
+
+                    // This can throw ObjectDisposedException.
+                    result = Interop.Winsock.WSARecv_Blocking(
+                        handle.DangerousGetHandle(),
+                        wsaBuffers,
+                        count,
+                        &bytesReceived,
+                        &flags,
+                        SafeNativeOverlapped.Zero,
+                        null);
                 }
-
-                // This can throw ObjectDisposedException.
-                SocketError errorCode = Interop.Winsock.WSARecv_Blocking(
-                    handle.DangerousGetHandle(),
-                    WSABuffers,
-                    count,
-                    out bytesTransferred,
-                    ref socketFlags,
-                    SafeNativeOverlapped.Zero,
-                    IntPtr.Zero);
-
-                if ((SocketError)errorCode == SocketError.SocketError)
+                finally
                 {
-                    errorCode = GetLastSocketError();
+                    UnpinBuffers(gcHandles, count);
                 }
-
-                return errorCode;
             }
-            finally
+            else
             {
-                if (objectsToPin != null)
+                WSABuffer[] wsaBuffersHeap = new WSABuffer[count];
+                GCHandle[] gcHandlesHeap = new GCHandle[count];
+
+                fixed (WSABuffer* wsaBuffers = wsaBuffersHeap)
+                fixed (GCHandle* gcHandles = gcHandlesHeap)
                 {
-                    for (int i = 0; i < objectsToPin.Length; ++i)
+                    try
                     {
-                        if (objectsToPin[i].IsAllocated)
-                        {
-                            objectsToPin[i].Free();
-                        }
+                        PinBuffers(buffers, gcHandles, count);
+                        PopulateWSABufferArray(wsaBuffers, buffers);
+
+                        // This can throw ObjectDisposedException.
+                        result = Interop.Winsock.WSARecv_Blocking(
+                            handle.DangerousGetHandle(),
+                            wsaBuffers,
+                            count,
+                            &bytesReceived,
+                            &flags,
+                            SafeNativeOverlapped.Zero,
+                            null);
+                    }
+                    finally
+                    {
+                        UnpinBuffers(gcHandles, count);
                     }
                 }
             }
+
+            if (result != 0)
+            {
+                bytesTransferred = 0;
+                return GetLastSocketError();
+            }
+
+            bytesTransferred = bytesReceived;
+            socketFlags = flags;
+            return SocketError.Success;
         }
 
         public static unsafe SocketError Receive(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, out int bytesTransferred)
@@ -346,7 +456,7 @@ namespace System.Net.Sockets
             return new IPPacketInformation(address, (int)controlBuffer->index);
         }
 
-        public static unsafe SocketError ReceiveMessageFrom(Socket socket, SafeCloseSocket handle, byte[] buffer, int offset, int size, ref SocketFlags socketFlags, Internals.SocketAddress socketAddress, out Internals.SocketAddress receiveAddress, out IPPacketInformation ipPacketInformation, out int bytesTransferred)
+        public static unsafe SocketError ReceiveMessageFrom(Socket socket, SafeCloseSocket handle, byte[] buffer, int offset, int count, ref SocketFlags socketFlags, Internals.SocketAddress socketAddress, out Internals.SocketAddress receiveAddress, out IPPacketInformation ipPacketInformation, out int bytesTransferred)
         {
             bool ipv4, ipv6;
             Socket.GetIPProtocolInformation(socket.AddressFamily, socketAddress, out ipv4, out ipv6);
@@ -355,32 +465,33 @@ namespace System.Net.Sockets
             receiveAddress = socketAddress;
             ipPacketInformation = default(IPPacketInformation);
 
-            fixed (byte* ptrBuffer = buffer)
+            int bytesReceived;
+            fixed (byte* ptrBuffer = &buffer[offset])
             fixed (byte* ptrSocketAddress = socketAddress.Buffer)
             {
-                Interop.Winsock.WSAMsg wsaMsg;
-                wsaMsg.socketAddress = (IntPtr)ptrSocketAddress;
-                wsaMsg.addressLength = (uint)socketAddress.Size;
-                wsaMsg.flags = socketFlags;
+                WSABuffer wsaBuffer = new WSABuffer(ptrBuffer, count);
 
-                WSABuffer wsaBuffer;
-                wsaBuffer.Length = size;
-                wsaBuffer.Pointer = (IntPtr)(ptrBuffer + offset);
-                wsaMsg.buffers = (IntPtr)(&wsaBuffer);
-                wsaMsg.count = 1;
+                Interop.Winsock.WSAMsg wsaMsg = new Interop.Winsock.WSAMsg(
+                    ptrSocketAddress,
+                    socketAddress.Size, 
+                    &wsaBuffer, 
+                    1, 
+                    default(WSABuffer),
+                    socketFlags);
 
                 if (ipv4)
                 {
                     Interop.Winsock.ControlData controlBuffer;
-                    wsaMsg.controlBuffer.Pointer = (IntPtr)(&controlBuffer);
-                    wsaMsg.controlBuffer.Length = sizeof(Interop.Winsock.ControlData);
+                    wsaMsg.controlBuffer = new WSABuffer((byte*) &controlBuffer, sizeof(Interop.Winsock.ControlData));
 
-                    if (socket.WSARecvMsgBlocking(
+                    int result = socket.WSARecvMsgBlocking(
                         handle.DangerousGetHandle(),
-                        (IntPtr)(&wsaMsg),
-                        out bytesTransferred,
-                        IntPtr.Zero,
-                        IntPtr.Zero) == SocketError.SocketError)
+                        &wsaMsg,
+                        &bytesReceived,
+                        null,
+                        null);
+                    
+                    if (result != 0)
                     {
                         return GetLastSocketError();
                     }
@@ -390,15 +501,16 @@ namespace System.Net.Sockets
                 else if (ipv6)
                 {
                     Interop.Winsock.ControlDataIPv6 controlBuffer;
-                    wsaMsg.controlBuffer.Pointer = (IntPtr)(&controlBuffer);
-                    wsaMsg.controlBuffer.Length = sizeof(Interop.Winsock.ControlDataIPv6);
+                    wsaMsg.controlBuffer = new WSABuffer((byte*)&controlBuffer, sizeof(Interop.Winsock.ControlDataIPv6));
 
-                    if (socket.WSARecvMsgBlocking(
+                    int result = socket.WSARecvMsgBlocking(
                         handle.DangerousGetHandle(),
-                        (IntPtr)(&wsaMsg),
-                        out bytesTransferred,
-                        IntPtr.Zero,
-                        IntPtr.Zero) == SocketError.SocketError)
+                        &wsaMsg,
+                        &bytesReceived,
+                        null,
+                        null);
+                        
+                    if (result != 0)
                     {
                         return GetLastSocketError();
                     }
@@ -407,21 +519,21 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    wsaMsg.controlBuffer.Pointer = IntPtr.Zero;
-                    wsaMsg.controlBuffer.Length = 0;
-
-                    if (socket.WSARecvMsgBlocking(
+                    int result = socket.WSARecvMsgBlocking(
                         handle.DangerousGetHandle(),
-                        (IntPtr)(&wsaMsg),
-                        out bytesTransferred,
-                        IntPtr.Zero,
-                        IntPtr.Zero) == SocketError.SocketError)
+                        &wsaMsg,
+                        &bytesReceived,
+                        null,
+                        null);
+                        
+                    if (result != 0)
                     {
                         return GetLastSocketError();
                     }
                 }
 
                 socketFlags = wsaMsg.flags;
+                bytesTransferred = bytesReceived;
             }
 
             return SocketError.Success;
@@ -430,15 +542,19 @@ namespace System.Net.Sockets
         public static unsafe SocketError ReceiveFrom(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, byte[] socketAddress, ref int addressLength, out int bytesTransferred)
         {
             int bytesReceived;
-            if (buffer.Length == 0)
+            int localAddressLength = addressLength;
+            fixed (byte* socketAddressPtr = socketAddress)
             {
-                bytesReceived = Interop.Winsock.recvfrom(handle.DangerousGetHandle(), null, 0, socketFlags, socketAddress, ref addressLength);
-            }
-            else
-            {
-                fixed (byte* pinnedBuffer = &buffer[0])
+                if (buffer.Length == 0)
                 {
-                    bytesReceived = Interop.Winsock.recvfrom(handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddress, ref addressLength);
+                    bytesReceived = Interop.Winsock.recvfrom(handle.DangerousGetHandle(), null, 0, socketFlags, socketAddressPtr, &localAddressLength);
+                }
+                else
+                {
+                    fixed (byte* pinnedBuffer = &buffer[0])
+                    {
+                        bytesReceived = Interop.Winsock.recvfrom(handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddressPtr, &localAddressLength);
+                    }
                 }
             }
 
@@ -449,6 +565,7 @@ namespace System.Net.Sockets
             }
 
             bytesTransferred = bytesReceived;
+            addressLength = localAddressLength;
             return SocketError.Success;
         }
 
@@ -801,15 +918,19 @@ namespace System.Net.Sockets
             asyncResult.SetUnmanagedStructures(socketAddress);
             try
             {
-                int ignoreBytesSent;
-                bool success = socket.ConnectEx(
-                    handle,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(socketAddress, 0),
-                    socketAddressLen,
-                    IntPtr.Zero,
-                    0,
-                    out ignoreBytesSent,
-                    asyncResult.OverlappedHandle);
+                bool success;
+                fixed (byte* socketAddressPtr = &socketAddress[0])
+                {
+                    int ignoreBytesSent;
+                    success = socket.ConnectEx(
+                        handle,
+                        socketAddressPtr,
+                        socketAddressLen,
+                        null,
+                        0,
+                        &ignoreBytesSent,
+                        asyncResult.OverlappedHandle);
+                }
 
                 return asyncResult.ProcessOverlappedResult(success, 0);
             }
@@ -823,21 +944,24 @@ namespace System.Net.Sockets
         public static unsafe SocketError SendAsync(SafeCloseSocket handle, byte[] buffer, int offset, int count, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
             // Set up unmanaged structures for overlapped WSASend.
-            asyncResult.SetUnmanagedStructures(buffer, offset, count, null, false /*don't pin null remoteEP*/);
+            // This will pin the buffer.
+            asyncResult.SetUnmanagedStructures(buffer);
             try
             {
-                // This can throw ObjectDisposedException.
+                WSABuffer wsaBuffer = new WSABuffer(GetPinnedBufferPointer(buffer, offset), count);
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSASend(
+
+                // This can throw ObjectDisposedException.
+                int result = Interop.Winsock.WSASend(
                     handle,
-                    ref asyncResult._singleBuffer,
-                    1, // There is only ever 1 buffer being sent.
-                    out bytesTransferred,
+                    &wsaBuffer,
+                    1,
+                    &bytesTransferred,
                     socketFlags,
                     asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
+                    null);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -849,21 +973,49 @@ namespace System.Net.Sockets
         public static unsafe SocketError SendAsync(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
             // Set up asyncResult for overlapped WSASend.
+            // This will pin the buffers.
             asyncResult.SetUnmanagedStructures(buffers);
             try
             {
-                // This can throw ObjectDisposedException.
+                int result;
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSASend(
-                    handle,
-                    asyncResult._wsaBuffers,
-                    asyncResult._wsaBuffers.Length,
-                    out bytesTransferred,
-                    socketFlags,
-                    asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                int bufferCount = buffers.Count;
+                if (bufferCount <= WSABuffer.StackAllocLimit)
+                {
+                    WSABuffer* wsaBuffers = stackalloc WSABuffer[bufferCount];
+                    PopulateWSABufferArray(wsaBuffers, buffers);
+
+                    // This can throw ObjectDisposedException.
+                    result = Interop.Winsock.WSASend(
+                        handle,
+                        wsaBuffers,
+                        bufferCount,
+                        &bytesTransferred,
+                        socketFlags,
+                        asyncResult.OverlappedHandle,
+                        null);
+                }
+                else
+                {
+                    WSABuffer[] wsaHeapBuffers = new WSABuffer[bufferCount];
+                    fixed (WSABuffer* wsaBuffers = wsaHeapBuffers)
+                    {
+                        PopulateWSABufferArray(wsaBuffers, buffers);
+
+                        // This can throw ObjectDisposedException.
+                        result = Interop.Winsock.WSASend(
+                            handle,
+                            wsaBuffers,
+                            bufferCount,
+                            &bytesTransferred,
+                            socketFlags,
+                            asyncResult.OverlappedHandle,
+                            null);
+                    }
+                }
+
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -877,7 +1029,7 @@ namespace System.Net.Sockets
         private static unsafe bool TransmitFileHelper(
             SafeHandle socket, 
             SafeHandle fileHandle,
-            SafeHandle overlapped,
+            SafeNativeOverlapped overlapped,
             byte[] preBuffer,
             byte[] postBuffer,
             TransmitFileOptions flags)
@@ -888,14 +1040,14 @@ namespace System.Net.Sockets
             if (preBuffer != null && preBuffer.Length > 0)
             {
                 needTransmitFileBuffers = true;
-                transmitFileBuffers.Head = Marshal.UnsafeAddrOfPinnedArrayElement(preBuffer, 0);
+                transmitFileBuffers.Head = (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(preBuffer, 0);
                 transmitFileBuffers.HeadLength = preBuffer.Length;
             }
 
             if (postBuffer != null && postBuffer.Length > 0)
             {
                 needTransmitFileBuffers = true;
-                transmitFileBuffers.Tail = Marshal.UnsafeAddrOfPinnedArrayElement(postBuffer, 0);
+                transmitFileBuffers.Tail = (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(postBuffer, 0);
                 transmitFileBuffers.TailLength = postBuffer.Length;
             }
 
@@ -930,22 +1082,25 @@ namespace System.Net.Sockets
         public static unsafe SocketError SendToAsync(SafeCloseSocket handle, byte[] buffer, int offset, int count, SocketFlags socketFlags, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             // Set up asyncResult for overlapped WSASendTo.
-            asyncResult.SetUnmanagedStructures(buffer, offset, count, socketAddress, false /* don't pin RemoteEP*/);
+            // This will pin the buffer and the socketAddress.
+            asyncResult.SetUnmanagedStructures(buffer, socketAddress);
             try
             {
+                WSABuffer wsaBuffer = new WSABuffer(GetPinnedBufferPointer(buffer, offset), count);
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSASendTo(
+
+                int result = Interop.Winsock.WSASendTo(
                     handle,
-                    ref asyncResult._singleBuffer,
-                    1, // There is only ever 1 buffer being sent.
-                    out bytesTransferred,
+                    &wsaBuffer,
+                    1,
+                    &bytesTransferred,
                     socketFlags,
                     asyncResult.GetSocketAddressPtr(),
                     asyncResult.SocketAddress.Size,
                     asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
+                    null);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -957,21 +1112,24 @@ namespace System.Net.Sockets
         public static unsafe SocketError ReceiveAsync(SafeCloseSocket handle, byte[] buffer, int offset, int count, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
             // Set up asyncResult for overlapped WSARecv.
-            asyncResult.SetUnmanagedStructures(buffer, offset, count, null, false /* don't pin null RemoteEP*/);
+            // This will pin the buffer.
+            asyncResult.SetUnmanagedStructures(buffer);
             try
             {
-                // This can throw ObjectDisposedException.
+                WSABuffer wsaBuffer = new WSABuffer(GetPinnedBufferPointer(buffer, offset), count);
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSARecv(
+                
+                // This can throw ObjectDisposedException.
+                int result = Interop.Winsock.WSARecv(
                     handle,
-                    ref asyncResult._singleBuffer,
+                    &wsaBuffer,
                     1,
-                    out bytesTransferred,
-                    ref socketFlags,
+                    &bytesTransferred,
+                    &socketFlags,
                     asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
+                    null);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -982,22 +1140,50 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError ReceiveAsync(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            // Set up asyncResult for overlapped WSASend.
+            // Set up asyncResult for overlapped WSARecv.
+            // This will pin the buffers.
             asyncResult.SetUnmanagedStructures(buffers);
             try
             {
-                // This can throw ObjectDisposedException.
+                int result;
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSARecv(
-                    handle,
-                    asyncResult._wsaBuffers,
-                    asyncResult._wsaBuffers.Length,
-                    out bytesTransferred,
-                    ref socketFlags,
-                    asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                int bufferCount = buffers.Count;
+                if (bufferCount <= WSABuffer.StackAllocLimit)
+                {
+                    WSABuffer* wsaBuffers = stackalloc WSABuffer[bufferCount];
+                    PopulateWSABufferArray(wsaBuffers, buffers);
+
+                    // This can throw ObjectDisposedException.
+                    result = Interop.Winsock.WSARecv(
+                        handle,
+                        wsaBuffers,
+                        bufferCount,
+                        &bytesTransferred,
+                        &socketFlags,
+                        asyncResult.OverlappedHandle,
+                        null);
+                }
+                else
+                {
+                    WSABuffer[] wsaHeapBuffers = new WSABuffer[bufferCount];
+                    fixed (WSABuffer* wsaBuffers = wsaHeapBuffers)
+                    {
+                        PopulateWSABufferArray(wsaBuffers, buffers);
+
+                        // This can throw ObjectDisposedException.
+                        result = Interop.Winsock.WSARecv(
+                            handle,
+                            wsaBuffers,
+                            bufferCount,
+                            &bytesTransferred,
+                            &socketFlags,
+                            asyncResult.OverlappedHandle,
+                            null);
+                    }
+                }
+
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -1009,22 +1195,25 @@ namespace System.Net.Sockets
         public static unsafe SocketError ReceiveFromAsync(SafeCloseSocket handle, byte[] buffer, int offset, int count, SocketFlags socketFlags, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             // Set up asyncResult for overlapped WSARecvFrom.
-            asyncResult.SetUnmanagedStructures(buffer, offset, count, socketAddress, true);
+            // This will pin the buffer and the socketAddress.
+            asyncResult.SetUnmanagedStructures(buffer, socketAddress);
             try
             {
+                WSABuffer wsaBuffer = new WSABuffer(GetPinnedBufferPointer(buffer, offset), count);
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSARecvFrom(
+
+                int result = Interop.Winsock.WSARecvFrom(
                     handle,
-                    ref asyncResult._singleBuffer,
+                    &wsaBuffer,
                     1,
-                    out bytesTransferred,
-                    ref socketFlags,
+                    &bytesTransferred,
+                    &socketFlags,
                     asyncResult.GetSocketAddressPtr(),
                     asyncResult.GetSocketAddressSizePtr(),
                     asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
+                    null);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransferred);
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransferred);
             }
             catch
             {
@@ -1035,18 +1224,30 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError ReceiveMessageFromAsync(Socket socket, SafeCloseSocket handle, byte[] buffer, int offset, int count, SocketFlags socketFlags, Internals.SocketAddress socketAddress, ReceiveMessageOverlappedAsyncResult asyncResult)
         {
-            asyncResult.SetUnmanagedStructures(buffer, offset, count, socketAddress, socketFlags);
+            asyncResult.SetUnmanagedStructures(buffer, socketAddress, socketFlags);
             try
             {
                 int bytesTransfered;
-                SocketError errorCode = (SocketError)socket.WSARecvMsg(
-                    handle,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult._messageBuffer, 0),
-                    out bytesTransfered,
-                    asyncResult.OverlappedHandle,
-                    IntPtr.Zero);
 
-                return asyncResult.ProcessOverlappedResult(errorCode == SocketError.Success, bytesTransfered);
+                WSABuffer wsaBuffer = new WSABuffer(GetPinnedBufferPointer(buffer, offset), count);
+                WSABuffer wsaControlBuffer = new WSABuffer(asyncResult.GetControlBuffer(), asyncResult.GetControlBufferSize());
+
+                Interop.Winsock.WSAMsg wsaMsg = new Interop.Winsock.WSAMsg(
+                    asyncResult.GetSocketAddressPtr(),
+                    asyncResult.GetSocketAddressSize(),
+                    &wsaBuffer,
+                    1,
+                    wsaControlBuffer,
+                    socketFlags);
+
+                int result = socket.WSARecvMsg(
+                    handle,
+                    &wsaMsg,
+                    &bytesTransfered,
+                    asyncResult.OverlappedHandle,
+                    null);
+
+                return asyncResult.ProcessOverlappedResult(result == 0, bytesTransfered);
             }
             catch
             {
@@ -1072,11 +1273,11 @@ namespace System.Net.Sockets
                 bool success = socket.AcceptEx(
                     handle,
                     acceptHandle,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.Buffer, 0),
+                    (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(asyncResult.Buffer, 0),
                     receiveSize,
                     addressBufferSize,
                     addressBufferSize,
-                    out bytesTransferred,
+                    &bytesTransferred,
                     asyncResult.OverlappedHandle);
 
                 return asyncResult.ProcessOverlappedResult(success, 0);
@@ -1114,12 +1315,12 @@ namespace System.Net.Sockets
             }
         }
 
-        internal static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
+        internal static unsafe SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
         {
             SocketError errorCode = SocketError.Success;
 
             // This can throw ObjectDisposedException (handle, and retrieving the delegate).
-            if (!socket.DisconnectExBlocking(handle, IntPtr.Zero, (int)(reuseSocket ? TransmitFileOptions.ReuseSocket : 0), 0))
+            if (!socket.DisconnectExBlocking(handle, null, (int)(reuseSocket ? TransmitFileOptions.ReuseSocket : 0), 0))
             {
                 errorCode = GetLastSocketError();
             }

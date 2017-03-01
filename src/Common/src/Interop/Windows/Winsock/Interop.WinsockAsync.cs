@@ -62,7 +62,7 @@ internal static partial class Interop
         //  };
         // } TRANSMIT_PACKETS_ELEMENT;
         [StructLayout(LayoutKind.Explicit)]
-        internal struct TransmitPacketsElement
+        internal unsafe struct TransmitPacketsElement
         {
             [System.Runtime.InteropServices.FieldOffset(0)]
             internal TransmitPacketsElementFlags flags;
@@ -71,20 +71,39 @@ internal static partial class Interop
             [System.Runtime.InteropServices.FieldOffset(8)]
             internal Int64 fileOffset;
             [System.Runtime.InteropServices.FieldOffset(8)]
-            internal IntPtr buffer;
+            internal byte* buffer;
             [System.Runtime.InteropServices.FieldOffset(16)]
             internal IntPtr fileHandle;
+
+            // This controls how many TransmitPacketsElement structs we will allocate on the stack.
+            // Beyond this, we need to alloc on the heap and pin.
+            internal const int StackAllocLimit = 128;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct WSAMsg
+        internal unsafe struct WSAMsg
         {
-            internal IntPtr socketAddress;
+            internal byte* socketAddress;
             internal uint addressLength;
-            internal IntPtr buffers;
+            internal WSABuffer* buffers;
             internal uint count;
             internal WSABuffer controlBuffer;
             internal SocketFlags flags;
+            internal int pad;
+
+            // NOTE: Even though Win32 docs say the flags arg is a DWORD, and thus 4 bytes long, it seems to actually write 4 bytes past this.
+            // The "pad" field above deals with this.
+
+            internal unsafe WSAMsg(byte* socketAddressBuffer, int socketAddressLen, WSABuffer* wsaBuffers, int bufferCount, WSABuffer controlBuffer, SocketFlags flags)
+            {
+                this.socketAddress = socketAddressBuffer;
+                this.addressLength = (uint)socketAddressLen;
+                this.buffers = wsaBuffers;
+                this.count = (uint)bufferCount;
+                this.controlBuffer = controlBuffer;
+                this.flags = flags;
+                this.pad = 0;
+            }
         }
     }
 }

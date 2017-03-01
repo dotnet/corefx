@@ -14,25 +14,36 @@ namespace System.Net.Sockets
 {
     internal unsafe sealed partial class ReceiveMessageOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        private Interop.Winsock.WSAMsg* _message;
-        private WSABuffer* _wsaBuffer;
-        private byte[] _wsaBufferArray;
         private byte[] _controlBuffer;
-        internal byte[] _messageBuffer;
 
         private static readonly int s_controlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
         private static readonly int s_controlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
-        private static readonly int s_wsaBufferSize = Marshal.SizeOf<WSABuffer>();
-        private static readonly int s_wsaMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
 
-        private IntPtr GetSocketAddressSizePtr()
+        internal unsafe byte* GetSocketAddressPtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, _socketAddress.GetAddressSizeOffset());
+            Debug.Assert(_socketAddress != null);
+            return (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
+        }
+
+        internal unsafe int* GetSocketAddressSizePtr()
+        {
+            Debug.Assert(_socketAddress != null);
+            return (int*)Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, _socketAddress.GetAddressSizeOffset());
         }
 
         internal unsafe int GetSocketAddressSize()
         {
-            return *(int*)GetSocketAddressSizePtr();
+            return *(GetSocketAddressSizePtr());
+        }
+
+        internal unsafe byte* GetControlBuffer()
+        {
+            return (_controlBuffer == null ? null : (byte*) Marshal.UnsafeAddrOfPinnedArrayElement(_controlBuffer, 0));
+        }
+
+        internal int GetControlBufferSize()
+        {
+            return _controlBuffer.Length;
         }
 
         // SetUnmanagedStructures
@@ -41,11 +52,10 @@ namespace System.Net.Sockets
         // These calls are outside the runtime and are unmanaged code, so we need
         // to prepare specific structures and ints that lie in unmanaged memory
         // since the overlapped calls may complete asynchronously.
-        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, Internals.SocketAddress socketAddress, SocketFlags socketFlags)
+        internal void SetUnmanagedStructures(byte[] buffer, Internals.SocketAddress socketAddress, SocketFlags flags)
         {
-            _messageBuffer = new byte[s_wsaMsgSize];
-            _wsaBufferArray = new byte[s_wsaBufferSize];
-
+            _socketFlags = flags;
+            
             bool ipv4, ipv6;
             Socket.GetIPProtocolInformation(((Socket)AsyncObject).AddressFamily, socketAddress, out ipv4, out ipv6);
 
@@ -60,56 +70,34 @@ namespace System.Net.Sockets
             }
 
             // Pin buffers.
-            object[] objectsToPin = new object[(_controlBuffer != null) ? 5 : 4];
+            object[] objectsToPin = new object[(_controlBuffer != null) ? 3 : 2];
             objectsToPin[0] = buffer;
-            objectsToPin[1] = _messageBuffer;
-            objectsToPin[2] = _wsaBufferArray;
 
             // Prepare socketaddress buffer.
             _socketAddress = socketAddress;
             _socketAddress.CopyAddressSizeIntoBuffer();
-            objectsToPin[3] = _socketAddress.Buffer;
+            objectsToPin[1] = _socketAddress.Buffer;
 
             if (_controlBuffer != null)
             {
-                objectsToPin[4] = _controlBuffer;
+                objectsToPin[2] = _controlBuffer;
             }
 
             base.SetUnmanagedStructures(objectsToPin);
-
-            // Prepare data buffer.
-            _wsaBuffer = (WSABuffer*)Marshal.UnsafeAddrOfPinnedArrayElement(_wsaBufferArray, 0);
-            _wsaBuffer->Length = size;
-            _wsaBuffer->Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
-
-
-            // Setup structure.
-            _message = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(_messageBuffer, 0);
-            _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
-            _message->addressLength = (uint)_socketAddress.Size;
-            _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_wsaBufferArray, 0);
-            _message->count = 1;
-
-            if (_controlBuffer != null)
-            {
-                _message->controlBuffer.Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(_controlBuffer, 0);
-                _message->controlBuffer.Length = _controlBuffer.Length;
-            }
-
-            _message->flags = socketFlags;
         }
 
         private unsafe void InitIPPacketInformation()
         {
+            IntPtr controlBufferPtr = Marshal.UnsafeAddrOfPinnedArrayElement(_controlBuffer, 0);
             if (_controlBuffer.Length == s_controlDataSize)
             {
                 // IPv4
-                _ipPacketInformation = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlData*)_message->controlBuffer.Pointer);
+                _ipPacketInformation = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlData*)controlBufferPtr);
             }
             else if (_controlBuffer.Length == s_controlDataIPv6Size)
             {
                 // IPv6
-                _ipPacketInformation = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlDataIPv6*)_message->controlBuffer.Pointer);
+                _ipPacketInformation = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlDataIPv6*)controlBufferPtr);
             }
             else
             {
@@ -120,24 +108,13 @@ namespace System.Net.Sockets
 
         protected override void ForceReleaseUnmanagedStructures()
         {
-            _socketFlags = _message->flags;
             base.ForceReleaseUnmanagedStructures();
         }
 
         internal override object PostCompletion(int numBytes)
         {
             InitIPPacketInformation();
-            if (ErrorCode == 0 && NetEventSource.IsEnabled)
-            {
-                LogBuffer(numBytes);
-            }
-
             return base.PostCompletion(numBytes);
-        }
-
-        private void LogBuffer(int size)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.DumpBuffer(this, _wsaBuffer->Pointer, Math.Min(_wsaBuffer->Length, size));
         }
     }
 }

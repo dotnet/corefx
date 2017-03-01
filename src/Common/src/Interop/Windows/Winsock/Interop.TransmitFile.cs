@@ -16,16 +16,16 @@ internal static partial class Interop
             SafeHandle fileHandle,
             int numberOfBytesToWrite,
             int numberOfBytesPerSend,
-            SafeHandle overlapped,
+            SafeNativeOverlapped overlapped,
             TransmitFileBuffers* buffers,
             TransmitFileOptions flags);
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct TransmitFileBuffers
+        internal unsafe struct TransmitFileBuffers
         {
-            internal IntPtr Head;
+            internal byte* Head;
             internal int HeadLength;
-            internal IntPtr Tail;
+            internal byte* Tail;
             internal int TailLength;
         }
     }
