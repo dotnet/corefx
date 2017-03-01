@@ -115,8 +115,8 @@ namespace System.Reflection
 
         public static void WriteUInt64(this byte[] buffer, int start, ulong value)
         {
-            WriteUInt32(buffer, start, (uint)value);
-            WriteUInt32(buffer, start, (uint)(value >> 32));
+            WriteUInt32(buffer, start, unchecked((uint)value));
+            WriteUInt32(buffer, start, unchecked((uint)(value >> 32)));
         }
 
         public const int SizeOfSerializedDecimal = sizeof(byte) + 3 * sizeof(uint);
@@ -143,19 +143,22 @@ namespace System.Reflection
                 byte* src = (byte*)&value;
 
                 uint a = *(uint*)(src + 0);
-                dst[0] = (byte)a;
-                dst[1] = (byte)(a >> 8);
-                dst[2] = (byte)(a >> 16);
-                dst[3] = (byte)(a >> 24);
+                unchecked
+                {
+                    dst[0] = (byte)a;
+                    dst[1] = (byte)(a >> 8);
+                    dst[2] = (byte)(a >> 16);
+                    dst[3] = (byte)(a >> 24);
 
-                ushort b = *(ushort*)(src + 4);
-                dst[4] = (byte)b;
-                dst[5] = (byte)(b >> 8);
+                    ushort b = *(ushort*)(src + 4);
+                    dst[4] = (byte)b;
+                    dst[5] = (byte)(b >> 8);
 
-                ushort c = *(ushort*)(src + 6);
-                dst[6] = (byte)c;
-                dst[7] = (byte)(c >> 8);
-
+                    ushort c = *(ushort*)(src + 6);
+                    dst[6] = (byte)c;
+                    dst[7] = (byte)(c >> 8);
+                }
+                
                 dst[8] = src[8];
                 dst[9] = src[9];
                 dst[10] = src[10];
