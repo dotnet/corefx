@@ -197,7 +197,7 @@ namespace System
         [System.Security.SecurityCritical]  // auto-generated
         private static bool IsKeyDownEvent(Interop.InputRecord ir)
         {
-            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown);
+            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown != Interop.BOOL.FALSE);
         }
 
         [System.Security.SecurityCritical]  // auto-generated
