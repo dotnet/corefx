@@ -234,8 +234,6 @@ namespace System.Runtime.CompilerServices.Tests
         [Fact]
         public static void GetOrCreateValue()
         {
-            object obj = null;
-
             WeakReference<object> wrValue;
             WeakReference<object> wrKey;
 
@@ -244,6 +242,7 @@ namespace System.Runtime.CompilerServices.Tests
             GC.Collect();
 
             // key and value must be collected
+            object obj;
             Assert.False(wrValue.TryGetTarget(out obj));
             Assert.False(wrKey.TryGetTarget(out obj));
         }
@@ -266,8 +265,6 @@ namespace System.Runtime.CompilerServices.Tests
         [Fact]
         public static void GetValue()
         {
-            object obj = null;
-
             WeakReference<object> wrValue;
             WeakReference<object> wrKey;
 
@@ -276,6 +273,7 @@ namespace System.Runtime.CompilerServices.Tests
             GC.Collect();
 
             // key and value must be collected
+            object obj;
             Assert.False(wrValue.TryGetTarget(out obj));
             Assert.False(wrKey.TryGetTarget(out obj));
         }

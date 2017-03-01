@@ -84,8 +84,7 @@ namespace System.Tests
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
             private static void MakeAndDropTest()
             {
-                var obj = new TestObject();
-                obj = null;
+                new TestObject();
             }
 
             public static void Run()
