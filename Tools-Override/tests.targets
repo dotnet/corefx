@@ -54,7 +54,7 @@
 
     <!-- Temporary till we fix the whole filtering with  TargetGroup -->
     <XunitOptions Condition="'$(BuildingNETFxVertical)' != 'true'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(BuildingNETFxVertical)' == 'true'">$(XunitOptions) -notrait category=nonnetfxtests </XunitOptions>
+    <XunitOptions Condition="'$(BuildingNETFxVertical)' == 'true'">$(XunitOptions) -notrait category=nonnetfxtests</XunitOptions>
 
     <XunitOptions Condition="'$(XunitMaxThreads)'!=''">$(XunitOptions) -maxthreads $(XunitMaxThreads)</XunitOptions>
     <XunitTestAssembly Condition="'$(XunitTestAssembly)' == ''">$(TargetFileName)</XunitTestAssembly>
