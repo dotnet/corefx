@@ -298,7 +298,7 @@ namespace System.Reflection.Metadata
 
         public ulong ReadUInt64()
         {
-            return (ulong)ReadInt64();
+            return unchecked((ulong)ReadInt64());
         }
 
         public float ReadSingle()
