@@ -93,18 +93,13 @@ namespace System.Data.SqlClient.SNI
 
             if (null != sessionHandle || null != packetHandle)
             {
-                try { }
-                finally
-                {
-                    
-                    packetHandle?.Dispose();
-                    asyncAttnPacket?.Dispose();
+                packetHandle?.Dispose();
+                asyncAttnPacket?.Dispose();
                 
-                    if (sessionHandle != null)
-                    {
-                        sessionHandle.Dispose();
-                        DecrementPendingCallbacks(true); // Will dispose of GC handle.
-                    }
+                if (sessionHandle != null)
+                {
+                    sessionHandle.Dispose();
+                    DecrementPendingCallbacks(true); // Will dispose of GC handle.
                 }
             }
 
@@ -195,7 +190,7 @@ namespace System.Data.SqlClient.SNI
         {
             if (_sniPacket != null)
             {
-                SNIProxy.Singleton.PacketReset(_sniPacket);
+                _sniPacket.Reset();
             }
             else
             {
@@ -259,7 +254,7 @@ namespace System.Data.SqlClient.SNI
                 {
                     // Success - reset the packet
                     packet = _packets.Pop();
-                    SNIProxy.Singleton.PacketReset(packet);
+                    packet.Reset();
                 }
                 else
                 {

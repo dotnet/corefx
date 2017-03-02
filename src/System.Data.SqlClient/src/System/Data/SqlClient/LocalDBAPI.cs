@@ -44,7 +44,7 @@ namespace System.Data
         private static IntPtr s_userInstanceDLLHandle = IntPtr.Zero;
 
         private static readonly object s_dllLock = new object();
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private delegate int LocalDBFormatMessageDelegate(int hrLocalDB, UInt32 dwFlags, UInt32 dwLanguageId, StringBuilder buffer, ref UInt32 buflen);
 
@@ -56,7 +56,8 @@ namespace System.Data
             {
                 if (s_localDBFormatMessage == null)
                 {
-                    lock (s_dllLock) { 
+                    lock (s_dllLock)
+                    {
                         if (s_localDBFormatMessage == null)
                         {
                             IntPtr functionAddr = SafeNativeMethods.GetProcAddress(UserInstanceDLLHandle, "LocalDBFormatMessage");

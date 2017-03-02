@@ -263,15 +263,6 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Reset a packet
-        /// </summary>
-        /// <param name="packet">SNI packet</param>
-        public void PacketReset(SNIPacket packet)
-        {
-            packet.Reset();
-        }
-
         private static string GetServerNameWithOutProtocol(string fullServerName, string protocolHeader)
         {
             string serverNameWithOutProtocol = null;

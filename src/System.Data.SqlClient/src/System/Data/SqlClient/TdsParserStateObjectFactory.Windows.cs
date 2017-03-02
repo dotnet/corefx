@@ -24,7 +24,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return useManagedSni ? SNILoadHandle.SingletonInstance.Status : SNI.SNILoadHandle.SingletonInstance.Status;
+                return useManagedSni ? SNI.SNILoadHandle.SingletonInstance.Status : SNILoadHandle.SingletonInstance.Status;
             }
         }
 

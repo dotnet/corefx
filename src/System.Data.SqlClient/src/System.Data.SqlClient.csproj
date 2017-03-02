@@ -143,7 +143,7 @@
     <Compile Include="Interop\SNINativeMethodWrapper.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserSafeHandles.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectNative.cs" />
-    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.cs" />
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.Windows.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.Windows.cs" />
   </ItemGroup>

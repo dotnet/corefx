@@ -426,11 +426,8 @@ namespace System.Data.SqlClient
             }
 
             // create a new packet encryption changes the internal packet size
-            try { }   // EmptyTry/Finally to avoid FXCop violation
-            finally
-            {
-                _physicalStateObj.ClearAllWritePackets();
-            }
+            _physicalStateObj.ClearAllWritePackets();
+            
         }
 
         internal void EnableMars()

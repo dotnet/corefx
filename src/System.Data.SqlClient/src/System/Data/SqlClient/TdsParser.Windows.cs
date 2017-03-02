@@ -23,19 +23,17 @@ namespace System.Data.SqlClient
             IntPtr temp = IntPtr.Zero;
             uint error = TdsEnums.SNI_SUCCESS;
 
-            try { }
-            finally
-            {
-                _pMarsPhysicalConObj.IncrementPendingCallbacks();
-                object handle = _pMarsPhysicalConObj.SessionHandle;
-                temp = (IntPtr)_pMarsPhysicalConObj.ReadAsync(out error, ref handle);
+            
+            _pMarsPhysicalConObj.IncrementPendingCallbacks();
+            object handle = _pMarsPhysicalConObj.SessionHandle;
+            temp = (IntPtr)_pMarsPhysicalConObj.ReadAsync(out error, ref handle);
 
-                if (temp != IntPtr.Zero)
-                {
-                    // Be sure to release packet, otherwise it will be leaked by native.
-                    _pMarsPhysicalConObj.ReleasePacket(temp);
-                }
+            if (temp != IntPtr.Zero)
+            {
+                // Be sure to release packet, otherwise it will be leaked by native.
+                _pMarsPhysicalConObj.ReleasePacket(temp);
             }
+            
             Debug.Assert(IntPtr.Zero == temp, "unexpected syncReadPacket without corresponding SNIPacketRelease");
             if (TdsEnums.SNI_SUCCESS_IO_PENDING != error)
             {
