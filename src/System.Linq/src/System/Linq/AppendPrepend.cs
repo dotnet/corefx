@@ -181,7 +181,7 @@ namespace System.Linq
                 Debug.Assert(GetCount(onlyIfCheap: true) == -1);
 
                 var builder = new LargeArrayBuilder<TSource>(initialize: true);
-                
+
                 if (!_appending)
                 {
                     builder.SlowAdd(_item);
@@ -247,7 +247,11 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                return new HashSet<TSource>(_source, comparer) { _item };
+                HashSet<TSource> hashSet = _source.ToHashSet(comparer);
+
+                hashSet.Add(_item);
+
+                return hashSet;
             }
 
             public override int GetCount(bool onlyIfCheap)
@@ -533,7 +537,7 @@ namespace System.Linq
 
             public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
+                HashSet<TSource> hashSet = _source.ToHashSet(comparer);
 
                 for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
                 {

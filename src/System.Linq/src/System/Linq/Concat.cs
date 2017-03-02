@@ -523,7 +523,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(GetEnumerable(0), comparer);
+                HashSet<TSource> hashSet = GetEnumerable(0).ToHashSet(comparer);
 
                 for (int i = 1; ; i++)
                 {

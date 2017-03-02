@@ -105,7 +105,7 @@ namespace System.Linq
 
             public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
             {
-                HashSet<TSource> hashSet = new HashSet<TSource>(_source, comparer);
+                HashSet<TSource> hashSet = _source.ToHashSet(comparer);
                 
                 if (hashSet.Count == 0)
                 {

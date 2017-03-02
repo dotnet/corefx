@@ -71,7 +71,7 @@ namespace System.Linq
             return list;
         }
 
-        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>(_source, comparer);
+        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => _source.ToHashSet(comparer);
 
         public int GetCount(bool onlyIfCheap)
         {

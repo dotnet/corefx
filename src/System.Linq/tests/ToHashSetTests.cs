@@ -76,11 +76,11 @@ namespace System.Linq.Tests
         [MemberData(nameof(GetData))]
         public void WorksAsExpected(IEnumerable<int> source, Func<IEnumerable<int>, IEnumerable<int>> action, IEqualityComparer<int> comparer)
         {
-            var result = action(source);
+            var iterator = action(source);
 
-            var expected = new HashSet<int>(result, comparer);
+            var expected = new HashSet<int>(iterator, comparer);
 
-            var actual = result.ToHashSet(comparer);
+            var actual = iterator.ToHashSet(comparer);
 
             Assert.Equal(expected, actual); // Implies they have equal Counts too
             Assert.Equal(expected.Comparer, actual.Comparer);
@@ -90,37 +90,36 @@ namespace System.Linq.Tests
         [MemberData(nameof(GetGroupingData))]
         public void WorksAsExpectedForGrouping(IEnumerable<int> source, Func<IEnumerable<int>, IEnumerable<IGrouping<int, int>>> action, IEqualityComparer<IGrouping<int, int>> comparer)
         {
-            var result = action(source);
+            var iterator = action(source);
 
-            var expected = new HashSet<IGrouping<int, int>>(result, comparer);
+            var expected = new HashSet<IGrouping<int, int>>(iterator, comparer);
 
-            var actual = result.ToHashSet(comparer);
+            var actual = iterator.ToHashSet(comparer);
 
             AssertHashSetGroupingEqual(expected, actual);
-            Assert.Equal(expected.Comparer, actual.Comparer);
         }
 
         private static IEnumerable<object[]> GetData()
         {
-            var testData = new WorkAsExpectedData<int>();
+            var testData = new TestDataBuilder<int>();
 
             testData.AddDefaultComparers();
 
             testData.AddActions(
-                source => source.Concat(Range(40, 50)), // ConcatIterator
-                source => source.DefaultIfEmpty(), // DefaultIfEmptyIterator
-                source => source.Append(100), // AppendPrependIterator, AppendPrepend1Iterator, AppendPrependN
-                source => source.Prepend(100), // AppendPrependIterator
-                source => source.Distinct(), // DistinctIterator
-                source => source.OrderBy(x => x), // OrderedEnumerable
-                source => source.Take(1), // EmptyPartition, EnumerablePartition, ListPartition, OrderedPartition
-                source => source.Reverse(), // ReverseIterator
-                source => source.SelectMany(x => new[] { x, 0 }), // SelectManySingleSelectorIterator
-                source => source.Union(Range(20, 50)), // UnionIterator
-                source => source.Select(x => x), // SelectArrayIterator, SelectEnumerableIterator, SelectListIterator, SelectIListIterator
-                source => source.Skip(1).Select(x => x), // SelectListPartitionIterator, SelectIPartitionIterator
-                source => source.Where(x => x < 40), // WhereArrayIterator, WhereEnumerableIterator, WhereListIterator
-                source => source.Where(x => x < 40).Select(x => x) // WhereSelectArrayIterator, WhereSelectEnumerableIterator, WhereSelectListIterator
+                source => source.Concat(Range(40, 50)),
+                source => source.DefaultIfEmpty(),
+                source => source.Append(100),
+                source => source.Prepend(100),
+                source => source.Distinct(),
+                source => source.OrderBy(x => x),
+                source => source.Take(1),
+                source => source.Reverse(),
+                source => source.SelectMany(x => new[] { x, 0 }),
+                source => source.Union(Range(20, 50)),
+                source => source.Select(x => x),
+                source => source.Skip(1).Select(x => x),
+                source => source.Where(x => x < 40),
+                source => source.Where(x => x < 40).Select(x => x)
             );
 
             testData.AddSources(GetSources());
@@ -130,14 +129,14 @@ namespace System.Linq.Tests
 
         private static IEnumerable<object[]> GetGroupingData()
         {
-            var testData = new WorkAsExpectedData<IGrouping<int, int>>();
+            var testData = new TestDataBuilder<IGrouping<int, int>>();
 
             testData.AddDefaultComparers();
 
             testData.AddActions(
-                source => source.GroupBy(x => x), // GroupedEnumerable<TSource, TKey>, GroupedEnumerable<TSource, TKey, TElement>
-                source => source.GroupBy(x => x, x => x), // GroupedResultEnumerable<TSource, TKey, TResult>, GroupedResultEnumerable<TSource, TKey, TElement, TResult>
-                source => source.ToLookup(i => i) // Lookup
+                source => source.GroupBy(x => x),
+                source => source.GroupBy(x => x, x => x),
+                source => source.ToLookup(i => i)
             );
 
             testData.AddSources(GetSources());
@@ -152,15 +151,13 @@ namespace System.Linq.Tests
         /// <param name="actual">Actual set</param>
         private void AssertHashSetGroupingEqual(HashSet<IGrouping<int, int>> expected, HashSet<IGrouping<int, int>> actual)
         {
-            // The Count should be equal
             Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal(expected.Comparer, actual.Comparer);
 
             // Get the group by key and check as IEnumerable
             foreach (var expectedGroup in expected)
             {
-                var group = actual.FirstOrDefault(x => x.Key == expectedGroup.Key);
-
-                Assert.NotNull(group);
+                var group = actual.Single(x => x.Key == expectedGroup.Key);
 
                 Assert.Equal(expectedGroup.AsEnumerable(), group.AsEnumerable());
             }
@@ -184,7 +181,6 @@ namespace System.Linq.Tests
                 yield return new SortedSet<int>(source);
             }
 
-            // Return RepeatIterator and RangeIterator
             yield return Repeat(0, 50);
             yield return Range(0, 50);
         }
@@ -193,43 +189,41 @@ namespace System.Linq.Tests
         /// Responsible for combining Actions, Comparers and Sources
         /// </summary>
         /// <typeparam name="T">Result Type</typeparam>
-        private class WorkAsExpectedData<T>
+        private class TestDataBuilder<T>
         {
-            private readonly List<Func<IEnumerable<int>, IEnumerable<T>>> actions;
-            private readonly List<IEqualityComparer<T>> comparers;
-            private readonly List<IEnumerable<int>> sources;
+            private readonly List<Func<IEnumerable<int>, IEnumerable<T>>> _actions;
+            private readonly List<IEqualityComparer<T>> _comparers;
+            private readonly List<IEnumerable<int>> _sources;
 
-            public WorkAsExpectedData()
+            public TestDataBuilder()
             {
-                actions = new List<Func<IEnumerable<int>, IEnumerable<T>>>();
-                comparers = new List<IEqualityComparer<T>>();
-                sources = new List<IEnumerable<int>>();
+                _actions = new List<Func<IEnumerable<int>, IEnumerable<T>>>();
+                _comparers = new List<IEqualityComparer<T>>();
+                _sources = new List<IEnumerable<int>>();
             }
 
             public void AddActions(params Func<IEnumerable<int>, IEnumerable<T>>[] actions)
             {
-                this.actions.AddRange(actions);
+                _actions.AddRange(actions);
             }
 
             public void AddDefaultComparers()
             {
-                comparers.Add(null);
-                comparers.Add(EqualityComparer<T>.Default);
-                comparers.Add(new CustomComparer<T>());
+                _comparers.Add(null);
+                _comparers.Add(EqualityComparer<T>.Default);
+                _comparers.Add(new CustomComparer<T>());
             }
 
             public void AddSources(IEnumerable<IEnumerable<int>> sources)
             {
-                this.sources.AddRange(sources);
+                _sources.AddRange(sources);
             }
 
             public IEnumerable<object[]> GetData()
             {
-                // Combine all and return one test of each combination
-                // Currently: 17 actions * 11 Sources * 3 Comparers = 561 tests
-                var tests = from action in actions
-                            from comparer in comparers
-                            from source in sources
+                var tests = from action in _actions
+                            from comparer in _comparers
+                            from source in _sources
                             select new { action, comparer, source };
 
                 foreach (var test in tests)
