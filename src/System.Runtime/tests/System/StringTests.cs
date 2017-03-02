@@ -828,7 +828,7 @@ namespace System.Tests
         [InlineData("abcdefghijklmnopqrstuvwxyz", 'z', true)]
         public static void EndsWith(string s, char value, bool expected)
         {
-            Assert.Equal(expected, s.EndsWith(value));
+            Assert.Equal(expected, s.EndsWith(value.ToString()));
         }
 
         [Theory]
@@ -2125,7 +2125,7 @@ namespace System.Tests
         [InlineData("abcdefghijklmnopqrstuvwxyz", 'a', true)]
         public static void StartsWith(string s, char value, bool expected)
         {
-            Assert.Equal(expected, s.StartsWith(value));
+            Assert.Equal(expected, s.StartsWith(value.ToString()));
         }
 
         [Theory]
