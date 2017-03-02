@@ -165,8 +165,8 @@ namespace System.Data.SqlClient.SNI
 
         internal override object ReadAsync(out uint error, ref object handle)
         {
-            SNIPacket packet = null;
-            error = SNIProxy.Singleton.ReadAsync((SNIHandle)handle, ref packet);
+            SNIPacket packet;
+            error = SNIProxy.Singleton.ReadAsync((SNIHandle)handle, out packet);
             return packet;
         }
 

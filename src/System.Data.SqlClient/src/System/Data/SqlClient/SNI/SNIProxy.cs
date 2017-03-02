@@ -662,7 +662,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">Packet</param>
         /// <returns>SNI error status</returns>
-        public uint ReadAsync(SNIHandle handle, ref SNIPacket packet)
+        public uint ReadAsync(SNIHandle handle, out SNIPacket packet)
         {
             packet = new SNIPacket(null);
 
