@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
@@ -239,9 +240,45 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("[a-f-[]]+", RegexOptions.None)]
         // Not character class substraction
         [InlineData("[A-[]+", RegexOptions.None)]
+        // Invalid testgroup
+        [InlineData("(?(?m))", RegexOptions.None)]
+        [InlineData("(?(?m)", RegexOptions.None)]
+        [InlineData("(?(?", RegexOptions.None)]
+        [InlineData("(?(", RegexOptions.None)]
+        [InlineData("?(a:b)", RegexOptions.None)]
+        [InlineData("?(a)", RegexOptions.None)]
+        [InlineData("?(a|b)", RegexOptions.None)]
+        [InlineData("?((a)", RegexOptions.None)]
+        [InlineData("?((a)a", RegexOptions.None)]
+        [InlineData("?((a)a|", RegexOptions.None)]
+        [InlineData("?((a)a|b", RegexOptions.None)]
         public void Ctor_InvalidPattern(string pattern, RegexOptions options)
         {
             Assert.Throws<ArgumentException>(() => new Regex(pattern, options));
+        }
+
+        [Theory]
+        // Testgroup with options
+        [InlineData("(?(?i))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?I))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?m))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?M))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?s))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?S))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?x))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?X))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?e))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData(" (?(?e))", RegexOptions.None, typeof(OutOfMemoryException))]
+        public void Ctor_InvalidPattern_NetCore(string pattern, RegexOptions options, Type exceptionType)
+        {
+            if (RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
+            {
+                Assert.Throws(exceptionType, () => new Regex(pattern, options));
+            }
+            else
+            {
+                Ctor_InvalidPattern(pattern, options);
+            }
         }
     }
 }
