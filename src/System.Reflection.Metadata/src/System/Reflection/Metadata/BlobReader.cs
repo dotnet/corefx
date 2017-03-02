@@ -242,46 +242,63 @@ namespace System.Reflection.Metadata
 
         public char ReadChar()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(char));
-            return (char)(ptr[0] + (ptr[1] << 8));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(char));
+                return (char)(ptr[0] + (ptr[1] << 8));
+            }
         }
 
         public short ReadInt16()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(short));
-            return (short)(ptr[0] + (ptr[1] << 8));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(short));
+                return (short)(ptr[0] + (ptr[1] << 8));
+            }
         }
 
         public ushort ReadUInt16()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
-            return (ushort)(ptr[0] + (ptr[1] << 8));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
+                return (ushort)(ptr[0] + (ptr[1] << 8));
+            }
         }
 
         public int ReadInt32()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(int));
-            return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(int));
+                return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
+            }
         }
 
         public uint ReadUInt32()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(uint));
-            return (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(uint));
+                return (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
+            }
         }
 
         public long ReadInt64()
         {
-            uint lo = ReadUInt32();
-            uint hi = ReadUInt32();
-            return (long)(lo + ((ulong)hi << 32));
+            unchecked
+            {
+                byte* ptr = GetCurrentPointerAndAdvance(sizeof(long));
+                uint lo = (uint)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
+                uint hi = (uint)(ptr[4] + (ptr[5] << 8) + (ptr[6] << 16) + (ptr[7] << 24));
+                return (long)(lo + ((ulong)hi << 32));
+            }
         }
 
         public ulong ReadUInt64()
         {
-            uint lo = ReadUInt32();
-            uint hi = ReadUInt32();
-            return lo + ((ulong)hi << 32);
+            return (ulong)ReadInt64();
         }
 
         public float ReadSingle()
@@ -306,11 +323,14 @@ namespace System.Reflection.Metadata
             }
             else
             {
-                return new Guid(
-                    (int)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
-                    (short)(ptr[4] | (ptr[5] << 8)),
-                    (short)(ptr[6] | (ptr[7] << 8)),
-                    ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+                unchecked
+                {
+                    return new Guid(
+                        (int)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
+                        (short)(ptr[4] | (ptr[5] << 8)),
+                        (short)(ptr[6] | (ptr[7] << 8)),
+                        ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+                }
             }
         }
 
@@ -333,12 +353,15 @@ namespace System.Reflection.Metadata
                 throw new BadImageFormatException(SR.ValueTooLarge);
             }
 
-            return new decimal(
-                (int)(ptr[1] | (ptr[2] << 8) | (ptr[3] << 16) | (ptr[4] << 24)),
-                (int)(ptr[5] | (ptr[6] << 8) | (ptr[7] << 16) | (ptr[8] << 24)),
-                (int)(ptr[9] | (ptr[10] << 8) | (ptr[11] << 16) | (ptr[12] << 24)),
-                isNegative: (*ptr & 0x80) != 0,
-                scale: scale);
+            unchecked
+            {
+                return new decimal(
+                    (int)(ptr[1] | (ptr[2] << 8) | (ptr[3] << 16) | (ptr[4] << 24)),
+                    (int)(ptr[5] | (ptr[6] << 8) | (ptr[7] << 16) | (ptr[8] << 24)),
+                    (int)(ptr[9] | (ptr[10] << 8) | (ptr[11] << 16) | (ptr[12] << 24)),
+                    isNegative: (*ptr & 0x80) != 0,
+                    scale: scale);
+            }
         }
 
         public DateTime ReadDateTime()

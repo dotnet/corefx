@@ -127,8 +127,12 @@ namespace System.Reflection.Internal
         internal uint PeekUInt32(int offset)
         {
             CheckBounds(offset, sizeof(uint));
-            byte* ptr = Pointer + offset;
-            return (uint)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24));
+
+            unchecked
+            {
+                byte* ptr = Pointer + offset;
+                return (uint)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24));
+            }
         }
 
         /// <summary>
@@ -184,8 +188,12 @@ namespace System.Reflection.Internal
         internal ushort PeekUInt16(int offset)
         {
             CheckBounds(offset, sizeof(ushort));
-            byte* ptr = Pointer + offset;
-            return (ushort)(ptr[0] | (ptr[1] << 8));
+
+            unchecked
+            {
+                byte* ptr = Pointer + offset;
+                return (ushort)(ptr[0] | (ptr[1] << 8));
+            }
         }
 
         // When reference has tag bits.
@@ -248,11 +256,14 @@ namespace System.Reflection.Internal
             }
             else
             {
-                return new Guid(
-                    (int)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
-                    (short)(ptr[4] | (ptr[5] << 8)),
-                    (short)(ptr[6] | (ptr[7] << 8)),
-                    ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+                unchecked
+                {
+                    return new Guid(
+                        (int)(ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24)),
+                        (short)(ptr[4] | (ptr[5] << 8)),
+                        (short)(ptr[6] | (ptr[7] << 8)),
+                        ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+                }
             }
         }
 
