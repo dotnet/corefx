@@ -116,7 +116,7 @@ namespace System.Linq
                 return FillSet().ToList();
             }
 
-            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer) => _source.ToHashSet(comparer);
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer) => new HashSet<TSource>(this, comparer);
 
             public int GetCount(bool onlyIfCheap)
             {

@@ -17,6 +17,34 @@ namespace System.Linq.Tests
             public int GetHashCode(T obj) => EqualityComparer<T>.Default.GetHashCode(obj);
         }
 
+        public class Record
+        {
+            public string Name;
+            public int Score;
+
+            private sealed class RecordComparer : IEqualityComparer<Record>
+            {
+                public bool Equals(Record x, Record y)
+                {
+                    if (ReferenceEquals(x, y)) return true;
+                    if (ReferenceEquals(x, null)) return false;
+                    if (ReferenceEquals(y, null)) return false;
+                    if (x.GetType() != y.GetType()) return false;
+                    return string.Equals(x.Name, y.Name) && x.Score == y.Score;
+                }
+
+                public int GetHashCode(Record obj)
+                {
+                    unchecked
+                    {
+                        return ((obj.Name?.GetHashCode() ?? 0) * 397) ^ obj.Score;
+                    }
+                }
+            }
+
+            public static IEqualityComparer<Record> Comparer { get; } = new RecordComparer();
+        }
+
         [Fact]
         public void NoExplicitComparer()
         {
@@ -70,6 +98,18 @@ namespace System.Linq.Tests
         public void ThrowOnNullSource()
         {
             Assert.Throws<ArgumentNullException>(() => ((IEnumerable<object>)null).ToHashSet());
+        }
+
+        [Fact]
+        public void Distinct_WithComparer_ShouldConsiderComparer_Regression()
+        {
+            Record[] source = { new Record { Name = "A", Score = 1 }, new Record { Name = "A", Score = 1 } };
+
+            HashSet<Record> result = source.Distinct(Record.Comparer).ToHashSet();
+
+            Assert.NotNull(result);
+            Assert.Equal(EqualityComparer<Record>.Default, result.Comparer);
+            Assert.Equal(1, result.Count);
         }
 
         [Theory]
