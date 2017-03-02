@@ -158,6 +158,12 @@ OSStatus ExportImportKey(SecKeyRef* key, SecExternalItemType type)
         status = SecItemImport(exportData, nullptr, &actualFormat, &actualType, 0, nullptr, nullptr, &outItems);
     }
 
+    CFRelease(exportData);
+    exportData = nullptr;
+
+    CFRelease(keyParams.passphrase);
+    keyParams.passphrase = nullptr;
+
     if (status == noErr && outItems != nullptr)
     {
         CFIndex count = CFArrayGetCount(outItems);
