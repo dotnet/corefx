@@ -12,7 +12,6 @@ namespace System.Net.HttpRequest.Tests
 
     public partial class HttpRequestResponseSerializationTest
     {
-        [ActiveIssue(14068)]
         [OuterLoop]
         [Fact]
         public void SerializeDeserialize_Roundtrips()
