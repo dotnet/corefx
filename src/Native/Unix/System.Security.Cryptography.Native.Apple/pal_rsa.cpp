@@ -7,7 +7,7 @@
 static int32_t ExecuteCFDataTransform(
     SecTransformRef xform, uint8_t* pbData, int32_t cbData, CFDataRef* pDataOut, CFErrorRef* pErrorOut);
 
-extern "C" int AppleCryptoNative_RsaGenerateKey(
+extern "C" int32_t AppleCryptoNative_RsaGenerateKey(
     int32_t keySizeBits, SecKeychainRef tempKeychain, SecKeyRef* pPublicKey, SecKeyRef* pPrivateKey, int32_t* pOSStatus)
 {
     if (pPublicKey != nullptr)

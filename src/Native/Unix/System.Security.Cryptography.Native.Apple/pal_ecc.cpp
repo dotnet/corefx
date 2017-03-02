@@ -4,7 +4,7 @@
 
 #include "pal_ecc.h"
 
-extern "C" int AppleCryptoNative_EccGenerateKey(
+extern "C" int32_t AppleCryptoNative_EccGenerateKey(
     int32_t keySizeBits, SecKeychainRef tempKeychain, SecKeyRef* pPublicKey, SecKeyRef* pPrivateKey, int32_t* pOSStatus)
 {
     if (pPublicKey != nullptr)
