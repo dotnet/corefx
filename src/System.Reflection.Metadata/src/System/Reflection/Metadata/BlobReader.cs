@@ -260,7 +260,7 @@ namespace System.Reflection.Metadata
 
         public int ReadInt32()
         {
-            byte* ptr = GetCurrentPointerAndAdvance(sizeof(ushort));
+            byte* ptr = GetCurrentPointerAndAdvance(sizeof(int));
             return (int)(ptr[0] + (ptr[1] << 8) + (ptr[2] << 16) + (ptr[3] << 24));
         }
 
