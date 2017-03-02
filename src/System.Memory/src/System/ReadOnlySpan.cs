@@ -58,7 +58,7 @@ namespace System
                 ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             int arrayLength = array.Length;
-            if ((uint)start > (uint)arrayLength)
+            if (unchecked((uint)start) > (uint)arrayLength)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = arrayLength - start;
@@ -86,7 +86,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
-            if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
+            if (unchecked((uint)start) > (uint)array.Length || unchecked((uint)length) > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
@@ -314,7 +314,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> Slice(int start)
         {
-            if ((uint)start > (uint)_length)
+            if (unchecked((uint)start) > (uint)_length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
@@ -333,7 +333,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> Slice(int start, int length)
         {
-            if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
+            if (unchecked((uint)start) > (uint)_length || unchecked((uint)length) > (uint)(_length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
