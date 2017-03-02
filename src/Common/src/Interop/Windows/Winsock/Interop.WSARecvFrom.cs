@@ -10,28 +10,49 @@ internal static partial class Interop
 {
     internal static partial class Winsock
     {
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSARecvFrom(
-            [In] SafeCloseSocket socketHandle,
-            [In] ref WSABuffer buffer,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In, Out] ref SocketFlags socketFlags,
-            [In] IntPtr socketAddressPointer,
-            [In] IntPtr socketAddressSizePointer,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
 
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSARecvFrom(
-            [In] SafeCloseSocket socketHandle,
-            [In, Out] WSABuffer[] buffers,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In, Out] ref SocketFlags socketFlags,
-            [In] IntPtr socketAddressPointer,
-            [In] IntPtr socketAddressSizePointer,
-            [In] SafeNativeOverlapped overlapped,
-            [In] IntPtr completionRoutine);
+        internal static unsafe extern SocketError WSARecvFrom(
+            SafeCloseSocket socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            ref SocketFlags socketFlags,
+            IntPtr socketAddressPointer,
+            IntPtr socketAddressSizePointer,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine);
+
+        internal static unsafe SocketError WSARecvFrom(
+            SafeCloseSocket socketHandle,
+            ref WSABuffer buffer,
+            int bufferCount,
+            out int bytesTransferred,
+            ref SocketFlags socketFlags,
+            IntPtr socketAddressPointer,
+            IntPtr socketAddressSizePointer,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            WSABuffer localBuffer = buffer;
+            return WSARecvFrom(socketHandle, &localBuffer, bufferCount, out bytesTransferred, ref socketFlags, socketAddressPointer, socketAddressSizePointer, overlapped, completionRoutine);
+        }
+
+        internal static unsafe SocketError WSARecvFrom(
+            SafeCloseSocket socketHandle,
+            WSABuffer[] buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            ref SocketFlags socketFlags,
+            IntPtr socketAddressPointer,
+            IntPtr socketAddressSizePointer,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            fixed (WSABuffer* buffersPtr = &buffers[0])
+            {
+                return WSARecvFrom(socketHandle, buffersPtr, bufferCount, out bytesTransferred, ref socketFlags, socketAddressPointer, socketAddressSizePointer, overlapped, completionRoutine);
+            }
+        }
     }
 }

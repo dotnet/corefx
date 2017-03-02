@@ -11,27 +11,47 @@ internal static partial class Interop
     internal static partial class Winsock
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASendTo(
-            [In] SafeCloseSocket socketHandle,
-            [In] ref WSABuffer buffer,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] IntPtr socketAddress,
-            [In] int socketAddressSize,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static unsafe extern SocketError WSASendTo(
+            SafeCloseSocket socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            IntPtr socketAddress,
+            int socketAddressSize,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine);
 
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASendTo(
-            [In] SafeCloseSocket socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
+        internal static unsafe SocketError WSASendTo(
+            SafeCloseSocket socketHandle,
+            ref WSABuffer buffer,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            IntPtr socketAddress,
+            int socketAddressSize,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            WSABuffer localBuffer = buffer;
+            return WSASendTo(socketHandle, &localBuffer, bufferCount, out bytesTransferred, socketFlags, socketAddress, socketAddressSize, overlapped, completionRoutine);
+        }
+
+        internal static unsafe SocketError WSASendTo(
+            SafeCloseSocket socketHandle,
+            WSABuffer[] buffers,
+            int bufferCount,
             [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] IntPtr socketAddress,
-            [In] int socketAddressSize,
-            [In] SafeNativeOverlapped overlapped,
-            [In] IntPtr completionRoutine);
+            SocketFlags socketFlags,
+            IntPtr socketAddress,
+            int socketAddressSize,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            fixed (WSABuffer* buffersPtr = &buffers[0])
+            {
+                return WSASendTo(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, socketAddress, socketAddressSize, overlapped, completionRoutine);
+            }
+        }
     }
 }

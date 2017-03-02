@@ -11,33 +11,66 @@ internal static partial class Interop
     internal static partial class Winsock
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASend(
-            [In] SafeCloseSocket socketHandle,
-            [In] ref WSABuffer buffer,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static extern unsafe SocketError WSASend(
+            SafeCloseSocket socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine);
 
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static extern SocketError WSASend(
-            [In] SafeCloseSocket socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static extern unsafe SocketError WSASend(
+            IntPtr socketHandle,
+            WSABuffer* buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine);
 
-        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSASend")]
-        internal static extern SocketError WSASend_Blocking(
-            [In] IntPtr socketHandle,
-            [In] WSABuffer[] buffersArray,
-            [In] int bufferCount,
-            [Out] out int bytesTransferred,
-            [In] SocketFlags socketFlags,
-            [In] SafeHandle overlapped,
-            [In] IntPtr completionRoutine);
+        internal static unsafe SocketError WSASend(
+            SafeCloseSocket socketHandle,
+            ref WSABuffer buffer,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            WSABuffer localBuffer = buffer;
+            return WSASend(socketHandle, &localBuffer, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);
+        }
+
+        internal static unsafe SocketError WSASend(
+            SafeCloseSocket socketHandle,
+            WSABuffer[] buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            fixed (WSABuffer* buffersPtr = &buffers[0])
+            {
+                return WSASend(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);
+            }
+        }
+
+        internal static unsafe SocketError WSASend(
+            IntPtr socketHandle,
+            WSABuffer[] buffers,
+            int bufferCount,
+            out int bytesTransferred,
+            SocketFlags socketFlags,
+            SafeNativeOverlapped overlapped,
+            IntPtr completionRoutine)
+        {
+            fixed (WSABuffer* buffersPtr = &buffers[0])
+            {
+                return WSASend(socketHandle, buffersPtr, bufferCount, out bytesTransferred, socketFlags, overlapped, completionRoutine);
+            }
+        }
     }
 }
