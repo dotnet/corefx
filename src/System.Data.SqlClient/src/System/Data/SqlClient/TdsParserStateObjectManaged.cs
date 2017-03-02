@@ -15,9 +15,9 @@ namespace System.Data.SqlClient.SNI
         private SNIHandle _sessionHandle = null;              // the SNI handle we're to work on
         private SNIPacket _sniPacket = null;                // Will have to re-vamp this for MARS
         internal SNIPacket _sniAsyncAttnPacket = null;                // Packet to use to send Attn
-        private Dictionary<SNIPacket, SNIPacket> _pendingWritePackets = new Dictionary<SNIPacket, SNIPacket>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
+        private readonly Dictionary<SNIPacket, SNIPacket> _pendingWritePackets = new Dictionary<SNIPacket, SNIPacket>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
 
-        protected WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
+        private readonly WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
 
         public TdsParserStateObjectManaged(TdsParser parser) : base(parser) { }
 
@@ -96,14 +96,10 @@ namespace System.Data.SqlClient.SNI
                 try { }
                 finally
                 {
-                    if (packetHandle != null)
-                    {
-                        packetHandle.Dispose();
-                    }
-                    if (asyncAttnPacket != null)
-                    {
-                        asyncAttnPacket.Dispose();
-                    }
+                    
+                    packetHandle?.Dispose();
+                    asyncAttnPacket?.Dispose();
+                
                     if (sessionHandle != null)
                     {
                         sessionHandle.Dispose();
@@ -117,16 +113,13 @@ namespace System.Data.SqlClient.SNI
 
         internal override void DisposePacketCache()
         {
-            if (_writePacketCache != null)
+            lock (_writePacketLockObject)
             {
-                lock (_writePacketLockObject)
+                try { }
+                finally
                 {
-                    try { }
-                    finally
-                    {
-                        _writePacketCache.Dispose();
-                        // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
-                    }
+                    _writePacketCache.Dispose();
+                    // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
                 }
             }
         }
@@ -247,15 +240,6 @@ namespace System.Data.SqlClient.SNI
         }
 
         internal override uint WaitForSSLHandShakeToComplete() => 0;
-
-        internal override void DisposeHandle()
-        {
-            var sessionHandle = Handle;
-            if (sessionHandle != null)
-            {
-                sessionHandle.Dispose();
-            }
-        }
 
         internal sealed class WritePacketCache : IDisposable
         {

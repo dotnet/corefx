@@ -52,11 +52,9 @@ namespace System.Data.SqlClient
         internal int _outBytesUsed = TdsEnums.HEADER_LEN; // number of bytes used in internal write buffer -
                                                           // - initialize past header
                                                           // In buffer variables
-        protected byte[] _inBuff;                                      // internal read buffer - initialize on login
+        protected byte[] _inBuff;                         // internal read buffer - initialize on login
         internal int _inBytesUsed = 0;                   // number of bytes used in internal read buffer
         internal int _inBytesRead = 0;                   // number of bytes read into internal read buffer
-
-        internal abstract void DisposeHandle();
 
         internal int _inBytesPacket = 0;                   // number of bytes left in packet
 
@@ -77,7 +75,7 @@ namespace System.Data.SqlClient
 
         // SNI variables                                                     // multiple resultsets in one batch.
         
-        protected object _writePacketLockObject = new object();        // Used to synchronize access to _writePacketCache and _pendingWritePackets
+        protected readonly object _writePacketLockObject = new object();        // Used to synchronize access to _writePacketCache and _pendingWritePackets
 
         // Async variables
         private int _pendingCallbacks;                            // we increment this before each async read/write call and decrement it in the callback.  We use this to determine when to release the GcHandle...
@@ -174,9 +172,9 @@ namespace System.Data.SqlClient
         internal SqlErrorCollection _preAttentionErrors;
         internal SqlErrorCollection _preAttentionWarnings;
 
-        volatile private TaskCompletionSource<object> _writeCompletionSource = null;
-        volatile protected int _asyncWriteCount = 0;
-        volatile private Exception _delayedWriteAsyncCallbackException = null; // set by write async callback if completion source is not yet created
+        private volatile TaskCompletionSource<object> _writeCompletionSource = null;
+        protected volatile int _asyncWriteCount = 0;
+        private volatile Exception _delayedWriteAsyncCallbackException = null; // set by write async callback if completion source is not yet created
 
         // _readingcount is incremented when we are about to read.
         // We check the parser state afterwards.
@@ -263,7 +261,6 @@ namespace System.Data.SqlClient
 
             CreateSessionHandle(physicalConnection, async);
 
-            ;
             if (IsFailedHandle())
             {
                 AddError(parser.ProcessSNIError(this));
@@ -776,6 +773,8 @@ namespace System.Data.SqlClient
         internal abstract object AddPacketToPendingList(object packet);
 
         protected abstract void RemovePacketFromPendingList(object pointer);
+
+        internal abstract uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer);
 
         internal bool Deactivate()
         {
@@ -3938,43 +3937,42 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal abstract uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer);
         /*
 
-// leave this in. comes handy if you have to do Console.WriteLine style debugging ;)
-private void DumpBuffer() {
-Console.WriteLine("dumping buffer");
-Console.WriteLine("_inBytesRead = {0}", _inBytesRead);
-Console.WriteLine("_inBytesUsed = {0}", _inBytesUsed);
-int cc = 0; // character counter
-int i;
-Console.WriteLine("used buffer:");
-for (i=0; i< _inBytesUsed; i++) {
-if (cc==16) {
-Console.WriteLine();
-cc = 0;
-}
-Console.Write("{0,-2:X2} ", _inBuff[i]);
-cc++;
-}
-if (cc>0) {
-Console.WriteLine();
-}
+        // leave this in. comes handy if you have to do Console.WriteLine style debugging ;)
+                private void DumpBuffer() {
+                    Console.WriteLine("dumping buffer");
+                    Console.WriteLine("_inBytesRead = {0}", _inBytesRead);
+                    Console.WriteLine("_inBytesUsed = {0}", _inBytesUsed);
+                    int cc = 0; // character counter
+                    int i;
+                    Console.WriteLine("used buffer:");
+                    for (i=0; i< _inBytesUsed; i++) {
+                        if (cc==16) {
+                            Console.WriteLine();
+                            cc = 0;
+                        }
+                        Console.Write("{0,-2:X2} ", _inBuff[i]);
+                        cc++;
+                    }
+                    if (cc>0) {
+                        Console.WriteLine();
+                    }
 
-cc = 0;
-Console.WriteLine("unused buffer:");
-for (i=_inBytesUsed; i<_inBytesRead; i++) {
-if (cc==16) {
-Console.WriteLine();
-cc = 0;
-}
-Console.Write("{0,-2:X2} ", _inBuff[i]);
-cc++;
-}
-if (cc>0) {
-Console.WriteLine();
-}
-}
-*/
+                    cc = 0;
+                    Console.WriteLine("unused buffer:");
+                    for (i=_inBytesUsed; i<_inBytesRead; i++) {
+                        if (cc==16) {
+                            Console.WriteLine();
+                            cc = 0;
+                        }
+                        Console.Write("{0,-2:X2} ", _inBuff[i]);
+                        cc++;
+                    }
+                    if (cc>0) {
+                        Console.WriteLine();
+                    }
+                }
+        */
     }
 }

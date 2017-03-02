@@ -9,7 +9,7 @@ namespace System.Data.SqlClient
 {
     sealed internal partial class TdsParser
     {
-        private static bool s_fSSPILoaded = false; // bool to indicate whether library has been loaded
+        private static volatile bool s_fSSPILoaded = false; // bool to indicate whether library has been loaded
 
         internal void PostReadAsyncForMars()
         {

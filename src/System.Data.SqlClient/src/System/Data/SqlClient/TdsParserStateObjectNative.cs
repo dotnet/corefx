@@ -16,7 +16,7 @@ namespace System.Data.SqlClient
 
         private SNIPacket _sniPacket = null;                // Will have to re-vamp this for MARS
         internal SNIPacket _sniAsyncAttnPacket = null;                // Packet to use to send Attn
-        protected WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
+        private readonly WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
 
         public TdsParserStateObjectNative(TdsParser parser) : base(parser) { }
 
@@ -149,14 +149,9 @@ namespace System.Data.SqlClient
                 try { }
                 finally
                 {
-                    if (packetHandle != null)
-                    {
-                        packetHandle.Dispose();
-                    }
-                    if (asyncAttnPacket != null)
-                    {
-                        asyncAttnPacket.Dispose();
-                    }
+                    packetHandle?.Dispose();
+                    asyncAttnPacket?.Dispose();
+                    
                     if (sessionHandle != null)
                     {
                         sessionHandle.Dispose();
@@ -295,29 +290,17 @@ namespace System.Data.SqlClient
 
         internal override void DisposePacketCache()
         {
-            if (_writePacketCache != null)
+            lock (_writePacketLockObject)
             {
-                lock (_writePacketLockObject)
+                try { }
+                finally
                 {
-                    try { }
-                    finally
-                    {
-                        _writePacketCache.Dispose();
-                        // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
-                    }
+                    _writePacketCache.Dispose();
+                    // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
                 }
             }
         }
-
-        internal override void DisposeHandle()
-        {
-            var sessionHandle = Handle;
-            if (sessionHandle != null)
-            {
-                sessionHandle.Dispose();
-            }
-        }
-
+        
         internal sealed class WritePacketCache : IDisposable
         {
             private bool _disposed;

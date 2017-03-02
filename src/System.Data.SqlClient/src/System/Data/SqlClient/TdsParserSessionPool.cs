@@ -77,19 +77,6 @@ namespace System.Data.SqlClient
             }
         }
 
-        // This is called from a ThreadAbort - ensure that it can be run from a CER Catch
-        internal void BestEffortCleanup()
-        {
-            for (int i = 0; i < _cache.Count; i++)
-            {
-                TdsParserStateObject session = _cache[i];
-                if (null != session)
-                {
-                    session.DisposeHandle();
-                }
-            }
-        }
-
         internal void Dispose()
         {
             lock (_cache)

@@ -12,14 +12,16 @@ namespace System.Data.SqlClient
 
         public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
 
-        public EncryptionOptions EncryptionOptions {
+        public EncryptionOptions EncryptionOptions
+        {
             get
             {
                 return useManagedSni ? SNI.SNILoadHandle.SingletonInstance.Options : SNILoadHandle.SingletonInstance.Options;
             }
         }
 
-        public uint SNIStatus {
+        public uint SNIStatus
+        {
             get
             {
                 return useManagedSni ? SNILoadHandle.SingletonInstance.Status : SNI.SNILoadHandle.SingletonInstance.Status;

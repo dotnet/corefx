@@ -19,7 +19,7 @@ using MSS = Microsoft.SqlServer.Server;
 namespace System.Data.SqlClient
 {
 
-    struct SNIErrorDetails
+    internal struct SNIErrorDetails
     {
         public string errorMessage;
         public uint nativeError;
@@ -32,7 +32,7 @@ namespace System.Data.SqlClient
 
     // The TdsParser Object controls reading/writing to the netlib, parsing the tds,
     // and surfacing objects to the user.
-    sealed internal partial class TdsParser
+    internal sealed partial class TdsParser
     {
         static TdsParser()
         {
@@ -71,7 +71,7 @@ namespace System.Data.SqlClient
 
         internal Encoding _defaultEncoding = null;                  // for sql character data
 
-        private static EncryptionOptions s_sniSupportedEncryptionOption = TdsParserStateObjectFactory.Singleton.EncryptionOptions;// SNILoadHandle.SingletonInstance.Options;
+        private static EncryptionOptions s_sniSupportedEncryptionOption = TdsParserStateObjectFactory.Singleton.EncryptionOptions;
 
         private EncryptionOptions _encryptionOption = s_sniSupportedEncryptionOption;
 
