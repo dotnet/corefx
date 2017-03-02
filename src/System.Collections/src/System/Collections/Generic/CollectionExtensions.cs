@@ -19,12 +19,7 @@ namespace System.Collections.Generic
             }
 
             TValue value;
-            if(dictionary.TryGetValue(key, out value))
-            {
-                return value;
-            }
-
-            return defaultValue;
+            return dictionary.TryGetValue(key, out value) ? value : defaultValue;
         }
 
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
@@ -39,13 +34,8 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            TValue value;
-            if(dictionary.TryGetValue(key, out value))
-            {
-                return value;
-            }
-
-            return defaultValue;
+            TValue value;            
+            return dictionary.TryGetValue(key, out value) ? value : defaultValue;
         }
     }
 }

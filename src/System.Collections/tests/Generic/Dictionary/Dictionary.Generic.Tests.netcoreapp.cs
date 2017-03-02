@@ -34,7 +34,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void GetValueOrDefault_KeyExistsInIDictionary_ReturnsValue()
+        public void GetValueOrDefault_KeyExists_ReturnsValue()
         {
             int seed = 9600;
             TKey key = CreateTKey(seed++);
@@ -46,7 +46,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void GetValueOrDefault_KeyDoesntExistInIDictionary_ReturnsDefaultValue()
+        public void GetValueOrDefault_KeyDoesntExist_ReturnsDefaultValue()
         {
             int seed = 9600;
             TKey key = CreateTKey(seed++);
