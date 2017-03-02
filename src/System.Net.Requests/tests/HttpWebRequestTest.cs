@@ -111,7 +111,6 @@ namespace System.Net.Tests
             Assert.True(request.AllowReadStreamBuffering);
         }
 
-        [ActiveIssue(12637)]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ContentLength_Get_ExpectSameAsGetResponseStream(Uri remoteServer)
         {
@@ -381,7 +380,6 @@ namespace System.Net.Tests
             new object[] { System.Net.Test.Common.Configuration.Http.StatusCodeUri(true, 404) },
         };
 
-        [ActiveIssue(12236, TestPlatforms.Linux)]
         [Theory, MemberData(nameof(StatusCodeServers))]
         public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException(Uri remoteServer)
         {
