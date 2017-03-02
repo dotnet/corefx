@@ -116,7 +116,7 @@ namespace System.Reflection
         public static void WriteUInt64(this byte[] buffer, int start, ulong value)
         {
             WriteUInt32(buffer, start, unchecked((uint)value));
-            WriteUInt32(buffer, start, unchecked((uint)(value >> 32)));
+            WriteUInt32(buffer, start + 4, unchecked((uint)(value >> 32)));
         }
 
         public const int SizeOfSerializedDecimal = sizeof(byte) + 3 * sizeof(uint);
@@ -128,10 +128,10 @@ namespace System.Reflection
             uint low, mid, high;
             value.GetBits(out isNegative, out scale, out low, out mid, out high);
 
-            WriteByte(buffer, 0, (byte)(scale | (isNegative ? 0x80 : 0x00)));
-            WriteUInt32(buffer, 1, low);
-            WriteUInt32(buffer, 5, mid);
-            WriteUInt32(buffer, 9, high);
+            WriteByte(buffer, start, (byte)(scale | (isNegative ? 0x80 : 0x00)));
+            WriteUInt32(buffer, start + 1, low);
+            WriteUInt32(buffer, start + 5, mid);
+            WriteUInt32(buffer, start + 9, high);
         }
 
         public const int SizeOfGuid = 16;
