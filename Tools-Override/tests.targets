@@ -52,9 +52,7 @@
 
     <XunitOptions Condition="'$(Performance)'!='true'">$(XunitOptions) -notrait Benchmark=true</XunitOptions>
 
-    <!-- Temporary till we fix the whole filtering with  TargetGroup -->
-    <XunitOptions Condition="'$(BuildingNETFxVertical)' != 'true'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(BuildingNETFxVertical)' == 'true'">$(XunitOptions) -notrait category=nonnetfxtests</XunitOptions>
+    <XunitOptions>$(XunitOptions) -notrait category=non$(_bc_TargetGroup)tests</XunitOptions>
 
     <XunitOptions Condition="'$(XunitMaxThreads)'!=''">$(XunitOptions) -maxthreads $(XunitMaxThreads)</XunitOptions>
     <XunitTestAssembly Condition="'$(XunitTestAssembly)' == ''">$(TargetFileName)</XunitTestAssembly>
