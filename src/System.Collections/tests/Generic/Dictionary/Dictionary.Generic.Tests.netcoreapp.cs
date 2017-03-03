@@ -6,6 +6,38 @@ namespace System.Collections.Tests
 {
     public abstract partial class Dictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
     {
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Dictionary_Generic_TryAdd(int count)
+        {
+            var dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
+
+            TKey key = CreateTKey(seed: count);
+            TValue value = dictionary.ContainsKey(key) ? dictionary[key] : default(TValue);
+            int originalCount = dictionary.Count;
+            bool alreadyContainsKey = dictionary.ContainsKey(key);
+
+            Assert.Equal(!alreadyContainsKey, dictionary.TryAdd(key, default(TValue)));
+            Assert.Equal(alreadyContainsKey ? originalCount : originalCount + 1, dictionary.Count);
+            Assert.Equal(dictionary[key], value);
+
+            if (!dictionary.Any())
+            {
+                return;
+            }
+
+            // It's unlikely that randomly generated data will already be in the dictionary,
+            // so take a key that is known to be in the dictionary and make sure TryAdd returns
+            // false in that case.
+            key = dictionary.Keys.First();
+            value = dictionary[key];
+            originalCount = dictionary.Count;
+
+            Assert.False(dictionary.TryAdd(key, default(TValue)));
+            Assert.Equal(originalCount, dictionary.Count);
+            Assert.Equal(dictionary[key], value);
+        }
+
         [Fact]
         public void Dictionary_Generic_Constructor_IEnumerable_ThrowsOnNull()
         {
