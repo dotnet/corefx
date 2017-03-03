@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -16,6 +17,8 @@ namespace System.Tests
             bool isEnabled;
             Assert.False(AppContext.TryGetSwitch(switchName, out isEnabled));
             Assert.False(isEnabled);
+            IntPtr ptr = new IntPtr(42);
+            Marshal.StructureToPtr(42, ptr, true);
         }
 
 
