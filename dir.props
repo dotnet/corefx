@@ -70,12 +70,13 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
-  <!-- Explicitly setting
-       - SupportsUWP to true when TargetGroup is uap101*. This will enable the correct pinvoke checker to be picked
-       - BlockReflectionAttribute to true. This will enable injecting BlockReflectionAttribute.cs into the compile target.
-       TODO: Both of these properties are being set in buildtools targets, however they need to be updated to reflect uap101 changes.
-  -->
-  <PropertyGroup Condition="'$(TargetGroup)' == 'uap101' or '$(TargetGroup)' == 'uap101aot'">
+  <!-- Only if we're building a binary flavor that's only ever going to run on uapaot is OK for it to have #if NETNATIVE blocks -->
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
+    <DefineConstants>$(DefineConstants),NETNATIVE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- If we're building a binary that may ever run on UAP then define SupportsUWP so eg., we can scan the PInvokes it does -->
+  <PropertyGroup Condition="'$(_bc_TargetGroup)' == 'uap' or '$(_bc_TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">
     <SupportsUWP>true</SupportsUWP>
     <BlockReflectionAttribute>true</BlockReflectionAttribute>
   </PropertyGroup>
