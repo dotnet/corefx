@@ -198,23 +198,34 @@
       Overwrite="true"
       Encoding="Ascii" />
 
+        <!--======================================================
+                      Section for uapaot ilc test runs
+            ====================================================== -->
     <PropertyGroup Condition="'$(UseDotNetNativeToolchain)' == 'true'">
       <ILCBuildType Condition="'$(ILCBuildType)' == ''">ret</ILCBuildType>
+      <_TestILCFolder>$(TestILCFolder)</_TestILCFolder>
+      <!--When archiving tests, ilc.exe will be located at %RUNTIME_PATH%\..\TestILC-->
+      <_TestILCFolder Condition="'$(ArchiveTests)' == 'true'">%RUNTIME_PATH%\TestILC</_TestILCFolder>
+      <_Runtime_Path>%RUNTIME_PATH%\ILCInputFolder\</_Runtime_Path>
     </PropertyGroup>
     
-    <!-- For .NET Native compilation, we first need to generate a native executable if possible. -->
     <ItemGroup Condition="'$(UseDotNetNativeToolchain)' == 'true' AND '$(Performance)'!='true'" >
       <IlcInputFolderContents Include="$(ILCFXInputFolder)/*" />
-      <TestCommandLines Include="mklink /H %(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension) %(IlcInputFolderContents.FullPath)" />
-      <TestCommandLines Include="copy /y $(TestILCFolder)\default.rd.xml  %EXECUTION_DIR%" />
-      <TestCommandLines Include="call $(TestILCFolder)\ilc.exe -ExeName xunit.console.netcore.exe -in %EXECUTION_DIR% -out %EXECUTION_DIR%\native -usedefaultpinvoke -buildtype $(ILCBuildType) -v diag || exit /b %ERRORLEVEL%"/>
-      <TestCommandLines Include="copy /y $(TestILCFolder)\CRT\vcruntime140_app.dll %EXECUTION_DIR%\native" />
+      <TestCommandLines Include="mklink /H %(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension) $(_Runtime_Path)%(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension)" />
+      <TestCommandLines Include="copy /y $(_TestILCFolder)\default.rd.xml  %EXECUTION_DIR%" />
+      <TestCommandLines Include="call $(_TestILCFolder)\ilc.exe -ExeName xunit.console.netcore.exe -in %EXECUTION_DIR% -out %EXECUTION_DIR%\native -usedefaultpinvoke -buildtype $(ILCBuildType) -v diag" />
+      <TestCommandLines Include="set ILCERRORLEVEL=%ERRORLEVEL%" />
+      <TestCommandLines Include="if NOT [%ILCERRORLEVEL%] == [0] exit /b %ILCERRORLEVEL%" />
+      <TestCommandLines Include="copy /y $(_TestILCFolder)\CRT\vcruntime140_app.dll %EXECUTION_DIR%\native" />
       <TestCommandLines Include="echo > %EXECUTION_DIR%\native\$(XunitTestAssembly)"/>
       <TestCommandLines Include="cd native"/>
       <PostExecutionTestCommandLines Include="type Xunit.Console.Output.txt" />
       <PostExecutionTestCommandLines Include="copy /y testResults.xml %EXECUTION_DIR%\" />
     </ItemGroup>
 
+        <!--======================================================
+                      Section for uap F5 test runs
+            ====================================================== -->
     <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true'">
       <!-- The location where the logs will be written by the test runner -->
       <UAP_Results_Path Condition="'$(UAP_Results_Path)'==''">%USERPROFILE%\Documents\TestResults\</UAP_Results_Path>

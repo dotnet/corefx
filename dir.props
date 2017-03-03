@@ -265,8 +265,7 @@
     <UAPTestSharedFrameworkPath>$(NETCoreAppTestRootPath)UAPLayout</UAPTestSharedFrameworkPath>	
 
     <!-- Constructed shared fx path for testing -->
-    <TestSharedFxDir Condition="'$(BinPlaceTestSharedFramework)' == 'true' or '$(BinPlaceUAPFramework)'=='true'">$(NETCoreAppTestRootPath)</TestSharedFxDir>
-    <TestSharedFxDir Condition="'$(BuildingUAPAOTVertical)' == 'true'">$(ILCFXInputFolder)</TestSharedFxDir>
+    <TestSharedFxDir Condition="'$(BinPlaceTestSharedFramework)' == 'true' or '$(BinPlaceUAPFramework)'=='true' or '$(BinPlaceILCInputFolder)' == 'true'">$(NETCoreAppTestRootPath)</TestSharedFxDir>
     <UseDotNetNativeToolchain Condition="'$(BuildingUAPAOTVertical)' == 'true' And '$(TestILCFolder)' != ''">true</UseDotNetNativeToolchain>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
