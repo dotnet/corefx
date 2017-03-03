@@ -57,6 +57,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
@@ -66,6 +67,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
+        //[SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);

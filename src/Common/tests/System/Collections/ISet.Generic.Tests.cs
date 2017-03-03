@@ -419,6 +419,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ISet_Generic_IntersectWith_Itself(int setLength)
         {
             ISet<T> set = GenericISetFactory(setLength);
