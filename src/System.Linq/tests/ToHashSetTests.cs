@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 using static System.Linq.Enumerable;
 
@@ -19,25 +20,18 @@ namespace System.Linq.Tests
 
         public class Record
         {
-            public string Name;
-            public int Score;
+            public string Name { get; set; }
+            public int Score { get; set; }
 
             private sealed class RecordComparer : IEqualityComparer<Record>
             {
-                public bool Equals(Record x, Record y)
-                {
-                    if (ReferenceEquals(x, y)) return true;
-                    if (ReferenceEquals(x, null)) return false;
-                    if (ReferenceEquals(y, null)) return false;
-                    if (x.GetType() != y.GetType()) return false;
-                    return string.Equals(x.Name, y.Name) && x.Score == y.Score;
-                }
+                public bool Equals(Record x, Record y) => string.Equals(x.Name, y.Name) && x.Score == y.Score;
 
                 public int GetHashCode(Record obj)
                 {
                     unchecked
                     {
-                        return ((obj.Name?.GetHashCode() ?? 0) * 397) ^ obj.Score;
+                        return (obj.Name.GetHashCode() * 397) ^ obj.Score;
                     }
                 }
             }
@@ -101,7 +95,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Distinct_WithComparer_ShouldConsiderComparer_Regression()
+        public void DistinctShouldConsiderIteratorComparerRegression()
         {
             Record[] source = { new Record { Name = "A", Score = 1 }, new Record { Name = "A", Score = 1 } };
 
@@ -216,9 +210,17 @@ namespace System.Linq.Tests
             // Some methods have specific handling for Arrays, Lists and IEnumerables
             foreach (var source in sources)
             {
+                yield return source;
+
+                // Implements IList<T>, but isn't a type we're likely to explicitly optimize for.
+                yield return new LinkedList<int>(source);
+
                 yield return source.ToArray();
-                yield return new List<int>(source);
-                yield return new SortedSet<int>(source);
+                yield return source.ToList();
+                yield return source.ToImmutableArray();
+
+                // Is not an ICollection<T>, but does implement ICollection and IReadOnlyCollection<T>.
+                yield return new Queue<int>(source);
             }
 
             yield return Repeat(0, 50);
