@@ -241,8 +241,8 @@ namespace System.Text.RegularExpressions.Tests
         // Not character class substraction
         [InlineData("[A-[]+", RegexOptions.None)]
         // Invalid testgroup
-        [InlineData("(?(?m))", RegexOptions.None)]
-        [InlineData("(?(?m)", RegexOptions.None)]
+        [InlineData("(?(?e))", RegexOptions.None)]
+        [InlineData("(?(?a)", RegexOptions.None)]
         [InlineData("(?(?", RegexOptions.None)]
         [InlineData("(?(", RegexOptions.None)]
         [InlineData("?(a:b)", RegexOptions.None)]
@@ -267,9 +267,10 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("(?(?S))", RegexOptions.None, typeof(NullReferenceException))]
         [InlineData("(?(?x))", RegexOptions.None, typeof(NullReferenceException))]
         [InlineData("(?(?X))", RegexOptions.None, typeof(NullReferenceException))]
-        [InlineData("(?(?e))", RegexOptions.None, typeof(NullReferenceException))]
-        [InlineData(" (?(?e))", RegexOptions.None, typeof(OutOfMemoryException))]
-        public void Ctor_InvalidPattern_NetCore(string pattern, RegexOptions options, Type exceptionType)
+        [InlineData("(?(?n))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData("(?(?N))", RegexOptions.None, typeof(NullReferenceException))]
+        [InlineData(" (?(?n))", RegexOptions.None, typeof(OutOfMemoryException))]
+        public void Ctor_InvalidPattern(string pattern, RegexOptions options, Type exceptionType)
         {
             if (RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
             {
