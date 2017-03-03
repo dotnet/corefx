@@ -135,47 +135,53 @@ namespace System.Linq.Tests
 
         private static IEnumerable<object[]> GetData()
         {
-            var testData = new TestDataBuilder<int>();
+            var builder = new TestDataBuilder<int>();
 
-            testData.AddDefaultComparers();
+            builder.AddDefaultComparers();
 
-            testData.AddActions(
+            builder.AddActions(
                 source => source.Concat(Range(40, 50)),
                 source => source.DefaultIfEmpty(),
                 source => source.Append(100),
-                source => source.Prepend(100),
+                source => source.Prepend(100).Append(200),
                 source => source.Distinct(),
-                source => source.OrderBy(x => x),
+                source => source.Skip(1),
                 source => source.Take(1),
+                source => source.OrderBy(x => x),
+                source => source.OrderBy(x => x).Take(1),
+                source => source.OrderBy(x => x).Take(1000),
                 source => source.Reverse(),
                 source => source.SelectMany(x => new[] { x, 0 }),
                 source => source.Union(Range(20, 50)),
                 source => source.Select(x => x),
                 source => source.Skip(1).Select(x => x),
                 source => source.Where(x => x < 40),
-                source => source.Where(x => x < 40).Select(x => x)
+                source => source.Where(x => x < 40).Select(x => x),
+
+                source => source.GroupBy(i => i, (i, ints) => i),
+                source => source.GroupBy(i => i, i => i, (i, ints) => i)
             );
 
-            testData.AddSources(GetSources());
+            builder.AddSources(GetSources());
 
-            return testData.GetData();
+            return builder.GetData();
         }
 
         private static IEnumerable<object[]> GetGroupingData()
         {
-            var testData = new TestDataBuilder<IGrouping<int, int>>();
+            var builder = new TestDataBuilder<IGrouping<int, int>>();
 
-            testData.AddDefaultComparers();
+            builder.AddDefaultComparers();
 
-            testData.AddActions(
+            builder.AddActions(
                 source => source.GroupBy(x => x),
                 source => source.GroupBy(x => x, x => x),
                 source => source.ToLookup(i => i)
             );
 
-            testData.AddSources(GetSources());
+            builder.AddSources(GetSources());
 
-            return testData.GetData();
+            return builder.GetData();
         }
 
         /// <summary>
@@ -196,7 +202,7 @@ namespace System.Linq.Tests
                 Assert.Equal(expectedGroup.AsEnumerable(), group.AsEnumerable());
             }
         }
-        
+
         private static IEnumerable<IEnumerable<int>> GetSources()
         {
             // Create empty, distinct and repeated sources
