@@ -57,27 +57,40 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
+#if netcoreapp
             SortedSet<T> set = new SortedSet<T>(enumerable, GetIComparer());
             Assert.True(set.SetEquals(enumerable));
+#else
+            // There is a bug in desktop that when the comparer is null it is overriding it to Default, but in one of the usages is not using the global comparer but the one passed in to the constructor.
+            // This is being done to not loose coverage and keep track of this bug.
+            IComparer<T> comparer = GetIComparer();
+            SortedSet<T> set = new SortedSet<T>(enumerable, comparer ?? Comparer<T>.Default);
+            Assert.True(set.SetEquals(enumerable));
+#endif
         }
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        //[SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
+#if netcoreapp
             SortedSet<T> set = new SortedSet<T>(enumerable, comparer: null);
             Assert.True(set.SetEquals(enumerable));
+#else
+            // There is a bug in desktop that when the comparer is null it is overriding it to Default, but in one of the usages is not using the global comparer but the one passed in to the constructor.
+            // This is being done to not loose coverage and keep track of this bug.
+            SortedSet<T> set = new SortedSet<T>(enumerable, Comparer<T>.Default);
+            Assert.True(set.SetEquals(enumerable));
+#endif
         }
 
-        #endregion
+#endregion
 
-        #region Max and Min
+#region Max and Min
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -98,9 +111,9 @@ namespace System.Collections.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region GetViewBetween
+#region GetViewBetween
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -203,7 +216,7 @@ namespace System.Collections.Tests
 
         #endregion
 
-        #region RemoveWhere
+#region RemoveWhere
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -231,9 +244,9 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentNullException>("match", () => set.RemoveWhere(null));
         }
 
-        #endregion
+#endregion
 
-        #region Enumeration and Ordering
+#region Enumeration and Ordering
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -277,9 +290,9 @@ namespace System.Collections.Tests
             Assert.True(mySubSet.SetEquals(en)); //"Expected to be the same set."
         }
 
-        #endregion
+#endregion
 
-        #region CopyTo
+#region CopyTo
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -315,9 +328,9 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => set.CopyTo(actual, 0, int.MinValue));
         }
 
-        #endregion
+#endregion
 
-        #region CreateSetComparer
+#region CreateSetComparer
 
         [Fact]
         public void SetComparer_SetEqualsTests()
@@ -352,6 +365,6 @@ namespace System.Collections.Tests
             Assert.True(comparerSet1.SetEquals(set));
             Assert.True(comparerSet2.SetEquals(set));
         }
-        #endregion
+#endregion
     }
 }
