@@ -234,6 +234,49 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        public static void EnsureCapacity_NewCapacityLessThanMin_CapsToMaxArrayLength()
+        {
+            // A situation like this occurs for very large lengths of SortedList.
+            // To avoid allocating several GBs of memory and making this test run for a very
+            // long time, we can use reflection to invoke SortedList's growth method manually.
+            // This is relatively brittle, as it relies on accessing a private method via reflection
+            // that isn't guaranteed to be stable.
+            const int InitialCapacity = 10;
+            const int MinCapacity = InitialCapacity * 2 + 1;
+            var sortedList = new SortedList(InitialCapacity);
+
+            MethodInfo ensureCapacity = sortedList.GetType().GetMethod("EnsureCapacity", BindingFlags.NonPublic | BindingFlags.Instance);
+            ensureCapacity.Invoke(sortedList, new object[] { MinCapacity });
+
+            Assert.Equal(MinCapacity, sortedList.Capacity);
+        }
+
+        [Fact]
+        [OuterLoop("Takes a long time (~10s) as the test creates a very large SortedList")]
+        public static void GrowthTest()
+        {
+            // A situation like this occurs for very large lengths of SortedList.
+            // To avoid having to actually add all the elements to the list, which would take a long
+            // time, we can use reflection to invoke SortedList's growth method manually.
+            // This is relatively brittle, as it relies on accessing a private method via reflection
+            // that isn't guaranteed to be stable.
+            const int InitialCapacity = 0X7FEFFFFF / 2 + 1;
+            const int MinCapacity = int.MaxValue;
+            var sortedList = new SortedList(InitialCapacity);
+
+            MethodInfo ensureCapacity = sortedList.GetType().GetMethod("EnsureCapacity", BindingFlags.NonPublic | BindingFlags.Instance);
+            try
+            {
+                ensureCapacity.Invoke(sortedList, new object[] { MinCapacity });
+                Assert.Equal(MinCapacity, sortedList.Capacity);
+            }
+            catch (TargetInvocationException ex) when(ex.InnerException is OutOfMemoryException) 
+            {
+                Assert.Equal(InitialCapacity, sortedList.Capacity);
+            }
+        }
+
+        [Fact]
         public static void Add()
         {
             var sortList1 = new SortedList();
