@@ -78,7 +78,8 @@
   <!-- If we're building a binary that may ever run on UAP then define SupportsUWP so eg., we can scan the PInvokes it does -->
   <PropertyGroup Condition="'$(_bc_TargetGroup)' == 'uap' or '$(_bc_TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">
     <SupportsUWP>true</SupportsUWP>
-    <BlockReflectionAttribute>true</BlockReflectionAttribute>
+    <!-- This was not previously enabled but needs to be investigated and enabled or removed 
+    <BlockReflectionAttribute>true</BlockReflectionAttribute> -->
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to dnu -->
