@@ -10,6 +10,13 @@ namespace System.ConfigurationTests
 {
     public class UrlPathTests
     {
+        private const string TEST_FILE_NAME = "TestFileForUrlPathTests.txt";
+        private const string TEST_DIRECTORY_PATH = "C:\\Directory";
+        private const string TEST_SUBDIRECTORY_PATH = TEST_DIRECTORY_PATH + "\\SubDirectory";
+
+        public const string TEST_DIRECTORY_PATH_WITH_BACKSLASK = TEST_DIRECTORY_PATH + "\\";
+        public const string TEST_SUBDIRECTORY_PATH_WITH_BACKSLASH = TEST_SUBDIRECTORY_PATH + "\\";
+
         [Fact]
         public void GetDirectoOrRootName_Null()
         {
@@ -28,12 +35,12 @@ namespace System.ConfigurationTests
         public void GetDirectoryOrRootName_FileExists()
         {
             string exePath = AppDomain.CurrentDomain.BaseDirectory;
-            Stream fileStream = File.Create("TestFileForUrlPathTests.txt");
+            Stream fileStream = File.Create(TEST_FILE_NAME);
             fileStream.Close();
 
-            string test = UrlPath.GetDirectoryOrRootName(exePath +"TestFileForUrlPathTests.txt");
+            string test = UrlPath.GetDirectoryOrRootName(exePath + TEST_FILE_NAME);
 
-            File.Delete("TestFileForUrlPathTests.txt");
+            File.Delete(TEST_FILE_NAME);
 
             //exePath has the trailing \.  Gotta get rid of it.
             Assert.Equal(exePath.Substring(0, exePath.Length - 1), test);
@@ -51,6 +58,52 @@ namespace System.ConfigurationTests
         public void IsEqualOrSubDirectory_NullDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory(null, "Hello");
+            Assert.Equal(true, test);
         }
+
+        [Fact]
+        public void IsEqualOrSubDirectory_NullSubDir()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory("Hello", null);
+            Assert.Equal(false, test);
+        }
+
+        [Fact]
+        public void IsEqualOrSubDirectory_NullDirAndSubDir()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory(null, null);
+
+            Assert.Equal(true, test);
+        }
+
+        [Fact]
+        public void IsEqualOrSubDIrectory_EmptyDir()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory("", null);
+            Assert.Equal(true, test);
+        }
+
+        [Fact]
+        public void IsEqualOrSubDirectory_NotEmptyDir_EmptySubDir()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory("Hello", "");
+            Assert.Equal(false, test);
+        }
+
+        [Fact]
+        public void IsEqualOrSubDirectory_SubDirAndDirAreReversed_NoTrailingBackslash()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory(TEST_SUBDIRECTORY_PATH, TEST_DIRECTORY_PATH);
+            Assert.Equal(false, test);
+        }
+
+        [Fact]
+        public void IsEqualOrSubDirectory_SubDirIsASubDirOfDir_NoTrailingBackslash()
+        {
+            bool test = UrlPath.IsEqualOrSubdirectory(TEST_DIRECTORY_PATH, TEST_SUBDIRECTORY_PATH);
+            Assert.Equal(true, test);
+        }
+
+        
     }
 }
