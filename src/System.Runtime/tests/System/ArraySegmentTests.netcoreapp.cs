@@ -60,6 +60,19 @@ namespace System.Tests
         {
             Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).GetEnumerator());
         }
+
+        [Fact]
+        public void Slice_Default_ThrowsInvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).Slice(0));
+            Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).Slice(0, 0));
+        }
+
+        [Fact]
+        public void ToArray_Default_ThrowsInvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).ToArray());
+        }
     }
 
     public static partial class ArraySegment_Tests
