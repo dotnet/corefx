@@ -20,10 +20,6 @@ namespace System.Net.Sockets
     {
         public const bool SupportsMultipleConnectAttempts = true;
 
-        private static readonly int s_protocolInformationSize = Marshal.SizeOf<Interop.Winsock.WSAPROTOCOL_INFO>();
-
-        public static int ProtocolInformationSize { get { return s_protocolInformationSize; } }
-
         private static void MicrosecondsToTimeValue(long microseconds, ref Interop.Winsock.TimeValue socketTime)
         {
             const int microcnv = 1000000;
@@ -149,7 +145,7 @@ namespace System.Net.Sockets
                 }
 
                 // This may throw ObjectDisposedException.
-                SocketError errorCode = Interop.Winsock.WSASend_Blocking(
+                SocketError errorCode = Interop.Winsock.WSASend(
                     handle.DangerousGetHandle(),
                     WSABuffers,
                     count,
@@ -275,7 +271,7 @@ namespace System.Net.Sockets
                 }
 
                 // This can throw ObjectDisposedException.
-                SocketError errorCode = Interop.Winsock.WSARecv_Blocking(
+                SocketError errorCode = Interop.Winsock.WSARecv(
                     handle.DangerousGetHandle(),
                     WSABuffers,
                     count,
