@@ -17,6 +17,7 @@ namespace System.Runtime.Loader.Tests
         private const string TestAssembly = "System.Runtime.Loader.Test.Assembly";
 
         [Fact(Skip = "https://github.com/dotnet/corefx/issues/15101")]
+        [ActiveIssue(15101)]
         public static void GetAssemblyNameTest_ValidAssembly()
         {
             string originalDir = Environment.CurrentDirectory;
@@ -90,6 +91,7 @@ namespace System.Runtime.Loader.Tests
         }
 
         [Fact(Skip = "https://github.com/dotnet/corefx/issues/15101")]
+        [ActiveIssue(15101)]
         public static void LoadFromAssemblyName_ValidTrustedPlatformAssembly()
         {
             string originalDir = Environment.CurrentDirectory;
