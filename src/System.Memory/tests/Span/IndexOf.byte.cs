@@ -136,8 +136,9 @@ namespace System.SpanTests
         {
             int length = 100;
             byte[] a = new byte[length];
+            a[50] = 99;
             Span<byte> span = new Span<byte>(a);
-            int idx = span.IndexOf(length + 1, 10, 100);
+            int idx = span.IndexOf(length + 1, 10, 99);
             Assert.Equal(-1, idx);
         }
 
@@ -145,8 +146,9 @@ namespace System.SpanTests
         {
             int length = 100;
             byte[] a = new byte[length];
+            a[50] = 99;
             Span<byte> span = new Span<byte>(a);
-            int idx = span.IndexOf(0, 0, 100);
+            int idx = span.IndexOf(0, 0, 99);
             Assert.Equal(-1, idx);
         }
     }
