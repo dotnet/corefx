@@ -70,5 +70,84 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
         }
+
+        [Fact]
+        public static void TestMatchWithIndexAndCount_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            a[50] = 99;
+            Span<byte> span = new Span<byte>(a);
+
+            int idx = span.IndexOf(45, 10, 99);
+            Assert.Equal(50, idx);
+        }
+
+        [Fact]
+        public static void TestMatchWithIndexAndCountGreaterThanLength_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            a[50] = 99;
+            Span<byte> span = new Span<byte>(a);
+
+            int idx = span.IndexOf(45, 75, 99);
+            Assert.Equal(50, idx);
+        }
+
+        [Fact]
+        public static void TestMatchWithCountGreaterThanLength_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            a[50] = 99;
+            Span<byte> span = new Span<byte>(a);
+
+            int idx = span.IndexOf(0, 105, 99);
+            Assert.Equal(50, idx);
+        }
+
+        [Fact]
+        public static void TestNoMatchWithCountGreaterThanLength_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            a[50] = 99;
+            Span<byte> span = new Span<byte>(a);
+
+            int idx = span.IndexOf(0, 105, 5);
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void TestNoMatchWithIndexAndCount_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            a[50] = 99;
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
+
+            int idx = span.IndexOf(45, 3, 99);
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void StartIndexTooLargeIndexOf_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            Span<byte> span = new Span<byte>(a);
+            int idx = span.IndexOf(length + 1, 10, 100);
+            Assert.Equal(-1, idx);
+        }
+
+        public static void ZeroCountIndexOf_Byte()
+        {
+            int length = 100;
+            byte[] a = new byte[length];
+            Span<byte> span = new Span<byte>(a);
+            int idx = span.IndexOf(0, 0, 100);
+            Assert.Equal(-1, idx);
+        }
     }
 }

@@ -87,6 +87,7 @@ namespace System
     {
          public static int IndexOf<T>(this Span<T> span, T value) where T:struct, IEquatable<T> { throw null; }
          public static int IndexOf(this Span<byte> span, byte value) { throw null; }
+         public static int IndexOf(this Span<byte> span, int index, int count, byte value) { throw null; }
          public static int IndexOf(this Span<char> span, char value) { throw null; }
 
          public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T:struct, IEquatable<T> { throw null; }
@@ -99,6 +100,7 @@ namespace System
 
         public static int IndexOf<T>(this ReadOnlySpan<T> span, T value) where T : struct, IEquatable<T> { throw null; }
         public static int IndexOf(this ReadOnlySpan<byte> span, byte value) { throw null; }
+        public static int IndexOf(this ReadOnlySpan<byte> span, int index, int count, byte value) { throw null; }
         public static int IndexOf(this ReadOnlySpan<char> span, char value) { throw null; }
 
         public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : struct, IEquatable<T> { throw null; }
