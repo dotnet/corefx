@@ -322,12 +322,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
 
             Assert.Throws<PlatformNotSupportedException>(
-                () =>
-                {
-                    using (Cert.Import(TestData.EmptyPfx, null, X509KeyStorageFlags.EphemeralKeySet))
-                    {
-                    }
-                });
+                () => new X509Certificate2(TestData.EmptyPfx, string.Empty, X509KeyStorageFlags.EphemeralKeySet));
         }
 #endif
 
