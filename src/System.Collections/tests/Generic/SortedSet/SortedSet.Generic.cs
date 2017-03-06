@@ -29,7 +29,6 @@ namespace System.Collections.Tests
 
         protected override bool DefaultValueAllowed => true;
 
-        [ActiveIssue(16760)]
         [Fact]
         public void SortedSet_Generic_GetViewBetween_MinMax()
         {
