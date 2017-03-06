@@ -15,7 +15,8 @@
     <ValidPinvokeMappings>$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32Apis.txt</ValidPinvokeMappings>
 
     <!-- Further restrict to API allowed for UWP -->
-    <ValidPinvokeMappings Condition="'$(SupportsUWP)'=='true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
+    <EnablePinvokeUWPAnalyzer Condition="'$(EnablePinvokeUWPAnalyzer)' == ''">true</EnablePinvokeUWPAnalyzer>
+    <ValidPinvokeMappings Condition="'$(EnableWinRT)'=='true' and '$(EnablePinvokeUWPAnalyzer)' == 'true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -41,7 +42,7 @@
     <AdditionalFiles Condition="'$(ValidPinvokeMappings)' != ''" Include="$(ValidPinvokeMappings)"/>
 
     <!-- Disable any analyzers that should not run -->
-    <DisabledAnalyzers Condition="'$(IsTestProject)' == true or '$(TargetsUnix)' == 'true'" Include="PinvokeAnalyzer"/>
+    <DisabledAnalyzers Condition="'$(IsTestProject)' == 'true' or '$(TargetsUnix)' == 'true'" Include="PinvokeAnalyzer"/>
     <DisabledAnalyzers Condition="'$(TargetsWindows)'=='true' and ($(TargetGroup.Contains('net46')) or $(TargetGroup.Contains('net45')))" Include="PinvokeAnalyzer" />
   </ItemGroup>
 
