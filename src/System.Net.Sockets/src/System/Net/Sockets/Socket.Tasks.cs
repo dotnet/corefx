@@ -365,9 +365,9 @@ namespace System.Net.Sockets
 
             if (pending)
             {
-                // The operation completed asynchronously.  Get the task for the operation,
-                // with appropriate synchronization to coordinate with the async callback
-                // that'll be completing the task.
+                // The operation is completing asynchronously (it may have already completed).
+                // Get the task for the operation, with appropriate synchronization to coordinate
+                // with the async callback that'll be completing the task.
                 bool responsibleForReturningToPool;
                 t = saea.GetCompletionResponsibility(out responsibleForReturningToPool).Task;
                 if (responsibleForReturningToPool)
