@@ -57,35 +57,32 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        public void SortedSet_Generic_Constructor_IEnumerable_IComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp)] //Netfx bug dotnet/corefx #16790
+        public void SortedSet_Generic_Constructor_IEnumerable_IComparer_Netcoreapp(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
-#if netcoreapp
             SortedSet<T> set = new SortedSet<T>(enumerable, GetIComparer());
             Assert.True(set.SetEquals(enumerable));
-#else
-            // There is a bug in desktop that when the comparer is null it is overriding it to Default, but in one of the usages is not using the global comparer but the one passed in to the constructor.
-            // This is being done to not loose coverage and keep track of this bug.
-            IComparer<T> comparer = GetIComparer();
-            SortedSet<T> set = new SortedSet<T>(enumerable, comparer ?? Comparer<T>.Default);
-            Assert.True(set.SetEquals(enumerable));
-#endif
         }
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
-        public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] //Netfx bug dotnet/corefx #16790
+        public void SortedSet_Generic_Constructor_IEnumerable_IComparer_Netfx(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
         {
             IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
-#if netcoreapp
+            SortedSet<T> set = new SortedSet<T>(enumerable, GetIComparer() ?? Comparer<T>.Default);
+            Assert.True(set.SetEquals(enumerable));
+        }
+
+        [Theory]
+        [MemberData(nameof(EnumerableTestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] //Netfx bug dotnet/corefx #16790
+        public void SortedSet_Generic_Constructor_IEnumerable_IComparer_NullComparer_Netcoreapp(EnumerableType enumerableType, int setLength, int enumerableLength, int numberOfMatchingElements, int numberOfDuplicateElements)
+        {
+            IEnumerable<T> enumerable = CreateEnumerable(enumerableType, null, enumerableLength, 0, 0);
             SortedSet<T> set = new SortedSet<T>(enumerable, comparer: null);
             Assert.True(set.SetEquals(enumerable));
-#else
-            // There is a bug in desktop that when the comparer is null it is overriding it to Default, but in one of the usages is not using the global comparer but the one passed in to the constructor.
-            // This is being done to not loose coverage and keep track of this bug.
-            SortedSet<T> set = new SortedSet<T>(enumerable, Comparer<T>.Default);
-            Assert.True(set.SetEquals(enumerable));
-#endif
         }
 
 #endregion
