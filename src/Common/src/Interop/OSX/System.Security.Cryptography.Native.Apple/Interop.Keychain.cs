@@ -9,7 +9,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
-using System.Security.Cryptography.X509Certificates;
+
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -49,18 +49,6 @@ internal static partial class Interop
         private static extern int AppleCryptoNative_SecKeychainEnumerateIdentities(
             SafeKeychainHandle keychain,
             out SafeCFArrayHandle matches,
-            out int pOSStatus);
-
-        [DllImport(Libraries.AppleCryptoNative)]
-        private static extern int AppleCryptoNative_X509StoreAddCertificate(
-            SafeKeychainItemHandle cert,
-            SafeKeychainHandle keychain,
-            out int pOSStatus);
-
-        [DllImport(Libraries.AppleCryptoNative)]
-        private static extern int AppleCryptoNative_X509StoreRemoveCertificate(
-            SafeSecCertificateHandle cert,
-            SafeKeychainHandle keychain,
             out int pOSStatus);
 
         internal static SafeKeychainHandle SecKeychainItemCopyKeychain(SafeKeychainItemHandle item)
@@ -207,51 +195,6 @@ internal static partial class Interop
             if (throwOnError && osStatus != 0)
             {
                 throw CreateExceptionForOSStatus(osStatus);
-            }
-        }
-
-        internal static void X509StoreAddCertificate(SafeKeychainItemHandle certOrIdentity, SafeKeychainHandle keychain)
-        {
-            int osStatus;
-            int ret = AppleCryptoNative_X509StoreAddCertificate(certOrIdentity, keychain, out osStatus);
-
-            if (ret == 0)
-            {
-                throw CreateExceptionForOSStatus(osStatus);
-            }
-
-            if (ret != 1)
-            {
-                Debug.Fail($"Unexpected result from AppleCryptoNative_X509StoreAddCertificate: {ret}");
-                throw new CryptographicException();
-            }
-        }
-
-        internal static void X509StoreRemoveCertificate(SafeSecCertificateHandle certHandle, SafeKeychainHandle keychain)
-        {
-            int osStatus;
-            int ret = AppleCryptoNative_X509StoreRemoveCertificate(certHandle, keychain, out osStatus);
-
-            if (ret == 0)
-            {
-                throw CreateExceptionForOSStatus(osStatus);
-            }
-
-            const int SuccessOrNoMatch = 1;
-            const int UserTrustExists = 2;
-            const int AdminTrustExists = 3;
-
-            switch (ret)
-            {
-                case SuccessOrNoMatch:
-                    break;
-                case UserTrustExists:
-                    throw new CryptographicException(SR.Cryptography_X509Store_WouldModifyUserTrust);
-                case AdminTrustExists:
-                    throw new CryptographicException(SR.Cryptography_X509Store_WouldModifyAdminTrust);
-                default:
-                    Debug.Fail($"Unexpected result from AppleCryptoNative_X509StoreRemoveCertificate: {ret}");
-                    throw new CryptographicException();
             }
         }
     }
