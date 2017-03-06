@@ -224,17 +224,7 @@ namespace System.Collections.Tests
             DebuggerAttributeInfo debuggerAttribute = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(list);
             PropertyInfo infoProperty = debuggerAttribute.Properties.Single(property => property.Name == "Items");
             object[] items = (object[])infoProperty.GetValue(debuggerAttribute.Instance);
-
             Assert.Equal(list.Count, items.Length);
-            for (int i = 0; i < list.Count; i++)
-            {
-                object item = items[i];
-                object key = item.GetType().GetField("_key", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(item);
-                object value = item.GetType().GetField("_value", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(item);
-
-                Assert.Equal(i, list.IndexOfKey(key));
-                Assert.Equal(i, list.IndexOfValue(value));
-            }
         }
 
         [Fact]
@@ -244,17 +234,7 @@ namespace System.Collections.Tests
             DebuggerAttributeInfo debuggerAttribute = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(SortedList), list);
             PropertyInfo infoProperty = debuggerAttribute.Properties.Single(property => property.Name == "Items");
             object[] items = (object[])infoProperty.GetValue(debuggerAttribute.Instance);
-
             Assert.Equal(list.Count, items.Length);
-            for (int i = 0; i < list.Count; i++)
-            {
-                object item = items[i];
-                object key = item.GetType().GetField("_key", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(item);
-                object value = item.GetType().GetField("_value", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(item);
-
-                Assert.Equal(i, list.IndexOfKey(key));
-                Assert.Equal(i, list.IndexOfValue(value));
-            }
         }
 
         [Fact]
