@@ -91,6 +91,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             VerifyKey_DSA((DSA)alg);
         }
 
+        [Fact]
+        public static void TestGetDsaPublicKey()
+        {
+            using(var cert = new X509Certificate2(TestData.DssCer))
+            {
+                DSA publicKey = cert.GetDSAPublicKey();
+                VerifyKey_DSA(publicKey);
+            }
+        }
+
         private static void VerifyKey_DSA(DSA dsa)
         {
             DSAParameters dsaParameters = dsa.ExportParameters(false);
