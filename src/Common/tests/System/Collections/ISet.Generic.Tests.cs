@@ -419,7 +419,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] //Throws InvalidOperationException, issue: dotnet/corefx #16796
         public void ISet_Generic_IntersectWith_Itself(int setLength)
         {
             ISet<T> set = GenericISetFactory(setLength);
