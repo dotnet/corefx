@@ -307,7 +307,7 @@ def buildArchConfiguration = ['Debug': 'x86',
 // Define uap and uapaot vertical builds that will run on every merge.
 // **************************
 [true, false].each { isPR ->
-    ['uap', 'uapaot'].each { targetGroup ->
+    ['uap', 'uapaot', 'netfx'].each { targetGroup ->
         ['Debug'].each { configurationGroup ->
             ['Windows_NT'].each { osName ->
                 def osGroup = osGroupMap[osName]
@@ -316,9 +316,17 @@ def buildArchConfiguration = ['Debug': 'x86',
                 def newJobName = "${targetGroup}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
-                    // On Windows we use the packer to put together everything. On *nix we use tar
-                    steps {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
+                    if (targetGroup == 'netfx') {
+                        // For netfx we build the tests without executing them, to ensure there are no new breaks in our test build 
+                        steps {
+                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
+                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -framework:${targetGroup} -SkipTests")
+                        }
+                    } else {
+                        // On Windows we use the packer to put together everything. On *nix we use tar
+                        steps {
+                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
+                        }
                     }
                 }
                 // Set the affinity.
