@@ -25,9 +25,6 @@
     <Project Include="..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
