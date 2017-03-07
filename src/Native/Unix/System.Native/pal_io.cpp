@@ -939,7 +939,7 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
     int32_t result;
     while (CheckInterrupted(
         result =
-#if HAVE_POSIX_ADVISE64
+#if HAVE_POSIX_FADVISE64
             posix_fadvise64(
 #else
             posix_fadvise(
