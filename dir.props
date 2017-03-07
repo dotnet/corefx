@@ -70,11 +70,6 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
-  <!-- Only if we're building a binary flavor that's only ever going to run on uapaot is OK for it to have #if NETNATIVE blocks -->
-  <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
-    <DefineConstants>$(DefineConstants),NETNATIVE</DefineConstants>
-  </PropertyGroup>
-
   <!-- list of nuget package sources passed to dnu -->
   <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
     <!-- Example to consume local CoreCLR package:
