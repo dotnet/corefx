@@ -273,7 +273,7 @@
   -->
   <PropertyGroup>
     <BlockReflectionAttribute Condition="'$(BlockReflectionAttribute)'=='' and '$(EnableWinRT)'=='true'">true</BlockReflectionAttribute>
-    <BlockReflectionAttribute Condition="'$(MSBuildProjectExtension)' == '.vbproj'">false</BlockReflectionAttribute>
+    <BlockReflectionAttribute Condition="'$(MSBuildProjectExtension)' != '.csproj'">false</BlockReflectionAttribute>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BlockReflectionAttribute)'=='true'">
