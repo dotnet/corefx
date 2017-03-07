@@ -570,7 +570,7 @@ extern "C" int32_t SystemNative_FnMatch(const char* pattern, const char* path, F
 extern "C" int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, SeekWhence whence)
 {
     int64_t result;
-    while (CheckInterrupted(result = lseek(ToFileDescriptor(fd), offset, whence)));
+    while (CheckInterrupted(result = lseek64(ToFileDescriptor(fd), offset, whence)));
     return result;
 }
 
@@ -712,7 +712,7 @@ extern "C" void* SystemNative_MMap(void* address,
     }
 
     // Use ToFileDescriptorUnchecked to allow -1 to be passed for the file descriptor, since managed code explicitly uses -1
-    void* ret = mmap(address, static_cast<size_t>(length), protection, flags, ToFileDescriptorUnchecked(fd), offset);
+    void* ret = mmap64(address, static_cast<size_t>(length), protection, flags, ToFileDescriptorUnchecked(fd), offset);
     if (ret == MAP_FAILED)
     {
         return nullptr;
@@ -836,7 +836,7 @@ extern "C" int64_t SystemNative_SysConf(SysConfName name)
 extern "C" int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
 {
     int32_t result;
-    while (CheckInterrupted(result = ftruncate(ToFileDescriptor(fd), length)));
+    while (CheckInterrupted(result = ftruncate64(ToFileDescriptor(fd), length)));
     return result;
 }
 
@@ -908,7 +908,7 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
 {
 #if HAVE_POSIX_ADVISE
     int32_t result;
-    while (CheckInterrupted(result = posix_fadvise(ToFileDescriptor(fd), offset, length, advice)));
+    while (CheckInterrupted(result = posix_fadvise64(ToFileDescriptor(fd), offset, length, advice)));
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
@@ -1140,9 +1140,9 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
         // futimes is not a POSIX function, and not available on Android,
         // but futimens is
         struct timespec origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[0].tv_sec = static_cast<__kernel_time_t>(sourceStat.st_atime);
         origTimes[0].tv_nsec = 0;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
+        origTimes[1].tv_sec = static_cast<__kernel_time_t>(sourceStat.st_mtime);
         origTimes[1].tv_nsec = 0;
         while (CheckInterrupted(ret = futimens(outFd, origTimes)));
 #endif
@@ -1244,7 +1244,7 @@ extern "C" int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int6
         return -1;
     }
     
-    struct flock lockArgs;
+    struct flock64 lockArgs;
     lockArgs.l_type = lockType;
     lockArgs.l_whence = SEEK_SET;
     lockArgs.l_start = offset;
