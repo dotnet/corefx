@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using Xunit;
+using Microsoft.Xunit.Performance;
 using Xunit.Abstractions;
 
 namespace System.Numerics.Tests
