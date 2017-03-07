@@ -72,7 +72,7 @@ check_function_exists(
     mmap64
     HAVE_MMAP64)
 
-check_function_exists
+check_function_exists(
     ftruncate64
     HAVE_FTRUNCATE64)
 
