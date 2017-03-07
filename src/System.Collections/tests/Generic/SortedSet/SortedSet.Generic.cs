@@ -73,10 +73,13 @@ namespace System.Collections.Tests
                 {
                     SortedSet<int> view = set.GetViewBetween(i, j);
 
-                    if (j < i || (j == i && i % 2 == 0) ){
+                    if (j < i || (j == i && i % 2 == 0) )
+                    {
                         Assert.Equal(default(int), view.Min);
                         Assert.Equal(default(int), view.Max);
-                    } else {
+                    }
+                    else
+                    {
                         Assert.Equal(i + ((i+1) % 2), view.Min);
                         Assert.Equal(j - ((j+1) % 2), view.Max);
                     }

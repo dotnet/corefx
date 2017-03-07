@@ -131,15 +131,21 @@ namespace System.Collections.Generic
                     Node current = _root;
                     T result = default(T);
 
-                    while (current != null) {
+                    while (current != null)
+                    {
 
                         int comp = _lBoundActive ? Comparer.Compare(_min, current.Item) : -1;
-                        if (comp == 1) {
+                        if (comp == 1)
+                        {
                             current = current.Right;
-                        } else {
+                        }
+                        else
+                        {
                             result = current.Item;
                             if (comp == 0)
+                            {
                                 break;
+                            }
                             current = current.Left;
                         }
                     }
@@ -155,15 +161,20 @@ namespace System.Collections.Generic
                     Node current = _root;
                     T result = default(T);
 
-                    while (current != null) {
-
+                    while (current != null)
+                    {
                         int comp = _uBoundActive ? Comparer.Compare(_max, current.Item) : 1;
-                        if (comp == -1) {
+                        if (comp == -1)
+                        {
                             current = current.Left;
-                        } else {
+                        }
+                        else
+                        {
                             result = current.Item;
                             if (comp == 0)
+                            {
                                 break;
+                            }
                             current = current.Right;
                         }
                     }
