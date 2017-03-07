@@ -74,6 +74,9 @@
     </TargetGroups>
     <TargetGroups Include="netstandard">
       <NuGetTargetMoniker>.NETStandard,Version=v2.0</NuGetTargetMoniker>
+      <!-- By default, netstandard libraries will be held to the UWP compatibility bar;
+           set this to false in the project to force otherwise. -->
+      <EnableWinRT>true</EnableWinRT>
       <Imports>netstandard2.0</Imports>
     </TargetGroups>
     <TargetGroups Include="netcoreapp1.0">

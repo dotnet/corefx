@@ -1,9 +1,0 @@
-advapi32.dll!CloseServiceHandle
-advapi32.dll!ControlService
-advapi32.dll!EnumDependentServices
-advapi32.dll!QueryServiceConfig
-advapi32.dll!EnumServicesStatusEx
-advapi32.dll!OpenService
-advapi32.dll!OpenSCManager
-advapi32.dll!QueryServiceStatus
-advapi32.dll!StartService
