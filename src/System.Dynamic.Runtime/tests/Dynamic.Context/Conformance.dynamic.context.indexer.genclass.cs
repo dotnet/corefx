@@ -586,7 +586,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.indexer.genclas
             }
 
             Assert.Equal(10, index);
-            Assert.Equal(3, MemberClassMultipleParams<int, string, Test>.Status);
+            Assert.Equal(3, MemberClassWithClassConstraint<Test>.Status);
         }
     }
     //</Code>
