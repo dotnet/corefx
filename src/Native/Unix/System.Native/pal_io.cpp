@@ -1179,9 +1179,9 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
         // futimes is not a POSIX function, and not available on Android,
         // but futimens is
         struct timespec origTimes[2];
-        origTimes[0].tv_sec = static_cast<__kernel_time_t>(sourceStat.st_atime);
+        origTimes[0].tv_sec = static_cast<time_t>(sourceStat.st_atime);
         origTimes[0].tv_nsec = 0;
-        origTimes[1].tv_sec = static_cast<__kernel_time_t>(sourceStat.st_mtime);
+        origTimes[1].tv_sec = static_cast<time_t>(sourceStat.st_mtime);
         origTimes[1].tv_nsec = 0;
         while (CheckInterrupted(ret = futimens(outFd, origTimes)));
 #endif
