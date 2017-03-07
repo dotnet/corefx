@@ -62,6 +62,27 @@ namespace System.Collections.Tests
 
             Assert.Equal(new[] { 3, 5, 7 }, set);
         }
+
+        [Fact]
+        public void SortedSet_Generic_GetViewBetween_MinMax_Exhaustive()
+        {
+            var set = (SortedSet<int>)CreateSortedSet(new[] { 7, 11, 3, 1, 5, 9, 13 }, 7, 7);
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = i; j < 14; j ++)
+                {
+                    SortedSet<int> view = set.GetViewBetween(i, j);
+
+                    if (j < i || (j == i && i % 2 == 0) ){
+                        Assert.Equal(default(int), view.Min);
+                        Assert.Equal(default(int), view.Max);
+                    } else {
+                        Assert.Equal(i + ((i+1) % 2), view.Min);
+                        Assert.Equal(j - ((j+1) % 2), view.Max);
+                    }
+                }
+            }
+        }
     }
 
     public class SortedSet_Generic_Tests_int_With_NullComparer : SortedSet_Generic_Tests_int
