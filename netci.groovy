@@ -304,7 +304,7 @@ def buildArchConfiguration = ['Debug': 'x86',
 }
 
 // **************************
-// Define uap and uapaot vertical builds that will run on every merge.
+// Define target group vertical builds that will run on every merge.
 // **************************
 [true, false].each { isPR ->
     ['uap', 'uapaot', 'netfx'].each { targetGroup ->
@@ -316,17 +316,10 @@ def buildArchConfiguration = ['Debug': 'x86',
                 def newJobName = "${targetGroup}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
-                    if (targetGroup == 'netfx') {
-                        // For netfx we build the tests without executing them, to ensure there are no new breaks in our test build 
-                        steps {
-                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
-                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -framework:${targetGroup} -SkipTests")
-                        }
-                    } else {
-                        // On Windows we use the packer to put together everything. On *nix we use tar
-                        steps {
-                            batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
-                        }
+                    // On Windows we use the packer to put together everything. On *nix we use tar
+                    steps {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:${targetGroup}")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -framework:${targetGroup} -SkipTests")
                     }
                 }
                 // Set the affinity.
