@@ -143,6 +143,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async Task ClonedClient_ActsAsOriginalClient()
         {
             byte[] msg1 = new byte[] { 5, 7, 9, 10 };
@@ -502,6 +503,7 @@ namespace System.IO.Pipes.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)] // Unix named pipes are on sockets, where small writes with an empty buffer will succeed immediately
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async Task WriteAsync_DisconnectDuringWrite_Throws()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -523,6 +525,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async Task Server_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -621,6 +624,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public async Task Client_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
