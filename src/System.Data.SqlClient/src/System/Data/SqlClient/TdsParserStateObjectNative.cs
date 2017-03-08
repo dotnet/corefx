@@ -146,17 +146,13 @@ namespace System.Data.SqlClient
 
             if (null != sessionHandle || null != packetHandle)
             {
-                try { }
-                finally
-                {
-                    packetHandle?.Dispose();
-                    asyncAttnPacket?.Dispose();
+                packetHandle?.Dispose();
+                asyncAttnPacket?.Dispose();
                     
-                    if (sessionHandle != null)
-                    {
-                        sessionHandle.Dispose();
-                        DecrementPendingCallbacks(true); // Will dispose of GC handle.
-                    }
+                if (sessionHandle != null)
+                {
+                    sessionHandle.Dispose();
+                    DecrementPendingCallbacks(true); // Will dispose of GC handle.
                 }
             }
 
@@ -292,12 +288,8 @@ namespace System.Data.SqlClient
         {
             lock (_writePacketLockObject)
             {
-                try { }
-                finally
-                {
-                    _writePacketCache.Dispose();
-                    // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
-                }
+                _writePacketCache.Dispose();
+                // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
             }
         }
         

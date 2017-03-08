@@ -110,12 +110,8 @@ namespace System.Data.SqlClient.SNI
         {
             lock (_writePacketLockObject)
             {
-                try { }
-                finally
-                {
-                    _writePacketCache.Dispose();
-                    // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
-                }
+                _writePacketCache.Dispose();
+                // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
             }
         }
 

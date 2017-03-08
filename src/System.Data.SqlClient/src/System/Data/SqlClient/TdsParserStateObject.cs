@@ -2302,27 +2302,23 @@ namespace System.Data.SqlClient
 
                 object handle = null;
 
-                try { }
-                finally
+                Interlocked.Increment(ref _readingCount);
+
+                handle = SessionHandle;
+                if (handle != null)
                 {
-                    Interlocked.Increment(ref _readingCount);
+                    IncrementPendingCallbacks();
 
-                    handle = SessionHandle;
-                    if (handle != null)
+                    readPacket = ReadAsync(out error, ref handle);
+
+                    if (!(TdsEnums.SNI_SUCCESS == error || TdsEnums.SNI_SUCCESS_IO_PENDING == error))
                     {
-                        IncrementPendingCallbacks();
-
-                        readPacket = ReadAsync(out error, ref handle);
-
-                        if (!(TdsEnums.SNI_SUCCESS == error || TdsEnums.SNI_SUCCESS_IO_PENDING == error))
-                        {
-                            DecrementPendingCallbacks(false); // Failure - we won't receive callback!
-                        }
+                        DecrementPendingCallbacks(false); // Failure - we won't receive callback!
                     }
-
-                    Interlocked.Decrement(ref _readingCount);
                 }
 
+                Interlocked.Decrement(ref _readingCount);
+                
                 if (handle == null)
                 {
                     throw ADP.ClosedConnectionError();

@@ -7,7 +7,7 @@ using System.Data.SqlClient.SNI;
 
 namespace System.Data.SqlClient
 {
-    sealed internal partial class TdsParser
+    internal sealed partial class TdsParser
     {
         private static volatile bool s_fSSPILoaded = false; // bool to indicate whether library has been loaded
 
@@ -23,7 +23,6 @@ namespace System.Data.SqlClient
             IntPtr temp = IntPtr.Zero;
             uint error = TdsEnums.SNI_SUCCESS;
 
-            
             _pMarsPhysicalConObj.IncrementPendingCallbacks();
             object handle = _pMarsPhysicalConObj.SessionHandle;
             temp = (IntPtr)_pMarsPhysicalConObj.ReadAsync(out error, ref handle);

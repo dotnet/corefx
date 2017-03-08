@@ -799,11 +799,7 @@ namespace System.Data.SqlClient
                             WaitForSSLHandShakeToComplete(ref error);
                             
                             // create a new packet encryption changes the internal packet size
-                            try { } // EmptyTry/Finally to avoid FXCop violation
-                            finally
-                            {
-                                _physicalStateObj.ClearAllWritePackets();
-                            }
+                            _physicalStateObj.ClearAllWritePackets();
                         }
 
                         break;

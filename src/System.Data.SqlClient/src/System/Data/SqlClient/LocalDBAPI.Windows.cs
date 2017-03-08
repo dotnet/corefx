@@ -17,8 +17,8 @@ namespace System.Data
             {
                 if (s_userInstanceDLLHandle == IntPtr.Zero)
                 {
-                        
-                    lock (s_dllLock) { 
+                    lock (s_dllLock)
+                    {
                         if (s_userInstanceDLLHandle == IntPtr.Zero)
                         {
                             SNINativeMethodWrapper.SNIQueryInfo(SNINativeMethodWrapper.QTypes.SNI_QUERY_LOCALDB_HMODULE, ref s_userInstanceDLLHandle);
