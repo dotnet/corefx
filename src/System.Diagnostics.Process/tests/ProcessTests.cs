@@ -163,13 +163,21 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestExitTime()
         {
-            DateTime timeBeforeProcessStart = DateTime.UtcNow;
+            // ExitTime resolution on some platforms is less accurate than our DateTime.UtcNow resolution, so
+            // we subtract ms from the begin time to account for it.
+            DateTime timeBeforeProcessStart = DateTime.UtcNow.AddMilliseconds(-25);
             Process p = CreateProcessLong();
             p.Start();
             Assert.Throws<InvalidOperationException>(() => p.ExitTime);
             p.Kill();
             Assert.True(p.WaitForExit(WaitInMS));
-            Assert.True(p.ExitTime.ToUniversalTime() >= timeBeforeProcessStart, $"TestExitTime is incorrect. TimeBeforeStart={timeBeforeProcessStart}, ExitTime={p.ExitTime}, ExitTimeUniversal={p.ExitTime.ToUniversalTime()}");
+
+            Assert.True(p.ExitTime.ToUniversalTime() >= timeBeforeProcessStart,
+                $@"TestExitTime is incorrect. " +
+                $@"TimeBeforeStart {timeBeforeProcessStart} Ticks={timeBeforeProcessStart.Ticks}, " +
+                $@"ExitTime={p.ExitTime}, Ticks={p.ExitTime.Ticks}, " +
+                $@"ExitTimeUniversal {p.ExitTime.ToUniversalTime()} Ticks={p.ExitTime.ToUniversalTime().Ticks}, " +
+                $@"NowUniversal {DateTime.Now.ToUniversalTime()} Ticks={DateTime.Now.Ticks}");
         }
 
         [Fact]

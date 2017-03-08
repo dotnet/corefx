@@ -13,6 +13,9 @@
     <Compile Include="HttpWebResponseTest.cs" />
     <Compile Include="RequestStreamTest.cs" />
     <Compile Include="WebRequestTest.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
     </Compile>
@@ -47,10 +50,6 @@
     <Compile Include="HttpWebRequestHeaderTest.cs" />
     <Compile Include="HttpWebRequestTest.netstandard.cs" />
     <Compile Include="HttpWebResponseHeaderTest.cs" />
-    <Compile Include="HttpRequestResponseSerializationTest.cs" />
-    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
-      <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

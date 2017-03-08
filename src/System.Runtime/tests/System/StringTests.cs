@@ -14,7 +14,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class StringTests
+    public static partial class StringTests
     {
         private static readonly bool s_isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private const string c_SoftHyphen = "\u00AD";
@@ -816,23 +816,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 'o', true)]
-        [InlineData("Hello", 'O', false)]
-        [InlineData("o", 'o', true)]
-        [InlineData("o", 'O', false)]
-        [InlineData("Hello", 'e', false)]
-        [InlineData("Hello", '\0', false)]
-        [InlineData("", '\0', false)]
-        [InlineData("\0", '\0', true)]
-        [InlineData("", 'a', false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", 'z', true)]
-        public static void EndsWith(string s, char value, bool expected)
-        {
-            Assert.Equal(expected, s.EndsWith(value));
-        }
-
-        [Theory]
-        [ActiveIssue("dotnet/coreclr#2051", TestPlatforms.AnyUnix)]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
         [InlineData(StringComparison.CurrentCulture)]
         [InlineData(StringComparison.CurrentCultureIgnoreCase)]
         [InlineData(StringComparison.Ordinal)]
@@ -1250,7 +1234,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [ActiveIssue("dotnet/coreclr#2051", TestPlatforms.AnyUnix)]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
         [InlineData("He\0lo", "He\0lo", 0)]
         [InlineData("He\0lo", "He\0", 0)]
         [InlineData("He\0lo", "\0", 2)]
@@ -1657,7 +1641,7 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.NetcoreUwp)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Uap)]
         public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
             Assert.Equal(expected, string.Join(separator, values));
@@ -1719,7 +1703,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [ActiveIssue("dotnet/coreclr#2051", TestPlatforms.AnyUnix)]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
         [InlineData("He\0lo", "He\0lo", 0)]
         [InlineData("He\0lo", "He\0", 0)]
         [InlineData("He\0lo", "\0", 2)]
@@ -2113,23 +2097,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 'H', true)]
-        [InlineData("Hello", 'h', false)]
-        [InlineData("H", 'H', true)]
-        [InlineData("H", 'h', false)]
-        [InlineData("Hello", 'e', false)]
-        [InlineData("Hello", '\0', false)]
-        [InlineData("", '\0', false)]
-        [InlineData("\0", '\0', true)]
-        [InlineData("", 'a', false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", 'a', true)]
-        public static void StartsWith(string s, char value, bool expected)
-        {
-            Assert.Equal(expected, s.StartsWith(value));
-        }
-
-        [Theory]
-        [ActiveIssue("dotnet/coreclr#2051", TestPlatforms.AnyUnix)]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
         [InlineData(StringComparison.CurrentCulture)]
         [InlineData(StringComparison.CurrentCultureIgnoreCase)]
         [InlineData(StringComparison.Ordinal)]

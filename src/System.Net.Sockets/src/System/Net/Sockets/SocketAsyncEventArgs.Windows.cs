@@ -2,26 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Collections;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace System.Net.Sockets
 {
     public partial class SocketAsyncEventArgs : EventArgs, IDisposable
     {
-        // Struct sizes needed for some custom marshaling.
-        internal static readonly int s_controlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
-        internal static readonly int s_controlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
-        internal static readonly int s_wsaMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
-
         // Buffer,Offset,Count property variables.
         private WSABuffer _wsaBuffer;
         private IntPtr _ptrSingleBuffer;
@@ -135,7 +124,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                overlapped = boundHandle.AllocateNativeOverlapped(CompletionPortCallback, this, null);
+                overlapped = boundHandle.AllocateNativeOverlapped(s_completionPortCallback, this, null);
                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"boundHandle:{boundHandle}, AllocateNativeOverlapped(pinData=null), Returned:{(IntPtr)overlapped}");
             }
             Debug.Assert(overlapped != null, "NativeOverlapped is null.");
@@ -378,7 +367,7 @@ namespace System.Net.Sockets
             return ProcessIOCPResult(socketError == SocketError.Success, bytesTransferred);
         }
 
-        private void InnerStartOperationReceiveMessageFrom()
+        private unsafe void InnerStartOperationReceiveMessageFrom()
         {
             // WSARecvMsg uses a WSAMsg descriptor.
             // The WSAMsg buffer is pinned with a GCHandle to avoid complicating the use of Overlapped.
@@ -391,7 +380,7 @@ namespace System.Net.Sockets
             // Create and pin a WSAMessageBuffer if none already.
             if (_wsaMessageBuffer == null)
             {
-                _wsaMessageBuffer = new byte[s_wsaMsgSize];
+                _wsaMessageBuffer = new byte[sizeof(Interop.Winsock.WSAMsg)];
                 _wsaMessageBufferGCHandle = GCHandle.Alloc(_wsaMessageBuffer, GCHandleType.Pinned);
                 _ptrWSAMessageBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(_wsaMessageBuffer, 0);
             }
@@ -401,21 +390,21 @@ namespace System.Net.Sockets
             bool ipv4 = (_currentSocket.AddressFamily == AddressFamily.InterNetwork || (ipAddress != null && ipAddress.IsIPv4MappedToIPv6)); // DualMode
             bool ipv6 = _currentSocket.AddressFamily == AddressFamily.InterNetworkV6;
 
-            if (ipv4 && (_controlBuffer == null || _controlBuffer.Length != s_controlDataSize))
+            if (ipv4 && (_controlBuffer == null || _controlBuffer.Length != sizeof(Interop.Winsock.ControlData)))
             {
                 if (_controlBufferGCHandle.IsAllocated)
                 {
                     _controlBufferGCHandle.Free();
                 }
-                _controlBuffer = new byte[s_controlDataSize];
+                _controlBuffer = new byte[sizeof(Interop.Winsock.ControlData)];
             }
-            else if (ipv6 && (_controlBuffer == null || _controlBuffer.Length != s_controlDataIPv6Size))
+            else if (ipv6 && (_controlBuffer == null || _controlBuffer.Length != sizeof(Interop.Winsock.ControlDataIPv6)))
             {
                 if (_controlBufferGCHandle.IsAllocated)
                 {
                     _controlBufferGCHandle.Free();
                 }
-                _controlBuffer = new byte[s_controlDataIPv6Size];
+                _controlBuffer = new byte[sizeof(Interop.Winsock.ControlDataIPv6)];
             }
             if (!_controlBufferGCHandle.IsAllocated)
             {
@@ -875,7 +864,7 @@ namespace System.Net.Sockets
             {
                 if (_buffer != null)
                 {
-                    _preAllocatedOverlapped = new PreAllocatedOverlapped(CompletionPortCallback, this, _buffer);
+                    _preAllocatedOverlapped = new PreAllocatedOverlapped(s_completionPortCallback, this, _buffer);
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"new PreAllocatedOverlapped pinSingleBuffer=true, non-null buffer:{_preAllocatedOverlapped}");
 
                     _pinnedSingleBuffer = _buffer;
@@ -889,7 +878,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    _preAllocatedOverlapped = new PreAllocatedOverlapped(CompletionPortCallback, this, null);
+                    _preAllocatedOverlapped = new PreAllocatedOverlapped(s_completionPortCallback, this, null);
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"new PreAllocatedOverlapped pinSingleBuffer=true, null buffer: {_preAllocatedOverlapped}");
 
                     _pinnedSingleBuffer = null;
@@ -904,7 +893,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                _preAllocatedOverlapped = new PreAllocatedOverlapped(CompletionPortCallback, this, _acceptBuffer);
+                _preAllocatedOverlapped = new PreAllocatedOverlapped(s_completionPortCallback, this, _acceptBuffer);
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"new PreAllocatedOverlapped pinSingleBuffer=false:{_preAllocatedOverlapped}");
 
                 _pinnedAcceptBuffer = _acceptBuffer;
@@ -938,7 +927,7 @@ namespace System.Net.Sockets
             }
 
             // Pin buffers and fill in WSABuffer descriptor pointers and lengths.
-            _preAllocatedOverlapped = new PreAllocatedOverlapped(CompletionPortCallback, this, _objectsToPin);
+            _preAllocatedOverlapped = new PreAllocatedOverlapped(s_completionPortCallback, this, _objectsToPin);
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"new PreAllocatedOverlapped.{_preAllocatedOverlapped}");
 
             for (int i = 0; i < bufferCount; i++)
@@ -980,7 +969,7 @@ namespace System.Net.Sockets
             }
 
             // Pin buffers.
-            _preAllocatedOverlapped = new PreAllocatedOverlapped(CompletionPortCallback, this, _objectsToPin);
+            _preAllocatedOverlapped = new PreAllocatedOverlapped(s_completionPortCallback, this, _objectsToPin);
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"new PreAllocatedOverlapped:{_preAllocatedOverlapped}");
 
             // Get pointer to native descriptor.
@@ -1019,7 +1008,10 @@ namespace System.Net.Sockets
 
         internal void LogBuffer(int size)
         {
-            if (!NetEventSource.IsEnabled) return;
+            // This should only be called if tracing is enabled. However, there is the potential for a race
+            // condition where tracing is disabled between a calling check and here, in which case the assert
+            // may fire erroneously.
+            Debug.Assert(NetEventSource.IsEnabled);
 
             switch (_pinState)
             {
@@ -1098,7 +1090,7 @@ namespace System.Net.Sockets
                     SocketOptionLevel.Socket,
                     SocketOptionName.UpdateAcceptContext,
                     ref handle,
-                    Marshal.SizeOf(handle));
+                    IntPtr.Size);
 
                 if (socketError == SocketError.SocketError)
                 {
@@ -1148,12 +1140,12 @@ namespace System.Net.Sockets
         {
             Interop.Winsock.WSAMsg* PtrMessage = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(_wsaMessageBuffer, 0);
 
-            if (_controlBuffer.Length == s_controlDataSize)
+            if (_controlBuffer.Length == sizeof(Interop.Winsock.ControlData))
             {
                 // IPv4.
                 _receiveMessageFromPacketInfo = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlData*)PtrMessage->controlBuffer.Pointer);
             }
-            else if (_controlBuffer.Length == s_controlDataIPv6Size)
+            else if (_controlBuffer.Length == sizeof(Interop.Winsock.ControlDataIPv6))
             {
                 // IPv6.
                 _receiveMessageFromPacketInfo = SocketPal.GetIPPacketInformation((Interop.Winsock.ControlDataIPv6*)PtrMessage->controlBuffer.Pointer);
@@ -1186,6 +1178,14 @@ namespace System.Net.Sockets
             _sendPacketsFileStreams = null;
             _sendPacketsFileHandles = null;
         }
+
+        private static readonly unsafe IOCompletionCallback s_completionPortCallback = delegate (uint errorCode, uint numBytes, NativeOverlapped* nativeOverlapped)
+        {
+            object state = ThreadPoolBoundHandle.GetNativeOverlappedState(nativeOverlapped);
+            var saea = (SocketAsyncEventArgs)state;
+            Debug.Assert(saea != null, $"Expected native overlapped state to contain SAEA, got {state?.GetType().ToString() ?? "(null)"}");
+            saea.CompletionPortCallback(errorCode, numBytes, nativeOverlapped);
+        };
 
         private unsafe void CompletionPortCallback(uint errorCode, uint numBytes, NativeOverlapped* nativeOverlapped)
         {

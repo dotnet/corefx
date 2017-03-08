@@ -2,18 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
 using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net.Internals;
-using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace System.Net.Sockets
@@ -76,7 +72,7 @@ namespace System.Net.Sockets
         private int _intCleanedUp; // 0 if not completed, > 0 otherwise.
 
         internal static volatile bool s_initialized;
-        internal static volatile bool s_perfCountersEnabled;
+        internal static readonly bool s_perfCountersEnabled = false; // TODO (#7833): Implement socket perf counters. 
 
         #region Constructors
         public Socket(SocketType socketType, ProtocolType protocolType)
@@ -107,8 +103,6 @@ namespace System.Net.Sockets
             _socketType = socketType;
             _protocolType = protocolType;
 
-            // TODO: Investigate this problematic assertion: Issue #4500.
-            // Debug.Assert(addressFamily != AddressFamily.InterNetworkV6 || !DualMode);
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
@@ -124,17 +118,12 @@ namespace System.Net.Sockets
         // Called by the class to create a socket to accept an incoming request.
         private Socket(SafeCloseSocket fd)
         {
+            // NOTE: If this ctor is ever made public/protected, this check will need
+            // to be converted into a runtime exception.
+            Debug.Assert(fd != null && !fd.IsInvalid);
+
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
             InitializeSockets();
-
-            // NOTE: if this ctor is re-publicized/protected, check
-            // that fd is valid socket handle.
-
-            // This should never happen.
-            if (fd == null || fd.IsInvalid)
-            {
-                throw new ArgumentException(SR.net_InvalidSocketHandle);
-            }
 
             _handle = fd;
 
@@ -193,11 +182,7 @@ namespace System.Net.Sockets
                 // Throw an appropriate SocketException if the native call fails.
                 if (errorCode != SocketError.Success)
                 {
-                    // Update the internal state of this socket according to the error before throwing.
-                    SocketException socketException = new SocketException((int)errorCode);
-                    UpdateStatusAfterSocketError(socketException);
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                    throw socketException;
+                    UpdateStatusAfterSocketErrorAndThrowException(errorCode);
                 }
 
                 return argp;
@@ -237,11 +222,7 @@ namespace System.Net.Sockets
 
                 if (errorCode != SocketError.Success)
                 {
-                    // Update the internal state of this socket according to the error before throwing.
-                    SocketException socketException = new SocketException((int)errorCode);
-                    UpdateStatusAfterSocketError(socketException);
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                    throw socketException;
+                    UpdateStatusAfterSocketErrorAndThrowException(errorCode);
                 }
 
                 return _rightEndPoint.Create(socketAddress);
@@ -283,11 +264,7 @@ namespace System.Net.Sockets
 
                     if (errorCode != SocketError.Success)
                     {
-                        // Update the internal state of this socket according to the error before throwing.
-                        SocketException socketException = new SocketException((int)errorCode);
-                        UpdateStatusAfterSocketError(socketException);
-                        if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                        throw socketException;
+                        UpdateStatusAfterSocketErrorAndThrowException(errorCode);
                     }
 
                     try
@@ -343,11 +320,7 @@ namespace System.Net.Sockets
 
                 if (errorCode != SocketError.Success)
                 {
-                    // Update the internal state of this socket according to the error before throwing.
-                    SocketException socketException = new SocketException((int)errorCode);
-                    UpdateStatusAfterSocketError(socketException);
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                    throw socketException;
+                    UpdateStatusAfterSocketErrorAndThrowException(errorCode);
                 }
 
                 // The native call succeeded, update the user's desired state.
@@ -773,10 +746,7 @@ namespace System.Net.Sockets
             IPEndPoint ipEndPoint = endPointSnapshot as IPEndPoint;
             if (!OSSupportsIPv4 && ipEndPoint != null && ipEndPoint.Address.IsIPv4MappedToIPv6)
             {
-                SocketException socketException = new SocketException((int)SocketError.InvalidArgument);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(SocketError.InvalidArgument);
             }
 
             // This may throw ObjectDisposedException.
@@ -799,11 +769,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             if (_rightEndPoint == null)
@@ -1057,11 +1023,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
             _isListening = true;
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -1111,12 +1073,7 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success)
             {
                 Debug.Assert(acceptedSocketHandle.IsInvalid);
-
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             Debug.Assert(!acceptedSocketHandle.IsInvalid);
@@ -1382,11 +1339,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             if (_rightEndPoint == null)
@@ -1679,11 +1632,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success && errorCode != SocketError.MessageSize)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             if (!socketAddressOriginal.Equals(receiveAddress))
@@ -1853,11 +1802,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return realOptionLength;
@@ -1897,11 +1842,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -2000,11 +1941,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return optionValue;
@@ -2032,11 +1969,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -2063,11 +1996,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             if (optionLength != realOptionLength)
@@ -2116,11 +2045,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return status;
@@ -2159,12 +2084,7 @@ namespace System.Net.Sockets
 
         // Routine Description:
         // 
-        //    BeginConnect - Does a async winsock connect, by calling
-        //    WSAEventSelect to enable Connect Events to signal an event and
-        //    wake up a callback which invokes a callback.
-        // 
-        //     So note: This routine may go pending at which time,
-        //     but any case the callback Delegate will be called upon completion
+        //    BeginConnect - Does an async connect.
         // 
         // Arguments:
         // 
@@ -2288,7 +2208,7 @@ namespace System.Net.Sockets
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
             result.StartPostingAsyncOp(false);
 
-            IAsyncResult dnsResult = DnsAPMExtensions.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
+            IAsyncResult dnsResult = Dns.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
             if (dnsResult.CompletedSynchronously)
             {
                 if (DoDnsCallback(dnsResult, result))
@@ -2443,11 +2363,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                // update our internal state after this socket error and throw
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             SetToDisconnected();
@@ -2557,15 +2473,10 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
 
-#if FEATURE_PAL
-            throw new PlatformNotSupportedException(SR.GetString(SR.WinNTRequired));
-#endif // FEATURE_PAL
-
             if (asyncResult == null)
             {
                 throw new ArgumentNullException(nameof(asyncResult));
             }
-
 
             //get async result and check for errors
             LazyAsyncResult castedAsyncResult = asyncResult as LazyAsyncResult;
@@ -2590,13 +2501,7 @@ namespace System.Net.Sockets
             //
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                //
-                // update our internal state after this socket error and throw
-                //
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -2668,27 +2573,6 @@ namespace System.Net.Sockets
                 // We're not throwing, so finish the async op posting code so we can return to the user.
                 // If the operation already finished, the callback will be called from here.
                 asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
-            }
-
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
-            return asyncResult;
-        }
-
-        internal IAsyncResult UnsafeBeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            if (CleanedUp)
-            {
-                throw new ObjectDisposedException(this.GetType().FullName);
-            }
-
-            // No need to flow the context.
-            OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-
-            SocketError errorCode = DoBeginSend(buffer, offset, size, socketFlags, asyncResult);
-            if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
-            {
-                throw new SocketException((int)errorCode);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
@@ -3064,11 +2948,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, bytesTransferred);
@@ -3153,23 +3033,6 @@ namespace System.Net.Sockets
             return asyncResult;
         }
 
-        internal IAsyncResult UnsafeBeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-
-            if (CleanedUp)
-            {
-                throw new ObjectDisposedException(this.GetType().FullName);
-            }
-
-            // No need to flow the context.
-            OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
-            DoBeginReceive(buffer, offset, size, socketFlags, asyncResult);
-
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, asyncResult);
-            return asyncResult;
-        }
-
         private SocketError DoBeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"size:{size}");
@@ -3181,18 +3044,14 @@ namespace System.Net.Sockets
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSARecv returns:{errorCode} returning AsyncResult:{asyncResult}");
 
-            // Throw an appropriate SocketException if the native call fails synchronously.
-            if (!CheckErrorAndUpdateStatus(errorCode))
+            if (CheckErrorAndUpdateStatus(errorCode))
             {
-            }
 #if DEBUG
-            else
-            {
                 _lastReceiveHandle = lastHandle;
                 _lastReceiveThread = Environment.CurrentManagedThreadId;
                 _lastReceiveTick = Environment.TickCount;
-            }
 #endif
+            }
 
             return errorCode;
         }
@@ -3559,11 +3418,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success && (SocketError)castedAsyncResult.ErrorCode != SocketError.MessageSize)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
             socketFlags = castedAsyncResult.SocketFlags;
@@ -3787,11 +3642,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, bytesTransferred);
             return bytesTransferred;
@@ -3962,11 +3813,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
 #if TRACE_VERBOSE
@@ -4006,11 +3853,7 @@ namespace System.Net.Sockets
             // Skip good cases: success, socket already closed.
             if (errorCode != SocketError.Success && errorCode != SocketError.NotSocket)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             SetToDisconnected();
@@ -4208,14 +4051,8 @@ namespace System.Net.Sockets
                 if (dnsEP.AddressFamily == AddressFamily.Unspecified)
                 {
                     // This is the only *Connect* API that fully supports multiple endpoint attempts, as it's responsible 
-                    // for creating each Socket instance and can create one per attempt. With the instance methods, once a 
-                    // connect fails, on unix systems that socket can't be used for subsequent connect attempts: we work
-                    // around that in a limited set of circumstances (namely if the Socket.Handle hasn't been exposed and
-                    // if only a limited set of options we track have been used), but in all other cases we throw.
-                    multipleConnectAsync = SocketPal.SupportsMultipleConnectAttempts ?
-#pragma warning disable CS0162 // compiler complains about dead code due to SupportsMultipleConnectAttempts being a const
-                        (MultipleConnectAsync)(new DualSocketMultipleConnectAsync(socketType, protocolType)) :
-                        (MultipleConnectAsync)(new MultipleSocketMultipleConnectAsync(socketType, protocolType));
+                    // for creating each Socket instance and can create one per attempt.
+                    multipleConnectAsync = new DualSocketMultipleConnectAsync(socketType, protocolType);
 #pragma warning restore
                 }
                 else
@@ -4714,7 +4551,7 @@ namespace System.Net.Sockets
                         SocketPal.Initialize();
 
                         // Cache some settings locally.
-                        s_perfCountersEnabled = SocketPerfCounter.Instance.Enabled;
+                        // s_perfCountersEnabled = SocketPerfCounter.Instance.Enabled; // TODO (#7833): Implement socket perf counters.
                         s_initialized = true;
                     }
                 }
@@ -4813,7 +4650,7 @@ namespace System.Net.Sockets
                 {
                     SocketError errorCode;
 
-                    // Go to blocking mode.  We know no WSAEventSelect is pending because of the lock and UnsetAsyncEventSelect() above.
+                    // Go to blocking mode.
                     if (!_willBlock || !_willBlockInternal)
                     {
                         bool willBlock;
@@ -4884,6 +4721,9 @@ namespace System.Net.Sockets
             {
                 NetEventSource.Fail(this, $"handle:{_handle}, Closing the handle threw ObjectDisposedException.");
             }
+
+            // Clean up any cached data
+            DisposeCachedTaskSocketAsyncEventArgs();
         }
 
         public void Dispose()
@@ -4990,11 +4830,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -5007,11 +4843,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -5025,11 +4857,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -5042,11 +4870,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }
 
@@ -5060,11 +4884,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return lingerOption;
@@ -5080,11 +4900,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return multicastOption;
@@ -5101,11 +4917,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             return multicastOption;
@@ -5266,7 +5078,7 @@ namespace System.Net.Sockets
 
         private static bool DoDnsCallback(IAsyncResult result, MultipleAddressConnectAsyncResult context)
         {
-            IPAddress[] addresses = DnsAPMExtensions.EndGetHostAddresses(result);
+            IPAddress[] addresses = Dns.EndGetHostAddresses(result);
             context._addresses = addresses;
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
         }
@@ -5436,6 +5248,7 @@ namespace System.Net.Sockets
         internal Socket CreateAcceptSocket(SafeCloseSocket fd, EndPoint remoteEP)
         {
             // Internal state of the socket is inherited from listener.
+            Debug.Assert(fd != null && !fd.IsInvalid);
             Socket socket = new Socket(fd);
             return UpdateAcceptSocket(socket, remoteEP);
         }
@@ -5504,9 +5317,17 @@ namespace System.Net.Sockets
 
             if (!CleanedUp)
             {
-                // If socket is still alive cancel WSAEventSelect().
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, "!CleanedUp");
             }
+        }
+
+        private void UpdateStatusAfterSocketErrorAndThrowException(SocketError error, [CallerMemberName] string callerName = null)
+        {
+            // Update the internal state of this socket according to the error before throwing.
+            var socketException = new SocketException((int)error);
+            UpdateStatusAfterSocketError(socketException);
+            if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException, memberName: callerName);
+            throw socketException;
         }
 
         // UpdateStatusAfterSocketError(socketException) - updates the status of a connected socket
@@ -5566,11 +5387,5 @@ namespace System.Net.Sockets
         private static FileStream OpenFile(string name) => string.IsNullOrEmpty(name) ? null : File.OpenRead(name);
 
         #endregion
-
-        [System.Diagnostics.Conditional("TRACE_VERBOSE")]
-        internal void DebugMembers()
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"_handle:{_handle} _isConnected:{_isConnected}");
-        }
     }
 }

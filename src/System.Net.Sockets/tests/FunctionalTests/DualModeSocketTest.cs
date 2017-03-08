@@ -403,7 +403,7 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeBeginConnect_IPAddressToHost_Fails_Helper(IPAddress connectTo, IPAddress listenOn)
         {
-            Assert.ThrowsAny<SocketException>(() =>
+            SocketException e = Assert.ThrowsAny<SocketException>(() =>
             {
                 DualModeBeginConnect_IPAddressToHost_Helper(connectTo, listenOn, false);
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -413,6 +413,7 @@ namespace System.Net.Sockets.Tests
                     DualModeBeginConnect_IPAddressToHost_Helper(connectTo, listenOn, false);
                 }
             });
+            Assert.NotEmpty(e.Message);
         }
     }
 
@@ -843,6 +844,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void BeginAcceptV6BoundToSpecificV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -852,6 +854,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void BeginAcceptV4BoundToSpecificV6_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -861,6 +864,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void BeginAcceptV6BoundToAnyV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -947,6 +951,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void AcceptAsyncV6BoundToSpecificV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -956,6 +961,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void AcceptAsyncV4BoundToSpecificV6_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -964,8 +970,8 @@ namespace System.Net.Sockets.Tests
             });
         }
 
-        [ActiveIssue(13213)]
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void AcceptAsyncV6BoundToAnyV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -1097,6 +1103,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void SendToV4IPEndPointToV6Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1106,6 +1113,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void SendToV6IPEndPointToV4Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1316,6 +1324,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void SendToAsyncV4IPEndPointToV6Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1325,6 +1334,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Binds to a specific port on 'connectTo' which on Unix may already be in use
         public void SendToAsyncV6IPEndPointToV4Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2632,7 +2642,7 @@ namespace System.Net.Sockets.Tests
                 catch (SocketException ex)
                 {
                     Error = ex.SocketErrorCode;
-                    Task.Delay(TestSettings.FailingTestTimeout).Wait(); // Give the other end a chance to call Accept().
+                    Thread.Sleep(TestSettings.FailingTestTimeout); // Give the other end a chance to call Accept().
                     _serverSocket.Dispose(); // Cancels the test
                     _waitHandle.Set();
                 }
@@ -2647,7 +2657,7 @@ namespace System.Net.Sockets.Tests
                 Error = e.SocketError;
                 if (Error != SocketError.Success)
                 {
-                    Task.Delay(TestSettings.FailingTestTimeout).Wait(); // Give the other end a chance to call Accept().
+                    Thread.Sleep(TestSettings.FailingTestTimeout); // Give the other end a chance to call Accept().
                     _serverSocket.Dispose(); // Cancels the test
                 }
                 handle.Set();

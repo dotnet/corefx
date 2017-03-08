@@ -2201,6 +2201,8 @@ namespace System
         public override int GetHashCode() { throw null; }
         public System.TimeSpan Negate() { throw null; }
         public static System.TimeSpan operator +(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static double operator /(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static System.TimeSpan operator /(System.TimeSpan timeSpan, double divisor) { throw null; }
         public static bool operator ==(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator >(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator >=(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
@@ -2208,6 +2210,8 @@ namespace System
         public static bool operator <(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator <=(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static System.TimeSpan operator -(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static System.TimeSpan operator *(System.TimeSpan timeSpan, double factor) { throw null; }
+        public static System.TimeSpan operator *(double factor, System.TimeSpan timeSpan) { throw null; }
         public static System.TimeSpan operator -(System.TimeSpan t) { throw null; }
         public static System.TimeSpan operator +(System.TimeSpan t) { throw null; }
         public static System.TimeSpan Parse(string s) { throw null; }
@@ -3789,6 +3793,10 @@ namespace System.Collections.Generic
         public KeyNotFoundException(string message) { }
         public KeyNotFoundException(string message, System.Exception innerException) { }
         protected KeyNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+    public static class KeyValuePair
+    {
+        public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value) { throw null; }        
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct KeyValuePair<TKey, TValue>
