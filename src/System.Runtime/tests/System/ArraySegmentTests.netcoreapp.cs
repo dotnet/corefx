@@ -14,10 +14,14 @@ namespace System.Tests
         [Fact]
         public void CopyTo_Default_ThrowsInvalidOperationException()
         {
+            // Source is default
             Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).CopyTo(new T[0]));
             Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).CopyTo(new T[0], 0));
             Assert.Throws<InvalidOperationException>(() => ((ICollection<T>)default(ArraySegment<T>)).CopyTo(new T[0], 0));
             Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).CopyTo(new ArraySegment<T>(new T[0])));
+
+            // Destination is default
+            Assert.Throws<InvalidOperationException>(() => new ArraySegment<T>(new T[0]).CopyTo(default(ArraySegment<T>)));
         }
 
         [Fact]
@@ -79,12 +83,11 @@ namespace System.Tests
     {
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void CopyTo(int[] array, int index, int count)
+        public static void CopyTo(ArraySegment<int> arraySegment)
         {
             const int CopyLining = 5;
             const int DestinationSegmentLining = 3;
 
-            var arraySegment = new ArraySegment<int>(array, index, count);
             var destinationModel = new int[count + 2 * CopyLining];
 
             // CopyTo(T[])
@@ -143,10 +146,9 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void CopyTo_Invalid(int[] array, int index, int count)
+        public static void CopyTo_Invalid(ArraySegment<int> arraySegment)
         {
             // ArraySegment.CopyTo calls Array.Copy internally, so the exception parameter names come from there.
-            var arraySegment = new ArraySegment<int>(array, index, count);
 
             // Destination is null
             Assert.Throws<ArgumentNullException>("destinationArray", () => arraySegment.CopyTo(null));
@@ -167,9 +169,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetEnumerator(int[] array, int index, int count)
+        public static void GetEnumerator(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             var enumerator = arraySegment.GetEnumerator();
 
             var actual = new List<int>();
@@ -188,9 +189,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetEnumerator_Dispose(int[] array, int index, int count)
+        public static void GetEnumerator_Dispose(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             var enumerator = arraySegment.GetEnumerator();
 
             bool expected = arraySegment.Count > 0;
@@ -208,9 +208,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetEnumerator_Reset(int[] array, int index, int count)
+        public static void GetEnumerator_Reset(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             var enumerator = (IEnumerator<int>)arraySegment.GetEnumerator();
 
             int[] expected = array.Skip(index).Take(count).ToArray();
@@ -233,9 +232,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetEnumerator_Invalid(int[] array, int index, int count)
+        public static void GetEnumerator_Invalid(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             var enumerator = arraySegment.GetEnumerator();
 
             // Before beginning
@@ -253,9 +251,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetSetItem_InRange(int[] array, int index, int count)
+        public static void GetSetItem_InRange(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             int[] expected = array.Skip(index).Take(count).ToArray();
 
             for (int i = 0; i < count; i++)
@@ -283,9 +280,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetSetItem_NotInRange(int[] array, int index, int count)
+        public static void GetSetItem_NotInRange(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
             TestGetSetItem_NotInRange(arraySegment, start: -arraySegment.Offset, end: 0); // Check values before start
             TestGetSetItem_NotInRange(arraySegment, start: arraySegment.Count, end: arraySegment.Offset + array.Length); // Check values after end
         }
@@ -312,10 +308,8 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetSetItem_Invalid(int[] array, int index, int count)
+        public static void GetSetItem_Invalid(ArraySegment<int> arraySegment)
         {
-            var arraySegment = new ArraySegment<int>(array, index, count);
-
             // Before start of array
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1]);
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1] = default(int));
@@ -325,15 +319,68 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Offset + array.Length] = default(int));
         }
 
-        public static IEnumerable<object[]> ArraySegment_TestData() =>
-            new[]
+        [Theory]
+        [MemberData(nameof(ArraySegment_TestData))]
+        public static void Slice_Index_Count(ArraySegment<int> arraySegment, int index, int count)
+        {
+
+        }
+
+        public static IEnumerable<object[]> Slice_TestData()
+        {
+            var arraySegments = ArraySegment_TestData().Select(array => array.Single()).Cast<ArraySegment<int>>();
+
+            foreach (ArraySegment<int> arraySegment in arraySegments)
             {
-                new object[] { new int[0], 0, 0 }, // Empty array
-                new object[] { new[] { 3, 4, 5, 6 }, 0, 4 }, // Full span of non-empty array
-                new object[] { new[] { 3, 4, 5, 6 }, 0, 3 }, // Starts at beginning, ends in middle
-                new object[] { new[] { 3, 4, 5, 6 }, 1, 3 }, // Starts in middle, ends at end
-                new object[] { new[] { 3, 4, 5, 6 }, 1, 2 }, // Starts in middle, ends in middle
-                new object[] { new[] { 3, 4, 5, 6 }, 1, 0 } // Non-empty array, count == 0
+                yield return new object[] { arraySegment, 0, 0 }; // Preserve start, no items
+                yield return new object[] { arraySegment, 0, arraySegment.Count }; // Preserve start, preserve count (noop)
+                yield return new object[] { arraySegment, arraySegment.Count, 0 }; // Start at end, no items
+                
+                if (arraySegment.Any())
+                {
+                    yield return new object[] { arraySegment, 1, 0 }; // Start at middle or end, no items
+                    yield return new object[] { arraySegment, 1, arraySegment.Count - 1 }; // Start at middle or end, rest of items
+                    yield return new object[] { arraySegment, arraySegment.Count - 1, 1 }; // Preserve start or start at middle, one item
+                }
+
+                yield return new object[] { arraySegment, 0, arraySegment.Count / 2 }; // Preserve start, multiple items, end at middle
+                yield return new object[] { arraySegment, arraySegment.Count / 2, arraySegment.Count / 2 }; // Start at middle, multiple items, end at middle (due to integer division truncation) or preserve end
+                yield return new object[] { arraySegment, arraySegment.Count / 4, arraySegment.Count / 2 }; // Start at middle, multiple items, end at middle
+
+                // ArraySegment.Slice permits negative indices. This allows the user to backtrack the start of the ArraySegment within the array.
+                // It also allows users to pass in counts larger than the count of the ArraySegment, provided that it will be able to fit within
+                // the ArraySegment's array.
+
+                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset }; // Previous segment
+                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset + arraySegment.Count }; // Previous + This segment
+                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Array.Length }; // Previous + This + Next segment
+                yield return new object[] { arraySegment, 0, arraySegment.Array.Length - arraySegment.Offset }; // This + Next segment
+                yield return new object[] { arraySegment, arraySegment.Count, arraySegment.Array.Length - arraySegment.Offset - arraySegment.Count }; // Next segment
+
+                // TODO: More work here?
+            }
+        }
+
+        public static IEnumerable<object[]> ArraySegment_TestData()
+        {
+            var arraySegments = new (int[] array, int index, int count)[]
+            {
+                (array: new int[0], index: 0, 0), // Empty array
+                (array: new[] { 3, 4, 5, 6 }, index: 0, count: 4), // Full span of non-empty array
+                (array: new[] { 3, 4, 5, 6 }, index: 0, count: 3), // Starts at beginning, ends in middle
+                (array: new[] { 3, 4, 5, 6 }, index: 1, count: 3), // Starts in middle, ends at end
+                (array: new[] { 3, 4, 5, 6 }, index: 1, count: 2), // Starts in middle, ends in middle
+                (array: new[] { 3, 4, 5, 6 }, index: 1, count: 0) // Non-empty array, count == 0
             };
+            
+            return arraySegments.Select(as => new object[] { new ArraySegment<int>(as.array, as.index, as.count) });
+        }
+        
+        private static void ValidateArraySegment<T>(ArraySegment<T> arraySegment, T[] array, int offset, int count)
+        {
+            Assert.Same(array, arraySegment.Array);
+            Assert.Equal(offset, arraySegment.Offset);
+            Assert.Equal(count, arraySegment.Count);
+        }
     }
 }
