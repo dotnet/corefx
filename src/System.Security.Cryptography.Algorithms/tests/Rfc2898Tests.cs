@@ -82,6 +82,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
             Assert.Throws<ArgumentOutOfRangeException>(() => new Rfc2898DeriveBytes(TestPassword, s_testSalt, int.MinValue / 2));
         }
 
+#if netcoreapp
         [Fact]
         public static void Ctor_EmptyAlgorithm()
         {
@@ -108,6 +109,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
             Assert.Throws<CryptographicException>(
                 () => new Rfc2898DeriveBytes(TestPassword, s_testSalt, DefaultIterationCount, new HashAlgorithmName("PotatoLemming")));
         }
+#endif
 
         [Fact]
         public static void Ctor_SaltCopied()
@@ -301,6 +303,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
                 });
         }
 
+#if netcoreapp
         [Theory]
         [MemberData(nameof(KnownValuesTestCases))]
         public static void GetBytes_KnownValues_WithAlgorithm(KnownValuesTestCase testCase)
@@ -335,6 +338,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
                 Assert.Equal(hashAlgorithm, pbkdf2.HashAlgorithm);
             }
         }
+#endif
 
         public static void CryptDeriveKey_NotSupported()
         {
