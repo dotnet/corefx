@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uap
+#if USE_REFEMIT || uapaot
     public class XmlWriterDelegator
 #else
     internal class XmlWriterDelegator

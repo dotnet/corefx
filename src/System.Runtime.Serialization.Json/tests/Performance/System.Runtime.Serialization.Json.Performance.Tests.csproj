@@ -4,6 +4,7 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{F6836E5C-BFA0-4E92-ADEE-87E797D7C90C}</ProjectGuid>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>  
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />

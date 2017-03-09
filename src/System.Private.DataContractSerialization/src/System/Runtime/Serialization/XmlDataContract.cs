@@ -15,7 +15,7 @@ namespace System.Runtime.Serialization
     using System.Security;
     using System.Linq;
 
-#if uap
+#if uapaot
     public delegate IXmlSerializable CreateXmlSerializableDelegate();
     public sealed class XmlDataContract : DataContract
 #else
@@ -84,14 +84,14 @@ namespace System.Runtime.Serialization
             { _helper.TopLevelElementNamespace = value; }
         }
 
-#if uap
+#if uapaot
         private CreateXmlSerializableDelegate _createXmlSerializableDelegate;
         public CreateXmlSerializableDelegate CreateXmlSerializableDelegate        
 #else
         internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
 #endif
         {
-#if !uap
+#if !uapaot
             get
             {
                 // We create XmlSerializableDelegate via CodeGen when CodeGen is enabled;
@@ -268,7 +268,7 @@ namespace System.Runtime.Serialization
             return ctor;
         }
 
-#if !uap
+#if !uapaot
         internal CreateXmlSerializableDelegate GenerateCreateXmlSerializableDelegate()
         {
             Type type = this.UnderlyingType;

@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
-#if !uap
+#if !uapaot
 namespace System.Xml.Serialization
 {
     using System;
