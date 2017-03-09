@@ -12,8 +12,8 @@
     <!-- Suppress warning for LockRecursionPolicy type conflicts between this assembly and System.Private.CoreLib. -->
     <!-- Remove when LockRecursionPolicy is removed from System.Private.CoreLib. -->
     <NoWarn>0436</NoWarn>
-    <!-- Remove when CDSsyncETWBCLProvider is supported -->
-    <DefineConstants>$(DefineConstants);UAPAOT</DefineConstants>
+    <!-- Remove this define after enabling CdsSyncEtwBCLProvider (https://github.com/dotnet/corefx/issues/16881) -->
+    <DefineConstants>$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />

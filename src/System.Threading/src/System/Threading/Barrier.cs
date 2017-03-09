@@ -661,7 +661,7 @@ namespace System.Threading
                 {
                     if (SetCurrentTotal(currentTotal, 0, total, !sense))
                     {
-#if !UAPAOT
+#if !uapaot
                         if (CdsSyncEtwBCLProvider.Log.IsEnabled())
                         {
                             CdsSyncEtwBCLProvider.Log.Barrier_PhaseFinished(sense, CurrentPhaseNumber);
