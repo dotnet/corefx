@@ -133,8 +133,11 @@ namespace System.Security.Cryptography
             if (disposing)
             {
                 if (_hmac != null)
+                {
                     _hmac.Dispose();
-                _hmac = null;
+                    _hmac = null;
+                }
+
                 if (_buffer != null)
                     Array.Clear(_buffer, 0, _buffer.Length);
                 if (_password != null)
