@@ -21,7 +21,7 @@
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" Condition="'$(TargetsWindows)'=='true'" />
     <Reference Include="System.Runtime" Condition="'$(TargetsWindows)'!='true'" />
-    <ReferenceFromRuntime Include="System.Private.Interop" Condition="'$(TargetGroup)' == 'netcore50aot'" />
+    <ReferenceFromRuntime Include="System.Private.Interop" Condition="'$(TargetGroup)' == 'uapaot'" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetsWindows)'!='true'">
     <GeneratePlatformNotSupportedAssembly>true</GeneratePlatformNotSupportedAssembly>

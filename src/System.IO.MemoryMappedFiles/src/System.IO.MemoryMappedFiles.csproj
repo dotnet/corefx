@@ -45,7 +45,7 @@
     </Compile>
     <Compile Include="System\IO\MemoryMappedFiles\Interop.Windows.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcore50' ">
+  <ItemGroup Condition=" '$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot' ">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFileMappingFromApp.cs">
       <Link>Common\Interop\Windows\Interop.CreateFileMappingFromApp.cs</Link>
     </Compile>
