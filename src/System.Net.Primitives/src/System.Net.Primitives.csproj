@@ -7,9 +7,6 @@
     <ProjectGuid>{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(EnableWinRT)' != 'true' AND '$(TargetGroup)' == 'netcoreapp'">
-    <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>

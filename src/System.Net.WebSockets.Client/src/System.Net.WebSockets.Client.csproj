@@ -9,9 +9,6 @@
       <TargetsUnix>true</TargetsUnix>
     -->
   </PropertyGroup>
-  <PropertyGroup Condition="'$(EnableWinRT)' != 'true'">
-    <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
