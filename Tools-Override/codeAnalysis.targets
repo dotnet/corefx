@@ -16,7 +16,7 @@
 
     <!-- Further restrict to API allowed for UWP -->
     <EnablePinvokeUWPAnalyzer Condition="'$(EnablePinvokeUWPAnalyzer)' == ''">true</EnablePinvokeUWPAnalyzer>
-    <ValidPinvokeMappings Condition="'$(EnableWinRT)'=='true' and '$(EnablePinvokeUWPAnalyzer)' == 'true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
+    <ValidPinvokeMappings Condition="'$(UWPCompatible)'=='true' and '$(EnablePinvokeUWPAnalyzer)' == 'true'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_Win32UWPApis.txt</ValidPinvokeMappings>
   </PropertyGroup>
 
   <PropertyGroup>
