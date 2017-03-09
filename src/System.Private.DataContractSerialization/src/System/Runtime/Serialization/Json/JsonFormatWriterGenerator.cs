@@ -5,7 +5,7 @@
 using System;
 using System.Xml;
 
-#if NET_NATIVE
+#if uap
 namespace System.Runtime.Serialization.Json
 {
     public delegate void JsonFormatClassWriterDelegate(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContextComplexJson context, ClassDataContract dataContract, XmlDictionaryString[] memberNames);
