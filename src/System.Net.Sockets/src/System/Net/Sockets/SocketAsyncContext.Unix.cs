@@ -241,13 +241,13 @@ namespace System.Net.Sockets
         private sealed class ReceiveMessageFromOperation : ReadOperation
         {
             public byte[] Buffer;
-            public IList<ArraySegment<byte>> Buffers;
             public int Offset;
             public int Count;
             public SocketFlags Flags;
             public int BytesTransferred;
             public SocketFlags ReceivedFlags;
-
+            public IList<ArraySegment<byte>> Buffers;
+            
             public bool IsIPv4;
             public bool IsIPv6;
             public IPPacketInformation IPPacketInformation;
