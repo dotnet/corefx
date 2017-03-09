@@ -1524,8 +1524,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(0, serializers.Length);
     }
 
-#if uap
-#endif
     [Fact]
     public static void Xml_ConstructorWithXmlRootAttr()
     {
@@ -1541,8 +1539,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(expected.SequenceEqual(actual));
     }
 
-#if uap
-#endif
     [Fact]
     public static void Xml_ConstructorWithXmlAttributeOverrides()
     {
