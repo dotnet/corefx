@@ -25,7 +25,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\Threading\Helpers.CoreCLR.cs" />
     <Compile Include="System\Threading\Barrier.cs" />
     <Compile Include="System\Threading\CDSsyncETWBCLProvider.cs" Condition="'$(TargetGroup)'!='uapaot'" />
     <Compile Include="System\Threading\CountdownEvent.cs" />
