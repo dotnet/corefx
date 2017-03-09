@@ -9,7 +9,7 @@ using System.IO;
 using System.Text;
 
 // The uap #define is used in some source files to indicate we are compiling classes
-// directly into the .NET Native System.Net.Http.dll implementation assembly in order to use internal class
+// directly into the UWP System.Net.Http.dll implementation assembly in order to use internal class
 // methods. Internal methods are needed in order to map cookie response headers from the WinRT Windows.Web.Http APIs.
 // Windows.Web.Http is used underneath the System.Net.Http classes on .NET Native. Having other similarly
 // named classes would normally conflict with the public System.Net namespace classes.
