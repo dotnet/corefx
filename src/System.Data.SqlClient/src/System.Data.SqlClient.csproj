@@ -6,8 +6,8 @@
     <AssemblyName>System.Data.SqlClient</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
-    <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
-    <EnableWinRT>false</EnableWinRT>
+    <!-- Although we have a NS configuration, we know we use API that's not currently whitelisted: just validate against OneCore -->
+    <EnablePinvokeUWPAnalyzer>false</EnablePinvokeUWPAnalyzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
