@@ -1013,7 +1013,7 @@ namespace System.Threading
             // Indicate to the processor that we are spinning. The return value facilitates usage in do-while spin loops that
             // use 'continue' statements for readability, like:
             //   do { ... } while (YieldProcessor());
-            RuntimeThread.Spin(1);
+            RuntimeThread.SpinWait(1);
             return true;
         }
 
