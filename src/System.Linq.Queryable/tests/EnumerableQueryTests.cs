@@ -20,6 +20,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void NullEnumerableConstantNullExpression()
         {
             IQueryable<int> query = new EnumerableQuery<int>((IEnumerable<int>)null);
