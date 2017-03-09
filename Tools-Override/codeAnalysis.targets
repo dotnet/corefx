@@ -31,6 +31,9 @@
   <PropertyGroup Condition="$(EnableFxCopAnalyzers)">
     <CodeAnalysisRuleSet Condition="'$(CodeAnalysisRuleSet)' == ''">$(MSBuildThisFileDirectory)Default.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <EnablePinvokeAnalyzer Condition="'$(EnablePinvokeAnalyzer)' == ''">true</EnablePinvokeAnalyzer>
+  </PropertyGroup>
   <ItemGroup Condition="'$(EnableDotnetAnalyzers)' == 'true'">
     <!-- Enable the Microsoft.Dotnet.CodeAnalysis.dll analyzer -->
     <Analyzer Include="$(CodeAnalyzerDir)Microsoft.DotNet.CodeAnalysis.dll"/>
@@ -42,7 +45,7 @@
     <AdditionalFiles Condition="'$(ValidPinvokeMappings)' != ''" Include="$(ValidPinvokeMappings)"/>
 
     <!-- Disable any analyzers that should not run -->
-    <DisabledAnalyzers Condition="'$(IsTestProject)' == 'true' or '$(TargetsUnix)' == 'true'" Include="PinvokeAnalyzer"/>
+    <DisabledAnalyzers Condition="'$(IsTestProject)' == 'true' or '$(TargetsUnix)' == 'true' or '$(EnablePinvokeAnalyzer)' != 'true'" Include="PinvokeAnalyzer"/>
     <DisabledAnalyzers Condition="'$(TargetsWindows)'=='true' and ($(TargetGroup.Contains('net46')) or $(TargetGroup.Contains('net45')))" Include="PinvokeAnalyzer" />
   </ItemGroup>
 
