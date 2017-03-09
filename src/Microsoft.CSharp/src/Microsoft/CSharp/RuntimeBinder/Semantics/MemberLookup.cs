@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // If it is first, record it.
             if (_swtFirst == null)
             {
-                _swtFirst.Set(sym, type);
+                _swtFirst.Set(sym, type); // NullReferenceException possible!
                 Debug.Assert(_csym == 1);
                 Debug.Assert(_prgtype[0] == type);
                 _fMulti = sym.IsMethodSymbol() || sym.IsPropertySymbol() && sym.AsPropertySymbol().isIndexer();
