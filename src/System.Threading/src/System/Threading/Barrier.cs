@@ -362,7 +362,7 @@ namespace System.Threading
                     // If this participant is going to join the next phase, which means the postPhaseAction is being running, this participants must wait until this done
                     // and its event is reset.
                     // Without that, if the postPhaseAction takes long time, this means the event that the current participant is going to wait on is still set
-                    // (FinishPPhase didn't reset it yet) so it should wait until it reset
+                    // (FinishPhase didn't reset it yet) so it should wait until it reset
                     if (newPhase != currPhase)
                     {
                         // Wait on the opposite event
