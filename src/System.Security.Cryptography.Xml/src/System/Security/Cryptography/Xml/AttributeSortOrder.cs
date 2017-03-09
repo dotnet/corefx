@@ -19,7 +19,7 @@ namespace System.Security.Cryptography.Xml
         {
             XmlNode nodeA = a as XmlNode;
             XmlNode nodeB = b as XmlNode;
-            if ((nodeA == null) || (nodeB == null))
+            if ((a == null) || (b == null))
                 throw new ArgumentException();
             int namespaceCompare = string.CompareOrdinal(nodeA.NamespaceURI, nodeB.NamespaceURI);
             if (namespaceCompare != 0) return namespaceCompare;
