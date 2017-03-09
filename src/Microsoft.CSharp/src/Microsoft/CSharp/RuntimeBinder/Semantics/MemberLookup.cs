@@ -104,7 +104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _csym++;
 
             // If it is first, record it.
-            if (_swtFirst == null)
+            if (_swtFirst != null)
             {
                 _swtFirst.Set(sym, type);
                 Debug.Assert(_csym == 1);
