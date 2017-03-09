@@ -878,9 +878,9 @@ namespace System.Xml.XPath
                 XText t = r as XText;
                 if (t != null && t.GetParent() != null)
                 {
-                    foreach (XNode node in t.GetParent().Nodes())
+                    while (t != t.parent.content)
                     {
-                        t = node as XText;
+                        t = t.next as XText;
                         if (t == null) break;
                         yield return (T)(object)t;
                     }
