@@ -219,7 +219,6 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeDirection.InOut)]
         [InlineData(PipeDirection.Out)]
         [PlatformSpecific(TestPlatforms.Windows)] // accessing SafePipeHandle on Unix fails for a non-connected stream
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Windows_CreateFromAlreadyBoundHandle_Throws_ArgumentException(PipeDirection direction)
         {
             // The pipe is already bound
