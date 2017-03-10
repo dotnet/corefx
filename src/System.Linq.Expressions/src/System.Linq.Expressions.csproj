@@ -9,7 +9,7 @@
     <ProjectGuid>{AEF718E9-D4FC-418F-A7AE-ED6B2C7B3787}</ProjectGuid>
     <AssemblyName>System.Linq.Expressions</AssemblyName>
     <RootNamespace>System.Linq.Expressions</RootNamespace>
-    <IsInterpreting Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</IsInterpreting>
+    <IsInterpreting Condition="'$(TargetGroup)' == 'uap'">true</IsInterpreting>
 
     <!-- Temporarily disable IsInterpreting build as it's broken and needs investigation 
          https://github.com/dotnet/corefx/issues/16910
@@ -27,7 +27,7 @@
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <DefineConstants>$(DefineConstants);FEATURE_DYNAMIC_DELEGATE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'"> 
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
     <ReferenceFromRuntime Include="System.Private.CoreLib.DynamicDelegate" />
   </ItemGroup>

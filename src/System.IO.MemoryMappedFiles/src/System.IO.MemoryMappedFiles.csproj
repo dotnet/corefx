@@ -27,7 +27,7 @@
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedViewStream.cs" />
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedFileRights.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot' ">
+  <ItemGroup Condition=" '$(TargetGroup)' == 'uap'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFileMappingFromApp.cs">
       <Link>Common\Interop\Windows\Interop.CreateFileMappingFromApp.cs</Link>
     </Compile>
@@ -42,7 +42,7 @@
     </Compile>
     <Compile Include="System\IO\MemoryMappedFiles\Interop.Windows.Uap.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and !('$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot')">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
     <Compile Include="System\IO\MemoryMappedFiles\Interop.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
