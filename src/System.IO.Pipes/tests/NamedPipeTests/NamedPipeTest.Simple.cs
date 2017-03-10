@@ -7,7 +7,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using Xunit;
 
 namespace System.IO.Pipes.Tests
@@ -146,7 +145,6 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public async Task ClonedClient_ActsAsOriginalClient()
         {
-            Debug.WriteLine("Entre");
             byte[] msg1 = new byte[] { 5, 7, 9, 10 };
             byte[] received1 = new byte[] { 0, 0, 0, 0 };
 
@@ -482,7 +480,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        public async Task ReadAsync_DisconnectDuringRead_Returns()
+        public async Task ReadAsync_DisconnectDuringRead_Returns0()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
             {
@@ -542,8 +540,7 @@ namespace System.IO.Pipes.Tests
 
                     Task<int> serverReadToken = server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token);
                     ctx1.Cancel();
-                    serverReadToken.Wait();
-                    //Assert.ThrowsAnyAsync<OperationCanceledException>(() => result = serverReadToken.Result);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverReadToken);
 
                     ctx1.Cancel();
                     Assert.True(server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
