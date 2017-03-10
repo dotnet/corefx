@@ -135,7 +135,7 @@ namespace System.Net.Sockets
         {
             ErrorCode = (int)socketError;
             object result = PostCompletion(numBytes);
-            ReleaseUnmanagedStructures();
+            ReleaseUnmanagedStructures(); // must come after PostCompletion, as overrides may use these resources
             InvokeCallback(result);
         }
 
