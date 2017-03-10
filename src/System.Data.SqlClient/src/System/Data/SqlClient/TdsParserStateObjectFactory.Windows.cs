@@ -13,19 +13,11 @@ namespace System.Data.SqlClient
 
         public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
 
-        static TdsParserStateObjectFactory()
-        {
-            bool shouldUseLegacyNetorking;
-            // If The appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
-            UseManagedSNI = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
-        }
+        private static bool shouldUseLegacyNetorking;
 
-        public static bool UseManagedSNI
-        {
-            get;
-            private set;
-        }
-        
+        // If The appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
+        public static bool UseManagedSNI { get; } = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
+
         public EncryptionOptions EncryptionOptions
         {
             get
