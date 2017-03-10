@@ -14,10 +14,8 @@
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-WindowsNT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-WindowsNT-Release|AnyCPU'" />
   <ItemGroup>
     <TargetingPackExclusions Include="System.Linq.Expressions" />
     <ReferenceFromRuntime Include="System.Linq.Expressions" />
@@ -27,7 +25,7 @@
     <Compile Include="$(CommonTestPath)\System\TypeBuilderExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" /> 
+    <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
