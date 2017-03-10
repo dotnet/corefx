@@ -24,6 +24,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />  
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <DefineConstants>$(DefineConstants);FEATURE_DYNAMIC_DELEGATE</DefineConstants>
   </PropertyGroup>
@@ -146,7 +148,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap' or '$(TargetGroup)' == 'uapaot'">
     <Compile Include="System\Linq\Expressions\DynamicExpressionVisitor.cs" />
     <Compile Include="System\Linq\Expressions\DynamicExpression.cs" />
     <Compile Include="System\Linq\Expressions\Expression.netstandard.cs" />
