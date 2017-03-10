@@ -11,21 +11,21 @@ namespace System.Data.SqlClient
 
         private const string UseLegacyNetworkingOnWindows = "System.Data.SqlClient.UseLegacyNetworkingOnWindows";
 
+        public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
+
         static TdsParserStateObjectFactory()
         {
+            bool shouldUseLegacyNetorking;
             // If The appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
             UseManagedSni = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
         }
 
-        private static bool shouldUseLegacyNetorking;
-
         public static bool UseManagedSni
         {
-            get; private set;
+            get;
+            private set;
         }
-
-        public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
-
+        
         public EncryptionOptions EncryptionOptions
         {
             get
