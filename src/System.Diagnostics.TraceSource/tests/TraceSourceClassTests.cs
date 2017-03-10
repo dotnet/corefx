@@ -131,10 +131,19 @@ namespace System.Diagnostics.TraceSourceTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In Desktop in TraceSource.ctor we create the ArgumentException without param name, just with Message = name, so the param name is null.")]
         public void EmptySourceName()
         {
             Assert.Throws<ArgumentException>("name", () => new TraceSource(string.Empty));
             Assert.Throws<ArgumentException>("name", () => new TraceSource(string.Empty, SourceLevels.All));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "In Desktop in TraceSource.ctor we create the ArgumentException without param name, just with Message = name, so the param name is null.")]
+        public void EmptySourceName_Desktop()
+        {
+            Assert.Throws<ArgumentException>(() => new TraceSource(string.Empty));
+            Assert.Throws<ArgumentException>(() => new TraceSource(string.Empty, SourceLevels.All));
         }
     }
 

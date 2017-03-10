@@ -16,6 +16,7 @@ namespace System.Diagnostics.TraceSourceTests
             public TestDefaultTraceListener()
             {
                 _writer = new StringWriter();
+                AssertUiEnabled = false;
             }
 
             public String Output
@@ -26,6 +27,11 @@ namespace System.Diagnostics.TraceSourceTests
             public override void Write(string message)
             {
                 _writer.Write(message);
+            }
+
+            public override void WriteLine(string message)
+            {
+                _writer.WriteLine(message);
             }
         }
 

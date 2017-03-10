@@ -119,5 +119,10 @@ namespace System.Diagnostics.TraceSourceTests
         {
             Call(Method.WriteLine);
         }
+
+        public override void Close()
+        {
+            Dispose(); // In desktop Trace.Close() calls listener.Close() on every listener and in Core we call listener.Dispose() so the tests would fail in desktop without this override. 
+        }
     }
 }
