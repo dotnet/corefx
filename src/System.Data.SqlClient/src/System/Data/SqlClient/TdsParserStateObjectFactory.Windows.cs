@@ -13,6 +13,7 @@ namespace System.Data.SqlClient
 
         static TdsParserStateObjectFactory()
         {
+            // If The appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
             UseManagedSni = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
         }
 
