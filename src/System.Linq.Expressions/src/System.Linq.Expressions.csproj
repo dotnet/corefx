@@ -31,7 +31,6 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'"> 
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-    <ReferenceFromRuntime Include="System.Private.CoreLib.DynamicDelegate" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
@@ -148,7 +147,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap' or '$(TargetGroup)' == 'uapaot'">
+  <ItemGroup>
     <Compile Include="System\Linq\Expressions\DynamicExpressionVisitor.cs" />
     <Compile Include="System\Linq\Expressions\DynamicExpression.cs" />
     <Compile Include="System\Linq\Expressions\Expression.netstandard.cs" />
