@@ -95,7 +95,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(16946, TestPlatforms.AnyUnix)]
         public static void TestPublicKey_Key_DSA()
         {
             PublicKey pk = GetTestDsaKey();
