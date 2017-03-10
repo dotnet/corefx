@@ -49,9 +49,9 @@ if (FEATURE_DISTRO_AGNOSTIC_SSL)
     endif()
 
     list(APPEND NATIVECRYPTO_SOURCES
-        #opensslshim.cpp
+        opensslshim.cpp
     )
-    #add_definitions(-DFEATURE_DISTRO_AGNOSTIC_SSL)
+    add_definitions(-DFEATURE_DISTRO_AGNOSTIC_SSL)
 endif()
 
 add_library(objlib OBJECT ${NATIVECRYPTO_SOURCES} ${VERSION_FILE_PATH})
