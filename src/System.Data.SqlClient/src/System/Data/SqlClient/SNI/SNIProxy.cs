@@ -158,7 +158,7 @@ namespace System.Data.SqlClient.SNI
                 //
                 // SecurityStatusPalErrorCode.InternalError only occurs in Unix and always comes with a GssApiException,
                 // so we don't need to check for a GssApiException here.
-                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError) 
+                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError)
                 {
                     throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
                 }
@@ -302,8 +302,11 @@ namespace System.Data.SqlClient.SNI
         {
             instanceName = new byte[1];
 
+            ServerDetails details = ParseServerName(fullServerName);
+
             SNIHandle sniHandle = null;
-            if (fullServerName.IndexOf(':') == -1)
+
+            if (details.protocol == ServerDetails.Protocol.None)
             {
                 // default to using tcp if no protocol is provided
                 sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
@@ -311,7 +314,7 @@ namespace System.Data.SqlClient.SNI
             else
             {
                 string serverNameWithOutProtocol = null;
-
+                
                 // when tcp protocol is specified
                 if ((serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, TdsEnums.TCP + ":")) != null)
                 {
@@ -356,6 +359,89 @@ namespace System.Data.SqlClient.SNI
             }
 
             return sniHandle;
+        }
+
+        private ServerDetails ParseServerName(string dataSource)
+        {
+            ServerDetails details = new ServerDetails();
+
+            // Remove all whitespaces from the datasource and all operations will happen on lower case.
+            string workingDataSource = dataSource.Trim().ToLower();
+
+            string[] splitByColon = workingDataSource.Split(':');
+
+            int firstIndexOfColon = workingDataSource.IndexOf(':');
+
+            bool colonSeparatorPresent = splitByColon.Length > 1;
+
+            string serverName = null;
+
+            if (!colonSeparatorPresent)
+            {
+                details.protocol = ServerDetails.Protocol.None;
+            } else {
+                
+                // We trim before switching because " tcp : server , 1433 " is a valid data source
+                switch(splitByColon[0].Trim())
+                {
+                    case TdsEnums.TCP:
+                        details.protocol = ServerDetails.Protocol.TCP;
+                        break;
+                    case TdsEnums.NP:
+                        details.protocol = ServerDetails.Protocol.NP;
+                        break;
+                    default:
+                        // None of the supported protocols were found. This may be a IPv6 address
+                        details.protocol = ServerDetails.Protocol.None;
+                        break;
+                }
+            }
+
+            int indexOfPipeBackwardSlash = workingDataSource.IndexOf("\\\\");
+
+            string dataSourceAfterTrimmingProtocol = colonSeparatorPresent && details.protocol != ServerDetails.Protocol.None ? workingDataSource.Substring(firstIndexOfColon + 1) : workingDataSource;
+
+            if(dataSourceAfterTrimmingProtocol.StartsWith("\\\\"))
+            {
+
+                // DataSource is like "\\pipename"
+                details.protocol = ServerDetails.Protocol.NP;
+
+                // Check if the dataSource ends with \\ Bad datasources like "np:\\" or "\\" should be caught here
+                if(workingDataSource.Length == indexOfPipeBackwardSlash + 2)
+                {
+                    // Error
+                }
+                // Find the first \ after the \\ in case of named pipe
+                int indexOfServerSeparator = workingDataSource.IndexOf("\\", indexOfPipeBackwardSlash + 2);
+
+                // If there is no \ after the \\, this is an error. There has to be a \ after \\ followed by the pipename
+                if(indexOfServerSeparator == -1)
+                {
+                    // Error
+                }
+
+                serverName = workingDataSource.Substring(indexOfPipeBackwardSlash + 2, indexOfServerSeparator - (indexOfPipeBackwardSlash + 2));
+
+                // Check if this is a LocalHost 
+                if(IsLocalHost(serverName))
+                {
+                    serverName = Environment.MachineName;
+                }
+            }
+
+            if(details.protocol == ServerDetails.Protocol.NP)
+            {
+                // If the protocol is Named Pipes , the the server name is the text between \\ and the first \ 
+            }
+            
+
+            return details;
+        }
+
+        private static bool IsLocalHost(string serverName)
+        {
+            return serverName.CompareTo(".") == 0 || serverName.CompareTo("(local)") == 0 || serverName.CompareTo("localhost") == 0;
         }
 
         private static byte[] MakeMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
@@ -698,4 +784,13 @@ namespace System.Data.SqlClient.SNI
             return SNILoadHandle.SingletonInstance.LastError;
         }
     }
+
+    internal class ServerDetails
+    {
+        internal enum Protocol { TCP, NP, None };
+
+        internal Protocol protocol;
+
+    }
+
 }
