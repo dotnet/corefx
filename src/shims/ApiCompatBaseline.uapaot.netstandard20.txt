@@ -304,16 +304,6 @@ MembersMustExist : Member 'System.Runtime.InteropServices.StructLayoutAttribute.
 TypesMustExist : Type 'System.Runtime.Serialization.ISafeSerializationData' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.SafeSerializationEventArgs' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo..ctor(System.Type, System.Runtime.Serialization.IFormatterConverter, System.Boolean)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.get()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.set(System.Security.PartialTrustVisibilityLevel)' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.PartialTrustVisibilityLevel' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute..ctor(System.Security.SecurityCriticalScope)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute.Scope.get()' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityCriticalScope' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityRulesAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityTreatAsSafeAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SuppressUnmanagedCodeSecurityAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.UnverifiableCodeAttribute' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.Cryptography.CryptoStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 MembersMustExist : Member 'System.Text.Decoder.Convert(System.Byte*, System.Int32, System.Char*, System.Int32, System.Boolean, System.Int32, System.Int32, System.Boolean)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.Decoder.GetCharCount(System.Byte*, System.Int32, System.Boolean)' does not exist in the implementation but it does exist in the contract.
@@ -638,6 +628,14 @@ CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.NamedPipeClientStream' d
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.NamedPipeServerStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.PipeStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 TypesMustExist : Type 'System.Net.AuthenticationSchemeSelector' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Net.Cookie' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.CopyTo(System.Net.Cookie[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Uri, System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Net.CookieException' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListener' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListenerBasicIdentity' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListenerContext' does not exist in the implementation but it does exist in the contract.
@@ -719,18 +717,10 @@ MembersMustExist : Member 'System.Runtime.InteropServices.StructLayoutAttribute.
 TypesMustExist : Type 'System.Runtime.Serialization.ISafeSerializationData' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.SafeSerializationEventArgs' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo..ctor(System.Type, System.Runtime.Serialization.IFormatterConverter, System.Boolean)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.get()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.set(System.Security.PartialTrustVisibilityLevel)' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.PartialTrustVisibilityLevel' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.SecureStringMarshal' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute..ctor(System.Security.SecurityCriticalScope)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute.Scope.get()' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityCriticalScope' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityRulesAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SecurityTreatAsSafeAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.SuppressUnmanagedCodeSecurityAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Security.UnverifiableCodeAttribute' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.Cryptography.CryptoStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.ECDsaCng..ctor(System.Security.Cryptography.ECCurve)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.Decoder.Convert(System.Byte*, System.Int32, System.Char*, System.Int32, System.Boolean, System.Int32, System.Int32, System.Boolean)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.Decoder.GetCharCount(System.Byte*, System.Int32, System.Boolean)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.Decoder.GetChars(System.Byte*, System.Int32, System.Char*, System.Int32, System.Boolean)' does not exist in the implementation but it does exist in the contract.
@@ -812,6 +802,14 @@ MembersMustExist : Member 'System.Diagnostics.Debug.Unindent()' does not exist i
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Compression.DeflateStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Compression.GZipStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 TypesMustExist : Type 'System.Net.AuthenticationSchemeSelector' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Net.Cookie' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.CopyTo(System.Net.Cookie[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Uri, System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Net.CookieException' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListener' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListenerBasicIdentity' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.HttpListenerContext' does not exist in the implementation but it does exist in the contract.
@@ -836,6 +834,7 @@ CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.AnonymousPipeServerStrea
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.NamedPipeClientStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.NamedPipeServerStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.IO.Pipes.PipeStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve)' does not exist in the implementation but it does exist in the contract.
 Compat issues with assembly System.Data.Common:
 CannotRemoveBaseTypeOrInterface : Type 'System.DBNull' does not implement interface 'System.IConvertible' in the implementation but it does in the contract.
 MembersMustExist : Member 'System.DBNull.GetObjectData(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
@@ -955,6 +954,15 @@ Compat issues with assembly System.Memory:
 TypesMustExist : Type 'System.ReadOnlySpan<T>' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Span' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Span<T>' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Net.Primitives:
+TypesMustExist : Type 'System.Net.Cookie' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.CopyTo(System.Net.Cookie[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieCollection.Item.get(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Net.CookieContainer.Add(System.Uri, System.Net.Cookie)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Net.CookieException' does not exist in the implementation but it does exist in the contract.
 Compat issues with assembly System.Net.Security:
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Security.AuthenticatedStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Security.NegotiateStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
@@ -1072,10 +1080,6 @@ MembersMustExist : Member 'System.Runtime.CompilerServices.MethodCodeType System
 MembersMustExist : Member 'System.Runtime.CompilerServices.MethodImplAttribute..ctor()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Runtime.CompilerServices.MethodImplAttribute..ctor(System.Int16)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Runtime.InteropServices.StructLayoutAttribute..ctor(System.Int16)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.get()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.AllowPartiallyTrustedCallersAttribute.PartialTrustVisibilityLevel.set(System.Security.PartialTrustVisibilityLevel)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute..ctor(System.Security.SecurityCriticalScope)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Security.SecurityCriticalAttribute.Scope.get()' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Text.StringBuilder' does not implement interface 'System.Runtime.Serialization.ISerializable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Threading.WaitHandle' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 Compat issues with assembly System.Runtime.Extensions:
@@ -1164,6 +1168,10 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.SEHExcept
 MembersMustExist : Member 'System.Runtime.InteropServices.SEHException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
 Compat issues with assembly System.Runtime.Serialization.Formatters:
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo..ctor(System.Type, System.Runtime.Serialization.IFormatterConverter, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Security.Cryptography.Algorithms:
+MembersMustExist : Member 'System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Security.Cryptography.Cng:
+MembersMustExist : Member 'System.Security.Cryptography.ECDsaCng..ctor(System.Security.Cryptography.ECCurve)' does not exist in the implementation but it does exist in the contract.
 Compat issues with assembly System.Security.Cryptography.Primitives:
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.Cryptography.CryptoStream' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 Compat issues with assembly System.Security.SecureString:
@@ -1235,4 +1243,4 @@ MembersMustExist : Member 'System.Threading.Timer..ctor(System.Threading.TimerCa
 MembersMustExist : Member 'System.Threading.Timer.Change(System.Int64, System.Int64)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Threading.Timer.Change(System.UInt32, System.UInt32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Threading.Timer.Dispose(System.Threading.WaitHandle)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 1201
+Total Issues: 1206
