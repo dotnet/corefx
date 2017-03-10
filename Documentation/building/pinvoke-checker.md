@@ -1,6 +1,6 @@
 # PInvoke Analyzer
 
-During the build of any product library in CoreFX we use a Roslyn code analyzer to look for disallowed native calls (PInvokes). When there is a violation, it will fail the build. To fix the build, either find an alternative to the PInvoke or baseline the failure temporarily. To baseline it, add the function name in the format `module!entrypoint` to a file named PInvokeAnalyzerExceptionList.analyzerdata in the same folder as the project. [Here](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.Process/src/PinvokeAnalyzerExceptionList.analyzerdata) is an example. 
+During the build of any product library in CoreFX we use a Roslyn code analyzer to look for disallowed native calls (PInvokes). When there is a violation, it will fail the build. To fix the build, either find an alternative to the PInvoke or baseline the failure temporarily. To baseline it, add the function name in the format `module!entrypoint` to a file named PInvokeAnalyzerExceptionList.analyzerdata in the same folder as the project. [Here](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.Process/src/PInvokeAnalyzerExceptionList.analyzerdata) is an example. 
 
 If you baseline a violation, please open an issue to fix it because the library likely cannot ship in this situation. It is better to not introduce the violation. We want to clean out any baselines. There are situations where a violation may be acceptable. One situation is where we are shipping the native implementation of the API. An example of this situation is `sni.dll` which is used by SqlClient.
 
@@ -21,7 +21,7 @@ To enforce this the analyzer consults the list [here](https://github.com/dotnet/
 
 The analyzer is enabled by default in the configurations below by the setting of the MSBuild property `UWPCompatible`. We aim to make all our `netstandard` compliant libraries work within a UWP app, but in rare cases where a library cannot, the check can be disabled with `<UWPCompatible>false</UWPCompatible>` in the project file.
 
-There is also a more fine grained property `<EnablePinvokeUWPAnalyzer>false</EnablePinvokeUWPAnalyzer>` for temporary use.
+There is also a more fine grained property `<EnablePInvokeUWPAnalyzer>false</EnablePInvokeUWPAnalyzer>` for temporary use.
 
 ## Legal OneCore API's
 
@@ -36,4 +36,4 @@ We do not currently apply this check to test binaries as they do not need to run
 ### Implementation
 To enforce this the analyzer consults the list [here](https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.CodeAnalysis/PackageFiles/PinvokeAnalyzer_Win32Apis.txt). 
 
-The analyzer is enabled by default when building for Windows, not a test, and not building for UWP. We aim to make all such configurations OneCore compilant, but in the rare cases where a library cannot be, the check can be disabled with `<EnablePinvokeAnalyzer>false<EnablePinvokeAnalyzer>` in the project file.
+The analyzer is enabled by default when building for Windows, not a test, and not building for UWP. We aim to make all such configurations OneCore compilant, but in the rare cases where a library cannot be, the check can be disabled with `<EnablePInvokeAnalyzer>false<EnablePInvokeAnalyzer>` in the project file.
