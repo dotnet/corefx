@@ -29,6 +29,39 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+    <!-- Needed for DynamicDelegate -->
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <!-- Causes us to use project references to avoid duplicate definitions that the ref assemblies would give us -->
+    <ProjectReference Include="System.Collections" />
+    <ProjectReference Include="System.Diagnostics.Contracts" />
+    <ProjectReference Include="System.Diagnostics.Debug" />
+    <ProjectReference Include="System.Diagnostics.Tools" />
+    <ProjectReference Include="System.Linq" />
+    <ProjectReference Include="System.ObjectModel" />
+    <ProjectReference Include="System.Reflection.Emit" />
+    <ProjectReference Include="System.Reflection.Emit.ILGeneration" />
+    <ProjectReference Include="System.Reflection.Emit.Lightweight" />
+    <ProjectReference Include="System.Reflection.Primitives" />
+    <ProjectReference Include="System.Resources.ResourceManager" />
+    <ProjectReference Include="System.Runtime" />
+    <ProjectReference Include="System.Runtime.Extensions" />
+    <ProjectReference Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Reflection.Emit" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
+    <Reference Include="System.Reflection.Emit.Lightweight" />
+    <Reference Include="System.Reflection.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Threading" />      
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
@@ -130,20 +163,6 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.RuntimeVariables.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.MergedRuntimeVariables.cs" />
     <Compile Include="System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs" />
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Linq" />
-    <Reference Include="System.ObjectModel" />
-    <Reference Include="System.Reflection.Emit" />
-    <Reference Include="System.Reflection.Emit.ILGeneration" />
-    <Reference Include="System.Reflection.Emit.Lightweight" />
-    <Reference Include="System.Reflection.Primitives" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Linq\Expressions\DynamicExpressionVisitor.cs" />
