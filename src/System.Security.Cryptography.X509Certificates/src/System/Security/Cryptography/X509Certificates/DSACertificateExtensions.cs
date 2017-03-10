@@ -15,7 +15,6 @@ namespace System.Security.Cryptography.X509Certificates
         /// <summary>
         /// Gets the <see cref="DSA" /> public key from the certificate or null if the certificate does not have a DSA public key.
         /// </summary>
-        [SecuritySafeCritical]
         public static DSA GetDSAPublicKey(this X509Certificate2 certificate)
         {
             return certificate.GetPublicKey<DSA>();
@@ -24,7 +23,6 @@ namespace System.Security.Cryptography.X509Certificates
         /// <summary>
         /// Gets the <see cref="DSA" /> private key from the certificate or null if the certificate does not have a DSA private key.
         /// </summary>
-        [SecuritySafeCritical]
         public static DSA GetDSAPrivateKey(this X509Certificate2 certificate)
         {
             return certificate.GetPrivateKey<DSA>();

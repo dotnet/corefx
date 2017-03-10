@@ -437,7 +437,7 @@ namespace Internal.Cryptography.Pal
 
             DSAParameters parameters = new DSAParameters();
 
-            // While this could use the object intializer, the read modifies the data stream, so
+            // While this could use the object initializer, the read modifies the data stream, so
             // leaving these in flat call for clarity.
             parameters.P = parametersReader.ReadIntegerBytes();
             parameters.Q = parametersReader.ReadIntegerBytes();
@@ -458,7 +458,7 @@ namespace Internal.Cryptography.Pal
 
         private static void TrimPaddingByte(ref byte[] data)
         {
-            if (data[0] == 0)
+            if (data.Length > 0 && data[0] == 0)
             {
                 byte[] tmp = new byte[data.Length - 1];
                 Buffer.BlockCopy(data, 1, tmp, 0, tmp.Length);
