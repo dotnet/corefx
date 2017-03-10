@@ -17,10 +17,10 @@ namespace System.Data.SqlClient
         {
             bool shouldUseLegacyNetorking;
             // If The appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
-            UseManagedSni = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
+            UseManagedSNI = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
         }
 
-        public static bool UseManagedSni
+        public static bool UseManagedSNI
         {
             get;
             private set;
@@ -30,7 +30,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return UseManagedSni ? SNI.SNILoadHandle.SingletonInstance.Options : SNILoadHandle.SingletonInstance.Options;
+                return UseManagedSNI ? SNI.SNILoadHandle.SingletonInstance.Options : SNILoadHandle.SingletonInstance.Options;
             }
         }
 
@@ -38,13 +38,13 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return UseManagedSni ? SNI.SNILoadHandle.SingletonInstance.Status : SNILoadHandle.SingletonInstance.Status;
+                return UseManagedSNI ? SNI.SNILoadHandle.SingletonInstance.Status : SNILoadHandle.SingletonInstance.Status;
             }
         }
 
         public TdsParserStateObject CreateTdsParserStateObject(TdsParser parser)
         {
-            if (UseManagedSni)
+            if (UseManagedSNI)
             {
                 return new TdsParserStateObjectManaged(parser);
             }
@@ -56,7 +56,7 @@ namespace System.Data.SqlClient
 
         internal TdsParserStateObject CreateSessionObject(TdsParser tdsParser, TdsParserStateObject _pMarsPhysicalConObj, bool v)
         {
-            if (TdsParserStateObjectFactory.UseManagedSni)
+            if (TdsParserStateObjectFactory.UseManagedSNI)
             {
                 return new TdsParserStateObjectManaged(tdsParser, _pMarsPhysicalConObj, true);
             }

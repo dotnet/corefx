@@ -2358,7 +2358,7 @@ namespace System.Data.SqlClient
             }
             finally
             {
-                if (!TdsParserStateObjectFactory.UseManagedSni)
+                if (!TdsParserStateObjectFactory.UseManagedSNI)
                 {
                     if (!IsPacketEmpty(readPacket))
                     {
