@@ -9,7 +9,7 @@ namespace System.Data.SqlClient
     internal sealed class TdsParserStateObjectFactory
     {
 
-        public static bool useManagedSni = true;
+        public static bool UseManagedSni => true;
 
         public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
 

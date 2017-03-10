@@ -437,7 +437,7 @@ namespace System.Data.SqlClient
                 // Cache physical stateObj and connection.
                 _pMarsPhysicalConObj = _physicalStateObj;
 
-                if(TdsParserStateObjectFactory.useManagedSni) _pMarsPhysicalConObj.IncrementPendingCallbacks();
+                if(TdsParserStateObjectFactory.UseManagedSni) _pMarsPhysicalConObj.IncrementPendingCallbacks();
 
                 UInt32 info = 0;
                 uint error = _pMarsPhysicalConObj.EnableMars(ref info);
@@ -1164,7 +1164,7 @@ namespace System.Data.SqlClient
             // !=null       | == 0     | replace text left of errorMessage
             //
 
-            if (TdsParserStateObjectFactory.useManagedSni)
+            if (TdsParserStateObjectFactory.UseManagedSni)
                 Debug.Assert(!string.IsNullOrEmpty(details.errorMessage) || details.sniErrorNumber != 0, "Empty error message received from SNI");
             else
                 Debug.Assert(!string.IsNullOrEmpty(details.errorMessage), "Empty error message received from SNI");
@@ -1206,7 +1206,7 @@ namespace System.Data.SqlClient
             else
             {
 
-                if (TdsParserStateObjectFactory.useManagedSni)
+                if (TdsParserStateObjectFactory.UseManagedSni)
                 {
                     // SNI error. Append additional error message info if available.
                     //
@@ -5936,7 +5936,7 @@ namespace System.Data.SqlClient
                     _physicalStateObj.SniContext = SniContext.Snix_LoginSspi;
 
                     SSPIData(null, 0, outSSPIBuff, ref outSSPILength);
-                    if (TdsParserStateObjectFactory.useManagedSni)
+                    if (TdsParserStateObjectFactory.UseManagedSni)
                     {
                         outSSPILength = outSSPIBuff != null ? (uint)outSSPIBuff.Length : 0;
                     }
@@ -6201,7 +6201,7 @@ namespace System.Data.SqlClient
 
         private void SNISSPIData(byte[] receivedBuff, UInt32 receivedLength, byte[] sendBuff, ref UInt32 sendLength)
         {
-            if (TdsParserStateObjectFactory.useManagedSni)
+            if (TdsParserStateObjectFactory.UseManagedSni)
             {
                 try
                 {
