@@ -133,10 +133,10 @@ namespace System.Net.Sockets
         // Called either synchronously from SocketPal async routines or asynchronously via CompletionPortCallback above. 
         private void CompletionCallback(int numBytes, SocketError socketError)
         {
-            ReleaseUnmanagedStructures();
-
             ErrorCode = (int)socketError;
-            InvokeCallback(PostCompletion(numBytes));
+            object result = PostCompletion(numBytes);
+            ReleaseUnmanagedStructures();
+            InvokeCallback(result);
         }
 
         // The following property returns the Win32 unsafe pointer to
