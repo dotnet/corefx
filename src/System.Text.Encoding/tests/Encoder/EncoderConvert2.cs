@@ -50,12 +50,62 @@ namespace System.Text.Tests
             yield return new object[] { Encoding.Unicode.GetEncoder(), 2 };
         }
 
-        [Fact]
-        public void ThisTestShouldFail_1()
+        [Theory] // Input                                           // Expected
+        [InlineData("_" ,                                           "_")]
+        [InlineData("_._",                                           "_._")]
+        [InlineData("A" ,                                           "A")]
+        [InlineData(" " ,                                           "_")]
+        [InlineData("  " ,                                          "__")]
+        [InlineData("A." ,                                          "A")]
+        [InlineData("A123" ,                                        "A123")]
+        [InlineData("A<T>" ,                                        "A_T_")]
+        [InlineData("A_1" ,                                         "A_1")]
+        [InlineData("A.B",                                          "A.B")]
+        [InlineData("Microsoft.VisualStudio.ProjectSystem",         "Microsoft.VisualStudio.ProjectSystem")]
+        [InlineData(".A",                                           "A")]
+        [InlineData(".A.",                                          "A")]
+        [InlineData("..A.",                                         "A")]
+        [InlineData("A....A.",                                      "A.A")]
+        [InlineData("A B",                                          "A_B")]
+        [InlineData("1.2",                                          "_1._2")]
+        [InlineData("A.B and C",                                    "A.B_and_C")]
+        [InlineData("A,B and C",                                    "A_B_and_C")]
+        [InlineData("\u1234",                                       "\u1234")]
+        [InlineData("\u00C6sh",                                     "\u00C6sh")]
+        [InlineData("my\u034Fvery\u034Flong\u034Fidentifier",       "my\u034Fvery\u034Flong\u034Fidentifier")]           // COMBINING GRAPHEME JOINERs, not actual spaces
+        public void ThisShouldPass(string name, string expected)
+        {
+            Assert.True(true);
+        }
+
+        [Theory] // Input                                           // Expected
+        [InlineData("_" ,                                           "_")]
+        [InlineData("_._",                                           "_._")]
+        [InlineData("A" ,                                           "A")]
+        [InlineData(" " ,                                           "_")]
+        [InlineData("  " ,                                          "__")]
+        [InlineData("A." ,                                          "A")]
+        [InlineData("A123" ,                                        "A123")]
+        [InlineData("A<T>" ,                                        "A_T_")]
+        [InlineData("A_1" ,                                         "A_1")]
+        [InlineData("A.B",                                          "A.B")]
+        [InlineData("Microsoft.VisualStudio.ProjectSystem",         "Microsoft.VisualStudio.ProjectSystem")]
+        [InlineData(".A",                                           "A")]
+        [InlineData(".A.",                                          "A")]
+        [InlineData("..A.",                                         "A")]
+        [InlineData("A....A.",                                      "A.A")]
+        [InlineData("A B",                                          "A_B")]
+        [InlineData("1.2",                                          "_1._2")]
+        [InlineData("A.B and C",                                    "A.B_and_C")]
+        [InlineData("A,B and C",                                    "A_B_and_C")]
+        [InlineData("\u1234",                                       "\u1234")]
+        [InlineData("\u00C6sh",                                     "\u00C6sh")]
+        [InlineData("my\u034Fvery\u034Flong\u034Fidentifier",       "my\u034Fvery\u034Flong\u034Fidentifier")]           // COMBINING GRAPHEME JOINERs, not actual spaces
+        public void ThisShouldFail(string name, string expected)
         {
             Assert.True(false);
         }
-        
+
         // Call Convert to convert a arbitrary character array encoders
         [Theory]
         [MemberData(nameof(Encoders_RandomInput))]
@@ -89,12 +139,6 @@ namespace System.Text.Tests
             VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, chars.Length * multiplier, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, chars.Length * multiplier, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, 0, bytes, 0, 0, true, 0, 0, expectedCompleted: true);
-        }
-
-        [Fact]
-        public void ThisTestShouldFail_2()
-        {
-            Assert.True(false);
         }
 
         // Call Convert to convert a ASCII character array with user implemented encoder
@@ -281,12 +325,6 @@ namespace System.Text.Tests
 
             VerificationHelper(encoder, chars, 0, 2, bytes, 0, bytes.Length, false, 2, 1, expectedCompleted: true);
             VerificationHelper(encoder, chars, 1, 1, bytes, 0, bytes.Length, true, 1, 3, expectedCompleted: true);
-        }
-
-        [Fact]
-        public void ThisTestShouldFail_3()
-        {
-            Assert.True(false);
         }
 
         private void VerificationHelper(Encoder encoder, char[] chars, int charIndex, int charCount,
