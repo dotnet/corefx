@@ -49,6 +49,12 @@ namespace System.Text.Tests
             yield return new object[] { Encoding.UTF8.GetEncoder(), 1 };
             yield return new object[] { Encoding.Unicode.GetEncoder(), 2 };
         }
+
+        [Fact]
+        public void ThisTestShouldFail_1()
+        {
+            Assert.True(false);
+        }
         
         // Call Convert to convert a arbitrary character array encoders
         [Theory]
@@ -83,6 +89,12 @@ namespace System.Text.Tests
             VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, false, chars.Length, chars.Length * multiplier, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, chars.Length * multiplier, expectedCompleted: true);
             VerificationHelper(encoder, chars, 0, 0, bytes, 0, 0, true, 0, 0, expectedCompleted: true);
+        }
+
+        [Fact]
+        public void ThisTestShouldFail_2()
+        {
+            Assert.True(false);
         }
 
         // Call Convert to convert a ASCII character array with user implemented encoder
@@ -269,6 +281,12 @@ namespace System.Text.Tests
 
             VerificationHelper(encoder, chars, 0, 2, bytes, 0, bytes.Length, false, 2, 1, expectedCompleted: true);
             VerificationHelper(encoder, chars, 1, 1, bytes, 0, bytes.Length, true, 1, 3, expectedCompleted: true);
+        }
+
+        [Fact]
+        public void ThisTestShouldFail_3()
+        {
+            Assert.True(false);
         }
 
         private void VerificationHelper(Encoder encoder, char[] chars, int charIndex, int charCount,
