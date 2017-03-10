@@ -46,7 +46,9 @@ namespace System.Security.Cryptography
             _iterations = (uint)iterations;
             _password = password.CloneByteArray();
             HashAlgorithm = hashAlgorithm;
-            OpenHmac(out _hmac, out _blockSize);
+            _hmac = OpenHmac();
+            // _blockSize is in bytes, HashSize is in bits.
+            _blockSize = _hmac.HashSize >> 3;
 
             Initialize();
         }
@@ -89,7 +91,9 @@ namespace System.Security.Cryptography
             _iterations = (uint)iterations;
             _password = Encoding.UTF8.GetBytes(password);
             HashAlgorithm = hashAlgorithm;
-            OpenHmac(out _hmac, out _blockSize);
+            _hmac = OpenHmac();
+            // _blockSize is in bytes, HashSize is in bits.
+            _blockSize = _hmac.HashSize >> 3;
 
             Initialize();
         }
@@ -214,39 +218,25 @@ namespace System.Security.Cryptography
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
-        private void OpenHmac(out HMAC hmac, out int hLen)
+        private HMAC OpenHmac()
         {
             Debug.Assert(_password != null);
 
             HashAlgorithmName hashAlgorithm = HashAlgorithm;
-            
+
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
                 throw new CryptographicException(SR.Cryptography_HashAlgorithmNameNullOrEmpty);
 
             if (hashAlgorithm == HashAlgorithmName.SHA1)
-            {
-                hmac = new HMACSHA1(_password);
-                hLen = 160 >> 3;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA256)
-            {
-                hmac = new HMACSHA256(_password);
-                hLen = 256 >> 3;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA384)
-            {
-                hmac = new HMACSHA384(_password);
-                hLen = 384 >> 3;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA512)
-            {
-                hmac = new HMACSHA512(_password);
-                hLen = 512 >> 3;
-            }
-            else
-            {
-                throw new CryptographicException(SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name));
-            }
+                return new HMACSHA1(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA256)
+                return new HMACSHA256(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA384)
+                return new HMACSHA384(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA512)
+                return new HMACSHA512(_password);
+
+            throw new CryptographicException(SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name));
         }
 
         private void Initialize()
