@@ -19,10 +19,11 @@ namespace System.Diagnostics.TraceSourceTests
             WriteLine,
             Flush,
             Fail,
+            Close
             //NOTE: update MethodEnumCount if values are added
         }
 
-        private const int MethodEnumCount = 8;
+        private const int MethodEnumCount = 9;
 
         public TestTraceListener(bool threadSafe = false)
             : this(null, threadSafe)
@@ -122,7 +123,7 @@ namespace System.Diagnostics.TraceSourceTests
 
         public override void Close()
         {
-            Dispose(); // In desktop Trace.Close() calls listener.Close() on every listener and in Core we call listener.Dispose() so the tests would fail in desktop without this override. 
+            Call(Method.Close);
         }
     }
 }

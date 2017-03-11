@@ -12,6 +12,7 @@ namespace System.Diagnostics.TraceSourceTests
         private class TestDefaultTraceListener : DefaultTraceListener
         {
             private StringWriter _writer;
+            public bool ShouldOverrideWriteLine { get; set; } = true;
 
             public TestDefaultTraceListener()
             {
@@ -31,7 +32,8 @@ namespace System.Diagnostics.TraceSourceTests
 
             public override void WriteLine(string message)
             {
-                _writer.WriteLine(message);
+                if (ShouldOverrideWriteLine)
+                    _writer.WriteLine(message);
             }
         }
 
@@ -48,6 +50,16 @@ namespace System.Diagnostics.TraceSourceTests
             var listener = new TestDefaultTraceListener();
             listener.Fail("FAIL");
             Assert.Contains("FAIL", listener.Output);
+        }
+
+        [Fact]
+        public void Fail_WithoutWriteLineOverride()
+        {
+            var listener = new TestDefaultTraceListener();
+            listener.ShouldOverrideWriteLine = false;
+            listener.Fail("FAIL");
+            listener.ShouldOverrideWriteLine = true;
+            Assert.False(listener.Output.Contains("FAIL"));
         }
 
         [Fact]

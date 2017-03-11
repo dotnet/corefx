@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
@@ -10,8 +12,8 @@ namespace System.Diagnostics.TraceSourceTests
 
     public class TraceClassTests : IDisposable
     {
-        private const string TestRunnerAssemblyName = "xunit.console.netcore";
-        private const string TestRunnerAssemblyNameDesktop = "xunit.console.exe";
+        private readonly string TestRunnerAssemblyName = TraceTestHelper.IsFullFramework ? 
+            Path.GetFileName(Environment.GetCommandLineArgs()[0]) : Assembly.GetEntryAssembly().GetName().Name;
 
         void IDisposable.Dispose()
         {
@@ -97,7 +99,7 @@ namespace System.Diagnostics.TraceSourceTests
             var listener = new TestTraceListener();
             Trace.Listeners.Add(listener);
             Trace.Close();
-            Assert.Equal(1, listener.GetCallCount(Method.Dispose));
+            Assert.Equal(1, listener.GetCallCount(Method.Close));
         }
 
         [Fact]
@@ -320,7 +322,6 @@ namespace System.Diagnostics.TraceSourceTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "It is netcoreapp specific as it uses TestRunnerAssemblyName (xunit.console.netcore) to compare a TraceListener.Output.")]
         public void TraceTest01()
         {
             var textTL = new TestTextTraceListener();
@@ -345,37 +346,6 @@ namespace System.Diagnostics.TraceSourceTests
                 String.Format(
                     "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
                     TestRunnerAssemblyName
-                );
-
-            Assert.Equal(expected, textTL.Output);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "It is Desktop specific as it uses TestRunnerAssemblyNameDesktop (xunit.console.exe) to compare a TraceListener.Output.")] 
-        public void TraceTest01_Desktop()
-        {
-            var textTL = new TestTextTraceListener();
-            Trace.Listeners.Add(textTL);
-            Trace.IndentLevel = 0;
-            Trace.WriteLine("Message start.");
-            Trace.IndentSize = 2;
-            Trace.IndentLevel = 2;
-            Trace.Write("This message should be indented.");
-            Trace.TraceError("This error not be indented.");
-            Trace.TraceError("{0}", "This error is indented");
-            Trace.TraceWarning("This warning is indented");
-            Trace.TraceWarning("{0}", "This warning is also indented");
-            Trace.TraceInformation("This information in indented");
-            Trace.TraceInformation("{0}", "This information is also indented");
-            Trace.IndentSize = 0;
-            Trace.IndentLevel = 0;
-            Trace.WriteLine("Message end.");
-            textTL.Flush();
-            String newLine = Environment.NewLine;
-            var expected =
-                String.Format(
-                    "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
-                    TestRunnerAssemblyNameDesktop
                 );
 
             Assert.Equal(expected, textTL.Output);

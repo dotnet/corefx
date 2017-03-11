@@ -115,7 +115,34 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void Write(string message)
         {
-            if (NeedIndent) WriteIndent();
+            Write(message, true);
+        }
+
+        /// <devdoc>
+        ///    <para>
+        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write"/>.
+        ///    </para>
+        /// </devdoc>
+        public override void WriteLine(string message)
+        {
+            WriteLine(message, true);
+        }
+
+        private void WriteLine(string message, bool useLogFile)
+        {
+            if (NeedIndent) 
+                WriteIndent();
+
+            // I do the concat here to make sure it goes as one call to the output.
+            // we would save a stringbuilder operation by calling Write twice.
+            Write(message + Environment.NewLine, useLogFile); 
+            NeedIndent = true;
+        }
+
+        private void Write(string message, bool useLogFile)
+        {
+            if (NeedIndent) 
+                WriteIndent();
 
             // really huge messages mess up both VS and dbmon, so we chop it up into 
             // reasonable chunks if it's too big
@@ -132,20 +159,28 @@ namespace System.Diagnostics
                 }
                 Debug.Write(message.Substring(offset));
             }
+
+            if (useLogFile && !string.IsNullOrEmpty(LogFileName))
+                WriteToLogFile(message);
         }
 
-        /// <devdoc>
-        ///    <para>
-        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write"/>.
-        ///    </para>
-        /// </devdoc>
-        public override void WriteLine(string message)
+        private void WriteToLogFile(string message)
         {
-            if (NeedIndent) WriteIndent();
-            // I do the concat here to make sure it goes as one call to the output.
-            // we would save a stringbuilder operation by calling Write twice.
-            Write(message + Environment.NewLine);
-            NeedIndent = true;
+            try
+            {
+                using (FileStream stream = File.OpenWrite(LogFileName))
+                {
+                    using (StreamWriter writer = new StreamWriter(stream)) 
+                    {
+                        stream.Position = stream.Length;
+                        writer.Write(message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                WriteLine(string.Format(SR.ExceptionOccurred, LogFileName, e.ToString()), false);
+            }
         }
     }
 }
