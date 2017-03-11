@@ -191,7 +191,7 @@ namespace System.Security.Cryptography.Xml
                     Y = Convert.FromBase64String(yNode.InnerText),
                     J = (jNode != null) ? Convert.FromBase64String(jNode.InnerText) : null,
                     Seed = (seedNode != null) ? Convert.FromBase64String(seedNode.InnerText) : null,
-                    Counter = (seedNode != null) ? Utils.ConvertByteArrayToInt(Convert.FromBase64String(pgenCounterNode.InnerText)) : 0
+                    Counter = (pgenCounterNode != null) ? Utils.ConvertByteArrayToInt(Convert.FromBase64String(pgenCounterNode.InnerText)) : 0
                 });
             }
             catch (Exception ex)

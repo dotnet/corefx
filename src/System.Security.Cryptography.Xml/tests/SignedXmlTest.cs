@@ -308,7 +308,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
             Assert.Null(signedXml.SignatureLength);
             Assert.Equal(SignedXml.XmlDsigDSAUrl, signedXml.SignatureMethod);
-            Assert.Equal(64, signedXml.SignatureValue.Length);
+            Assert.True(signedXml.SignatureValue.Length >= 40, $"At {signedXml.SignatureValue.Length} bytes long, the signature value is less than the minimum length of 40 bytes.");
             Assert.Null(signedXml.SigningKeyName);
 
             // Get the XML representation of the signature.
