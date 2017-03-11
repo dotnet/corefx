@@ -58,6 +58,8 @@ namespace System.Net.Http
             SslPolicyErrors,
             bool> _serverCertificateCustomValidationCallback;
 
+        private readonly DiagnosticsHandler _diagnosticsPipeline;
+
         #endregion Fields
 
         #region Properties
@@ -446,6 +448,7 @@ namespace System.Net.Http
             _properties = null; // only create collection when required.
             _maxConnectionsPerServer = ServicePointManager.DefaultConnectionLimit;
             _serverCertificateCustomValidationCallback = null;
+            _diagnosticsPipeline = new DiagnosticsHandler(this.SendAsyncImpl);
         }
 
         protected override void Dispose(bool disposing)
@@ -753,8 +756,18 @@ namespace System.Net.Http
         #endregion Message Setup
 
         #region Request Processing
-
+        
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            if (DiagnosticsHandler.IsEnabled())
+            {
+                return _diagnosticsPipeline.SendAsync(request, cancellationToken);
+            }
+            return SendAsyncImpl(request, cancellationToken);
+        }
+
+        internal Task<HttpResponseMessage> SendAsyncImpl(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             if (request == null)

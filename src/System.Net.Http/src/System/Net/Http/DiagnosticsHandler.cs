@@ -13,15 +13,15 @@ namespace System.Net.Http
     /// <summary>
     /// DiagnosticHandler notifies DiagnosticSource subscribers about outgoing Http requests
     /// </summary>
-    internal sealed class DiagnosticsHandler : DelegatingHandler
+    internal sealed class DiagnosticsHandler
     {
         /// <summary>
         /// DiagnosticHandler constructor
         /// </summary>
-        /// <param name="innerHandler">Inner handler: Windows or Unix implementation of HttpMessageHandler. 
-        /// Note that DiagnosticHandler is the latest in the pipeline </param>
-        public DiagnosticsHandler(HttpMessageHandler innerHandler) : base(innerHandler)
+        /// <param name="sendAsync">referene to HttpClientHandler.SendAsync (Windows\Linux\Win Desktop)</param>
+        public DiagnosticsHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> sendAsync)
         {
+            _sendAsync = sendAsync;
         }
 
         internal static bool IsEnabled()
@@ -30,7 +30,7 @@ namespace System.Net.Http
             return s_diagnosticListener.IsEnabled();
         }
 
-        protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        internal async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             //HttpClientHandler is responsible to call DiagnosticsHandler.IsEnabled() before forwarding request here.
@@ -55,6 +55,7 @@ namespace System.Net.Http
                     activity.Start();
                 }
             }
+#if !NET46
             //if Activity events are disabled, try to write System.Net.Http.Request event (deprecated)
             else if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteNameDeprecated))
             {
@@ -69,7 +70,7 @@ namespace System.Net.Http
                     }
                 );
             }
-
+#endif
             // If we are on at all, we propagate any activity information.  
             Activity currentActivity = Activity.Current;
             if (currentActivity != null)
@@ -92,7 +93,7 @@ namespace System.Net.Http
                 }
             }
 
-            Task<HttpResponseMessage> responseTask = base.SendAsync(request, cancellationToken);
+            Task<HttpResponseMessage> responseTask = _sendAsync(request, cancellationToken);
             try
             {
                 await responseTask.ConfigureAwait(false);
@@ -128,6 +129,7 @@ namespace System.Net.Http
                         RequestTaskStatus = responseTask.Status
                     });
                 }
+#if !NET46
                 //if Activity events are disabled, try to write System.Net.Http.Response event (deprecated)
                 else if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ResponseWriteNameDeprecated))
                 {
@@ -142,15 +144,18 @@ namespace System.Net.Http
                         }
                     );
                 }
+#endif
             }
+
             return responseTask.Result;
         }
 
-        #region private
+#region private
 
+        private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _sendAsync;
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(DiagnosticsHandlerLoggingStrings.DiagnosticListenerName);
 
-        #endregion
+#endregion
     }
 }

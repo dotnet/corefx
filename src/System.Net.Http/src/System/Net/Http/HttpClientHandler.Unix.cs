@@ -143,7 +143,7 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _curlHandler = new CurlHandler();
-            _diagnosticsPipeline = new DiagnosticsHandler(_curlHandler);
+            _diagnosticsPipeline = new DiagnosticsHandler(_curlHandler.SendAsync);
         }
 
         protected override void Dispose(bool disposing)

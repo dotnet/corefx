@@ -37,7 +37,7 @@ namespace System.Net.Http
 
         private readonly RTHttpBaseProtocolFilter rtFilter;
         private readonly HttpHandlerToFilter handlerToFilter;
-        private readonly HttpMessageHandler diagnosticsPipeline;
+        private readonly DiagnosticsHandler diagnosticsPipeline;
 
         private volatile bool operationStarted;
         private volatile bool disposed;
@@ -422,7 +422,7 @@ namespace System.Net.Http
         {
             this.rtFilter = new RTHttpBaseProtocolFilter();
             this.handlerToFilter = new HttpHandlerToFilter(this.rtFilter);
-            this.diagnosticsPipeline = new DiagnosticsHandler(handlerToFilter);
+            this.diagnosticsPipeline = new DiagnosticsHandler(handlerToFilter.SendAsync);
 
             this.clientCertificateOptions = ClientCertificateOption.Manual;
 
