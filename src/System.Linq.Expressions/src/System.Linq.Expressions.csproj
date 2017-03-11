@@ -32,20 +32,17 @@
     <!-- Needed for DynamicDelegate -->
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <!-- Causes us to use project references to avoid duplicate definitions that the ref assemblies would give us -->
-    <ProjectReference Include="System.Collections" />
-    <ProjectReference Include="System.Diagnostics.Contracts" />
-    <ProjectReference Include="System.Diagnostics.Debug" />
-    <ProjectReference Include="System.Diagnostics.Tools" />
-    <ProjectReference Include="System.Linq" />
-    <ProjectReference Include="System.ObjectModel" />
-    <ProjectReference Include="System.Reflection.Emit" />
-    <ProjectReference Include="System.Reflection.Emit.ILGeneration" />
-    <ProjectReference Include="System.Reflection.Emit.Lightweight" />
-    <ProjectReference Include="System.Reflection.Primitives" />
-    <ProjectReference Include="System.Resources.ResourceManager" />
-    <ProjectReference Include="System.Runtime" />
-    <ProjectReference Include="System.Runtime.Extensions" />
-    <ProjectReference Include="System.Threading" />
+    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.ObjectModel\src\System.ObjectModel.csproj" />
+    <ProjectReference Include="..\..\System.Reflection.Primitives\src\System.Reflection.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.Linq\src\System.Linq.csproj" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" /> <!-- Have to add reference to ref because the contract is not fulfilled yet -->
+    <Reference Include="System.Reflection.Emit" /> <!-- Have to add reference to ref because the contract is not fulfilled yet -->
+    <Reference Include="System.Reflection.Emit.Lightweight" /> <!-- Have to add reference to ref because the contract is not fulfilled yet -->
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Reference Include="System.Collections" />
