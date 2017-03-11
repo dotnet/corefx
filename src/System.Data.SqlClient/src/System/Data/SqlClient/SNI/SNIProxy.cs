@@ -303,58 +303,28 @@ namespace System.Data.SqlClient.SNI
             instanceName = new byte[1];
 
             ServerDetails details = ParseServerName(fullServerName);
+            if (details == null)
+            {
+                return null;
+            }
 
             SNIHandle sniHandle = null;
 
             if (details.protocol == ServerDetails.Protocol.None)
             {
                 // default to using tcp if no protocol is provided
-                sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
             }
             else
             {
-                string serverNameWithOutProtocol = null;
-                
-                // when tcp protocol is specified
-                if ((serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, TdsEnums.TCP + ":")) != null)
+                switch (details.protocol)
                 {
-                    sniHandle = CreateTcpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-                }
-                // when np protocol is specified
-                else if ((serverNameWithOutProtocol = GetServerNameWithOutProtocol(fullServerName, TdsEnums.NP + ":")) != null)
-                {
-                    sniHandle = CreateNpHandle(serverNameWithOutProtocol, timerExpire, callbackObject, parallel);
-                }
-                // possibly error case
-                else
-                {
-                    int portOrInstanceNameIndex = Math.Max(fullServerName.LastIndexOf(','), fullServerName.LastIndexOf('\\'));
-                    string serverNameWithOutPortOrInstanceName = portOrInstanceNameIndex > 0 ? fullServerName.Substring(0, portOrInstanceNameIndex) : fullServerName;
-                    IPAddress address = null;
-
-                    // when no protocol is specified, and fullServerName is IPv6
-                    if (IPAddress.TryParse(serverNameWithOutPortOrInstanceName, out address) && address.AddressFamily == AddressFamily.InterNetworkV6)
-                    {
-                        // default to using tcp if no protocol is provided
-                        sniHandle = CreateTcpHandle(fullServerName, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-                    }
-                    // error case for sure
-                    else
-                    {
-                        // when invalid protocol is specified
-                        if (IsOccursOnce(fullServerName, ':'))
-                        {
-                            SNICommon.ReportSNIError(
-                                SNIProviders.INVALID_PROV, 0,
-                                (uint)(parallel ? SNICommon.MultiSubnetFailoverWithNonTcpProtocol : SNICommon.ProtocolNotSupportedError),
-                                string.Empty);
-                        }
-                        // when fullServerName is in invalid format
-                        else
-                        {
-                            SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                        }
-                    }
+                    case ServerDetails.Protocol.TCP:
+                        sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                        break;
+                    case ServerDetails.Protocol.NP:
+                        sniHandle = CreateNpHandle(details, timerExpire, callbackObject, parallel);
+                        break;
                 }
             }
 
@@ -374,21 +344,24 @@ namespace System.Data.SqlClient.SNI
 
             bool colonSeparatorPresent = splitByColon.Length > 1;
 
-            string serverName = null;
-
             if (!colonSeparatorPresent)
             {
                 details.protocol = ServerDetails.Protocol.None;
-            } else {
-                
+            }
+            else
+            {
+
                 // We trim before switching because " tcp : server , 1433 " is a valid data source
-                switch(splitByColon[0].Trim())
+                switch (splitByColon[0].Trim())
                 {
                     case TdsEnums.TCP:
                         details.protocol = ServerDetails.Protocol.TCP;
                         break;
                     case TdsEnums.NP:
                         details.protocol = ServerDetails.Protocol.NP;
+                        break;
+                    case TdsEnums.ADMIN:
+                        details.protocol = ServerDetails.Protocol.Admin;
                         break;
                     default:
                         // None of the supported protocols were found. This may be a IPv6 address
@@ -397,45 +370,186 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            int indexOfPipeBackwardSlash = workingDataSource.IndexOf("\\\\");
+            string pipeBeginning = @"\\";
+            int indexOfPipeBackwardSlash = workingDataSource.IndexOf(pipeBeginning);
 
-            string dataSourceAfterTrimmingProtocol = colonSeparatorPresent && details.protocol != ServerDetails.Protocol.None ? workingDataSource.Substring(firstIndexOfColon + 1) : workingDataSource;
+            string dataSourceAfterTrimmingProtocol = colonSeparatorPresent && details.protocol != ServerDetails.Protocol.None ? workingDataSource.Substring(firstIndexOfColon + 1).Trim() : workingDataSource;
 
-            if(dataSourceAfterTrimmingProtocol.StartsWith("\\\\"))
+            // If we have a datasource beginning with a pipe
+            if (dataSourceAfterTrimmingProtocol.StartsWith(pipeBeginning))
             {
-
                 // DataSource is like "\\pipename"
-                details.protocol = ServerDetails.Protocol.NP;
-
-                // Check if the dataSource ends with \\ Bad datasources like "np:\\" or "\\" should be caught here
-                if(workingDataSource.Length == indexOfPipeBackwardSlash + 2)
+                if (details.protocol != ServerDetails.Protocol.None)
                 {
-                    // Error
-                }
-                // Find the first \ after the \\ in case of named pipe
-                int indexOfServerSeparator = workingDataSource.IndexOf("\\", indexOfPipeBackwardSlash + 2);
-
-                // If there is no \ after the \\, this is an error. There has to be a \ after \\ followed by the pipename
-                if(indexOfServerSeparator == -1)
-                {
-                    // Error
+                    details.protocol = ServerDetails.Protocol.NP;
                 }
 
-                serverName = workingDataSource.Substring(indexOfPipeBackwardSlash + 2, indexOfServerSeparator - (indexOfPipeBackwardSlash + 2));
-
-                // Check if this is a LocalHost 
-                if(IsLocalHost(serverName))
+                else if (details.protocol != ServerDetails.Protocol.NP)
                 {
-                    serverName = Environment.MachineName;
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
                 }
+
+                // Check if the dataSource ends with "\\" Bad datasources like "np:\\" or "\\" should be caught here. 
+                // There should be a server name after "\\"
+                if (dataSourceAfterTrimmingProtocol.Length == 2)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
+
+                // Split on the '\' separator. The first two elements of the result will be empty strings because of the beginning "\\" in the pipename
+                // [0] empty 
+                // [1] empty 
+                // [2] servername 
+                // [3] "pipe"
+                // if there is no [6] element the [4] + [5] is default pipe name sql\query
+                // If there is a [6] then [4] has the instance name in it
+                string[] tokensSeparatedBySlash = dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator);
+
+                details.serverName = tokensSeparatedBySlash[2];
+
+                if (IsLocalHost(details.serverName))
+                {
+                    details.serverName = Environment.MachineName;
+                }
+
+                // The "/pipe" portion should be available in NP string
+                if (tokensSeparatedBySlash.Length < 6 || string.IsNullOrEmpty(tokensSeparatedBySlash[3])
+                    || string.IsNullOrEmpty(tokensSeparatedBySlash[4])
+                    || string.IsNullOrEmpty(tokensSeparatedBySlash[5]))
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
+
+                // There is no instance name and pipe name was in the format \\server\pipe\sql\query
+                if ("sql".CompareTo(tokensSeparatedBySlash[4]) == 0 && "query".CompareTo(tokensSeparatedBySlash[5]) == 0)
+                {
+                    details.InstanceName = string.Empty;
+                    details.PipeName = tokensSeparatedBySlash[4] + @"\" + tokensSeparatedBySlash[5];
+                }
+                //  Possible standard named instance, i.e. "\\server\pipe\MSSQL$instancename\sql\query".
+                else if (tokensSeparatedBySlash[4].StartsWith("mssql$"))
+                {
+                    // Standard instance name ending in \sql\query
+                    if ("sql".CompareTo(tokensSeparatedBySlash[5]) == 0 && "query".CompareTo(tokensSeparatedBySlash[6]) == 0)
+                    {
+                        StringBuilder instanceNameBuilder = new StringBuilder();
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[4].Split('$')[1]);
+                        instanceNameBuilder.Append(BackSlashSeparator);
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
+                        instanceNameBuilder.Append(BackSlashSeparator);
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
+                        details.InstanceName = instanceNameBuilder.ToString();
+                    }
+                    else
+                    {
+                        StringBuilder instanceNameBuilder = new StringBuilder();
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[3]);
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[4]);
+                        instanceNameBuilder.Append(BackSlashSeparator);
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
+                        instanceNameBuilder.Append(BackSlashSeparator);
+                        instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
+                        details.InstanceName = instanceNameBuilder.ToString();
+                    }
+                }
+                else
+                {
+                    StringBuilder instanceNameBuilder = new StringBuilder();
+                    instanceNameBuilder.Append(tokensSeparatedBySlash[3]);
+                    instanceNameBuilder.Append(tokensSeparatedBySlash[4]);
+                    instanceNameBuilder.Append(BackSlashSeparator);
+                    instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
+                    instanceNameBuilder.Append(BackSlashSeparator);
+                    instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
+                    details.InstanceName = instanceNameBuilder.ToString();
+                }
+
+                return details;
             }
 
-            if(details.protocol == ServerDetails.Protocol.NP)
+            string[] tokensByCommaAndSlash = dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator, ',');
+            details.serverName = tokensByCommaAndSlash[0];
+
+            // Check the parameters. The parameters are Comma separated in the Data Source. The parameter we really care about is the port
+            if (dataSourceAfterTrimmingProtocol.Contains(","))
             {
-                // If the protocol is Named Pipes , the the server name is the text between \\ and the first \ 
-            }
-            
+                // We are looking at datasources like "server,port\instance" or "server\instance,port"
 
+                string[] tokensSeparatedByComma = dataSourceAfterTrimmingProtocol.Split(',');
+
+                string parameter = tokensSeparatedByComma[1].Trim();
+
+                // Bad Data Source like "server, "
+                if (string.IsNullOrEmpty(parameter))
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
+
+                // For Tcp and Only Tcp are parameters allowed.
+                if (details.protocol == ServerDetails.Protocol.None)
+                {
+                    details.protocol = ServerDetails.Protocol.TCP;
+                }
+                // Parameter specified for non-TCP protocol
+                else if (details.protocol != ServerDetails.Protocol.TCP)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
+
+                // If there is a "\" in the parameter e.g. "1432\MyInstance", then simply take the part before the "\"
+                string[] parameterTokenSplitByBackSlash = parameter.Split('\\');
+                if (parameterTokenSplitByBackSlash.Length > 2)
+                {
+                    parameter = parameterTokenSplitByBackSlash[0];
+                    if (!int.TryParse(parameter, out details.port))
+                    {
+                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                        return null;
+                    }
+                }
+
+
+                // Instance Name handling
+                string[] tokensSeparatedByBackSlash = dataSourceAfterTrimmingProtocol.Split('\\');
+                if (tokensSeparatedByBackSlash.Length > 1)
+                {
+                    //Error case "server\ " An empty space after '\' 
+                    if (string.IsNullOrWhiteSpace(tokensSeparatedByBackSlash[1]))
+                    {
+                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                        return null;
+                    }
+                    // In case the datasource is of the format "server\instance,port, then port takes precedence.
+                    else if (string.IsNullOrEmpty(parameter))
+                    {
+                        details.InstanceName = tokensSeparatedByBackSlash[1].Split(',')[0];
+                    }
+                }
+
+                if ("mssqlserver".CompareTo(details.InstanceName) == 0)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
+            }
+
+            // If Server name is empty or localhost, then use "localhost" in case of TCP protocol.
+            if (string.IsNullOrEmpty(details.serverName) || IsLocalHost(details.serverName))
+            {
+                if (details.protocol == ServerDetails.Protocol.Admin)
+                {
+                    details.serverName = Environment.MachineName;
+                }
+                else
+                {
+                    details.serverName = DefaultHostName;
+                }
+            }
             return details;
         }
 
@@ -464,63 +578,32 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
         /// <param name="parallel">Should MultiSubnetFailover be used</param>
         /// <returns>SNITCPHandle</returns>
-        private SNITCPHandle CreateTcpHandle(string fullServerName, long timerExpire, object callbackObject, bool parallel, ref byte[] spnBuffer, bool isIntegratedSecurity)
+        private SNITCPHandle CreateTcpHandle(ServerDetails details, long timerExpire, object callbackObject, bool parallel, ref byte[] spnBuffer, bool isIntegratedSecurity)
         {
             // TCP Format: 
             // tcp:<host name>\<instance name>
             // tcp:<host name>,<TCP/IP port number>
 
-            string hostName = null;
-            int port = -1;
-            Exception exception = null;
+            string hostName = details.serverName;
+            int port = details.port;
 
-            if (string.IsNullOrWhiteSpace(fullServerName)) // when fullServerName is empty
+            if(port == -1)
             {
-                hostName = DefaultHostName;
-                port = DefaultSqlServerPort;
-            }
-            else
-            {
-                string[] serverNamePartsByComma = fullServerName.Split(CommaSeparator);
-                string[] serverNamePartsByBackSlash = fullServerName.Split(BackSlashSeparator);
-
-                // when no port or instance name provided
-                if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length < 2)
+                try
                 {
-                    hostName = fullServerName;
-                    port = DefaultSqlServerPort;
+                    port = string.IsNullOrEmpty(details.InstanceName) ? DefaultSqlServerPort : GetPortByInstanceName(hostName, details.InstanceName);
                 }
-                // when port is provided, and no instance name
-                else if (serverNamePartsByComma.Length == 2 && serverNamePartsByBackSlash.Length < 2)
+                // The GetPortByInstanceName can throw a SocketException
+                catch(SocketException se)
                 {
-                    hostName = serverNamePartsByComma[0];
-                    string portString = serverNamePartsByComma[1];
-                    try
-                    {
-                        port = ushort.Parse(portString);
-                    }
-                    catch (Exception e)
-                    {
-                        exception = e;
-                    }
-                }
-                // when instance name is provided, and no port
-                else if (serverNamePartsByComma.Length < 2 && serverNamePartsByBackSlash.Length == 2)
-                {
-                    hostName = serverNamePartsByBackSlash[0];
-                    string instanceName = serverNamePartsByBackSlash[1];
-                    try
-                    {
-                        port = GetPortByInstanceName(hostName, instanceName);
-                    }
-                    catch (Exception e)
-                    {
-                        exception = e;
-                    }
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
+                    return null;
                 }
             }
 
-            if (hostName != null && port > 0 && exception == null && isIntegratedSecurity)
+            
+
+            if (hostName != null && port > 0 && isIntegratedSecurity)
             {
                 try
                 {
@@ -529,24 +612,17 @@ namespace System.Data.SqlClient.SNI
                 }
                 catch (Exception e)
                 {
-                    exception = e;
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, e);
+                    return null;
                 }
             }
 
             SNITCPHandle sniTcpHandle = null;
-            if (hostName != null && port > 0 && exception == null)
+            if (hostName != null && port > 0)
             {
                 sniTcpHandle = new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
             }
-            else if (exception != null)
-            {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, exception);
-            }
-            else
-            {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-            }
-
+            
             return sniTcpHandle;
         }
 
@@ -672,7 +748,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
         /// <param name="parallel">Should MultiSubnetFailover be used. Only returns an error for named pipes.</param>
         /// <returns>SNINpHandle</returns>
-        private SNINpHandle CreateNpHandle(string fullServerName, long timerExpire, object callbackObject, bool parallel)
+        private SNINpHandle CreateNpHandle(ServerDetails details, long timerExpire, object callbackObject, bool parallel)
         {
             if (parallel)
             {
@@ -680,42 +756,7 @@ namespace System.Data.SqlClient.SNI
                 return null;
             }
 
-            if (fullServerName.Length == 0 || fullServerName.Contains("/")) // Pipe paths only allow back slashes
-            {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                return null;
-            }
-
-            string serverName, pipeName;
-            if (!fullServerName.Contains(@"\"))
-            {
-                serverName = fullServerName;
-                pipeName = SNINpHandle.DefaultPipePath;
-            }
-            else
-            {
-                try
-                {
-                    Uri pipeURI = new Uri(fullServerName);
-                    string resourcePath = pipeURI.AbsolutePath;
-
-                    string pipeToken = "/pipe/";
-                    if (!resourcePath.StartsWith(pipeToken))
-                    {
-                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                        return null;
-                    }
-                    pipeName = resourcePath.Substring(pipeToken.Length);
-                    serverName = pipeURI.Host;
-                }
-                catch (UriFormatException)
-                {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return null;
-                }
-            }
-
-            return new SNINpHandle(serverName, pipeName, timerExpire, callbackObject);
+            return new SNINpHandle(details.serverName, details.PipeName, timerExpire, callbackObject);
         }
 
         /// <summary>
@@ -787,10 +828,14 @@ namespace System.Data.SqlClient.SNI
 
     internal class ServerDetails
     {
-        internal enum Protocol { TCP, NP, None };
+        internal enum Protocol { TCP, NP, None, Admin };
 
-        internal Protocol protocol;
+        internal Protocol protocol = Protocol.None;
+        internal string serverName;
+        internal int port = -1;
 
+        public string InstanceName { get; internal set; }
+        public string PipeName { get; internal set; }
     }
 
 }
