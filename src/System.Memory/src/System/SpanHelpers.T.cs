@@ -28,12 +28,12 @@ namespace System
                 Debug.Assert(0 <= index && index <= searchSpaceLength); // Ensures no deceptive underflows in the computation of "remainingSearchSpaceLength".
                 int remainingSearchSpaceLength = searchSpaceLength - index - valueTailLength;
                 if (remainingSearchSpaceLength <= 0)
-                    return -1;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
+                    break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
                 int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
                 if (relativeIndex == -1)
-                    return -1;
+                    break;
                 index += relativeIndex;
 
                 // Found the first element of "value". See if the tail matches.
@@ -42,6 +42,7 @@ namespace System
 
                 index++;
             }
+            return -1;
         }
 
         public static int IndexOf<T>(ref T searchSpace, T value, int length)
@@ -54,35 +55,35 @@ namespace System
             while (remainingLength >= 8)
             {
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
 
                 remainingLength -= 8;
             }
 
-            while (remainingLength >= 4)
+            if (remainingLength >= 4)
             {
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
 
                 remainingLength -= 4;
             }
@@ -90,11 +91,14 @@ namespace System
             while (remainingLength > 0)
             {
                 if (value.Equals(Unsafe.Add(ref searchSpace, ++index)))
-                    return index;
+                    goto Found;
 
                 remainingLength--;
             }
             return -1;
+
+        Found: // Workaround for https://github.com/dotnet/coreclr/issues/9692
+            return index;
         }
 
         public static bool SequenceEqual<T>(ref T first, ref T second, int length)
@@ -103,41 +107,41 @@ namespace System
             Debug.Assert(length >= 0);
 
             if (Unsafe.AreSame(ref first, ref second))
-                return true;
+                goto Equal;
 
             int index = 0;
             while (length >= 8)
             {
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 length -= 8;
@@ -146,19 +150,19 @@ namespace System
             while (length >= 4)
             {
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
 
                 length -= 4;
@@ -167,12 +171,16 @@ namespace System
             while (length > 0)
             {
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
-                    return false;
+                    goto NotEqual;
                 index++;
                 length--;
             }
 
+        Equal:
             return true;
+
+        NotEqual: // Workaround for https://github.com/dotnet/coreclr/issues/9692
+            return false;
         }
     }
 }

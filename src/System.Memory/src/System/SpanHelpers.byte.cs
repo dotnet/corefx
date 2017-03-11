@@ -5,6 +5,10 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#if !netstandard10
+using System.Numerics;
+#endif
+
 namespace System
 {
     internal static partial class SpanHelpers
@@ -27,12 +31,12 @@ namespace System
                 Debug.Assert(0 <= index && index <= searchSpaceLength); // Ensures no deceptive underflows in the computation of "remainingSearchSpaceLength".
                 int remainingSearchSpaceLength = searchSpaceLength - index - valueTailLength;
                 if (remainingSearchSpaceLength <= 0)
-                    return -1;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
+                    break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
                 int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
                 if (relativeIndex == -1)
-                    return -1;
+                    break;
                 index += relativeIndex;
 
                 // Found the first element of "value". See if the tail matches.
@@ -41,6 +45,7 @@ namespace System
 
                 index++;
             }
+            return -1;
         }
 
         public static int IndexOf(ref byte searchSpace, byte value, int length)
@@ -52,35 +57,35 @@ namespace System
             while (remainingLength >= 8)
             {
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
 
                 remainingLength -= 8;
             }
 
-            while (remainingLength >= 4)
+            if (remainingLength >= 4)
             {
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
 
                 remainingLength -= 4;
             }
@@ -88,89 +93,72 @@ namespace System
             while (remainingLength > 0)
             {
                 if (value == Unsafe.Add(ref searchSpace, ++index))
-                    return index;
+                    goto Found;
 
                 remainingLength--;
             }
             return -1;
+
+        Found: // Workaround for https://github.com/dotnet/coreclr/issues/9692
+            return index;
         }
 
-        public static bool SequenceEqual(ref byte first, ref byte second, int length)
+        public static unsafe bool SequenceEqual(ref byte first, ref byte second, int length)
         {
             Debug.Assert(length >= 0);
 
             if (Unsafe.AreSame(ref first, ref second))
-                return true;
+                goto Equal;
 
-            int index = 0;
-            while (length >= 8)
+            IntPtr i = (IntPtr)0; // Use IntPtr and byte* for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr n = (IntPtr)length;
+
+#if !netstandard10
+            if (Vector.IsHardwareAccelerated && (byte*)n >= (byte*)Vector<byte>.Count)
             {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
+                n -= Vector<byte>.Count;
+                while ((byte*)n > (byte*)i)
+                {
+                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
+                    {
+                        goto NotEqual;
+                    }
+                    i += Vector<byte>.Count;
+                }
+                return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, n)) ==
+                       Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, n));
+            }
+#endif
 
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-
-                length -= 8;
+            if ((byte*)n >= (byte*)sizeof(UIntPtr))
+            {
+                n -= sizeof(UIntPtr);
+                while ((byte*)n > (byte*)i)
+                {
+                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
+                    {
+                        goto NotEqual;
+                    }
+                    i += sizeof(UIntPtr);
+                }
+                return Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, n)) ==
+                       Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, n));
             }
 
-            while (length >= 4)
+            while ((byte*)n > (byte*)i)
             {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-
-                length -= 4;
+                if (Unsafe.AddByteOffset(ref first, i) != Unsafe.AddByteOffset(ref second, i))
+                    goto NotEqual;
+                i += 1;
             }
 
-            while (length > 0)
-            {
-                if (Unsafe.Add(ref first, index) != Unsafe.Add(ref second, index))
-                    return false;
-                index++;
-                length--;
-            }
-
+        Equal:
             return true;
+
+        NotEqual: // Workaround for https://github.com/dotnet/coreclr/issues/9692
+            return false;
         }
     }
 }
