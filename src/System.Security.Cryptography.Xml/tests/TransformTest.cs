@@ -66,8 +66,10 @@ namespace System.Security.Cryptography.Xml.Tests
         {
             ConcreteTransform concreteTransform = new ConcreteTransform();
             Assert.Null(concreteTransform.Context);
-            Assert.Empty(concreteTransform.PropagatedNamespaces);
             Assert.Null(concreteTransform.Algorithm);
+#if !NET45 && !NET451 && !NET452 && !NET46 && !NET461 && !NET462 && !NET463
+            Assert.Empty(concreteTransform.PropagatedNamespaces);
+#endif
         }
 
         [Fact]
