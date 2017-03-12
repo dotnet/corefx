@@ -36,6 +36,19 @@ namespace System
         }
 
         /// <summary>
+        /// Searches for the specified value starting at the specified index and returns the index of its first occurrence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="index">The index within the span from where to start the search.</param>
+        /// <param name="count">The number of bytes to search starting from the index.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this Span<byte> span, int index, int count, byte value)
+        {
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, index, count, span.Length);
+        }
+
+        /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. 
         /// </summary>
         /// <param name="span">The span to search.</param>
@@ -132,6 +145,20 @@ namespace System
         public static int IndexOf(this ReadOnlySpan<byte> span, byte value)
         {
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
+        }
+
+
+        /// <summary>
+        /// Searches for the specified value starting at the specified index and returns the index of its first occurrence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="index">The index within the span from where to start the search.</param>
+        /// <param name="count">The number of bytes to search starting from the index.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this ReadOnlySpan<byte> span, int index, int count, byte value)
+        {
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, index, count, span.Length);
         }
 
         /// <summary>

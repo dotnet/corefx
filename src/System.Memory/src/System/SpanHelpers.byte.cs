@@ -95,6 +95,69 @@ namespace System
             return -1;
         }
 
+        public static int IndexOf(ref byte searchSpace, byte value, int startIndex, int count, int spanLength)
+        {
+            Debug.Assert(count >= 0);
+            Debug.Assert(spanLength >= 0);
+            Debug.Assert(startIndex >= 0);
+
+            int index = startIndex;
+
+            if (startIndex >= spanLength || count == 0)
+            {
+                return -1;
+            }
+
+            int remainingLength = Math.Min(count, spanLength - startIndex);
+
+            Unsafe.Add(ref searchSpace, startIndex);
+
+            while (remainingLength >= 8)
+            {
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+
+                remainingLength -= 8;
+            }
+
+            while (remainingLength >= 4)
+            {
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+
+                remainingLength -= 4;
+            }
+
+            while (remainingLength > 0)
+            {
+                if (value == Unsafe.Add(ref searchSpace, ++index))
+                    return index;
+
+                remainingLength--;
+            }
+            return -1;
+        }
+
         public static bool SequenceEqual(ref byte first, ref byte second, int length)
         {
             Debug.Assert(length >= 0);
