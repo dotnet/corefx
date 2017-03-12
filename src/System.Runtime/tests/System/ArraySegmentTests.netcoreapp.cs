@@ -77,10 +77,45 @@ namespace System.Tests
         {
             Assert.Throws<InvalidOperationException>(() => default(ArraySegment<T>).ToArray());
         }
+
+        [Fact]
+        public void ToArray_Empty_ReturnsSameArray()
+        {
+            T[] cachedArray = ArraySegment<T>.Empty.ToArray();
+            Assert.Same(cachedArray, ArraySegment<T>.Empty.ToArray());
+            Assert.Same(cachedArray, new ArraySegment<T>(new T[0]).ToArray());
+            Assert.Same(cachedArray, new ArraySegment<T>(new T[1], 0, 0).ToArray());
+        }
+
+        [Fact]
+        public void ToArray_NonEmptyArray_DoesNotReturnSameArray()
+        {
+            // Prevent a faulty implementation like `if (Count == 0) { return Array; }`
+            var emptyArraySegment = new ArraySegment<T>(new T[1], 0, 0);
+            Assert.NotSame(emptyArraySegment.Array, emptyArraySegment.ToArray());
+        }
     }
 
     public static partial class ArraySegment_Tests
     {
+        [Theory]
+        [MemberData(nameof(Conversion_FromArray_TestData))]
+        public static void Conversion_FromArray(int[] array)
+        {
+            ArraySegment<int> implicitlyConverted = array;
+            ArraySegment<int> explicitlyConverted = (ArraySegment<int>)array;
+
+            var expected = new ArraySegment<int>(array);
+            Assert.Equal(expected, implicitlyConverted);
+            Assert.Equal(expected, explicitlyConverted);
+        }
+
+        public static IEnumerable<object[]> Conversion_FromArray_TestData()
+        {
+            yield return new object[] { new int[0] };
+            yield return new object[] { new int[1] };
+        }
+
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
         public static void CopyTo(ArraySegment<int> arraySegment)
@@ -320,10 +355,17 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ArraySegment_TestData))]
-        public static void Slice_Index_Count(ArraySegment<int> arraySegment, int index, int count)
+        [MemberData(nameof(Slice_TestData))]
+        public static void Slice(ArraySegment<int> arraySegment, int index, int count)
         {
+            var expected = new ArraySegment<int>(arraySegment.Array, arraySegment.Offset + index, count);
 
+            if (index + count == arraySegment.Count)
+            {
+                Assert.Equal(expected, arraySegment.Slice(index));
+            }
+
+            Assert.Equal(expected, arraySegment.Slice(index, count));
         }
 
         public static IEnumerable<object[]> Slice_TestData()
@@ -356,9 +398,16 @@ namespace System.Tests
                 yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Array.Length }; // Previous + This + Next segment
                 yield return new object[] { arraySegment, 0, arraySegment.Array.Length - arraySegment.Offset }; // This + Next segment
                 yield return new object[] { arraySegment, arraySegment.Count, arraySegment.Array.Length - arraySegment.Offset - arraySegment.Count }; // Next segment
-
-                // TODO: More work here?
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(ArraySegment_TestData))]
+        public static void ToArray(ArraySegment<int> arraySegment)
+        {
+            // ToList is called here so we copy the data and raise an assert if ToArray modifies the underlying array.
+            var expected = arraySegment.Array.Skip(arraySegment.Offset).Take(arraySegment.Count).ToList();
+            Assert.Equal(expected, arraySegment.ToArray());
         }
 
         public static IEnumerable<object[]> ArraySegment_TestData()
@@ -374,13 +423,6 @@ namespace System.Tests
             };
             
             return arraySegments.Select(as => new object[] { new ArraySegment<int>(as.array, as.index, as.count) });
-        }
-        
-        private static void ValidateArraySegment<T>(ArraySegment<T> arraySegment, T[] array, int offset, int count)
-        {
-            Assert.Same(array, arraySegment.Array);
-            Assert.Equal(offset, arraySegment.Offset);
-            Assert.Equal(count, arraySegment.Count);
         }
     }
 }
