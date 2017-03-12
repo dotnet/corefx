@@ -63,12 +63,12 @@ namespace System.Collections.Tests
             var dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
 
             TKey key = CreateTKey(seed: count);
-            TValue value = dictionary.GetValueOrDefault(key);
+            TValue value = CreateTValue(seed: count);
+            dictionary.Remove(key);
             int originalCount = dictionary.Count;
-            bool alreadyContainsKey = dictionary.ContainsKey(key);
 
-            Assert.Equal(!alreadyContainsKey, dictionary.TryAdd(key, default(TValue)));
-            Assert.Equal(alreadyContainsKey ? originalCount : originalCount + 1, dictionary.Count);
+            Assert.True(dictionary.TryAdd(key, value));
+            Assert.Equal(originalCount + 1, dictionary.Count);
             Assert.Equal(dictionary[key], value);
 
             // After adding the key, make sure that trying to add it again fails.
