@@ -100,7 +100,7 @@ namespace System
             return -1;
 
         Found: // Workaround for https://github.com/dotnet/coreclr/issues/9692
-            goto Found;
+            return index;
         }
 
         public static unsafe bool SequenceEqual(ref char firstAsChar, ref char secondAsChar, int length)
