@@ -338,32 +338,26 @@ namespace System.Net.Test.Uri.IriTest
                 "Invalid test: MatchUTF8Sequence cannot be called when no Unicode characters can be decoded.");
 
             // dest is guaranteed to have space for the escaped version of all characters (in the form of %HH).
-            char[] dest = new char[inbytes.Length * 3];
             char[] unescapedChars = new char[inbytes.Length];
             chars.CopyTo(unescapedChars, 0);
 
-            HeapCheck hc = new HeapCheck(dest);
-
+            PooledCharArray pooledArray = HeapCheck.CreateFilledPooledArray(inbytes.Length * 3);
             unsafe
             {
-                fixed (char* pInput = hc.HeapBlock)
-                {
-                    int offset = hc.Offset;
-                    UriHelper.MatchUTF8Sequence(
-                        pInput,
-                        hc.HeapBlock,
-                        ref offset,
-                        unescapedChars,
-                        chars.Length,
-                        inbytes,
-                        numBytes,
-                        isQuery,
-                        iriParsing);
-                }
+                int offset = 32;
+                UriHelper.MatchUTF8Sequence(
+                    ref pooledArray,
+                    ref offset,
+                    unescapedChars,
+                    chars.Length,
+                    inbytes,
+                    numBytes,
+                    isQuery,
+                    iriParsing);
             }
 
             // Check for buffer under and overruns.
-            hc.ValidatePadding();
+            HeapCheck.ValidatePadding(pooledArray);
         }
 
         private class HeapCheck
@@ -389,11 +383,6 @@ namespace System.Net.Test.Uri.IriTest
                 input.CopyTo(0, _memblock, padding, _len);
             }
 
-            public HeapCheck(char[] input) : this(input.Length)
-            {
-                input.CopyTo(_memblock, padding);
-            }
-
             public char[] HeapBlock
             {
                 get { return _memblock; }
@@ -416,6 +405,30 @@ namespace System.Net.Test.Uri.IriTest
                             " Data allocated at idx: " + padding + " - " + (_len + padding - 1));
                     }
                 }
+            }
+            
+            public static void ValidatePadding(PooledCharArray pooledArray)
+            {
+                for (int i = 0; i < pooledArray.Length; i++)
+                {
+                    if ((i < padding) || (i >= padding + pooledArray.Length))
+                    {
+                        Assert.True(
+                            (int)paddingValue == (int)pooledArray[i],
+                            "Heap corruption detected: unexpected padding value at index: " + i +
+                            " Data allocated at idx: " + padding + " - " + (pooledArray.Length + padding - 1));
+                    }
+                }
+            }
+
+            public static PooledCharArray CreateFilledPooledArray(int length)
+            {
+                PooledCharArray pooledArray = new PooledCharArray(length + padding * 2);
+                for (int i = 0; i < pooledArray.Length; i++)
+                {
+                    pooledArray[i] = paddingValue;
+                }
+                return pooledArray;
             }
         }
     }
