@@ -48,59 +48,75 @@ namespace System
             return -1;
         }
 
-        public static int IndexOf(ref byte searchSpace, byte value, int length)
+        public static unsafe int IndexOf(ref byte searchSpace, byte value, int length)
         {
             Debug.Assert(length >= 0);
 
-            int index = -1;
-            int remainingLength = length;
-            while (remainingLength >= 8)
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            while (length >= 8)
             {
-                if (value == Unsafe.Add(ref searchSpace, ++index))
+                if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
+                if (value == Unsafe.Add(ref searchSpace, index + 1))
+                    goto Found1;
+                if (value == Unsafe.Add(ref searchSpace, index + 2))
+                    goto Found2;
+                if (value == Unsafe.Add(ref searchSpace, index + 3))
+                    goto Found3;
+                if (value == Unsafe.Add(ref searchSpace, index + 4))
+                    goto Found4;
+                if (value == Unsafe.Add(ref searchSpace, index + 5))
+                    goto Found5;
+                if (value == Unsafe.Add(ref searchSpace, index + 6))
+                    goto Found6;
+                if (value == Unsafe.Add(ref searchSpace, index + 7))
+                    goto Found7;
 
-                remainingLength -= 8;
+                length -= 8;
+                index += 8;
             }
 
-            if (remainingLength >= 4)
+            if (length >= 4)
             {
-                if (value == Unsafe.Add(ref searchSpace, ++index))
+                if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
-                if (value == Unsafe.Add(ref searchSpace, ++index))
-                    goto Found;
+                if (value == Unsafe.Add(ref searchSpace, index + 1))
+                    goto Found1;
+                if (value == Unsafe.Add(ref searchSpace, index + 2))
+                    goto Found2;
+                if (value == Unsafe.Add(ref searchSpace, index + 3))
+                    goto Found3;
 
-                remainingLength -= 4;
+                length -= 4;
+                index += 4;
             }
 
-            while (remainingLength > 0)
+            while (length > 0)
             {
-                if (value == Unsafe.Add(ref searchSpace, ++index))
+                if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
 
-                remainingLength--;
+                index += 1;
+                length--;
             }
             return -1;
 
         Found: // Workaround for https://github.com/dotnet/coreclr/issues/9692
-            return index;
+            return (int)(byte*)index;
+        Found1:
+            return (int)(byte*)(index + 1);
+        Found2:
+            return (int)(byte*)(index + 2);
+        Found3:
+            return (int)(byte*)(index + 3);
+        Found4:
+            return (int)(byte*)(index + 4);
+        Found5:
+            return (int)(byte*)(index + 5);
+        Found6:
+            return (int)(byte*)(index + 6);
+        Found7:
+            return (int)(byte*)(index + 7);
         }
 
         public static unsafe bool SequenceEqual(ref byte first, ref byte second, int length)
