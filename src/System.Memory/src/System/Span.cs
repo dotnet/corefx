@@ -28,8 +28,9 @@ namespace System
         public Span(T[] array)
         {
             if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
+                ThrowHelper.ThrowArgumentNullException_Array();
+            // Check will be Jitted out for ValueTypes
+            if (!SpanHelpers.IsValueType<T>() && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
             _length = array.Length;
@@ -52,16 +53,13 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span(T[] array, int start)
         {
-            if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (array == null || (uint)start > (uint)array.Length)
+                ThrowHelper.ThrowArgumentNullOrOutOfRangeException(array);
+            // Check will be Jitted out for ValueTypes
+            if (!SpanHelpers.IsValueType<T>() && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
 
-            int arrayLength = array.Length;
-            if ((uint)start > (uint)arrayLength)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-
-            _length = arrayLength - start;
+            _length = array.Length - start;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
             _byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start);
         }
@@ -82,12 +80,11 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span(T[] array, int start, int length)
         {
-            if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (array == null || (uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
+                ThrowHelper.ThrowArgumentNullOrOutOfRangeException(array);
+            // Check will be Jitted out for ValueTypes
+            if (!SpanHelpers.IsValueType<T>() && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
-            if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -111,10 +108,11 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException_Length();
 
             _length = length;
             _pinnable = null;
@@ -138,10 +136,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
         {
-            if (obj == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
-            if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
+            if (obj == null || length < 0)
+                ThrowHelper.ThrowArgumentNullOrOutOfRangeException(length);
 
             Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
             IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
@@ -204,6 +200,7 @@ namespace System
 
             var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
 
+            // Branch will be Jit eliminated
             if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
             {
                 if (_pinnable == null)
@@ -221,6 +218,7 @@ namespace System
             }
             else
             {
+                // Branch will be Jit eliminated
                 if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 {
                     UIntPtr pointerSizedLength = (UIntPtr)((length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
@@ -248,6 +246,7 @@ namespace System
             if (length == 0)
                 return;
 
+            // Branch will be Jit eliminated
             if (Unsafe.SizeOf<T>() == 1)
             {
                 byte fill = Unsafe.As<T, byte>(ref value);
@@ -423,11 +422,10 @@ namespace System
         public Span<T> Slice(int start)
         {
             if ((uint)start > (uint)_length)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException_Start();
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
-            int length = _length - start;
-            return new Span<T>(_pinnable, newOffset, length);
+            return new Span<T>(_pinnable, newOffset, _length - start);
         }
 
         /// <summary>
@@ -442,7 +440,7 @@ namespace System
         public Span<T> Slice(int start, int length)
         {
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException_Start();
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             return new Span<T>(_pinnable, newOffset, length);
@@ -522,6 +520,7 @@ namespace System
         public static Span<byte> AsBytes<T>(this Span<T> source)
             where T : struct
         {
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
 
@@ -544,6 +543,7 @@ namespace System
         public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
             where T : struct
         {
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
 
@@ -570,9 +570,10 @@ namespace System
             where TFrom : struct
             where TTo : struct
         {
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
 
@@ -599,9 +600,10 @@ namespace System
             where TFrom : struct
             where TTo : struct
         {
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
+            // Check will be Jitted out for valid types
             if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
 
@@ -618,7 +620,7 @@ namespace System
         public static ReadOnlySpan<char> Slice(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                ThrowHelper.ThrowArgumentNullException_Text();
 
             return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), StringAdjustment, text.Length);
         }
@@ -635,16 +637,13 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> Slice(this string text, int start)
         {
-            if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
-            int textLength = text.Length;
-            if ((uint)start > (uint)textLength)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+            if (text == null || (uint)start > (uint)text.Length)
+                ThrowHelper.ThrowArgumentNullOrOutOfRangeException(text);
 
             unsafe
             {
                 byte* byteOffset = ((byte*)StringAdjustment) + (uint)(start * sizeof(char));
-                return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), (IntPtr)byteOffset, textLength - start);
+                return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), (IntPtr)byteOffset, text.Length - start);
             }
         }
 
@@ -661,11 +660,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> Slice(this string text, int start, int length)
         {
-            if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
-            int textLength = text.Length;
-            if ((uint)start > (uint)textLength || (uint)length > (uint)(textLength - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+            if (text == null || (uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
+                ThrowHelper.ThrowArgumentNullOrOutOfRangeException(text);
 
             unsafe
             {

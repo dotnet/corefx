@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -32,6 +31,10 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this Span<byte> span, byte value)
         {
+            if (!BitConverter.IsLittleEndian)
+            {
+                return SpanHelpers.IndexOfBigEndian(ref span.DangerousGetPinnableReference(), value, span.Length);
+            }
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
@@ -131,6 +134,10 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this ReadOnlySpan<byte> span, byte value)
         {
+            if (!BitConverter.IsLittleEndian)
+            {
+                return SpanHelpers.IndexOfBigEndian(ref span.DangerousGetPinnableReference(), value, span.Length);
+            }
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 

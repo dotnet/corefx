@@ -23,9 +23,45 @@ namespace System
 
     internal static class ThrowHelper
     {
-        internal static void ThrowArgumentNullException(ExceptionArgument argument) { throw CreateArgumentNullException(argument); }
+        internal static void ThrowArgumentNullException_Array() { throw CreateArgumentNullException(ExceptionArgument.array); }
+        internal static void ThrowArgumentNullException_Text() { throw CreateArgumentNullException(ExceptionArgument.text); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentNullException(ExceptionArgument argument) { return new ArgumentNullException(argument.ToString()); }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentNullOrOutofRangeException(int length) {
+            if (length < 0)
+            {
+                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+            }
+
+            return CreateArgumentNullException(ExceptionArgument.obj);
+        }
+        internal static void ThrowArgumentNullOrOutOfRangeException(int length) { throw CreateArgumentNullOrOutofRangeException(length); }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentNullOrOutofRangeException(Array array)
+        {
+            if (array == null)
+            {
+                return CreateArgumentNullException(ExceptionArgument.array);
+            }
+
+            return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+        }
+        internal static void ThrowArgumentNullOrOutOfRangeException(Array array) { throw CreateArgumentNullOrOutofRangeException(array); }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentNullOrOutofRangeException(string text)
+        {
+            if (text == null)
+            {
+                return CreateArgumentNullException(ExceptionArgument.text);
+            }
+
+            return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+        }
+        internal static void ThrowArgumentNullOrOutOfRangeException(string text) { throw CreateArgumentNullOrOutofRangeException(text); }
 
         internal static void ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type) { throw CreateArrayTypeMismatchException_ArrayTypeMustBeExactMatch(type); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -43,7 +79,8 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateIndexOutOfRangeException() { return new IndexOutOfRangeException(); }
 
-        internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument) { throw CreateArgumentOutOfRangeException(argument); }
+        internal static void ThrowArgumentOutOfRangeException_Start() { throw CreateArgumentOutOfRangeException(ExceptionArgument.start); }
+        internal static void ThrowArgumentOutOfRangeException_Length() { throw CreateArgumentOutOfRangeException(ExceptionArgument.length); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException(ExceptionArgument argument) { return new ArgumentOutOfRangeException(argument.ToString()); }
     }
