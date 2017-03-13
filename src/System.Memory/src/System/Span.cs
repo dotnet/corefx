@@ -204,12 +204,12 @@ namespace System
 
             var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
 
-            if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0) 
+            if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0)
             {
                 if (_pinnable == null)
                 {
                     var ptr = (byte*)_byteOffset.ToPointer();
-                    
+
                     SpanHelpers.ClearLessThanPointerSized(ptr, byteLength);
                 }
                 else
@@ -311,7 +311,6 @@ namespace System
                 ThrowHelper.ThrowArgumentException_DestinationTooShort();
         }
 
-
         /// <summary>
         /// Copies the contents of this span into destination span. If the source
         /// and destinations overlap, this method behaves as if the original values in
@@ -323,25 +322,46 @@ namespace System
         /// <param name="destination">The span to copy items into.</param>
         public bool TryCopyTo(Span<T> destination)
         {
-            if ((uint)_length > (uint)destination._length)
+            int length = _length;
+            int destLength = destination._length;
+
+            if ((uint)length > (uint)destLength)
                 return false;
 
-            // TODO: This is a tide-over implementation as we plan to add a overlap-safe cpblk-based api to Unsafe. (https://github.com/dotnet/corefx/issues/13427)
-            unsafe
-            {
-                ref T src = ref DangerousGetPinnableReference();
-                ref T dst = ref destination.DangerousGetPinnableReference();
-                IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-                int length = _length;
+            ref T src = ref DangerousGetPinnableReference();
+            ref T dst = ref destination.DangerousGetPinnableReference();
+            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
+            IntPtr dstMinusSrc = Unsafe.ByteOffset<T>(ref src, ref dst);
 
-                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-                if (srcGreaterThanDst)
+            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
+            if (srcGreaterThanDst)
+            {
+                IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, destLength), ref src);
+                bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+                if (!isOverlapped)
+                {
+                    Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
+                }
+                else
                 {
                     // Source address greater than or equal to destination address. Can do normal copy.
                     for (int i = 0; i < length; i++)
                     {
                         Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
                     }
+                }
+
+                return true;
+            }
+
+            bool dstGreaterThanSrc = (sizeof(IntPtr) == sizeof(int)) ? dstMinusSrc.ToInt32() >= 0 : dstMinusSrc.ToInt64() >= 0;
+            if (dstGreaterThanSrc)
+            {
+                IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, length), ref dst);
+                bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+                if (!isOverlapped)
+                {
+                    Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
                 }
                 else
                 {
@@ -352,8 +372,11 @@ namespace System
                         Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
                     }
                 }
+
                 return true;
             }
+
+            return false;
         }
 
         /// <summary>
