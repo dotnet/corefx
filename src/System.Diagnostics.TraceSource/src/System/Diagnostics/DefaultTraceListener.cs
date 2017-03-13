@@ -115,7 +115,7 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void Write(string message)
         {
-            Write(message, true);
+            Write(message, useLogFile: true);
         }
 
         /// <devdoc>
@@ -125,7 +125,7 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void WriteLine(string message)
         {
-            WriteLine(message, true);
+            WriteLine(message, useLogFile: true);
         }
 
         private void WriteLine(string message, bool useLogFile)
@@ -133,8 +133,7 @@ namespace System.Diagnostics
             if (NeedIndent) 
                 WriteIndent();
 
-            // I do the concat here to make sure it goes as one call to the output.
-            // we would save a stringbuilder operation by calling Write twice.
+            // The concat is done here to enable a single call to Write
             Write(message + Environment.NewLine, useLogFile); 
             NeedIndent = true;
         }
@@ -168,18 +167,11 @@ namespace System.Diagnostics
         {
             try
             {
-                using (FileStream stream = File.OpenWrite(LogFileName))
-                {
-                    using (StreamWriter writer = new StreamWriter(stream)) 
-                    {
-                        stream.Position = stream.Length;
-                        writer.Write(message);
-                    }
-                }
+                File.AppendAllText(LogFileName, message);
             }
             catch (Exception e)
             {
-                WriteLine(string.Format(SR.ExceptionOccurred, LogFileName, e.ToString()), false);
+                WriteLine(string.Format(SR.ExceptionOccurred, LogFileName, e.ToString()), useLogFile: false);
             }
         }
     }

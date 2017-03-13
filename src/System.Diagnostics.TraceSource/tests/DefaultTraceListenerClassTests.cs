@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
@@ -33,7 +34,13 @@ namespace System.Diagnostics.TraceSourceTests
             public override void WriteLine(string message)
             {
                 if (ShouldOverrideWriteLine)
+                {
                     _writer.WriteLine(message);
+                }
+                else
+                {
+                    base.WriteLine(message);
+                }
             }
         }
 
@@ -60,6 +67,36 @@ namespace System.Diagnostics.TraceSourceTests
             listener.Fail("FAIL");
             listener.ShouldOverrideWriteLine = true;
             Assert.False(listener.Output.Contains("FAIL"));
+        }
+
+        [Fact]
+        public void Fail_WithLogFile()
+        {
+            var listener = new TestDefaultTraceListener();
+            listener.LogFileName = "LogFile.txt";
+
+            string pathToLogFile = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), listener.LogFileName);
+
+            listener.ShouldOverrideWriteLine = false;
+            listener.Fail("FAIL");
+            listener.ShouldOverrideWriteLine = true;
+            
+            Assert.True(File.Exists(pathToLogFile));
+            Assert.Contains("FAIL", File.ReadAllText(pathToLogFile));
+
+            File.Delete(pathToLogFile);
+        }
+
+        [Fact]
+        public void Fail_LogFileDirectoryNotFound()
+        {
+            // Exception should be handled by DefaultTraceListener.WriteLine so no need to assert.
+            var listener = new TestDefaultTraceListener();
+            listener.LogFileName = @"testfiles\LogFile.txt";
+
+            listener.ShouldOverrideWriteLine = false;
+            listener.Fail("FAIL");
+            listener.ShouldOverrideWriteLine = true;
         }
 
         [Fact]
