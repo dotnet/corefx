@@ -342,7 +342,9 @@ namespace System
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
                     if (!isOverlapped)
                     {
-                        Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
+                        void* pSrc = Unsafe.AsPointer<T>(ref src);
+                        void* pDst = Unsafe.AsPointer<T>(ref dst);
+                        Unsafe.CopyBlockUnaligned(pDst, pSrc, (uint)(length * Unsafe.SizeOf<T>()));
                     }
                     else
                     {
@@ -363,7 +365,9 @@ namespace System
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
                     if (!isOverlapped)
                     {
-                        Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
+                        void* pSrc = Unsafe.AsPointer<T>(ref src);
+                        void* pDst = Unsafe.AsPointer<T>(ref dst);
+                        Unsafe.CopyBlockUnaligned(pDst, pSrc, (uint)(length * Unsafe.SizeOf<T>()));
                     }
                     else
                     {
