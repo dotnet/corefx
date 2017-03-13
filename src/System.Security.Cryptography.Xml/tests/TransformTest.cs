@@ -79,6 +79,7 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
 #if !NET45 && !NET451 && !NET452 && !NET46 && !NET461 && !NET462 && !NET463
+        // Use a selection of transforms that do not modify the XML if applied.
         [Theory]
         [InlineData(typeof(XmlDsigC14NTransform))]
         [InlineData(typeof(XmlDsigExcC14NTransform))]
