@@ -53,6 +53,8 @@ namespace System
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             while (length >= 8)
             {
+                length -= 8;
+
                 if (value.Equals(Unsafe.Add(ref searchSpace, index)))
                     goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, index + 1)))
@@ -70,12 +72,13 @@ namespace System
                 if (value.Equals(Unsafe.Add(ref searchSpace, index + 7)))
                     goto Found7;
 
-                length -= 8;
                 index += 8;
             }
 
             if (length >= 4)
             {
+                length -= 4;
+
                 if (value.Equals(Unsafe.Add(ref searchSpace, index)))
                     goto Found;
                 if (value.Equals(Unsafe.Add(ref searchSpace, index + 1)))
@@ -85,7 +88,6 @@ namespace System
                 if (value.Equals(Unsafe.Add(ref searchSpace, index + 3)))
                     goto Found3;
 
-                length -= 4;
                 index += 4;
             }
 
@@ -128,6 +130,8 @@ namespace System
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             while (length >= 8)
             {
+                length -= 8;
+
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
                     goto NotEqual;
                 if (!Unsafe.Add(ref first, index + 1).Equals(Unsafe.Add(ref second, index + 1)))
@@ -145,12 +149,13 @@ namespace System
                 if (!Unsafe.Add(ref first, index + 7).Equals(Unsafe.Add(ref second, index + 7)))
                     goto NotEqual;
 
-                length -= 8;
                 index += 8;
             }
 
             if (length >= 4)
             {
+                length -= 4;
+
                 if (!Unsafe.Add(ref first, index).Equals(Unsafe.Add(ref second, index)))
                     goto NotEqual;
                 if (!Unsafe.Add(ref first, index + 1).Equals(Unsafe.Add(ref second, index + 1)))
@@ -160,7 +165,6 @@ namespace System
                 if (!Unsafe.Add(ref first, index + 3).Equals(Unsafe.Add(ref second, index + 3)))
                     goto NotEqual;
 
-                length -= 4;
                 index += 4;
             }
 
