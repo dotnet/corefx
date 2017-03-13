@@ -328,52 +328,55 @@ namespace System
             if ((uint)length > (uint)destLength)
                 return false;
 
-            ref T src = ref DangerousGetPinnableReference();
-            ref T dst = ref destination.DangerousGetPinnableReference();
-            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-            IntPtr dstMinusSrc = Unsafe.ByteOffset<T>(ref src, ref dst);
-
-            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-            if (srcGreaterThanDst)
+            unsafe
             {
-                IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, destLength), ref src);
-                bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                if (!isOverlapped)
+                ref T src = ref DangerousGetPinnableReference();
+                ref T dst = ref destination.DangerousGetPinnableReference();
+                IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
+                IntPtr dstMinusSrc = Unsafe.ByteOffset<T>(ref src, ref dst);
+
+                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
+                if (srcGreaterThanDst)
                 {
-                    Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
-                }
-                else
-                {
-                    // Source address greater than or equal to destination address. Can do normal copy.
-                    for (int i = 0; i < length; i++)
+                    IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, destLength), ref src);
+                    bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+                    if (!isOverlapped)
                     {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                        Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
                     }
-                }
-
-                return true;
-            }
-
-            bool dstGreaterThanSrc = (sizeof(IntPtr) == sizeof(int)) ? dstMinusSrc.ToInt32() >= 0 : dstMinusSrc.ToInt64() >= 0;
-            if (dstGreaterThanSrc)
-            {
-                IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, length), ref dst);
-                bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                if (!isOverlapped)
-                {
-                    Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
-                }
-                else
-                {
-                    // Source address less than destination address. Must do backward copy.
-                    int i = length;
-                    while (i-- != 0)
+                    else
                     {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                        // Source address greater than or equal to destination address. Can do normal copy.
+                        for (int i = 0; i < length; i++)
+                        {
+                            Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                        }
                     }
+
+                    return true;
                 }
 
-                return true;
+                bool dstGreaterThanSrc = (sizeof(IntPtr) == sizeof(int)) ? dstMinusSrc.ToInt32() >= 0 : dstMinusSrc.ToInt64() >= 0;
+                if (dstGreaterThanSrc)
+                {
+                    IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, length), ref dst);
+                    bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+                    if (!isOverlapped)
+                    {
+                        Unsafe.CopyBlock<T>(ref dst, ref src, (uint)length);
+                    }
+                    else
+                    {
+                        // Source address less than destination address. Must do backward copy.
+                        int i = length;
+                        while (i-- != 0)
+                        {
+                            Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                        }
+                    }
+
+                    return true;
+                }
             }
 
             return false;
