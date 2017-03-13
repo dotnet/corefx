@@ -375,6 +375,17 @@ namespace System.Data.SqlClient.SNI
 
             string dataSourceAfterTrimmingProtocol = colonSeparatorPresent && details.protocol != ServerDetails.Protocol.None ? workingDataSource.Substring(firstIndexOfColon + 1).Trim() : workingDataSource;
 
+            if (dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
+            {
+                if(details.protocol == ServerDetails.Protocol.None)
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                else if (details.protocol == ServerDetails.Protocol.NP)
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                else if (details.protocol == ServerDetails.Protocol.TCP)
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                return null;
+            }
+
             // If we have a datasource beginning with a pipe
             if (dataSourceAfterTrimmingProtocol.StartsWith(pipeBeginning))
             {
@@ -386,7 +397,7 @@ namespace System.Data.SqlClient.SNI
 
                 else if (details.protocol != ServerDetails.Protocol.NP)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                     return null;
                 }
 
@@ -394,7 +405,7 @@ namespace System.Data.SqlClient.SNI
                 // There should be a server name after "\\"
                 if (dataSourceAfterTrimmingProtocol.Length == 2)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                     return null;
                 }
 
@@ -419,7 +430,7 @@ namespace System.Data.SqlClient.SNI
                     || string.IsNullOrEmpty(tokensSeparatedBySlash[4])
                     || string.IsNullOrEmpty(tokensSeparatedBySlash[5]))
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                     return null;
                 }
 
@@ -506,13 +517,13 @@ namespace System.Data.SqlClient.SNI
                 if (parameterTokenSplitByBackSlash.Length > 2)
                 {
                     parameter = parameterTokenSplitByBackSlash[0];
-                    if (!int.TryParse(parameter, out details.port))
-                    {
-                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                        return null;
-                    }
                 }
 
+                if (!int.TryParse(parameter, out details.port))
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                    return null;
+                }
 
                 // Instance Name handling
                 string[] tokensSeparatedByBackSlash = dataSourceAfterTrimmingProtocol.Split('\\');
@@ -755,8 +766,8 @@ namespace System.Data.SqlClient.SNI
                 SNICommon.ReportSNIError(SNIProviders.NP_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
                 return null;
             }
-
-            return new SNINpHandle(details.serverName, details.PipeName, timerExpire, callbackObject);
+            string pipeName = string.IsNullOrEmpty(details.PipeName) ? SNINpHandle.DefaultPipePath : details.PipeName;
+            return new SNINpHandle(details.serverName, pipeName, timerExpire, callbackObject);
         }
 
         /// <summary>

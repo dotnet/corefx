@@ -69,10 +69,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             // Nothing but slashes
             builder.DataSource = @"np:\\\\\";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
-
-            // Empty string
-            builder.DataSource = "np:";
-            OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
         }
 #endif
 
