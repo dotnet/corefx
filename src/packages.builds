@@ -28,6 +28,9 @@
     <Project Include="System.Diagnostics.DiagnosticSource\pkg\System.Diagnostics.DiagnosticSource.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>       
+    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
