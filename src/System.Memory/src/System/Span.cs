@@ -340,7 +340,7 @@ namespace System
                 {
                     IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, destLength), ref src);
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                    if (!isOverlapped)
+                    if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
                     {
                         CopyBlocks(ref dst, ref src, length);
                     }
@@ -361,7 +361,7 @@ namespace System
                 {
                     IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, length), ref dst);
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                    if (!isOverlapped)
+                    if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
                     {
                         CopyBlocks(ref dst, ref src, length);
                     }
