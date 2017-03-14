@@ -325,6 +325,9 @@ namespace System
             int length = _length;
             int destLength = destination._length;
 
+            if ((uint)length == 0)
+                return true;
+
             if ((uint)length > (uint)destLength)
                 return false;
 
@@ -363,19 +366,27 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private unsafe bool TryFastCopy(ref T dst, int dstLength, ref T src, int srcLength)
         {
+            Debug.Assert(dstLength >= srcLength);
+
             IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
             bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
             IntPtr tailDiff;
 
             if (srcGreaterThanDst)
             {
+                // If the start of source is greater than the start of destination, then we need to calculate
+                // the different between the end of destination relative to the start of source.
                 tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, dstLength), ref src);
             }
             else
             {
+                // If the start of source is less than the start of destination, then we need to calculate
+                // the different between the end of source relative to the start of destunation.
                 tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, srcLength), ref dst);
             }
 
+            // If the source is entirely before or entirely after the destination and the type inside the span is not
+            // itself a reference type or containing reference types, then we can do a simple block copy of the data.
             bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
@@ -389,6 +400,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private unsafe void CopyBlocks(ref T dst, ref T src, int length)
         {
+            Debug.Assert(length > 0);
+
             ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
             ref byte srcBytes = ref Unsafe.As<T, byte>(ref src);
             ulong byteCount = (ulong)length * (ulong)Unsafe.SizeOf<T>();
