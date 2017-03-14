@@ -332,38 +332,18 @@ namespace System
             {
                 ref T src = ref DangerousGetPinnableReference();
                 ref T dst = ref destination.DangerousGetPinnableReference();
-                IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-                IntPtr dstMinusSrc = Unsafe.ByteOffset<T>(ref src, ref dst);
 
-                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-                if (srcGreaterThanDst)
+                if (!TryFastCopy(ref dst, destLength, ref src, length))
                 {
-                    IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, destLength), ref src);
-                    bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                    if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
-                    {
-                        CopyBlocks(ref dst, ref src, length);
-                    }
-                    else
+                    IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
+                    bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
+                    if (srcGreaterThanDst)
                     {
                         // Source address greater than or equal to destination address. Can do normal copy.
                         for (int i = 0; i < length; i++)
                         {
                             Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
                         }
-                    }
-
-                    return true;
-                }
-
-                bool dstGreaterThanSrc = (sizeof(IntPtr) == sizeof(int)) ? dstMinusSrc.ToInt32() >= 0 : dstMinusSrc.ToInt64() >= 0;
-                if (dstGreaterThanSrc)
-                {
-                    IntPtr tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, length), ref dst);
-                    bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
-                    if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
-                    {
-                        CopyBlocks(ref dst, ref src, length);
                     }
                     else
                     {
@@ -374,9 +354,33 @@ namespace System
                             Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
                         }
                     }
-
-                    return true;
                 }
+
+                return true;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe bool TryFastCopy(ref T dst, int dstLength, ref T src, int srcLength)
+        {
+            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
+            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
+            IntPtr tailDiff;
+
+            if (srcGreaterThanDst)
+            {
+                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, dstLength), ref src);
+            }
+            else
+            {
+                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, srcLength), ref dst);
+            }
+
+            bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+            if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                CopyBlocks(ref dst, ref src, srcLength);
+                return true;
             }
 
             return false;
