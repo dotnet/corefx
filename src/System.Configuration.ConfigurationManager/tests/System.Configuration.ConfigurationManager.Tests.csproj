@@ -86,7 +86,6 @@
     <Compile Include="System\Configuration\ImplicitMachineConfigTests.cs" />
     <Compile Include="System\Configuration\KeyValueConfigurationCollectionTests.cs" />
     <Compile Include="System\Configuration\LocalFileSettingsProviderTests.cs" />
-    <Compile Include="System\Configuration\UrlPathTests.cs" />
     <Compile Include="System\Configuration\NameValueConfigurationCollectionTests.cs" />
     <Compile Include="System\Configuration\SectionGroupsTests.cs" />
     <Compile Include="System\Configuration\SmokeTest.cs" />
@@ -95,6 +94,7 @@
     <Compile Include="System\Configuration\TestData.cs" />
     <Compile Include="System\Configuration\TypeUtilTests.cs" />
     <Compile Include="System\Configuration\UriSectionTests.cs" />
+	<Compile Include="System\Configuration\UrlPathTests.cs" />
     <Compile Include="System\Configuration\ValidatiorUtilsTests.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

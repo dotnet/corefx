@@ -10,22 +10,15 @@ namespace System.ConfigurationTests
 {
     public class UrlPathTests
     {
-        private const string TestFileName = "TestFileForUrlPathTests.txt";
-        private const string TestDirectoryPath = "C:\\Directory";
-        private const string TestSubdirectoryPath = TestDirectoryPath + "\\SubDirectory";
-
-        public const string TestDirectoryPathWithBackslash = TestDirectoryPath + "\\";
-        public const string TestSubdirectoryPathWithBackslash = TestSubdirectoryPath + "\\";
-
         [Fact]
-        public void GetDirectoOrRootName_Null()
+        public void GetDirectoryOrRootName_Null()
         {
             string test = UrlPath.GetDirectoryOrRootName(null);
             Assert.Equal(null, null);
         }
 
         [Fact]
-        public void GetDirectoryOrRootName_NotDIrectoryOrRoot()
+        public void GetDirectoryOrRootName_NotDirectoryOrRoot()
         {
             string test = UrlPath.GetDirectoryOrRootName("Hello");
             Assert.Equal("", test);
@@ -35,7 +28,7 @@ namespace System.ConfigurationTests
         public void GetDirectoryOrRootName_FileExists()
         {
             using (TempDirectory tempDirectory = new TempDirectory())
-            using (TempFile tempFile = new TempFile(tempDirectory.Path + "\\" + TestFileName))
+            using (TempFile tempFile = new TempFile(tempDirectory.Path + "\\TestFileForUrlPathTests.txt"))
             {
                 string test = UrlPath.GetDirectoryOrRootName(tempFile.Path);
                 Assert.Equal(tempDirectory.Path, test);
@@ -43,10 +36,14 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void GetDirectoryOrRootName_ofC()
+        public void GetDirectoryOrRootName_ofRoot()
         {
-            string test = UrlPath.GetDirectoryOrRootName("C:\\");
-            Assert.Equal("C:\\", test);
+            using (TempDirectory tempDirectory = new TempDirectory())
+            {
+                string root = Path.GetPathRoot(tempDirectory.Path);
+                string test = UrlPath.GetDirectoryOrRootName(root);
+                Assert.Equal(root, test);
+            }
         }
 
         [Fact]
@@ -68,85 +65,84 @@ namespace System.ConfigurationTests
         {
             bool test = UrlPath.IsEqualOrSubdirectory(null, null);
 
-            Assert.Equal(true, test);
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_EmptyDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory("", null);
-            Assert.Equal(true, test);
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_NotEmptyDir_EmptySubDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory("Hello", "");
-            Assert.Equal(false, test);
+            Assert.False(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_SubDirAndDirAreReversed_NoTrailingBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestSubdirectoryPath, TestDirectoryPath);
-            Assert.Equal(false, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory\\SubDirectory", "C:\\Directory");
+            Assert.False(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_SubDirIsASubDirOfDir_NoTrailingBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPath, TestSubdirectoryPath);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory", "C:\\Directory\\SubDirectory");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_True_TrailingBackslashOnBoth()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPathWithBackslash, TestSubdirectoryPathWithBackslash);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory\\", "C:\\Directory\\SubDirectory");
+            Assert.True(test);
         }
 
         [Fact]
-        public void IsEqualOrSubDirectory_True_DirBacksalsh()
+        public void IsEqualOrSubDirectory_True_DirBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPathWithBackslash, TestSubdirectoryPath);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory\\", "C:\\Directory\\SubDirectory");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_True_SubDirBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPath, TestSubdirectoryPathWithBackslash);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory", "C:\\Directory\\SubDirectory\\");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_Equal_NoBackslashes()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPath, TestDirectoryPath);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory", "C:\\Directory");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_Equal_BothBackslashes()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPathWithBackslash, TestDirectoryPathWithBackslash);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory\\", "C:\\Directory\\");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_Equal_FirstHasBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPathWithBackslash, TestDirectoryPath);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory\\", "C:\\Directory");
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_Equal_SecondHasBackslash()
         {
-            bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPath, TestDirectoryPathWithBackslash);
-            Assert.Equal(true, test);
+            bool test = UrlPath.IsEqualOrSubdirectory("C:\\Directory", "C:\\Directory\\");
+            Assert.True(test);
         }
-        
     }
 }
