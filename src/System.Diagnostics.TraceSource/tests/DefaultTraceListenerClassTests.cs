@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
 {
-    public class DefaultTraceListenerClassTests
+    public class DefaultTraceListenerClassTests : FileCleanupTestBase
     {
         private class TestDefaultTraceListener : DefaultTraceListener
         {
@@ -65,7 +65,6 @@ namespace System.Diagnostics.TraceSourceTests
             var listener = new TestDefaultTraceListener();
             listener.ShouldOverrideWriteLine = false;
             listener.Fail("FAIL");
-            listener.ShouldOverrideWriteLine = true;
             Assert.False(listener.Output.Contains("FAIL"));
         }
 
@@ -73,18 +72,14 @@ namespace System.Diagnostics.TraceSourceTests
         public void Fail_WithLogFile()
         {
             var listener = new TestDefaultTraceListener();
-            listener.LogFileName = "LogFile.txt";
+            string pathToLogFile = GetTestFilePath();
 
-            string pathToLogFile = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), listener.LogFileName);
-
+            listener.LogFileName = pathToLogFile;
             listener.ShouldOverrideWriteLine = false;
             listener.Fail("FAIL");
-            listener.ShouldOverrideWriteLine = true;
             
             Assert.True(File.Exists(pathToLogFile));
             Assert.Contains("FAIL", File.ReadAllText(pathToLogFile));
-
-            File.Delete(pathToLogFile);
         }
 
         [Fact]
@@ -92,11 +87,10 @@ namespace System.Diagnostics.TraceSourceTests
         {
             // Exception should be handled by DefaultTraceListener.WriteLine so no need to assert.
             var listener = new TestDefaultTraceListener();
-            listener.LogFileName = @"testfiles\LogFile.txt";
+            listener.LogFileName = $"{Guid.NewGuid().ToString("N")}\\LogFile.txt";
 
             listener.ShouldOverrideWriteLine = false;
             listener.Fail("FAIL");
-            listener.ShouldOverrideWriteLine = true;
         }
 
         [Fact]
