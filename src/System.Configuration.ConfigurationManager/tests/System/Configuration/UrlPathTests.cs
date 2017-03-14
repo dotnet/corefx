@@ -34,13 +34,10 @@ namespace System.ConfigurationTests
         [Fact]
         public void GetDirectoryOrRootName_FileExists()
         {
-            
-            string test = string.Empty;
             using (TempDirectory tempDirectory = new TempDirectory())
             using (TempFile tempFile = new TempFile(tempDirectory.Path + "\\" + TestFileName))
             {
                 string test = UrlPath.GetDirectoryOrRootName(tempFile.Path);
-
                 Assert.Equal(tempDirectory.Path, test);
             }
         }
@@ -49,7 +46,6 @@ namespace System.ConfigurationTests
         public void GetDirectoryOrRootName_ofC()
         {
             string test = UrlPath.GetDirectoryOrRootName("C:\\");
-
             Assert.Equal("C:\\", test);
         }
 
@@ -146,7 +142,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void IsEqualOrSubDirectory_Equal_SeconHasBackslash()
+        public void IsEqualOrSubDirectory_Equal_SecondHasBackslash()
         {
             bool test = UrlPath.IsEqualOrSubdirectory(TestDirectoryPath, TestDirectoryPathWithBackslash);
             Assert.Equal(true, test);
