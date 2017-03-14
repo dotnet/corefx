@@ -27,23 +27,23 @@ namespace System.ConfigurationTests
         [Fact]
         public void GetDirectoryOrRootName_FileExists()
         {
-            using (TempDirectory tempDirectory = new TempDirectory())
-            using (TempFile tempFile = new TempFile(tempDirectory.Path + "\\TestFileForUrlPathTests.txt"))
-            {
-                string test = UrlPath.GetDirectoryOrRootName(tempFile.Path);
-                Assert.Equal(tempDirectory.Path, test);
-            }
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            string pathToNonexistentFile = exePath + "TestFileForUrlPathTests.txt";
+
+            //GetDirectoryOrRootName removes the trailing backslash.  We need to add it again.
+            string test = UrlPath.GetDirectoryOrRootName(pathToNonexistentFile) + "\\";
+            Assert.Equal(exePath, test);
         }
 
         [Fact]
         public void GetDirectoryOrRootName_ofRoot()
         {
-            using (TempDirectory tempDirectory = new TempDirectory())
-            {
-                string root = Path.GetPathRoot(tempDirectory.Path);
-                string test = UrlPath.GetDirectoryOrRootName(root);
-                Assert.Equal(root, test);
-            }
+
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            string root = Path.GetPathRoot(exePath);
+            string test = UrlPath.GetDirectoryOrRootName(root);
+
+            Assert.Equal(root, test);
         }
 
         [Fact]
