@@ -342,9 +342,7 @@ namespace System
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
                     if (!isOverlapped)
                     {
-                        void* pSrc = Unsafe.AsPointer<T>(ref src);
-                        void* pDst = Unsafe.AsPointer<T>(ref dst);
-                        Unsafe.CopyBlockUnaligned(pDst, pSrc, (uint)(length * Unsafe.SizeOf<T>()));
+                        CopyBlocks(ref dst, ref src, length);
                     }
                     else
                     {
@@ -365,9 +363,7 @@ namespace System
                     bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
                     if (!isOverlapped)
                     {
-                        void* pSrc = Unsafe.AsPointer<T>(ref src);
-                        void* pDst = Unsafe.AsPointer<T>(ref dst);
-                        Unsafe.CopyBlockUnaligned(pDst, pSrc, (uint)(length * Unsafe.SizeOf<T>()));
+                        CopyBlocks(ref dst, ref src, length);
                     }
                     else
                     {
@@ -384,6 +380,25 @@ namespace System
             }
 
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe void CopyBlocks(ref T dst, ref T src, int length)
+        {
+            ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
+            ref byte srcBytes = ref Unsafe.As<T, byte>(ref src);
+            ulong byteCount = (ulong)length * (ulong)Unsafe.SizeOf<T>();
+            ulong index = 0;
+
+            while (index < byteCount)
+            {
+                uint blockSize = byteCount > uint.MaxValue ? uint.MaxValue : (uint)byteCount;
+                Unsafe.CopyBlock(
+                    ref Unsafe.Add(ref dstBytes, (IntPtr)index),
+                    ref Unsafe.Add(ref srcBytes, (IntPtr)index),
+                    blockSize);
+                index += blockSize;
+            }
         }
 
         /// <summary>
