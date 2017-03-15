@@ -62,14 +62,19 @@ namespace System.Security.Cryptography.Xml.Tests
     public class TransformTest
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Constructor()
+        {
+            ConcreteTransform concreteTransform = new ConcreteTransform();
+            Assert.Empty(concreteTransform.PropagatedNamespaces);
+        }
+
+        [Fact]
+        public void Constructor_NoPropagatedNamespaces()
         {
             ConcreteTransform concreteTransform = new ConcreteTransform();
             Assert.Null(concreteTransform.Context);
             Assert.Null(concreteTransform.Algorithm);
-#if !NET45 && !NET451 && !NET452 && !NET46 && !NET461 && !NET462 && !NET463
-            Assert.Empty(concreteTransform.PropagatedNamespaces);
-#endif
         }
 
         [Fact]
@@ -78,8 +83,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Throws<NullReferenceException>(() => new ConcreteTransform().GetDigestedOutput(null));
         }
 
-#if !NET45 && !NET451 && !NET452 && !NET46 && !NET461 && !NET462 && !NET463
-        // Use a selection of transforms that do not modify the XML if applied.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [InlineData(typeof(XmlDsigC14NTransform))]
         [InlineData(typeof(XmlDsigExcC14NTransform))]
@@ -103,6 +107,5 @@ namespace System.Security.Cryptography.Xml.Tests
                 Assert.Equal("urn:foo", doc.DocumentElement.NamespaceURI);
             }
         }
-#endif
     }
 }
