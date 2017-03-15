@@ -132,35 +132,31 @@ namespace System
             return (int)(byte*)(index + 7);
 #if !netstandard10
         VectorLength:
-            // Already checked, but for jit branch elmination
-            if (Vector.IsHardwareAccelerated)
+            nLength -= Vector<byte>.Count;
+            // Get comparision Vector
+            Vector<byte> vComparision = GetVector(value);
+            while ((byte*)nLength > (byte*)index)
             {
-                nLength -= Vector<byte>.Count;
-                // Get comparision Vector
-                Vector<byte> vComparision = GetVector(value);
-                while ((byte*)nLength > (byte*)index)
+                var vMatches = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)), vComparision);
+                if (!vMatches.Equals(Vector<byte>.Zero))
                 {
-                    var vMatches = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)), vComparision);
-                    if (!vMatches.Equals(Vector<byte>.Zero))
-                    {
-                        // Found match, reuse Vector vComparision to keep register pressure low
-                        vComparision = vMatches;
-                        // goto rather than inline return to keep function smaller https://github.com/dotnet/coreclr/issues/9692
-                        goto VectorFound;
-                    }
-                    index += Vector<byte>.Count;
+                    // Found match, reuse Vector vComparision to keep register pressure low
+                    vComparision = vMatches;
+                    // goto rather than inline return to keep function smaller https://github.com/dotnet/coreclr/issues/9692
+                    goto VectorFound;
                 }
-                index = nLength;
-                vComparision = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, nLength)), vComparision);
-                if (vComparision.Equals(Vector<byte>.Zero))
-                {
-                    goto VectorNotFound;
-                }
-        VectorFound:
-                // Find offset of first match
-                return (int)(byte*)index + LocateFirstFoundByte(vComparision);
-        VectorNotFound:;
+                index += Vector<byte>.Count;
             }
+            index = nLength;
+            vComparision = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, nLength)), vComparision);
+            if (vComparision.Equals(Vector<byte>.Zero))
+            {
+                goto VectorNotFound;
+            }
+        VectorFound:
+            // Find offset of first match
+            return (int)(byte*)index + LocateFirstFoundByte(vComparision);
+        VectorNotFound:;
             return -1;
 #endif
         }
@@ -244,7 +240,9 @@ namespace System
             // Single LEA instruction with jitted const (using function result)
             return i * 8 + LocateFirstFoundByte(candidate);
         }
+#endif
 
+#if !netstandard10
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateFirstFoundByte(ulong match)
         {
@@ -256,11 +254,13 @@ namespace System
                 return (int)((powerOfTwoFlag * xorPowerOfTwoToHighByte) >> 57);
             }
         }
+#endif
 
+#if !netstandard10
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector<byte> GetVector(byte vectorByte)
         {
-#if !NETCOREAPP
+#if !netcoreapp
             // Vector<byte> .ctor doesn't become an intrinsic due to detection issue
             // However this does cause it to become an intrinsic (with additional multiply and reg->reg copy)
             // https://github.com/dotnet/coreclr/issues/7459#issuecomment-253965670
@@ -269,7 +269,9 @@ namespace System
             return new Vector<byte>(vectorByte);
 #endif
         }
+#endif
 
+#if !netstandard10
         private const ulong xorPowerOfTwoToHighByte = (0x07ul       |
                                                        0x06ul <<  8 |
                                                        0x05ul << 16 |
