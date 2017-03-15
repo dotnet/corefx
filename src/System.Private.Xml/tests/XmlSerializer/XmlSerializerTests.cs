@@ -3002,9 +3002,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(cg);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(10675)]
-#endif
     [Fact]
     public static void XmlMembersMapping_PrimitiveValue()
     {
@@ -3016,9 +3013,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(10675)]
-#endif
     [Fact]
     public static void XmlMembersMapping_SimpleType()
     {
@@ -3030,9 +3024,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(10675)]
-#endif
     [Fact]
     public static void XmlMembersMapping_CompositeType()
     {

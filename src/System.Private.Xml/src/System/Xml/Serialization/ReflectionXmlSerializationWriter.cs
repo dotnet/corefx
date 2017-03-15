@@ -1236,12 +1236,108 @@ namespace System.Xml.Serialization
             return stringValue;
         }
 
-        private void WriteMembersElement(object o, XmlMembersMapping mapping)
+        private void WriteMembersElement(object o, XmlMembersMapping xmlMembersMapping)
         {
-            // #10675: we should implement this method. WCF is the major customer of the method
-            // as WCF uses XmlReflectionImporter.ImportMembersMapping and generates special
-            // serializers for OperationContracts.
-            throw new NotImplementedException();
+            ElementAccessor element = xmlMembersMapping.Accessor;
+            MembersMapping mapping = (MembersMapping)element.Mapping;
+            bool hasWrapperElement = mapping.HasWrapperElement;
+            bool writeAccessors = mapping.WriteAccessors;
+            bool isRpc = xmlMembersMapping.IsSoap && writeAccessors;
+
+            WriteStartDocument();
+
+            if (!mapping.IsSoap)
+            {
+                TopLevelElement();
+            }
+
+            object[] p = (object[])o;
+            int pLength = p.Length;
+
+            if (hasWrapperElement)
+            {
+                throw new NotImplementedException();
+            }
+
+            for (int i = 0; i < mapping.Members.Length; i++)
+            {
+                MemberMapping member = mapping.Members[i];
+                if (member.Xmlns != null)
+                    continue;
+                if (member.Ignore)
+                    continue;
+
+                bool? specifiedSource = null;
+                int specifiedPosition = 0;
+                if (member.CheckSpecified != SpecifiedAccessor.None)
+                {
+                    string memberNameSpecified = member.Name + "Specified";
+
+                    for (int j = 0; j < mapping.Members.Length; j++)
+                    {
+                        if (mapping.Members[j].Name == memberNameSpecified)
+                        {
+                            specifiedSource = (bool)p[j];
+                            specifiedPosition = j;
+                            break;
+                        }
+                    }
+                }
+
+                if (pLength > i)
+                {
+                    if (specifiedSource == null || (specifiedSource != null && (pLength <= specifiedPosition || specifiedSource.Value)))
+                    {
+
+                        object source = p[i];
+                        object enumSource = null;
+                        if (member.ChoiceIdentifier != null)
+                        {
+                            for (int j = 0; j < mapping.Members.Length; j++)
+                            {
+                                if (mapping.Members[j].Name == member.ChoiceIdentifier.MemberName)
+                                {
+                                    enumSource = p[j];
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isRpc && member.IsReturnValue && member.Elements.Length > 0)
+                        {
+                            WriteRpcResult(member.Elements[0].Name, "");
+                        }
+
+                        // override writeAccessors choice when we've written a wrapper element
+                        WriteMember(source, enumSource, member.ElementsSortedByDerivation, member.Text, member.ChoiceIdentifier, member.TypeDesc, writeAccessors || hasWrapperElement);
+                    }
+                }
+
+                if (hasWrapperElement)
+                {
+                    throw new NotImplementedException();
+                    //WriteEndElement();
+                }
+
+                if (element.IsSoap)
+                {
+                    throw new NotImplementedException();
+                    //if (!hasWrapperElement && !writeAccessors)
+                    //{
+                    //    // doc/bare case -- allow extra members
+                    //    Writer.Write("if (pLength > ");
+                    //    Writer.Write(mapping.Members.Length.ToString(CultureInfo.InvariantCulture));
+                    //    Writer.WriteLine(") {");
+                    //    Writer.Indent++;
+
+                    //    WriteExtraMembers(mapping.Members.Length.ToString(CultureInfo.InvariantCulture), "pLength");
+
+                    //    Writer.Indent--;
+                    //    Writer.WriteLine("}");
+                    //}
+                    //Writer.WriteLine("WriteReferencedElements();");
+                }
+            }
         }
 
         [Flags]

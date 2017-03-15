@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -73,11 +74,223 @@ namespace System.Xml.Serialization
                 throw new ArgumentException(SR.Format(SR.XmlInternalError, "xmlMapping"));
         }
 
-        private object GenerateMembersElement(XmlMembersMapping xmlMapping)
+        private object GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
         {
-            // #10675: we should implement this method. WCF is the major customer of the method
-            // as WCF uses XmlReflectionImporter.ImportMembersMapping and generates special
-            // serializers for OperationContracts.
+            if (xmlMembersMapping.Accessor.IsSoap)
+                return GenerateEncodedMembersElement(xmlMembersMapping);
+            else
+                return GenerateLiteralMembersElement(xmlMembersMapping);
+        }
+
+        private object GenerateLiteralMembersElement(XmlMembersMapping xmlMembersMapping)
+        {
+            ElementAccessor element = xmlMembersMapping.Accessor;
+            MemberMapping[] mappings = ((MembersMapping)element.Mapping).Members;
+            bool hasWrapperElement = ((MembersMapping)element.Mapping).HasWrapperElement;
+            Reader.MoveToContent();
+
+            object[] p = new object[mappings.Length];
+            object o = p;
+
+            InitializeValueTypes(p, mappings);
+
+            //int wrapperLoopIndex = 0;
+            if (hasWrapperElement)
+            {
+                throw new NotImplementedException();
+                //wrapperLoopIndex = WriteWhileNotLoopStart();
+                //Writer.Indent++;
+                //WriteIsStartTag(element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
+            }
+
+            Member anyText = null;
+            Member anyElement = null;
+            Member anyAttribute = null;
+
+            ArrayList membersList = new ArrayList();
+            ArrayList textOrArrayMembersList = new ArrayList();
+            var attributeMembersList = new List<MemberMapping>();
+
+            for (int i = 0; i < mappings.Length; i++)
+            {
+                MemberMapping mapping = mappings[i];
+                //object source = p[i];
+                //object arraySource = source;
+                //if (mapping.Xmlns != null)
+                //{
+                //    arraySource = "((" + mapping.TypeDesc.CSharpName + ")" + source + ")";
+                //}
+
+                //string choiceSource = GetChoiceIdentifierSource(mappings, mapping);
+                //Member member = new Member(this, source, arraySource, "a", i, mapping, choiceSource);
+                //Member anyMember = new Member(this, source, null, "a", i, mapping, choiceSource);
+                Member member = new Member(mapping);
+                Member anyMember = new Member(mapping);
+
+                if (mapping.CheckSpecified == SpecifiedAccessor.ReadWrite)
+                {
+                    throw new NotImplementedException();
+                }
+
+                bool foundAnyElement = false;
+                if (mapping.Text != null) anyText = anyMember;
+                if (mapping.Attribute != null && mapping.Attribute.Any)
+                    anyAttribute = anyMember;
+                if (mapping.Attribute != null || mapping.Xmlns != null)
+                    attributeMembersList.Add(member.Mapping);
+                else if (mapping.Text != null)
+                    textOrArrayMembersList.Add(member);
+
+                if (!mapping.IsSequence)
+                {
+                    for (int j = 0; j < mapping.Elements.Length; j++)
+                    {
+                        if (mapping.Elements[j].Any && mapping.Elements[j].Name.Length == 0)
+                        {
+                            anyElement = anyMember;
+                            if (mapping.Attribute == null && mapping.Text == null)
+                                textOrArrayMembersList.Add(anyMember);
+                            foundAnyElement = true;
+                            break;
+                        }
+                    }
+                }
+                if (mapping.Attribute != null || mapping.Text != null || foundAnyElement)
+                    membersList.Add(anyMember);
+                else if (mapping.TypeDesc.IsArrayLike && !(mapping.Elements.Length == 1 && mapping.Elements[0].Mapping is ArrayMapping))
+                {
+                    membersList.Add(anyMember);
+                    textOrArrayMembersList.Add(anyMember);
+                }
+                else
+                {
+                    //if (mapping.TypeDesc.IsArrayLike && !mapping.TypeDesc.IsArray)
+                    //    member.ParamsReadSource = null; // collection
+                    membersList.Add(member);
+                }
+            }
+
+            Member[] members = (Member[])membersList.ToArray(typeof(Member));
+            Member[] textOrArrayMembers = (Member[])textOrArrayMembersList.ToArray(typeof(Member));
+
+            if (members.Length > 0 && members[0].Mapping.IsReturnValue)
+                IsReturnValue = true;
+
+            if (attributeMembersList.Count > 0)
+            {
+                var attributeMembers = attributeMembersList.ToArray();
+                WriteAttributes(attributeMembers, anyAttribute.Mapping, UnknownNode, ref o);
+                Reader.MoveToElement();
+            }
+
+            if (textOrArrayMembers.Length != 0)
+            {
+                throw new NotImplementedException();
+                //WriteMemberBegin(textOrArrayMembers);
+            }
+
+            if (hasWrapperElement)
+            {
+                throw new NotImplementedException();
+                //Writer.WriteLine("if (Reader.IsEmptyElement) { Reader.Skip(); Reader.MoveToContent(); continue; }");
+                //Writer.WriteLine("Reader.ReadStartElement();");
+            }
+            if (IsSequence(members))
+            {
+                throw new NotImplementedException();
+                //Writer.WriteLine("int state = 0;");
+            }
+            //int loopIndex = WriteWhileNotLoopStart();
+
+            //string expectedElements = ExpectedElements(members);
+            var collectionMember = new CollectionMember();
+            Member tempMember = null;
+            WriteMemberElements(ref o, collectionMember, out tempMember, members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, anyElement, anyText, null);
+            SetCollectionObjectWithCollectionMember(ref o, collectionMember, typeof(object[]));
+
+            Reader.MoveToContent();
+            //WriteWhileLoopEnd(loopIndex);
+
+            if (textOrArrayMembers.Length != 0)
+            {
+                throw new NotImplementedException();
+                //WriteMemberEnd(textOrArrayMembers);
+            }
+
+            if (hasWrapperElement)
+            {
+                throw new NotImplementedException();
+                //Writer.WriteLine("ReadEndElement();");
+
+                //Writer.Indent--;
+                //Writer.WriteLine("}");
+
+                //WriteUnknownNode("UnknownNode", "null", element, true);
+
+                //Writer.WriteLine("Reader.MoveToContent();");
+                //WriteWhileLoopEnd(wrapperLoopIndex);
+            }
+
+            return o;
+        }
+
+        private string ExpectedElements(Member[] members)
+        {
+            if (IsSequence(members))
+                return "null";
+            string qnames = string.Empty;
+            bool firstElement = true;
+            for (int i = 0; i < members.Length; i++)
+            {
+                Member member = (Member)members[i];
+                if (member.Mapping.Xmlns != null)
+                    continue;
+                if (member.Mapping.Ignore)
+                    continue;
+                if (member.Mapping.IsText || member.Mapping.IsAttribute)
+                    continue;
+
+                ElementAccessor[] elements = member.Mapping.Elements;
+
+                for (int j = 0; j < elements.Length; j++)
+                {
+                    ElementAccessor e = elements[j];
+                    string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : "";
+                    if (e.Any && (e.Name == null || e.Name.Length == 0)) continue;
+
+                    if (!firstElement)
+                        qnames += ", ";
+                    qnames += ns + ":" + e.Name;
+                    firstElement = false;
+                }
+            }
+
+            var writer = new StringWriter(CultureInfo.InvariantCulture);
+            ReflectionAwareCodeGen.WriteQuotedCSharpString(new IndentedWriter(writer, true), qnames);
+            return writer.ToString();
+        }
+
+        private void InitializeValueTypes(object[] p, MemberMapping[] mappings)
+        {
+            for (int i = 0; i < mappings.Length; i++)
+            {
+                if (!mappings[i].TypeDesc.IsValueType)
+                    continue;
+                
+
+                if (mappings[i].TypeDesc.IsOptionalValue && mappings[i].TypeDesc.BaseTypeDesc.UseReflection)
+                {
+                    p[i] = null;
+                }
+                else
+                {
+                    p[i] = ReflectionCreateObject(mappings[i].TypeDesc.Type);
+                }
+            }
+        }
+
+        private object GenerateEncodedMembersElement(XmlMembersMapping xmlMembersMapping)
+        {
             throw new NotImplementedException();
         }
 
@@ -997,6 +1210,7 @@ namespace System.Xml.Serialization
                 for (int i = 0; i < mappings.Length; i++)
                 {
                     MemberMapping mapping = mappings[i];
+                    // Member member = new Member(this, source, source, "a", i, mapping, GetChoiceIdentifierSource(mapping, "o", structMapping.TypeDesc));
                     var member = new Member(mapping);
                     members[i] = member;
                 }
