@@ -53,9 +53,19 @@ namespace System
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            while (length >= 8)
+            IntPtr nLength = (IntPtr)length;
+#if !netstandard10
+            // If length < Vector<byte>.Count length the jumping over Vector will dominate the search; as the Vector section is quite chunky
+            // So we keep the < Vector<byte>.Count at start of function, then jump to vector as it will amortize the cost
+            if (Vector.IsHardwareAccelerated && (byte*)nLength >= (byte*)Vector<byte>.Count)
             {
-                length -= 8;
+                // Seek through Vector lengths
+                goto VectorLength;
+            }
+#endif
+            while ((byte*)nLength >= (byte*)8)
+            {
+                nLength -= 8;
 
                 if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
@@ -77,9 +87,9 @@ namespace System
                 index += 8;
             }
 
-            if (length >= 4)
+            if ((byte*)nLength >= (byte*)4)
             {
-                length -= 4;
+                nLength -= 4;
 
                 if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
@@ -93,13 +103,14 @@ namespace System
                 index += 4;
             }
 
-            while (length > 0)
+            while ((byte*)nLength > (byte*)0)
             {
+                nLength -= 1;
+
                 if (value == Unsafe.Add(ref searchSpace, index))
                     goto Found;
 
                 index += 1;
-                length--;
             }
             return -1;
 
@@ -119,6 +130,39 @@ namespace System
             return (int)(byte*)(index + 6);
         Found7:
             return (int)(byte*)(index + 7);
+#if !netstandard10
+        VectorLength:
+            // Already checked, but for jit branch elmination
+            if (Vector.IsHardwareAccelerated)
+            {
+                nLength -= Vector<byte>.Count;
+                // Get comparision Vector
+                Vector<byte> vComparision = GetVector(value);
+                while ((byte*)nLength > (byte*)index)
+                {
+                    var vMatches = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)), vComparision);
+                    if (!vMatches.Equals(Vector<byte>.Zero))
+                    {
+                        // Found match, reuse Vector vComparision to keep register pressure low
+                        vComparision = vMatches;
+                        // goto rather than inline return to keep function smaller https://github.com/dotnet/coreclr/issues/9692
+                        goto VectorFound;
+                    }
+                    index += Vector<byte>.Count;
+                }
+                index = nLength;
+                vComparision = Vector.Equals(Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, nLength)), vComparision);
+                if (vComparision.Equals(Vector<byte>.Zero))
+                {
+                    goto VectorNotFound;
+                }
+        VectorFound:
+                // Find offset of first match
+                return (int)(byte*)index + LocateFirstFoundByte(vComparision);
+        VectorNotFound:;
+            }
+            return -1;
+#endif
         }
 
         public static unsafe bool SequenceEqual(ref byte first, ref byte second, int length)
@@ -178,5 +222,61 @@ namespace System
         NotEqual: // Workaround for https://github.com/dotnet/coreclr/issues/9692
             return false;
         }
+
+#if !netstandard10
+        // Vector sub-search adapted from https://github.com/aspnet/KestrelHttpServer/pull/1138
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int LocateFirstFoundByte(Vector<byte> match)
+        {
+            var vector64 = Vector.AsVectorUInt64(match);
+            ulong candidate = 0;
+            int i = 0;
+            // Pattern unrolled by jit https://github.com/dotnet/coreclr/pull/8001
+            for (; i < Vector<ulong>.Count; i++)
+            {
+                candidate = vector64[i];
+                if (candidate != 0)
+                {
+                    break;
+                }
+            }
+
+            // Single LEA instruction with jitted const (using function result)
+            return i * 8 + LocateFirstFoundByte(candidate);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int LocateFirstFoundByte(ulong match)
+        {
+            unchecked
+            {
+                // Flag least significant power of two bit
+                var powerOfTwoFlag = match ^ (match - 1);
+                // Shift all powers of two into the high byte and extract
+                return (int)((powerOfTwoFlag * xorPowerOfTwoToHighByte) >> 57);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector<byte> GetVector(byte vectorByte)
+        {
+#if !NETCOREAPP
+            // Vector<byte> .ctor doesn't become an intrinsic due to detection issue
+            // However this does cause it to become an intrinsic (with additional multiply and reg->reg copy)
+            // https://github.com/dotnet/coreclr/issues/7459#issuecomment-253965670
+            return Vector.AsVectorByte(new Vector<uint>(vectorByte * 0x01010101u));
+#else
+            return new Vector<byte>(vectorByte);
+#endif
+        }
+
+        private const ulong xorPowerOfTwoToHighByte = (0x07ul       |
+                                                       0x06ul <<  8 |
+                                                       0x05ul << 16 |
+                                                       0x04ul << 24 |
+                                                       0x03ul << 32 |
+                                                       0x02ul << 40 |
+                                                       0x01ul << 48) + 1;
+#endif
     }
 }
