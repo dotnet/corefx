@@ -302,7 +302,7 @@
     <Compile Include="System\StringNormalizationExtensions.cs" />
     <Compile Include="System\Globalization\Extensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+  <ItemGroup>
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
@@ -314,11 +314,6 @@
     <Reference Include="mscorlib" />
     <Reference Include="Windows" />
     <ReferenceFromRuntime Include="System.Private.Interop" />
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
-    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
-      <Aliases>System_Security_Principal</Aliases>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
