@@ -10,12 +10,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Xml;
-using Microsoft.CSharp.RuntimeBinder;
 using Xunit;
-using BindingFlags = System.Reflection.BindingFlags;
 
 namespace System.Security.Cryptography.Xml.Tests
 {
@@ -94,7 +91,7 @@ namespace System.Security.Cryptography.Xml.Tests
             doc.AppendChild(doc.CreateElement("foo", "urn:foo"));
             doc.DocumentElement.AppendChild(doc.CreateElement("bar", "urn:bar"));
             Assert.Equal(string.Empty, doc.DocumentElement.GetAttribute("xmlns:f"));
-            Transform transform = type.GetConstructor(Type.EmptyTypes).Invoke(new object[0]) as Transform;
+            Transform transform = Activator.CreateInstance(type) as Transform;
             transform.LoadInput(doc);
             transform.PropagatedNamespaces.Add("f", "urn:foo");
             transform.PropagatedNamespaces.Add("b", "urn:bar");
