@@ -28,6 +28,7 @@ namespace Microsoft.Win32
         private static readonly IntPtr HKEY_USERS = new IntPtr(unchecked((int)0x80000003));
         private static readonly IntPtr HKEY_PERFORMANCE_DATA = new IntPtr(unchecked((int)0x80000004));
         private static readonly IntPtr HKEY_CURRENT_CONFIG = new IntPtr(unchecked((int)0x80000005));
+        private static readonly IntPtr HKEY_DYN_DATA = new IntPtr(unchecked((int)0x80000006));
 
         /// <summary>Names of keys.  This array must be in the same order as the HKEY values listed above.</summary>
         private static readonly string[] s_hkeyNames = new string[]
@@ -37,7 +38,8 @@ namespace Microsoft.Win32
             "HKEY_LOCAL_MACHINE",
             "HKEY_USERS",
             "HKEY_PERFORMANCE_DATA",
-            "HKEY_CURRENT_CONFIG"
+            "HKEY_CURRENT_CONFIG",
+            "HKEY_DYN_DATA",
         };
 
         // MSDN defines the following limits for registry key names & values:
