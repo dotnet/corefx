@@ -174,7 +174,7 @@ namespace System.Security.Cryptography.Xml
                 if (signedXml == null)
                     return null;
 
-                return signedXml.Context;
+                return signedXml._context;
             }
             set
             {
@@ -204,8 +204,8 @@ namespace System.Security.Cryptography.Xml
                 CanonicalXmlNodeList namespaces = null;
                 if (reference != null)
                     namespaces = reference._namespaces;
-                else if (signedXml?.Context != null)
-                    namespaces = Utils.GetPropagatedAttributes(signedXml.Context);
+                else if (signedXml?._context != null)
+                    namespaces = Utils.GetPropagatedAttributes(signedXml._context);
 
                 // if no namespaces have been propagated, return an empty hashtable.
                 if (namespaces == null)

@@ -381,8 +381,8 @@ namespace System.Security.Cryptography.Xml
                                             && (Utils.GetAttribute(tempElem, "Id", SignedXml.XmlDsigNamespaceUrl).Equals(idref)))
                                         {
                                             elem = tempElem;
-                                            if (_signedXml.Context != null)
-                                                _namespaces = Utils.GetPropagatedAttributes(_signedXml.Context);
+                                            if (_signedXml._context != null)
+                                                _namespaces = Utils.GetPropagatedAttributes(_signedXml._context);
                                             break;
                                         }
                                     }

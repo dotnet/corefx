@@ -33,7 +33,7 @@ namespace System.Security.Cryptography.Xml
         private int[] _refLevelCache = null;
 
         internal XmlResolver _xmlResolver = null;
-        private XmlElement _context = null;
+        internal XmlElement _context = null;
         private bool _bResolverSet = false;
 
         private Func<SignedXml, bool> _signatureFormatValidator = DefaultSignatureFormatValidator;
@@ -208,11 +208,6 @@ namespace System.Security.Cryptography.Xml
         {
             get { return m_signature.KeyInfo; }
             set { m_signature.KeyInfo = value; }
-        }
-
-        internal XmlElement Context
-        {
-            get { return _context; }
         }
 
         public XmlElement GetXml()
