@@ -82,6 +82,36 @@ namespace System.Security.Cryptography.Xml.Tests
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [Theory]
+        [InlineData(false, "<a><b><c xmlns=\"urn:foo\" /></b></a>")]
+        [InlineData(true, "<a f=\"urn:foo\"><b><c xmlns=\"urn:foo\" /></b></a>")]
+        public void PropagatedNamespaces_XmlDecryptionTransform(bool addPropagatedNamespace, string expectedResult)
+        {
+            XmlDocument baseDocument = new XmlDocument();
+            baseDocument.LoadXml("<a><b><c xmlns=\"urn:foo\"/></b></a>");
+
+            using (Aes aes = Aes.Create())
+            {
+                EncryptedXml encryptedXml = new EncryptedXml(baseDocument);
+                encryptedXml.AddKeyNameMapping("key", aes);
+                XmlElement bElement = (XmlElement) baseDocument.DocumentElement.SelectSingleNode("b");
+                EncryptedData encryptedData = encryptedXml.Encrypt(bElement, "key");
+                EncryptedXml.ReplaceElement(bElement, encryptedData, false);
+
+                XmlDecryptionTransform decryptionTransform = new XmlDecryptionTransform();
+                decryptionTransform.EncryptedXml = encryptedXml;
+                decryptionTransform.LoadInput(baseDocument);
+                if (addPropagatedNamespace)
+                {
+                    decryptionTransform.PropagatedNamespaces.Add("f", "urn:foo");
+                }
+                XmlDocument decryptedDocument = (XmlDocument) decryptionTransform.GetOutput(typeof(XmlDocument));
+
+                Assert.Equal(expectedResult, decryptedDocument.OuterXml);
+            }
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [Theory]
         [InlineData(typeof(XmlDsigC14NTransform))]
         [InlineData(typeof(XmlDsigExcC14NTransform))]
         [InlineData(typeof(XmlDsigC14NWithCommentsTransform))]
@@ -99,8 +129,7 @@ namespace System.Security.Cryptography.Xml.Tests
             using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
             {
                 string result = streamReader.ReadToEnd();
-                Assert.Equal(result,
-                    "<foo xmlns=\"urn:foo\"><bar xmlns=\"urn:bar\"></bar></foo>");
+                Assert.Equal("<foo xmlns=\"urn:foo\"><bar xmlns=\"urn:bar\"></bar></foo>", result);
                 Assert.Equal("urn:foo", doc.DocumentElement.NamespaceURI);
             }
         }
