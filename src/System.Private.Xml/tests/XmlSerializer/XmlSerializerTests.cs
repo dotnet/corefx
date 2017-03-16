@@ -3036,7 +3036,21 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(requestBodyValue.composite.StringValue, requestBodyActual.composite.StringValue);
     }
 
-    private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false)
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_HasWrapperElement()
+    {
+        string memberName = "GetData";
+        var getDataRequestBodyValue = new GetDataRequestBody(3);
+        var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(getDataRequestBodyValue, memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n</wrapper>",
+            wrapperName: "wrapper",
+            hasWrapperElement: true);
+
+        Assert.NotNull(getDataRequestBodyActual);
+        Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
+    }
+
+    private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null, bool hasWrapperElement = false)
     {
         var member = new XmlReflectionMember();
         member.MemberName = memberName;
@@ -3049,7 +3063,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         member.XmlAttributes.XmlElements.Add(elementAttribute);
 
         var importer = new XmlReflectionImporter(null, ns);
-        var membersMapping = importer.ImportMembersMapping(null, ns, new XmlReflectionMember[] { member }, false);
+        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, new XmlReflectionMember[] { member }, hasWrapperElement);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
         using (var ms = new MemoryStream())
         {

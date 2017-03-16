@@ -74,7 +74,7 @@ namespace System.Xml.Serialization
             }
             else if (xmlMapping is XmlMembersMapping)
             {
-                WriteMembersElement(o, (XmlMembersMapping)xmlMapping);
+                GenerateMembersElement(o, (XmlMembersMapping)xmlMapping);
             }
         }
 
@@ -1236,7 +1236,7 @@ namespace System.Xml.Serialization
             return stringValue;
         }
 
-        private void WriteMembersElement(object o, XmlMembersMapping xmlMembersMapping)
+        private void GenerateMembersElement(object o, XmlMembersMapping xmlMembersMapping)
         {
             ElementAccessor element = xmlMembersMapping.Accessor;
             MembersMapping mapping = (MembersMapping)element.Mapping;
@@ -1256,7 +1256,73 @@ namespace System.Xml.Serialization
 
             if (hasWrapperElement)
             {
-                throw new NotImplementedException();
+                WriteStartElement(element.Name, (element.Form == XmlSchemaForm.Qualified ? element.Namespace : ""), mapping.IsSoap);
+
+                int xmlnsMember = FindXmlnsIndex(mapping.Members);
+                if (xmlnsMember >= 0)
+                {
+                    throw new NotImplementedException("xmlnsMember >= 0");
+                    //MemberMapping member = mapping.Members[xmlnsMember];
+                    //var source = (XmlSerializerNamespaces)p[xmlnsMember];
+
+                    //if (pLength > xmlnsMember)
+                    //{
+                    //    WriteNamespaceDeclarations(source);
+                    //}
+                }
+
+                for (int i = 0; i < mapping.Members.Length; i++)
+                {
+                    MemberMapping member = mapping.Members[i];
+
+                    if (member.Attribute != null && !member.Ignore)
+                    {
+                        throw new NotImplementedException("member.Attribute != null && !member.Ignore");
+                        //string source = "p[" + i.ToString(CultureInfo.InvariantCulture) + "]";
+
+                        //string specifiedSource = null;
+                        //int specifiedPosition = 0;
+                        //if (member.CheckSpecified != SpecifiedAccessor.None)
+                        //{
+                        //    string memberNameSpecified = member.Name + "Specified";
+                        //    for (int j = 0; j < mapping.Members.Length; j++)
+                        //    {
+                        //        if (mapping.Members[j].Name == memberNameSpecified)
+                        //        {
+                        //            specifiedSource = "((bool) p[" + j.ToString(CultureInfo.InvariantCulture) + "])";
+                        //            specifiedPosition = j;
+                        //            break;
+                        //        }
+                        //    }
+                        //}
+
+                        //Writer.Write("if (pLength > ");
+                        //Writer.Write(i.ToString(CultureInfo.InvariantCulture));
+                        //Writer.WriteLine(") {");
+                        //Writer.Indent++;
+
+                        //if (specifiedSource != null)
+                        //{
+                        //    Writer.Write("if (pLength <= ");
+                        //    Writer.Write(specifiedPosition.ToString(CultureInfo.InvariantCulture));
+                        //    Writer.Write(" || ");
+                        //    Writer.Write(specifiedSource);
+                        //    Writer.WriteLine(") {");
+                        //    Writer.Indent++;
+                        //}
+
+                        //WriteMember(source, member.Attribute, member.TypeDesc, "p");
+
+                        //if (specifiedSource != null)
+                        //{
+                        //    Writer.Indent--;
+                        //    Writer.WriteLine("}");
+                        //}
+
+                        //Writer.Indent--;
+                        //Writer.WriteLine("}");
+                    }
+                }
             }
 
             for (int i = 0; i < mapping.Members.Length; i++)
@@ -1315,8 +1381,7 @@ namespace System.Xml.Serialization
 
                 if (hasWrapperElement)
                 {
-                    throw new NotImplementedException();
-                    //WriteEndElement();
+                    WriteEndElement();
                 }
 
                 if (element.IsSoap)

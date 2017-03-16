@@ -94,15 +94,41 @@ namespace System.Xml.Serialization
 
             InitializeValueTypes(p, mappings);
 
-            //int wrapperLoopIndex = 0;
             if (hasWrapperElement)
             {
-                throw new NotImplementedException();
-                //wrapperLoopIndex = WriteWhileNotLoopStart();
-                //Writer.Indent++;
-                //WriteIsStartTag(element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
+                string elementName = element.Name;
+                string elementNs = element.Form == XmlSchemaForm.Qualified ? element.Namespace : "";
+                Reader.MoveToContent();
+                while (Reader.NodeType != XmlNodeType.EndElement && Reader.NodeType != XmlNodeType.None)
+                {
+                    if (Reader.IsStartElement(element.Name, elementNs))
+                    {
+                        if (!GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, ref o))
+                        {
+                            continue;
+                        }
+
+                        ReadEndElement();
+                    }
+                    else
+                    {
+
+                        UnknownNode(null, $"{elementNs}:{elementName}");
+                    }
+                    
+                    Reader.MoveToContent();
+                }
+            }
+            else
+            {
+                GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, ref o);
             }
 
+            return o;
+        }
+
+        private bool GenerateLiteralMembersElementInternal(MemberMapping[] mappings, bool hasWrapperElement, ref object o)
+        {
             Member anyText = null;
             Member anyElement = null;
             Member anyAttribute = null;
@@ -191,25 +217,33 @@ namespace System.Xml.Serialization
 
             if (hasWrapperElement)
             {
-                throw new NotImplementedException();
-                //Writer.WriteLine("if (Reader.IsEmptyElement) { Reader.Skip(); Reader.MoveToContent(); continue; }");
-                //Writer.WriteLine("Reader.ReadStartElement();");
+                if (Reader.IsEmptyElement)
+                {
+                    Reader.Skip();
+                    Reader.MoveToContent();
+                    return false;
+                }
+
+                Reader.ReadStartElement();
             }
             if (IsSequence(members))
             {
                 throw new NotImplementedException();
                 //Writer.WriteLine("int state = 0;");
             }
-            //int loopIndex = WriteWhileNotLoopStart();
-
-            //string expectedElements = ExpectedElements(members);
-            var collectionMember = new CollectionMember();
-            Member tempMember = null;
-            WriteMemberElements(ref o, collectionMember, out tempMember, members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, anyElement, anyText, null);
-            SetCollectionObjectWithCollectionMember(ref o, collectionMember, typeof(object[]));
 
             Reader.MoveToContent();
-            //WriteWhileLoopEnd(loopIndex);
+            while (Reader.NodeType != System.Xml.XmlNodeType.EndElement && Reader.NodeType != System.Xml.XmlNodeType.None)
+            {
+
+                //string expectedElements = ExpectedElements(members);
+                var collectionMember = new CollectionMember();
+                Member tempMember = null;
+                WriteMemberElements(ref o, collectionMember, out tempMember, members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, anyElement, anyText, null);
+                SetCollectionObjectWithCollectionMember(ref o, collectionMember, typeof(object[]));
+
+                Reader.MoveToContent();
+            }
 
             if (textOrArrayMembers.Length != 0)
             {
@@ -217,21 +251,7 @@ namespace System.Xml.Serialization
                 //WriteMemberEnd(textOrArrayMembers);
             }
 
-            if (hasWrapperElement)
-            {
-                throw new NotImplementedException();
-                //Writer.WriteLine("ReadEndElement();");
-
-                //Writer.Indent--;
-                //Writer.WriteLine("}");
-
-                //WriteUnknownNode("UnknownNode", "null", element, true);
-
-                //Writer.WriteLine("Reader.MoveToContent();");
-                //WriteWhileLoopEnd(wrapperLoopIndex);
-            }
-
-            return o;
+            return true;
         }
 
         private string ExpectedElements(Member[] members)
