@@ -26,12 +26,12 @@ namespace System.Collections.Generic
         private const int DefaultSize = 17;
 
         public LowLevelDictionary()
-            : this(DefaultSize, new DefaultComparer<TKey>())
+            : this(DefaultSize, DefaultComparer<TKey>.Cached)
         {
         }
 
         public LowLevelDictionary(int capacity)
-            : this(capacity, new DefaultComparer<TKey>())
+            : this(capacity, DefaultComparer<TKey>.Cached)
         {
         }
 
@@ -232,6 +232,8 @@ namespace System.Collections.Generic
         // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default.
         private sealed class DefaultComparer<T> : IEqualityComparer<T>
         {
+            public static readonly DefaultComparer<T> Cached = new DefaultComparer<T>();
+            
             public bool Equals(T x, T y)
             {
                 if (x == null)
