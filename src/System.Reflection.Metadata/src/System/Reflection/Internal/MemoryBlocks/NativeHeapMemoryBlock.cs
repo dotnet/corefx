@@ -22,6 +22,7 @@ namespace System.Reflection.Internal
         {
             _pointer = (byte*)Marshal.AllocHGlobal(size);
             _size = size;
+            GC.AddMemoryPressure(size);
         }
 
         ~NativeHeapMemoryBlock()
@@ -32,6 +33,7 @@ namespace System.Reflection.Internal
         protected override void Dispose(bool disposing)
         {
             Marshal.FreeHGlobal((IntPtr)_pointer);
+            GC.RemoveMemoryPressure(_size);
             _pointer = null;
         }
 
