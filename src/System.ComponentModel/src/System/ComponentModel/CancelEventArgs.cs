@@ -5,7 +5,7 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    /// EventArgs used to describe a cancel event.
+    /// Provides data for a cancelable event.
     /// </summary>
     public class CancelEventArgs : EventArgs
     {
@@ -15,16 +15,16 @@ namespace System.ComponentModel
         public bool Cancel { get; set; }
 
         /// <summary>
-        /// Default constructor
+        /// Initializes a new instance of the CancelEventArgs class with the Cancel property set to false.
         /// </summary>
         public CancelEventArgs()
         {
         }
 
         /// <summary>
-        /// Helper constructor
+        /// Initializes a new instance of the CancelEventArgs class with the Cancel property set to the given value.
         /// </summary>
-        /// <param name="cancel"></param>
+        /// <param name="cancel">true to cancel the event; otherwise, false.</param>
         public CancelEventArgs(bool cancel)
         {
             this.Cancel = cancel;
