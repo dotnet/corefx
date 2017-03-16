@@ -43,30 +43,28 @@ namespace System.Linq.Expressions
         public ReadOnlyCollection<Expression> Visit(ReadOnlyCollection<Expression> nodes)
         {
             ContractUtils.RequiresNotNull(nodes, nameof(nodes));
-            Expression[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
                 Expression node = Visit(nodes[i]);
-
-                if (newNodes != null)
+                if (node != nodes[i])
                 {
-                    newNodes[i] = node;
-                }
-                else if (!object.ReferenceEquals(node, nodes[i]))
-                {
-                    newNodes = new Expression[n];
+                    Expression[] newNodes = new Expression[n];
                     for (int j = 0; j < i; j++)
                     {
                         newNodes[j] = nodes[j];
                     }
+
                     newNodes[i] = node;
+                    while (++i < n)
+                    {
+                        newNodes[i] = Visit(nodes[i]);
+                    }
+
+                    return new TrueReadOnlyCollection<Expression>(newNodes);
                 }
             }
-            if (newNodes == null)
-            {
-                return nodes;
-            }
-            return new TrueReadOnlyCollection<Expression>(newNodes);
+
+            return nodes;
         }
 
         private Expression[] VisitArguments(IArgumentProvider nodes)
@@ -92,29 +90,28 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(nodes, nameof(nodes));
             ContractUtils.RequiresNotNull(elementVisitor, nameof(elementVisitor));
-            T[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
                 T node = elementVisitor(nodes[i]);
-                if (newNodes != null)
+                if (!ReferenceEquals(node, nodes[i]))
                 {
-                    newNodes[i] = node;
-                }
-                else if (!object.ReferenceEquals(node, nodes[i]))
-                {
-                    newNodes = new T[n];
+                    T[] newNodes = new T[n];
                     for (int j = 0; j < i; j++)
                     {
                         newNodes[j] = nodes[j];
                     }
+
                     newNodes[i] = node;
+                    while (++i < n)
+                    {
+                        newNodes[i] = elementVisitor(nodes[i]);
+                    }
+
+                    return new TrueReadOnlyCollection<T>(newNodes);
                 }
             }
-            if (newNodes == null)
-            {
-                return nodes;
-            }
-            return new TrueReadOnlyCollection<T>(newNodes);
+
+            return nodes;
         }
 
         /// <summary>
@@ -152,7 +149,6 @@ namespace System.Linq.Expressions
         public ReadOnlyCollection<T> VisitAndConvert<T>(ReadOnlyCollection<T> nodes, string callerName) where T : Expression
         {
             ContractUtils.RequiresNotNull(nodes, nameof(nodes));
-            T[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
                 T node = Visit(nodes[i]) as T;
@@ -161,25 +157,31 @@ namespace System.Linq.Expressions
                     throw Error.MustRewriteToSameNode(callerName, typeof(T), callerName);
                 }
 
-                if (newNodes != null)
+                if (node != nodes[i])
                 {
-                    newNodes[i] = node;
-                }
-                else if (!object.ReferenceEquals(node, nodes[i]))
-                {
-                    newNodes = new T[n];
+                    T[] newNodes = new T[n];
                     for (int j = 0; j < i; j++)
                     {
                         newNodes[j] = nodes[j];
                     }
+
                     newNodes[i] = node;
+                    while (++i < n)
+                    {
+                        node = Visit(nodes[i]) as T;
+                        if (node == null)
+                        {
+                            throw Error.MustRewriteToSameNode(callerName, typeof(T), callerName);
+                        }
+
+                        newNodes[i] = node;
+                    }
+
+                    return new TrueReadOnlyCollection<T>(newNodes);
                 }
             }
-            if (newNodes == null)
-            {
-                return nodes;
-            }
-            return new TrueReadOnlyCollection<T>(newNodes);
+
+            return nodes;
         }
 
         /// <summary>
