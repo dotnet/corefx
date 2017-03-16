@@ -1597,6 +1597,11 @@ namespace System.Data.SqlClient
                 operationId = _diagnosticListener.WriteCommandBefore(this);
 
             TaskCompletionSource<SqlDataReader> source = new TaskCompletionSource<SqlDataReader>();
+            if(_stateObj != null)
+            {
+                source.SetException(ADP.ExceptionWithStackTrace(ADP.AsyncOperationPending()));
+                return source.Task;
+            }
 
             CancellationTokenRegistration registration = new CancellationTokenRegistration();
             if (cancellationToken.CanBeCanceled)
