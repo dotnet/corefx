@@ -1330,9 +1330,9 @@ namespace System.Data
                         _addNewRow = null;
                         _addNewMoved = new ListChangedEventArgs(ListChangedType.ItemMoved, index, Count - 1);
                     }
-                    else if (!_rowViewCache.ContainsKey(row))
+                    else if (_rowViewCache.TryAdd(row, buffer ?? new DataRowView(this, row)))
                     {
-                        _rowViewCache.Add(row, buffer ?? new DataRowView(this, row));
+                        // Row was added
                     }
                     else
                     {
