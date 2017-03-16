@@ -731,7 +731,8 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Theory]
-        [InlineData(1000)]
+        [InlineData(3000000)]
+        [OuterLoop]
         public void ManyConcurrentAddsTakes_CollectionRemainsConsistent(int operations)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();
