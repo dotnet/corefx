@@ -29,7 +29,6 @@ namespace System.ComponentModel.Tests
                 // MethodDescriptor.Equals checks for this quirk and if it is set to true the behavior will be different to what we expect and the test will fail.
                 // This quirk is set to true by default on .NET versions earlier than 4.6.1 and Xunit runner was built against 4.5, so we override the quirk value to have the expected behavior.
                 AppContext.SetSwitch(@"Switch.System.MemberDescriptorEqualsReturnsFalseIfEquivalent", false);
-                
             }
 
             Assert.True(firstDescriptor.Equals(copiedDescriptor));
