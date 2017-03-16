@@ -1684,9 +1684,9 @@ namespace System.Linq.Expressions.Interpreter
                             nullCase.Value = caseOffset;
                         }
                     }
-                    else if (caseDict.TryAdd(key, caseOffset))
+                    else
                     {
-                        // Offset was added
+                        caseDict.TryAdd(key, caseOffset);
                     }
                 }
 
