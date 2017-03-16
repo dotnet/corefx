@@ -6,7 +6,7 @@ namespace System.ComponentModel.DataAnnotations
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
-    public sealed class PhoneAttribute : DataTypeAttribute
+    public class PhoneAttribute : DataTypeAttribute
     {
         private const string _additionalPhoneNumberCharacters = "-.()";
         private const string _extensionAbbreviationExtDot = "ext.";
