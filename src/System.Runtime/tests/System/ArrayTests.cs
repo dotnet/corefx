@@ -2693,7 +2693,8 @@ namespace System.Tests
         [InlineData(1)]
         public static void Reverse_IndexLessThanLowerBound_ThrowsArgumentOutOfRangeException(int lowerBound)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(NonZeroLowerBoundArray(new int[0], lowerBound), lowerBound - 1, 0));
+            var paramName = lowerBound <= 0 ? "index" : "length";
+            Assert.Throws<ArgumentOutOfRangeException>(paramName, () => Array.Reverse(NonZeroLowerBoundArray(new int[0], lowerBound), lowerBound - 1, 0));
         }
 
         [Fact]
