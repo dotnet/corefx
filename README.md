@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/dotnet/corefx.png?label=ready&title=Ready)](https://waffle.io/dotnet/corefx)
 # .NET Core Libraries (CoreFX)
 
 The corefx repo contains the library implementation (called "CoreFX") for [.NET Core](http://github.com/dotnet/core). It includes System.Collections, System.IO, System.Xml, and many other components. You can see more information in [Documentation](Documentation/README.md). The corresponding [.NET Core Runtime repo](https://github.com/dotnet/coreclr) contains the runtime implementation (called "CoreCLR") for .NET Core. It includes RyuJIT, the .NET GC, and many other components. Runtime-specific library code - namely [System.Private.Corelib](https://github.com/dotnet/coreclr/tree/master/src/mscorlib) - lives in the CoreCLR repo. It needs to be built and versioned in tandem with the runtime. The rest of CoreFX is agnostic of runtime-implementation and can be run on any compatible .NET runtime.
