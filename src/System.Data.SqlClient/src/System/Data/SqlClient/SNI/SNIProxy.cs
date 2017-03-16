@@ -306,22 +306,21 @@ namespace System.Data.SqlClient.SNI
 
             SNIHandle sniHandle = null;
 
-            if (details.ConnectionProtocol == DataSource.Protocol.None)
+            switch (details.ConnectionProtocol)
             {
-                // default to using tcp if no protocol is provided
-                sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-            }
-            else
-            {
-                switch (details.ConnectionProtocol)
-                {
-                    case DataSource.Protocol.TCP:
-                        sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
-                        break;
-                    case DataSource.Protocol.NP:
-                        sniHandle = CreateNpHandle(details, timerExpire, callbackObject, parallel);
-                        break;
-                }
+                case DataSource.Protocol.TCP:
+                    sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                    break;
+                case DataSource.Protocol.NP:
+                    sniHandle = CreateNpHandle(details, timerExpire, callbackObject, parallel);
+                    break;
+                case DataSource.Protocol.None:
+                    // default to using tcp if no protocol is provided
+                    sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel, ref spnBuffer, isIntegratedSecurity);
+                    break;
+                default:
+                    Debug.Fail($"Unexpected connection protocol: {details.ConnectionProtocol}");
+                    break;
             }
 
             return sniHandle;
@@ -586,6 +585,8 @@ namespace System.Data.SqlClient.SNI
         private const char ForwardSlashSeparator = '/';
         private const string DefaultHostName = "localhost";
         private const string DefaultSqlServerInstanceName = "mssqlserver";
+        private const string PipeBeginning = @"\\";
+        private const string PipeToken = "pipe";
 
         internal enum Protocol { TCP, NP, None, Admin };
 
@@ -610,7 +611,7 @@ namespace System.Data.SqlClient.SNI
 
             int firstIndexOfColon = _workingDataSource.IndexOf(':');
 
-            populateProtocol();
+            PopulateProtocol();
 
             _dataSourceAfterTrimmingProtocol = (firstIndexOfColon >= -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
@@ -626,11 +627,11 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        private void populateProtocol()
+        private void PopulateProtocol()
         {
             string[] splitByColon = _workingDataSource.Split(':');
 
-            if (!(splitByColon.Length > 1))
+            if (splitByColon.Length <= 1)
             {
                 ConnectionProtocol = DataSource.Protocol.None;
             }
@@ -669,9 +670,9 @@ namespace System.Data.SqlClient.SNI
             {
                 return details;
             }
-            
-            if(details.IsBadDataSource)
-            { 
+
+            if (details.IsBadDataSource)
+            {
                 return null;
             }
 
@@ -688,14 +689,8 @@ namespace System.Data.SqlClient.SNI
             // If Server name is empty or localhost, then use "localhost"
             if (string.IsNullOrEmpty(ServerName) || IsLocalHost(ServerName))
             {
-                if (ConnectionProtocol == DataSource.Protocol.Admin)
-                {
-                    ServerName = Environment.MachineName;
-                }
-                else
-                {
-                    ServerName = DefaultHostName;
-                }
+                ServerName = ConnectionProtocol == DataSource.Protocol.Admin ?
+                    Environment.MachineName : DefaultHostName;
             }
             return true;
         }
@@ -715,7 +710,7 @@ namespace System.Data.SqlClient.SNI
             {
                 bool commaAfterSlash = commaIndex > backSlashIndex ? true : false;
 
-                string parameter = backSlashIndex > -1 
+                string parameter = backSlashIndex > -1
                         ? commaIndex > backSlashIndex ? tokensByCommaAndSlash[2].Trim() : tokensByCommaAndSlash[1].Trim()
                         : tokensByCommaAndSlash[1].Trim();
 
@@ -763,7 +758,7 @@ namespace System.Data.SqlClient.SNI
             }
 
             InferLocalServerName();
-            
+
             return true;
         }
 
@@ -775,10 +770,8 @@ namespace System.Data.SqlClient.SNI
 
         private bool InferNamedPipesInformation()
         {
-            string pipeBeginning = @"\\";
-            string pipeToken = "pipe";
             // If we have a datasource beginning with a pipe or we have already determined that the protocol is NamedPipe
-            if (_dataSourceAfterTrimmingProtocol.StartsWith(pipeBeginning) || ConnectionProtocol == Protocol.NP)
+            if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
                 if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
@@ -800,7 +793,7 @@ namespace System.Data.SqlClient.SNI
                     string[] absolutePathParts = uri.AbsolutePath.Split(ForwardSlashSeparator);
 
                     //Check if the "pipe" keyword is the first part of path
-                    if (pipeToken.CompareTo(absolutePathParts[1]) != 0)
+                    if (PipeToken.CompareTo(absolutePathParts[1]) != 0)
                     {
                         return ReportSNIError(SNIProviders.NP_PROV);
                     }
@@ -811,7 +804,7 @@ namespace System.Data.SqlClient.SNI
                         return ReportSNIError(SNIProviders.NP_PROV);
                     }
 
-                    PipeName = uri.AbsolutePath.Substring(pipeToken.Length + 2);
+                    PipeName = uri.AbsolutePath.Substring(PipeToken.Length + 2);
                     ServerName = IsLocalHost(uri.Host) ? Environment.MachineName : uri.Host;
                 }
                 catch (UriFormatException)
@@ -834,9 +827,9 @@ namespace System.Data.SqlClient.SNI
             return false;
         }
 
-        private static bool IsLocalHost(string serverName) 
-            =>  serverName.CompareTo(".") == 0 || serverName.CompareTo("(local)") == 0 || serverName.CompareTo("localhost") == 0;
-        
+        private static bool IsLocalHost(string serverName)
+            => serverName.CompareTo(".") == 0 || serverName.CompareTo("(local)") == 0 || serverName.CompareTo("localhost") == 0;
+
     }
 
 }
