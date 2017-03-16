@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public static class TextEncoderSettingsExtensions
     {
@@ -32,13 +30,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_OtherTextEncoderSettingsAsInterface()
         {
-            // Arrange
             var originalFilter = new OddTextEncoderSettings();
-
-            // Act
             var newFilter = new TextEncoderSettings(originalFilter);
 
-            // Assert
             for (int i = 0; i <= Char.MaxValue; i++)
             {
                 Assert.Equal((i % 2) == 1, newFilter.IsCharacterAllowed((char)i));
@@ -48,15 +42,12 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_OtherTextEncoderSettingsAsConcreteType_Clones()
         {
-            // Arrange
             var originalFilter = new TextEncoderSettings();
             originalFilter.AllowCharacter('x');
-
-            // Act
+            
             var newFilter = new TextEncoderSettings(originalFilter);
             newFilter.AllowCharacter('y');
-
-            // Assert
+            
             Assert.True(originalFilter.IsCharacterAllowed('x'));
             Assert.False(originalFilter.IsCharacterAllowed('y'));
             Assert.True(newFilter.IsCharacterAllowed('x'));
@@ -66,10 +57,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_UnicodeRanges()
         {
-            // Act
             var filter = new TextEncoderSettings(UnicodeRanges.LatinExtendedA, UnicodeRanges.LatinExtendedC);
 
-            // Assert
             for (int i = 0; i < 0x0100; i++)
             {
                 Assert.False(filter.IsCharacterAllowed((char)i));
@@ -95,11 +84,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowChar()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowCharacter('\u0100');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('\u0100'));
             Assert.False(filter.IsCharacterAllowed('\u0101'));
         }
@@ -107,11 +94,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowChars_Array()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowCharacters('\u0100', '\u0102');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('\u0100'));
             Assert.False(filter.IsCharacterAllowed('\u0101'));
             Assert.True(filter.IsCharacterAllowed('\u0102'));
@@ -121,11 +106,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowChars_String()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowCharacters('\u0100', '\u0102');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('\u0100'));
             Assert.False(filter.IsCharacterAllowed('\u0101'));
             Assert.True(filter.IsCharacterAllowed('\u0102'));
@@ -135,11 +118,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowFilter()
         {
-            // Arrange
             var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin);
             filter.AllowCodePoints(new OddTextEncoderSettings().GetAllowedCodePoints());
 
-            // Assert
             for (int i = 0; i <= 0x007F; i++)
             {
                 Assert.True(filter.IsCharacterAllowed((char)i));
@@ -153,11 +134,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowRange()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowRange(UnicodeRanges.LatinExtendedA);
-
-            // Assert
+            
             for (int i = 0; i < 0x0100; i++)
             {
                 Assert.False(filter.IsCharacterAllowed((char)i));
@@ -175,11 +154,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void AllowRanges()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowRanges(UnicodeRanges.LatinExtendedA, UnicodeRanges.LatinExtendedC);
 
-            // Assert
             for (int i = 0; i < 0x0100; i++)
             {
                 Assert.False(filter.IsCharacterAllowed((char)i));
@@ -205,7 +182,6 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Clear()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             for (int i = 1; i <= Char.MaxValue; i++)
             {
@@ -214,8 +190,6 @@ namespace Microsoft.Framework.WebEncoders
 
             // Act
             filter.Clear();
-
-            // Assert
             for (int i = 0; i <= Char.MaxValue; i++)
             {
                 Assert.False(filter.IsCharacterAllowed((char)i));
@@ -225,11 +199,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void ForbidChar()
         {
-            // Arrange
             var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin);
             filter.ForbidCharacter('x');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('w'));
             Assert.False(filter.IsCharacterAllowed('x'));
             Assert.True(filter.IsCharacterAllowed('y'));
@@ -239,11 +211,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void ForbidChars_Array()
         {
-            // Arrange
             var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin);
             filter.ForbidCharacters('x', 'z');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('w'));
             Assert.False(filter.IsCharacterAllowed('x'));
             Assert.True(filter.IsCharacterAllowed('y'));
@@ -253,11 +223,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void ForbidChars_String()
         {
-            // Arrange
             var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin);
             filter.ForbidCharacters('x', 'z');
-
-            // Assert
+            
             Assert.True(filter.IsCharacterAllowed('w'));
             Assert.False(filter.IsCharacterAllowed('x'));
             Assert.True(filter.IsCharacterAllowed('y'));
@@ -267,11 +235,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void ForbidRange()
         {
-            // Arrange
             var filter = new TextEncoderSettings(new OddTextEncoderSettings());
             filter.ForbidRange(UnicodeRanges.Specials);
-
-            // Assert
+            
             for (int i = 0; i <= 0xFFEF; i++)
             {
                 Assert.Equal((i % 2) == 1, filter.IsCharacterAllowed((char)i));
@@ -285,11 +251,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void ForbidRanges()
         {
-            // Arrange
             var filter = new TextEncoderSettings(new OddTextEncoderSettings());
             filter.ForbidRanges(UnicodeRanges.BasicLatin, UnicodeRanges.Specials);
-
-            // Assert
+            
             for (int i = 0; i <= 0x007F; i++)
             {
                 Assert.False(filter.IsCharacterAllowed((char)i));
@@ -307,7 +271,6 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void GetAllowedCodePoints()
         {
-            // Arrange
             var expected = Enumerable.Range(UnicodeRanges.BasicLatin.FirstCodePoint, UnicodeRanges.BasicLatin.Length)
                 .Concat(Enumerable.Range(UnicodeRanges.Specials.FirstCodePoint, UnicodeRanges.Specials.Length))
                 .Except(new int[] { 'x' })
@@ -316,12 +279,8 @@ namespace Microsoft.Framework.WebEncoders
 
             var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Specials);
             filter.ForbidCharacter('x');
-
-            // Act
-            var retVal = filter.GetAllowedCodePoints().OrderBy(i => i).ToArray();
-
-            // Assert
-            Assert.Equal<int>(expected, retVal);
+            
+            Assert.Equal(expected, filter.GetAllowedCodePoints().OrderBy(i => i).ToArray());
         }
 
         // a code point filter which allows only odd code points through

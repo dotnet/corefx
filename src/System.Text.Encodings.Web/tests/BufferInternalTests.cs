@@ -5,7 +5,7 @@
 using System;
 using Xunit;
 
-namespace System.Text.Encodings.Web
+namespace System.Text.Encodings.Web.Tests
 {
     public class BufferInternalTests
     {
@@ -20,10 +20,7 @@ namespace System.Text.Encodings.Web
                 BufferInternal.MemoryCopy(pArray, pArrayPlusOne, array.Length - 1, array.Length - 1);
             }
 
-            Assert.Equal(1, array[0]);
-            Assert.Equal(1, array[1]);
-            Assert.Equal(2, array[2]);
-            Assert.Equal(3, array[3]);
+            Assert.Equal(new byte[] { 1, 1, 2, 3 }, array);
         }
 
         [Fact]
@@ -37,8 +34,7 @@ namespace System.Text.Encodings.Web
                 BufferInternal.MemoryCopy(pArray, pArrayPlusOne, array.Length - 1, array.Length - 1);
             }
 
-            Assert.Equal(1, array[0]);
-            Assert.Equal(1, array[1]);
+            Assert.Equal(new byte[] { 1, 1 }, array);
         }
 
         [Fact]
@@ -51,11 +47,7 @@ namespace System.Text.Encodings.Web
                 void* pArrayPlusOne = pArray + 1;
                 BufferInternal.MemoryCopy(pArrayPlusOne, pArray, array.Length - 1, array.Length - 1);
             }
-
-            Assert.Equal(2, array[0]);
-            Assert.Equal(3, array[1]);
-            Assert.Equal(4, array[2]);
-            Assert.Equal(4, array[3]);
+            Assert.Equal(new byte[] { 2, 3, 4, 4 }, array);
         }
     }
 }

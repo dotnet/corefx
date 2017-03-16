@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class UnicodeRangeTests
     {
@@ -32,10 +30,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_SuccessCase()
         {
-            // Act
             var range = new UnicodeRange(0x0100, 128); // Latin Extended-A
 
-            // Assert
             Assert.Equal(0x0100, range.FirstCodePoint);
             Assert.Equal(128, range.Length);
         }
@@ -50,10 +46,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void FromSpan_SuccessCase()
         {
-            // Act
             var range = UnicodeRange.Create('\u0180', '\u024F'); // Latin Extended-B
-
-            // Assert
+            
             Assert.Equal(0x0180, range.FirstCodePoint);
             Assert.Equal(208, range.Length);
         }
@@ -61,10 +55,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void FromSpan_SuccessCase_All()
         {
-            // Act
             var range = UnicodeRange.Create('\u0000', '\uFFFF');
-
-            // Assert
+            
             Assert.Equal(0, range.FirstCodePoint);
             Assert.Equal(0x10000, range.Length);
         }
