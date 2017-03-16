@@ -4,6 +4,8 @@
     <RoslynVersion>2.0.0-beta3</RoslynVersion>
     <RoslynPackageName>Microsoft.Net.Compilers</RoslynPackageName>
     <RoslynTargetsPath>$(ToolRuntimePath)</RoslynTargetsPath>
+    <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == ''">$(RoslynTargetsPath)$(RoslynPackageName)\$(RoslynVersion)\tools\Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
+    <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == ''">$(RoslynTargetsPath)$(RoslynPackageName)\$(RoslynVersion)\tools\Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
   </PropertyGroup>
 
   <PropertyGroup>
