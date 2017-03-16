@@ -1,0 +1,12 @@
+{
+    "version": "1.0.0-*",
+    "dependencies": {
+        "System.Console": "4.0.0-beta-*",
+        "System.Runtime": "4.0.20-beta-*",
+        "System.Globalization": "4.0.10-beta-*"
+    },
+    "frameworks" : {
+        "dnx451" : { },
+        "dnxcore50" : {}
+    }
+}
