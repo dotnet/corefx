@@ -584,6 +584,7 @@ namespace System.Data.SqlClient.SNI
 
         private const char CommaSeparator = ',';
         private const char BackSlashSeparator = '\\';
+        private const char ForwardSlashSeparator = '/';
         private const string DefaultHostName = "localhost";
         private const string DefaultSqlServerInstanceName = "mssqlserver";
 
@@ -601,6 +602,7 @@ namespace System.Data.SqlClient.SNI
 
         private string _workingDataSource;
         private string _dataSourceAfterTrimmingProtocol;
+        internal bool IsBadDataSource { get; private set; } = false;
 
         private DataSource(string dataSource)
         {
@@ -613,6 +615,16 @@ namespace System.Data.SqlClient.SNI
 
             _dataSourceAfterTrimmingProtocol = (firstIndexOfColon >= -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
+
+            if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
+            {
+                if (ConnectionProtocol == DataSource.Protocol.None)
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                else if (ConnectionProtocol == DataSource.Protocol.NP)
+                    ReportSNIError(SNIProviders.NP_PROV);
+                else if (ConnectionProtocol == DataSource.Protocol.TCP)
+                    ReportSNIError(SNIProviders.TCP_PROV);
+            }
         }
 
         private void populateProtocol()
@@ -649,26 +661,35 @@ namespace System.Data.SqlClient.SNI
         {
             DataSource details = new DataSource(dataSource);
 
-            if (details.inferNamedPipesInformation())
+            if (details.IsBadDataSource)
+            {
+                return null;
+            }
+
+            if (details.InferNamedPipesInformation() && !details.IsBadDataSource)
             {
                 return details;
             }
+            
+            if(details.IsBadDataSource)
+            { 
+                return null;
+            }
 
-            if(SNILoadHandle.SingletonInstance.LastError.sniError != TdsEnums.SNI_SUCCESS)
+            if (!details.InferConnectionDetails() && details.IsBadDataSource)
             {
                 return null;
             }
 
-            if (!details.inferParameterAndServerInformation() && SNILoadHandle.SingletonInstance.LastError.sniError != TdsEnums.SNI_SUCCESS)
+            if (!details.InferLocalServerName() && details.IsBadDataSource)
+            {
                 return null;
-
-            if (!details.inferLocalServerName() && SNILoadHandle.SingletonInstance.LastError.sniError != TdsEnums.SNI_SUCCESS)
-                return null;
+            }
 
             return details;
         }
 
-        private bool inferLocalServerName()
+        private bool InferLocalServerName()
         {
             // If Server name is empty or localhost, then use "localhost"
             if (string.IsNullOrEmpty(ServerName) || IsLocalHost(ServerName))
@@ -685,25 +706,29 @@ namespace System.Data.SqlClient.SNI
             return true;
         }
 
-        private bool inferParameterAndServerInformation()
+        private bool InferConnectionDetails()
         {
             string[] tokensByCommaAndSlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator, ',');
             ServerName = tokensByCommaAndSlash[0];
 
+            int commaIndex = _dataSourceAfterTrimmingProtocol.IndexOf(',');
+
+            int backSlashIndex = _dataSourceAfterTrimmingProtocol.IndexOf(BackSlashSeparator);
+
             // Check the parameters. The parameters are Comma separated in the Data Source. The parameter we really care about is the port
-            if (_dataSourceAfterTrimmingProtocol.Contains(CommaSeparator))
+            // If Comma exists, the try to get the port number
+            if (commaIndex > -1)
             {
-                // We are looking at datasources like "server,port\instance" or "server\instance,port"
+                bool commaAfterSlash = commaIndex > backSlashIndex ? true : false;
 
-                string[] tokensSeparatedByComma = _dataSourceAfterTrimmingProtocol.Split(CommaSeparator);
-
-                string parameter = tokensSeparatedByComma[1].Trim();
+                string parameter = backSlashIndex > -1 
+                        ? commaIndex > backSlashIndex ? tokensByCommaAndSlash[2].Trim() : tokensByCommaAndSlash[1].Trim()
+                        : tokensByCommaAndSlash[1].Trim();
 
                 // Bad Data Source like "server, "
                 if (string.IsNullOrEmpty(parameter))
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
+                    return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
 
                 // For Tcp and Only Tcp are parameters allowed.
@@ -711,174 +736,104 @@ namespace System.Data.SqlClient.SNI
                 {
                     ConnectionProtocol = DataSource.Protocol.TCP;
                 }
-
-                // Parameter has been specified for non-TCP protocol. This is not allowed.
                 else if (ConnectionProtocol != DataSource.Protocol.TCP)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
-                }
-
-                // If there is a "\" in the parameter e.g. "1432\MyInstance", then simply take the part before the "\"
-                string[] parameterTokenSplitByBackSlash = parameter.Split(BackSlashSeparator);
-                if (parameterTokenSplitByBackSlash.Length > 2)
-                {
-                    parameter = parameterTokenSplitByBackSlash[0];
+                    // Parameter has been specified for non-TCP protocol. This is not allowed.
+                    return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
 
                 int port;
                 if (!int.TryParse(parameter, out port))
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
+                    return ReportSNIError(SNIProviders.TCP_PROV);
                 }
 
                 Port = port;
+            }
+
+            // Instance Name Handling. Only if we found a '\' and we did not find a port in the Data Source
+            if (backSlashIndex > -1 && Port == -1)
+            {
+                // This means that there will not be any part separated by comma. 
+                InstanceName = tokensByCommaAndSlash[1].Trim();
+
+                if (string.IsNullOrWhiteSpace(InstanceName))
+                {
+                    return ReportSNIError(SNIProviders.INVALID_PROV);
+                }
 
                 if (DefaultSqlServerInstanceName.CompareTo(InstanceName) == 0)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
+                    return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
             }
-            return false;
+            return true;
         }
 
-        public bool inferInstanceName()
+        private bool ReportSNIError(SNIProviders provider)
         {
-            // Instance Name handling
-            string[] tokensSeparatedByBackSlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator);
-            if (tokensSeparatedByBackSlash.Length > 1)
+            SNILoadHandle.SingletonInstance.LastError = new SNIError(provider, 0, SNICommon.InvalidConnStringError, string.Empty);
+            return !(IsBadDataSource = true);
+        }
+
+        private bool InferNamedPipesInformation()
+        {
+            string pipeBeginning = @"\\";
+            string pipeToken = "pipe";
+            // If we have a datasource beginning with a pipe or we have already determined that the protocol is NamedPipe
+            if (_dataSourceAfterTrimmingProtocol.StartsWith(pipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
-                //Error case "server\ " An empty space after '\' 
-                if (string.IsNullOrWhiteSpace(tokensSeparatedByBackSlash[1]))
+                // If the data source is "np:servername"
+                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
-                }
-                // In case the datasource is of the format "server\instance,port, then port takes precedence.
-                else if (Port == -1)
-                {
-                    InstanceName = tokensSeparatedByBackSlash[1].Split(',')[0];
+                    ServerName = _dataSourceAfterTrimmingProtocol;
+                    ServerName = IsLocalHost(_dataSourceAfterTrimmingProtocol) ? Environment.MachineName : _dataSourceAfterTrimmingProtocol;
+                    PipeName = SNINpHandle.DefaultPipePath;
                     return true;
                 }
-            }
-            return false;
-        }
 
-        private bool inferNamedPipesInformation()
-        {
-            if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
-            {
-                if (ConnectionProtocol == DataSource.Protocol.None)
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                else if (ConnectionProtocol == DataSource.Protocol.NP)
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                else if (ConnectionProtocol == DataSource.Protocol.TCP)
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                return false;
-            }
+                try
+                {
+                    Uri uri = new Uri(_dataSourceAfterTrimmingProtocol);
+                    if (string.IsNullOrEmpty(uri.Host))
+                    {
+                        return ReportSNIError(SNIProviders.NP_PROV);
+                    }
 
-            string pipeBeginning = @"\\";
-            int indexOfPipeBackwardSlash = _workingDataSource.IndexOf(pipeBeginning);
+                    string[] absolutePathParts = uri.AbsolutePath.Split(ForwardSlashSeparator);
 
-            // If we have a datasource beginning with a pipe
-            if (_dataSourceAfterTrimmingProtocol.StartsWith(pipeBeginning))
-            {
+                    //Check if the "pipe" keyword is the first part of path
+                    if (pipeToken.CompareTo(absolutePathParts[1]) != 0)
+                    {
+                        return ReportSNIError(SNIProviders.NP_PROV);
+                    }
+
+                    // There should be 4 parts in the pipename e.g /pipe/sql/query [0]/[1]/[2]/[3]
+                    if (absolutePathParts.Length != 4)
+                    {
+                        return ReportSNIError(SNIProviders.NP_PROV);
+                    }
+
+                    PipeName = uri.AbsolutePath.Substring(pipeToken.Length + 2);
+                    ServerName = IsLocalHost(uri.Host) ? Environment.MachineName : uri.Host;
+                }
+                catch (UriFormatException)
+                {
+                    return ReportSNIError(SNIProviders.NP_PROV);
+                }
+
                 // DataSource is something like "\\pipename"
                 if (ConnectionProtocol != DataSource.Protocol.None)
                 {
                     ConnectionProtocol = DataSource.Protocol.NP;
                 }
-
                 else if (ConnectionProtocol != DataSource.Protocol.NP)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
-                }
-
-                // Check if the dataSource ends with "\\" Bad datasources like "np:\\" or "\\" should be caught here. 
-                // There should be a server name after "\\"
-                if (_dataSourceAfterTrimmingProtocol.Length == 2)
-                {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
-                }
-
-                // Split on the '\' separator. The first two elements of the result will be empty strings because of the beginning "\\" in the pipename
-                // [0] empty 
-                // [1] empty 
-                // [2] servername 
-                // [3] "pipe"
-                // if there is no [6] element the [4] + [5] is default pipe name sql\query
-                // If there is a [6] then [4] has the instance name in it
-                string[] tokensSeparatedBySlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator);
-
-                ServerName = tokensSeparatedBySlash[2];
-
-                if (IsLocalHost(ServerName))
-                {
-                    ServerName = Environment.MachineName;
-                }
-
-                // The "/pipe" portion should be available in NP string
-                if (tokensSeparatedBySlash.Length < 6
-                    || string.IsNullOrEmpty(tokensSeparatedBySlash[2])
-                    || string.IsNullOrEmpty(tokensSeparatedBySlash[3])
-                    || string.IsNullOrEmpty(tokensSeparatedBySlash[4])
-                    || string.IsNullOrEmpty(tokensSeparatedBySlash[5]))
-                {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.NP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
-                    return false;
-                }
-
-                // There is no instance name and pipe name was in the format \\server\pipe\sql\query
-                if ("sql".CompareTo(tokensSeparatedBySlash[4]) == 0 && "query".CompareTo(tokensSeparatedBySlash[5]) == 0)
-                {
-                    InstanceName = string.Empty;
-                    PipeName = tokensSeparatedBySlash[4] + @"\" + tokensSeparatedBySlash[5];
-                }
-
-                //  Possible standard named instance, i.e. "\\server\pipe\MSSQL$instancename\sql\query".
-                else if (tokensSeparatedBySlash[4].StartsWith("mssql$"))
-                {
-                    // Standard instance name ending in \sql\query
-                    if ("sql".CompareTo(tokensSeparatedBySlash[5]) == 0 && "query".CompareTo(tokensSeparatedBySlash[6]) == 0)
-                    {
-                        StringBuilder instanceNameBuilder = new StringBuilder();
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[4].Split('$')[1]);
-                        instanceNameBuilder.Append(BackSlashSeparator);
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
-                        instanceNameBuilder.Append(BackSlashSeparator);
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
-                        InstanceName = instanceNameBuilder.ToString();
-                    }
-                    else
-                    {
-                        StringBuilder instanceNameBuilder = new StringBuilder();
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[3]);
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[4]);
-                        instanceNameBuilder.Append(BackSlashSeparator);
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
-                        instanceNameBuilder.Append(BackSlashSeparator);
-                        instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
-                        InstanceName = instanceNameBuilder.ToString();
-                    }
-                }
-                else
-                {
-                    StringBuilder instanceNameBuilder = new StringBuilder();
-                    instanceNameBuilder.Append(tokensSeparatedBySlash[3]);
-                    instanceNameBuilder.Append(tokensSeparatedBySlash[4]);
-                    instanceNameBuilder.Append(BackSlashSeparator);
-                    instanceNameBuilder.Append(tokensSeparatedBySlash[5]);
-                    instanceNameBuilder.Append(BackSlashSeparator);
-                    instanceNameBuilder.Append(tokensSeparatedBySlash[6]);
-                    InstanceName = instanceNameBuilder.ToString();
+                    // In case the path began with a "\\" and protocol was not Named Pipes
+                    return ReportSNIError(SNIProviders.NP_PROV);
                 }
                 return true;
             }
-
             return false;
         }
 
