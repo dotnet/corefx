@@ -25,13 +25,12 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void GetDirectoryOrRootName_GettingDIrectoryFromAFilePath()
+        public void GetDirectoryOrRootName_GettingDirectoryFromAFilePath()
         {
-
             string exePath = AppDomain.CurrentDomain.BaseDirectory;
-            //Remove the trailing slash.  Different OS's use a different slash.
-            //This is to make the test pass without worrying about adding a slash 
-            //and which kind of slash.
+            // Remove the trailing slash.  Different OS's use a different slash.
+            // This is to make the test pass without worrying about adding a slash 
+            // and which kind of slash.
             string exePathWithoutTrailingSlash = exePath.Substring(0, exePath.Length - 1);
             string pathToNonexistentFile = exePath + "TestFileForUrlPathTests.txt";
 
@@ -40,9 +39,8 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void GetDirectoryOrRootName_ofRoot()
+        public void GetDirectoryOrRootName_OfRoot()
         {
-
             string exePath = AppDomain.CurrentDomain.BaseDirectory;
             string root = Path.GetPathRoot(exePath);
             string test = UrlPath.GetDirectoryOrRootName(root);
