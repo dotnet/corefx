@@ -2106,6 +2106,7 @@ namespace System.Runtime.Serialization
                         {
                             knownDataContracts = new DataContractDictionary();
                         }
+
                         knownDataContracts.TryAdd(itemDataContract.StableName, itemDataContract);
                     }
                 }
