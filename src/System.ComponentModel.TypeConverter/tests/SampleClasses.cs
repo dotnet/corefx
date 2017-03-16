@@ -82,7 +82,13 @@ namespace System.ComponentModel.Tests
         }
     }
 
-    [TypeConverter(typeof(BaseClassConverter))]
+#if FUNCTIONAL_TESTS
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=null")]
+#elif PERFORMANCE_TESTS
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Performance.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=null")]
+#else
+#error Define FUNCTIONAL_TESTS or PERFORMANCE_TESTS
+#endif
     public class BaseClass
     {
         public BaseClass()
