@@ -238,11 +238,15 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callback">Completion callback</param>
         public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
         {
-            bool error = false;
-
-            stream.ReadAsync(_data, 0, _capacity).ContinueWith(t =>
+            stream.ReadAsync(_data, 0, _capacity).ContinueWith((t, state) =>
             {
-                Exception e = t.Exception != null ? t.Exception.InnerException : null;
+                var tuple = (Tuple<SNIPacket, SNIAsyncCallback>)state;
+                SNIPacket self = tuple.Item1;
+                SNIAsyncCallback capturedCallback = tuple.Item2;
+                
+                bool error = false;
+                
+                Exception e = t.Exception?.InnerException;
                 if (e != null)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, e);
@@ -250,9 +254,9 @@ namespace System.Data.SqlClient.SNI
                 }
                 else
                 {
-                    _length = t.Result;
+                    self._length = t.Result;
 
-                    if (_length == 0)
+                    if (self._length == 0)
                     {
                         SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.ConnTerminatedError, string.Empty);
                         error = true;
@@ -261,11 +265,12 @@ namespace System.Data.SqlClient.SNI
 
                 if (error)
                 {
-                    this.Release();
+                    self.Release();
                 }
 
-                callback(this, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
+                capturedCallback(self, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
             },
+            Tuple.Create(this, callback),
             CancellationToken.None,
             TaskContinuationOptions.DenyChildAttach,
             TaskScheduler.Default);

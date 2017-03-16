@@ -217,16 +217,26 @@ namespace System.Data.ProviderBase
 
                             // now that we have an antecedent task, schedule our work when it is completed.
                             // If it is a new slot or a completed task, this continuation will start right away.
-                            newTask = s_pendingOpenNonPooled[idx].ContinueWith((_) =>
+                            newTask = s_pendingOpenNonPooled[idx].ContinueWith((_, state) =>
                             {
-                                var newConnection = CreateNonPooledConnection(owningConnection, poolGroup, userOptions);
-                                if ((oldConnection != null) && (oldConnection.State == ConnectionState.Open))
+                                // Avoid implicitly closing over our variables to avoid a closure allocation
+                                var tuple = (Tuple<DbConnectionFactory, DbConnection, DbConnectionPoolGroup, DbConnectionOptions, DbConnectionInternal>)state;
+                                DbConnectionFactory self = tuple.Item1;
+                                DbConnection capturedOwningConnection = tuple.Item2;
+                                DbConnectionPoolGroup capturedPoolGroup = tuple.Item3;
+                                DbConnectionOptions capturedUserOptions = tuple.Item4;
+                                DbConnectionInternal capturedOldConnection = tuple.Item5;
+                                
+                                var newConnection = self.CreateNonPooledConnection(capturedOwningConnection, capturedPoolGroup, capturedUserOptions);
+                                if ((capturedOldConnection != null) && (capturedOldConnection.State == ConnectionState.Open))
                                 {
-                                    oldConnection.PrepareForReplaceConnection();
-                                    oldConnection.Dispose();
+                                    capturedOldConnection.PrepareForReplaceConnection();
+                                    capturedOldConnection.Dispose();
                                 }
                                 return newConnection;
-                            }, cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, TaskScheduler.Default);
+                            },
+                            Tuple.Create(this, owningConnection, poolGroup, userOptions, oldConnection),
+                            cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, TaskScheduler.Default);
 
                             // Place this new task in the slot so any future work will be queued behind it
                             s_pendingOpenNonPooled[idx] = newTask;
@@ -240,20 +250,24 @@ namespace System.Data.ProviderBase
                         }
 
                         // once the task is done, propagate the final results to the original caller
-                        newTask.ContinueWith((task) =>
+                        newTask.ContinueWith((task, state) =>
                         {
-                            cancellationTokenSource.Dispose();
+                            var tuple = (Tuple<CancellationTokenSource, TaskCompletionSource<DbConnectionInternal>>)state;
+                            CancellationTokenSource tokenSource = tuple.Item1;
+                            TaskCompletionSource<DbConnectionInternal> tcs = tuple.Item2;
+                            
+                            tokenSource.Dispose();
                             if (task.IsCanceled)
                             {
-                                retry.TrySetException(ADP.ExceptionWithStackTrace(ADP.NonPooledOpenTimeout()));
+                                tcs.TrySetException(ADP.ExceptionWithStackTrace(ADP.NonPooledOpenTimeout()));
                             }
                             else if (task.IsFaulted)
                             {
-                                retry.TrySetException(task.Exception.InnerException);
+                                tcs.TrySetException(task.Exception.InnerException);
                             }
                             else
                             {
-                                if (!retry.TrySetResult(task.Result))
+                                if (!tcs.TrySetResult(task.Result))
                                 {
                                     // The outer TaskCompletionSource was already completed
                                     // Which means that we don't know if someone has messed with the outer connection in the middle of creation
@@ -262,7 +276,9 @@ namespace System.Data.ProviderBase
                                     task.Result.Dispose();
                                 }
                             }
-                        }, TaskScheduler.Default);
+                        },
+                        Tuple.Create(cancellationTokenSource, retry),
+                        TaskScheduler.Default);
 
                         return false;
                     }
