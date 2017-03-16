@@ -508,7 +508,7 @@ namespace System.Data.SqlClient.SNI
                 SNICommon.ReportSNIError(SNIProviders.NP_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
                 return null;
             }
-            return new SNINpHandle(details.ServerName, pipeName, timerExpire, callbackObject);
+            return new SNINpHandle(details.ServerName, details.PipeName, timerExpire, callbackObject);
         }
 
         /// <summary>
