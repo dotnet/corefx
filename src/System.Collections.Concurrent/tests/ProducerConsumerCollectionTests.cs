@@ -731,25 +731,19 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Theory]
-        [InlineData(ConcurrencyTestSeconds)]
-        public void ManyConcurrentAddsTakes_CollectionRemainsConsistent(double seconds)
+        [InlineData(1000)]
+        public void ManyConcurrentAddsTakes_CollectionRemainsConsistent(int operations)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();
-
-            DateTime end = DateTime.UtcNow + TimeSpan.FromSeconds(seconds);
 
             // Thread that adds
             Task<HashSet<int>> adds = ThreadFactory.StartNew(() =>
             {
-                var added = new HashSet<int>();
-                int i = int.MinValue;
-                while (DateTime.UtcNow < end)
+                for (int i = int.MinValue; i < (int.MinValue + operations); i++)
                 {
-                    i++;
                     Assert.True(c.TryAdd(i));
-                    added.Add(i);
                 }
-                return added;
+                return new HashSet<int>(Enumerable.Range(int.MinValue, operations));
             });
 
             // Thread that adds and takes
@@ -758,10 +752,9 @@ namespace System.Collections.Concurrent.Tests
                 var added = new HashSet<int>();
                 var taken = new HashSet<int>();
 
-                int i = 1; // avoid 0 as default(T), to detect accidentally reading a default value
-                while (DateTime.UtcNow < end)
+                // avoid 0 as default(T), to detect accidentally reading a default value
+                for (int i = 1; i < (1 + operations); i++)
                 {
-                    i++;
                     Assert.True(c.TryAdd(i));
                     added.Add(i);
 
@@ -780,7 +773,7 @@ namespace System.Collections.Concurrent.Tests
             Task<HashSet<int>> takes = ThreadFactory.StartNew(() =>
             {
                 var taken = new HashSet<int>();
-                while (DateTime.UtcNow < end)
+                for (int i = 1; i < (1 + operations); i++)
                 {
                     int item;
                     if (c.TryTake(out item))
