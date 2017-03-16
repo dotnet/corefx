@@ -2,8 +2,8 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
   <PropertyGroup>
+  	<!-- don't change the Asssembly Version as one test would break -->
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
-    <SkipSigning>true</SkipSigning>
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsUAP>true</IsUAP>
   </PropertyGroup>
