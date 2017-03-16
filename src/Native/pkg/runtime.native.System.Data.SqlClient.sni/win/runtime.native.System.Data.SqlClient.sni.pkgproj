@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
-    <Version>4.0.1</Version>
+    <Version>4.0.2</Version>
     <!-- use the same naming convention as a runtime package, but don't treat as a runtime dependency -->
     <IdPrefix>runtime.win7-$(PackagePlatform).</IdPrefix>
     <PackagePlatforms>x64;x86;</PackagePlatforms>
