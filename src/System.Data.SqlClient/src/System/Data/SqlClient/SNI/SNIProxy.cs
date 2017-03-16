@@ -508,7 +508,6 @@ namespace System.Data.SqlClient.SNI
                 SNICommon.ReportSNIError(SNIProviders.NP_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
                 return null;
             }
-            string pipeName = string.IsNullOrEmpty(details.PipeName) ? SNINpHandle.DefaultPipePath : details.PipeName;
             return new SNINpHandle(details.ServerName, pipeName, timerExpire, callbackObject);
         }
 
@@ -681,11 +680,6 @@ namespace System.Data.SqlClient.SNI
                 return null;
             }
 
-            if (!details.InferLocalServerName() && details.IsBadDataSource)
-            {
-                return null;
-            }
-
             return details;
         }
 
@@ -767,6 +761,9 @@ namespace System.Data.SqlClient.SNI
                     return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
             }
+
+            InferLocalServerName();
+            
             return true;
         }
 
@@ -787,7 +784,7 @@ namespace System.Data.SqlClient.SNI
                 if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
                 {
                     ServerName = _dataSourceAfterTrimmingProtocol;
-                    ServerName = IsLocalHost(_dataSourceAfterTrimmingProtocol) ? Environment.MachineName : _dataSourceAfterTrimmingProtocol;
+                    InferLocalServerName();
                     PipeName = SNINpHandle.DefaultPipePath;
                     return true;
                 }
