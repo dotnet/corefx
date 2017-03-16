@@ -24,6 +24,12 @@ namespace System.ComponentModel.Tests
             Assert.Equal(firstDescriptor.Category, copiedDescriptor.Category);
             Assert.Equal(firstDescriptor.Description, copiedDescriptor.Description);
 
+            if(PlatformDetection.IsFullFramework)
+            {
+                // This quirk set to true in the tests is causing the Equals to behave different.
+                AppContext.SetSwitch(@"Switch.System.MemberDescriptorEqualsReturnsFalseIfEquivalent", false);
+            }
+
             Assert.True(firstDescriptor.Equals(copiedDescriptor));
         }
 
