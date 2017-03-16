@@ -25,14 +25,18 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void GetDirectoryOrRootName_FileExists()
+        public void GetDirectoryOrRootName_GettingDIrectoryFromAFilePath()
         {
+
             string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            //Remove the trailing slash.  Different OS's use a different slash.
+            //This is to make the test pass without worrying about adding a slash 
+            //and which kind of slash.
+            string exePathWithoutTrailingSlash = exePath.Substring(0, exePath.Length - 1);
             string pathToNonexistentFile = exePath + "TestFileForUrlPathTests.txt";
 
-            //GetDirectoryOrRootName removes the trailing backslash.  We need to add it again.
-            string test = UrlPath.GetDirectoryOrRootName(pathToNonexistentFile) + "\\";
-            Assert.Equal(exePath, test);
+            string test = UrlPath.GetDirectoryOrRootName(pathToNonexistentFile);
+            Assert.Equal(exePathWithoutTrailingSlash, test);
         }
 
         [Fact]
