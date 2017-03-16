@@ -132,6 +132,16 @@ namespace System.Numerics
                 return X * X + Y * Y;
             }
         }
+
+        /// <summary>
+        /// Returns an array containing the vector data (X at index 0 and Y at index 1).
+        /// </summary>
+        /// <returns>An array containing the vector data.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float[] ToArray()
+        {
+            return new float[2] { X, Y };
+        }
         #endregion Public Instance Methods
 
         #region Public Static Methods
@@ -347,6 +357,36 @@ namespace System.Numerics
             return new Vector2(
                 value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2),
                 value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2));
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array.
+        /// The element at index 0 will become Vector2.X and the element at index 1 will become Vector2.Y.
+        /// If there are more than 2 elements in the array, the elements after index 1 will be ignored.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <returns>The <see cref="Vector2"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 FromArray(float[] values)
+        {
+            return Vector2.FromArray(values, 0);
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array and the given offset.
+        /// The element at index offset + 0 will become Vector2.X and the element at index offset + 1 will become Vector2.Y.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The <see cref="Vector2"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 FromArray(float[] values, int offset)
+        {
+            if (values.Length < offset + 2)
+            {
+                throw new ArgumentException("Array is too small or offset is too large.");
+            }
+            return new Vector2(values[offset], values[offset + 1]);
         }
         #endregion Public Static Methods
 

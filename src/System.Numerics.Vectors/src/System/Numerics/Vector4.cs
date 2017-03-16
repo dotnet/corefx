@@ -149,6 +149,16 @@ namespace System.Numerics
                 return X * X + Y * Y + Z * Z + W * W;
             }
         }
+
+        /// <summary>
+        /// Returns an array containing the vector data (X at index 0, Y at index 1, ...)
+        /// </summary>
+        /// <returns>An array containing the vector data.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float[] ToArray()
+        {
+            return new float[4] { X, Y, Z, W };
+        }
         #endregion Public Instance Methods
 
         #region Public Static Methods
@@ -416,6 +426,36 @@ namespace System.Numerics
                 value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2) + value.Z * (yz2 - wx2),
                 value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2),
                 value.W);
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array.
+        /// The element at index 0 will become Vector4.X, the element at index 1 will become Vector4.Y and so on.
+        /// If there are more than 4 elements in the array, the elements after index 3 will be ignored.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <returns>The <see cref="Vector4"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 FromArray(float[] values)
+        {
+            return Vector4.FromArray(values, 0);
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array and the given offset.
+        /// The element at index offset + 0 will become Vector4.X, the element at index offset + 1 will become Vector4.Y and so on.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The <see cref="Vector4"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 FromArray(float[] values, int offset)
+        {
+            if (values.Length < offset + 4)
+            {
+                throw new ArgumentException("Array is too small or offset is too large.");
+            }
+            return new Vector4(values[offset], values[offset + 1], values[offset + 2], values[offset + 3]);
         }
         #endregion Public Static Methods
 
