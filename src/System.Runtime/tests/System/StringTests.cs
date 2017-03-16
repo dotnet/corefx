@@ -1579,31 +1579,71 @@ namespace System.Tests
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 0, 3, "Foo$$Bar$$Baz")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 3, 0, "")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 1, 1, "Bar")]
+        [InlineData("$", new string[] { }, 0, 0, "")]
+        [InlineData("$", new string[] { null }, 0, 1, "")]
+        [InlineData("$", new string[] { null, "Bar", null }, 0, 3, "$Bar$")]
+        [InlineData("$", new string[] { "", "", "" }, 0, 3, "$$")]
+        [InlineData("$", new string[] { "Foo", "Bar", "Baz" }, 0, 3, "Foo$Bar$Baz")]
+        [InlineData("$", new string[] { "Foo", "Bar", "Baz" }, 3, 0, "")]
+        [InlineData("$", new string[] { "Foo", "Bar", "Baz" }, 1, 1, "Bar")]
         public static void Join_StringArray(string separator, string[] values, int startIndex, int count, string expected)
         {
             if (startIndex + count == values.Length && count != 0)
             {
-                Assert.Equal(expected, string.Join(separator, values));
-
-                var iEnumerableStringOptimized = new List<string>(values);
-                Assert.Equal(expected, string.Join(separator, iEnumerableStringOptimized));
-                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
-
-                var iEnumerableStringNotOptimized = new Queue<string>(values);
-                Assert.Equal(expected, string.Join(separator, iEnumerableStringNotOptimized));
-                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringNotOptimized));
-
-                var iEnumerableObject = new List<object>(values);
-                Assert.Equal(expected, string.Join(separator, iEnumerableObject));
-
-                // Bug/Documented behavior: Join(string, object[]) returns "" when the first item in the array is null
-                if (values.Length == 0 || values[0] != null)
                 {
-                    var arrayOfObjects = (object[])values;
-                    Assert.Equal(expected, string.Join(separator, arrayOfObjects));
+                    Assert.Equal(expected, string.Join(separator, values));
+
+                    var iEnumerableStringOptimized = new List<string>(values);
+                    Assert.Equal(expected, string.Join(separator, iEnumerableStringOptimized));
+                    Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
+
+                    var iEnumerableStringNotOptimized = new Queue<string>(values);
+                    Assert.Equal(expected, string.Join(separator, iEnumerableStringNotOptimized));
+                    Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringNotOptimized));
+
+                    var iEnumerableObject = new List<object>(values);
+                    Assert.Equal(expected, string.Join(separator, iEnumerableObject));
+
+                    // Bug/Documented behavior: Join(string, object[]) returns "" when the first item in the array is null
+                    if (values.Length == 0 || values[0] != null)
+                    {
+                        var arrayOfObjects = (object[])values;
+                        Assert.Equal(expected, string.Join(separator, arrayOfObjects));
+                    }
                 }
+
+#if netcoreapp11
+                if (separator.Length == 1)
+                {
+                    // Test the char-based overloads too.
+                    char separatorChar = separator[0];
+
+                    Assert.Equal(expected, string.Join(separatorChar, values));
+
+                    var iEnumerableStringOptimized = new List<string>(values);
+                    Assert.Equal(expected, string.Join(separatorChar, iEnumerableStringOptimized));
+
+                    var iEnumerableStringNotOptimized = new Queue<string>(values);
+                    Assert.Equal(expected, string.Join(separatorChar, iEnumerableStringNotOptimized));
+
+                    var iEnumerableObject = new List<object>(values);
+                    Assert.Equal(expected, string.Join(separatorChar, iEnumerableObject));
+
+                    var arrayOfObjects = (object[])values;
+                    Assert.Equal(expected, string.Join(separatorChar, arrayOfObjects));
+                }
+#endif
             }
             Assert.Equal(expected, string.Join(separator, values, startIndex, count));
+
+#if netcoreapp11
+            if (separator.Length == 1)
+            {
+                char separatorChar = separator[0];
+
+                Assert.Equal(expected, string.Join(separatorChar, values, startIndex, count));
+            }
+#endif
         }
 
         [Fact]
@@ -1621,6 +1661,18 @@ namespace System.Tests
             // Start index > separators.Length
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 2, 1));
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 0, 2));
+
+#if netcoreapp11
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('$', null));
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('$$', null, 0, 0));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<string>)null));
+
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join('$', new string[] { "Foo" }, 0, -1));
+            
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, 2, 1));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('$', new string[] { "Foo" }, 0, 2));
+#endif
         }
 
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
@@ -1637,6 +1689,15 @@ namespace System.Tests
 
             // Join should ignore objects that have a null ToString() value
             yield return new object[] { "|", new object[] { new ObjectWithNullToString(), "Foo", new ObjectWithNullToString(), "Bar", new ObjectWithNullToString() }, "|Foo||Bar|" };
+            
+            yield return new object[] { "$", new object[] { }, "" };
+            yield return new object[] { "$", new object[] { new ObjectWithNullToString() }, "" };
+            yield return new object[] { "$", new object[] { "Foo" }, "Foo" };
+            yield return new object[] { "$", new object[] { "Foo", "Bar", "Baz" }, "Foo$Bar$Baz" };
+            yield return new object[] { "$", new object[] { "Foo", null, "Baz" }, "Foo$$Baz" };
+
+            // Test join when first value is null
+            yield return new object[] { "$", new object[] { null, "Bar", "Baz" }, "$Bar$Baz" };
         }
 
         [Theory]
@@ -1646,6 +1707,16 @@ namespace System.Tests
         {
             Assert.Equal(expected, string.Join(separator, values));
             Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
+
+#if netcoreapp11
+            if (separator.Length == 1)
+            {
+                char separatorChar = separator[0];
+
+                Assert.Equal(expected, string.Join(separatorChar, values));
+                Assert.Equal(expected, string.Join(separatorChar, (IEnumerable<object>)values));
+            }
+#endif
         }
 
         [Theory]
@@ -1665,6 +1736,11 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
             Assert.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
+
+#if netcoreapp11
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('$', (object[])null));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('-', (IEnumerable<object>)null));
+#endif
         }
 
         [Theory]
