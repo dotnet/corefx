@@ -155,7 +155,17 @@ namespace System.Xml.Serialization
 
                 if (mapping.CheckSpecified == SpecifiedAccessor.ReadWrite)
                 {
-                    throw new NotImplementedException();
+                    // We probably don't need to do anything here.
+
+                    //string nameSpecified = mapping.Name + "Specified";
+                    //for (int j = 0; j < mappings.Length; j++)
+                    //{
+                    //    if (mappings[j].Name == nameSpecified)
+                    //    {
+                    //        member.CheckSpecifiedSource = p[j];
+                    //        break;
+                    //    }
+                    //}
                 }
 
                 bool foundAnyElement = false;

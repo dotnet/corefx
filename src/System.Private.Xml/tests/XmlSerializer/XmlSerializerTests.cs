@@ -3043,31 +3043,109 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var getDataRequestBodyValue = new GetDataRequestBody(3);
         var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(getDataRequestBodyValue, memberName,
             "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n</wrapper>",
-            wrapperName: "wrapper",
-            hasWrapperElement: true);
+            wrapperName: "wrapper");
 
         Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
-    private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null, bool hasWrapperElement = false)
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_SpecifiedField_MissingSpecifiedValue()
     {
-        var member = new XmlReflectionMember();
-        member.MemberName = memberName;
-        member.MemberType = typeof(T);
-        member.XmlAttributes = new XmlAttributes();
-        var elementAttribute = new XmlElementAttribute();
-        elementAttribute.ElementName = memberName;
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
+        var member2 = GetReflectionMember<bool>("GetDataSpecified");
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        var value = new object[] { getDataRequestBody };
+        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+            value,
+            null,
+            "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: null);
+
+        Assert.NotNull(actual);
+        Assert.Equal(getDataRequestBody.value, actual.value);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_SpecifiedField_True_Wrapper()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
+        var member2 = GetReflectionMember<bool>("GetDataSpecified");
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        var value = new object[] { getDataRequestBody, true };
+        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+            value,
+            null,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n  <GetDataSpecified>true</GetDataSpecified>\r\n</wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+        Assert.Equal(getDataRequestBody.value, actual.value);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_SpecifiedField_False_Wrapper()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("value");
+        var member2 = GetReflectionMember<bool>("valueSpecified");
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        var value = new object[] { getDataRequestBody, false };
+        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+            value,
+            null,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <valueSpecified>false</valueSpecified>\r\n</wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper");
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_SpecifiedField_False()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("value");
+        var member2 = GetReflectionMember<bool>("valueSpecified");
+        var value = new object[] { new GetDataRequestBody() { value = 3 }, false };
+        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+            value,
+            null,
+            "<?xml version=\"1.0\"?>\r\n<valueSpecified xmlns=\"http://tempuri.org/\">false</valueSpecified>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: null);
+
+        Assert.Null(actual);
+    }
+
+    private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
+    {
+        object[] value = new object[] { requestBodyValue };
+        return RoundTripWithXmlMembersMapping<T>(value, memberName, baseline, skipStringCompare, members: null, wrapperName: wrapperName);
+    }
+
+    private static T RoundTripWithXmlMembersMapping<T>(object[] value, string memberName, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string wrapperName = null)
+    {
         string ns = "http://tempuri.org/";
-        elementAttribute.Namespace = ns;
-        member.XmlAttributes.XmlElements.Add(elementAttribute);
+        if (members == null)
+        {
+            XmlReflectionMember member = GetReflectionMember<T>(memberName, ns);
+            members = new XmlReflectionMember[] { member };
+        }
 
         var importer = new XmlReflectionImporter(null, ns);
-        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, new XmlReflectionMember[] { member }, hasWrapperElement);
+        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
         using (var ms = new MemoryStream())
         {
-            object[] value = new object[] { requestBodyValue };
+
             serializer.Serialize(ms, value);
             ms.Flush();
             ms.Position = 0;
@@ -3082,9 +3160,23 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             ms.Position = 0;
             var actual = serializer.Deserialize(ms) as object[];
             Assert.NotNull(actual);
-            Assert.Equal(value.Length, actual.Length);
+            Assert.True(actual.Length > 0);
             return (T)actual[0];
         }
+    }
+
+    private static XmlReflectionMember GetReflectionMember<T>(string memberName, string ns = null)
+    {
+        ns = ns ?? "http://tempuri.org/";
+        var member = new XmlReflectionMember();
+        member.MemberName = memberName;
+        member.MemberType = typeof(T);
+        member.XmlAttributes = new XmlAttributes();
+        var elementAttribute = new XmlElementAttribute();
+        elementAttribute.ElementName = memberName;
+        elementAttribute.Namespace = ns;
+        member.XmlAttributes.XmlElements.Add(elementAttribute);
+        return member;
     }
 
     private static Stream GenerateStreamFromString(string s)

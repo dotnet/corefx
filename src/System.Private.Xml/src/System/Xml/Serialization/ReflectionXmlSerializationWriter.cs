@@ -1339,7 +1339,7 @@ namespace System.Xml.Serialization
                 {
                     string memberNameSpecified = member.Name + "Specified";
 
-                    for (int j = 0; j < mapping.Members.Length; j++)
+                    for (int j = 0; j < Math.Min(pLength, mapping.Members.Length); j++)
                     {
                         if (mapping.Members[j].Name == memberNameSpecified)
                         {
@@ -1359,49 +1359,51 @@ namespace System.Xml.Serialization
                         object enumSource = null;
                         if (member.ChoiceIdentifier != null)
                         {
-                            for (int j = 0; j < mapping.Members.Length; j++)
-                            {
-                                if (mapping.Members[j].Name == member.ChoiceIdentifier.MemberName)
-                                {
-                                    enumSource = p[j];
-                                    break;
-                                }
-                            }
+                            throw new NotImplementedException("(member.ChoiceIdentifier != null)");
+                            //for (int j = 0; j < mapping.Members.Length; j++)
+                            //{
+                            //    if (mapping.Members[j].Name == member.ChoiceIdentifier.MemberName)
+                            //    {
+                            //        enumSource = p[j];
+                            //        break;
+                            //    }
+                            //}
                         }
 
                         if (isRpc && member.IsReturnValue && member.Elements.Length > 0)
                         {
-                            WriteRpcResult(member.Elements[0].Name, "");
+                            throw new NotImplementedException("isRpc && member.IsReturnValue && member.Elements.Length > 0");
+                            //WriteRpcResult(member.Elements[0].Name, "");
                         }
 
                         // override writeAccessors choice when we've written a wrapper element
                         WriteMember(source, enumSource, member.ElementsSortedByDerivation, member.Text, member.ChoiceIdentifier, member.TypeDesc, writeAccessors || hasWrapperElement);
                     }
                 }
+            }
 
-                if (hasWrapperElement)
-                {
-                    WriteEndElement();
-                }
+            if (hasWrapperElement)
+            {
+                WriteEndElement();
+            }
 
-                if (element.IsSoap)
-                {
-                    throw new NotImplementedException();
-                    //if (!hasWrapperElement && !writeAccessors)
-                    //{
-                    //    // doc/bare case -- allow extra members
-                    //    Writer.Write("if (pLength > ");
-                    //    Writer.Write(mapping.Members.Length.ToString(CultureInfo.InvariantCulture));
-                    //    Writer.WriteLine(") {");
-                    //    Writer.Indent++;
+            if (element.IsSoap)
+            {
+                throw new NotImplementedException();
+                //if (!hasWrapperElement && !writeAccessors)
+                //{
+                //    // doc/bare case -- allow extra members
+                //    Writer.Write("if (pLength > ");
+                //    Writer.Write(mapping.Members.Length.ToString(CultureInfo.InvariantCulture));
+                //    Writer.WriteLine(") {");
+                //    Writer.Indent++;
 
-                    //    WriteExtraMembers(mapping.Members.Length.ToString(CultureInfo.InvariantCulture), "pLength");
+                //    WriteExtraMembers(mapping.Members.Length.ToString(CultureInfo.InvariantCulture), "pLength");
 
-                    //    Writer.Indent--;
-                    //    Writer.WriteLine("}");
-                    //}
-                    //Writer.WriteLine("WriteReferencedElements();");
-                }
+                //    Writer.Indent--;
+                //    Writer.WriteLine("}");
+                //}
+                //Writer.WriteLine("WriteReferencedElements();");
             }
         }
 
