@@ -183,14 +183,11 @@ namespace System.IO.Tests
 
                     try
                     {
-                        if (i == DefaultAttemptsForExpectedEvent)
-                        {
-                            Assert.Equal(TaskStatus.RanToCompletion, t.Status);
-                            Assert.Equal(WatcherChangeTypes.Changed, t.Result.ChangeType);
-                            Assert.NotNull(t.Result.Name);
-                            Assert.Null(t.Result.OldName);
-                            Assert.False(t.Result.TimedOut);
-                        }
+                        Assert.Equal(TaskStatus.RanToCompletion, t.Status);
+                        Assert.Equal(WatcherChangeTypes.Changed, t.Result.ChangeType);
+                        Assert.NotNull(t.Result.Name);
+                        Assert.Null(t.Result.OldName);
+                        Assert.False(t.Result.TimedOut);
                     }
                     catch when (i < DefaultAttemptsForExpectedEvent)
                     {
@@ -225,13 +222,10 @@ namespace System.IO.Tests
 
                     try
                     {
-                        if (i == DefaultAttemptsForExpectedEvent)
-                        {
-                            Assert.Equal(TaskStatus.RanToCompletion, t.Status);
-                            Assert.True(t.Result.ChangeType == WatcherChangeTypes.Created || t.Result.ChangeType == WatcherChangeTypes.Renamed);
-                            Assert.NotNull(t.Result.Name);
-                            Assert.False(t.Result.TimedOut);
-                        }
+                        Assert.Equal(TaskStatus.RanToCompletion, t.Status);
+                        Assert.True(t.Result.ChangeType == WatcherChangeTypes.Created || t.Result.ChangeType == WatcherChangeTypes.Renamed);
+                        Assert.NotNull(t.Result.Name);
+                        Assert.False(t.Result.TimedOut);
                     }
                     catch when (i < DefaultAttemptsForExpectedEvent)
                     {
