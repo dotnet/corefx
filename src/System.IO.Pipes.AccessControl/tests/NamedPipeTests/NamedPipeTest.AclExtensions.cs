@@ -44,6 +44,7 @@ namespace System.IO.Pipes.Tests
         /// Tests that SetAccessControl on a Broken NamedPipeClientStream throws an Exception.
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On Desktop we throw an exception based on the internal PipeStream state. In .NET Core, we do not have access to that member since Pipes.AccessControl is its own assembly.")]
         public void GetAccessControl_NamedPipeClientStream_Broken()
         {
             string pipeName = GetUniquePipeName();
