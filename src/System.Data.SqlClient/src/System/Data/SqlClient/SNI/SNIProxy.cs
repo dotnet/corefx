@@ -677,7 +677,7 @@ namespace System.Data.SqlClient.SNI
             return null;
         }
 
-        private bool InferLocalServerName()
+        private void InferLocalServerName()
         {
             // If Server name is empty or localhost, then use "localhost"
             if (string.IsNullOrEmpty(ServerName) || IsLocalHost(ServerName))
@@ -685,13 +685,12 @@ namespace System.Data.SqlClient.SNI
                 ServerName = ConnectionProtocol == DataSource.Protocol.Admin ?
                     Environment.MachineName : DefaultHostName;
             }
-            return true;
         }
 
         private bool InferConnectionDetails()
         {
             string[] tokensByCommaAndSlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator, ',');
-            ServerName = tokensByCommaAndSlash[0];
+            ServerName = tokensByCommaAndSlash[0].Trim();
 
             int commaIndex = _dataSourceAfterTrimmingProtocol.IndexOf(',');
 
@@ -708,7 +707,8 @@ namespace System.Data.SqlClient.SNI
                 // Bad Data Source like "server, "
                 if (string.IsNullOrEmpty(parameter))
                 {
-                    return ReportSNIError(SNIProviders.INVALID_PROV);
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                    return false;
                 }
 
                 // For Tcp and Only Tcp are parameters allowed.
@@ -719,13 +719,22 @@ namespace System.Data.SqlClient.SNI
                 else if (ConnectionProtocol != DataSource.Protocol.TCP)
                 {
                     // Parameter has been specified for non-TCP protocol. This is not allowed.
-                    return ReportSNIError(SNIProviders.INVALID_PROV);
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                    return false;
                 }
 
                 int port;
                 if (!int.TryParse(parameter, out port))
                 {
-                    return ReportSNIError(SNIProviders.TCP_PROV);
+                    ReportSNIError(SNIProviders.TCP_PROV);
+                    return false;
+                }
+
+                // If the user explicitly specified a invalid port in the connection string.
+                if (port < 1)
+                {
+                    ReportSNIError(SNIProviders.TCP_PROV);
+                    return false;
                 }
 
                 Port = port;
@@ -739,12 +748,14 @@ namespace System.Data.SqlClient.SNI
 
                 if (string.IsNullOrWhiteSpace(InstanceName))
                 {
-                    return ReportSNIError(SNIProviders.INVALID_PROV);
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                    return false;
                 }
 
                 if (DefaultSqlServerInstanceName.Equals(InstanceName))
                 {
-                    return ReportSNIError(SNIProviders.INVALID_PROV);
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                    return false;
                 }
             }
 
@@ -753,10 +764,10 @@ namespace System.Data.SqlClient.SNI
             return true;
         }
 
-        private bool ReportSNIError(SNIProviders provider)
+        private void ReportSNIError(SNIProviders provider)
         {
             SNILoadHandle.SingletonInstance.LastError = new SNIError(provider, 0, SNICommon.InvalidConnStringError, string.Empty);
-            return !(IsBadDataSource = true);
+            IsBadDataSource = true;
         }
 
         private bool InferNamedPipesInformation()
@@ -778,7 +789,8 @@ namespace System.Data.SqlClient.SNI
                     Uri uri = new Uri(_dataSourceAfterTrimmingProtocol);
                     if (string.IsNullOrEmpty(uri.Host))
                     {
-                        return ReportSNIError(SNIProviders.NP_PROV);
+                        ReportSNIError(SNIProviders.NP_PROV);
+                        return false;
                     }
 
                     string[] absolutePathParts = uri.AbsolutePath.Split(ForwardSlashSeparator);
@@ -786,13 +798,15 @@ namespace System.Data.SqlClient.SNI
                     //Check if the "pipe" keyword is the first part of path
                     if (PipeToken.CompareTo(absolutePathParts[1]) != 0)
                     {
-                        return ReportSNIError(SNIProviders.NP_PROV);
+                        ReportSNIError(SNIProviders.NP_PROV);
+                        return false;
                     }
 
                     // There should be 4 parts in the pipename e.g /pipe/sql/query [0]/[1]/[2]/[3]
                     if (absolutePathParts.Length != 4)
                     {
-                        return ReportSNIError(SNIProviders.NP_PROV);
+                        ReportSNIError(SNIProviders.NP_PROV);
+                        return false;
                     }
 
                     PipeName = uri.AbsolutePath.Substring(PipeToken.Length + 2);
@@ -800,7 +814,8 @@ namespace System.Data.SqlClient.SNI
                 }
                 catch (UriFormatException)
                 {
-                    return ReportSNIError(SNIProviders.NP_PROV);
+                    ReportSNIError(SNIProviders.NP_PROV);
+                    return false;
                 }
 
                 // DataSource is something like "\\pipename"
@@ -811,7 +826,8 @@ namespace System.Data.SqlClient.SNI
                 else if (ConnectionProtocol != DataSource.Protocol.NP)
                 {
                     // In case the path began with a "\\" and protocol was not Named Pipes
-                    return ReportSNIError(SNIProviders.NP_PROV);
+                    ReportSNIError(SNIProviders.NP_PROV);
+                    return false;
                 }
                 return true;
             }
