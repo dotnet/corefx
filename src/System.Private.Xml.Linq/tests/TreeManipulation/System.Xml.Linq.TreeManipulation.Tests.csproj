@@ -9,6 +9,10 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="XAttributeEnumRemove.netcoreapp.cs" />
+    <Compile Include="XNodeSequenceRemove.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="AddFirstAddFirstIntoDocument.cs" />
     <Compile Include="AddFirstInvalidIntoXDocument.cs" />
