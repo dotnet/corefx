@@ -65,6 +65,9 @@
   <ItemGroup>
     <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="ILReader\ILPrinter.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
     <Compile Include="DebugViewTests.cs" />
