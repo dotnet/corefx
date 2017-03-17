@@ -355,20 +355,20 @@ namespace System.Data.SqlClient.SNI
             string hostName = details.ServerName;
             int port = details.Port;
 
-            if(port == -1)
+            if (port == -1)
             {
                 try
                 {
                     port = string.IsNullOrEmpty(details.InstanceName) ? DefaultSqlServerPort : GetPortByInstanceName(hostName, details.InstanceName);
                 }
                 // The GetPortByInstanceName can throw a SocketException
-                catch(SocketException se)
+                catch (SocketException se)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
                     return null;
                 }
             }
-            
+
             if (hostName != null && port > 0 && isIntegratedSecurity)
             {
                 try
@@ -385,7 +385,6 @@ namespace System.Data.SqlClient.SNI
 
             return (hostName != null && port > 0) ?
                  new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel) : null;
-            
         }
 
         /// <summary>
@@ -702,10 +701,8 @@ namespace System.Data.SqlClient.SNI
             // If Comma exists, the try to get the port number
             if (commaIndex > -1)
             {
-                bool commaAfterSlash = commaIndex > backSlashIndex ? true : false;
-
                 string parameter = backSlashIndex > -1
-                        ? commaIndex > backSlashIndex ? tokensByCommaAndSlash[2].Trim() : tokensByCommaAndSlash[1].Trim()
+                        ? ((commaIndex > backSlashIndex) ? tokensByCommaAndSlash[2].Trim() : tokensByCommaAndSlash[1].Trim())
                         : tokensByCommaAndSlash[1].Trim();
 
                 // Bad Data Source like "server, "
@@ -822,7 +819,7 @@ namespace System.Data.SqlClient.SNI
         }
 
         private static bool IsLocalHost(string serverName)
-            => serverName.CompareTo(".") == 0 || serverName.CompareTo("(local)") == 0 || serverName.CompareTo("localhost") == 0;
+            => ".".Equals(serverName) || "(local)".Equals(serverName) || "localhost".Equals(serverName);
 
     }
 
