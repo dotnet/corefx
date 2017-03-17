@@ -45,7 +45,7 @@ namespace System.IO
                 _asyncState = new AsyncState();
 
             // Translate the arguments into arguments for an open call.
-            Interop.Sys.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, _access, options); // FileShare currently ignored
+            Interop.Sys.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, _access, share, options); // FileShare currently ignored
 
             // If the file gets created a new, we'll select the permissions for it.  Most utilities by default use 666 (read and 
             // write for all). However, on Windows it's possible to write out a file and then execute it.  To maintain that similarity, 
@@ -122,7 +122,7 @@ namespace System.IO
         /// <param name="access">The FileAccess provided to the stream's constructor</param>
         /// <param name="options">The FileOptions provided to the stream's constructor</param>
         /// <returns>The flags value to be passed to the open system call.</returns>
-        private static Interop.Sys.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
+        private static Interop.Sys.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileShare share, FileOptions options)
         {
             // Translate FileMode.  Most of the values map cleanly to one or more options for open.
             Interop.Sys.OpenFlags flags = default(Interop.Sys.OpenFlags);
@@ -164,6 +164,11 @@ namespace System.IO
                 case FileAccess.Write:
                     flags |= Interop.Sys.OpenFlags.O_WRONLY;
                     break;
+            }
+
+            if ((share & FileShare.Inheritable) == 0)
+            {
+                flags |= Interop.Sys.OpenFlags.O_CLOEXEC;
             }
 
             // Translate some FileOptions; some just aren't supported, and others will be handled after calling open.
