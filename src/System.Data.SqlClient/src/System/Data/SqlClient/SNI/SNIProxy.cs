@@ -742,7 +742,7 @@ namespace System.Data.SqlClient.SNI
                     return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
 
-                if (DefaultSqlServerInstanceName.CompareTo(InstanceName) == 0)
+                if (DefaultSqlServerInstanceName.Equals(InstanceName))
                 {
                     return ReportSNIError(SNIProviders.INVALID_PROV);
                 }
