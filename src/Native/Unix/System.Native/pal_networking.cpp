@@ -1730,7 +1730,11 @@ extern "C" Error SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, in
 
     socklen_t addrLen = static_cast<socklen_t>(*socketAddressLen);
     int accepted;
+#ifdef HAVE_ACCEPT_4
+    while (CheckInterrupted(accepted = accept4(fd, reinterpret_cast<sockaddr*>(socketAddress), &addrLen, SOCK_CLOEXEC)));
+#else
     while (CheckInterrupted(accepted = accept(fd, reinterpret_cast<sockaddr*>(socketAddress), &addrLen)));
+#endif
     if (accepted == -1)
     {
         *acceptedSocket = -1;
@@ -2314,6 +2318,9 @@ extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, 
         return PAL_EPROTONOSUPPORT;
     }
 
+#ifdef SOCK_CLOEXEC
+    platformSocketType |= SOCK_CLOEXEC;
+#endif
     *createdSocket = socket(platformAddressFamily, platformSocketType, platformProtocolType);
     return *createdSocket != -1 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }

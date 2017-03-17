@@ -245,6 +245,10 @@ check_function_exists(
     HAVE_EPOLL)
 
 check_function_exists(
+    accept4
+    HAVE_ACCEPT4)
+
+check_function_exists(
     kqueue
     HAVE_KQUEUE)
 
