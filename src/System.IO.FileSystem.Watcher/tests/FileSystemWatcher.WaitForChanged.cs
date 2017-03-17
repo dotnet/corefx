@@ -146,26 +146,19 @@ namespace System.IO.Tests
                         }
                     }
 
-                    if ((TaskStatus.RanToCompletion != t.Status) ||
-                        (changeType != t.Result.ChangeType) ||
-                        (null == t.Result.Name) ||
-                        (null != t.Result.OldName) ||
-                        (t.Result.TimedOut))
+                    try
                     {
-                        if (i == DefaultAttemptsForExpectedEvent)
-                        {
-                            Assert.Equal(TaskStatus.RanToCompletion, t.Status);
-                            Assert.Equal(changeType, t.Result.ChangeType);
-                            Assert.NotNull(t.Result.Name);
-                            Assert.Null(t.Result.OldName);
-                            Assert.False(t.Result.TimedOut);
-                        }
+                        Assert.Equal(TaskStatus.RanToCompletion, t.Status);
+                        Assert.Equal(changeType, t.Result.ChangeType);
+                        Assert.NotNull(t.Result.Name);
+                        Assert.Null(t.Result.OldName);
+                        Assert.False(t.Result.TimedOut);
                     }
-                    else
+                    catch when (i < DefaultAttemptsForExpectedEvent)
                     {
-                        // This test has passed, so no need to retry it.
-                        break;
+                        continue;
                     }
+                    return;
                 }
             }
         }
@@ -187,11 +180,8 @@ namespace System.IO.Tests
                         File.AppendAllText(name, "text");
                         Task.Delay(BetweenOperationsDelayMilliseconds).Wait();
                     }
-                    if ((TaskStatus.RanToCompletion != t.Status) ||
-                        (WatcherChangeTypes.Changed != t.Result.ChangeType) ||
-                        (null == t.Result.Name) ||
-                        (null != t.Result.OldName) ||
-                        (t.Result.TimedOut))
+
+                    try
                     {
                         if (i == DefaultAttemptsForExpectedEvent)
                         {
@@ -202,11 +192,11 @@ namespace System.IO.Tests
                             Assert.False(t.Result.TimedOut);
                         }
                     }
-                    else
+                    catch when (i < DefaultAttemptsForExpectedEvent)
                     {
-                        // This test has passed, so no need to retry it.
-                        break;
+                        continue;
                     }
+                    return;
                 }
             }
         }
@@ -233,10 +223,7 @@ namespace System.IO.Tests
                         Task.Delay(BetweenOperationsDelayMilliseconds).Wait();
                     }
 
-                    if ((TaskStatus.RanToCompletion != t.Status) ||
-                        (t.Result.ChangeType != WatcherChangeTypes.Created && t.Result.ChangeType != WatcherChangeTypes.Renamed) ||
-                        (null == t.Result.Name) ||
-                        (t.Result.TimedOut))
+                    try
                     {
                         if (i == DefaultAttemptsForExpectedEvent)
                         {
@@ -246,11 +233,11 @@ namespace System.IO.Tests
                             Assert.False(t.Result.TimedOut);
                         }
                     }
-                    else
+                    catch when (i < DefaultAttemptsForExpectedEvent)
                     {
-                        // This test has passed, so no need to retry it.
-                        break;
+                        continue;
                     }
+                    return;
                 }
             }
         }
