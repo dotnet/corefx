@@ -802,8 +802,9 @@ namespace System.Data.SqlClient.SNI
                         return false;
                     }
 
-                    // There should be 4 parts in the pipename e.g /pipe/sql/query [0]/[1]/[2]/[3]
-                    if (absolutePathParts.Length != 4)
+                    // There should be at least 4 parts in the pipename e.g /pipe/sql/query [0]/[1]/[2]/[3]
+                    // Another valid Sql named pipe for an named instance is \\.\pipe\MSSQL$MYINSTANCE\sql\query
+                    if (absolutePathParts.Length < 4)
                     {
                         ReportSNIError(SNIProviders.NP_PROV);
                         return false;
