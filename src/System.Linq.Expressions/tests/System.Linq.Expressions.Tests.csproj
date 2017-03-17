@@ -292,7 +292,7 @@
     <Compile Include="ILReader\ILReaderFactory.cs" />
     <Compile Include="ILReader\ReadableILStringVisitor.cs" />
     <Compile Include="ILReader\TokenResolver.cs" />
-    <Compile Include="ILReader\ILPrinter.cs" />
+    <Compile Include="ILReader\ILPrinter.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="ILReader\PrivateReflectionHelpers.cs" />
     <Compile Include="ILReader\LocalsSignatureParser.cs" />
     <Compile Include="ILReader\SigParser.cs" />
