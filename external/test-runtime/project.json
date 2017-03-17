@@ -11,7 +11,6 @@
     "Microsoft.3rdpartytools.MarkdownLog": "0.10.0-alpha-experimental",
     "CommandLineParser": "2.1.1-beta",
     "Newtonsoft.Json": "9.0.1",
-    "coveralls.io": "1.4",
     "OpenCover": "4.6.519",
     "ReportGenerator": "2.5.0",
     "System.IO.Compression.TestData": "1.0.4-prerelease",
