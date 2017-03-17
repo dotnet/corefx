@@ -22,7 +22,7 @@
     <Compile Include="SaveOptions_OmitDuplicateNamespace.cs" />
     <Compile Include="WriterSettings.cs" />
     <Compile Include="XmlFactoryWriterTests.cs" />
-    <Compile Include="XmlReaderDiff.cs" />
+    <Compile Include="XmlReaderDiff.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Xml\XmlCoreTest\XmlCoreTest.csproj" />
