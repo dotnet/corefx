@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Xunit;
 using Xunit.NetCore.Extensions;
 
@@ -33,8 +34,16 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [Fact]
     public static void WindowWidth_WindowHeight_InvalidSize()
     {
-        Assert.Throws<ArgumentOutOfRangeException>("width", () => Console.WindowWidth = 0);
-        Assert.Throws<ArgumentOutOfRangeException>("height", () => Console.WindowHeight = 0);
+        if (Console.IsOutputRedirected)
+        {
+            Assert.Throws<IOException>(() => Console.WindowWidth = 0);
+            Assert.Throws<IOException>(() => Console.WindowHeight = 0);
+        }
+        else
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("width", () => Console.WindowWidth = 0);
+            Assert.Throws<ArgumentOutOfRangeException>("height", () => Console.WindowHeight = 0);
+        }
     }
 
     [Fact]
