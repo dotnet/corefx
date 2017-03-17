@@ -20,7 +20,8 @@ namespace System.Collections.Tests
             while (dict.Count < size)
             {
                 int key = rand.Next(500000, int.MaxValue);
-                dict.TryAdd(key, 0);
+                if (!dict.ContainsKey(key))
+                    dict.Add(key, 0);
             }
             return dict;
         }
