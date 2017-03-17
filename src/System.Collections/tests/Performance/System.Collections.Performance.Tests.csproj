@@ -8,6 +8,9 @@
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="Perf.Dictionary.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Perf.Dictionary.cs" />
     <Compile Include="Perf.HashSet.cs" />
