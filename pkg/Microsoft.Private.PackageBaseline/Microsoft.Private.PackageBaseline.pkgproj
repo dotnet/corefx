@@ -7,6 +7,9 @@
     <HarvestStablePackage>false</HarvestStablePackage>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <PackageIndexFileName>packageIndex.json</PackageIndexFileName>
+
+    <!-- Include symbols in package by default-->
+    <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
   </PropertyGroup>
   
   <ItemGroup>
