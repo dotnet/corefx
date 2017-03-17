@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -430,7 +431,11 @@ static bool InitializeSignalHandling()
     // thread.  We can't do anything interesting in the signal handler,
     // so we instead send a message to another thread that'll do
     // the handling work.
+#if HAVE_PIPE2
+    if (pipe2(g_signalPipe, O_CLOEXEC) != 0)
+#else
     if (pipe(g_signalPipe) != 0)
+#endif
     {
         return false;
     }
