@@ -12,7 +12,7 @@
     <Compile Include="Perf.Dictionary.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Perf.Dictionary.cs" />
+    <Compile Include="Perf.Dictionary.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="Perf.HashSet.cs" />
     <Compile Include="Perf.List.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
