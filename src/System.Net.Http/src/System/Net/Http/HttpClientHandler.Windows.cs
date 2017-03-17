@@ -194,7 +194,7 @@ namespace System.Net.Http
         public HttpClientHandler()
         {
             _winHttpHandler = new WinHttpHandler();
-            _diagnosticsPipeline = new DiagnosticsHandler(_winHttpHandler);
+            _diagnosticsPipeline = new DiagnosticsHandler(_winHttpHandler.SendAsync);
 
             // Adjust defaults to match current .NET Desktop HttpClientHandler (based on HWR stack).
             AllowAutoRedirect = true;

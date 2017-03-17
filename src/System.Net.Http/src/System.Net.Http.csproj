@@ -40,6 +40,8 @@
     <Compile Include="System\Net\Http\ByteArrayContent.cs" />
     <Compile Include="System\Net\Http\ClientCertificateOption.cs" />
     <Compile Include="System\Net\Http\DelegatingHandler.cs" />
+    <Compile Include="System\Net\Http\DiagnosticsHandler.cs" />    
+    <Compile Include="System\Net\Http\DiagnosticsHandlerLoggingStrings.cs"/>        
     <Compile Include="System\Net\Http\FormUrlEncodedContent.cs" />
     <Compile Include="System\Net\Http\HttpClient.cs" />
     <Compile Include="System\Net\Http\HttpCompletionOption.cs" />
@@ -119,8 +121,6 @@
   </ItemGroup>
   <!-- Common, except for Windows net46 build -->
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'  And '$(TargetGroup)' != 'netfx'">
-    <Compile Include="System\Net\Http\DiagnosticsHandler.cs" />    
-    <Compile Include="System\Net\Http\DiagnosticsHandlerLoggingStrings.cs"/>    
     <Compile Include="$(CommonPath)\System\Net\Mail\DomainLiteralReader.cs">
       <Link>Common\System\Net\Mail\DomainLiteralReader.cs</Link>
     </Compile>
@@ -179,6 +179,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime" />
+    <ProjectReference Include="..\..\System.Diagnostics.DiagnosticSource\src\System.Diagnostics.DiagnosticSource.csproj" />
   </ItemGroup>
   <!-- Unix -->
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
