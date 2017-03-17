@@ -660,7 +660,7 @@ namespace System.Data.SqlClient.SNI
                 return null;
             }
 
-            if (details.InferNamedPipesInformation() && !details.IsBadDataSource)
+            if (details.InferNamedPipesInformation())
             {
                 return details;
             }
@@ -670,12 +670,12 @@ namespace System.Data.SqlClient.SNI
                 return null;
             }
 
-            if (!details.InferConnectionDetails() && details.IsBadDataSource)
+            if (details.InferConnectionDetails())
             {
-                return null;
+                return details;
             }
 
-            return details;
+            return null;
         }
 
         private bool InferLocalServerName()
