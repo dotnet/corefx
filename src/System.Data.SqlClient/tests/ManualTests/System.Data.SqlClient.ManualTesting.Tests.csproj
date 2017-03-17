@@ -16,7 +16,7 @@
     <Compile Include="DataCommon\CheckConnStrSetupFactAttribute.cs" />
     <Compile Include="SQL\Common\AsyncDebugScope.cs" />
     <Compile Include="SQL\Common\ConnectionPoolWrapper.cs" />
-    <Compile Include="SQL\Common\InternalConnectionWrapper.cs" />
+    <Compile Include="SQL\Common\InternalConnectionWrapper.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="SQL\Common\SystemDataExtensions.cs" />
     <Compile Include="SQL\Common\SystemDataInternals\CommandHelper.cs" />
     <Compile Include="SQL\Common\SystemDataInternals\ConnectionHelper.cs" />
