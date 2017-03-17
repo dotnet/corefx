@@ -325,7 +325,7 @@ namespace System.Data.SqlClient.SNI
 
             return sniHandle;
         }
-        
+
         private static byte[] MakeMsSqlServerSPN(string fullyQualifiedDomainName, int port = DefaultSqlServerPort)
         {
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + port;
@@ -368,9 +368,7 @@ namespace System.Data.SqlClient.SNI
                     return null;
                 }
             }
-
             
-
             if (hostName != null && port > 0 && isIntegratedSecurity)
             {
                 try
@@ -385,13 +383,9 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            SNITCPHandle sniTcpHandle = null;
-            if (hostName != null && port > 0)
-            {
-                sniTcpHandle = new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
-            }
+            return (hostName != null && port > 0) ?
+                 new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel) : null;
             
-            return sniTcpHandle;
         }
 
         /// <summary>
@@ -613,7 +607,7 @@ namespace System.Data.SqlClient.SNI
 
             PopulateProtocol();
 
-            _dataSourceAfterTrimmingProtocol = (firstIndexOfColon >= -1) && ConnectionProtocol != DataSource.Protocol.None
+            _dataSourceAfterTrimmingProtocol = (firstIndexOfColon > -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
 
             if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
