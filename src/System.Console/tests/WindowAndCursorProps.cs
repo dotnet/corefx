@@ -31,6 +31,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
     public static void WindowWidth_WindowHeight_InvalidSize()
     {
         if (Console.IsOutputRedirected)
