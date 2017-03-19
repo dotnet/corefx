@@ -786,32 +786,44 @@ namespace System.Data.SqlClient.SNI
 
                 try
                 {
-                    Uri uri = new Uri(_dataSourceAfterTrimmingProtocol);
-                    if (string.IsNullOrEmpty(uri.Host))
+                    string[] tokensByBackSlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator);
+
+                    // The datasource is of the format \\host\pipe\sql\query [0]\[1]\[2]\[3]\[4]\[5]
+                    // It would at least have 6 parts. 
+                    // Another valid Sql named pipe for an named instance is \\.\pipe\MSSQL$MYINSTANCE\sql\query
+                    if (tokensByBackSlash.Length < 6)
                     {
                         ReportSNIError(SNIProviders.NP_PROV);
                         return false;
                     }
 
-                    string[] absolutePathParts = uri.AbsolutePath.Split(ForwardSlashSeparator);
+                    string host = tokensByBackSlash[2];
+
+                    if (string.IsNullOrEmpty(host))
+                    {
+                        ReportSNIError(SNIProviders.NP_PROV);
+                        return false;
+                    }
 
                     //Check if the "pipe" keyword is the first part of path
-                    if (PipeToken.CompareTo(absolutePathParts[1]) != 0)
+                    if (!PipeToken.Equals(tokensByBackSlash[3]))
                     {
                         ReportSNIError(SNIProviders.NP_PROV);
                         return false;
                     }
 
-                    // There should be at least 4 parts in the pipename e.g /pipe/sql/query [0]/[1]/[2]/[3]
-                    // Another valid Sql named pipe for an named instance is \\.\pipe\MSSQL$MYINSTANCE\sql\query
-                    if (absolutePathParts.Length < 4)
-                    {
-                        ReportSNIError(SNIProviders.NP_PROV);
-                        return false;
-                    }
+                    StringBuilder pipeNameBuilder = new StringBuilder();
 
-                    PipeName = uri.AbsolutePath.Substring(PipeToken.Length + 2);
-                    ServerName = IsLocalHost(uri.Host) ? Environment.MachineName : uri.Host;
+                    for ( int i = 4; i < tokensByBackSlash.Length-1; i++)
+                    {
+                        pipeNameBuilder.Append(tokensByBackSlash[i]);
+                        pipeNameBuilder.Append(ForwardSlashSeparator);
+                    }
+                    // Append the last part without a "/"
+                    pipeNameBuilder.Append(tokensByBackSlash[tokensByBackSlash.Length - 1]);
+
+                    PipeName = pipeNameBuilder.ToString();
+                    ServerName = IsLocalHost(host) ? Environment.MachineName : host;
                 }
                 catch (UriFormatException)
                 {
@@ -820,7 +832,7 @@ namespace System.Data.SqlClient.SNI
                 }
 
                 // DataSource is something like "\\pipename"
-                if (ConnectionProtocol != DataSource.Protocol.None)
+                if (ConnectionProtocol == DataSource.Protocol.None)
                 {
                     ConnectionProtocol = DataSource.Protocol.NP;
                 }
