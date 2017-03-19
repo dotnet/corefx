@@ -302,6 +302,13 @@ namespace System.Data.SqlClient.SNI
         {
             instanceName = new byte[1];
 
+            string localDbInstance = DataSource.GetLocalDBInstance(fullServerName);
+
+            if (!string.IsNullOrEmpty(localDbInstance))
+            {
+                fullServerName = LocalDB.Singleton.GetLocalDBConnectionString(localDbInstance);
+            }
+
             DataSource details = DataSource.ParseServerName(fullServerName);
             if (details == null)
             {
@@ -586,6 +593,7 @@ namespace System.Data.SqlClient.SNI
         private const string DefaultSqlServerInstanceName = "mssqlserver";
         private const string PipeBeginning = @"\\";
         private const string PipeToken = "pipe";
+        private const string LocalDbHost = "(localdb)";
 
         internal enum Protocol { TCP, NP, None, Admin };
 
@@ -654,6 +662,28 @@ namespace System.Data.SqlClient.SNI
                         break;
                 }
             }
+        }
+
+        public static string GetLocalDBInstance(string dataSource)
+        {
+            Debug.Assert(!string.IsNullOrEmpty(dataSource), "Empty data source");
+
+            string instanceName = null;
+
+            string workingDataSource = dataSource.ToLower();
+
+            string[] tokensByBackSlash = workingDataSource.Split(BackSlashSeparator);
+
+            // All LocalDb endpoints are of the format host\instancename where host is always (LocalDb) (case-insensitive)
+            if (tokensByBackSlash.Length == 2 && LocalDbHost.Equals(tokensByBackSlash[0].Trim()))
+            {
+                if (!string.IsNullOrEmpty(tokensByBackSlash[1].Trim()))
+                {
+                    instanceName = tokensByBackSlash[1];
+                }
+            }
+
+            return instanceName;
         }
 
         public static DataSource ParseServerName(string dataSource)
