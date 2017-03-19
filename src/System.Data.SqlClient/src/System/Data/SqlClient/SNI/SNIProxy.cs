@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -10,9 +9,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System;
-using System.Threading;
-using System.Collections;
+using System.IO;
 
 namespace System.Data.SqlClient.SNI
 {
@@ -575,7 +572,6 @@ namespace System.Data.SqlClient.SNI
 
         private const char CommaSeparator = ',';
         private const char BackSlashSeparator = '\\';
-        private const char ForwardSlashSeparator = '/';
         private const string DefaultHostName = "localhost";
         private const string DefaultSqlServerInstanceName = "mssqlserver";
         private const string PipeBeginning = @"\\";
@@ -817,7 +813,7 @@ namespace System.Data.SqlClient.SNI
                     for ( int i = 4; i < tokensByBackSlash.Length-1; i++)
                     {
                         pipeNameBuilder.Append(tokensByBackSlash[i]);
-                        pipeNameBuilder.Append(ForwardSlashSeparator);
+                        pipeNameBuilder.Append(Path.PathSeparator);
                     }
                     // Append the last part without a "/"
                     pipeNameBuilder.Append(tokensByBackSlash[tokensByBackSlash.Length - 1]);
