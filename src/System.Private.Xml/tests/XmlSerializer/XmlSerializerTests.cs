@@ -3066,7 +3066,10 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             wrapperName: null);
 
         Assert.NotNull(actual);
-        Assert.Equal(getDataRequestBody.value, actual.value);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.True((bool)actual[1]);
     }
 
     [Fact]
@@ -3086,7 +3089,34 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             wrapperName: "wrapper");
 
         Assert.NotNull(actual);
-        Assert.Equal(getDataRequestBody.value, actual.value);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.True((bool)actual[1]);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_SimpleType_SpecifiedField_True_IgnoreSpecifiedField_Wrapper()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
+        var member2 = GetReflectionMember<bool>("GetDataSpecified");
+        member2.XmlAttributes.XmlIgnore = true;
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        var value = new object[] { getDataRequestBody, true };
+        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+            value,
+            null,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n </wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.True((bool)actual[1]);
     }
 
     [Fact]
@@ -3105,7 +3135,9 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             members: new XmlReflectionMember[] { member1, member2 },
             wrapperName: "wrapper");
 
-        Assert.Null(actual);
+        Assert.NotNull(actual);
+        Assert.Null(actual[0]);
+        Assert.False((bool)actual[1]);
     }
 
     [Fact]
@@ -3122,16 +3154,20 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             members: new XmlReflectionMember[] { member1, member2 },
             wrapperName: null);
 
-        Assert.Null(actual);
+        Assert.NotNull(actual);
+        Assert.Null(actual[0]);
+        Assert.False((bool)actual[1]);
     }
 
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
         object[] value = new object[] { requestBodyValue };
-        return RoundTripWithXmlMembersMapping<T>(value, memberName, baseline, skipStringCompare, members: null, wrapperName: wrapperName);
+        object[] actual = RoundTripWithXmlMembersMapping<T>(value, memberName, baseline, skipStringCompare, members: null, wrapperName: wrapperName);
+        Assert.Equal(value.Length, actual.Length);
+        return (T)actual[0];
     }
 
-    private static T RoundTripWithXmlMembersMapping<T>(object[] value, string memberName, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string wrapperName = null)
+    private static object[] RoundTripWithXmlMembersMapping<T>(object[] value, string memberName, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string wrapperName = null)
     {
         string ns = "http://tempuri.org/";
         if (members == null)
@@ -3160,8 +3196,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             ms.Position = 0;
             var actual = serializer.Deserialize(ms) as object[];
             Assert.NotNull(actual);
-            Assert.True(actual.Length > 0);
-            return (T)actual[0];
+
+            return actual;
         }
     }
 

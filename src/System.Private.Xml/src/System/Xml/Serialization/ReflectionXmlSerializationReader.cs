@@ -90,7 +90,6 @@ namespace System.Xml.Serialization
             Reader.MoveToContent();
 
             object[] p = new object[mappings.Length];
-            object o = p;
 
             InitializeValueTypes(p, mappings);
 
@@ -103,7 +102,7 @@ namespace System.Xml.Serialization
                 {
                     if (Reader.IsStartElement(element.Name, elementNs))
                     {
-                        if (!GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, ref o))
+                        if (!GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, p))
                         {
                             continue;
                         }
@@ -121,13 +120,15 @@ namespace System.Xml.Serialization
             }
             else
             {
-                GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, ref o);
+                GenerateLiteralMembersElementInternal(mappings, hasWrapperElement, p);
             }
 
-            return o;
+            return p;
         }
 
-        private bool GenerateLiteralMembersElementInternal(MemberMapping[] mappings, bool hasWrapperElement, ref object o)
+        private void DummySource(object o) { }
+
+        private bool GenerateLiteralMembersElementInternal(MemberMapping[] mappings, bool hasWrapperElement, object[] p)
         {
             Member anyText = null;
             Member anyElement = null;
@@ -137,15 +138,19 @@ namespace System.Xml.Serialization
             ArrayList textOrArrayMembersList = new ArrayList();
             var attributeMembersList = new List<MemberMapping>();
 
+            int pLength = p.Length;
             for (int i = 0; i < mappings.Length; i++)
             {
                 MemberMapping mapping = mappings[i];
-                //object source = p[i];
+                int index = i;
+                Action<object> source = (o) => p[index] = o;
+
                 //object arraySource = source;
-                //if (mapping.Xmlns != null)
-                //{
-                //    arraySource = "((" + mapping.TypeDesc.CSharpName + ")" + source + ")";
-                //}
+                if (mapping.Xmlns != null)
+                {
+                    throw new NotImplementedException("mapping.Xmlns != null");
+                    //arraySource = "((" + mapping.TypeDesc.CSharpName + ")" + source + ")";
+                }
 
                 //string choiceSource = GetChoiceIdentifierSource(mappings, mapping);
                 //Member member = new Member(this, source, arraySource, "a", i, mapping, choiceSource);
@@ -153,19 +158,20 @@ namespace System.Xml.Serialization
                 Member member = new Member(mapping);
                 Member anyMember = new Member(mapping);
 
+                member.Source = source;
+                anyMember.Source = source;
+
                 if (mapping.CheckSpecified == SpecifiedAccessor.ReadWrite)
                 {
-                    // We probably don't need to do anything here.
-
-                    //string nameSpecified = mapping.Name + "Specified";
-                    //for (int j = 0; j < mappings.Length; j++)
-                    //{
-                    //    if (mappings[j].Name == nameSpecified)
-                    //    {
-                    //        member.CheckSpecifiedSource = p[j];
-                    //        break;
-                    //    }
-                    //}
+                    string nameSpecified = mapping.Name + "Specified";
+                    for (int j = 0; j < mappings.Length; j++)
+                    {
+                        if (mappings[j].Name == nameSpecified)
+                        {
+                            int indexJ = j;
+                            member.CheckSpecifiedSource = (o) => p[indexJ] = o;
+                        }
+                    }
                 }
 
                 bool foundAnyElement = false;
@@ -214,9 +220,10 @@ namespace System.Xml.Serialization
 
             if (attributeMembersList.Count > 0)
             {
-                var attributeMembers = attributeMembersList.ToArray();
-                WriteAttributes(attributeMembers, anyAttribute.Mapping, UnknownNode, ref o);
-                Reader.MoveToElement();
+                throw new NotImplementedException();
+                //var attributeMembers = attributeMembersList.ToArray();
+                //WriteAttributes(attributeMembers, anyAttribute.Mapping, UnknownNode, ref o);
+                //Reader.MoveToElement();
             }
 
             if (textOrArrayMembers.Length != 0)
@@ -243,15 +250,9 @@ namespace System.Xml.Serialization
             }
 
             Reader.MoveToContent();
-            while (Reader.NodeType != System.Xml.XmlNodeType.EndElement && Reader.NodeType != System.Xml.XmlNodeType.None)
+            while (Reader.NodeType != XmlNodeType.EndElement && Reader.NodeType != XmlNodeType.None)
             {
-
-                //string expectedElements = ExpectedElements(members);
-                var collectionMember = new CollectionMember();
-                Member tempMember = null;
-                WriteMemberElements(ref o, collectionMember, out tempMember, members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, anyElement, anyText, null);
-                SetCollectionObjectWithCollectionMember(ref o, collectionMember, typeof(object[]));
-
+                WriteMemberElements(members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, anyElement, anyText, null);
                 Reader.MoveToContent();
             }
 
@@ -331,17 +332,20 @@ namespace System.Xml.Serialization
 
             Reader.MoveToContent();
 
-            MemberMapping member = new MemberMapping();
-            member.TypeDesc = mapping.TypeDesc;
-            member.Elements = new ElementAccessor[] { element };
+            var memberMapping = new MemberMapping();
+            memberMapping.TypeDesc = mapping.TypeDesc;
+            memberMapping.Elements = new ElementAccessor[] { element };
 
             UnknownNodeAction elementElseAction = UnknownNodeAction.CreateUnknownNodeException;
             UnknownNodeAction elseAction = UnknownNodeAction.ReadUnknownNode;
 
             object o = null;
-            Member tempMember = null;
-            var currentMember = new Member(member);
-            WriteMemberElements(ref o, null/*collectionMember*/, out tempMember, new Member[] { currentMember }, elementElseAction, elseAction, element.Any ? currentMember : null, null);
+            var holder = new ObjectHolder();
+            var member = new Member(memberMapping);
+            member.Source = (value) => holder.Object = value;
+            WriteMemberElements(new Member[] { member }, elementElseAction, elseAction, element.Any ? member : null, null);
+            o = holder.Object;
+
             if (element.IsSoap)
             {
                 Referenced(o);
@@ -351,19 +355,17 @@ namespace System.Xml.Serialization
             return o;
         }
 
-        private void WriteMemberElements(ref object o, CollectionMember collectionMember, out Member member, Member[] expectedMembers, UnknownNodeAction elementElseAction, UnknownNodeAction elseAction, Member anyElement, Member anyText, Fixup fixup = null, object masterObject = null)
+        private void WriteMemberElements(Member[] expectedMembers, UnknownNodeAction elementElseAction, UnknownNodeAction elseAction, Member anyElement, Member anyText, Fixup fixup = null)
         {
             if (Reader.NodeType == XmlNodeType.Element)
             {
-                WriteMemberElementsIf(ref o, collectionMember, out member, expectedMembers, anyElement, elementElseAction, fixup: fixup, masterObject: masterObject);
+                WriteMemberElementsIf(expectedMembers, anyElement, elementElseAction, fixup: fixup);
             }
-            else if (anyText != null && anyText.Mapping != null && WriteMemberText(out o, anyText))
+            else if (anyText != null && anyText.Mapping != null && WriteMemberText(anyText))
             {
-                member = anyText;
             }
             else
             {
-                member = null;
                 ProcessUnknownNode(elseAction);
             }
         }
@@ -384,57 +386,10 @@ namespace System.Xml.Serialization
         {
             Reader.MoveToContent();
 
-            var collectionMemberToBeSet = new HashSet<Member>();
             while (Reader.NodeType != XmlNodeType.EndElement && Reader.NodeType != XmlNodeType.None)
             {
-                object value = null;
-                Member member;
-                WriteMemberElements(ref value, null, out member, members, elementElseAction, elseAction, anyElement, anyText, masterObject: o);
-                if (member != null)
-                {
-                    PropertyInfo pi = member.Mapping.MemberInfo as PropertyInfo;
-                    if (pi != null && typeof(IList).IsAssignableFrom(pi.PropertyType)
-                        && (pi.SetMethod == null || !pi.SetMethod.IsPublic))
-                    {
-                        var getOnlyList = (IList)pi.GetValue(o);
-
-                        var valueList = value as IList;
-                        if (valueList != null)
-                        {
-                            foreach (var i in valueList)
-                            {
-                                getOnlyList.Add(i);
-                            }
-                        }
-                        else
-                        {
-                            getOnlyList.Add(value);
-                        }
-                    }
-                    else if (member.Collection != null)
-                    {
-                        member.Collection.Add(value);
-                        collectionMemberToBeSet.Add(member);
-                    }
-                    else
-                    {
-                        SetMemberValue(o, value, member.Mapping.Name);
-                    }
-                }
-
+                WriteMemberElements(members, elementElseAction, elseAction, anyElement, anyText);
                 Reader.MoveToContent();
-            }
-
-            foreach (var member in collectionMemberToBeSet)
-            {
-                if (member.Collection != null)
-                {
-                    MemberInfo[] memberInfos = o.GetType().GetMember(member.Mapping.Name);
-                    var memberInfo = memberInfos[0];
-                    object collection = null;
-                    SetCollectionObjectWithCollectionMember(ref collection, member.Collection, member.Mapping.TypeDesc.Type);
-                    SetMemberValue(o, collection, memberInfo);
-                }
             }
         }
 
@@ -541,8 +496,9 @@ namespace System.Xml.Serialization
             throw new InvalidOperationException("unknown member type");
         }
 
-        private bool WriteMemberText(out object o, Member anyText)
+        private bool WriteMemberText(Member anyText)
         {
+            object value;
             MemberMapping anyTextMapping = anyText.Mapping;
             if ((Reader.NodeType == XmlNodeType.Text ||
                         Reader.NodeType == XmlNodeType.CDATA ||
@@ -556,7 +512,7 @@ namespace System.Xml.Serialization
                     SpecialMapping special = (SpecialMapping)text.Mapping;
                     if (special.TypeDesc.Kind == TypeKind.Node)
                     {
-                        o = Document.CreateTextNode(ReadString());
+                        value = Document.CreateTextNode(ReadString());
                     }
                     else
                     {
@@ -569,30 +525,30 @@ namespace System.Xml.Serialization
                     {
                         if (text.Mapping.TypeDesc.CollapseWhitespace)
                         {
-                            o = CollapseWhitespace(ReadString());
+                            value = CollapseWhitespace(ReadString());
                         }
                         else
                         {
-                            o = ReadString();
-                        }
+                            value = ReadString();
+                        }                        
                     }
                     else
                     {
                         if (text.Mapping.TypeDesc == StringTypeDesc || text.Mapping.TypeDesc.FormatterName == "String")
                         {
-                            o = ReadString(null, text.Mapping.TypeDesc.CollapseWhitespace);
+                            value = ReadString(null, text.Mapping.TypeDesc.CollapseWhitespace);
                         }
                         else
                         {
-                            o = WritePrimitive(text.Mapping, () => ReadString());
+                            value = WritePrimitive(text.Mapping, () => ReadString());
                         }
                     }
                 }
 
+                anyText.Source.Invoke(value);
                 return true;
             }
 
-            o = null;
             return false;
         }
 
@@ -609,7 +565,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        private void WriteMemberElementsIf(ref object o, CollectionMember collectionMember, out Member member, Member[] expectedMembers, Member anyElementMember, UnknownNodeAction elementElseAction, Fixup fixup = null, object masterObject = null)
+        private void WriteMemberElementsIf(Member[] expectedMembers, Member anyElementMember, UnknownNodeAction elementElseAction, Fixup fixup = null, object masterObject = null)
         {
             bool isSequence = IsSequence(expectedMembers);
             if (isSequence)
@@ -619,7 +575,7 @@ namespace System.Xml.Serialization
             }
 
             ElementAccessor e = null;
-            member = null;
+            Member member = null;
             bool foundElement = false;
             int elementIndex = -1;
             foreach (var m in  expectedMembers)
@@ -650,10 +606,9 @@ namespace System.Xml.Serialization
 
             if (foundElement)
             {
-                ChoiceIdentifierAccessor choice = member.Mapping.ChoiceIdentifier;
                 string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : "";
                 bool isList = member.Mapping.TypeDesc.IsArrayLike && !member.Mapping.TypeDesc.IsArray;
-                WriteElement(ref o, collectionMember, e, choice, member.Mapping.CheckSpecified == SpecifiedAccessor.ReadWrite, isList && member.Mapping.TypeDesc.IsNullable, member.Mapping.ReadOnly, ns, member.FixupIndex, elementIndex, fixup, masterObject, member);
+                WriteElement(e, member.Mapping.CheckSpecified == SpecifiedAccessor.ReadWrite, isList && member.Mapping.TypeDesc.IsNullable, member.Mapping.ReadOnly, ns, member.FixupIndex, elementIndex, fixup, member);
             }
             else
             {
@@ -662,7 +617,6 @@ namespace System.Xml.Serialization
                     var anyElement = anyElementMember.Mapping;
 
                     member = anyElementMember;
-                    ChoiceIdentifierAccessor choice = member.Mapping.ChoiceIdentifier;
                     ElementAccessor[] elements = anyElement.Elements;
                     for (int i = 0; i < elements.Length; i++)
                     {
@@ -670,7 +624,7 @@ namespace System.Xml.Serialization
                         if (element.Any && element.Name.Length == 0)
                         {
                             string ns = element.Form == XmlSchemaForm.Qualified ? element.Namespace : "";
-                            WriteElement(ref o, collectionMember, element, choice, anyElement.CheckSpecified == SpecifiedAccessor.ReadWrite, false, false, ns, fixup: fixup, masterObject : masterObject);
+                            WriteElement(element, anyElement.CheckSpecified == SpecifiedAccessor.ReadWrite, false, false, ns, fixup: fixup, member: member);
                             break;
                         }
                     }
@@ -683,20 +637,12 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteElement(ref object o, CollectionMember collectionMember, ElementAccessor element, ChoiceIdentifierAccessor choice, bool checkSpecified, bool checkForNull, bool readOnly, string defaultNamespace, int fixupIndex = -1, int elementIndex = -1, Fixup fixup = null, object masterObject = null, Member member = null)
+        private object WriteElement(ElementAccessor element, bool checkSpecified, bool checkForNull, bool readOnly, string defaultNamespace, int fixupIndex = -1, int elementIndex = -1, Fixup fixup = null, Member member = null)
         {
             object value = null;
             if (element.Mapping is ArrayMapping)
             {
-                if (collectionMember != null)
-                {
-                    WriteArray(ref value, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
-                }
-                else
-                {
-                    WriteArray(ref o, (ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
-                    value = o;
-                }
+                value = WriteArray((ArrayMapping)element.Mapping, readOnly, element.IsNullable, defaultNamespace, fixupIndex, fixup, member);
             }
             else if (element.Mapping is NullableMapping)
             {
@@ -758,7 +704,7 @@ namespace System.Xml.Serialization
                         value = rre;
                         Referenced(value);
                     }
-                    
+
                     if (fixupIndex >= 0)
                     {
                         if (member == null)
@@ -766,13 +712,13 @@ namespace System.Xml.Serialization
                             throw new InvalidOperationException("member == null");
                         }
 
-                        SetMemberValue(o, value, member.Mapping.MemberInfo);
-                        return;
+                        member.Source(value);
+                        return value;
                     }
                 }
                 else
                 {
-                    if (checkForNull && o == null)
+                    if (checkForNull && (member.Source == null && member.ArraySource == null))
                     {
                         Reader.Skip();
                     }
@@ -799,7 +745,7 @@ namespace System.Xml.Serialization
                             value = ReadXmlDocument(!element.Any);
                         }
                         else
-                        {                            
+                        {
                             value = ReadXmlNode(!element.Any);
                         }
 
@@ -844,28 +790,19 @@ namespace System.Xml.Serialization
                 throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
             }
 
-            if (choice != null && masterObject != null)
-            {
-                foreach(var name in choice.MemberIds)
-                {
-                    if (name == element.Name)
-                    {
-                        object choiceValue = Enum.Parse(choice.Mapping.TypeDesc.Type, name);
-                        SetOrAddValueToMember(masterObject, choiceValue, choice.MemberInfo);
+            member?.ChoiceSource?.Invoke(element.Name);
 
-                        break;
-                    }
-                }
-            }
-
-            if (collectionMember != null)
+            if (member?.ArraySource != null)
             {
-                collectionMember.Add(value);
+                member?.ArraySource(value);
             }
             else
             {
-                o = value;
+                member?.Source?.Invoke(value);
+                member?.CheckSpecifiedSource?.Invoke(true);
             }
+
+            return value;
         }
 
         private XmlSerializationReadCallback CreateXmlSerializationReadCallback(TypeMapping mapping)
@@ -921,8 +858,9 @@ namespace System.Xml.Serialization
             return mapping.TypeDesc.CanBeElementValue;
         }
 
-        private void WriteArray(ref object o, ArrayMapping arrayMapping, bool readOnly, bool isNullable, string defaultNamespace, int fixupIndex = -1, Fixup fixup = null, Member member = null)
+        private object WriteArray(ArrayMapping arrayMapping, bool readOnly, bool isNullable, string defaultNamespace, int fixupIndex = -1, Fixup fixup = null, Member member = null)
         {
+            object o = null;
             if (arrayMapping.IsSoap)
             {
                 object rre;
@@ -951,8 +889,10 @@ namespace System.Xml.Serialization
                         throw new InvalidOperationException("member == null");
                     }
 
-                    SetMemberValue(o, rre, member.Mapping.Name);
+                    member.Source(rre);
                 }
+
+                o = rre;
             }
             else
             {
@@ -964,11 +904,7 @@ namespace System.Xml.Serialization
                     memberMapping.ReadOnly = readOnly;
 
                     Type collectionType = memberMapping.TypeDesc.Type;
-
-                    if (o == null)
-                    {
-                        o = ReflectionCreateObject(memberMapping.TypeDesc.Type);
-                    }
+                    o = ReflectionCreateObject(memberMapping.TypeDesc.Type);
 
                     if (memberMapping.ChoiceIdentifier != null)
                     {
@@ -976,7 +912,13 @@ namespace System.Xml.Serialization
                         throw new NotImplementedException("memberMapping.ChoiceIdentifier != null");
                     }
 
-                    var collectionMember = new CollectionMember();
+                    var arrayMember = new Member(memberMapping);
+                    arrayMember.Collection = new CollectionMember();
+                    arrayMember.ArraySource = (item) =>
+                    {
+                        arrayMember.Collection.Add(item);
+                    };
+                    
                     if ((readOnly && o == null) || Reader.IsEmptyElement)
                     {
                         Reader.Skip();
@@ -988,17 +930,17 @@ namespace System.Xml.Serialization
                         UnknownNodeAction unknownNode = UnknownNodeAction.ReadUnknownNode;
                         while (Reader.NodeType != XmlNodeType.EndElement && Reader.NodeType != XmlNodeType.None)
                         {
-                            Member temp;
-                            WriteMemberElements(ref o, collectionMember, out temp, new Member[] { new Member(memberMapping) }, unknownNode, unknownNode, null, null);
+                            WriteMemberElements(new Member[] { arrayMember }, unknownNode, unknownNode, null, null);
                             Reader.MoveToContent();
                         }
                         ReadEndElement();
                     }
 
-                    SetCollectionObjectWithCollectionMember(ref o, collectionMember, collectionType);
-
+                    SetCollectionObjectWithCollectionMember(ref o, arrayMember.Collection, collectionType);
                 }
             }
+
+            return o;
         }
 
         private object WritePrimitive(TypeMapping mapping, Func<string> readFunc)
@@ -1120,7 +1062,7 @@ namespace System.Xml.Serialization
                 element.Any = false;
                 element.IsNullable = nullableMapping.BaseMapping.TypeDesc.IsNullable;
 
-                WriteElement(ref o, null, element, null, false, false, false, defaultNamespace);
+                o = WriteElement(element, false, false, false, defaultNamespace);
             }
 
             return o;
@@ -1242,6 +1184,11 @@ namespace System.Xml.Serialization
                     MemberMapping mapping = mappings[i];
                     // Member member = new Member(this, source, source, "a", i, mapping, GetChoiceIdentifierSource(mapping, "o", structMapping.TypeDesc));
                     var member = new Member(mapping);
+                    member.Source = (value) =>
+                    {
+                        SetMemberValue(o, value, member.Mapping.MemberInfo);
+                    };
+
                     members[i] = member;
                 }
 
@@ -1260,8 +1207,7 @@ namespace System.Xml.Serialization
 
                 while (Reader.NodeType != XmlNodeType.EndElement && Reader.NodeType != XmlNodeType.None)
                 {
-                    Member tempMember;
-                    WriteMemberElements(ref o, null, out tempMember, members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, null, null, fixup: fixup);
+                    WriteMemberElements(members, UnknownNodeAction.ReadUnknownNode, UnknownNodeAction.ReadUnknownNode, null, null, fixup: fixup);
                     Reader.MoveToContent();
                 }
 
@@ -1505,12 +1451,70 @@ namespace System.Xml.Serialization
                     {
                         if (mapping.TypeDesc.IsArrayLike && !(mapping.Elements.Length == 1 && mapping.Elements[0].Mapping is ArrayMapping))
                         {
-                            member.Collection = new CollectionMember();
+                            member.Source = (item) =>
+                            {
+                                if (member.Collection == null)
+                                {
+                                    member.Collection = new CollectionMember();
+                                }
+
+                                member.Collection.Add(item);
+                            };
+                            member.ArraySource = member.Source;
                         }
                         else if (!mapping.TypeDesc.IsArray)
                         {
 
                         }
+                    }
+
+                    if (member.ArraySource == null)
+                    {
+                        PropertyInfo pi = member.Mapping.MemberInfo as PropertyInfo;
+                        if (pi != null && typeof(IList).IsAssignableFrom(pi.PropertyType)
+                            && (pi.SetMethod == null || !pi.SetMethod.IsPublic))
+                        {
+                            member.Source = (value) =>
+                            {
+                                var getOnlyList = (IList)pi.GetValue(o);
+
+                                var valueList = value as IList;
+                                if (valueList != null)
+                                {
+                                    foreach (var v in valueList)
+                                    {
+                                        getOnlyList.Add(v);
+                                    }
+                                }
+                                else
+                                {
+                                    getOnlyList.Add(value);
+                                }
+                            };
+                        }
+                        else
+                        {
+                            member.Source = (value) => SetMemberValue(o, value, member.Mapping.Name);
+                        }
+                    }
+
+                    ChoiceIdentifierAccessor choice = mapping.ChoiceIdentifier;
+                    if (choice != null && o != null)
+                    {
+                        member.ChoiceSource = (elementNameObject) =>
+                        {
+                            string elementName = elementNameObject as string;
+                            foreach (var name in choice.MemberIds)
+                            {
+                                if (name == elementName)
+                                {
+                                    object choiceValue = Enum.Parse(choice.Mapping.TypeDesc.Type, name);
+                                    SetOrAddValueToMember(o, choiceValue, choice.MemberInfo);
+
+                                    break;
+                                }
+                            }
+                        };
                     }
 
                     allMemberMappingList.Add(mapping);
@@ -1550,6 +1554,18 @@ namespace System.Xml.Serialization
                 UnknownNodeAction unknownNode = UnknownNodeAction.ReadUnknownNode;
                 WriteMembers(ref o, allMembers, unknownNode, unknownNode, anyElementMember, anyTextMember);
 
+                foreach (var member in allMembers)
+                {
+                    if (member.Collection != null)
+                    {
+                        MemberInfo[] memberInfos = o.GetType().GetMember(member.Mapping.Name);
+                        var memberInfo = memberInfos[0];
+                        object collection = null;
+                        SetCollectionObjectWithCollectionMember(ref collection, member.Collection, member.Mapping.TypeDesc.Type);
+                        SetMemberValue(o, collection, memberInfo);
+                    }
+                }
+
                 ReadEndElement();
                 return o;
             }
@@ -1578,8 +1594,7 @@ namespace System.Xml.Serialization
                 {
                     if (QNameEqual(xsiType, am.TypeName, am.Namespace, defaultNamespace))
                     {
-                        o = null;
-                        WriteArray(ref o, am, false, false, defaultNamespace);
+                        o = WriteArray(am, false, false, defaultNamespace);
                         return true;
                     }
 
@@ -1824,6 +1839,10 @@ namespace System.Xml.Serialization
             public CollectionMember Collection;
             public int FixupIndex = -1;
             public bool MultiRef = false;
+            public Action<object> Source;
+            public Action<object> ArraySource;
+            public Action<object> CheckSpecifiedSource;
+            public Action<object> ChoiceSource;
 
             public Member(MemberMapping mapping)
             {
@@ -1834,6 +1853,11 @@ namespace System.Xml.Serialization
             {
                 Collection = collectionMember;
             }
+        }
+
+        internal class ObjectHolder
+        {
+            public Object Object;
         }
 
         enum UnknownNodeAction
