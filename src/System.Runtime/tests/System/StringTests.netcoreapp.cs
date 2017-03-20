@@ -49,6 +49,7 @@ namespace System.Tests
             yield return new object[] { '|', new string[] { "a", "b", "c" }, 0, 2, "a|b" };
             yield return new object[] { '|', new string[] { "a", "b", "c" }, 1, 1, "b" };
             yield return new object[] { '|', new string[] { "a", "b", "c" }, 1, 2, "b|c" };
+            yield return new object[] { '|', new string[] { "a", "b", "c" }, 3, 0, "" };
             yield return new object[] { '|', new string[] { "a", "b", "c" }, 0, 0, "" };
             yield return new object[] { '|', new string[] { "", "", "" }, 0, 3, "||" };
             yield return new object[] { '|', new string[] { null, null, null }, 0, 3, "||" };
@@ -67,18 +68,19 @@ namespace System.Tests
             }
 
             Assert.Equal(expected, string.Join(separator, values, startIndex, count));
+            Assert.Equal(expected, string.Join(separator.ToString(), values, startIndex, count));
         }
 
         public static IEnumerable<object[]> Join_Char_ObjectArray_TestData()
         {
-        	yield return new object[] { '|', new object[0], "" };
-        	yield return new object[] { '|', new object[] { 1 }, "1" };
-        	yield return new object[] { '|', new object[] { 1, 2, 3 }, "1|2|3" };
-        	yield return new object[] { '|', new object[] { new ObjectWithNullToString(), 2, new ObjectWithNullToString() }, "|2|" };
-        	yield return new object[] { '|', new object[] { "1", null, "3" }, "1||3" };
-        	yield return new object[] { '|', new object[] { "", "", "" }, "||" };
-        	yield return new object[] { '|', new object[] { "", null, "" }, "||" };
-        	yield return new object[] { '|', new object[] { null, null, null }, "||" };
+            yield return new object[] { '|', new object[0], "" };
+            yield return new object[] { '|', new object[] { 1 }, "1" };
+            yield return new object[] { '|', new object[] { 1, 2, 3 }, "1|2|3" };
+            yield return new object[] { '|', new object[] { new ObjectWithNullToString(), 2, new ObjectWithNullToString() }, "|2|" };
+            yield return new object[] { '|', new object[] { "1", null, "3" }, "1||3" };
+            yield return new object[] { '|', new object[] { "", "", "" }, "||" };
+            yield return new object[] { '|', new object[] { "", null, "" }, "||" };
+            yield return new object[] { '|', new object[] { null, null, null }, "||" };
         }
 
         [Theory]
@@ -86,16 +88,16 @@ namespace System.Tests
         public static void Join_Char_ObjectArray(char separator, object[] values, string expected)
         {
             Assert.Equal(expected, string.Join(separator, values));
-            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));       	
+            Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
         }
 
         [Fact]
         public static void Join_Char_NullValues_ThrowsArgumentNullException()
         {
-        	Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null));
-        	Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null, 0, 0));
-        	Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (object[])null));
-        	Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<object>)null));
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null));
+            Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null, 0, 0));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (object[])null));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<object>)null));
         }
 
         [Fact]
@@ -110,12 +112,16 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join('|', new string[] { "Foo" }, 0, -1));
         }
 
-        [Fact]
-        public static void Join_Char_InvalidStartIndexOut_ThrowsArgumentOutOfRangeException()
+        [Theory]
+        [InlineData(2, 1)]
+        [InlineData(2, 0)]
+        [InlineData(1, 2)]
+        [InlineData(1, 1)]
+        [InlineData(0, 2)]
+        [InlineData(-1, 0)]
+        public static void Join_Char_InvalidStartIndexCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('|', new string[] { "Foo" }, 2, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('|', new string[] { "Foo" }, 1, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('|', new string[] { "Foo" }, 0, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join('|', new string[] { "Foo" }, startIndex, count));
         }
     }
 }
