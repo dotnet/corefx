@@ -221,7 +221,7 @@ namespace System
         public bool TryCopyTo(Span<T> destination)
         {
             int length = _length;
-            int destLength = destination._length;
+            int destLength = destination.Length;
 
             if ((uint)length == 0)
                 return true;
