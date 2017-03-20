@@ -65,9 +65,6 @@
   <ItemGroup>
     <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="ILReader\ILPrinter.netcoreapp.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
     <Compile Include="DebugViewTests.cs" />
@@ -283,6 +280,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(IsInterpreting)' != 'true' ">
+    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" />
     <Compile Include="ILReader\DynamicMethodILProvider.cs" />
     <Compile Include="ILReader\DynamicScopeTokenResolver.cs" />
     <Compile Include="ILReader\FormatProvider.cs" />
@@ -292,7 +290,7 @@
     <Compile Include="ILReader\ILReaderFactory.cs" />
     <Compile Include="ILReader\ReadableILStringVisitor.cs" />
     <Compile Include="ILReader\TokenResolver.cs" />
-    <Compile Include="ILReader\ILPrinter.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
+    <Compile Include="ILReader\ILPrinter.cs" />
     <Compile Include="ILReader\PrivateReflectionHelpers.cs" />
     <Compile Include="ILReader\LocalsSignatureParser.cs" />
     <Compile Include="ILReader\SigParser.cs" />
