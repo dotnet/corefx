@@ -14,8 +14,8 @@ namespace System.Net.Http
         public const string ResponseWriteNameDeprecated = "System.Net.Http.Response";
 
         public const string ExceptionEventName = "System.Net.Http.Exception";
-        public const string ActivityName = "System.Net.Http.HttpReqOut";
-        public const string ActivityStartName = "System.Net.Http.HttpReqOut.Start";
+        public const string ActivityName = "System.Net.Http.HttpRequestOut";
+        public const string ActivityStartName = "System.Net.Http.HttpRequestOut.Start";
 
         public const string RequestIdHeaderName = "Request-Id";
         public const string CorrelationContextHeaderName = "Correlation-Context";
