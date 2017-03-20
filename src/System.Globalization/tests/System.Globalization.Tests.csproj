@@ -125,7 +125,7 @@
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.Unix.cs" Condition="'$(TargetGroup)' != 'uap'">
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.Unix.cs" Condition="'$(TargetsWindows)' != 'true'">
       <Link>Common\System\PlatformDetection.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
