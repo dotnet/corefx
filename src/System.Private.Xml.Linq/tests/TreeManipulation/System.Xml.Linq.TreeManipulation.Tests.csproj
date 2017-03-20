@@ -9,11 +9,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="XAttributeEnumRemove.netcoreapp.cs" />
-    <Compile Include="XNodeSequenceRemove.netcoreapp.cs" />
-  </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" />
     <Compile Include="AddFirstAddFirstIntoDocument.cs" />
     <Compile Include="AddFirstInvalidIntoXDocument.cs" />
     <Compile Include="AddFirstSingeNodeAddIntoElement.cs" />
@@ -30,7 +27,7 @@
     <Compile Include="SaveWithWriter.cs" />
     <Compile Include="SimpleObjectsCreation.cs" />
     <Compile Include="TreeManipulationTests.cs" />
-    <Compile Include="XAttributeEnumRemove.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
+    <Compile Include="XAttributeEnumRemove.cs" />
     <Compile Include="XAttributeRemove.cs" />
     <Compile Include="XContainerAddIntoDocument.cs" />
     <Compile Include="XContainerAddIntoElement.cs" />
@@ -50,7 +47,7 @@
     <Compile Include="XNodeReplaceOnDocument2.cs" />
     <Compile Include="XNodeReplaceOnDocument3.cs" />
     <Compile Include="XNodeReplaceOnElement.cs" />
-    <Compile Include="XNodeSequenceRemove.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
+    <Compile Include="XNodeSequenceRemove.cs" />
     <Compile Include="XElementChangedNotificationTests.cs" />
     <Compile Include="SaveWithFileName.cs" />
   </ItemGroup>

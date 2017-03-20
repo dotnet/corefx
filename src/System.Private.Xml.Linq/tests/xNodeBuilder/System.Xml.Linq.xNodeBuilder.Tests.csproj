@@ -9,10 +9,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="XmlReaderDiff.netcoreapp.cs" />
-  </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" />
     <Compile Include="CommonTests.cs" />
     <Compile Include="EndOfLineHandlingTests.cs" />
     <Compile Include="ErrorConditions.cs" />
