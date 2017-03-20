@@ -402,7 +402,7 @@ namespace System.Net.Sockets
             }
 
             // OK to dispose now.
-            FreeInternals(false);
+            FreeInternals();
 
             // Don't bother finalizing later.
             GC.SuppressFinalize(this);
@@ -410,7 +410,10 @@ namespace System.Net.Sockets
 
         ~SocketAsyncEventArgs()
         {
-            FreeInternals(true);
+            if (!Environment.HasShutdownStarted)
+            {
+                FreeInternals();
+            }
         }
 
         // NOTE: Use a try/finally to make sure Complete is called when you're done
@@ -469,14 +472,10 @@ namespace System.Net.Sockets
             // Remember the operation type.
             _completedOperation = SocketAsyncOperation.Accept;
 
-            // AcceptEx needs a single buffer with room for two special sockaddr data structures.
-            // It can also take additional buffer space in front of those special sockaddr 
-            // structures that can be filled in with initial data coming in on a connection.
-
-            // First calculate the special AcceptEx address buffer size.
-            // It is the size of two native sockaddr buffers with 16 extra bytes each.
-            // The native sockaddr buffers vary by address family so must reference the current socket.
-            _acceptAddressBufferCount = 2 * (_currentSocket._rightEndPoint.Serialize().Size + 16);
+            // AcceptEx needs a single buffer that's the size of two native sockaddr buffers with 16
+            // extra bytes each. It can also take additional buffer space in front of those special
+            // sockaddr structures that can be filled in with initial data coming in on a connection.
+            _acceptAddressBufferCount = 2 * (Socket.GetAddressSize(_currentSocket._rightEndPoint) + 16);
 
             // If our caller specified a buffer (willing to get received data with the Accept) then
             // it needs to be large enough for the two special sockaddr buffers that AcceptEx requires.

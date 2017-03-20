@@ -5,10 +5,7 @@
     <AssemblyName>System.Threading.Thread</AssemblyName>
     <OutputType>Library</OutputType>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <!-- Type being defined conflicts with imported type from dependency assembly -->
-    <NoWarn>436</NoWarn>
     <ProjectGuid>{06197EED-FF48-43F3-976D-463839D43E8C}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -28,16 +25,10 @@
     <Compile Include="System\Threading\ThreadAbortException.cs" />
     <Compile Include="System\Threading\ThreadExceptionEventArgs.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
-      <Aliases>System_Runtime</Aliases>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj">
-      <Aliases>System_Runtime_Extensions</Aliases>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj">
-      <Aliases>System_Security_Principal</Aliases>
-    </ProjectReference>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
+    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
   </ItemGroup>
   <ItemGroup>

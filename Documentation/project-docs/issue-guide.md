@@ -16,16 +16,16 @@ Sometimes after debate, we'll decide an issue isn't a good fit for CoreFx.  In t
 We use GitHub [labels](https://github.com/dotnet/corefx/labels) on our issues in order to classify them.  We have the following categories per issue:
 * **Area**: These area-&#42; labels (e.g. [area-System.Collections](https://github.com/dotnet/corefx/labels/area-System.Collections)) call out the assembly or assemblies the issue applies to. In addition to labels per assembly, we have a few other area labels: [area-Infrastructure](https://github.com/dotnet/corefx/labels/area-Infrastructure), for issues that relate to our build or test infrastructure, and [area-Meta](https://github.com/dotnet/corefx/labels/area-Meta) for issues that deal with the repository itself, the direction of the .NET Core Platform, our processes, etc. See [full list of areas](#areas).
 * **Issue Type**: These labels classify the type of issue.  We use the following types:
- * [bug](https://github.com/dotnet/corefx/labels/bug): Bugs in an assembly.
- * api-&#42; ([api-approved](https://github.com/dotnet/corefx/labels/api-approved), [api-needs-work](https://github.com/dotnet/corefx/labels/api-needs-work), [api-ready-for-review](https://github.com/dotnet/corefx/labels/api-ready-for-review)): Issues which would add APIs to an assembly (see [API Review process](api-review-process.md) for details).
- * [enhancement](https://github.com/dotnet/corefx/labels/enhancement): Improvements to an assembly which do not add new APIs (e.g. performance improvements, code cleanup).
- * [test bug](https://github.com/dotnet/corefx/labels/test%20bug): Bugs in the tests for a specific assembly.
- * [test enhancement](https://github.com/dotnet/corefx/labels/test%20enhancement): Improvements in the tests for a specific assembly (e.g. improving test coverage).
- * [documentation](https://github.com/dotnet/corefx/labels/documentation): Issues related to documentation (e.g. incorrect documentation, enhancement requests).
- * [question](https://github.com/dotnet/corefx/labels/question): Questions about the product, source code, etc.
+  * [bug](https://github.com/dotnet/corefx/labels/bug): Bugs in an assembly.
+  * api-&#42; ([api-approved](https://github.com/dotnet/corefx/labels/api-approved), [api-needs-work](https://github.com/dotnet/corefx/labels/api-needs-work), [api-ready-for-review](https://github.com/dotnet/corefx/labels/api-ready-for-review)): Issues which would add APIs to an assembly (see [API Review process](api-review-process.md) for details).
+  * [enhancement](https://github.com/dotnet/corefx/labels/enhancement): Improvements to an assembly which do not add new APIs (e.g. performance improvements, code cleanup).
+  * [test bug](https://github.com/dotnet/corefx/labels/test%20bug): Bugs in the tests for a specific assembly.
+  * [test enhancement](https://github.com/dotnet/corefx/labels/test%20enhancement): Improvements in the tests for a specific assembly (e.g. improving test coverage).
+  * [documentation](https://github.com/dotnet/corefx/labels/documentation): Issues related to documentation (e.g. incorrect documentation, enhancement requests).
+  * [question](https://github.com/dotnet/corefx/labels/question): Questions about the product, source code, etc.
 * **Other**:
- * [up for grabs](https://github.com/dotnet/corefx/labels/up%20for%20grabs): Small sections of work which we believe are well scoped.  These sorts of issues are a good place to start if you are new.  Anyone is free to work on these issues.
- * [needs more info](https://github.com/dotnet/corefx/labels/needs%20more%20info): Issues which need more information to be actionable.  Usually this will be because we can't reproduce a reported bug.  We'll close these issues after a little bit if we haven't gotten actionable information, but we welcome folks who have acquired more information to reopen the issue.
+  * [up for grabs](https://github.com/dotnet/corefx/labels/up%20for%20grabs): Small sections of work which we believe are well scoped.  These sorts of issues are a good place to start if you are new.  Anyone is free to work on these issues.
+  * [needs more info](https://github.com/dotnet/corefx/labels/needs%20more%20info): Issues which need more information to be actionable.  Usually this will be because we can't reproduce a reported bug.  We'll close these issues after a little bit if we haven't gotten actionable information, but we welcome folks who have acquired more information to reopen the issue.
 
 In addition to the above, we have a handful of other labels we use to help classify our issues.  Some of these tag cross cutting concerns (e.g. [tenet-performance](https://github.com/dotnet/corefx/labels/tenet-performance)), whereas others are used to help us track additional work needed before closing an issue (e.g. [api-needs-exposed](https://github.com/dotnet/corefx/labels/api-needs-exposed)).
 
@@ -55,7 +55,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Composition](https://github.com/dotnet/corefx/labels/area-System.Composition)         | [@AlexGhiondea](https://github.com/AlexGhiondea) |  |
 | [System.Configuration](https://github.com/dotnet/corefx/labels/area-System.Configuration)     | [@JeremyKuhne](https://github.com/JeremyKuhne) |  |
 | [System.Console](https://github.com/dotnet/corefx/labels/area-System.Console)                 | [@ianhays](https://github.com/ianhays) |  |
-| [System.Data](https://github.com/dotnet/corefx/labels/area-System.Data)                       | [@saurabh500](https://github.com/saurabh500), [@YoungGah](https://github.com/YoungGah) |  |
+| [System.Data](https://github.com/dotnet/corefx/labels/area-System.Data)                       | [@saurabh500](https://github.com/saurabh500), [@corivera](https://github.com/corivera) |  |
 | [System.Data.SqlClient](https://github.com/dotnet/corefx/labels/area-System.Data.SqlClient)   | [@saurabh500](https://github.com/saurabh500), [@YoungGah](https://github.com/YoungGah) | **Pending triage** |
 | [System.Diagnostics](https://github.com/dotnet/corefx/labels/area-System.Diagnostics)         | [@joperezr](https://github.com/dotnet/joperezr) |  |
 | [System.Diagnostics.Process](https://github.com/dotnet/corefx/labels/area-System.Diagnostics.Process) | [@Priya91](https://github.com/Priya91) |  |
@@ -106,7 +106,7 @@ Note: Area triage will apply the new scheme (issue types and assignee) throughou
 1. Use **up for grabs** as much as possible, ideally with a quick note about next steps / complexity of the issue
 1. Set milestone to **Future**, unless you can 95%-commit you can fund the issue in specific milestone
 1. Each issue has exactly one "*issue type*" label (**bug**, **enhancement**, **api-needs-work**, **test bug**, **test enhancement**, **question**, **documentation**, etc.)
-  * Don't be afraid to be wrong when deciding 'bug' vs. 'test bug' (flip a coin if you must). The most useful values for tracking are 'api-&#42;' vs. 'enhancement', 'question', and 'documentation'.
+    * Don't be afraid to be wrong when deciding 'bug' vs. 'test bug' (flip a coin if you must). The most useful values for tracking are 'api-&#42;' vs. 'enhancement', 'question', and 'documentation'.
 1. Don't be afraid to say no, or close issues - just explain why and be polite
 1. Don't be afraid to be wrong - just be flexible when new information appears
 

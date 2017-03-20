@@ -1768,7 +1768,11 @@ extern "C" Error SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, in
 
     socklen_t addrLen = static_cast<socklen_t>(*socketAddressLen);
     int accepted;
+#if defined(HAVE_ACCEPT_4) && defined(SOCK_CLOEXEC)
+    while (CheckInterrupted(accepted = accept4(fd, reinterpret_cast<sockaddr*>(socketAddress), &addrLen, SOCK_CLOEXEC)));
+#else
     while (CheckInterrupted(accepted = accept(fd, reinterpret_cast<sockaddr*>(socketAddress), &addrLen)));
+#endif
     if (accepted == -1)
     {
         *acceptedSocket = -1;
@@ -2040,7 +2044,11 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     optName = IP_DROP_MEMBERSHIP;
                     return true;
 
-                // case PAL_SO_IP_DONTFRAGMENT:
+#ifdef IP_MTU_DISCOVER
+                case PAL_SO_IP_DONTFRAGMENT:
+                    optName = IP_MTU_DISCOVER; // option values will also need to be translated
+                    return true;
+#endif
 
 #ifdef IP_ADD_SOURCE_MEMBERSHIP
                 case PAL_SO_IP_ADD_SOURCE_MEMBERSHIP:
@@ -2202,6 +2210,17 @@ extern "C" Error SystemNative_GetSockOpt(
         return SystemNative_ConvertErrorPlatformToPal(errno);
     }
 
+#ifdef IP_MTU_DISCOVER
+    // Handle some special cases for compatibility with Windows
+    if (socketOptionLevel == PAL_SOL_IP)
+    {
+        if (socketOptionName == PAL_SO_IP_DONTFRAGMENT)
+        {
+            *optionValue = *optionValue == IP_PMTUDISC_DO ? 1 : 0;
+        }
+    }
+#endif
+
     assert(optLen <= static_cast<socklen_t>(*optionLen));
     *optionLen = static_cast<int32_t>(optLen);
     return PAL_SUCCESS;
@@ -2210,7 +2229,7 @@ extern "C" Error SystemNative_GetSockOpt(
 extern "C" Error
 SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
 {
-    if (optionLen < 0)
+    if (optionLen < 0 || optionValue == nullptr)
     {
         return PAL_EFAULT;
     }
@@ -2257,6 +2276,15 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
             return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
         }
     }
+#ifdef IP_MTU_DISCOVER
+    else if (socketOptionLevel == PAL_SOL_IP)
+    {
+        if (socketOptionName == PAL_SO_IP_DONTFRAGMENT)
+        {
+            *optionValue = *optionValue != 0 ? IP_PMTUDISC_DO : IP_PMTUDISC_DONT;
+        }
+    }
+#endif
 
     int optLevel, optName;
     if (!TryGetPlatformSocketOption(socketOptionLevel, socketOptionName, optLevel, optName))
@@ -2360,6 +2388,9 @@ extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, 
         return PAL_EPROTONOSUPPORT;
     }
 
+#ifdef SOCK_CLOEXEC
+    platformSocketType |= SOCK_CLOEXEC;
+#endif
     *createdSocket = socket(platformAddressFamily, platformSocketType, platformProtocolType);
     return *createdSocket != -1 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }

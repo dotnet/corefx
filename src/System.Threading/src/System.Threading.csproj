@@ -8,10 +8,9 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
-    <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
-    <!-- Suppress warning for LockRecursionPolicy type conflicts between this assembly and System.Private.CoreLib. -->
-    <!-- Remove when LockRecursionPolicy is removed from System.Private.CoreLib. -->
+    <!-- type LockRecursionPolicy conflicts with Corelib -->
     <NoWarn>0436</NoWarn>
+    <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
     <!-- Remove this define after enabling CdsSyncEtwBCLProvider (https://github.com/dotnet/corefx/issues/16881) -->
     <DefineConstants>$(DefineConstants);uapaot</DefineConstants>
   </PropertyGroup>
@@ -39,8 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
-    <!-- The Environment class is public in CoreCLR version of System.Private.CoreLib, however, internal in .NET Native's version -->
-    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" Condition="'$(TargetGroup)' == 'uapaot'" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />

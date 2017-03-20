@@ -224,9 +224,10 @@ namespace System.Data.SqlClient.SNI
 
         internal override uint SetConnectionBufferSize(ref uint unsignedPacketSize) => SNIProxy.Singleton.SetConnectionBufferSize(Handle, unsignedPacketSize);
 
-        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer)
+        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, ref byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer)
         {
             SNIProxy.Singleton.GenSspiClientContext(sspiClientContextStatus, receivedBuff, ref sendBuff, _sniSpnBuffer);
+            sendLength = (uint)(sendBuff != null ? sendBuff.Length : 0);
             return 0;
         }
 

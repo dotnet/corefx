@@ -2052,6 +2052,10 @@ namespace System
         public static string Join(string separator, params string[] value) { throw null; }
         public static string Join(string separator, string[] value, int startIndex, int count) { throw null; }
         public static string Join<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
+        public static string Join(char separator, params object[] values) { throw null; }
+        public static string Join(char separator, params string[] value) { throw null; }
+        public static string Join(char separator, string[] value, int startIndex, int count) { throw null; }
+        public static string Join<T>(char separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public int LastIndexOf(char value) { throw null; }
         public int LastIndexOf(char value, int startIndex) { throw null; }
         public int LastIndexOf(char value, int startIndex, int count) { throw null; }
@@ -2622,6 +2626,7 @@ namespace System
         public virtual bool IsSecurityTransparent { get { throw null; } }
         public virtual bool IsSerializable { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
+        public virtual bool IsSZArray { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public bool IsVisible { get { throw null; } }
@@ -6119,6 +6124,7 @@ namespace System.Reflection
         protected override bool IsValueTypeImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsConstructedGenericType { get { throw null; } }
+        public override bool IsSZArray { get { throw null; } }
         public override System.Type GetElementType() { throw null; }
         protected override bool HasElementTypeImpl() { throw null; }
         public override System.Type UnderlyingSystemType { get { throw null; } }
