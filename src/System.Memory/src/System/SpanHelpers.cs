@@ -12,15 +12,15 @@ namespace System
     internal static partial class SpanHelpers
     {
         /// <summary>
-        /// Implements the core copy functionality used by Span and ReadOnlySpan.
+        /// Implements the copy functionality used by Span and ReadOnlySpan.
         ///
-        /// NOTE: Fast span implements TryCopyTo in core and therefore this implementation
+        /// NOTE: Fast span implements TryCopyTo in corelib and therefore this implementation
         ///       is only used by portable span. The code must live in code that only compiles
         ///       for portable span which means either each individual span implementation
         ///       of this shared code file. Other shared SpanHelper.X.cs files are compiled
         ///       for both portable and fast span implementations.
         /// </summary>
-        public static unsafe void CopyCore<T>(ref T dst, int dstLength, ref T src, int srcLength)
+        public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
         {
             IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
             bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;

@@ -333,7 +333,7 @@ namespace System
 
             ref T src = ref DangerousGetPinnableReference();
             ref T dst = ref destination.DangerousGetPinnableReference();
-            SpanHelpers.CopyCore<T>(ref dst, destLength, ref src, length);
+            SpanHelpers.CopyTo<T>(ref dst, destLength, ref src, length);
             return true;
         }
 
