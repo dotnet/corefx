@@ -2381,31 +2381,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 switch (ftDest)
                 {
                     case FUNDTYPE.FT_I1:
-                        if (value <= (ulong)SByte.MaxValue)
+                        if (value <= (ulong)sbyte.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_I2:
-                        if (value <= (ulong)Int16.MaxValue)
+                        if (value <= (ulong)short.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_I4:
-                        if (value <= Int32.MaxValue)
+                        if (value <= int.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_I8:
-                        if (value <= Int64.MaxValue)
+                        if (value <= long.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_U1:
-                        if (value <= Byte.MaxValue)
+                        if (value <= byte.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_U2:
-                        if (value <= UInt16.MaxValue)
+                        if (value <= ushort.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_U4:
-                        if (value <= UInt32.MaxValue)
+                        if (value <= uint.MaxValue)
                             return true;
                         break;
                     case FUNDTYPE.FT_U8:

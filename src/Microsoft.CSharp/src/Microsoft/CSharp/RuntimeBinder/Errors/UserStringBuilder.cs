@@ -143,7 +143,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendPrintf(string format, params object[] args)
         {
-            ErrAppendString(String.Format(CultureInfo.InvariantCulture, format, args));
+            ErrAppendString(string.Format(CultureInfo.InvariantCulture, format, args));
         }
         private void ErrAppendName(Name name)
         {

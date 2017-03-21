@@ -247,7 +247,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     AggregateSymbol aggregate = (cType as AggregateType).getAggregate();
                     FieldSymbol addedField = null;
 
-                    // We need to add fields before the actual events, so do the first iteration 
+                    // We need to add fields before the actual events, so do the first iteration
                     // excludint events.
                     foreach (MemberInfo member in members)
                     {
@@ -420,7 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     // Suppose we have the following:
                     //
-                    // class A<A1, A2, ..., An> 
+                    // class A<A1, A2, ..., An>
                     // {
                     //     class B<B1, B2, ..., Bm>
                     //     {
@@ -429,7 +429,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     //
                     // B will have m+n generic arguments - { A1, A2, ..., An, B1, B2, ..., Bn }.
                     // As we enumerate these, we need to skip type parameters whose GenericParameterPosition
-                    // is less than n, since the first n type parameters are { A1, A2, ..., An }. 
+                    // is less than n, since the first n type parameters are { A1, A2, ..., An }.
 
                     Type t = genericArguments[i];
 
@@ -530,7 +530,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         //
         // In the above two methods, the two U's are different in Reflection. Here we just
         // return the type parameter type given if it is in a method, we do not try to
-        // generalize these occurrences for reference equality. 
+        // generalize these occurrences for reference equality.
         //
         private Type GetOriginalTypeParameterType(Type t)
         {
@@ -672,7 +672,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             NamespaceOrAggregateSymbol current = _rootNamespace;
 
-            // Go through the declaration chain and add namespaces and types for 
+            // Go through the declaration chain and add namespaces and types for
             // each element in the chain.
             for (int i = 0; i < declarationChain.Count; i++)
             {
@@ -695,7 +695,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // cannot both have entries in the symbol table with our current architecture.
                     // This can happen in dynamic, since the runtime binder lives across all
                     // call sites in an appdomain, and assemblies can have been loaded at runtime
-                    // that have different types with the same name. 
+                    // that have different types with the same name.
 
                     // In the real compiler, this would have been an error and name lookup would
                     // be ambiguous, but here we never have to lookup names of types for real (only
@@ -705,7 +705,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // identically named types that are not the same, then we are going to clear
                     // the entire symbol table and restart this binding. This solution is not
                     // without its own problems, since it is possible to conceive of a single
-                    // dynamic binding that needs to simultaneously know about both of the 
+                    // dynamic binding that needs to simultaneously know about both of the
                     // similarly named types, but we are not going to try to solve that
                     // scenario here.
 
@@ -726,7 +726,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // If we haven't found this type yet, then add it to our symbol table.
                     if (next == null || t.IsNullableType())
                     {
-                        // Note that if we have anything other than an AggregateSymbol, 
+                        // Note that if we have anything other than an AggregateSymbol,
                         // we must be at the end of the line - that is, nothing else can
                         // have children.
 
@@ -791,7 +791,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 meth = AddMethodToSymbolTable(methinfo, parent, MethodKindEnum.Actual);
 
                 // Because we return null from AddMethodToSymbolTable when we have a MethodKindEnum.Actual
-                // and the method that we're trying to add is a special name, we need to assert that 
+                // and the method that we're trying to add is a special name, we need to assert that
                 // we indeed have added a method. This is because no special name should have a method
                 // type parameter on it.
                 Debug.Assert(meth != null);
@@ -851,7 +851,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // Get a nullable type of the underlying type.
                 if (t.GetGenericArguments()[0].DeclaringType == t)
                 {
-                    // If the generic argument for nullable is our child, then we're 
+                    // If the generic argument for nullable is our child, then we're
                     // declaring the initial Nullable<T>.
                     AggregateSymbol agg = _symbolTable.LookupSym(
                         GetName(t), parent, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol();
@@ -880,10 +880,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             // have the type itself, first we need to build the chain up from the
             // type down to the root namespace, then we need to ensure that
             // the chain exists in our symbol table by searching from the root namespace
-            // back down to the calling type. Also note that if we have a method type 
+            // back down to the calling type. Also note that if we have a method type
             // parameter, then we'll also add the MethodBase to the chain.
             //
-            // Note that we'll populate this list in a hybrid way - we'll add the 
+            // Note that we'll populate this list in a hybrid way - we'll add the
             // types for the type part of the chain, and we'll just add the string names
             // of the namespaces.
 
@@ -1032,7 +1032,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             else
             {
                 // If it derives from Delegate or MulticastDelegate, then its
-                // a delegate type. However, MuticastDelegate itself is not a 
+                // a delegate type. However, MuticastDelegate itself is not a
                 // delegate type.
                 if (type.BaseType != null &&
                     (type.BaseType.FullName == "System.MulticastDelegate" ||
@@ -1167,7 +1167,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
-            // We won't be able to find the difference between Ifaces and 
+            // We won't be able to find the difference between Ifaces and
             // IfacesAll anymore - at runtime, the class implements all of its
             // Ifaces and IfacesAll, so theres no way to differentiate.
             //
@@ -1407,7 +1407,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 prop = prevProp;
                 if (isIndexer)
                 {
-                    // We have an indexer for a different property info, so 
+                    // We have an indexer for a different property info, so
                     // create a new symbol for it.
                     prop = null;
                 }
@@ -1415,12 +1415,12 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // If we already had a property but its associated info doesn't match,
             // then we repurpose the property that we've found. This can happen
-            // in the case of generic instantiations. 
+            // in the case of generic instantiations.
             //
-            // Note that this is a bit of a hack - the best way to fix this is 
+            // Note that this is a bit of a hack - the best way to fix this is
             // by not depending on the instantiated properties at all, but rather depending
             // on their non-instantiated generic form, which can be gotten from the
-            // parent's generic type definition's member. From there, we'll also need to 
+            // parent's generic type definition's member. From there, we'll also need to
             // keep track of the instantiation as we move along, so that when we need the
             // associated property, we can instantiate it correctly.
             //
@@ -1560,8 +1560,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 #if UNSUPPORTEDAPI
             Debug.Assert(member.DeclaringType == member.ReflectedType);
 #endif
-            // If we are trying to add an actual method via MethodKindEnum.Actual, and 
-            // the memberinfo is a special name, and its not static, then return null. 
+            // If we are trying to add an actual method via MethodKindEnum.Actual, and
+            // the memberinfo is a special name, and its not static, then return null.
             // We'll re-add the thing later with some other method kind.
             //
             // This will happen for things like indexers and properties. The ones that have
@@ -1784,74 +1784,74 @@ namespace Microsoft.CSharp.RuntimeBinder
 #endif
                     Type defType = defValue.GetType();
 
-                    if (defType == typeof(Byte))
+                    if (defType == typeof(byte))
                     {
-                        cv = ConstVal.Get((long)(Byte)defValue);
+                        cv = ConstVal.Get((byte)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BYTE);
                     }
-                    else if (defType == typeof(Int16))
+                    else if (defType == typeof(short))
                     {
-                        cv = ConstVal.Get((long)(Int16)defValue);
+                        cv = ConstVal.Get((short)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SHORT);
                     }
-                    else if (defType == typeof(Int32))
+                    else if (defType == typeof(int))
                     {
-                        cv = ConstVal.Get((long)(Int32)defValue);
+                        cv = ConstVal.Get((int)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_INT);
                     }
-                    else if (defType == typeof(Int64))
+                    else if (defType == typeof(long))
                     {
-                        cv = ConstVal.Get((Int64)defValue);
+                        cv = ConstVal.Get((long)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_LONG);
                     }
-                    else if (defType == typeof(Single))
+                    else if (defType == typeof(float))
                     {
-                        cv = ConstVal.Get((Single)defValue);
+                        cv = ConstVal.Get((float)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_FLOAT);
                     }
-                    else if (defType == typeof(Double))
+                    else if (defType == typeof(double))
                     {
-                        cv = ConstVal.Get((Double)defValue);
+                        cv = ConstVal.Get((double)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DOUBLE);
                     }
-                    else if (defType == typeof(Decimal))
+                    else if (defType == typeof(decimal))
                     {
-                        cv = ConstVal.Get((Decimal)defValue);
+                        cv = ConstVal.Get((decimal)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DECIMAL);
                     }
-                    else if (defType == typeof(Char))
+                    else if (defType == typeof(char))
                     {
-                        cv = ConstVal.Get((long)(Char)defValue);
+                        cv = ConstVal.Get((char)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_CHAR);
                     }
-                    else if (defType == typeof(Boolean))
+                    else if (defType == typeof(bool))
                     {
-                        cv = ConstVal.Get((Boolean)defValue);
+                        cv = ConstVal.Get((bool)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BOOL);
                     }
-                    else if (defType == typeof(SByte))
+                    else if (defType == typeof(sbyte))
                     {
-                        cv = ConstVal.Get((long)(SByte)defValue);
+                        cv = ConstVal.Get((sbyte)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SBYTE);
                     }
-                    else if (defType == typeof(UInt16))
+                    else if (defType == typeof(ushort))
                     {
-                        cv = ConstVal.Get((long)(UInt16)defValue);
+                        cv = ConstVal.Get((ushort)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_USHORT);
                     }
-                    else if (defType == typeof(UInt32))
+                    else if (defType == typeof(uint))
                     {
-                        cv = ConstVal.Get((long)(UInt32)defValue);
+                        cv = ConstVal.Get((uint)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_UINT);
                     }
-                    else if (defType == typeof(UInt64))
+                    else if (defType == typeof(ulong))
                     {
-                        cv = ConstVal.Get((UInt64)defValue);
+                        cv = ConstVal.Get((ulong)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ULONG);
                     }
-                    else if (defType == typeof(String))
+                    else if (defType == typeof(string))
                     {
-                        cv = ConstVal.Get((String)defValue);
+                        cv = ConstVal.Get((string)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_STRING);
                     }
                     // if we fall off the end of this cascading if, we get Object/null
@@ -1978,7 +1978,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 // We have the base class method that we're overriding. We can assume
                 // that all the parent aggregate symbols were added, and that we added
-                // the methods in order. As such, our parent methods should be in the 
+                // the methods in order. As such, our parent methods should be in the
                 // symbol table at this point.
 
                 AggregateSymbol aggregate = GetCTypeFromType(baseMethodInfo.DeclaringType).getAggregate();

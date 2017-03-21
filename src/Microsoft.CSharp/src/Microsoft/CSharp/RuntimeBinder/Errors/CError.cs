@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private static string ComputeString(ErrorCode code, string[] args)
         {
-            return String.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(code), args);
+            return string.Format(CultureInfo.InvariantCulture, ErrorFacts.GetMessage(code), args);
         }
 
         public void Initialize(ErrorCode code, string[] args)
