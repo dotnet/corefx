@@ -178,5 +178,26 @@ namespace System
         NotEqual: // Workaround for https://github.com/dotnet/coreclr/issues/9692
             return false;
         }
+
+        public static bool StartsWith(ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
+        {
+            int length = value.Length;
+
+            if (length == 0)
+                return true;
+
+            if (length > span.Length)
+                return false;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (span[i] != value[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
