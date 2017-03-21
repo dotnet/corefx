@@ -152,9 +152,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value)
         {
-            int spanLength = span.Length;
             int valueLength = value.Length;
-            return valueLength <= spanLength && SpanHelpers.StartsWith(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
         }
 
         /// <summary>
@@ -164,9 +163,8 @@ namespace System
         public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
             where T : struct, IEquatable<T>
         {
-            int spanLength = span.Length;
             int valueLength = value.Length;
-            return valueLength <= spanLength && SpanHelpers.StartsWith<T>(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
         }
 
         /// <summary>
@@ -175,9 +173,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
         {
-            int spanLength = span.Length;
             int valueLength = value.Length;
-            return valueLength <= spanLength && SpanHelpers.StartsWith(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
         }
 
         /// <summary>
@@ -187,9 +184,8 @@ namespace System
         public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
             where T : struct, IEquatable<T>
         {
-            int spanLength = span.Length;
             int valueLength = value.Length;
-            return valueLength <= spanLength && SpanHelpers.StartsWith<T>(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
         }
     }
 }
