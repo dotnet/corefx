@@ -10,46 +10,27 @@ namespace System.Memory.Tests
     public class Perf_Span_StartsWith
     {
         [Benchmark]
-        [InlineData(0, 0)]
         [InlineData(1, 1)]
-        [InlineData(2, 1)]
-        [InlineData(3, 1)]
-        [InlineData(4, 1)]
-        [InlineData(5, 1)]
-        [InlineData(6, 1)]
-        [InlineData(7, 1)]
-        [InlineData(8, 1)]
-        [InlineData(16, 1)]
-        [InlineData(16, 10)]
-        [InlineData(32, 1)]
-        [InlineData(32, 10)]
-        [InlineData(64, 1)]
-        [InlineData(64, 10)]
-        [InlineData(64, 50)]
+        [InlineData(10, 1)]
         [InlineData(100, 1)]
-        [InlineData(100, 10)]
-        [InlineData(100, 50)]
-        [InlineData(100, 100)]
         [InlineData(1000, 1)]
-        [InlineData(1000, 10)]
-        [InlineData(1000, 50)]
-        [InlineData(1000, 100)]
         [InlineData(10000, 1)]
+        [InlineData(10, 10)]
+        [InlineData(100, 10)]
+        [InlineData(1000, 10)]
         [InlineData(10000, 10)]
-        [InlineData(10000, 50)]
+        [InlineData(100, 100)]
+        [InlineData(1000, 100)]
         [InlineData(10000, 100)]
-        [InlineData(100000, 1)]
-        [InlineData(100000, 10)]
-        [InlineData(100000, 50)]
-        [InlineData(100000, 100)]
-        public void String(int size, int valSize)
+        [InlineData(1000, 1000)]
+        [InlineData(10000, 1000)]
+        [InlineData(10000, 10000)]
+        public void Int(int size, int valSize)
         {
             var a = new int[size];
             for (int i = 0; i < size; i++)
             {
                 int num = 65 + i % 26;
-                /*char c = Convert.ToChar(num);
-                char[] chars = {c};*/
                 a[i] = num;
             }
 
@@ -57,8 +38,6 @@ namespace System.Memory.Tests
             for (int i = 0; i < valSize; i++)
             {
                 int num = 65 + i % 26;
-                /*char c = Convert.ToChar(num);
-                char[] chars = { c };*/
                 b[i] = num;
             }
             var span = new Span<int>(a);
@@ -76,38 +55,21 @@ namespace System.Memory.Tests
         }
 
         [Benchmark]
-        [InlineData(0, 0)]
         [InlineData(1, 1)]
-        [InlineData(2, 1)]
-        [InlineData(3, 1)]
-        [InlineData(4, 1)]
-        [InlineData(5, 1)]
-        [InlineData(6, 1)]
-        [InlineData(7, 1)]
-        [InlineData(8, 1)]
-        [InlineData(16, 1)]
-        [InlineData(16, 10)]
-        [InlineData(32, 1)]
-        [InlineData(32, 10)]
-        [InlineData(64, 1)]
-        [InlineData(64, 10)]
-        [InlineData(64, 50)]
+        [InlineData(10, 1)]
         [InlineData(100, 1)]
-        [InlineData(100, 10)]
-        [InlineData(100, 50)]
-        [InlineData(100, 100)]
         [InlineData(1000, 1)]
-        [InlineData(1000, 10)]
-        [InlineData(1000, 50)]
-        [InlineData(1000, 100)]
         [InlineData(10000, 1)]
+        [InlineData(10, 10)]
+        [InlineData(100, 10)]
+        [InlineData(1000, 10)]
         [InlineData(10000, 10)]
-        [InlineData(10000, 50)]
+        [InlineData(100, 100)]
+        [InlineData(1000, 100)]
         [InlineData(10000, 100)]
-        [InlineData(100000, 1)]
-        [InlineData(100000, 10)]
-        [InlineData(100000, 50)]
-        [InlineData(100000, 100)]
+        [InlineData(1000, 1000)]
+        [InlineData(10000, 1000)]
+        [InlineData(10000, 10000)]
         public void Byte(int size, int valSize)
         {
             var a = new byte[size];

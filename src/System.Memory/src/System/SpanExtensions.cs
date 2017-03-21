@@ -152,7 +152,9 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value)
         {
-            return SpanHelpers.StartsWith(span, value);
+            int spanLength = span.Length;
+            int valueLength = value.Length;
+            return valueLength <= spanLength && SpanHelpers.StartsWith(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
         }
 
         /// <summary>
@@ -173,7 +175,9 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
         {
-            return SpanHelpers.StartsWith(span, value);
+            int spanLength = span.Length;
+            int valueLength = value.Length;
+            return valueLength <= spanLength && SpanHelpers.StartsWith(ref span.DangerousGetPinnableReference(), spanLength, ref value.DangerousGetPinnableReference(), valueLength);
         }
 
         /// <summary>

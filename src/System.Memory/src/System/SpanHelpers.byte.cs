@@ -179,25 +179,75 @@ namespace System
             return false;
         }
 
-        public static bool StartsWith(ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
+        public static unsafe bool StartsWith(ref byte searchSpace, int searchSpaceLength, ref byte value, int valueLength)
         {
-            int length = value.Length;
+            Debug.Assert(searchSpaceLength >= 0);
+            Debug.Assert(valueLength >= 0);
 
-            if (length == 0)
+            if (valueLength == 0)
+                return true;  // A zero-length sequence is always treated as "found" at the start of the search space.
+
+            if (Unsafe.AreSame(ref searchSpace, ref value))
                 return true;
 
-            if (length > span.Length)
+            if (valueLength > searchSpaceLength)
                 return false;
 
-            for (int i = 0; i < length; i++)
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            while (valueLength >= 8)
             {
-                if (span[i] != value[i])
-                {
-                    return false;
-                }
+                valueLength -= 8;
+
+                if (Unsafe.Add(ref value, index) != Unsafe.Add(ref searchSpace, index))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 1) != Unsafe.Add(ref searchSpace, index + 1))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 2) != Unsafe.Add(ref searchSpace, index + 2))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 3) != Unsafe.Add(ref searchSpace, index + 3))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 4) != Unsafe.Add(ref searchSpace, index + 4))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 5) != Unsafe.Add(ref searchSpace, index + 5))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 6) != Unsafe.Add(ref searchSpace, index + 6))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 7) != Unsafe.Add(ref searchSpace, index + 7))
+                    goto NotMatched;
+
+                index += 8;
+            }
+
+            if (valueLength >= 4)
+            {
+                valueLength -= 4;
+
+                if (Unsafe.Add(ref value, index) != Unsafe.Add(ref searchSpace, index))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 1) != Unsafe.Add(ref searchSpace, index + 1))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 2) != Unsafe.Add(ref searchSpace, index + 2))
+                    goto NotMatched;
+                if (Unsafe.Add(ref value, index + 3) != Unsafe.Add(ref searchSpace, index + 3))
+                    goto NotMatched;
+
+                index += 4;
+            }
+
+            while (valueLength > 0)
+            {
+                valueLength--;
+
+                if (Unsafe.Add(ref value, index) != Unsafe.Add(ref searchSpace, index))
+                    goto NotMatched;
+
+                index += 1;
             }
 
             return true;
+
+            NotMatched: // Workaround for https://github.com/dotnet/coreclr/issues/9692
+            return false;
         }
     }
 }
