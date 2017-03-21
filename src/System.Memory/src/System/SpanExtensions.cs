@@ -147,8 +147,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this Span<byte> span, byte value0, byte value1, byte value2)
         {
-            return -1;
-            //return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
         }
 
         /// <summary>
@@ -173,8 +172,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
         {
-            return -1;
-            //return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
         }
 
         /// <summary>
