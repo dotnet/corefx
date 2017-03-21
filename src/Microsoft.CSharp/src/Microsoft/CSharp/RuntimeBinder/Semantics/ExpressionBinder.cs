@@ -30,14 +30,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public List<EXPR> prgexpr;
     }
 
-    internal enum BodyType
-    {
-        NormalBlock,
-        StatementExpression,
-        ReturnedExpression
-    }
-
-
     internal enum ConstCastResult
     {
         Success,      // Constant can be cast to type

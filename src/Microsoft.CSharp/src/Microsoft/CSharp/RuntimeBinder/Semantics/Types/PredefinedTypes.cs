@@ -10,31 +10,6 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal enum CorElementType
-    {
-        ELEMENT_TYPE_U1,
-        ELEMENT_TYPE_I2,
-        ELEMENT_TYPE_I4,
-        ELEMENT_TYPE_I8,
-        ELEMENT_TYPE_R4,
-        ELEMENT_TYPE_R8,
-        ELEMENT_TYPE_CHAR,
-        ELEMENT_TYPE_BOOLEAN,
-        ELEMENT_TYPE_I1,
-        ELEMENT_TYPE_U2,
-        ELEMENT_TYPE_U4,
-        ELEMENT_TYPE_U8,
-        ELEMENT_TYPE_I,
-        ELEMENT_TYPE_U,
-        ELEMENT_TYPE_OBJECT,
-        ELEMENT_TYPE_STRING,
-        ELEMENT_TYPE_TYPEDBYREF,
-        ELEMENT_TYPE_CLASS,
-        ELEMENT_TYPE_VALUETYPE,
-        ELEMENT_TYPE_END
-    }
-
-
     internal sealed class PredefinedTypes
     {
         private SymbolTable _runtimeBinderSymbolTable;

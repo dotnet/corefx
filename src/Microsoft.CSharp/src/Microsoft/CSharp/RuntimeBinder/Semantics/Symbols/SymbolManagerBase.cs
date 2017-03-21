@@ -14,13 +14,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         internal static readonly AidContainer NullAidContainer = default(AidContainer);
 
-        private enum Kind
-        {
-            None = 0,
-            File,
-            ExternAlias
-        }
-
         private object _value;
 
         public AidContainer(FileRecord file)
