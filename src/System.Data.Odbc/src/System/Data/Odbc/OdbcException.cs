@@ -25,7 +25,7 @@ namespace System.Data.Odbc
                     builder.Append(Environment.NewLine);
                 }
 
-                builder.Append(Res.GetString(Res.Odbc_ExceptionMessage, ODBC32.RetcodeToString(retcode), error.SQLState, error.Message)); // MDAC 68337
+                builder.Append(SR.GetString(SR.Odbc_ExceptionMessage, ODBC32.RetcodeToString(retcode), error.SQLState, error.Message)); // MDAC 68337
             }
             OdbcException exception = new OdbcException(builder.ToString(), errors);
             return exception;

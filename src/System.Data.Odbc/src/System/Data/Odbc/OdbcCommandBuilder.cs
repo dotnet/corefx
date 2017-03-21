@@ -177,7 +177,7 @@ namespace System.Data.Odbc
             // parts[3] = ProcedureName
             //
             string quote = connection.QuoteChar(ADP.DeriveParameters);
-            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quote, quote, '.', 4, true, Res.ODBC_ODBCCommandText, false);
+            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quote, quote, '.', 4, true, SR.ODBC_ODBCCommandText, false);
             if (null == parts[3])
             { // match Everett behavior, if the commandtext is nothing but whitespace set the command text to the whitespace
                 parts[3] = command.CommandText;

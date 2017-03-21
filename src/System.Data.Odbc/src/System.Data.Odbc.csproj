@@ -42,8 +42,6 @@
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbReferenceCollection.cs" />
-    <Compile Include="Common\System\Data\Res.missing.cs" />
-    <Compile Include="Common\System\Data\Res.cs" />
     <Compile Include="Properties\SecurityTransparent.cs" />
     <Compile Include="System\Data\Odbc\DbDataRecord.cs" />
     <Compile Include="System\Data\Odbc\Odbc32.cs" />

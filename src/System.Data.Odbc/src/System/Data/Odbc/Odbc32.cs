@@ -13,29 +13,29 @@ namespace System.Data.Odbc
     {
         internal static Exception ConnectionClosed()
         {
-            return ADP.InvalidOperation(Res.GetString(Res.Odbc_ConnectionClosed));
+            return ADP.InvalidOperation(SR.GetString(SR.Odbc_ConnectionClosed));
         }
 
         internal static Exception OpenConnectionNoOwner()
         {
-            return ADP.InvalidOperation(Res.GetString(Res.Odbc_OpenConnectionNoOwner));
+            return ADP.InvalidOperation(SR.GetString(SR.Odbc_OpenConnectionNoOwner));
         }
 
         internal static Exception UnknownSQLType(ODBC32.SQL_TYPE sqltype)
         {
-            return ADP.Argument(Res.GetString(Res.Odbc_UnknownSQLType, sqltype.ToString()));
+            return ADP.Argument(SR.GetString(SR.Odbc_UnknownSQLType, sqltype.ToString()));
         }
         internal static Exception ConnectionStringTooLong()
         {
-            return ADP.Argument(Res.GetString(Res.OdbcConnection_ConnectionStringTooLong, ODBC32.MAX_CONNECTION_STRING_LENGTH));
+            return ADP.Argument(SR.GetString(SR.OdbcConnection_ConnectionStringTooLong, ODBC32.MAX_CONNECTION_STRING_LENGTH));
         }
         internal static ArgumentException GetSchemaRestrictionRequired()
         {
-            return ADP.Argument(Res.GetString(Res.ODBC_GetSchemaRestrictionRequired));
+            return ADP.Argument(SR.GetString(SR.ODBC_GetSchemaRestrictionRequired));
         }
         internal static ArgumentOutOfRangeException NotSupportedEnumerationValue(Type type, int value)
         {
-            return ADP.ArgumentOutOfRange(Res.GetString(Res.ODBC_NotSupportedEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
+            return ADP.ArgumentOutOfRange(SR.GetString(SR.ODBC_NotSupportedEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
         }
         internal static ArgumentOutOfRangeException NotSupportedCommandType(CommandType value)
         {
@@ -80,32 +80,32 @@ namespace System.Data.Odbc
 
         internal static InvalidOperationException NoMappingForSqlTransactionLevel(int value)
         {
-            return ADP.DataAdapter(Res.GetString(Res.Odbc_NoMappingForSqlTransactionLevel, value.ToString(CultureInfo.InvariantCulture)));
+            return ADP.DataAdapter(SR.GetString(SR.Odbc_NoMappingForSqlTransactionLevel, value.ToString(CultureInfo.InvariantCulture)));
         }
 
         internal static Exception NegativeArgument()
         {
-            return ADP.Argument(Res.GetString(Res.Odbc_NegativeArgument));
+            return ADP.Argument(SR.GetString(SR.Odbc_NegativeArgument));
         }
         internal static Exception CantSetPropertyOnOpenConnection()
         {
-            return ADP.InvalidOperation(Res.GetString(Res.Odbc_CantSetPropertyOnOpenConnection));
+            return ADP.InvalidOperation(SR.GetString(SR.Odbc_CantSetPropertyOnOpenConnection));
         }
         internal static Exception CantEnableConnectionpooling(ODBC32.RetCode retcode)
         {
-            return ADP.DataAdapter(Res.GetString(Res.Odbc_CantEnableConnectionpooling, ODBC32.RetcodeToString(retcode)));
+            return ADP.DataAdapter(SR.GetString(SR.Odbc_CantEnableConnectionpooling, ODBC32.RetcodeToString(retcode)));
         }
         internal static Exception CantAllocateEnvironmentHandle(ODBC32.RetCode retcode)
         {
-            return ADP.DataAdapter(Res.GetString(Res.Odbc_CantAllocateEnvironmentHandle, ODBC32.RetcodeToString(retcode)));
+            return ADP.DataAdapter(SR.GetString(SR.Odbc_CantAllocateEnvironmentHandle, ODBC32.RetcodeToString(retcode)));
         }
         internal static Exception FailedToGetDescriptorHandle(ODBC32.RetCode retcode)
         {
-            return ADP.DataAdapter(Res.GetString(Res.Odbc_FailedToGetDescriptorHandle, ODBC32.RetcodeToString(retcode)));
+            return ADP.DataAdapter(SR.GetString(SR.Odbc_FailedToGetDescriptorHandle, ODBC32.RetcodeToString(retcode)));
         }
         internal static Exception NotInTransaction()
         {
-            return ADP.InvalidOperation(Res.GetString(Res.Odbc_NotInTransaction));
+            return ADP.InvalidOperation(SR.GetString(SR.Odbc_NotInTransaction));
         }
         internal static Exception UnknownOdbcType(OdbcType odbctype)
         {
