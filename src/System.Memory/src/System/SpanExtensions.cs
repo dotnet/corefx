@@ -126,6 +126,58 @@ namespace System
         }
 
         /// <summary>
+        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">The first value to search for.</param>
+        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this Span<byte> span, byte value0, byte value1)
+        {
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">The first value to search for.</param>
+        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        /// <param name="value2">The value to search for at the index right after the one where the second one is found.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this Span<byte> span, byte value0, byte value1, byte value2)
+        {
+            return -1;
+            //return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">The first value to search for.</param>
+        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this ReadOnlySpan<byte> span, byte value0, byte value1)
+        {
+            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">The first value to search for.</param>
+        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        /// <param name="value2">The value to search for at the index right after the one where the second one is found.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int IndexOf(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
+        {
+            return -1;
+            //return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
         /// Determines whether two sequences are equal by comparing the elements using IEquatable&lt;T&gt;.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
