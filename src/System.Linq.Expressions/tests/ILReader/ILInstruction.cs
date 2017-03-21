@@ -4,6 +4,7 @@
 
 // Code adapted from https://blogs.msdn.microsoft.com/haibo_luo/2010/04/19/ilvisualizer-2010-solution
 
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 
@@ -20,7 +21,11 @@ namespace System.Linq.Expressions.Tests
         public int Offset { get; }
         public OpCode OpCode { get; }
 
-        public abstract void Accept(ILInstructionVisitor visitor);
+        public abstract void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels);
+
+        public virtual int TargetOffset => -1;
+
+        public virtual int[] TargetOffsets => Array.Empty<int>();
     }
 
     public sealed class InlineNoneInstruction : ILInstruction
@@ -28,7 +33,7 @@ namespace System.Linq.Expressions.Tests
         internal InlineNoneInstruction(int offset, OpCode opCode)
             : base(offset, opCode) { }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineNoneInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineNoneInstruction(this, targetLabels);
     }
 
     public sealed class InlineBrTargetInstruction : ILInstruction
@@ -39,10 +44,10 @@ namespace System.Linq.Expressions.Tests
             Delta = delta;
         }
 
-        public int Delta { get; }
-        public int TargetOffset => Offset + Delta + 1 + 4;
+        private int Delta { get; }
+        public override int TargetOffset => Offset + Delta + 1 + 4;
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineBrTargetInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineBrTargetInstruction(this, targetLabels);
     }
 
     public sealed class ShortInlineBrTargetInstruction : ILInstruction
@@ -53,10 +58,10 @@ namespace System.Linq.Expressions.Tests
             Delta = delta;
         }
 
-        public sbyte Delta { get; }
-        public int TargetOffset => Offset + Delta + 1 + 1;
+        private sbyte Delta { get; }
+        public override int TargetOffset => Offset + Delta + 1 + 1;
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitShortInlineBrTargetInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitShortInlineBrTargetInstruction(this, targetLabels);
     }
 
     public sealed class InlineSwitchInstruction : ILInstruction
@@ -70,8 +75,7 @@ namespace System.Linq.Expressions.Tests
             _deltas = deltas;
         }
 
-        public int[] Deltas => (int[])_deltas.Clone();
-        public int[] TargetOffsets
+        public override int[] TargetOffsets
         {
             get
             {
@@ -88,7 +92,7 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineSwitchInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineSwitchInstruction(this, targetLabels);
     }
 
     public sealed class InlineIInstruction : ILInstruction
@@ -101,7 +105,7 @@ namespace System.Linq.Expressions.Tests
 
         public int Value { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineIInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineIInstruction(this, targetLabels);
     }
 
     public sealed class InlineI8Instruction : ILInstruction
@@ -114,7 +118,7 @@ namespace System.Linq.Expressions.Tests
 
         public long Value { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineI8Instruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineI8Instruction(this, targetLabels);
     }
 
     public sealed class ShortInlineIInstruction : ILInstruction
@@ -127,7 +131,7 @@ namespace System.Linq.Expressions.Tests
 
         public sbyte Value { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitShortInlineIInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitShortInlineIInstruction(this, targetLabels);
     }
 
     public sealed class InlineRInstruction : ILInstruction
@@ -140,7 +144,7 @@ namespace System.Linq.Expressions.Tests
 
         public double Value { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineRInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineRInstruction(this, targetLabels);
     }
 
     public sealed class ShortInlineRInstruction : ILInstruction
@@ -153,7 +157,7 @@ namespace System.Linq.Expressions.Tests
 
         public float Value { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitShortInlineRInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitShortInlineRInstruction(this, targetLabels);
     }
 
     public sealed class InlineFieldInstruction : ILInstruction
@@ -169,9 +173,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public FieldInfo Field => _field ?? (_field = _resolver.AsField(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineFieldInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineFieldInstruction(this, targetLabels);
     }
 
     public sealed class InlineMethodInstruction : ILInstruction
@@ -187,9 +192,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public MethodBase Method => _method ?? (_method = _resolver.AsMethod(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineMethodInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineMethodInstruction(this, targetLabels);
     }
 
     public sealed class InlineTypeInstruction : ILInstruction
@@ -205,9 +211,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public Type Type => _type ?? (_type = _resolver.AsType(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineTypeInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineTypeInstruction(this, targetLabels);
     }
 
     public sealed class InlineSigInstruction : ILInstruction
@@ -223,9 +230,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public byte[] Signature => _signature ?? (_signature = _resolver.AsSignature(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineSigInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineSigInstruction(this, targetLabels);
     }
 
     public sealed class InlineTokInstruction : ILInstruction
@@ -241,9 +249,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public MemberInfo Member => _member ?? (_member = _resolver.AsMember(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineTokInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineTokInstruction(this, targetLabels);
     }
 
     public sealed class InlineStringInstruction : ILInstruction
@@ -259,9 +268,10 @@ namespace System.Linq.Expressions.Tests
         }
 
         public string String => _string ?? (_string = _resolver.AsString(Token));
-        public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineStringInstruction(this);
+        private int Token { get; }
+
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineStringInstruction(this, targetLabels);
     }
 
     public sealed class InlineVarInstruction : ILInstruction
@@ -274,7 +284,7 @@ namespace System.Linq.Expressions.Tests
 
         public ushort Ordinal { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitInlineVarInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitInlineVarInstruction(this, targetLabels);
     }
 
     public sealed class ShortInlineVarInstruction : ILInstruction
@@ -287,6 +297,6 @@ namespace System.Linq.Expressions.Tests
 
         public byte Ordinal { get; }
 
-        public override void Accept(ILInstructionVisitor visitor) => visitor.VisitShortInlineVarInstruction(this);
+        public override void Accept(ILInstructionVisitor visitor, Dictionary<int, int> targetLabels) => visitor.VisitShortInlineVarInstruction(this, targetLabels);
     }
 }

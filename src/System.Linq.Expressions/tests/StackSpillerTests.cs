@@ -411,46 +411,46 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 4
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector&,
-                        [1] int32,
-                        [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 4
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector&,
+    [1] int32,
+    [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector,
+    [3] int32
+  )
 
-                      // V0 = ref v                  // spill reference to v [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref v                  // spill reference to v [V2] into V0
+  ldloca.s   V_2
+  stloc.0    
 
-                      // try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // try { 42 } finally { }
+  .try
+  {
+    ldc.i4.s   42
+    stloc.3    
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally 
+  }
+  Label_00: ldloc.3    
+  stloc.1    
 
-                      // v[0] = try { 42 }           // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldc.i4.0   
-                      IL_0010: ldloc.1    
-                      IL_0011: call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector::set_Item(int32,int32)
+  // v[0] = try { 42 }           // using spilled reference in V0
+  ldloc.0    
+  ldc.i4.0   
+  ldloc.1    
+  call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector::set_Item(int32,int32)
 
-                      // return v[0]
-                      IL_0016: ldloca.s   V_2
-                      IL_0018: ldc.i4.0   
-                      IL_0019: call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector::get_Item(int32)
-                      IL_001e: ret        
-                    }",
+  // return v[0]
+  ldloca.s   V_2
+  ldc.i4.0   
+  call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueVector::get_Item(int32)
+  ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -458,24 +458,24 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: LoadLocal(0)
-                      IP_0002: LoadObject(0)
+                      InitMutableValue(0)
+                      LoadLocal(0)
+                      LoadObject(0)
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: Call(Void set_Item(Int32, Int32))
-                      IP_0009: LoadLocal(0)
-                      IP_0010: LoadObject(0)
-                      IP_0011: Call(Int32 get_Item(Int32))
+                      Call(Void set_Item(Int32, Int32))
+                      LoadLocal(0)
+                      LoadObject(0)
+                      Call(Int32 get_Item(Int32))
                     }");
         }
 
@@ -514,40 +514,40 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [1] int32,
-                        [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [1] int32,
+    [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [3] int32
+  )
 
-                      // V0 = ref v                  // spill reference to v [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref v                  // spill reference to v [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // return v[try { 42 }]        // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Item(int32)
-                      IL_0015: ret        
-                    }",
+  // return v[try { 42 }]        // using spilled reference in V0
+   ldloc.0    
+   ldloc.1    
+   call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Item(int32)
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -555,20 +555,20 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 4
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: LoadLocal(0)
+                      InitMutableValue(0)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0002: EnterTryFinally[0] -> 5
-                        IP_0003: LoadObject(42)
-                        IP_0004: Goto[1] -> 7
+                        EnterTryFinally[0] -> 5
+                        LoadObject(42)
+                        Goto[1] -> 7
                       }
                       finally
                       {
-                        IP_0005: EnterFinally[0] -> 5
-                        IP_0006: LeaveFinally()
+                        EnterFinally[0] -> 5
+                        LeaveFinally()
                       }
-                      IP_0007: Call(Int32 get_Item(Int32))
+                      Call(Int32 get_Item(Int32))
                     }");
         }
 
@@ -609,44 +609,44 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [1] int32,
-                        [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [1] int32,
+    [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [3] int32
+  )
 
-                      // V0 = ref v                  // spill reference to v [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref v                  // spill reference to v [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // v.Foo = try { 42 }          // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::set_Foo(int32)
+  // v.Foo = try { 42 }          // using spilled reference in V0
+   ldloc.0    
+   ldloc.1    
+   call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::set_Foo(int32)
 
-                      // return v.Foo
-                      IL_0015: ldloca.s   V_2
-                      IL_0017: call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Foo()
-                      IL_001c: ret        
-                    }",
+  // return v.Foo
+   ldloca.s   V_2
+   call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Foo()
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -654,22 +654,22 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 4
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: LoadLocal(0)
+                      InitMutableValue(0)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0002: EnterTryFinally[0] -> 5
-                        IP_0003: LoadObject(42)
-                        IP_0004: Goto[1] -> 7
+                        EnterTryFinally[0] -> 5
+                        LoadObject(42)
+                        Goto[1] -> 7
                       }
                       finally
                       {
-                        IP_0005: EnterFinally[0] -> 5
-                        IP_0006: LeaveFinally()
+                        EnterFinally[0] -> 5
+                        LeaveFinally()
                       }
-                      IP_0007: Call(Void set_Foo(Int32))
-                      IP_0008: LoadLocal(0)
-                      IP_0009: Call(Int32 get_Foo())
+                      Call(Void set_Foo(Int32))
+                      LoadLocal(0)
+                      Call(Int32 get_Foo())
                     }");
         }
 
@@ -714,44 +714,44 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [1] int32,
-                        [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [1] int32,
+    [2] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [3] int32
+  )
 
-                      // V0 = ref v                  // spill reference to v [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref v                  // spill reference to v [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // V1 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // V1 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // v.Qux(try { 42 })           // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::Qux(int32)
+  // v.Qux(try { 42 })           // using spilled reference in V0
+   ldloc.0    
+   ldloc.1    
+   call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::Qux(int32)
 
-                      // return v.Foo
-                      IL_0015: ldloca.s   V_2
-                      IL_0017: call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Foo()
-                      IL_001c: ret        
-                    }",
+  // return v.Foo
+   ldloca.s   V_2
+   call       instance int32 valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Foo()
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -759,22 +759,22 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 4
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: LoadLocal(0)
+                      InitMutableValue(0)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0002: EnterTryFinally[0] -> 5
-                        IP_0003: LoadObject(42)
-                        IP_0004: Goto[1] -> 7
+                        EnterTryFinally[0] -> 5
+                        LoadObject(42)
+                        Goto[1] -> 7
                       }
                       finally
                       {
-                        IP_0005: EnterFinally[0] -> 5
-                        IP_0006: LeaveFinally()
+                        EnterFinally[0] -> 5
+                        LeaveFinally()
                       }
-                      IP_0007: Call(Void Qux(Int32))
-                      IP_0008: LoadLocal(0)
-                      IP_0009: Call(Int32 get_Foo())
+                      Call(Void Qux(Int32))
+                      LoadLocal(0)
+                      Call(Int32 get_Foo())
                     }");
         }
 
@@ -808,43 +808,43 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] int32&,
-                        [1] int32,
-                        [2] int32,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] int32&,
+    [1] int32,
+    [2] int32,
+    [3] int32
+  )
 
-                      // V0 = ref x                  // spill reference to x [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref x                  // spill reference to x [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // V1 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // V1 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // Assign(ref x, try { 42 })   // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: call       void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ByRefs::Assign(int32&,int32)
+  // Assign(ref x, try { 42 })   // using spilled reference in V0
+   ldloc.0    
+   ldloc.1    
+   call       void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ByRefs::Assign(int32&,int32)
 
-                      // return x
-                      IL_0015: ldloc.2    
-                      IL_0016: ret        
-                    }",
+  // return x
+   ldloc.2    
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -852,21 +852,21 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 4
                       .maxcontinuation 1
 
-                      IP_0000: InitImmutableValue(0)
-                      IP_0001: LoadLocal(0)
+                      InitImmutableValue(0)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0002: EnterTryFinally[0] -> 5
-                        IP_0003: LoadObject(42)
-                        IP_0004: Goto[1] -> 7
+                        EnterTryFinally[0] -> 5
+                        LoadObject(42)
+                        Goto[1] -> 7
                       }
                       finally
                       {
-                        IP_0005: EnterFinally[0] -> 5
-                        IP_0006: LeaveFinally()
+                        EnterFinally[0] -> 5
+                        LeaveFinally()
                       }
-                      IP_0007: Call(Void Assign(Int32 ByRef, Int32))
-                      IP_0008: LoadLocal(0)
+                      Call(Void Assign(Int32 ByRef, Int32))
+                      LoadLocal(0)
                     }");
         }
 
@@ -900,44 +900,44 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 5
-                      .locals init (
-                        [0] int32&,
-                        [1] int32,
-                        [2] int32,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 5
+  .locals init (
+    [0] int32&,
+    [1] int32,
+    [2] int32,
+    [3] int32
+  )
 
-                      // V0 = ref x                       // spill reference to x [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref x   // spill reference to x [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // V1 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // V1 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // new ByRefs(ref x, try { 42 })    // using spilled reference in V0
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: newobj     instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ByRefs::.ctor(int32&,int32)
-                      IL_0015: pop        
+  // new ByRefs(ref x, try { 42 })    // using spilled reference in V0
+   ldloc.0    
+   ldloc.1    
+   newobj     instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ByRefs::.ctor(int32&,int32)
+   pop        
 
-                      // return x
-                      IL_0016: ldloc.2    
-                      IL_0017: ret        
-                    }",
+  // return x
+   ldloc.2    
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -945,22 +945,22 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 4
                       .maxcontinuation 1
 
-                      IP_0000: InitImmutableValue(0)
-                      IP_0001: LoadLocal(0)
+                      InitImmutableValue(0)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0002: EnterTryFinally[0] -> 5
-                        IP_0003: LoadObject(42)
-                        IP_0004: Goto[1] -> 7
+                        EnterTryFinally[0] -> 5
+                        LoadObject(42)
+                        Goto[1] -> 7
                       }
                       finally
                       {
-                        IP_0005: EnterFinally[0] -> 5
-                        IP_0006: LeaveFinally()
+                        EnterFinally[0] -> 5
+                        LeaveFinally()
                       }
-                      IP_0007: New ByRefs(Void .ctor(Int32 ByRef, Int32))
-                      IP_0008: Pop()
-                      IP_0009: LoadLocal(0)
+                      New ByRefs(Void .ctor(Int32 ByRef, Int32))
+                      Pop()
+                      LoadLocal(0)
                     }");
         }
 
@@ -983,48 +983,48 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 4
-                      .locals init (
-                        [0] int32&,
-                        [1] int32,
-                        [2] int32,
-                        [3] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 4
+  .locals init (
+    [0] int32&,
+    [1] int32,
+    [2] int32,
+    [3] int32
+  )
 
-                      // V0 = ref x                       // spill reference to x [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref x   // spill reference to x [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // V1 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // V1 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // f.Invoke(ref x, try { 42 })      // using spilled reference in V0
-                      IL_000e: ldarg.0    
-                      IL_000f: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
-                      IL_0014: ldc.i4.0   
-                      IL_0015: ldelem.ref 
-                      IL_0016: castclass  class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign
-                      IL_001b: ldloc.0    
-                      IL_001c: ldloc.1    
-                      IL_001d: callvirt   instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign::Invoke(int32&,int32)
+  // f.Invoke(ref x, try { 42 })      // using spilled reference in V0
+   ldarg.0    
+   ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
+   ldc.i4.0   
+   ldelem.ref 
+   castclass  class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign
+   ldloc.0    
+   ldloc.1    
+   callvirt   instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Assign::Invoke(int32&,int32)
 
-                      // return x
-                      IL_0022: ldloc.2    
-                      IL_0023: ret        
-                    }",
+  // return x
+   ldloc.2    
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1032,22 +1032,22 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitImmutableValue(0)
-                      IP_0001: LoadCached(0: System.Linq.Expressions.Tests.StackSpillerTests+Assign)
-                      IP_0002: LoadLocal(0)
+                      InitImmutableValue(0)
+                      LoadCached(0: System.Linq.Expressions.Tests.StackSpillerTests+Assign)
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: Call(Void Invoke(Int32 ByRef, Int32))
-                      IP_0009: LoadLocal(0)
+                      Call(Void Invoke(Int32 ByRef, Int32))
+                      LoadLocal(0)
                     }");
         }
 
@@ -1094,57 +1094,57 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] int32&,
-                        [1] int32,
-                        [2] int32,
-                        [3] int32,
-                        [4] int32&,
-                        [5] int32,
-                        [6] int32
-                      )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] int32&,
+    [1] int32,
+    [2] int32,
+    [3] int32,
+    [4] int32&,
+    [5] int32,
+    [6] int32
+  )
 
-                      // V0 = ref x                       // spill reference to x [V2] into V0
-                      IL_0000: ldloca.s   V_2
-                      IL_0002: stloc.0    
+  // V0 = ref x   // spill reference to x [V2] into V0
+   ldloca.s   V_2
+   stloc.0    
 
-                      // V1 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_0003: ldc.i4.s   42
-                        IL_0005: stloc.3    
-                        IL_0006: leave      IL_000c
-                      }
-                      finally
-                      {
-                        IL_000b: endfinally 
-                      }
-                      IL_000c: ldloc.3    
-                      IL_000d: stloc.1    
+  // V1 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.3    
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.3    
+   stloc.1    
 
-                      // l [V4] = ref x
-                      // r [V5] = try { 42 }
-                      IL_000e: ldloc.0    
-                      IL_000f: ldloc.1    
-                      IL_0010: stloc.s    V_5
-                      IL_0012: stloc.s    V_4
+  // l [V4] = ref x
+  // r [V5] = try { 42 }
+   ldloc.0    
+   ldloc.1    
+   stloc.s    V_5
+   stloc.s    V_4
 
-                      // V6 = V5  (used to return value of assignment; ignored here)
-                      IL_0014: ldloc.s    V_5
-                      IL_0016: stloc.s    V_6
+  // V6 = V5  (used to return value of assignment; ignored here)
+   ldloc.s    V_5
+   stloc.s    V_6
 
-                      // l = r
-                      IL_0018: ldloc.s    V_4
-                      IL_001a: ldloc.s    V_6
-                      IL_001c: stind.i4   
+  // l = r
+   ldloc.s    V_4
+   ldloc.s    V_6
+   stind.i4   
 
-                      // return x
-                      IL_001d: ldloc.2    
-                      IL_001e: ret        
-                    }",
+  // return x
+   ldloc.2    
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1152,22 +1152,22 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitImmutableValue(0)
-                      IP_0001: CreateDelegate()
-                      IP_0002: LoadLocal(0)
+                      InitImmutableValue(0)
+                      CreateDelegate()
+                      LoadLocal(0)
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: Call(Void Invoke(Int32 ByRef, Int32))
-                      IP_0009: LoadLocal(0)
+                      Call(Void Invoke(Int32 ByRef, Int32))
+                      LoadLocal(0)
                     }");
         }
 
@@ -1200,55 +1200,55 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
-                        [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList&,
-                        [2] int32,
-                        [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
-                        [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
-                        [5] int32
-                      )
+.method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
+    [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList&,
+    [2] int32,
+    [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
+    [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList,
+    [5] int32
+  )
 
-                      // t = new ValueList()
-                      IL_0000: ldloca.s   V_4
-                      IL_0002: initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList
-                      IL_0008: ldloc.s    V_4
-                      IL_000a: stloc.0    
+  // t = new ValueList()
+   ldloca.s   V_4
+   initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList
+   ldloc.s    V_4
+   stloc.0    
 
-                      // V0 = ref t                  // spill reference to t [V0] into V1
-                      IL_000b: ldloca.s   V_0
-                      IL_000d: stloc.1    
+  // V0 = ref t                  // spill reference to t [V0] into V1
+   ldloca.s   V_0
+   stloc.1    
 
-                      // V2 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_000e: ldc.i4.s   42
-                        IL_0010: stloc.s    V_5
-                        IL_0012: leave      IL_0018
-                      }
-                      finally
-                      {
-                        IL_0017: endfinally 
-                      }
-                      IL_0018: ldloc.s    V_5
-                      IL_001a: stloc.2    
+  // V2 = try { 42 } finally { }
+  .try
+  {
+     ldc.i4.s   42
+     stloc.s    V_5
+     leave      Label_00
+  }
+  finally
+  {
+     endfinally 
+  }
+  Label_00: ldloc.s    V_5
+   stloc.2    
 
-                      // t.Add(try { 42 })           // using spilled reference in V0
-                      IL_001b: ldloc.1    
-                      IL_001c: ldloc.2    
-                      IL_001d: call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList::Add(int32)
+  // t.Add(try { 42 })           // using spilled reference in V0
+   ldloc.1    
+   ldloc.2    
+   call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueList::Add(int32)
 
-                      // l = t
-                      IL_0022: ldloc.0    
-                      IL_0023: stloc.3    
+  // l = t
+   ldloc.0    
+   stloc.3    
 
-                      // return l
-                      IL_0024: ldloc.3    
-                      IL_0025: ret        
-                    }",
+  // return l
+   ldloc.3    
+   ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1256,24 +1256,24 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueList
-                      IP_0002: Dup()
+                      InitMutableValue(0)
+                      DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueList
+                      Dup()
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: Call(Void Add(Int32))
-                      IP_0009: StoreLocal(0)
-                      IP_0010: LoadLocal(0)
-                      IP_0011: ValueTypeCopy()
+                      Call(Void Add(Int32))
+                      StoreLocal(0)
+                      LoadLocal(0)
+                      ValueTypeCopy()
                     }");
         }
 
@@ -1307,55 +1307,55 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [2] int32,
-                        [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [5] int32
-                      )
+.method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [2] int32,
+    [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [5] int32
+  )
 
-                      // t = new ValueBar()
-                      IL_0000: ldloca.s   V_4
-                      IL_0002: initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IL_0008: ldloc.s    V_4
-                      IL_000a: stloc.0    
+  // t = new ValueBar()
+  ldloca.s   V_4
+  initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+  ldloc.s    V_4
+  stloc.0    
 
-                      // V0 = ref t                  // spill reference to t [V0] into V1
-                      IL_000b: ldloca.s   V_0
-                      IL_000d: stloc.1    
+  // V0 = ref t                  // spill reference to t [V0] into V1
+  ldloca.s   V_0
+  stloc.1    
 
-                      // V2 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_000e: ldc.i4.s   42
-                        IL_0010: stloc.s    V_5
-                        IL_0012: leave      IL_0018
-                      }
-                      finally
-                      {
-                        IL_0017: endfinally 
-                      }
-                      IL_0018: ldloc.s    V_5
-                      IL_001a: stloc.2    
+  // V2 = try { 42 } finally { }
+  .try
+  {
+    ldc.i4.s   42
+    stloc.s    V_5
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally 
+  }
+  Label_00: ldloc.s    V_5
+  stloc.2    
 
-                      // t.Baz = try { 42 }          // using spilled reference in V0
-                      IL_001b: ldloc.1    
-                      IL_001c: ldloc.2    
-                      IL_001d: stfld      valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::Baz
+  // t.Baz = try { 42 }          // using spilled reference in V0
+  ldloc.1    
+  ldloc.2    
+  stfld      valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::Baz
 
-                      // l = t
-                      IL_0022: ldloc.0    
-                      IL_0023: stloc.3    
+  // l = t
+  ldloc.0    
+  stloc.3    
 
-                      // return l
-                      IL_0024: ldloc.3    
-                      IL_0025: ret        
-                    }",
+  // return l
+  ldloc.3    
+  ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1363,24 +1363,24 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IP_0002: Dup()
+                      InitMutableValue(0)
+                      DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+                      Dup()
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: StoreField(Int32 Baz)
-                      IP_0009: StoreLocal(0)
-                      IP_0010: LoadLocal(0)
-                      IP_0011: ValueTypeCopy()
+                      StoreField(Int32 Baz)
+                      StoreLocal(0)
+                      LoadLocal(0)
+                      ValueTypeCopy()
                     }");
         }
 
@@ -1414,55 +1414,55 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [2] int32,
-                        [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [5] int32
-                      )
+.method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [2] int32,
+    [3] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [5] int32
+  )
 
-                      // t = new ValueBar()
-                      IL_0000: ldloca.s   V_4
-                      IL_0002: initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IL_0008: ldloc.s    V_4
-                      IL_000a: stloc.0    
+  // t = new ValueBar()
+  ldloca.s   V_4
+  initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+  ldloc.s    V_4
+  stloc.0    
 
-                      // V0 = ref t                  // spill reference to t [V0] into V1
-                      IL_000b: ldloca.s   V_0
-                      IL_000d: stloc.1    
+  // V0 = ref t                  // spill reference to t [V0] into V1
+  ldloca.s   V_0
+  stloc.1    
 
-                      // V2 = try { 42 } finally { }
-                      .try
-                      {
-                        IL_000e: ldc.i4.s   42
-                        IL_0010: stloc.s    V_5
-                        IL_0012: leave      IL_0018
-                      }
-                      finally
-                      {
-                        IL_0017: endfinally 
-                      }
-                      IL_0018: ldloc.s    V_5
-                      IL_001a: stloc.2    
+  // V2 = try { 42 } finally { }
+  .try
+  {
+    ldc.i4.s   42
+    stloc.s    V_5
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally 
+  }
+  Label_00: ldloc.s    V_5
+  stloc.2    
 
-                      // t.Foo = try { 42 }          // using spilled reference in V0
-                      IL_001b: ldloc.1    
-                      IL_001c: ldloc.2    
-                      IL_001d: call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::set_Foo(int32)
+  // t.Foo = try { 42 }          // using spilled reference in V0
+  ldloc.1    
+  ldloc.2    
+  call       instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::set_Foo(int32)
 
-                      // l = t
-                      IL_0022: ldloc.0    
-                      IL_0023: stloc.3    
+  // l = t
+  ldloc.0    
+  stloc.3    
 
-                      // return l
-                      IL_0024: ldloc.3    
-                      IL_0025: ret        
-                    }",
+  // return l
+  ldloc.3    
+  ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1470,24 +1470,24 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 5
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IP_0002: Dup()
+                      InitMutableValue(0)
+                      DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+                      Dup()
                       .try
                       {
-                        IP_0003: EnterTryFinally[0] -> 6
-                        IP_0004: LoadObject(42)
-                        IP_0005: Goto[1] -> 8
+                        EnterTryFinally[0] -> 6
+                        LoadObject(42)
+                        Goto[1] -> 8
                       }
                       finally
                       {
-                        IP_0006: EnterFinally[0] -> 6
-                        IP_0007: LeaveFinally()
+                        EnterFinally[0] -> 6
+                        LeaveFinally()
                       }
-                      IP_0008: Call(Void set_Foo(Int32))
-                      IP_0009: StoreLocal(0)
-                      IP_0010: LoadLocal(0)
-                      IP_0011: ValueTypeCopy()
+                      Call(Void set_Foo(Int32))
+                      StoreLocal(0)
+                      LoadLocal(0)
+                      ValueTypeCopy()
                     }");
         }
 
@@ -1511,46 +1511,46 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 6
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [2] class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz,
-                        [3] int32,
-                        [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [5] int32
-                      )
+.method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 6
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [2] class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz,
+    [3] int32,
+    [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [5] int32
+  )
                 
-                      IL_0000: newobj     instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz::.ctor()
-                      IL_0005: newobj     instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::.ctor(class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz)
-                      IL_000a: stloc.0    
-                      IL_000b: ldloca.s   V_0
-                      IL_000d: stloc.1    
-                      IL_000e: ldloc.1    
-                      IL_000f: call       instance class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Baz2()
-                      IL_0014: stloc.2    
-                      .try
-                      {
-                        IL_0015: ldc.i4.s   42
-                        IL_0017: stloc.s    V_5
-                        IL_0019: leave      IL_001f
-                      }
-                      finally
-                      {
-                        IL_001e: endfinally 
-                      }
-                      IL_001f: ldloc.s    V_5
-                      IL_0021: stloc.3    
-                      IL_0022: ldloc.2    
-                      IL_0023: ldloc.3    
-                      IL_0024: stfld      class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz::Foo
-                      IL_0029: ldloc.0    
-                      IL_002a: stloc.s    V_4
-                      IL_002c: ldloc.s    V_4
-                      IL_002e: ret        
-                    }",
+  newobj     instance void class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz::.ctor()
+  newobj     instance void valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::.ctor(class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz)
+  stloc.0    
+  ldloca.s   V_0
+  stloc.1    
+  ldloc.1    
+  call       instance class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Baz2()
+  stloc.2    
+  .try
+  {
+    ldc.i4.s   42
+    stloc.s    V_5
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally 
+  }
+  Label_00: ldloc.s    V_5
+  stloc.3    
+  ldloc.2    
+  ldloc.3    
+  stfld      class [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+Baz::Foo
+  ldloc.0    
+  stloc.s    V_4
+  ldloc.s    V_4
+  ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1558,28 +1558,28 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 6
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: New Baz(Void .ctor())
-                      IP_0002: New ValueBar(Void .ctor(Baz))
-                      IP_0003: Dup()
-                      IP_0004: Call(Baz get_Baz2())
-                      IP_0005: Dup()
+                      InitMutableValue(0)
+                      New Baz(Void .ctor())
+                      New ValueBar(Void .ctor(Baz))
+                      Dup()
+                      Call(Baz get_Baz2())
+                      Dup()
                       .try
                       {
-                        IP_0006: EnterTryFinally[0] -> 9
-                        IP_0007: LoadObject(42)
-                        IP_0008: Goto[1] -> 11
+                        EnterTryFinally[0] -> 9
+                        LoadObject(42)
+                        Goto[1] -> 11
                       }
                       finally
                       {
-                        IP_0009: EnterFinally[0] -> 9
-                        IP_0010: LeaveFinally()
+                        EnterFinally[0] -> 9
+                        LeaveFinally()
                       }
-                      IP_0011: StoreField(Int32 Foo)
-                      IP_0012: Pop()
-                      IP_0013: StoreLocal(0)
-                      IP_0014: LoadLocal(0)
-                      IP_0015: ValueTypeCopy()
+                      StoreField(Int32 Foo)
+                      Pop()
+                      StoreLocal(0)
+                      LoadLocal(0)
+                      ValueTypeCopy()
                     }");
         }
 
@@ -1603,48 +1603,48 @@ namespace System.Linq.Expressions.Tests
 
             e.Verify(
                 il: @"
-                    .method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                    {
-                      .maxstack 3
-                      .locals init (
-                        [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
-                        [2] class [System.Private.CoreLib]System.Collections.Generic.List`1<int32>,
-                        [3] int32,
-                        [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [5] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
-                        [6] int32
-                      )
+.method valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [1] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar&,
+    [2] class [System.Private.CoreLib]System.Collections.Generic.List`1<int32>,
+    [3] int32,
+    [4] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [5] valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar,
+    [6] int32
+  )
                 
-                      IL_0000: ldloca.s   V_5
-                      IL_0002: initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IL_0008: ldloc.s    V_5
-                      IL_000a: stloc.0    
-                      IL_000b: ldloca.s   V_0
-                      IL_000d: stloc.1    
-                      IL_000e: ldloc.1    
-                      IL_000f: call       instance class [System.Private.CoreLib]System.Collections.Generic.List`1<int32> valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Xs()
-                      IL_0014: stloc.2    
-                      .try
-                      {
-                        IL_0015: ldc.i4.s   42
-                        IL_0017: stloc.s    V_6
-                        IL_0019: leave      IL_001f
-                      }
-                      finally
-                      {
-                        IL_001e: endfinally 
-                      }
-                      IL_001f: ldloc.s    V_6
-                      IL_0021: stloc.3    
-                      IL_0022: ldloc.2    
-                      IL_0023: ldloc.3    
-                      IL_0024: callvirt   instance void class [System.Private.CoreLib]System.Collections.Generic.List`1<int32>::Add(int32)
-                      IL_0029: ldloc.0    
-                      IL_002a: stloc.s    V_4
-                      IL_002c: ldloc.s    V_4
-                      IL_002e: ret        
-                    }",
+  ldloca.s   V_5
+  initobj    valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+  ldloc.s    V_5
+  stloc.0    
+  ldloca.s   V_0
+  stloc.1    
+  ldloc.1    
+  call       instance class [System.Private.CoreLib]System.Collections.Generic.List`1<int32> valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.StackSpillerTests+ValueBar::get_Xs()
+  stloc.2    
+  .try
+  {
+    ldc.i4.s   42
+    stloc.s    V_6
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally 
+  }
+  Label_00: ldloc.s    V_6
+  stloc.3    
+  ldloc.2    
+  ldloc.3    
+  callvirt   instance void class [System.Private.CoreLib]System.Collections.Generic.List`1<int32>::Add(int32)
+  ldloc.0    
+  stloc.s    V_4
+  ldloc.s    V_4
+  ret        
+}",
                 instructions: @"
                     object lambda_method(object[])
                     {
@@ -1652,27 +1652,27 @@ namespace System.Linq.Expressions.Tests
                       .maxstack 6
                       .maxcontinuation 1
 
-                      IP_0000: InitMutableValue(0)
-                      IP_0001: DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
-                      IP_0002: Dup()
-                      IP_0003: Call(System.Collections.Generic.List`1[System.Int32] get_Xs())
-                      IP_0004: Dup()
+                      InitMutableValue(0)
+                      DefaultValue System.Linq.Expressions.Tests.StackSpillerTests+ValueBar
+                      Dup()
+                      Call(System.Collections.Generic.List`1[System.Int32] get_Xs())
+                      Dup()
                       .try
                       {
-                        IP_0005: EnterTryFinally[0] -> 8
-                        IP_0006: LoadObject(42)
-                        IP_0007: Goto[1] -> 10
+                        EnterTryFinally[0] -> 8
+                        LoadObject(42)
+                        Goto[1] -> 10
                       }
                       finally
                       {
-                        IP_0008: EnterFinally[0] -> 8
-                        IP_0009: LeaveFinally()
+                        EnterFinally[0] -> 8
+                        LeaveFinally()
                       }
-                      IP_0010: Call(Void Add(Int32))
-                      IP_0011: Pop()
-                      IP_0012: StoreLocal(0)
-                      IP_0013: LoadLocal(0)
-                      IP_0014: ValueTypeCopy()
+                      Call(Void Add(Int32))
+                      Pop()
+                      StoreLocal(0)
+                      LoadLocal(0)
+                      ValueTypeCopy()
                     }");
         }
 
@@ -1692,47 +1692,47 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32[])
-                {
-                  .maxstack 4
-                  .locals init (
-                    [0] int32[],
-                    [1] int32,
-                    [2] int32
-                  )
+.method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32[])
+{
+  .maxstack 4
+  .locals init (
+    [0] int32[],
+    [1] int32,
+    [2] int32
+  )
 
-                  // Save instance (`xs`) into V_0
-                  IL_0000: ldarg.1
-                  IL_0001: stloc.0
+  // Save instance (`xs`) into V_0
+  ldarg.1
+  stloc.0
 
-                  // Save rhs (`try { 1 } finally {}`) into V_1
-                  .try
-                  {
-                    IL_0002: ldc.i4.1
-                    IL_0003: stloc.2
-                    IL_0004: leave      IL_000a
-                  }
-                  finally
-                  {
-                    IL_0009: endfinally
-                  }
-                  IL_000a: ldloc.2
-                  IL_000b: stloc.1
+  // Save rhs (`try { 1 } finally {}`) into V_1
+  .try
+  {
+    ldc.i4.1
+    stloc.2
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.2
+  stloc.1
 
-                  // Load instance from V_0
-                  IL_000c: ldloc.0
+  // Load instance from V_0
+  ldloc.0
 
-                  // <OPTIMIZATION> Evaluate index (`0`) </OPTIMIZATION>
-                  IL_000d: ldc.i4.0
+  // <OPTIMIZATION> Evaluate index (`0`) </OPTIMIZATION>
+  ldc.i4.0
 
-                  // Load rhs from V_1
-                  IL_000e: ldloc.1
+  // Load rhs from V_1
+  ldloc.1
 
-                  // Evaluate `instance[index] = rhs` index assignment
-                  IL_000f: stelem.i4
+  // Evaluate `instance[index] = rhs` index assignment
+  stelem.i4
 
-                  IL_0010: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -1750,47 +1750,47 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32[])
-                {
-                  .maxstack 4
-                  .locals init (
-                    [0] int32[],
-                    [1] int32,
-                    [2] int32
-                  )
+.method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32[])
+{
+  .maxstack 4
+  .locals init (
+    [0] int32[],
+    [1] int32,
+    [2] int32
+  )
 
-                  // Save instance (`xs`) into V_0
-                  IL_0000: ldarg.1
-                  IL_0001: stloc.0
+  // Save instance (`xs`) into V_0
+  ldarg.1
+  stloc.0
 
-                  // Save rhs (`try { 1 } finally {}`) into V_1
-                  .try
-                  {
-                    IL_0002: ldc.i4.1
-                    IL_0003: stloc.2
-                    IL_0004: leave      IL_000a
-                  }
-                  finally
-                  {
-                    IL_0009: endfinally
-                  }
-                  IL_000a: ldloc.2
-                  IL_000b: stloc.1
+  // Save rhs (`try { 1 } finally {}`) into V_1
+  .try
+  {
+    ldc.i4.1
+    stloc.2
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.2
+  stloc.1
 
-                  // Load instance from V_0
-                  IL_000c: ldloc.0
+  // Load instance from V_0
+  ldloc.0
 
-                  // <OPTIMIZATION> Evaluate index (`0`) </OPTIMIZATION>
-                  IL_000d: ldc.i4.0
+  // <OPTIMIZATION> Evaluate index (`0`) </OPTIMIZATION>
+  ldc.i4.0
 
-                  // Load rhs from V_1
-                  IL_000e: ldloc.1
+  // Load rhs from V_1
+  ldloc.1
 
-                  // Evaluate `instance[index] = rhs` index assignment
-                  IL_000f: stelem.i4
+  // Evaluate `instance[index] = rhs` index assignment
+  stelem.i4
 
-                  IL_0010: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -1806,39 +1806,39 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method float64 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                {
-                  .maxstack 3
-                  .locals init (
-                    [0] float64,
-                    [1] float64
-                  )
+.method float64 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] float64,
+    [1] float64
+  )
 
-                  // Save rhs (`try { 0.0 } finally {}`) into V_0
-                  .try
-                  {
-                    IL_0000: ldc.r8     0
-                    IL_0009: stloc.1
-                    IL_000a: leave      IL_0010
-                  }
-                  finally
-                  {
-                    IL_000f: endfinally
-                  }
-                  IL_0010: ldloc.1
-                  IL_0011: stloc.0
+  // Save rhs (`try { 0.0 } finally {}`) into V_0
+  .try
+  {
+    ldc.r8     0
+    stloc.1
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.1
+  stloc.0
 
-                  // <OPTIMIZATION> Evaluate lhs (`Math.PI` gets inlined) </OPTIMIZATION>
-                  IL_0012: ldc.r8     3.14159265358979
+  // <OPTIMIZATION> Evaluate lhs (`Math.PI` gets inlined) </OPTIMIZATION>
+  ldc.r8     3.14159265358979
 
-                  // Load rhs from V_0
-                  IL_001b: ldloc.0
+  // Load rhs from V_0
+  ldloc.0
 
-                  // Evaluate `lhs + rhs`
-                  IL_001c: add
+  // Evaluate `lhs + rhs`
+  add
 
-                  IL_001d: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -1855,39 +1855,39 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method string ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                {
-                  .maxstack 3
-                  .locals init (
-                    [0] string,
-                    [1] string
-                  )
+.method string ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 3
+  .locals init (
+    [0] string,
+    [1] string
+  )
 
-                  // Save arg1 (`try { ""!"" } finally {}`) into V_0
-                  .try
-                  {
-                    IL_0000: ldstr      ""!""
-                    IL_0005: stloc.1
-                    IL_0006: leave      IL_000c
-                  }
-                  finally
-                  {
-                    IL_000b: endfinally
-                  }
-                  IL_000c: ldloc.1
-                  IL_000d: stloc.0
+  // Save arg1 (`try { ""!"" } finally {}`) into V_0
+  .try
+  {
+    ldstr      ""!""
+    stloc.1
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.1
+  stloc.0
 
-                  // <OPTIMIZATION> Evaluate arg0 (`bool::TrueString`) </OPTIMIZATION>
-                  IL_000e: ldsfld     bool::TrueString
+  // <OPTIMIZATION> Evaluate arg0 (`bool::TrueString`) </OPTIMIZATION>
+  ldsfld     bool::TrueString
 
-                  // Load arg1 from V_0
-                  IL_0013: ldloc.0
+  // Load arg1 from V_0
+  ldloc.0
 
-                  // Evaluate `string.Concat(arg0, arg1)` call
-                  IL_0014: call       string string::Concat(string,string)
+  // Evaluate `string.Concat(arg0, arg1)` call
+  call       string string::Concat(string,string)
 
-                  IL_0019: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -1906,47 +1906,47 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>)
-                {
-                  .maxstack 4
-                  .locals init (
-                    [0] class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,
-                    [1] int32,
-                    [2] int32
-                  )
+.method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>)
+{
+  .maxstack 4
+  .locals init (
+    [0] class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,
+    [1] int32,
+    [2] int32
+  )
 
-                  // Save target (`f`) into V_0
-                  IL_0000: ldarg.1
-                  IL_0001: stloc.0
+  // Save target (`f`) into V_0
+  ldarg.1
+  stloc.0
 
-                  // Save arg1 (`try { 2 } finally {}`) into V_1
-                  .try
-                  {
-                    IL_0002: ldc.i4.2
-                    IL_0003: stloc.2
-                    IL_0004: leave      IL_000a
-                  }
-                  finally
-                  {
-                    IL_0009: endfinally
-                  }
-                  IL_000a: ldloc.2
-                  IL_000b: stloc.1
+  // Save arg1 (`try { 2 } finally {}`) into V_1
+  .try
+  {
+    ldc.i4.2
+    stloc.2
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.2
+  stloc.1
 
-                  // Load target from V_0
-                  IL_000c: ldloc.0
+  // Load target from V_0
+  ldloc.0
 
-                  // <OPTIMIZATION> Load arg0 (`RuntimeVariables`) by calling RuntimeOps.CreateRuntimeVariables </OPTIMIZATION>
-                  IL_000d: call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables()
+  // <OPTIMIZATION> Load arg0 (`RuntimeVariables`) by calling RuntimeOps.CreateRuntimeVariables </OPTIMIZATION>
+  call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables()
 
-                  // Load arg1 from V_1
-                  IL_0012: ldloc.1
+  // Load arg1 from V_1
+  ldloc.1
 
-                  // Evaluate `target(arg0, arg1)` delegate invocation
-                  IL_0013: callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
+  // Evaluate `target(arg0, arg1)` delegate invocation
+  callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
 
-                  IL_0018: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -1967,64 +1967,64 @@ namespace System.Linq.Expressions.Tests
                 );
 
             e.VerifyIL(@"
-                .method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,int32)
-                {
-                  .maxstack 10
-                  .locals init (
-                    [0] object[],
-                    [1] class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,
-                    [2] int32,
-                    [3] int32
-                  )
+.method void ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,int32)
+{
+  .maxstack 10
+  .locals init (
+    [0] object[],
+    [1] class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>,
+    [2] int32,
+    [3] int32
+  )
 
-                  // Hoist `x` to a closure in V_0
-                  IL_0000: ldc.i4.1
-                  IL_0001: newarr     object
-                  IL_0006: dup
-                  IL_0007: ldc.i4.0
-                  IL_0008: ldarg.2
-                  IL_0009: newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
-                  IL_000e: stelem.ref
-                  IL_000f: stloc.0
+  // Hoist `x` to a closure in V_0
+  ldc.i4.1
+  newarr     object
+  dup
+  ldc.i4.0
+  ldarg.2
+  newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
+  stelem.ref
+  stloc.0
 
-                  // Save target (`f`) into V_1
-                  IL_0010: ldarg.1
-                  IL_0011: stloc.1
+  // Save target (`f`) into V_1
+  ldarg.1
+  stloc.1
 
-                  // Save arg1 (`try { 2 } finally {}`) into V_2
-                  .try
-                  {
-                    IL_0012: ldc.i4.2
-                    IL_0013: stloc.3
-                    IL_0014: leave      IL_001a
-                  }
-                  finally
-                  {
-                    IL_0019: endfinally
-                  }
-                  IL_001a: ldloc.3
-                  IL_001b: stloc.2
+  // Save arg1 (`try { 2 } finally {}`) into V_2
+  .try
+  {
+    ldc.i4.2
+    stloc.3
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.3
+  stloc.2
 
-                  // Load target from V_1
-                  IL_001c: ldloc.1
+  // Load target from V_1
+  ldloc.1
 
-                  // <OPTIMIZATION> Load arg0 (`RuntimeVariables`) by calling RuntimeOps.CreateRuntimeVariables </OPTIMIZATION>
-                  IL_001d: ldloc.0
-                  IL_001e: ldarg.0
-                  IL_001f: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
-                  IL_0024: ldc.i4.0
-                  IL_0025: ldelem.ref
-                  IL_0026: castclass  int64[]
-                  IL_002b: call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables(object[],int64[])
+  // <OPTIMIZATION> Load arg0 (`RuntimeVariables`) by calling RuntimeOps.CreateRuntimeVariables </OPTIMIZATION>
+  ldloc.0
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
+  ldc.i4.0
+  ldelem.ref
+  castclass  int64[]
+  call       class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables class [System.Linq.Expressions]System.Runtime.CompilerServices.RuntimeOps::CreateRuntimeVariables(object[],int64[])
 
-                  // Load arg1 from V_2
-                  IL_0030: ldloc.2
+  // Load arg1 from V_2
+  ldloc.2
 
-                  // Evaluate `target(arg0, arg1)` delegate invocation
-                  IL_0031: callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
+  // Evaluate `target(arg0, arg1)` delegate invocation
+  callvirt   instance void class [System.Private.CoreLib]System.Action`2<class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32>::Invoke(class [System.Linq.Expressions]System.Runtime.CompilerServices.IRuntimeVariables,int32)
 
-                  IL_0036: ret
-                }"
+  ret
+}"
             );
         }
 
@@ -2057,48 +2057,48 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(7, d((a, b, c) => a + b * c, 1, 2, 3));
 
             e.VerifyIL(@"
-                .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>,int32,int32,int32)
-                {
-                  .maxstack 5
-                  .locals init (
-                    [0] class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>,
-                    [1] int32,
-                    [2] int32
-                  )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>,int32,int32,int32)
+{
+  .maxstack 5
+  .locals init (
+    [0] class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>,
+    [1] int32,
+    [2] int32
+  )
 
-                  // Save invocation target (`f`) into V_0
-                  IL_0000: ldarg.1
-                  IL_0001: stloc.0
+  // Save invocation target (`f`) into V_0
+  ldarg.1
+  stloc.0
 
-                  // Save arg0 (`try { x } finally {}`) into V_1
-                  .try
-                  {
-                    IL_0002: ldarg.2
-                    IL_0003: stloc.2
-                    IL_0004: leave      IL_000a
-                  }
-                  finally
-                  {
-                    IL_0009: endfinally
-                  }
-                  IL_000a: ldloc.2
-                  IL_000b: stloc.1
+  // Save arg0 (`try { x } finally {}`) into V_1
+  .try
+  {
+    ldarg.2
+    stloc.2
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.2
+  stloc.1
 
-                  // Load invocation target from V_0
-                  IL_000c: ldloc.0
+  // Load invocation target from V_0
+  ldloc.0
 
-                  // Load arg0 from V_1
-                  IL_000d: ldloc.1
+  // Load arg0 from V_1
+  ldloc.1
 
-                  // <OPTIMIZATION> Load arguments beyond spill site </OPTIMIZATION>
-                  IL_000e: ldarg.3
-                  IL_000f: ldarg.s    V_4
+  // <OPTIMIZATION> Load arguments beyond spill site </OPTIMIZATION>
+  ldarg.3
+  ldarg.s    V_4
 
-                  // Evaluate `f(try { x } finally {}, y, z)`
-                  IL_0011: callvirt   instance int32 class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>::Invoke(int32,int32,int32)
+  // Evaluate `f(try { x } finally {}, y, z)`
+  callvirt   instance int32 class [System.Private.CoreLib]System.Func`4<int32,int32,int32,int32>::Invoke(int32,int32,int32)
 
-                  IL_0016: ret
-                }");
+  ret
+}");
         }
 
         [Fact]
@@ -2135,56 +2135,56 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(10, d(1, 2, 3, 4));
 
             e.VerifyIL(@"
-                .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32,int32,int32,int32)
-                {
-                  .maxstack 3
-                  .locals init (
-                    [0] int32,
-                    [1] int32,
-                    [2] int32,
-                    [3] int32,
-                    [4] int32
-                  )
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32,int32,int32,int32)
+{
+  .maxstack 3
+  .locals init (
+    [0] int32,
+    [1] int32,
+    [2] int32,
+    [3] int32,
+    [4] int32
+  )
 
-                  // Save `x1` into V_0
-                  IL_0000: ldarg.1
-                  IL_0001: stloc.0
+  // Save `x1` into V_0
+  ldarg.1
+  stloc.0
 
-                  // Save `try { x2 } finally {}` into V_1
-                  .try
-                  {
-                    IL_0002: ldarg.2
-                    IL_0003: stloc.s    V_4
-                    IL_0005: leave      IL_000b
-                  }
-                  finally
-                  {
-                    IL_000a: endfinally
-                  }
-                  IL_000b: ldloc.s    V_4
-                  IL_000d: stloc.1
+  // Save `try { x2 } finally {}` into V_1
+  .try
+  {
+    ldarg.2
+    stloc.s    V_4
+    leave      Label_00
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_00: ldloc.s    V_4
+  stloc.1
 
-                  // Eval `x1 + x2` and store into V_2
-                  IL_000e: ldloc.0
-                  IL_000f: ldloc.1
-                  IL_0010: add
-                  IL_0011: stloc.2
+  // Eval `x1 + x2` and store into V_2
+  ldloc.0
+  ldloc.1
+  add
+  stloc.2
 
-                  // Eval `(x1 + x2) + x3` and save into V_3
-                  // <OPTIMIZATION> `x3` does not get stored in a temporary </OPTIMIZATION>
-                  IL_0012: ldloc.2
-                  IL_0013: ldarg.3
-                  IL_0014: add
-                  IL_0015: stloc.3
+  // Eval `(x1 + x2) + x3` and save into V_3
+  // <OPTIMIZATION> `x3` does not get stored in a temporary </OPTIMIZATION>
+  ldloc.2
+  ldarg.3
+  add
+  stloc.3
 
-                  // Eval `((x1 + x2) + x3) + x4`
-                  // <OPTIMIZATION> `x4` does not get stored in a temporary </OPTIMIZATION>
-                  IL_0016: ldloc.3
-                  IL_0017: ldarg.s    V_4
-                  IL_0019: add
+  // Eval `((x1 + x2) + x3) + x4`
+  // <OPTIMIZATION> `x4` does not get stored in a temporary </OPTIMIZATION>
+  ldloc.3
+  ldarg.s    V_4
+  add
 
-                  IL_001a: ret
-                }");
+  ret
+}");
         }
 
 #endif

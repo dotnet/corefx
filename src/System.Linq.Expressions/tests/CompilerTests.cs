@@ -171,13 +171,13 @@ namespace System.Linq.Expressions.Tests
 
             f.VerifyIL(
                 @".method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                  {
-                    .maxstack 1
+{
+.maxstack 1
 
-                    IL_0000: ldc.i4.s   42
-                    IL_0002: call       int32 class [System.Private.CoreLib]System.Math::Abs(int32)
-                    IL_0007: ret
-                  }");
+ldc.i4.s   42
+call       int32 class [System.Private.CoreLib]System.Math::Abs(int32)
+ret
+}");
         }
 
         [Fact]
@@ -205,39 +205,39 @@ namespace System.Linq.Expressions.Tests
 
             f.VerifyIL(
                 @".method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
-                  {
-                    .maxstack 4
-                    .locals init (
-                      [0] int32
-                    )
+{
+  .maxstack 4
+  .locals init (
+    [0] int32
+  )
 
-                    .try
-                    {
-                      .try
-                      {
-                        IL_0000: ldc.i4.s   42
-                        IL_0002: ldarg.1
-                        IL_0003: div
-                        IL_0004: call       int32 class [System.Private.CoreLib]System.Math::Abs(int32)
-                        IL_0009: stloc.0
-                        IL_000a: leave      IL_0017
-                      }
-                      catch (class [System.Private.CoreLib]System.DivideByZeroException)
-                      {
-                        IL_000f: pop
-                        IL_0010: ldc.i4.m1
-                        IL_0011: stloc.0
-                        IL_0012: leave      IL_0017
-                      }
-                      IL_0017: leave      IL_001d
-                    }
-                    finally
-                    {
-                      IL_001c: endfinally
-                    }
-                    IL_001d: ldloc.0
-                    IL_001e: ret
-                  }");
+  .try
+  {
+    .try
+    {
+      ldc.i4.s   42
+      ldarg.1
+      div
+      call       int32 class [System.Private.CoreLib]System.Math::Abs(int32)
+      stloc.0
+      leave      Label_00
+    }
+    catch (class [System.Private.CoreLib]System.DivideByZeroException)
+    {
+      pop
+      ldc.i4.m1
+      stloc.0
+      leave      Label_00
+    }
+    Label_00: leave      Label_01
+  }
+  finally
+  {
+    endfinally
+  }
+  Label_01: ldloc.0
+  ret
+}");
         }
 
         [Fact]
@@ -247,30 +247,30 @@ namespace System.Linq.Expressions.Tests
 
             f.VerifyIL(
                 @".method class [System.Private.CoreLib]System.Func`1<int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                  {
-                    .maxstack 3
+{
+  .maxstack 3
 
-                    IL_0000: ldarg.0
-                    IL_0001: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
-                    IL_0006: ldc.i4.0
-                    IL_0007: ldelem.ref
-                    IL_0008: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_000d: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0012: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0017: ldnull
-                    IL_0018: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_001d: castclass  class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0022: ret
-                  }
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
+  ldc.i4.0
+  ldelem.ref
+  castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
+  ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
+  call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+  ldnull
+  callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+  castclass  class [System.Private.CoreLib]System.Func`1<int32>
+  ret
+}
 
-                  // closure.Constants[0]
-                  .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                  {
-                    .maxstack 1
+// closure.Constants[0]
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 1
 
-                    IL_0000: ldc.i4.s   42
-                    IL_0002: ret
-                  }",
+  ldc.i4.s   42
+  ret
+}",
                 appendInnerLambdas: true);
         }
 
@@ -281,53 +281,53 @@ namespace System.Linq.Expressions.Tests
 
             f.VerifyIL(
                 @".method class [System.Private.CoreLib]System.Func`1<int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
-                  {
-                    .maxstack 8
-                    .locals init (
-                      [0] object[]
-                    )
+{
+  .maxstack 8
+  .locals init (
+    [0] object[]
+  )
 
-                    IL_0000: ldc.i4.1
-                    IL_0001: newarr     object
-                    IL_0006: dup
-                    IL_0007: ldc.i4.0
-                    IL_0008: ldarg.1
-                    IL_0009: newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
-                    IL_000e: stelem.ref
-                    IL_000f: stloc.0
-                    IL_0010: ldarg.0
-                    IL_0011: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
-                    IL_0016: ldc.i4.0
-                    IL_0017: ldelem.ref
-                    IL_0018: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_001d: ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0022: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0027: ldnull
-                    IL_0028: ldloc.0
-                    IL_0029: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
-                    IL_002e: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_0033: castclass  class [System.Private.CoreLib]System.Func`1<int32>
-                    IL_0038: ret
-                  }
+  ldc.i4.1
+  newarr     object
+  dup
+  ldc.i4.0
+  ldarg.1
+  newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
+  stelem.ref
+  stloc.0
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
+  ldc.i4.0
+  ldelem.ref
+  castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
+  ldtoken    class [System.Private.CoreLib]System.Func`1<int32>
+  call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+  ldnull
+  ldloc.0
+  newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
+  callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+  castclass  class [System.Private.CoreLib]System.Func`1<int32>
+  ret
+}
 
-                  // closure.Constants[0]
-                  .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
-                  {
-                    .maxstack 2
-                    .locals init (
-                      [0] object[]
-                    )
+// closure.Constants[0]
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure)
+{
+  .maxstack 2
+  .locals init (
+    [0] object[]
+  )
 
-                    IL_0000: ldarg.0
-                    IL_0001: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Locals
-                    IL_0006: stloc.0
-                    IL_0007: ldloc.0
-                    IL_0008: ldc.i4.0
-                    IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
-                    IL_0014: ret
-                  }",
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Locals
+  stloc.0
+  ldloc.0
+  ldc.i4.0
+  ldelem.ref
+  castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
+  ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+  ret
+}",
                 appendInnerLambdas: true);
         }
 
@@ -339,55 +339,55 @@ namespace System.Linq.Expressions.Tests
 
             f.VerifyIL(
                 @".method class [System.Private.CoreLib]System.Func`2<int32,int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
-                  {
-                    .maxstack 8
-                    .locals init (
-                      [0] object[]
-                    )
+{
+  .maxstack 8
+  .locals init (
+    [0] object[]
+  )
 
-                    IL_0000: ldc.i4.1
-                    IL_0001: newarr     object
-                    IL_0006: dup
-                    IL_0007: ldc.i4.0
-                    IL_0008: ldarg.1
-                    IL_0009: newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
-                    IL_000e: stelem.ref
-                    IL_000f: stloc.0
-                    IL_0010: ldarg.0
-                    IL_0011: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
-                    IL_0016: ldc.i4.0
-                    IL_0017: ldelem.ref
-                    IL_0018: castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
-                    IL_001d: ldtoken    class [System.Private.CoreLib]System.Func`2<int32,int32>
-                    IL_0022: call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
-                    IL_0027: ldnull
-                    IL_0028: ldloc.0
-                    IL_0029: newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
-                    IL_002e: callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
-                    IL_0033: castclass  class [System.Private.CoreLib]System.Func`2<int32,int32>
-                    IL_0038: ret
-                  }
+  ldc.i4.1
+  newarr     object
+  dup
+  ldc.i4.0
+  ldarg.1
+  newobj     instance void class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::.ctor(int32)
+  stelem.ref
+  stloc.0
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Constants
+  ldc.i4.0
+  ldelem.ref
+  castclass  class [System.Private.CoreLib]System.Reflection.MethodInfo
+  ldtoken    class [System.Private.CoreLib]System.Func`2<int32,int32>
+  call       class [System.Private.CoreLib]System.Type class [System.Private.CoreLib]System.Type::GetTypeFromHandle(valuetype [System.Private.CoreLib]System.RuntimeTypeHandle)
+  ldnull
+  ldloc.0
+  newobj     instance void class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::.ctor(object[],object[])
+  callvirt   instance class [System.Private.CoreLib]System.Delegate class [System.Private.CoreLib]System.Reflection.MethodInfo::CreateDelegate(class [System.Private.CoreLib]System.Type,object)
+  castclass  class [System.Private.CoreLib]System.Func`2<int32,int32>
+  ret
+}
 
-                  // closure.Constants[0]
-                  .method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
-                  {
-                    .maxstack 2
-                    .locals init (
-                      [0] object[]
-                    )
+// closure.Constants[0]
+.method int32 ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,int32)
+{
+  .maxstack 2
+  .locals init (
+    [0] object[]
+  )
 
-                    IL_0000: ldarg.0
-                    IL_0001: ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Locals
-                    IL_0006: stloc.0
-                    IL_0007: ldloc.0
-                    IL_0008: ldc.i4.0
-                    IL_0009: ldelem.ref
-                    IL_000a: castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
-                    IL_000f: ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
-                    IL_0014: ldarg.1
-                    IL_0015: add
-                    IL_0016: ret
-                  }",
+  ldarg.0
+  ldfld      class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure::Locals
+  stloc.0
+  ldloc.0
+  ldc.i4.0
+  ldelem.ref
+  castclass  class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>
+  ldfld      class [System.Runtime]System.Runtime.CompilerServices.StrongBox`1<int32>::Value
+  ldarg.1
+  add
+  ret
+}",
                 appendInnerLambdas: true);
         }
 
@@ -405,8 +405,7 @@ namespace System.Linq.Expressions.Tests
         {
             Collections.Generic.IEnumerable<string> lines =
                 s
-                .Replace("\r\n", "\n")
-                .Split(new[] { '\n' })
+                .Split('\n', '\r')
                 .Select(line => line.Trim())
                 .Where(line => line != "" && !line.StartsWith("//"));
 
@@ -415,7 +414,7 @@ namespace System.Linq.Expressions.Tests
 
         private static void VerifyEmitConstantsToIL<T>(T value)
         {
-            VerifyEmitConstantsToIL<T>(value, 0);
+            VerifyEmitConstantsToIL(value, 0);
         }
 
         private static void VerifyEmitConstantsToIL<T>(T value, int expectedCount)
