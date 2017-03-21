@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- todo: improve this condition -->
+    <ILLinkTrimAssembly Condition="'$(ILLinkTrimAssembly)' == '' AND '$(IsRuntimeAssembly)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'">true</ILLinkTrimAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetsTriggeredByCompilation Condition="'$(ILLinkTrimAssembly)' == 'true'">
+      $(TargetsTriggeredByCompilation);ILLinkTrimAssembly
+    </TargetsTriggeredByCompilation>
+  </PropertyGroup>
+
+  <!-- ILLinkTrimAssembly
+       Examines the "input assembly" for IL that is unreachable from public API and trims that,
+       rewriting the assembly to an "output assembly"
+  -->
+  <Target Name="ILLinkTrimAssembly" DependsOnTargets="EnsureBuildToolsRuntime">
+    <!-- Inputs and outputs of ILLinkTrimAssembly -->
+    <PropertyGroup>
+      <ILLinkToolPath Condition="'$(ILLinkToolPath)' == ''">$(ToolsDir)ILLink/illink.dll</ILLinkToolPath>
+      <ILLinkTrimAssemblyPath>$(IntermediateOutputPath)$(TargetName)$(TargetExt)</ILLinkTrimAssemblyPath>
+      <ILLinkTrimAssemblySymbols>$(IntermediateOutputPath)$(TargetName).pdb</ILLinkTrimAssemblySymbols>
+      <ILLinkTrimInputPath>$(IntermediateOutputPath)PreTrim/</ILLinkTrimInputPath>
+      <ILLinkTrimInputAssembly>$(ILLinkTrimInputPath)$(TargetName)$(TargetExt)</ILLinkTrimInputAssembly>
+      <ILLinkTrimInputSymbols>$(ILLinkTrimInputPath)$(TargetName).pdb</ILLinkTrimInputSymbols>
+      <ILLinkTrimOutputPath>$(IntermediateOutputPath)</ILLinkTrimOutputPath>
+
+      <!-- if building a portable PDB, tell illink to rewrite the symbols file -->
+      <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- currently only directories are supported by ILLink. -->
+      <_ILLinkReferenceDirectory Include="%(ReferencePath.RootDir)%(ReferencePath.Directory)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <!-- root public entry points in this assembly -->
+      <ILLinkArgs>$(ILLinkArgs) -r "$(ILLinkTrimInputAssembly)"</ILLinkArgs>
+      <!-- directories to examine for assembly dependencies -->
+      <ILLinkArgs>$(ILLinkArgs) @(_ILLinkReferenceDirectory->'-d %(Identity)', ' ')</ILLinkArgs>
+      <!-- treat core assemblies the same way as other assemblies -->
+      <ILLinkArgs>$(ILLinkArgs) -c link</ILLinkArgs>
+      <!-- root everything in these assemblies -->
+      <!--ILLinkArgs>$(ILLinkArgs) -a System.Private.CoreLib -a mscorlib</ILLinkArgs-->
+      <!-- keep type-forward assemblies (facades) -->
+      <ILLinkArgs>$(ILLinkArgs) -t</ILLinkArgs>
+      <ILLinkArgs>$(ILLinkArgs) -out $(ILLinkTrimOutputPath)</ILLinkArgs>
+      <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true'">$(ILLinkArgs) -p true</ILLinkArgs>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(ILLinkTrimInputPath)" />
+
+    <!-- Move the assembly into a subdirectory for ILLink -->
+    <Move SourceFiles="$(ILLinkTrimAssemblyPath)"
+          DestinationFolder="$(ILLinkTrimInputPath)"
+    />
+
+    <!-- Move the PDB into a subdirectory for ILLink if we are rewriting PDBs -->
+    <Move SourceFiles="$(ILLinkTrimAssemblySymbols)"
+          DestinationFolder="$(ILLinkTrimInputPath)"
+          Condition="'$(ILLinkRewritePDBs)' == 'true'"
+    />
+
+    <PropertyGroup>
+      <ILLinkCmd>$(OverrideToolHost) "$(ILLinkToolPath)"</ILLinkCmd>
+    </PropertyGroup>
+
+    <Exec Command="$(ILLinkCmd) $(ILLinkArgs)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(ILLinkTrimInputAssembly)" />
+      <FileWrites Include="$(ILLinkTrimInputSymbols)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
