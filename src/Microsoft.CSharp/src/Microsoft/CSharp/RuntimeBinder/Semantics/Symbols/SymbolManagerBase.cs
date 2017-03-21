@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -330,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (other._types == _types) return true;
                 if (other._types.Length != _types.Length) return false;
                 if (other._hashCode != _hashCode) return false;
-                for (int i = 0, n = _types.Length; i < n; i++)
+                for (int i = 0; i < _types.Length; i++)
                 {
                     if (!_types[i].Equals(other._types[i]))
                         return false;
@@ -338,8 +339,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
+            [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
             public override bool Equals(object obj)
             {
+                Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
                 if (obj is TypeArrayKey)
                 {
                     return this.Equals((TypeArrayKey)obj);

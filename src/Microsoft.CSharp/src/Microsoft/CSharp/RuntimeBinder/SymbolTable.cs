@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -47,7 +48,12 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             public bool Equals(NameHashKey other) => other != null && type.Equals(other.type) && name.Equals(other.name);
 
-            public override bool Equals(object obj) => Equals(obj as NameHashKey);
+            [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
+            public override bool Equals(object obj)
+            {
+                Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
+                return Equals(obj as NameHashKey);
+            }
 
             public override int GetHashCode()
             {
