@@ -37,7 +37,7 @@ namespace System.Reflection.Metadata
         public BlobHandle SequencePointsBlob => _reader.MethodDebugInformationTable.GetSequencePoints(Handle);
 
         /// <summary>
-        /// handle of the single document containing all sequence points of the method, 
+        /// Handle of the single document containing all sequence points of the method, 
         /// or nil if the method doesn't have sequence points or spans multiple documents.
         /// </summary>
         public DocumentHandle Document => _reader.MethodDebugInformationTable.GetDocument(Handle);
