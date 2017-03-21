@@ -40,11 +40,27 @@ namespace System.IO.Pipes.Tests
             Assert.Throws<InvalidOperationException>(() => client.SetAccessControl(new PipeSecurity()));
         }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On Desktop we throw an exception based on the internal PipeStream state. In .NET Core, we do not have access to that member since Pipes.AccessControl is its own assembly.")]
+        public void SetAccessControl_NamedPipeClientStream_Broken()
+        {
+            NamedPipeClientStream client = GetAccessControl_NamedPipeClientStream_Broken();
+            Assert.Throws<InvalidOperationException>(() => client.SetAccessControl(new PipeSecurity()));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "On Desktop we throw an exception based on the internal PipeStream state. In .NET Core, we do not have access to that member since Pipes.AccessControl is its own assembly.")]
+        public void SetAccessControl_NamedPipeClientStream_Broken_Desktop()
+        {
+            NamedPipeClientStream client = GetAccessControl_NamedPipeClientStream_Broken();
+            Assert.Throws<IOException>(() => client.SetAccessControl(new PipeSecurity()));
+        }
+
+
         /// <summary>
         /// Tests that SetAccessControl on a Broken NamedPipeClientStream throws an Exception.
         /// </summary>
-        [Fact]
-        public void GetAccessControl_NamedPipeClientStream_Broken()
+        public NamedPipeClientStream GetAccessControl_NamedPipeClientStream_Broken()
         {
             string pipeName = GetUniquePipeName();
             var server = new NamedPipeServerStream(pipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
@@ -61,7 +77,7 @@ namespace System.IO.Pipes.Tests
 
             server.Dispose();
             Assert.Throws<IOException>(() => client.Write(new byte[] { 0 }, 0, 1)); // Sets the clients PipeState to Broken
-            Assert.Throws<InvalidOperationException>(() => client.SetAccessControl(new PipeSecurity()));
+            return client;
         }
 
         /// <summary>
