@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26127.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.Odbc.Tests", "tests\FunctionalTests\System.Data.Odbc.Tests.csproj", "{F3E72F35-0351-4D67-2209-725BCAD807BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.Odbc.Tests", "tests\System.Data.Odbc.Tests.csproj", "{F3E72F35-0351-4D67-2209-725BCAD807BA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7BAD100F-AD6B-490A-AF7C-8E3854E812C0} = {7BAD100F-AD6B-490A-AF7C-8E3854E812C0}
 	EndProjectSection
