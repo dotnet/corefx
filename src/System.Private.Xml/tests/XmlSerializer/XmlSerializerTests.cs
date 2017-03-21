@@ -3159,6 +3159,49 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.False((bool)actual[1]);
     }
 
+    [Fact]
+    public static void XmlMembersMapping_IntArray()
+    {
+        string memberName = "IntArray";
+        var requestBodyValue = new int[] { 1, 2, 3 };
+        var requestBodyActual = RoundTripWithXmlMembersMapping<int[]>(requestBodyValue, memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <IntArray>1</IntArray>\r\n  <IntArray>2</IntArray>\r\n  <IntArray>3</IntArray>\r\n</wrapper>",
+            wrapperName: "wrapper");
+
+        Assert.NotNull(requestBodyActual);
+        Assert.Equal(requestBodyValue.Length, requestBodyActual.Length);
+        Assert.True(Enumerable.SequenceEqual(requestBodyValue, requestBodyActual));
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_IntList()
+    {
+        string memberName = "IntArray";
+        List<int> requestBodyValue = new List<int> { 1, 2, 3 };
+        var requestBodyActual = RoundTripWithXmlMembersMapping<List<int>>(requestBodyValue, memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <IntArray>1</IntArray>\r\n  <IntArray>2</IntArray>\r\n  <IntArray>3</IntArray>\r\n</wrapper>",
+            wrapperName: "wrapper");
+
+        Assert.NotNull(requestBodyActual);
+        Assert.Equal(requestBodyValue.Count(), requestBodyActual.Count());
+        Assert.True(Enumerable.SequenceEqual(requestBodyValue, requestBodyActual));
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_TypeHavingIntArray()
+    {
+        string memberName = "data";
+        var requestBodyValue = new XmlMembersMappingTypeHavingIntArray() { IntArray = new int[] { 1, 2, 3 } };
+        var requestBodyActual = RoundTripWithXmlMembersMapping<XmlMembersMappingTypeHavingIntArray>(requestBodyValue, memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <data>\r\n    <IntArray>\r\n      <int>1</int>\r\n      <int>2</int>\r\n      <int>3</int>\r\n    </IntArray>\r\n  </data>\r\n</wrapper>",
+            wrapperName: "wrapper");
+
+        Assert.NotNull(requestBodyActual);
+        Assert.NotNull(requestBodyActual.IntArray);
+        Assert.Equal(requestBodyValue.IntArray.Length, requestBodyActual.IntArray.Length);
+        Assert.True(Enumerable.SequenceEqual(requestBodyValue.IntArray, requestBodyActual.IntArray));
+    }
+
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
         object[] value = new object[] { requestBodyValue };

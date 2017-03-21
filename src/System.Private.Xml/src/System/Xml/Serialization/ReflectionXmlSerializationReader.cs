@@ -191,7 +191,11 @@ namespace System.Xml.Serialization
                         {
                             anyElement = anyMember;
                             if (mapping.Attribute == null && mapping.Text == null)
-                                textOrArrayMembersList.Add(anyMember);
+                            {
+                                throw new NotImplementedException("mapping.Attribute == null && mapping.Text == null");
+                                //textOrArrayMembersList.Add(anyMember);
+                            }
+
                             foundAnyElement = true;
                             break;
                         }
@@ -201,6 +205,12 @@ namespace System.Xml.Serialization
                     membersList.Add(anyMember);
                 else if (mapping.TypeDesc.IsArrayLike && !(mapping.Elements.Length == 1 && mapping.Elements[0].Mapping is ArrayMapping))
                 {
+                    anyMember.Collection = new CollectionMember();
+                    anyMember.ArraySource = (item) =>
+                    {
+                        anyMember.Collection.Add(item);
+                    };
+
                     membersList.Add(anyMember);
                     textOrArrayMembersList.Add(anyMember);
                 }
@@ -224,12 +234,6 @@ namespace System.Xml.Serialization
                 //var attributeMembers = attributeMembersList.ToArray();
                 //WriteAttributes(attributeMembers, anyAttribute.Mapping, UnknownNode, ref o);
                 //Reader.MoveToElement();
-            }
-
-            if (textOrArrayMembers.Length != 0)
-            {
-                throw new NotImplementedException();
-                //WriteMemberBegin(textOrArrayMembers);
             }
 
             if (hasWrapperElement)
@@ -256,10 +260,11 @@ namespace System.Xml.Serialization
                 Reader.MoveToContent();
             }
 
-            if (textOrArrayMembers.Length != 0)
+            foreach (var member in textOrArrayMembers)
             {
-                throw new NotImplementedException();
-                //WriteMemberEnd(textOrArrayMembers);
+                object value = null;
+                SetCollectionObjectWithCollectionMember(ref value, member.Collection, member.Mapping.TypeDesc.Type);
+                member.Source(value);
             }
 
             return true;
