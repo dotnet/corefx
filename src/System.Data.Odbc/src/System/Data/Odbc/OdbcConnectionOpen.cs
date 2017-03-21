@@ -12,24 +12,6 @@ namespace System.Data.Odbc
         // Construct from a compiled connection string
         internal OdbcConnectionOpen(OdbcConnection outerConnection, OdbcConnectionString connectionOptions)
         {
-#if DEBUG
-            try
-            { // use this to help validate this object is only created after the following permission has been previously demanded in the current codepath
-                if (null != outerConnection)
-                {
-                    outerConnection.UserConnectionOptions.DemandPermission();
-                }
-                else
-                {
-                    connectionOptions.DemandPermission();
-                }
-            }
-            catch (System.Security.SecurityException)
-            {
-                System.Diagnostics.Debug.Assert(false, "unexpected SecurityException for current codepath");
-                throw;
-            }
-#endif
             OdbcEnvironmentHandle environmentHandle = OdbcEnvironment.GetGlobalEnvironmentHandle();
             outerConnection.ConnectionHandle = new OdbcConnectionHandle(outerConnection, connectionOptions, environmentHandle);
         }

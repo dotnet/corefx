@@ -593,7 +593,6 @@ namespace System.Data.Odbc
 
         public static void ReleaseObjectPool()
         {
-            (new OdbcPermission(PermissionState.Unrestricted)).Demand();
             OdbcEnvironment.ReleaseObjectPool();
         }
 

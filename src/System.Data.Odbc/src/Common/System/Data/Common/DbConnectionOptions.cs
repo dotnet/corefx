@@ -122,8 +122,6 @@ namespace System.Data.Common
         //     strip quotes from value
         internal readonly bool UseOdbcRules;
 
-        private System.Security.PermissionSet _permissionset;
-
         // called by derived classes that may cache based on connectionString
         public DbConnectionOptions(string connectionString)
             : this(connectionString, null, false)
@@ -408,25 +406,6 @@ namespace System.Data.Common
         public bool ContainsKey(string keyword)
         {
             return _parsetable.ContainsKey(keyword);
-        }
-
-        protected internal virtual System.Security.PermissionSet CreatePermissionSet()
-        {
-            return null;
-        }
-
-        internal void DemandPermission()
-        {
-            if (null == _permissionset)
-            {
-                _permissionset = CreatePermissionSet();
-            }
-            _permissionset.Demand();
-        }
-
-        protected internal virtual string Expand()
-        {
-            return _usersConnectionString;
         }
 
         // SxS notes:
