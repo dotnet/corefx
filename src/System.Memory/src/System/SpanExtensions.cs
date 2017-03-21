@@ -153,7 +153,7 @@ namespace System
         public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value)
         {
             int valueLength = value.Length;
-            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.Slice(0, valueLength).DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace System
             where T : struct, IEquatable<T>
         {
             int valueLength = value.Length;
-            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.Slice(0, valueLength).DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace System
         public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value)
         {
             int valueLength = value.Length;
-            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.Slice(0, valueLength).DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace System
             where T : struct, IEquatable<T>
         {
             int valueLength = value.Length;
-            return valueLength <= span.Length && (valueLength == 0 || span.Slice(0, valueLength).SequenceEqual(value));
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.Slice(0, valueLength).DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
     }
 }
