@@ -44,7 +44,7 @@ namespace System.Security
         protected virtual IPermission RemovePermissionImpl(Type permClass) { return default(IPermission); }
         public static void RevertAssert() { }
         public IPermission SetPermission(IPermission perm) { return SetPermissionImpl(perm); }
-        public IPermission SetPermissionImpl(IPermission perm) { return default(IPermission); }
+        protected virtual IPermission SetPermissionImpl(IPermission perm) { return default(IPermission); }
         void IDeserializationCallback.OnDeserialization(object sender) { }
         public override string ToString() => base.ToString();
         public virtual SecurityElement ToXml() { return default(SecurityElement); }

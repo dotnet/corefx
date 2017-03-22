@@ -177,7 +177,7 @@ namespace System.Security {
         protected virtual System.Security.IPermission RemovePermissionImpl(System.Type permClass) { throw null; }
         public static void RevertAssert() { }
         public System.Security.IPermission SetPermission(System.Security.IPermission perm) { throw null; }
-        public System.Security.IPermission SetPermissionImpl(System.Security.IPermission perm) { throw null; }
+        protected virtual System.Security.IPermission SetPermissionImpl(System.Security.IPermission perm) { throw null; }
         void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
         public override string ToString() { throw null; }
         public virtual System.Security.SecurityElement ToXml() { throw null; }
