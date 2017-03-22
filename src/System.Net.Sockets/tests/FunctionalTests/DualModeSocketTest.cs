@@ -1464,7 +1464,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]  // ReceiveFrom not supported on OSX
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also ReceiveFrom not supported on OSX
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ReceiveFromV6BoundToSpecificV4_NotReceived()
         {
             Assert.Throws<SocketException>(() =>
@@ -1474,7 +1476,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~(TestPlatforms.Linux | TestPlatforms.OSX))]  // Expected behavior is different on OSX and Linux
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also expected behavior is different on OSX and Linux (see ReceiveFromV4BoundToSpecificV6_NotReceived_Linux)
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ReceiveFromV4BoundToSpecificV6_NotReceived()
         {
             Assert.Throws<SocketException>(() =>
@@ -1483,6 +1487,9 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Test preserved if we change these tests to run in series (instead of parallel) to avoid port collision
+#if false
         // NOTE: on Linux, the OS IP stack changes a dual-mode socket back to a
         //       normal IPv6 socket once the socket is bound to an IPv6-specific
         //       address. As a result, the argument validation checks in
@@ -1499,9 +1506,12 @@ namespace System.Net.Sockets.Tests
                 ReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
             });
         }
+#endif
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]  // ReceiveFrom not supported on OSX
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also ReceiveFrom not supported on OSX
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ReceiveFromV6BoundToAnyV4_NotReceived()
         {
             Assert.Throws<SocketException>(() =>
@@ -1606,7 +1616,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]  // BeginReceiveFrom not supported on OSX
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also BeginReceiveFrom not supported on OSX
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginReceiveFromV6BoundToSpecificV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1616,7 +1628,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~(TestPlatforms.Linux | TestPlatforms.OSX))]  // Expected behavior is different on OSX and Linux
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also expected behavior is different on OSX and Linux (see BeginReceiveFromV4BoundToSpecificV6_NotReceived_Linux)
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginReceiveFromV4BoundToSpecificV6_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1625,6 +1639,9 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Test preserved if we change these tests to run in series (instead of parallel) to avoid port collision
+#if false
         // NOTE: on Linux, the OS IP stack changes a dual-mode socket back to a
         //       normal IPv6 socket once the socket is bound to an IPv6-specific
         //       address. As a result, the argument validation checks in
@@ -1641,9 +1658,12 @@ namespace System.Net.Sockets.Tests
                 BeginReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, expectedToTimeout: true);
             });
         }
+#endif
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]  // BeginReceiveFrom not supported on OSX
+        // Binds to a specific port on 'connectTo' which on Unix may already be in use
+        // Also BeginReceiveFrom not supported on OSX
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginReceiveFromV6BoundToAnyV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
