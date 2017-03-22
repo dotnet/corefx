@@ -328,14 +328,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             public bool Equals(TypeArrayKey other)
             {
-                if (other._types == _types) return true;
-                if (other._types.Length != _types.Length) return false;
-                if (other._hashCode != _hashCode) return false;
-                for (int i = 0; i < _types.Length; i++)
+                CType[] types = _types;
+                CType[] otherTypes = other._types;
+                if (other._types == _types)
                 {
-                    if (!_types[i].Equals(other._types[i]))
-                        return false;
+                    return true;
                 }
+
+                if (other._hashCode != _hashCode || otherTypes.Length != types.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < otherTypes.Length; i++)
+                {
+                    if (!types[i].Equals(otherTypes[i]))
+                    {
+                        return false;
+                    }
+                }
+
                 return true;
             }
 
@@ -343,11 +355,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                if (obj is TypeArrayKey)
-                {
-                    return this.Equals((TypeArrayKey)obj);
-                }
-                return false;
+                return obj is TypeArrayKey && Equals((TypeArrayKey)obj);
             }
 
             public override int GetHashCode()
