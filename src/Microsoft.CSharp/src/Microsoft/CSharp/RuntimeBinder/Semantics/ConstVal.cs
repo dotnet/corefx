@@ -48,85 +48,80 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool boolVal
         {
             get { return SpecialUnbox<bool>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public sbyte sbyteVal
         {
             get { return SpecialUnbox<sbyte>(_value); }
-            //set { this.value = SpecialBox(value); }
         }
 
         public byte byteVal
         {
             get { return SpecialUnbox<byte>(_value); }
-            //set { this.value = SpecialBox(value); }
         }
 
         public short shortVal
         {
             get { return SpecialUnbox<short>(_value); }
-            //set { this.value = SpecialBox(value); }
         }
 
         public ushort ushortVal
         {
             get { return SpecialUnbox<ushort>(_value); }
-            //set { this.value = SpecialBox(value); }
         }
 
         public int iVal
         {
             get { return SpecialUnbox<int>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public uint uiVal
         {
             get { return SpecialUnbox<uint>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public long longVal
         {
             get { return SpecialUnbox<long>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public ulong ulongVal
         {
             get { return SpecialUnbox<ulong>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public float floatVal
         {
             get { return SpecialUnbox<float>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public double doubleVal
         {
             get { return SpecialUnbox<double>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public decimal decVal
         {
             get { return SpecialUnbox<decimal>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public char cVal
         {
             get { return SpecialUnbox<char>(_value); }
-            //set { this.value = SpecialBox(value); }
         }
 
         public string strVal
         {
             get { return SpecialUnbox<string>(_value); }
-            set { _value = SpecialBox(value); }
+            set { _value = value; }
         }
 
         public bool IsNullRef()
@@ -155,11 +150,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return (T)Convert.ChangeType(o, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        private object SpecialBox<T>(T x)
-        {
-            return x;
         }
 
         private bool IsDefault(object o)
