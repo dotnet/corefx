@@ -124,7 +124,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static bool isZero(this EXPR expr)
         {
-            return (expr.isCONSTANT_OK()) && (expr.asCONSTANT().isZero());
+            return (expr.isCONSTANT_OK()) && (expr.asCONSTANT().IsZero);
         }
 
         private static EXPR GetSeqVal(this EXPR expr)

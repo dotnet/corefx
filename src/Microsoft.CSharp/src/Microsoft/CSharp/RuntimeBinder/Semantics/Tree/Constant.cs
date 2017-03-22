@@ -13,14 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public EXPR GetOptionalConstructorCall() { return OptionalConstructorCall; }
         public void SetOptionalConstructorCall(EXPR value) { OptionalConstructorCall = value; }
 
-        private bool IsZero
-        {
-            get
-            {
-                return Val.IsZero(this.type.constValKind());
-            }
-        }
-        public bool isZero() { return IsZero; }
+        public bool IsZero => Val.IsZero(type.constValKind());
 
         public ConstVal Val { get; set; }
 
