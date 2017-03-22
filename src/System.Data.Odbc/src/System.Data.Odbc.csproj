@@ -7,10 +7,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Linux-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Linux-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-OSX-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-OSX-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Linux-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Linux-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-OSX-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-OSX-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
@@ -45,17 +45,27 @@
     <Compile Include="Properties\SecurityTransparent.cs" />
     <Compile Include="System\Data\Odbc\DbDataRecord.cs" />
     <Compile Include="System\Data\Odbc\Odbc32.cs" />
-    <Compile Include="System\Data\Odbc\OdbcCommand.cs" />
-    <Compile Include="System\Data\Odbc\OdbcCommandBuilder.cs" />
-    <Compile Include="System\Data\Odbc\OdbcConnection.cs" />
+    <Compile Include="System\Data\Odbc\OdbcCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Data\Odbc\OdbcCommandBuilder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Data\Odbc\OdbcConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\Odbc\OdbcConnectionFactory.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnectionHandle.cs" />
-    <Compile Include="System\Data\Odbc\OdbcConnectionHelper.cs" />
+    <Compile Include="System\Data\Odbc\OdbcConnectionHelper.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\Odbc\OdbcConnectionOpen.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnectionPoolProviderInfo.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnectionString.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnectionStringbuilder.cs" />
-    <Compile Include="System\Data\Odbc\OdbcDataAdapter.cs" />
+    <Compile Include="System\Data\Odbc\OdbcDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\Odbc\OdbcDataReader.cs" />
     <Compile Include="System\Data\Odbc\OdbcEnvironment.cs" />
     <Compile Include="System\Data\Odbc\OdbcEnvironmentHandle.cs" />
