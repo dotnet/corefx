@@ -606,7 +606,7 @@ namespace System.Data.SqlClient.SNI
             }
             else if (!string.IsNullOrEmpty(localDbInstance))
             {
-                fullServerName = LocalDB.GetLocalDBConnectionString(localDbInstance);
+                localDBConnectionString = LocalDB.GetLocalDBConnectionString(localDbInstance);
                 if (fullServerName == null)
                 {
                     // The Last error is set in LocalDB.GetLocalDBConnectionString. We don't need to set Last here.

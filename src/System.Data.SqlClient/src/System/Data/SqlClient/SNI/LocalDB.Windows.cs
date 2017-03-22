@@ -119,7 +119,7 @@ namespace System.Data.SqlClient.SNI
                 }
 
                 // Load the procs from the DLLs
-                _startInstanceHandle = Interop.Kernel32.GetProcAddress(_sqlUserInstanceLibraryHandle, ProcLocalDBStartInstance);
+                _startInstanceHandle = Interop.Kernel32.GetProcAddress(libraryHandle, ProcLocalDBStartInstance);
 
                 // Set the delegate the invoke.
                 localDBStartInsanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
