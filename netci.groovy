@@ -274,6 +274,44 @@ def buildArchConfiguration = ['Debug': 'x86',
 }
 
 // **************************
+// Define outerloop testing for netfx that can build and run.  Run locally on each machine.
+// **************************
+[true, false].each { isPR ->
+    ['Debug', 'Release'].each { configurationGroup ->
+
+        def osForMachineAffinity = 'Windows_NT'
+        def archGroup = "x64"
+        def newJobName = "outerloop_netfx_${configurationGroup.toLowerCase()}"
+
+        def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+            steps {
+                batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -framework:netfx")
+                batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -framework:netfx -outerloop -- /p:IsCIBuild=true")
+            }
+        }
+
+        Utilities.setMachineAffinity(newJob, osForMachineAffinity, "latest-or-auto-elevated")
+
+        // Set up standard options.
+        Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+        // Add the unit test results
+        Utilities.addXUnitDotNETResults(newJob, 'bin/**/testResults.xml')
+        // Add archival for the built data.
+        Utilities.addArchival(newJob, "msbuild.log", '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
+        // Set up appropriate triggers.  PR on demand, otherwise nightly
+        if (isPR) {
+            // Set PR trigger.
+            // TODO: More elaborate regex trigger?
+            Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop netfx ${configurationGroup} ${archGroup}", "(?i).*test\\W+outerloop\\W+netfx\\W+${configurationGroup}.*")
+        }
+        else {
+            // Set a periodic trigger
+            Utilities.addPeriodicTrigger(newJob, '@daily')
+        }
+    }
+}
+
+// **************************
 // Define perf testing.  Built locally and submitted to Helix.
 // **************************
 
