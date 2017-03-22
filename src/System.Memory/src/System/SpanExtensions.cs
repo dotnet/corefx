@@ -125,54 +125,55 @@ namespace System
             return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
+
         /// <summary>
-        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
-        /// <param name="value0">The first value to search for.</param>
-        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this Span<byte> span, byte value0, byte value1)
+        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1)
         {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
-        /// <param name="value0">The first value to search for.</param>
-        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
-        /// <param name="value2">The value to search for at the index right after the one where the second one is found.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this Span<byte> span, byte value0, byte value1, byte value2)
+        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2)
         {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
-        /// <param name="value0">The first value to search for.</param>
-        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this ReadOnlySpan<byte> span, byte value0, byte value1)
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1)
         {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified values and returns the index of the first occurrence where all of them appear in sequence. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
         /// </summary>
         /// <param name="span">The span to search.</param>
-        /// <param name="value0">The first value to search for.</param>
-        /// <param name="value1">The value to search for at the index right after the one where the first one is found.</param>
-        /// <param name="value2">The value to search for at the index right after the one where the second one is found.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
         {
-            return SpanHelpers.IndexOf(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
         }
 
         /// <summary>

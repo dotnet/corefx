@@ -176,7 +176,7 @@ namespace System
             return (int)(byte*)(index + 7);
         }
 
-        public static unsafe int IndexOf(ref byte searchSpace, byte value0, byte value1, int length)
+        public static unsafe int IndexOfAny(ref byte searchSpace, byte value0, byte value1, int length)
         {
             Debug.Assert(length >= 0);
 
@@ -195,51 +195,65 @@ namespace System
             }
             SequentialScan:
 #endif
-            while ((byte*)nLength >= (byte*)9)
+            uint lookUp;
+            while ((byte*)nLength >= (byte*)8)
             {
                 nLength -= 8;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && uValue1 == Unsafe.Add(ref searchSpace, index + 1))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 1) && uValue1 == Unsafe.Add(ref searchSpace, index + 2))
+                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 2) && uValue1 == Unsafe.Add(ref searchSpace, index + 3))
+                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 3) && uValue1 == Unsafe.Add(ref searchSpace, index + 4))
+                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 4) && uValue1 == Unsafe.Add(ref searchSpace, index + 5))
+                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found4;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 5) && uValue1 == Unsafe.Add(ref searchSpace, index + 6))
+                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found5;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 6) && uValue1 == Unsafe.Add(ref searchSpace, index + 7))
+                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found6;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 7) && uValue1 == Unsafe.Add(ref searchSpace, index + 8))
+                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found7;
 
                 index += 8;
             }
 
-            if ((byte*)nLength >= (byte*)5)
+            if ((byte*)nLength >= (byte*)4)
             {
                 nLength -= 4;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && uValue1 == Unsafe.Add(ref searchSpace, index + 1))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 1) && uValue1 == Unsafe.Add(ref searchSpace, index + 2))
+                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 2) && uValue1 == Unsafe.Add(ref searchSpace, index + 3))
+                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 3) && uValue1 == Unsafe.Add(ref searchSpace, index + 4))
+                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
 
                 index += 4;
             }
 
-            while ((byte*)nLength >= (byte*)2)
+            while ((byte*)nLength > (byte*)0)
             {
                 nLength -= 1;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && uValue1 == Unsafe.Add(ref searchSpace, index + 1))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
 
                 index += 1;
@@ -257,11 +271,10 @@ namespace System
                 Vector<byte> values1 = GetVector(value1);
                 do
                 {
-                    var vData0 = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
-                    var vData1 = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index + 1));
-                    var vMatches = Vector.BitwiseAnd(
-                        Vector.Equals(vData0, values0),
-                        Vector.Equals(vData1, values1));
+                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
+                    var vMatches = Vector.BitwiseOr(
+                        Vector.Equals(vData, values0),
+                        Vector.Equals(vData, values1));
 
                     if (!vMatches.Equals(Vector<byte>.Zero))
                     {
@@ -311,7 +324,7 @@ namespace System
             return (int)(byte*)(index + 7);
         }
 
-        public static unsafe int IndexOf(ref byte searchSpace, byte value0, byte value1, byte value2, int length)
+        public static unsafe int IndexOfAny(ref byte searchSpace, byte value0, byte value1, byte value2, int length)
         {
             Debug.Assert(length >= 0);
 
@@ -331,77 +344,65 @@ namespace System
             }
             SequentialScan:
 #endif
-            while ((byte*)nLength >= (byte*)10)
+            uint lookUp;
+            while ((byte*)nLength >= (byte*)8)
             {
                 nLength -= 8;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 1) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 2))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 1) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 2) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 3))
+                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 2) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 3) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 4))
+                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 3) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 4) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 5))
+                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 4) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 5) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 6))
+                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found4;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 5) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 6) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 7))
+                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found5;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 6) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 7) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 8))
+                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found6;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 7) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 8) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 9))
+                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found7;
 
                 index += 8;
             }
 
-            if ((byte*)nLength >= (byte*)6)
+            if ((byte*)nLength >= (byte*)4)
             {
                 nLength -= 4;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 1) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 2))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 1) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 2) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 3))
+                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 2) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 3) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 4))
+                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                if (uValue0 == Unsafe.Add(ref searchSpace, index + 3) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 4) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 5))
+                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
 
                 index += 4;
             }
 
-            while ((byte*)nLength >= (byte*)3)
+            while ((byte*)nLength > (byte*)0)
             {
                 nLength -= 1;
 
-                if (uValue0 == Unsafe.Add(ref searchSpace, index) && 
-                    uValue1 == Unsafe.Add(ref searchSpace, index + 1) &&
-                    uValue2 == Unsafe.Add(ref searchSpace, index + 2))
+                lookUp = Unsafe.Add(ref searchSpace, index);
+                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
 
                 index += 1;
@@ -420,15 +421,13 @@ namespace System
                 Vector<byte> values2 = GetVector(value2);
                 do
                 {
-                    var vData0 = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
-                    var vData1 = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index + 1));
-                    var vData2 = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index + 2));
+                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
 
-                    var vMatches = Vector.BitwiseAnd(
+                    var vMatches = Vector.BitwiseOr(
                         Vector.BitwiseAnd(
-                            Vector.Equals(vData0, values0),
-                            Vector.Equals(vData1, values1)),
-                        Vector.Equals(vData2, values2));
+                            Vector.Equals(vData, values0),
+                            Vector.Equals(vData, values1)),
+                        Vector.Equals(vData, values2));
 
                     if (!vMatches.Equals(Vector<byte>.Zero))
                     {
