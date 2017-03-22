@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class EXPRCONSTANT : EXPR
+    internal sealed class ExprConstant : EXPR
     {
         public EXPR OptionalConstructorCall { get; set; }
 

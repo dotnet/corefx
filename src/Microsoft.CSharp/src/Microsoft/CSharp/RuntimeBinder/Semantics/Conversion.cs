@@ -1453,7 +1453,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool srcIntegral = (ftSrc <= FUNDTYPE.FT_LASTINTEGRAL);
             bool srcNumeric = (ftSrc <= FUNDTYPE.FT_LASTNUMERIC);
 
-            EXPRCONSTANT constSrc = exprSrc.GetConst().asCONSTANT();
+            ExprConstant constSrc = exprSrc.GetConst().asCONSTANT();
             Debug.Assert(constSrc != null);
             if (ftSrc == FUNDTYPE.FT_STRUCT || ftDest == FUNDTYPE.FT_STRUCT)
             {
@@ -1626,7 +1626,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     cv = ConstVal.Get(valueFlt);
                 }
-                EXPRCONSTANT expr = ExprFactory.CreateConstant(typeDest, cv);
+                ExprConstant expr = ExprFactory.CreateConstant(typeDest, cv);
                 pexprDest = expr;
             }
             return ConstCastResult.Success;
@@ -1700,7 +1700,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
          * Bind a constant cast to or from decimal. Return null if cast can't be done.
          */
-        private EXPR bindDecimalConstCast(EXPRTYPEORNAMESPACE exprDestType, CType srcType, EXPRCONSTANT src)
+        private EXPR bindDecimalConstCast(EXPRTYPEORNAMESPACE exprDestType, CType srcType, ExprConstant src)
         {
             CType destType = exprDestType.TypeOrNamespace.AsType();
             CType typeDecimal = SymbolLoader.GetOptPredefType(PredefinedType.PT_DECIMAL);
@@ -1745,7 +1745,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 cv = ConstVal.Get(result);
-                EXPRCONSTANT exprConst = ExprFactory.CreateConstant(typeDecimal, cv);
+                ExprConstant exprConst = ExprFactory.CreateConstant(typeDecimal, cv);
 
                 return exprConst;
             }
@@ -1802,7 +1802,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return null;
                 }
-                EXPRCONSTANT exprConst = ExprFactory.CreateConstant(destType, cv);
+                ExprConstant exprConst = ExprFactory.CreateConstant(destType, cv);
                 // Create the cast that was the original tree for this thing.
                 return exprConst;
             }

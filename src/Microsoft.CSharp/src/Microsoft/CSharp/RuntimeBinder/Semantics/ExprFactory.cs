@@ -448,7 +448,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (rval);
         }
 
-        public EXPRCONSTANT CreateStringConstant(string str)
+        public ExprConstant CreateStringConstant(string str)
         {
             return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
         }
@@ -510,7 +510,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // For enum types, we create a constant that has the default value
                 // as an object pointer.
-                EXPRCONSTANT expr = CreateConstant(pType, ConstVal.Get(Activator.CreateInstance(pType.AssociatedSystemType)));
+                ExprConstant expr = CreateConstant(pType, ConstVal.Get(Activator.CreateInstance(pType.AssociatedSystemType)));
                 return expr;
             }
 
@@ -529,7 +529,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             // Create a constant here.
 
-                            EXPRCONSTANT expr = CreateConstant(pType, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
+                            ExprConstant expr = CreateConstant(pType, ConstVal.GetDefaultValue(ConstValKind.IntPtr));
                             return (expr);
                         }
 
@@ -551,16 +551,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
                     {
-                        EXPRCONSTANT expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        EXPRCONSTANT exprInOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
+                        ExprConstant expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
+                        ExprConstant exprInOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
                         exprInOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
                         return expr;
                     }
                 case FUNDTYPE.FT_STRUCT:
                     if (pType.isPredefType(PredefinedType.PT_DECIMAL))
                     {
-                        EXPRCONSTANT expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        EXPRCONSTANT exprOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
+                        ExprConstant expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
+                        ExprConstant exprOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
                         exprOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
                         return expr;
                     }
@@ -586,33 +586,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (rval);
         }
 
-        public EXPRCONSTANT CreateConstant(CType pType, ConstVal constVal)
+        public ExprConstant CreateConstant(CType pType, ConstVal constVal)
         {
             return CreateConstant(pType, constVal, null);
         }
 
-        private EXPRCONSTANT CreateConstant(CType pType, ConstVal constVal, EXPR pOriginal)
+        private ExprConstant CreateConstant(CType pType, ConstVal constVal, EXPR pOriginal)
         {
-            EXPRCONSTANT rval = CreateConstant(pType);
+            ExprConstant rval = CreateConstant(pType);
             rval.Val = constVal;
             Debug.Assert(rval != null);
             return (rval);
         }
 
-        private EXPRCONSTANT CreateConstant(CType pType)
+        private ExprConstant CreateConstant(CType pType)
         {
-            EXPRCONSTANT rval = new EXPRCONSTANT();
+            ExprConstant rval = new ExprConstant();
             rval.kind = ExpressionKind.EK_CONSTANT;
             rval.type = pType;
             rval.flags = 0;
             return rval;
         }
 
-        public EXPRCONSTANT CreateIntegerConstant(int x)
+        public ExprConstant CreateIntegerConstant(int x)
         {
             return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
         }
-        public EXPRCONSTANT CreateBoolConstant(bool b)
+        public ExprConstant CreateBoolConstant(bool b)
         {
             return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
         }

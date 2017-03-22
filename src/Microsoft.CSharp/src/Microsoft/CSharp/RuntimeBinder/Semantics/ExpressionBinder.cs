@@ -716,7 +716,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 exprSrc.type.fundType() == typeDest.fundType() &&
                 (!exprSrc.type.isPredefType(PredefinedType.PT_STRING) || exprConst.asCONSTANT().Val.IsNullRef))
             {
-                EXPRCONSTANT expr = GetExprFactory().CreateConstant(typeDest, exprConst.asCONSTANT().Val);
+                ExprConstant expr = GetExprFactory().CreateConstant(typeDest, exprConst.asCONSTANT().Val);
                 pexprDest = expr;
                 return;
             }
@@ -2300,12 +2300,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Check to see if an integral constant is within range of a integral 
         // destination type.
-        private static bool isConstantInRange(EXPRCONSTANT exprSrc, CType typeDest)
+        private static bool isConstantInRange(ExprConstant exprSrc, CType typeDest)
         {
             return isConstantInRange(exprSrc, typeDest, false);
         }
 
-        private static bool isConstantInRange(EXPRCONSTANT exprSrc, CType typeDest, bool realsOk)
+        private static bool isConstantInRange(ExprConstant exprSrc, CType typeDest, bool realsOk)
         {
             FUNDTYPE ftSrc = exprSrc.type.fundType();
             FUNDTYPE ftDest = typeDest.fundType();
