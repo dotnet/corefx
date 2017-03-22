@@ -285,6 +285,8 @@ namespace System.Data.SqlClient.SNI
             return pos >= 0 && (s.Length == nextIndex || s.IndexOf(c, pos + 1) == -1);
         }
 
+        
+
         /// <summary>
         /// Create a SNI connection handle
         /// </summary>
@@ -302,11 +304,12 @@ namespace System.Data.SqlClient.SNI
         {
             instanceName = new byte[1];
 
-            string localDbInstance = DataSource.GetLocalDBInstance(fullServerName);
-
-            if (!string.IsNullOrEmpty(localDbInstance))
+            bool errorWithLocalDBProcessing;
+            fullServerName = GetLocalDBConnectionString(fullServerName, out errorWithLocalDBProcessing);
+            
+            if (errorWithLocalDBProcessing)
             {
-                fullServerName = LocalDB.Singleton.GetLocalDBConnectionString(localDbInstance);
+                return null;
             }
 
             DataSource details = DataSource.ParseServerName(fullServerName);
@@ -582,6 +585,39 @@ namespace System.Data.SqlClient.SNI
         {
             return SNILoadHandle.SingletonInstance.LastError;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fullServerName">The data source</param>
+        /// <param name="error">Set true when an error occured while getting LocalDB up</param>
+        /// <returns></returns>
+        private string GetLocalDBConnectionString(string fullServerName, out bool error)
+        {
+            string localDBConnectionString = null;
+            bool isBadLocalDBDataSource;
+            string localDbInstance = DataSource.GetLocalDBInstance(fullServerName, out isBadLocalDBDataSource);
+
+            if (isBadLocalDBDataSource)
+            {
+                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                error = true;
+                return null;
+            }
+            else if (!string.IsNullOrEmpty(localDbInstance))
+            {
+                fullServerName = LocalDB.GetLocalDBConnectionString(localDbInstance);
+                if (fullServerName == null)
+                {
+                    // The Last error is set in LocalDB.GetLocalDBConnectionString. We don't need to set Last here.
+                    error = true;
+                    return null;
+                }
+            }
+
+            error = false;
+            return localDBConnectionString;
+        }
     }
 
     internal class DataSource
@@ -664,9 +700,11 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        public static string GetLocalDBInstance(string dataSource)
+        public static string GetLocalDBInstance(string dataSource, out bool error)
         {
             Debug.Assert(!string.IsNullOrEmpty(dataSource), "Empty data source");
+
+            error = false;
 
             string instanceName = null;
 
