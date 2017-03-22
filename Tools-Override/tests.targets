@@ -214,17 +214,10 @@
       <PostExecutionTestCommandLines Include="copy /y testResults.xml %EXECUTION_DIR%\" />
     </ItemGroup>
 
-    <!-- For UAP F5 scenario, generate the test commands -->
     <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true'">
-      <_Results_Path>$([System.Environment]::GetFolderPath(SpecialFolder.MyDocuments))\TestResults\</_Results_Path>
-    </PropertyGroup>
-  
-    <!-- The results path is different on the helix machine than locally -->
-    <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true' and '$(ArchiveTests)' == 'true'">
-      <_Results_Path>%USERPROFILE%\Documents\TestResults\</_Results_Path>
-    </PropertyGroup>
+      <!-- The location where the logs will be written by the test runner -->
+      <UAP_Results_Path Condition="'$(UAP_Results_Path)'==''">%USERPROFILE%\Documents\TestResults\</UAP_Results_Path>
 
-    <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true'">
       <_Runtime_Path>%RUNTIME_PATH%\UAPLayout\</_Runtime_Path>
       <!-- Make sure the path only has one type of slashes -->
       <_Runtime_Path>$(_Runtime_Path.Replace('/', '\'))</_Runtime_Path>
@@ -248,8 +241,8 @@
       <TestCommandLines Include="mklink /H %(RuntimePathContents.RecursiveDir)%(RuntimePathContents.Filename)%(RuntimePathContents.Extension) $(_Runtime_Path)%(RuntimePathContents.Filename)%(RuntimePathContents.Extension)" />
 
       <!-- Copy the log files and the results files from the Documents folder to the test folder -->
-      <PostExecutionTestCommandLines Include="move $(_Results_Path)$(XunitTestAssembly).xml .\$(XunitResultsFileName)" /> 
-      <PostExecutionTestCommandLines Include="move $(_Results_Path)$(XunitTestAssembly).txt .\logs.txt" />
+      <PostExecutionTestCommandLines Include="move $(UAP_Results_Path)$(XunitTestAssembly).xml .\$(XunitResultsFileName)" /> 
+      <PostExecutionTestCommandLines Include="move $(UAP_Results_Path)$(XunitTestAssembly).txt .\logs.txt" />
       <PostExecutionTestCommandLines Include="type logs.txt" />
     </ItemGroup>
       

@@ -10,6 +10,7 @@
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' != 'netfx'">xunit.console.netcore</XUnitRunnerPackageId>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' == 'netfx'">xunit.runner.console</XUnitRunnerPackageId>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'uapaot'">.NETStandard,Version=v2.0</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'uap'">.NETStandard,Version=v2.0</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -40,7 +41,7 @@
   <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost" 
           AfterTargets="RestorePackages"
-          Condition="'$(BuildingUAPVertical)'=='true' and '$(UAPToolsFolder)'!=''" >
+          Condition="'$(TargetGroup)'=='uap' and '$(UAPToolsFolder)'!=''" >
 
     <ItemGroup>
       <RunnerFolderContents Include="$(UAPToolsFolder)\Runner\**\*" />
@@ -48,11 +49,11 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(RunnerFolderContents)" 
-          DestinationFiles="$(NETCoreAppTestRootPath)\Runner\%(RunnerFolderContents.RecursiveDir)%(RunnerFolderContents.Filename)%(RunnerFolderContents.Extension)" 
+          DestinationFolder="$(NETCoreAppTestRootPath)\Runner\%(RecursiveDir)"
           SkipUnchangedFiles="true"/>
 
     <Copy SourceFiles="@(LauncherFolderContents)" 
-          DestinationFiles="$(NETCoreAppTestRootPath)\Launcher\%(LauncherFolderContents.RecursiveDir)%(LauncherFolderContents.Filename)%(LauncherFolderContents.Extension)" 
+          DestinationFolder="$(NETCoreAppTestRootPath)\Launcher\%(RecursiveDir)"
           SkipUnchangedFiles="true"/>
   </Target>
 
