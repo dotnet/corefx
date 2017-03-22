@@ -305,12 +305,15 @@ namespace System.Data.SqlClient.SNI
             instanceName = new byte[1];
 
             bool errorWithLocalDBProcessing;
-            fullServerName = GetLocalDBConnectionString(fullServerName, out errorWithLocalDBProcessing);
+            string localDBDataSource = GetLocalDBDataSource(fullServerName, out errorWithLocalDBProcessing);
             
             if (errorWithLocalDBProcessing)
             {
                 return null;
             }
+
+            // If a localDB Data source is available, we need to use it.
+            fullServerName = localDBDataSource?? fullServerName;
 
             DataSource details = DataSource.ParseServerName(fullServerName);
             if (details == null)
@@ -517,7 +520,7 @@ namespace System.Data.SqlClient.SNI
                 SNICommon.ReportSNIError(SNIProviders.NP_PROV, 0, SNICommon.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
                 return null;
             }
-            return new SNINpHandle(details.ServerName, details.PipeName, timerExpire, callbackObject);
+            return new SNINpHandle(details.PipeHostName, details.PipeName, timerExpire, callbackObject);
         }
 
         /// <summary>
@@ -592,7 +595,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="fullServerName">The data source</param>
         /// <param name="error">Set true when an error occured while getting LocalDB up</param>
         /// <returns></returns>
-        private string GetLocalDBConnectionString(string fullServerName, out bool error)
+        private string GetLocalDBDataSource(string fullServerName, out bool error)
         {
             string localDBConnectionString = null;
             bool isBadLocalDBDataSource;
@@ -636,12 +639,14 @@ namespace System.Data.SqlClient.SNI
         internal Protocol ConnectionProtocol = Protocol.None;
 
         internal string ServerName { get; private set; }
+
         internal int Port { get; private set; } = -1;
 
         public string InstanceName { get; internal set; }
 
         public string PipeName { get; internal set; }
 
+        public string PipeHostName { get; internal set; }
 
         private string _workingDataSource;
         private string _dataSourceAfterTrimmingProtocol;
@@ -898,6 +903,7 @@ namespace System.Data.SqlClient.SNI
 
                     PipeName = pipeNameBuilder.ToString();
                     ServerName = IsLocalHost(host) ? Environment.MachineName : host;
+                    PipeHostName = host;
                 }
                 catch (UriFormatException)
                 {
