@@ -729,7 +729,7 @@ namespace System.Security.Policy {
         public System.Security.Policy.ApplicationTrustCollection Find(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { throw null; }
         public System.Security.Policy.ApplicationTrustEnumerator GetEnumerator() { throw null; }
         public void Remove(System.Security.Policy.ApplicationTrust trust) { }
-        public void Remove(System.Security.Policy.ApplicationTrust trust, System.Security.Policy.ApplicationVersionMatch versionMatch) { }
+        public void Remove(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrust[] trusts) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrustCollection trusts) { }
         void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
