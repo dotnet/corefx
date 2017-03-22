@@ -66,7 +66,6 @@
     <Compile Include="ReadOnlySpan\Slice.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
-    <Compile Include="ReadOnlySpan\StringSlice.cs" />
     <Compile Include="ReadOnlySpan\TestHelpers.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
   </ItemGroup>
