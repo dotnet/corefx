@@ -857,7 +857,7 @@ namespace System.Data.SqlClient.SNI
                 // If the data source is "np:servername"
                 if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
                 {
-                    ServerName = _dataSourceAfterTrimmingProtocol;
+                    PipeHostName = ServerName = _dataSourceAfterTrimmingProtocol;
                     InferLocalServerName();
                     PipeName = SNINpHandle.DefaultPipePath;
                     return true;
