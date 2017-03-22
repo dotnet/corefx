@@ -1609,14 +1609,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Create a new constant with the value in "valueInt" or "valueFlt".
             {
-                CONSTVAL cv = new CONSTVAL();
+                CONSTVAL cv;
                 if (ftDest == FUNDTYPE.FT_U4)
                 {
-                    cv.uiVal = (uint)valueInt;
+                    cv = ConstValFactory.GetUInt((uint)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTNONLONG)
                 {
-                    cv.iVal = (int)valueInt;
+                    cv = ConstValFactory.GetInt((int)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTINTEGRAL)
                 {
@@ -1704,7 +1704,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             CType destType = exprDestType.TypeOrNamespace.AsType();
             CType typeDecimal = SymbolLoader.GetOptPredefType(PredefinedType.PT_DECIMAL);
-            CONSTVAL cv = new CONSTVAL();
+            CONSTVAL cv;
 
             if (typeDecimal == null)
                 return null;
@@ -1765,22 +1765,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     switch (ftDest)
                     {
                         case FUNDTYPE.FT_I1:
-                            cv.iVal = Convert.ToSByte(decTrunc);
+                            cv = ConstValFactory.GetInt(Convert.ToSByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_U1:
-                            cv.uiVal = Convert.ToByte(decTrunc);
+                            cv = ConstValFactory.GetUInt(Convert.ToByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_I2:
-                            cv.iVal = Convert.ToInt16(decTrunc);
+                            cv = ConstValFactory.GetInt(Convert.ToInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_U2:
-                            cv.uiVal = Convert.ToUInt16(decTrunc);
+                            cv = ConstValFactory.GetUInt(Convert.ToUInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_I4:
-                            cv.iVal = Convert.ToInt32(decTrunc);
+                            cv = ConstValFactory.GetInt(Convert.ToInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_U4:
-                            cv.uiVal = Convert.ToUInt32(decTrunc);
+                            cv = ConstValFactory.GetUInt(Convert.ToUInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_I8:
                             cv = GetExprConstants().Create(Convert.ToInt64(decTrunc));

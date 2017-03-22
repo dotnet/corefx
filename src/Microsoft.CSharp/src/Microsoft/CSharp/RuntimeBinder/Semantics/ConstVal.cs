@@ -27,7 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class CONSTVAL
     {
-        private object _value;
+        private readonly object _value;
 
         internal CONSTVAL()
             : this(null)
@@ -39,90 +39,35 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _value = value;
         }
 
-        public object objectVal
-        {
-            get { return _value; }
-            set { _value = value; }
-        }
+        public object objectVal => _value;
 
-        public bool boolVal
-        {
-            get { return SpecialUnbox<bool>(_value); }
-            set { _value = value; }
-        }
+        public bool boolVal => SpecialUnbox<bool>(_value);
 
-        public sbyte sbyteVal
-        {
-            get { return SpecialUnbox<sbyte>(_value); }
-        }
+        public sbyte sbyteVal => SpecialUnbox<sbyte>(_value);
 
-        public byte byteVal
-        {
-            get { return SpecialUnbox<byte>(_value); }
-        }
+        public byte byteVal => SpecialUnbox<byte>(_value);
 
-        public short shortVal
-        {
-            get { return SpecialUnbox<short>(_value); }
-        }
+        public short shortVal => SpecialUnbox<short>(_value);
 
-        public ushort ushortVal
-        {
-            get { return SpecialUnbox<ushort>(_value); }
-        }
+        public ushort ushortVal => SpecialUnbox<ushort>(_value);
 
-        public int iVal
-        {
-            get { return SpecialUnbox<int>(_value); }
-            set { _value = value; }
-        }
+        public int iVal => SpecialUnbox<int>(_value);
 
-        public uint uiVal
-        {
-            get { return SpecialUnbox<uint>(_value); }
-            set { _value = value; }
-        }
+        public uint uiVal => SpecialUnbox<uint>(_value);
 
-        public long longVal
-        {
-            get { return SpecialUnbox<long>(_value); }
-            set { _value = value; }
-        }
+        public long longVal => SpecialUnbox<long>(_value);
 
-        public ulong ulongVal
-        {
-            get { return SpecialUnbox<ulong>(_value); }
-            set { _value = value; }
-        }
+        public ulong ulongVal => SpecialUnbox<ulong>(_value);
 
-        public float floatVal
-        {
-            get { return SpecialUnbox<float>(_value); }
-            set { _value = value; }
-        }
+        public float floatVal => SpecialUnbox<float>(_value);
 
-        public double doubleVal
-        {
-            get { return SpecialUnbox<double>(_value); }
-            set { _value = value; }
-        }
+        public double doubleVal => SpecialUnbox<double>(_value);
 
-        public decimal decVal
-        {
-            get { return SpecialUnbox<decimal>(_value); }
-            set { _value = value; }
-        }
+        public decimal decVal => SpecialUnbox<decimal>(_value);
 
-        public char cVal
-        {
-            get { return SpecialUnbox<char>(_value); }
-        }
+        public char cVal => SpecialUnbox<char>(_value);
 
-        public string strVal
-        {
-            get { return SpecialUnbox<string>(_value); }
-            set { _value = value; }
-        }
+        public string strVal => SpecialUnbox<string>(_value);
 
         public bool IsNullRef()
         {

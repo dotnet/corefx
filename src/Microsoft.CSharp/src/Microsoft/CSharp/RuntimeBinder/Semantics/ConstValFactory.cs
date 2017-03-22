@@ -21,36 +21,28 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static CONSTVAL GetDefaultValue(ConstValKind kind)
         {
-            CONSTVAL result = new CONSTVAL();
-
             switch (kind)
             {
                 case ConstValKind.Int:
-                    result.iVal = 0;
-                    break;
+                    return new CONSTVAL(0);
 
                 case ConstValKind.Double:
-                    result.doubleVal = 0;
-                    break;
+                    return new CONSTVAL(0.0);
 
                 case ConstValKind.Long:
-                    result.longVal = 0;
-                    break;
+                    return new CONSTVAL(0L);
 
                 case ConstValKind.Decimal:
-                    result.decVal = 0;
-                    break;
+                    return new CONSTVAL(0M);
 
                 case ConstValKind.Float:
-                    result.floatVal = 0;
-                    break;
+                    return new CONSTVAL(0F);
 
                 case ConstValKind.Boolean:
-                    result.boolVal = false;
-                    break;
+                    return new CONSTVAL(false);
             }
 
-            return result;
+            return new CONSTVAL();
         }
 
         public static CONSTVAL GetNullRef()
@@ -60,79 +52,57 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static CONSTVAL GetBool(bool value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.boolVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public static CONSTVAL GetInt(int value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.iVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public static CONSTVAL GetUInt(uint value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.uiVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(decimal value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.decVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(string value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.strVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(float value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.floatVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(double value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.doubleVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(long value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.longVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         public CONSTVAL Create(ulong value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.ulongVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         internal CONSTVAL Create(bool value)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.boolVal = value;
-            return result;
+            return new CONSTVAL(value);
         }
 
         internal CONSTVAL Create(object p)
         {
-            CONSTVAL result = new CONSTVAL();
-            result.objectVal = p;
-            return result;
+            return new CONSTVAL(p);
         }
     }
 }

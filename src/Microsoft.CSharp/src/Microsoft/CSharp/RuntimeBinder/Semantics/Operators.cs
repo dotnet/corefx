@@ -1743,7 +1743,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private EXPR BindIncOpCore(ExpressionKind ek, EXPRFLAG flags, EXPR exprVal, CType type)
         {
             Debug.Assert(ek == ExpressionKind.EK_ADD || ek == ExpressionKind.EK_SUB);
-            CONSTVAL cv = new CONSTVAL();
+            CONSTVAL cv;
             EXPR pExprResult = null;
 
             if (type.isEnumType() && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
@@ -1766,7 +1766,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
                 case FUNDTYPE.FT_PTR:
-                    cv.iVal = 1;
+                    cv = ConstValFactory.GetInt(1);
                     pExprResult = BindPtrBinOp(ek, flags, exprVal, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), cv));
                     break;
                 case FUNDTYPE.FT_I1:
@@ -1774,12 +1774,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_U1:
                 case FUNDTYPE.FT_U2:
                     typeTmp = GetReqPDT(PredefinedType.PT_INT);
-                    cv.iVal = 1;
+                    cv = ConstValFactory.GetInt(1);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
                 case FUNDTYPE.FT_I4:
                 case FUNDTYPE.FT_U4:
-                    cv.iVal = 1;
+                    cv = ConstValFactory.GetInt(1);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
                 case FUNDTYPE.FT_I8:
