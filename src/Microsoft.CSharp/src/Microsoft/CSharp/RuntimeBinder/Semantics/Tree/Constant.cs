@@ -13,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public EXPR GetOptionalConstructorCall() { return OptionalConstructorCall; }
         public void SetOptionalConstructorCall(EXPR value) { OptionalConstructorCall = value; }
 
-        private CONSTVAL _val;
+        private ConstVal _val;
 
         private bool IsZero
         {
@@ -23,9 +23,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
         public bool isZero() { return IsZero; }
-        public CONSTVAL getVal() { return Val; }
-        public void setVal(CONSTVAL newValue) { Val = newValue; }
-        public CONSTVAL Val
+        public ConstVal getVal() { return Val; }
+        public void setVal(ConstVal newValue) { Val = newValue; }
+        public ConstVal Val
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public ulong getU64Value() { return _val.ulongVal; }
+        public ulong getU64Value() { return _val.UInt64Val; }
         public long getI64Value() { return I64Value; }
         public long I64Value
         {
@@ -48,15 +48,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     case FUNDTYPE.FT_I8:
                     case FUNDTYPE.FT_U8:
-                        return _val.longVal;
+                        return _val.Int64Val;
                     case FUNDTYPE.FT_U4:
-                        return _val.uiVal;
+                        return _val.UInt32Val;
                     case FUNDTYPE.FT_I1:
                     case FUNDTYPE.FT_I2:
                     case FUNDTYPE.FT_I4:
                     case FUNDTYPE.FT_U1:
                     case FUNDTYPE.FT_U2:
-                        return _val.iVal;
+                        return _val.Int32Val;
                     default:
                         Debug.Assert(false, "Bad fundType in getI64Value");
                         return 0;

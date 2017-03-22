@@ -21,64 +21,64 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         Decimal,
         IntPtr,
         Float,
-        Boolean,
-        Lim
-    };
+        Boolean
+    }
 
-
-    internal sealed class CONSTVAL
+    internal sealed class ConstVal
     {
-        private CONSTVAL(object value)
+        public static readonly ConstVal NullReference = new ConstVal(null);
+
+        private ConstVal(object value)
         {
-            objectVal = value;
+            ObjectVal = value;
         }
 
-        public object objectVal { get; }
+        public object ObjectVal { get; }
 
-        public bool boolVal => SpecialUnbox<bool>(objectVal);
+        public bool BooleanVal => SpecialUnbox<bool>(ObjectVal);
 
-        public sbyte sbyteVal => SpecialUnbox<sbyte>(objectVal);
+        public sbyte SByteVal => SpecialUnbox<sbyte>(ObjectVal);
 
-        public byte byteVal => SpecialUnbox<byte>(objectVal);
+        public byte ByteVal => SpecialUnbox<byte>(ObjectVal);
 
-        public short shortVal => SpecialUnbox<short>(objectVal);
+        public short Int16Val => SpecialUnbox<short>(ObjectVal);
 
-        public ushort ushortVal => SpecialUnbox<ushort>(objectVal);
+        public ushort UInt16Val => SpecialUnbox<ushort>(ObjectVal);
 
-        public int iVal => SpecialUnbox<int>(objectVal);
+        public int Int32Val => SpecialUnbox<int>(ObjectVal);
 
-        public uint uiVal => SpecialUnbox<uint>(objectVal);
+        public uint UInt32Val => SpecialUnbox<uint>(ObjectVal);
 
-        public long longVal => SpecialUnbox<long>(objectVal);
+        public long Int64Val => SpecialUnbox<long>(ObjectVal);
 
-        public ulong ulongVal => SpecialUnbox<ulong>(objectVal);
+        public ulong UInt64Val => SpecialUnbox<ulong>(ObjectVal);
 
-        public float floatVal => SpecialUnbox<float>(objectVal);
+        public float SingleVal => SpecialUnbox<float>(ObjectVal);
 
-        public double doubleVal => SpecialUnbox<double>(objectVal);
+        public double DoubleVal => SpecialUnbox<double>(ObjectVal);
 
-        public decimal decVal => SpecialUnbox<decimal>(objectVal);
+        public decimal DecimalVal => SpecialUnbox<decimal>(ObjectVal);
 
-        public char cVal => SpecialUnbox<char>(objectVal);
+        public char CharVal => SpecialUnbox<char>(ObjectVal);
 
-        public string strVal => SpecialUnbox<string>(objectVal);
+        public string StringVal => SpecialUnbox<string>(ObjectVal);
 
-        public bool IsNullRef => objectVal == null;
+        public bool IsNullRef => ObjectVal == null;
 
         public bool IsZero(ConstValKind kind)
         {
             switch (kind)
             {
                 case ConstValKind.Decimal:
-                    return decVal == 0;
+                    return DecimalVal == 0;
                 case ConstValKind.String:
                     return false;
                 default:
-                    return IsDefault(objectVal);
+                    return IsDefault(ObjectVal);
             }
         }
 
-        private T SpecialUnbox<T>(object o)
+        private static T SpecialUnbox<T>(object o)
         {
             if (IsDefault(o))
             {
@@ -88,7 +88,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (T)Convert.ChangeType(o, typeof(T), CultureInfo.InvariantCulture);
         }
 
-        private bool IsDefault(object o)
+        private static bool IsDefault(object o)
         {
             if (o == null)
                 return true;
@@ -126,85 +126,80 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public static CONSTVAL GetDefaultValue(ConstValKind kind)
+        public static ConstVal GetDefaultValue(ConstValKind kind)
         {
             switch (kind)
             {
                 case ConstValKind.Int:
-                    return new CONSTVAL(0);
+                    return new ConstVal(0);
 
                 case ConstValKind.Double:
-                    return new CONSTVAL(0.0);
+                    return new ConstVal(0.0);
 
                 case ConstValKind.Long:
-                    return new CONSTVAL(0L);
+                    return new ConstVal(0L);
 
                 case ConstValKind.Decimal:
-                    return new CONSTVAL(0M);
+                    return new ConstVal(0M);
 
                 case ConstValKind.Float:
-                    return new CONSTVAL(0F);
+                    return new ConstVal(0F);
 
                 case ConstValKind.Boolean:
-                    return new CONSTVAL(false);
+                    return new ConstVal(false);
             }
 
-            return new CONSTVAL(null);
+            return NullReference;
         }
 
-        public static CONSTVAL GetNullRef()
+        public static ConstVal Get(bool value)
         {
-            return new CONSTVAL(null);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(bool value)
+        public static ConstVal Get(int value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(int value)
+        public static ConstVal Get(uint value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(uint value)
+        public static ConstVal Get(decimal value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(decimal value)
+        public static ConstVal Get(string value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(string value)
+        public static ConstVal Get(float value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(float value)
+        public static ConstVal Get(double value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(double value)
+        public static ConstVal Get(long value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(long value)
+        public static ConstVal Get(ulong value)
         {
-            return new CONSTVAL(value);
+            return new ConstVal(value);
         }
 
-        public static CONSTVAL Get(ulong value)
+        public static ConstVal Get(object p)
         {
-            return new CONSTVAL(value);
-        }
-
-        public static CONSTVAL Get(object p)
-        {
-            return new CONSTVAL(p);
+            return p == null ? NullReference : new ConstVal(p);
         }
     }
 }
