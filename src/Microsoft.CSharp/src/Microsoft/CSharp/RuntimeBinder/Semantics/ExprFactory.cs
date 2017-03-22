@@ -553,7 +553,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         EXPRCONSTANT expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
                         EXPRCONSTANT exprInOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        exprInOriginal.SetOptionalConstructorCall(pOptionalOriginalConstructorCall);
+                        exprInOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
                         return expr;
                     }
                 case FUNDTYPE.FT_STRUCT:
@@ -561,7 +561,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         EXPRCONSTANT expr = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
                         EXPRCONSTANT exprOriginal = CreateConstant(pType, ConstVal.GetDefaultValue(pType.constValKind()));
-                        exprOriginal.SetOptionalConstructorCall(pOptionalOriginalConstructorCall);
+                        exprOriginal.OptionalConstructorCall = pOptionalOriginalConstructorCall;
                         return expr;
                     }
                     break;

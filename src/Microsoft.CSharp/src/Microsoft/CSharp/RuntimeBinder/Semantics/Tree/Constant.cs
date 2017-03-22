@@ -9,9 +9,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class EXPRCONSTANT : EXPR
     {
-        private EXPR OptionalConstructorCall;
-        public EXPR GetOptionalConstructorCall() { return OptionalConstructorCall; }
-        public void SetOptionalConstructorCall(EXPR value) { OptionalConstructorCall = value; }
+        public EXPR OptionalConstructorCall { get; set; }
 
         public bool IsZero => Val.IsZero(type.constValKind());
 

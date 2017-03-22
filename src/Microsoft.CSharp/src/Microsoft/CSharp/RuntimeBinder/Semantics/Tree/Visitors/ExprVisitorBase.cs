@@ -540,8 +540,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     goto VISIT_EXPR;
                 VISIT_EXPRCONSTANT:
                     // Used for when we zeroinit 0 parameter constructors for structs/enums.
-                    exprRet = Visit((pExpr as EXPRCONSTANT).GetOptionalConstructorCall());
-                    (pExpr as EXPRCONSTANT).SetOptionalConstructorCall(exprRet as EXPR);
+                    exprRet = Visit((pExpr as EXPRCONSTANT).OptionalConstructorCall);
+                    (pExpr as EXPRCONSTANT).OptionalConstructorCall = exprRet as EXPR;
                     goto VISIT_BASE_EXPRCONSTANT;
 
                 /*************************************************************************************************
