@@ -220,13 +220,11 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        // This is updated to be correct, need to update CoreCLR path code so this will pass on all platforms
-        [ActiveIssue(15098)]
         [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]  // invalid colons throws ArgumentException
         public void PathWithInvalidColons_ThrowsArgumentException(string invalidPath)
         {
-            Assert.Throws<ArgumentException>(() => Create(invalidPath));
+            Assert.Throws<NotSupportedException>(() => Create(invalidPath));
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
@@ -243,7 +241,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(11687)]
         [PlatformSpecific(TestPlatforms.Windows)]  // long directory path throws PathTooLongException
         public void DirectoryLongerThanMaxLongPath_ThrowsPathTooLongException()
         {
