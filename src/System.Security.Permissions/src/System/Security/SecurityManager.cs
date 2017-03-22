@@ -36,5 +36,7 @@ namespace System.Security
         public static void SavePolicy() { }
         [Obsolete("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
         public static void SavePolicyLevel(PolicyLevel level) { }
+        public static bool CurrentThreadRequiresSecurityContextCapture() { return false; }
+        public static PermissionSet GetStandardSandbox(Evidence evidence) { return default(PermissionSet); }
     }
 }

@@ -20,7 +20,9 @@ namespace System.Security.Policy
         public void Clear() { }
         public void CopyTo(ApplicationTrust[] array, int index) { }
         public ApplicationTrustEnumerator GetEnumerator() { return new ApplicationTrustEnumerator(); }
+        public ApplicationTrustCollection Find(ApplicationIdentity applicationIdentity, ApplicationVersionMatch versionMatch) { return default(ApplicationTrustCollection); }
         public void Remove(ApplicationTrust trust) { }
+        public void Remove(ApplicationTrust trust, ApplicationVersionMatch versionMatch) { }
         public void RemoveRange(ApplicationTrust[] trusts) { }
         public void RemoveRange(ApplicationTrustCollection trusts) { }
         void ICollection.CopyTo(Array array, int index) { }

@@ -9,7 +9,9 @@ namespace System.Security.Policy
     [Serializable]
     public sealed partial class ApplicationTrust : EvidenceBase, ISecurityEncodable
     {
+        public ApplicationIdentity ApplicationIdentity { get; set; }
         public ApplicationTrust() { }
+        public ApplicationTrust(ApplicationIdentity identity) { }
         public ApplicationTrust(PermissionSet defaultGrantSet, IEnumerable<StrongName> fullTrustAssemblies) { }
         public PolicyStatement DefaultGrantSet { get; set; }
         public object ExtraInfo { get; set; }
