@@ -316,18 +316,11 @@ namespace System.Data.SqlClient.SNI
 
                 try
                 {
-                    if (connPort >= 0)
-                    {
-                        spnBuffer = GetSqlServerSPN(hostName, connPort);
-                    }
-                    else
-                    {
-                        spnBuffer = GetSqlServerSPN(hostName, connInstanceName);
-                    }
+                    spnBuffer = GetSqlServerSPN(hostName, (connPort >= 0 ? connPort.ToString() : connInstanceName));
                 }
                 catch (Exception e)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, e);
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, SNICommon.ErrorSpnLookup, e);
                     return null;
                 }
             }
@@ -353,7 +346,7 @@ namespace System.Data.SqlClient.SNI
             return sniHandle;
         }
 
-        private static byte[] GetSqlServerSPN(string hostNameOrAddress, string instanceName = null)
+        private static byte[] GetSqlServerSPN(string hostNameOrAddress, string instanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress));
             IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
@@ -364,12 +357,6 @@ namespace System.Data.SqlClient.SNI
             }
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + instanceName;
             return Encoding.UTF8.GetBytes(serverSpn);
-        }
-
-        private static byte[] GetSqlServerSPN(string hostNameOrAddress, int port)
-        {
-            Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress) && port >= 0 && port <= 65535);
-            return GetSqlServerSPN(hostNameOrAddress, port.ToString());
         }
 
         /// <summary>
