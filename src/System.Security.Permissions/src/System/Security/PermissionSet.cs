@@ -21,7 +21,7 @@ namespace System.Security
         protected virtual IPermission AddPermissionImpl(IPermission perm) { return default(IPermission); }
         public void Assert() { }
         public bool ContainsNonCodeAccessPermissions() { return false; }
-        [Obsolete]
+        [ObsoleteAttribute]
         public static byte[] ConvertPermissionSet(string inFormat, byte[] inData, string outFormat) { return null; }
         public virtual PermissionSet Copy() { return default(PermissionSet); }
         public virtual void CopyTo(Array array, int index) { }

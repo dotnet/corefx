@@ -13,23 +13,22 @@
 
 namespace System
 {
-    public sealed partial class ApplicationIdentity : System.Runtime.Serialization.ISerializable
-    {
-        [System.Security.SecuritySafeCriticalAttribute]
-        public ApplicationIdentity(string applicationIdentityFullName) { }
-        public string CodeBase { get { throw null; } }
-        public string FullName { get { throw null; } }
-        [System.Security.SecurityCriticalAttribute]
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override string ToString() { throw null; }
-    }
+  public sealed partial class ApplicationIdentity : System.Runtime.Serialization.ISerializable
+  {
+    public ApplicationIdentity(string applicationIdentityFullName) { }
+    public string CodeBase { get { throw null; } }
+    public string FullName { get { throw null; } }
+    [System.Security.SecurityCriticalAttribute]
+    void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    public override string ToString() { throw null; }
+  }
 }
 
 namespace System.Net.NetworkInformation
 {
     [Flags]
-    public enum NetworkInformationAccess
-    {
+    public enum    NetworkInformationAccess
+ {
         None = 0,
         Read = 1,
         Ping = 4
@@ -63,7 +62,7 @@ namespace System.Security {
         public void Assert() { }
         public abstract System.Security.IPermission Copy();
         public void Demand() { }
-        [System.ObsoleteAttribute("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public void Deny() { }
         public override bool Equals(object obj) { throw null; }
         public abstract void FromXml(System.Security.SecurityElement elem);
@@ -73,7 +72,7 @@ namespace System.Security {
         public void PermitOnly() { }
         public static void RevertAll() { }
         public static void RevertAssert() { }
-        [System.ObsoleteAttribute("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static void RevertDeny() { }
         public static void RevertPermitOnly() { }
         public override string ToString() { throw null; }
@@ -159,7 +158,7 @@ namespace System.Security {
         public virtual System.Security.PermissionSet Copy() { throw null; }
         public virtual void CopyTo(System.Array array, int index) { }
         public void Demand() { }
-        [System.ObsoleteAttribute("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public void Deny() { }
         public override bool Equals(object o) { throw null; }
         public virtual void FromXml(System.Security.SecurityElement et) { }
@@ -205,34 +204,35 @@ namespace System.Security {
   }
     public static partial class SecurityManager
     {
-        [System.ObsoleteAttribute("Because execution permission checks can no longer be turned off, the CheckExecutionRights property no longer has any effect.")]
-        public static bool CheckExecutionRights { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        [System.ObsoleteAttribute("Because security can no longer be turned off, the SecurityEnabled property no longer has any effect.")]
-        public static bool SecurityEnabled { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [System.ObsoleteAttribute]
+        public static bool CheckExecutionRights { get { throw null; } set { } }
+        [System.ObsoleteAttribute]
+        public static bool SecurityEnabled { get { throw null; } set { } }
+        [SecurityCritical]
         public static bool CurrentThreadRequiresSecurityContextCapture() { throw null; }
         public static System.Security.PermissionSet GetStandardSandbox(System.Security.Policy.Evidence evidence) { throw null; }
         public static void GetZoneAndOrigin(out System.Collections.ArrayList zone, out System.Collections.ArrayList origin) { zone = default(System.Collections.ArrayList); origin = default(System.Collections.ArrayList); }
-        [System.ObsoleteAttribute("IsGranted is obsolete and will be removed in a future release of the .NET Framework.  Please use the PermissionSet property of either AppDomain or Assembly instead.")]
+        [System.ObsoleteAttribute]
         public static bool IsGranted(System.Security.IPermission perm) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.Policy.PolicyLevel LoadPolicyLevelFromFile(string path, System.Security.PolicyLevelType type) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.Policy.PolicyLevel LoadPolicyLevelFromString(string str, System.Security.PolicyLevelType type) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Collections.IEnumerator PolicyHierarchy() { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.PermissionSet ResolvePolicy(System.Security.Policy.Evidence evidence) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.PermissionSet ResolvePolicy(System.Security.Policy.Evidence evidence, System.Security.PermissionSet reqdPset, System.Security.PermissionSet optPset, System.Security.PermissionSet denyPset, out System.Security.PermissionSet denied) { denied = default(System.Security.PermissionSet); throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.PermissionSet ResolvePolicy(System.Security.Policy.Evidence[] evidences) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Collections.IEnumerator ResolvePolicyGroups(System.Security.Policy.Evidence evidence) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static System.Security.PermissionSet ResolveSystemPolicy(System.Security.Policy.Evidence evidence) { throw null; }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static void SavePolicy() { }
-        [System.ObsoleteAttribute("This method is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+        [System.ObsoleteAttribute]
         public static void SavePolicyLevel(System.Security.Policy.PolicyLevel level) { }
     }
     public abstract partial class SecurityState {
@@ -319,8 +319,8 @@ namespace System.Security.Permissions {
         public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string path) { }
         public FileIOPermission(System.Security.Permissions.FileIOPermissionAccess access, string[] pathList) { }
         public FileIOPermission(System.Security.Permissions.PermissionState state) { }
-        public System.Security.Permissions.FileIOPermissionAccess AllFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.Security.Permissions.FileIOPermissionAccess AllLocalFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Security.Permissions.FileIOPermissionAccess AllFiles { get { throw null; } set { } }
+        public System.Security.Permissions.FileIOPermissionAccess AllLocalFiles { get { throw null; } set { } }
         public void AddPathList(System.Security.Permissions.FileIOPermissionAccess access, string path) { }
         public void AddPathList(System.Security.Permissions.FileIOPermissionAccess access, string[] pathList) { }
         public override System.Security.IPermission Copy() { throw null; }
@@ -471,7 +471,7 @@ namespace System.Security.Permissions {
     [System.ObsoleteAttribute]
     public bool ReflectionEmit { get; set; }
     public bool RestrictedMemberAccess { get; set; }
-    [System.ObsoleteAttribute("not enforced in 2.0+")]
+    [System.ObsoleteAttribute]
     public bool TypeInformation { get; set; }
     public override System.Security.IPermission CreatePermission() { throw null; }
   }
@@ -484,7 +484,7 @@ namespace System.Security.Permissions {
     [System.ObsoleteAttribute]
     ReflectionEmit = 4,
     RestrictedMemberAccess = 8,
-    [System.ObsoleteAttribute("not used anymore")]
+    [System.ObsoleteAttribute]
     TypeInformation = 1,
   }
     public sealed partial class RegistryPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
@@ -704,12 +704,12 @@ namespace System.Security.Policy {
         public ApplicationTrust() { }
         public ApplicationTrust(System.ApplicationIdentity identity) { }
         public ApplicationTrust(System.Security.PermissionSet defaultGrantSet, System.Collections.Generic.IEnumerable<System.Security.Policy.StrongName> fullTrustAssemblies) { }
-        public System.ApplicationIdentity ApplicationIdentity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.Security.Policy.PolicyStatement DefaultGrantSet { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public object ExtraInfo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.ApplicationIdentity ApplicationIdentity { get { throw null; } set { } }
+        public System.Security.Policy.PolicyStatement DefaultGrantSet { get { throw null; } set { } }
+        public object ExtraInfo { get { throw null; } set { } }
         public System.Collections.Generic.IList<System.Security.Policy.StrongName> FullTrustAssemblies { get { throw null; } }
-        public bool IsApplicationTrustedToRun { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public bool Persist { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool IsApplicationTrustedToRun { get { throw null; } set { } }
+        public bool Persist { get { throw null; } set { } }
         public void FromXml(System.Security.SecurityElement element) { }
         public System.Security.SecurityElement ToXml() { throw null; }
     }
@@ -726,9 +726,11 @@ namespace System.Security.Policy {
         public void AddRange(System.Security.Policy.ApplicationTrustCollection trusts) { }
         public void Clear() { }
         public void CopyTo(System.Security.Policy.ApplicationTrust[] array, int index) { }
+        [System.Security.SecurityCritical]
         public System.Security.Policy.ApplicationTrustCollection Find(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { throw null; }
         public System.Security.Policy.ApplicationTrustEnumerator GetEnumerator() { throw null; }
         public void Remove(System.Security.Policy.ApplicationTrust trust) { }
+        [System.Security.SecurityCritical]
         public void Remove(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrust[] trusts) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrustCollection trusts) { }
@@ -787,29 +789,29 @@ namespace System.Security.Policy {
     public sealed partial class Evidence : System.Collections.ICollection, System.Collections.IEnumerable
     {
         public Evidence() { }
-        [System.ObsoleteAttribute("This constructor is obsolete. Please use the constructor which takes arrays of EvidenceBase instead.")]
+        [System.ObsoleteAttribute]
         public Evidence(object[] hostEvidence, object[] assemblyEvidence) { }
         public Evidence(System.Security.Policy.Evidence evidence) { }
         public Evidence(System.Security.Policy.EvidenceBase[] hostEvidence, System.Security.Policy.EvidenceBase[] assemblyEvidence) { }
-        [System.ObsoleteAttribute("Evidence should not be treated as an ICollection. Please use GetHostEnumerator and GetAssemblyEnumerator to iterate over the evidence to collect a count.")]
+        [System.ObsoleteAttribute]
         public int Count { get { throw null; } }
         public bool IsReadOnly { get { throw null; } }
         public bool IsSynchronized { get { throw null; } }
-        public bool Locked { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Locked { get { throw null; } set { } }
         public object SyncRoot { get { throw null; } }
-        [System.ObsoleteAttribute("This method is obsolete. Please use AddAssemblyEvidence instead.")]
+        [System.ObsoleteAttribute]
         public void AddAssembly(object id) { }
         public void AddAssemblyEvidence<T>(T evidence) where T : System.Security.Policy.EvidenceBase { }
-        [System.ObsoleteAttribute("This method is obsolete. Please use AddHostEvidence instead.")]
+        [System.ObsoleteAttribute]
         public void AddHost(object id) { }
         public void AddHostEvidence<T>(T evidence) where T : System.Security.Policy.EvidenceBase { }
         public void Clear() { }
         public System.Security.Policy.Evidence Clone() { throw null; }
-        [System.ObsoleteAttribute("Evidence should not be treated as an ICollection. Please use the GetHostEnumerator and GetAssemblyEnumerator methods rather than using CopyTo.")]
+        [System.ObsoleteAttribute]
         public void CopyTo(System.Array array, int index) { }
         public System.Collections.IEnumerator GetAssemblyEnumerator() { throw null; }
         public T GetAssemblyEvidence<T>() where T : System.Security.Policy.EvidenceBase { throw null; }
-        [System.ObsoleteAttribute("GetEnumerator is obsolete. Please use GetAssemblyEnumerator and GetHostEnumerator instead.")]
+        [System.ObsoleteAttribute]
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public System.Collections.IEnumerator GetHostEnumerator() { throw null; }
         public T GetHostEvidence<T>() where T : System.Security.Policy.EvidenceBase { throw null; }
@@ -1056,12 +1058,12 @@ namespace System.Security.Policy {
     {
         public TrustManagerContext() { }
         public TrustManagerContext(System.Security.Policy.TrustManagerUIContext uiContext) { }
-        public virtual bool IgnorePersistedDecision { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual bool KeepAlive { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual bool NoPrompt { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual bool Persist { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual System.ApplicationIdentity PreviousApplicationIdentity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual System.Security.Policy.TrustManagerUIContext UIContext { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public virtual bool IgnorePersistedDecision { get { throw null; } set { } }
+        public virtual bool KeepAlive { get { throw null; } set { } }
+        public virtual bool NoPrompt { get { throw null; } set { } }
+        public virtual bool Persist { get { throw null; } set { } }
+        public virtual System.ApplicationIdentity PreviousApplicationIdentity { get { throw null; } set { } }
+        public virtual System.Security.Policy.TrustManagerUIContext UIContext { get { throw null; } set { } }
     }
     public enum TrustManagerUIContext {
     Install = 0,

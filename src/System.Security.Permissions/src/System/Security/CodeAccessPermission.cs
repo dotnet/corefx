@@ -19,13 +19,13 @@ namespace System.Security
         public abstract IPermission Intersect(IPermission target);
         public abstract bool IsSubsetOf(IPermission target);
         public void PermitOnly() { throw new PlatformNotSupportedException(); }
-        public override string ToString() => base.ToString();
+		public static void RevertAll() { }
+	    public static void RevertAssert() { }
+	    [ObsoleteAttribute]
+		public static void RevertDeny() { }
+	    public static void RevertPermitOnly() { }
+	    public override string ToString() => base.ToString();
         public abstract SecurityElement ToXml();
         public virtual IPermission Union(IPermission other) { return default(IPermission); }
-        public static void RevertAssert() { }
-        [Obsolete("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-        public static void RevertDeny() { }
-        public static void RevertAll() { }
-        public static void RevertPermitOnly() { }
     }
 }
