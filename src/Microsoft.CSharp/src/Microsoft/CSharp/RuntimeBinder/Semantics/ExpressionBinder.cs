@@ -719,7 +719,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (exprConst != null && exprFlags == 0 &&
                 exprSrc.type.fundType() == typeDest.fundType() &&
-                (!exprSrc.type.isPredefType(PredefinedType.PT_STRING) || exprConst.asCONSTANT().getVal().IsNullRef()))
+                (!exprSrc.type.isPredefType(PredefinedType.PT_STRING) || exprConst.asCONSTANT().getVal().IsNullRef))
             {
                 EXPRCONSTANT expr = GetExprFactory().CreateConstant(typeDest, exprConst.asCONSTANT().getVal());
                 pexprDest = expr;

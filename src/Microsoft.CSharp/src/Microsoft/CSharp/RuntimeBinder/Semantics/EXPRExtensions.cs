@@ -119,7 +119,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public static bool isNull(this EXPR expr)
         {
-            return expr.isCONSTANT_OK() && (expr.type.fundType() == FUNDTYPE.FT_REF) && expr.asCONSTANT().Val.IsNullRef();
+            return expr.isCONSTANT_OK() && (expr.type.fundType() == FUNDTYPE.FT_REF) && expr.asCONSTANT().Val.IsNullRef;
         }
 
         public static bool isZero(this EXPR expr)

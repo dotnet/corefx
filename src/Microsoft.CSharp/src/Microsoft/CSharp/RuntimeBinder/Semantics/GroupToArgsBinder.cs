@@ -610,7 +610,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             optionalArgument = exprFactory.CreateConstant(pConstValType, cv);
                         }
                     }
-                    else if ((pParamType.IsRefType() || pParamType.IsNullableType()) && cv.IsNullRef())
+                    else if ((pParamType.IsRefType() || pParamType.IsNullableType()) && cv.IsNullRef)
                     {
                         // We have an "= null" default value with a reference type or a nullable type.
 

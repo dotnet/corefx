@@ -69,9 +69,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public string strVal => SpecialUnbox<string>(_value);
 
-        public bool IsNullRef()
+        public bool IsNullRef
         {
-            return _value == null;
+            get { return _value == null; }
         }
 
         public bool IsZero(ConstValKind kind)
