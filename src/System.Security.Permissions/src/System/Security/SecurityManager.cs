@@ -27,7 +27,7 @@ namespace System.Security
         [ObsoleteAttribute]
         public static PermissionSet ResolvePolicy(Evidence evidence) { return default(PermissionSet); }
         [ObsoleteAttribute]
-        public static PermissionSet ResolvePolicy(System.Security.Policy.Evidence evidence, PermissionSet reqdPset, PermissionSet optPset, PermissionSet denyPset, out PermissionSet denied) { return default(PermissionSet); }
+        public static PermissionSet ResolvePolicy(System.Security.Policy.Evidence evidence, PermissionSet reqdPset, PermissionSet optPset, PermissionSet denyPset, out PermissionSet denied) { denied = default(System.Security.PermissionSet); return default(PermissionSet); }
         [ObsoleteAttribute]
         public static PermissionSet ResolvePolicy(System.Security.Policy.Evidence[] evidences) { return default(PermissionSet); }
         [ObsoleteAttribute]
