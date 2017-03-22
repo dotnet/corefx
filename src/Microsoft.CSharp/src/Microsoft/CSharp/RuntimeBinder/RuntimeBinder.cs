@@ -843,7 +843,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     if (argument.Info.UseCompileTimeType)
                     {
-                        arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), new CONSTVAL());
+                        arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), CONSTVAL.GetNullRef());
                     }
                     else
                     {
@@ -852,7 +852,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else
                 {
-                    arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), new CONSTVAL(argument.Value));
+                    arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), CONSTVAL.Get(argument.Value));
                 }
             }
             else
@@ -1972,7 +1972,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 result = true;
             }
 
-            return _exprFactory.CreateConstant(boolType, ConstValFactory.Get(result));
+            return _exprFactory.CreateConstant(boolType, CONSTVAL.Get(result));
         }
         #endregion
 

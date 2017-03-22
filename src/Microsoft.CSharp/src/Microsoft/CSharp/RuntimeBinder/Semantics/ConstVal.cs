@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Globalization;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -29,12 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private readonly object _value;
 
-        internal CONSTVAL()
-            : this(null)
-        {
-        }
-
-        internal CONSTVAL(object value)
+        private CONSTVAL(object value)
         {
             _value = value;
         }
@@ -91,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return default(T);
             }
 
-            return (T)Convert.ChangeType(o, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+            return (T)Convert.ChangeType(o, typeof(T), CultureInfo.InvariantCulture);
         }
 
         private bool IsDefault(object o)
@@ -130,6 +126,87 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return false;
+        }
+
+        public static CONSTVAL GetDefaultValue(ConstValKind kind)
+        {
+            switch (kind)
+            {
+                case ConstValKind.Int:
+                    return new CONSTVAL(0);
+
+                case ConstValKind.Double:
+                    return new CONSTVAL(0.0);
+
+                case ConstValKind.Long:
+                    return new CONSTVAL(0L);
+
+                case ConstValKind.Decimal:
+                    return new CONSTVAL(0M);
+
+                case ConstValKind.Float:
+                    return new CONSTVAL(0F);
+
+                case ConstValKind.Boolean:
+                    return new CONSTVAL(false);
+            }
+
+            return new CONSTVAL(null);
+        }
+
+        public static CONSTVAL GetNullRef()
+        {
+            return new CONSTVAL(null);
+        }
+
+        public static CONSTVAL Get(bool value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(int value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(uint value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(decimal value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(string value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(float value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(double value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(long value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(ulong value)
+        {
+            return new CONSTVAL(value);
+        }
+
+        public static CONSTVAL Get(object p)
+        {
+            return new CONSTVAL(p);
         }
     }
 }

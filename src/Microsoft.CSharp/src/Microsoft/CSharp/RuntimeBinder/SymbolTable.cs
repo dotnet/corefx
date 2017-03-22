@@ -1744,7 +1744,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 DateTimeConstantAttribute attr = (DateTimeConstantAttribute)attrs[0];
 
-                CONSTVAL cv = ConstValFactory.Get(((DateTime)attr.Value).Ticks);
+                CONSTVAL cv = CONSTVAL.Get(((DateTime)attr.Value).Ticks);
                 CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DATETIME);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
@@ -1755,7 +1755,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 DecimalConstantAttribute attr = (DecimalConstantAttribute)attrs[0];
 
-                CONSTVAL cv = ConstValFactory.Get(attr.Value);
+                CONSTVAL cv = CONSTVAL.Get(attr.Value);
                 CType cvType = _semanticChecker.GetSymbolLoader().GetOptPredefType(PredefinedType.PT_DECIMAL);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
@@ -1765,7 +1765,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // Only set a default value if we have one, and the type that we're
                 // looking at isn't a by ref type or a type parameter.
 
-                CONSTVAL cv = ConstValFactory.GetNullRef();
+                CONSTVAL cv = CONSTVAL.GetNullRef();
                 CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
 
                 // We need to use RawDefaultValue, because DefaultValue is too clever.
@@ -1782,72 +1782,72 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     if (defType == typeof(Byte))
                     {
-                        cv = ConstValFactory.Get((long)(Byte)defValue);
+                        cv = CONSTVAL.Get((long)(Byte)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BYTE);
                     }
                     else if (defType == typeof(Int16))
                     {
-                        cv = ConstValFactory.Get((long)(Int16)defValue);
+                        cv = CONSTVAL.Get((long)(Int16)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SHORT);
                     }
                     else if (defType == typeof(Int32))
                     {
-                        cv = ConstValFactory.Get((long)(Int32)defValue);
+                        cv = CONSTVAL.Get((long)(Int32)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_INT);
                     }
                     else if (defType == typeof(Int64))
                     {
-                        cv = ConstValFactory.Get((Int64)defValue);
+                        cv = CONSTVAL.Get((Int64)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_LONG);
                     }
                     else if (defType == typeof(Single))
                     {
-                        cv = ConstValFactory.Get((Single)defValue);
+                        cv = CONSTVAL.Get((Single)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_FLOAT);
                     }
                     else if (defType == typeof(Double))
                     {
-                        cv = ConstValFactory.Get((Double)defValue);
+                        cv = CONSTVAL.Get((Double)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DOUBLE);
                     }
                     else if (defType == typeof(Decimal))
                     {
-                        cv = ConstValFactory.Get((Decimal)defValue);
+                        cv = CONSTVAL.Get((Decimal)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_DECIMAL);
                     }
                     else if (defType == typeof(Char))
                     {
-                        cv = ConstValFactory.Get((long)(Char)defValue);
+                        cv = CONSTVAL.Get((long)(Char)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_CHAR);
                     }
                     else if (defType == typeof(Boolean))
                     {
-                        cv = ConstValFactory.Get((Boolean)defValue);
+                        cv = CONSTVAL.Get((Boolean)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_BOOL);
                     }
                     else if (defType == typeof(SByte))
                     {
-                        cv = ConstValFactory.Get((long)(SByte)defValue);
+                        cv = CONSTVAL.Get((long)(SByte)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_SBYTE);
                     }
                     else if (defType == typeof(UInt16))
                     {
-                        cv = ConstValFactory.Get((long)(UInt16)defValue);
+                        cv = CONSTVAL.Get((long)(UInt16)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_USHORT);
                     }
                     else if (defType == typeof(UInt32))
                     {
-                        cv = ConstValFactory.Get((long)(UInt32)defValue);
+                        cv = CONSTVAL.Get((long)(UInt32)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_UINT);
                     }
                     else if (defType == typeof(UInt64))
                     {
-                        cv = ConstValFactory.Get((UInt64)defValue);
+                        cv = CONSTVAL.Get((UInt64)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_ULONG);
                     }
                     else if (defType == typeof(String))
                     {
-                        cv = ConstValFactory.Get((String)defValue);
+                        cv = CONSTVAL.Get((String)defValue);
                         cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_STRING);
                     }
                     // if we fall off the end of this cascading if, we get Object/null

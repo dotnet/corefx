@@ -1492,7 +1492,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we're going from ulong to something, make sure we can fit.
                     if (ftDest == FUNDTYPE.FT_U8)
                     {
-                        CONSTVAL cv = ConstValFactory.Get(constSrc.getU64Value());
+                        CONSTVAL cv = CONSTVAL.Get(constSrc.getU64Value());
                         pexprDest = ExprFactory.CreateConstant(typeDest, cv);
                         return ConstCastResult.Success;
                     }
@@ -1612,19 +1612,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CONSTVAL cv;
                 if (ftDest == FUNDTYPE.FT_U4)
                 {
-                    cv = ConstValFactory.Get((uint)valueInt);
+                    cv = CONSTVAL.Get((uint)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTNONLONG)
                 {
-                    cv = ConstValFactory.Get((int)valueInt);
+                    cv = CONSTVAL.Get((int)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTINTEGRAL)
                 {
-                    cv = ConstValFactory.Get(valueInt);
+                    cv = CONSTVAL.Get(valueInt);
                 }
                 else
                 {
-                    cv = ConstValFactory.Get(valueFlt);
+                    cv = CONSTVAL.Get(valueFlt);
                 }
                 EXPRCONSTANT expr = ExprFactory.CreateConstant(typeDest, cv);
                 pexprDest = expr;
@@ -1744,7 +1744,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return null;  // Not supported cast.
                 }
 
-                cv = ConstValFactory.Get(result);
+                cv = CONSTVAL.Get(result);
                 EXPRCONSTANT exprConst = ExprFactory.CreateConstant(typeDecimal, cv);
 
                 return exprConst;
@@ -1765,34 +1765,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     switch (ftDest)
                     {
                         case FUNDTYPE.FT_I1:
-                            cv = ConstValFactory.Get(Convert.ToSByte(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToSByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_U1:
-                            cv = ConstValFactory.Get((uint)Convert.ToByte(decTrunc));
+                            cv = CONSTVAL.Get((uint)Convert.ToByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_I2:
-                            cv = ConstValFactory.Get(Convert.ToInt16(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_U2:
-                            cv = ConstValFactory.Get((uint)Convert.ToUInt16(decTrunc));
+                            cv = CONSTVAL.Get((uint)Convert.ToUInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_I4:
-                            cv = ConstValFactory.Get(Convert.ToInt32(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_U4:
-                            cv = ConstValFactory.Get(Convert.ToUInt32(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToUInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_I8:
-                            cv = ConstValFactory.Get(Convert.ToInt64(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToInt64(decTrunc));
                             break;
                         case FUNDTYPE.FT_U8:
-                            cv = ConstValFactory.Get(Convert.ToUInt64(decTrunc));
+                            cv = CONSTVAL.Get(Convert.ToUInt64(decTrunc));
                             break;
                         case FUNDTYPE.FT_R4:
-                            cv = ConstValFactory.Get(Convert.ToSingle(src.getVal().decVal));
+                            cv = CONSTVAL.Get(Convert.ToSingle(src.getVal().decVal));
                             break;
                         case FUNDTYPE.FT_R8:
-                            cv = ConstValFactory.Get(Convert.ToDouble(src.getVal().decVal));
+                            cv = CONSTVAL.Get(Convert.ToDouble(src.getVal().decVal));
                             break;
                         default:
                             return null; // Not supported cast.

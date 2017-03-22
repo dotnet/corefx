@@ -571,18 +571,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // the time of the cast and the assignment to the local, we're toast.
             EXPRWRAP wrapArray = WrapShortLivedExpression(array).asWRAP();
             EXPR save = GetExprFactory().CreateSave(wrapArray);
-            EXPR nullTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), save, GetExprFactory().CreateConstant(wrapArray.type, ConstValFactory.Get(0)));
+            EXPR nullTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), save, GetExprFactory().CreateConstant(wrapArray.type, CONSTVAL.Get(0)));
             EXPR lenTest;
 
             if (array.type.AsArrayType().rank == 1)
             {
                 EXPR len = GetExprFactory().CreateArrayLength(wrapArray);
-                lenTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), len, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstValFactory.Get(0)));
+                lenTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), len, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), CONSTVAL.Get(0)));
             }
             else
             {
                 EXPRCALL call = BindPredefMethToArgs(PREDEFMETH.PM_ARRAY_GETLENGTH, wrapArray, null, null, null);
-                lenTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), call, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstValFactory.Get(0)));
+                lenTest = GetExprFactory().CreateBinop(ExpressionKind.EK_NE, GetReqPDT(PredefinedType.PT_BOOL), call, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), CONSTVAL.Get(0)));
             }
 
             test = GetExprFactory().CreateBinop(ExpressionKind.EK_LOGAND, GetReqPDT(PredefinedType.PT_BOOL), nullTest, lenTest);
@@ -592,7 +592,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             EXPR pLastList = null;
             for (int cc = 0; cc < array.type.AsArrayType().rank; cc++)
             {
-                GetExprFactory().AppendItemToList(GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstValFactory.Get(0)), ref pList, ref pLastList);
+                GetExprFactory().AppendItemToList(GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), CONSTVAL.Get(0)), ref pList, ref pLastList);
             }
             Debug.Assert(list != null);
 
