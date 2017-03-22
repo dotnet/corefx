@@ -903,6 +903,8 @@ namespace System.Data.SqlClient.SNI
 
                     PipeName = pipeNameBuilder.ToString();
                     ServerName = IsLocalHost(host) ? Environment.MachineName : host;
+                    // Pipe hostname is the hostname after leading \\ which should be passed down as is to open NamedPipe.
+                    // For Named Pipes the ServerName makes sense for SPN creation only.
                     PipeHostName = host;
                 }
                 catch (UriFormatException)
