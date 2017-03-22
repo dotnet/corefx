@@ -192,7 +192,7 @@ namespace System
         /// Determines whether the specified sequence appears at the start of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<char> AsSpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string text)
         {
             if (text == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
@@ -201,9 +201,12 @@ namespace System
 
             if (textLength == 0) return ReadOnlySpan<char>.Empty;
 
-            fixed (char* charPointer = text)
+            unsafe
             {
-                return ReadOnlySpan<char>.DangerousCreate(text, ref *charPointer, textLength);
+                fixed (char* charPointer = text)
+                {
+                    return ReadOnlySpan<char>.DangerousCreate(text, ref *charPointer, textLength);
+                }
             }
         }
 
