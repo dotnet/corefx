@@ -1505,7 +1505,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else if (srcNumeric)
             {
-                valueFlt = constSrc.getVal().DoubleVal;
+                valueFlt = constSrc.Val.DoubleVal;
             }
             else
             {
@@ -1721,24 +1721,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case FUNDTYPE.FT_I1:
                     case FUNDTYPE.FT_I2:
                     case FUNDTYPE.FT_I4:
-                        result = Convert.ToDecimal(src.getVal().Int32Val);
+                        result = Convert.ToDecimal(src.Val.Int32Val);
                         break;
                     case FUNDTYPE.FT_U1:
                     case FUNDTYPE.FT_U2:
                     case FUNDTYPE.FT_U4:
-                        result = Convert.ToDecimal(src.getVal().UInt32Val);
+                        result = Convert.ToDecimal(src.Val.UInt32Val);
                         break;
                     case FUNDTYPE.FT_R4:
-                        result = Convert.ToDecimal((float)src.getVal().DoubleVal);
+                        result = Convert.ToDecimal((float)src.Val.DoubleVal);
                         break;
                     case FUNDTYPE.FT_R8:
-                        result = Convert.ToDecimal(src.getVal().DoubleVal);
+                        result = Convert.ToDecimal(src.Val.DoubleVal);
                         break;
                     case FUNDTYPE.FT_U8:
-                        result = Convert.ToDecimal((ulong)src.getVal().Int64Val);
+                        result = Convert.ToDecimal((ulong)src.Val.Int64Val);
                         break;
                     case FUNDTYPE.FT_I8:
-                        result = Convert.ToDecimal(src.getVal().Int64Val);
+                        result = Convert.ToDecimal(src.Val.Int64Val);
                         break;
                     default:
                         return null;  // Not supported cast.
@@ -1760,7 +1760,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (ftDest != FUNDTYPE.FT_R4 && ftDest != FUNDTYPE.FT_R8)
                     {
-                        decTrunc = Decimal.Truncate(src.getVal().DecimalVal);
+                        decTrunc = Decimal.Truncate(src.Val.DecimalVal);
                     }
                     switch (ftDest)
                     {
@@ -1789,10 +1789,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             cv = ConstVal.Get(Convert.ToUInt64(decTrunc));
                             break;
                         case FUNDTYPE.FT_R4:
-                            cv = ConstVal.Get(Convert.ToSingle(src.getVal().DecimalVal));
+                            cv = ConstVal.Get(Convert.ToSingle(src.Val.DecimalVal));
                             break;
                         case FUNDTYPE.FT_R8:
-                            cv = ConstVal.Get(Convert.ToDouble(src.getVal().DecimalVal));
+                            cv = ConstVal.Get(Convert.ToDouble(src.Val.DecimalVal));
                             break;
                         default:
                             return null; // Not supported cast.

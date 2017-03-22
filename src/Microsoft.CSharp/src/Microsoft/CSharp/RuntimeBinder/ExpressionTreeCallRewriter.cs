@@ -538,7 +538,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (list.GetOptionalNextListNode().isLIST())
             {
                 EXPRCONSTANT isLifted = list.GetOptionalNextListNode().asLIST().GetOptionalElement().asCONSTANT();
-                bIsLifted = isLifted.getVal().Int32Val == 1;
+                bIsLifted = isLifted.Val.Int32Val == 1;
                 methodInfo = GetMethodInfoFromExpr(list.GetOptionalNextListNode().asLIST().GetOptionalNextListNode().asMETHODINFO());
             }
             else

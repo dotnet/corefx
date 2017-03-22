@@ -714,9 +714,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (exprConst != null && exprFlags == 0 &&
                 exprSrc.type.fundType() == typeDest.fundType() &&
-                (!exprSrc.type.isPredefType(PredefinedType.PT_STRING) || exprConst.asCONSTANT().getVal().IsNullRef))
+                (!exprSrc.type.isPredefType(PredefinedType.PT_STRING) || exprConst.asCONSTANT().Val.IsNullRef))
             {
-                EXPRCONSTANT expr = GetExprFactory().CreateConstant(typeDest, exprConst.asCONSTANT().getVal());
+                EXPRCONSTANT expr = GetExprFactory().CreateConstant(typeDest, exprConst.asCONSTANT().Val);
                 pexprDest = expr;
                 return;
             }
@@ -2331,7 +2331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // if converting from float to an integral type, we need to check whether it fits
             if (ftSrc > FUNDTYPE.FT_LASTINTEGRAL)
             {
-                double dvalue = (exprSrc.asCONSTANT().getVal().DoubleVal);
+                double dvalue = (exprSrc.asCONSTANT().Val.DoubleVal);
 
                 switch (ftDest)
                 {

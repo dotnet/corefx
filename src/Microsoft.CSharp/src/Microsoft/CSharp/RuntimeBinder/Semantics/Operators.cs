@@ -2058,7 +2058,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (argConst == null)
                 return GetExprFactory().CreateUnaryOp(ExpressionKind.EK_LOGNOT, typeBool, arg);
 
-            bool fRes = argConst.asCONSTANT().getVal().Int32Val != 0;
+            bool fRes = argConst.asCONSTANT().Val.Int32Val != 0;
             EXPR rval = GetExprFactory().CreateConstant(typeBool, ConstVal.Get(!fRes));
 
             return rval;

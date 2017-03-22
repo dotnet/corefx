@@ -594,7 +594,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private EXPRCONSTANT CreateConstant(CType pType, ConstVal constVal, EXPR pOriginal)
         {
             EXPRCONSTANT rval = CreateConstant(pType);
-            rval.setVal(constVal);
+            rval.Val = constVal;
             Debug.Assert(rval != null);
             return (rval);
         }
