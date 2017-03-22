@@ -104,6 +104,13 @@ namespace System
 
         public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
         public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
+
+        public static unsafe ReadOnlySpan<char> AsSpan(this string text) { throw null; }
+
+        public static Span<T> AsSpan<T>(this T[] array) { throw null; }
+
+        public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment) { throw null; }
+
     }
 }
 
