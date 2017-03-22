@@ -28,44 +28,42 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class CONSTVAL
     {
-        private readonly object _value;
-
         private CONSTVAL(object value)
         {
-            _value = value;
+            objectVal = value;
         }
 
-        public object objectVal => _value;
+        public object objectVal { get; }
 
-        public bool boolVal => SpecialUnbox<bool>(_value);
+        public bool boolVal => SpecialUnbox<bool>(objectVal);
 
-        public sbyte sbyteVal => SpecialUnbox<sbyte>(_value);
+        public sbyte sbyteVal => SpecialUnbox<sbyte>(objectVal);
 
-        public byte byteVal => SpecialUnbox<byte>(_value);
+        public byte byteVal => SpecialUnbox<byte>(objectVal);
 
-        public short shortVal => SpecialUnbox<short>(_value);
+        public short shortVal => SpecialUnbox<short>(objectVal);
 
-        public ushort ushortVal => SpecialUnbox<ushort>(_value);
+        public ushort ushortVal => SpecialUnbox<ushort>(objectVal);
 
-        public int iVal => SpecialUnbox<int>(_value);
+        public int iVal => SpecialUnbox<int>(objectVal);
 
-        public uint uiVal => SpecialUnbox<uint>(_value);
+        public uint uiVal => SpecialUnbox<uint>(objectVal);
 
-        public long longVal => SpecialUnbox<long>(_value);
+        public long longVal => SpecialUnbox<long>(objectVal);
 
-        public ulong ulongVal => SpecialUnbox<ulong>(_value);
+        public ulong ulongVal => SpecialUnbox<ulong>(objectVal);
 
-        public float floatVal => SpecialUnbox<float>(_value);
+        public float floatVal => SpecialUnbox<float>(objectVal);
 
-        public double doubleVal => SpecialUnbox<double>(_value);
+        public double doubleVal => SpecialUnbox<double>(objectVal);
 
-        public decimal decVal => SpecialUnbox<decimal>(_value);
+        public decimal decVal => SpecialUnbox<decimal>(objectVal);
 
-        public char cVal => SpecialUnbox<char>(_value);
+        public char cVal => SpecialUnbox<char>(objectVal);
 
-        public string strVal => SpecialUnbox<string>(_value);
+        public string strVal => SpecialUnbox<string>(objectVal);
 
-        public bool IsNullRef => _value == null;
+        public bool IsNullRef => objectVal == null;
 
         public bool IsZero(ConstValKind kind)
         {
@@ -76,7 +74,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ConstValKind.String:
                     return false;
                 default:
-                    return IsDefault(_value);
+                    return IsDefault(objectVal);
             }
         }
 
