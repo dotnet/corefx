@@ -5,8 +5,10 @@
     <ProjectGuid>{7BAD100F-AD6B-490A-AF7C-8E3854E812C0}</ProjectGuid>
     <AssemblyName>System.Data.Odbc</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Linux-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Linux-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-OSX-Debug|AnyCPU'" />
@@ -106,8 +108,8 @@
     <Compile Include="Common\System\Data\Common\ExternDll.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System.Data" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Registry" />
