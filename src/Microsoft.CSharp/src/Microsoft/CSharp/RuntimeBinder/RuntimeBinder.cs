@@ -1972,7 +1972,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 result = true;
             }
 
-            return _exprFactory.CreateConstant(boolType, ConstValFactory.GetBool(result));
+            return _exprFactory.CreateConstant(boolType, ConstValFactory.Get(result));
         }
         #endregion
 

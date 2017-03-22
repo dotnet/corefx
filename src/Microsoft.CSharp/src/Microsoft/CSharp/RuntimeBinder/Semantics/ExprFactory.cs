@@ -11,17 +11,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class ExprFactory
     {
         private readonly GlobalSymbolContext _globalSymbolContext;
-        private readonly ConstValFactory _constants;
 
         public ExprFactory(GlobalSymbolContext globalSymbolContext)
         {
             Debug.Assert(globalSymbolContext != null);
             _globalSymbolContext = globalSymbolContext;
-            _constants = new ConstValFactory();
-        }
-        public ConstValFactory GetExprConstants()
-        {
-            return _constants;
         }
         private TypeManager GetTypes()
         {
@@ -456,7 +450,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EXPRCONSTANT CreateStringConstant(string str)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), _constants.Create(str));
+            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstValFactory.Get(str));
         }
 
         public EXPRMULTIGET CreateMultiGet(EXPRFLAG nFlags, CType pType, EXPRMULTI pOptionalMulti)
@@ -516,8 +510,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // For enum types, we create a constant that has the default value
                 // as an object pointer.
-                ConstValFactory factory = new ConstValFactory();
-                EXPRCONSTANT expr = CreateConstant(pType, factory.Create(Activator.CreateInstance(pType.AssociatedSystemType)));
+                EXPRCONSTANT expr = CreateConstant(pType, ConstValFactory.Get(Activator.CreateInstance(pType.AssociatedSystemType)));
                 return expr;
             }
 
@@ -617,11 +610,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EXPRCONSTANT CreateIntegerConstant(int x)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstValFactory.GetInt(x));
+            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_INT).getThisType(), ConstValFactory.Get(x));
         }
         public EXPRCONSTANT CreateBoolConstant(bool b)
         {
-            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstValFactory.GetBool(b));
+            return CreateConstant(GetTypes().GetReqPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstValFactory.Get(b));
         }
         public EXPRBLOCK CreateBlock(EXPRBLOCK pOptionalCurrentBlock, EXPRSTMT pOptionalStatements, Scope pOptionalScope)
         {

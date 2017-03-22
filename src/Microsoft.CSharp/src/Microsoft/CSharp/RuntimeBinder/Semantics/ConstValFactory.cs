@@ -12,7 +12,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // so ConstValFactory should not take a dependency on TYPESYMs
     // or predefined types.
 
-    internal sealed class ConstValFactory
+    internal static class ConstValFactory
     {
         public static CONSTVAL GetDefaultValue(ConstValKind kind)
         {
@@ -45,57 +45,52 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new CONSTVAL();
         }
 
-        public static CONSTVAL GetBool(bool value)
+        public static CONSTVAL Get(bool value)
         {
             return new CONSTVAL(value);
         }
 
-        public static CONSTVAL GetInt(int value)
+        public static CONSTVAL Get(int value)
         {
             return new CONSTVAL(value);
         }
 
-        public static CONSTVAL GetUInt(uint value)
+        public static CONSTVAL Get(uint value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(decimal value)
+        public static CONSTVAL Get(decimal value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(string value)
+        public static CONSTVAL Get(string value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(float value)
+        public static CONSTVAL Get(float value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(double value)
+        public static CONSTVAL Get(double value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(long value)
+        public static CONSTVAL Get(long value)
         {
             return new CONSTVAL(value);
         }
 
-        public CONSTVAL Create(ulong value)
+        public static CONSTVAL Get(ulong value)
         {
             return new CONSTVAL(value);
         }
 
-        internal CONSTVAL Create(bool value)
-        {
-            return new CONSTVAL(value);
-        }
-
-        internal CONSTVAL Create(object p)
+        public static CONSTVAL Get(object p)
         {
             return new CONSTVAL(p);
         }

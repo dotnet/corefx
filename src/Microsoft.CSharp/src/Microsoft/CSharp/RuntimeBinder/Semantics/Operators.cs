@@ -1766,7 +1766,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
                 case FUNDTYPE.FT_PTR:
-                    cv = ConstValFactory.GetInt(1);
+                    cv = ConstValFactory.Get(1);
                     pExprResult = BindPtrBinOp(ek, flags, exprVal, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), cv));
                     break;
                 case FUNDTYPE.FT_I1:
@@ -1774,22 +1774,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_U1:
                 case FUNDTYPE.FT_U2:
                     typeTmp = GetReqPDT(PredefinedType.PT_INT);
-                    cv = ConstValFactory.GetInt(1);
+                    cv = ConstValFactory.Get(1);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
                 case FUNDTYPE.FT_I4:
                 case FUNDTYPE.FT_U4:
-                    cv = ConstValFactory.GetInt(1);
+                    cv = ConstValFactory.Get(1);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
                 case FUNDTYPE.FT_I8:
                 case FUNDTYPE.FT_U8:
-                    cv = GetExprConstants().Create((long)1);
+                    cv = ConstValFactory.Get((long)1);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
-                    cv = GetExprConstants().Create(1.0);
+                    cv = ConstValFactory.Get(1.0);
                     pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
                     break;
             }
@@ -2059,7 +2059,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return GetExprFactory().CreateUnaryOp(ExpressionKind.EK_LOGNOT, typeBool, arg);
 
             bool fRes = argConst.asCONSTANT().getVal().iVal != 0;
-            EXPR rval = GetExprFactory().CreateConstant(typeBool, ConstValFactory.GetBool(!fRes));
+            EXPR rval = GetExprFactory().CreateConstant(typeBool, ConstValFactory.Get(!fRes));
 
             return rval;
         }

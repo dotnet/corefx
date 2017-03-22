@@ -123,7 +123,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void SetDefaultParameterValue(int index, CType type, CONSTVAL cv)
         {
             Debug.Assert(_defaultParameterIndex != null);
-            ConstValFactory factory = new ConstValFactory();
             _defaultParameterIndex[index] = true;
             _defaultParameters[index] = cv;
             _defaultParameterConstValTypes[index] = type;
