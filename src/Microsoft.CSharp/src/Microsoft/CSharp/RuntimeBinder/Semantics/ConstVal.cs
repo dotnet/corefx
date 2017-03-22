@@ -27,6 +27,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class ConstVal
     {
         public static readonly ConstVal NullReference = new ConstVal(null);
+        private static readonly ConstVal False = new ConstVal(false);
+        private static readonly ConstVal True = new ConstVal(true);
+        private static readonly ConstVal Zero = new ConstVal(0);
 
         private ConstVal(object value)
         {
@@ -131,7 +134,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (kind)
             {
                 case ConstValKind.Int:
-                    return new ConstVal(0);
+                    return Zero;
 
                 case ConstValKind.Double:
                     return new ConstVal(0.0);
@@ -146,60 +149,30 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return new ConstVal(0F);
 
                 case ConstValKind.Boolean:
-                    return new ConstVal(false);
+                    return False;
             }
 
             return NullReference;
         }
 
-        public static ConstVal Get(bool value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(bool value) => value ? True : False;
 
-        public static ConstVal Get(int value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(int value) => value == 0 ? Zero : new ConstVal(value);
 
-        public static ConstVal Get(uint value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(uint value) => new ConstVal(value);
 
-        public static ConstVal Get(decimal value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(decimal value) => new ConstVal(value);
 
-        public static ConstVal Get(string value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(string value) => new ConstVal(value);
 
-        public static ConstVal Get(float value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(float value) => new ConstVal(value);
 
-        public static ConstVal Get(double value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(double value) => new ConstVal(value);
 
-        public static ConstVal Get(long value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(long value) => new ConstVal(value);
 
-        public static ConstVal Get(ulong value)
-        {
-            return new ConstVal(value);
-        }
+        public static ConstVal Get(ulong value) => new ConstVal(value);
 
-        public static ConstVal Get(object p)
-        {
-            return p == null ? NullReference : new ConstVal(p);
-        }
+        public static ConstVal Get(object p) => p == null ? NullReference : new ConstVal(p);
     }
 }
