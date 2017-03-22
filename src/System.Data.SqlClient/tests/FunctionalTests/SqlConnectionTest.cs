@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 
-using Microsoft.Win32;
 using Xunit;
 
 namespace System.Data.SqlClient.Tests
@@ -38,30 +37,6 @@ namespace System.Data.SqlClient.Tests
                 }
             }
         }
-
-        private const string LocalDBInstalledVersionRegistryKey = "SOFTWARE\\Microsoft\\Microsoft SQL Server Local DB\\Installed Versions\\";
-
-        [Fact]
-        public void LocaldbTest()
-        {
-            Exception e = null;
-            
-            
-            //AppContext.SetSwitch("System.Data.SqlClient.UseLegacyNetworkingOnWindows", true);
-
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
-            builder.DataSource = "(localdb)\\MSSQLLocalDB";
-            builder.IntegratedSecurity = true;
-            
-        
-                SqlConnection connection = new SqlConnection(builder.ConnectionString);
-                connection.Open();
-                connection = new SqlConnection(builder.ConnectionString);
-                connection.Open();
-        
-            
-        }
-
     }
 
 }

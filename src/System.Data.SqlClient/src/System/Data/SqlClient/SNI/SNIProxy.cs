@@ -306,14 +306,14 @@ namespace System.Data.SqlClient.SNI
 
             bool errorWithLocalDBProcessing;
             string localDBDataSource = GetLocalDBDataSource(fullServerName, out errorWithLocalDBProcessing);
-            
+
             if (errorWithLocalDBProcessing)
             {
                 return null;
             }
 
             // If a localDB Data source is available, we need to use it.
-            fullServerName = localDBDataSource?? fullServerName;
+            fullServerName = localDBDataSource ?? fullServerName;
 
             DataSource details = DataSource.ParseServerName(fullServerName);
             if (details == null)
