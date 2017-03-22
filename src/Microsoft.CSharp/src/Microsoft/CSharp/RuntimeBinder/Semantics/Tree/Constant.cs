@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -15,14 +14,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ConstVal Val { get; set; }
 
-        public ulong getU64Value() { return Val.UInt64Val; }
-        public long getI64Value() { return I64Value; }
-        public long I64Value
+        public ulong UInt64Value => Val.UInt64Val;
+
+        public long Int64Value
         {
             get
             {
-                FUNDTYPE ft = type.fundType();
-                switch (ft)
+                switch (type.fundType())
                 {
                     case FUNDTYPE.FT_I8:
                     case FUNDTYPE.FT_U8:

@@ -2384,7 +2384,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // U8 src is unsigned, so deal with values > MAX_LONG here.
             if (ftSrc == FUNDTYPE.FT_U8)
             {
-                ulong value = exprSrc.asCONSTANT().getU64Value();
+                ulong value = exprSrc.asCONSTANT().UInt64Value;
 
                 switch (ftDest)
                 {
@@ -2424,7 +2424,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                long value = exprSrc.asCONSTANT().getI64Value();
+                long value = exprSrc.asCONSTANT().Int64Value;
 
                 switch (ftDest)
                 {

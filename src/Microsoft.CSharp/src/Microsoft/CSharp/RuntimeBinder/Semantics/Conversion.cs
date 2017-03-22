@@ -398,7 +398,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         (ftSrc == FUNDTYPE.FT_I8 && ftDest == FUNDTYPE.FT_U8))
                     {
                         // Failed because value was out of range. Report nifty error message.
-                        string value = expr.asCONSTANT().I64Value.ToString(CultureInfo.InvariantCulture);
+                        string value = expr.asCONSTANT().Int64Value.ToString(CultureInfo.InvariantCulture);
                         ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
                         exprResult = ExprFactory.CreateCast(0, destExpr, expr);
                         exprResult.SetError();
@@ -534,9 +534,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (expr_type <= FUNDTYPE.FT_LASTINTEGRAL)
                         {
                             if (expr.type.isUnsigned())
-                                value = ((ulong)(exprConst.asCONSTANT()).I64Value).ToString(CultureInfo.InvariantCulture);
+                                value = ((ulong)(exprConst.asCONSTANT()).Int64Value).ToString(CultureInfo.InvariantCulture);
                             else
-                                value = ((long)(exprConst.asCONSTANT()).I64Value).ToString(CultureInfo.InvariantCulture);
+                                value = ((long)(exprConst.asCONSTANT()).Int64Value).ToString(CultureInfo.InvariantCulture);
                         }
                         else if (expr_type <= FUNDTYPE.FT_LASTNUMERIC)
                         {
@@ -1492,15 +1492,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we're going from ulong to something, make sure we can fit.
                     if (ftDest == FUNDTYPE.FT_U8)
                     {
-                        ConstVal cv = ConstVal.Get(constSrc.getU64Value());
+                        ConstVal cv = ConstVal.Get(constSrc.UInt64Value);
                         pexprDest = ExprFactory.CreateConstant(typeDest, cv);
                         return ConstCastResult.Success;
                     }
-                    valueInt = (Int64)(constSrc.getU64Value() & 0xFFFFFFFFFFFFFFFF);
+                    valueInt = (Int64)(constSrc.UInt64Value& 0xFFFFFFFFFFFFFFFF);
                 }
                 else
                 {
-                    valueInt = constSrc.getI64Value();
+                    valueInt = constSrc.Int64Value;
                 }
             }
             else if (srcNumeric)
