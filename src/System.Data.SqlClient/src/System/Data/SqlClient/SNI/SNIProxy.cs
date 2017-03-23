@@ -590,7 +590,7 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// 
+        /// Gets the Local db Named pipe data source if the input is a localDB server. 
         /// </summary>
         /// <param name="fullServerName">The data source</param>
         /// <param name="error">Set true when an error occured while getting LocalDB up</param>
@@ -655,7 +655,7 @@ namespace System.Data.SqlClient.SNI
         private DataSource(string dataSource)
         {
             // Remove all whitespaces from the datasource and all operations will happen on lower case.
-            _workingDataSource = dataSource.Trim().ToLower();
+            _workingDataSource = dataSource.Trim().ToLowerInvariant();
 
             int firstIndexOfColon = _workingDataSource.IndexOf(':');
 
@@ -713,7 +713,7 @@ namespace System.Data.SqlClient.SNI
 
             string instanceName = null;
 
-            string workingDataSource = dataSource.ToLower();
+            string workingDataSource = dataSource.ToLowerInvariant();
 
             string[] tokensByBackSlash = workingDataSource.Split(BackSlashSeparator);
 

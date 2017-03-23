@@ -9,7 +9,7 @@ using System.Text;
 
 namespace System.Data.SqlClient.SNI
 {
-    internal class LocalDB
+    internal sealed class LocalDB
     {
         private static readonly LocalDB Instance = new LocalDB();
 
@@ -88,6 +88,10 @@ namespace System.Data.SqlClient.SNI
 
             lock (this)
             {
+                if(_sqlUserInstanceLibraryHandle !=null)
+                {
+                    return;
+                }
                 //Get UserInstance Dll path
                 LocalDBErrorState registryQueryErrorState;
 
@@ -153,7 +157,7 @@ namespace System.Data.SqlClient.SNI
                     return null;
                 }
 
-                Version zeroVersion = new Version("0.0");
+                Version zeroVersion = new Version();
 
                 Version latestVersion = zeroVersion;
 
@@ -162,7 +166,10 @@ namespace System.Data.SqlClient.SNI
                     try
                     {
                         Version currentKeyVersion = new Version(subKey);
-                        latestVersion = latestVersion.CompareTo(currentKeyVersion) < 0 ? currentKeyVersion : latestVersion;
+                        if(latestVersion.CompareTo(currentKeyVersion) < 0)
+                        {
+                            latestVersion = currentKeyVersion;
+                        }
                     }
                     catch (FormatException)
                     {

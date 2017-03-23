@@ -9,7 +9,7 @@ namespace System.Data.SqlClient.SNI
     {
         internal static string GetLocalDBConnectionString(string localDbInstance)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(); // LocalDB is not available for Unix and hence it cannot be supported.
         }
     }
 }
