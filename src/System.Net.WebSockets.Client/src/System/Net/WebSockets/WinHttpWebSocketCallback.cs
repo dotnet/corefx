@@ -315,18 +315,16 @@ namespace System.Net.WebSockets
 
             if (asyncResult.AsyncResult.dwError == Interop.WinHttp.ERROR_WINHTTP_OPERATION_CANCELLED)
             {
-                var exception = new OperationCanceledException("Aborted");
-
                 state.UpdateState(WebSocketState.Aborted);
 
                 if (state.TcsReceive != null)
                 {
-                    state.TcsReceive.TrySetException(exception);
+                    state.TcsReceive.TrySetCanceled();
                 }
 
                 if (state.TcsSend != null)
                 {
-                    state.TcsSend.TrySetException(exception);
+                    state.TcsSend.TrySetCanceled();
                 }
 
                 return;

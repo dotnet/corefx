@@ -795,9 +795,7 @@ namespace System.Net.WebSockets
 
             if (_operation.TcsReceive != null)
             {
-                var exception = new OperationCanceledException("Aborted");
-
-                _operation.TcsReceive.TrySetException(exception);
+                _operation.TcsReceive.TrySetCanceled();
             }
 
             if (_operation.TcsSend != null)
