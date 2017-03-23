@@ -10,49 +10,60 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
-        [ActiveIssue(16593)]
+        // NOTE: IndexOverflow test is constrained to run on Windows and MacOSX because it
+        //       causes problems on Linux due to the way deferred memory allocation works.
+        //       On Linux, the allocation can succeed even if there is not enough memory
+        //       but then the test may get killed by the OOM killer at the time the memory
+        //       is accessed which triggers the full memory allocation.
+
+        //[ActiveIssue(16593)]
         [Fact]
-        [OuterLoop]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        //[OuterLoop]
         public static void IndexOverflow()
         {
-            //
-            // Although Span constrains indexes to 0..2Gb, it does not similarly constrain index * sizeof(T).
-            // Make sure that internal offset calculcations handle the >2Gb case properly.
-            //
-            unsafe
+            // If this test is run in a 32-bit process, the 3GB allocation will fail.
+            if (Unsafe.SizeOf<IntPtr>() == sizeof(long))
             {
-                byte* pMemory;
-                try
+                //
+                // Although Span constrains indexes to 0..2Gb, it does not similarly constrain index * sizeof(T).
+                // Make sure that internal offset calculcations handle the >2Gb case properly.
+                //
+                unsafe
                 {
-                    pMemory = (byte*)Marshal.AllocHGlobal((IntPtr)ThreeGiB);
-                }
-                catch (Exception)
-                {
-                    return;  // It's not implausible to believe that a 3gb allocation will fail - if so, skip this test to avoid unnecessary test flakiness.
-                }
+                    byte* pMemory;
+                    try
+                    {
+                        pMemory = (byte*)Marshal.AllocHGlobal((IntPtr)ThreeGiB);
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        return;  // It's not implausible to believe that a 3gb allocation will fail - if so, skip this test to avoid unnecessary test flakiness.
+                    }
 
-                try
-                {
-                    ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>(pMemory, GuidThreeGiBLimit);
+                    try
+                    {
+                        ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>(pMemory, GuidThreeGiBLimit);
 
-                    int bigIndex = checked(GuidTwoGiBLimit + 1);
-                    uint byteOffset = checked((uint)bigIndex * (uint)sizeof(Guid));
-                    Assert.True(byteOffset > (uint)int.MaxValue);  // Make sure byteOffset actually overflows 2Gb, or this test is pointless.
-                    ref Guid expected = ref Unsafe.AsRef<Guid>(((byte*)pMemory) + byteOffset);
-                    Guid expectedGuid = Guid.NewGuid();
-                    expected = expectedGuid;
-                    Guid actualGuid = span[bigIndex];
-                    Assert.Equal(expectedGuid, actualGuid);
+                        int bigIndex = checked(GuidTwoGiBLimit + 1);
+                        uint byteOffset = checked((uint)bigIndex * (uint)sizeof(Guid));
+                        Assert.True(byteOffset > (uint)int.MaxValue);  // Make sure byteOffset actually overflows 2Gb, or this test is pointless.
+                        ref Guid expected = ref Unsafe.AsRef<Guid>(((byte*)pMemory) + byteOffset);
+                        Guid expectedGuid = Guid.NewGuid();
+                        expected = expectedGuid;
+                        Guid actualGuid = span[bigIndex];
+                        Assert.Equal(expectedGuid, actualGuid);
 
-                    ReadOnlySpan<Guid> slice = span.Slice(bigIndex);
-                    Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
+                        ReadOnlySpan<Guid> slice = span.Slice(bigIndex);
+                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
 
-                    slice = span.Slice(bigIndex, 1);
-                    Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal((IntPtr)pMemory);
+                        slice = span.Slice(bigIndex, 1);
+                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal((IntPtr)pMemory);
+                    }
                 }
             }
         }

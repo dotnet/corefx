@@ -192,8 +192,8 @@ namespace System.SpanTests
             Assert.Equal<TestValueTypeWithReference>(expected, actual);
         }
 
-        [ActiveIssue(16492)]
-        [OuterLoop]
+        //[ActiveIssue(16492)]
+        //[OuterLoop]
         [Fact]
         public unsafe static void ClearLongerThanUintMaxValueBytes()
         {
@@ -203,8 +203,8 @@ namespace System.SpanTests
                 int[] a = null;
                 try
                 {
-                    // The maximum index in any single dimension is 2,147,483,591 (0x7FFFFFC7) 
-                    // for byte arrays and arrays of single-byte structures, 
+                    // The maximum index in any single dimension is 2,147,483,591 (0x7FFFFFC7)
+                    // for byte arrays and arrays of single-byte structures,
                     // and 2,146,435,071 (0X7FEFFFFF) for other types.
                     const int maxArraySizeForLargerThanByteTypes = 0X7FEFFFFF;
                     a = new int[maxArraySizeForLargerThanByteTypes];
@@ -239,8 +239,8 @@ namespace System.SpanTests
             }
         }
 
-        [ActiveIssue(16492)]
-        [OuterLoop]
+        //[ActiveIssue(16492)]
+        //[OuterLoop]
         [Fact]
         public unsafe static void ClearNativeLongerThanUintMaxValueBytes()
         {
