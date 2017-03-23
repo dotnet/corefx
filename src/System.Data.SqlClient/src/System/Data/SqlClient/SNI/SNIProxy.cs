@@ -717,7 +717,7 @@ namespace System.Data.SqlClient.SNI
             error = false;
 
             // All LocalDb endpoints are of the format host\instancename where host is always (LocalDb) (case-insensitive)
-            if (tokensByBackSlash.Length == 2 && LocalDbHost.Equals(tokensByBackSlash[0].Trim()))
+            if (tokensByBackSlash.Length == 2 && LocalDbHost.Equals(tokensByBackSlash[0].TrimStart()))
             {
                 if (!string.IsNullOrWhiteSpace(tokensByBackSlash[1]))
                 {
