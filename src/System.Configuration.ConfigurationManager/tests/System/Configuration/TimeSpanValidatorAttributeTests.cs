@@ -99,6 +99,32 @@ namespace System.ConfigurationTests
             Assert.True(attribute.ExcludeRange);
         }
 
+        [Fact]
+        public void MinValue_Get()
+        {
+            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+
+
+            attribute.MinValueString = "05:55:55";
+            TimeSpan test = attribute.MinValue;
+            Assert.Equal(test, TimeSpan.Parse("05:55:55"));
+
+            attribute.MinValueString = "23:59:59";
+            test = attribute.MinValue;
+            Assert.Equal(test, TimeSpan.Parse("23:59:59"));
+
+            attribute.MinValueString = "00:00:00";
+            test = attribute.MinValue;
+            Assert.Equal(test, TimeSpan.Parse("00:00:00"));
+
+            attribute.MinValueString = "1:01:00:00";
+            test = attribute.MinValue;
+            Assert.Equal(test, TimeSpan.Parse("1:01:00:00"));
+
+            attribute.MinValueString = "2.22:50:45.2563";
+            test = attribute.MinValue;
+            Assert.Equal(test, TimeSpan.Parse("2.22:50:45.2563"));
+        }
 
 
         private TimeSpanValidatorAttribute MakeTimeSpanValidatorAttribute()
