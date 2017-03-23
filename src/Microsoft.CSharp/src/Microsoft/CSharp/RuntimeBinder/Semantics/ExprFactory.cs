@@ -862,7 +862,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EXPR CreateNull()
         {
-            return CreateConstant(GetTypes().GetNullType(), ConstVal.NullReference);
+            return CreateConstant(GetTypes().GetNullType(), default(ConstVal));
         }
 
         public void AppendItemToList(

@@ -843,7 +843,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     if (argument.Info.UseCompileTimeType)
                     {
-                        arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), ConstVal.NullReference);
+                        arg = _exprFactory.CreateConstant(_symbolTable.GetCTypeFromType(argument.Type), default(ConstVal));
                     }
                     else
                     {

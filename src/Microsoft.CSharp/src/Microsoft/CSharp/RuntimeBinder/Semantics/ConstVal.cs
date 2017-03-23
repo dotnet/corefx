@@ -24,12 +24,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         Boolean
     }
 
-    internal sealed class ConstVal
+    internal struct ConstVal
     {
-        public static readonly ConstVal NullReference = new ConstVal(null);
-        private static readonly ConstVal False = new ConstVal(false);
-        private static readonly ConstVal True = new ConstVal(true);
-        private static readonly ConstVal Zero = new ConstVal(0);
+        // Pre-boxed common values.
+        private static readonly object s_false = false;
+        private static readonly object s_true = true;
+        private static readonly object s_zeroInt32 = 0;
 
         private ConstVal(object value)
         {
@@ -134,7 +134,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (kind)
             {
                 case ConstValKind.Int:
-                    return Zero;
+                    return new ConstVal(s_zeroInt32);
 
                 case ConstValKind.Double:
                     return new ConstVal(0.0);
@@ -149,15 +149,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return new ConstVal(0F);
 
                 case ConstValKind.Boolean:
-                    return False;
+                    return new ConstVal(s_false);
             }
 
-            return NullReference;
+            return default(ConstVal);
         }
 
-        public static ConstVal Get(bool value) => value ? True : False;
+        public static ConstVal Get(bool value) => new ConstVal(value ? s_true : s_false);
 
-        public static ConstVal Get(int value) => value == 0 ? Zero : new ConstVal(value);
+        public static ConstVal Get(int value) => new ConstVal(value == 0 ? s_zeroInt32 : value);
 
         public static ConstVal Get(uint value) => new ConstVal(value);
 
@@ -173,6 +173,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static ConstVal Get(ulong value) => new ConstVal(value);
 
-        public static ConstVal Get(object p) => p == null ? NullReference : new ConstVal(p);
+        public static ConstVal Get(object p) => new ConstVal(p);
     }
 }

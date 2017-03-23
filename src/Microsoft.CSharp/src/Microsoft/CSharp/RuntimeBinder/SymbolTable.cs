@@ -1765,7 +1765,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // Only set a default value if we have one, and the type that we're
                 // looking at isn't a by ref type or a type parameter.
 
-                ConstVal cv = ConstVal.NullReference;
+                ConstVal cv = default(ConstVal);
                 CType cvType = _semanticChecker.GetSymbolLoader().GetReqPredefType(PredefinedType.PT_OBJECT);
 
                 // We need to use RawDefaultValue, because DefaultValue is too clever.
