@@ -273,8 +273,8 @@ namespace System
                 {
                     var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
                     var vMatches = Vector.BitwiseOr(
-                        Vector.Equals(vData, values0),
-                        Vector.Equals(vData, values1));
+                                    Vector.Equals(vData, values0),
+                                    Vector.Equals(vData, values1));
 
                     if (!vMatches.Equals(Vector<byte>.Zero))
                     {
@@ -283,10 +283,10 @@ namespace System
                         break;
                     }
                     index += Vector<byte>.Count;
-                } while ((byte*) nLength > (byte*) index);
+                } while ((byte*)nLength > (byte*)index);
 
                 // Found match? Perform secondary search outside out of loop, so above loop body is small
-                if ((byte*) nLength > (byte*) index)
+                if ((byte*)nLength > (byte*)index)
                 {
                     // Find offset of first match
                     index += LocateFirstFoundByte(values0);
@@ -424,10 +424,10 @@ namespace System
                     var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
 
                     var vMatches = Vector.BitwiseOr(
-                        Vector.BitwiseAnd(
-                            Vector.Equals(vData, values0),
-                            Vector.Equals(vData, values1)),
-                        Vector.Equals(vData, values2));
+                                    Vector.BitwiseAnd(
+                                        Vector.Equals(vData, values0),
+                                        Vector.Equals(vData, values1)),
+                                    Vector.Equals(vData, values2));
 
                     if (!vMatches.Equals(Vector<byte>.Zero))
                     {
