@@ -12,25 +12,25 @@
     </TargetsTriggeredByCompilation>
   </PropertyGroup>
 
+  <!-- Inputs and outputs of ILLinkTrimAssembly -->
+  <PropertyGroup>
+    <ILLinkToolPath Condition="'$(ILLinkToolPath)' == ''">$(ToolsDir)ILLink/illink.dll</ILLinkToolPath>
+    <ILLinkTrimAssemblyPath>$(IntermediateOutputPath)$(TargetName)$(TargetExt)</ILLinkTrimAssemblyPath>
+    <ILLinkTrimAssemblySymbols>$(IntermediateOutputPath)$(TargetName).pdb</ILLinkTrimAssemblySymbols>
+    <ILLinkTrimInputPath>$(IntermediateOutputPath)PreTrim/</ILLinkTrimInputPath>
+    <ILLinkTrimInputAssembly>$(ILLinkTrimInputPath)$(TargetName)$(TargetExt)</ILLinkTrimInputAssembly>
+    <ILLinkTrimInputSymbols>$(ILLinkTrimInputPath)$(TargetName).pdb</ILLinkTrimInputSymbols>
+    <ILLinkTrimOutputPath>$(IntermediateOutputPath)</ILLinkTrimOutputPath>
+
+    <!-- if building a portable PDB, tell illink to rewrite the symbols file -->
+    <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
+  </PropertyGroup>
+
   <!-- ILLinkTrimAssembly
        Examines the "input assembly" for IL that is unreachable from public API and trims that,
        rewriting the assembly to an "output assembly"
   -->
   <Target Name="ILLinkTrimAssembly" DependsOnTargets="EnsureBuildToolsRuntime">
-    <!-- Inputs and outputs of ILLinkTrimAssembly -->
-    <PropertyGroup>
-      <ILLinkToolPath Condition="'$(ILLinkToolPath)' == ''">$(ToolsDir)ILLink/illink.dll</ILLinkToolPath>
-      <ILLinkTrimAssemblyPath>$(IntermediateOutputPath)$(TargetName)$(TargetExt)</ILLinkTrimAssemblyPath>
-      <ILLinkTrimAssemblySymbols>$(IntermediateOutputPath)$(TargetName).pdb</ILLinkTrimAssemblySymbols>
-      <ILLinkTrimInputPath>$(IntermediateOutputPath)PreTrim/</ILLinkTrimInputPath>
-      <ILLinkTrimInputAssembly>$(ILLinkTrimInputPath)$(TargetName)$(TargetExt)</ILLinkTrimInputAssembly>
-      <ILLinkTrimInputSymbols>$(ILLinkTrimInputPath)$(TargetName).pdb</ILLinkTrimInputSymbols>
-      <ILLinkTrimOutputPath>$(IntermediateOutputPath)</ILLinkTrimOutputPath>
-
-      <!-- if building a portable PDB, tell illink to rewrite the symbols file -->
-      <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
-    </PropertyGroup>
-
     <ItemGroup>
       <!-- currently only directories are supported by ILLink. -->
       <_ILLinkReferenceDirectory Include="%(ReferencePath.RootDir)%(ReferencePath.Directory)" />
@@ -68,10 +68,17 @@
     </PropertyGroup>
 
     <Exec Command="$(ILLinkCmd) $(ILLinkArgs)" />
-
+  </Target>
+  
+  <!-- Similar to _CheckForCompileOutputs and runs in the same places, 
+       always set these even if compile didn't run. -->
+  <Target Name="_CheckForILLinkTrimAssemblyOutputs" 
+          BeforeTargets="CopyFilesToOutputDirectory;_CleanGetCurrentAndPriorFileWrites"
+          Condition="'$(ILLinkTrimAssembly)' == 'true'">
     <ItemGroup>
-      <FileWrites Include="$(ILLinkTrimInputAssembly)" />
-      <FileWrites Include="$(ILLinkTrimInputSymbols)" />
+      <PreTrimmedItem Condition="Exists('$(ILLinkTrimInputAssembly)')" Include="$(ILLinkTrimInputAssembly)" />
+      <PreTrimmedItem Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimInputSymbols)')" Include="$(ILLinkTrimInputSymbols)" />
+      <FileWrites Include="@(PreTrimmedItem)" />
     </ItemGroup>
   </Target>
 
