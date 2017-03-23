@@ -42,20 +42,50 @@ namespace System.ConfigurationTests
 
             attribute.MinValueString = "2:22:50:45.2563";
             test = attribute.MinValueString;
-            Assert.Equal(test, "2.22:50:45.2563");
+            Assert.Equal(test, "2.22:50:45.2563000");
+        }
+
+
+        [Fact]
+        public void MinValueString_SetValueHigherThanMax()
+        {
+            // Not implemented.  Can't find a way to make TimeSpanValidatorAttribute throw ArgumentOutOfRangeException
+            // Because trying to assign a TimeSpan greater than TimeSpan max throws a StackOverFlowException.
+            // So, this can't happen
+            // TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            // attribute.MinValueString = "10675200.02:48:05.4775807"
+            // test = attribute.MinValueString //This calls TimeSpan.Parse, which will throw a StackOverflowException.
         }
 
         [Fact]
-        public void MinValuString_SetValueBiggerThanMax()
+        public void MaxValueString_GetAndSetCorrectly()
         {
             TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
 
-            Exception ex = Assert.Throws<ArgumentOutOfRangeException>(() => attribute.MinValueString = "-10675200.02:48:05.4775808");
 
-            Exception test = new ArgumentOutOfRangeException("System.String", SR.Validator_min_greater_than_max);
+            attribute.MaxValueString = "05:55:55";
+            string test = attribute.MaxValueString;
+            Assert.Equal(test, "05:55:55");
 
-            Assert.Equal(test, ex);
+            attribute.MaxValueString = "23:59:59";
+            test = attribute.MaxValueString;
+            Assert.Equal(test, "23:59:59");
+
+            attribute.MaxValueString = "00:00:00";
+            test = attribute.MaxValueString;
+            Assert.Equal(test, "00:00:00");
+
+            attribute.MaxValueString = "1:01:00:00";
+            test = attribute.MaxValueString;
+            Assert.Equal(test, "1.01:00:00");
+
+            attribute.MaxValueString = "2:22:50:45.2563";
+            test = attribute.MaxValueString;
+            Assert.Equal(test, "2.22:50:45.2563000");
         }
+
+
+
 
         private TimeSpanValidatorAttribute MakeTimeSpanValidatorAttribute()
         {
