@@ -263,30 +263,6 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        private static string GetServerNameWithOutProtocol(string fullServerName, string protocolHeader)
-        {
-            string serverNameWithOutProtocol = null;
-            if (fullServerName.Length >= protocolHeader.Length &&
-                String.Compare(fullServerName, 0, protocolHeader, 0, protocolHeader.Length, true) == 0)
-            {
-                serverNameWithOutProtocol = fullServerName.Substring(protocolHeader.Length, fullServerName.Length - protocolHeader.Length);
-            }
-
-            return serverNameWithOutProtocol;
-        }
-
-        private static bool IsOccursOnce(string s, char c)
-        {
-            Debug.Assert(!String.IsNullOrEmpty(s));
-            Debug.Assert(c != '\0');
-
-            int pos = s.IndexOf(c);
-            int nextIndex = pos + 1;
-            return pos >= 0 && (s.Length == nextIndex || s.IndexOf(c, pos + 1) == -1);
-        }
-
-        
-
         /// <summary>
         /// Create a SNI connection handle
         /// </summary>
@@ -606,9 +582,13 @@ namespace System.Data.SqlClient.SNI
                 error = true;
                 return null;
             }
+
             else if (!string.IsNullOrEmpty(localDBInstance))
             {
+                // We have successfully received a localDBInstance which is valid.
+                Debug.Assert(!string.IsNullOrWhiteSpace(localDBInstance), "Local DB Instance name cannot be empty.");
                 localDBConnectionString = LocalDB.GetLocalDBConnectionString(localDBInstance);
+
                 if (fullServerName == null)
                 {
                     // The Last error is set in LocalDB.GetLocalDBConnectionString. We don't need to set Last here.
@@ -616,7 +596,6 @@ namespace System.Data.SqlClient.SNI
                     return null;
                 }
             }
-
             error = false;
             return localDBConnectionString;
         }
@@ -637,14 +616,30 @@ namespace System.Data.SqlClient.SNI
 
         internal Protocol ConnectionProtocol = Protocol.None;
 
+        /// <summary>
+        /// Provides the HostName of the server to connect to for TCP protocol. 
+        /// This information is also used for finding the SPN of SqlServer
+        /// </summary>
         internal string ServerName { get; private set; }
 
+        /// <summary>
+        /// Provides the port on which the TCP connection should be made if one was specified in Data Source
+        /// </summary>
         internal int Port { get; private set; } = -1;
 
+        /// <summary>
+        /// Provides the inferred Instance Name from Server Data Source
+        /// </summary>
         public string InstanceName { get; internal set; }
 
+        /// <summary>
+        /// Provides the pipe name in case of Named Pipes
+        /// </summary>
         public string PipeName { get; internal set; }
 
+        /// <summary>
+        /// Provides the HostName to connect to in case of Named pipes Data Source
+        /// </summary>
         public string PipeHostName { get; internal set; }
 
         private string _workingDataSource;
@@ -706,8 +701,6 @@ namespace System.Data.SqlClient.SNI
 
         public static string GetLocalDBInstance(string dataSource, out bool error)
         {
-            Debug.Assert(!string.IsNullOrEmpty(dataSource), "Empty data source");
-
             string instanceName = null;
 
             string workingDataSource = dataSource.ToLowerInvariant();
@@ -908,7 +901,7 @@ namespace System.Data.SqlClient.SNI
 
                     PipeName = pipeNameBuilder.ToString();
                     ServerName = IsLocalHost(host) ? Environment.MachineName : host;
-                    // Pipe hostname is the hostname after leading \\ which should be passed down as is to open NamedPipe.
+                    // Pipe hostname is the hostname after leading \\ which should be passed down as is to open Named Pipe.
                     // For Named Pipes the ServerName makes sense for SPN creation only.
                     PipeHostName = host;
                 }

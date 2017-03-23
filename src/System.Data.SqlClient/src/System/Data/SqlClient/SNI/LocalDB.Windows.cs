@@ -33,7 +33,7 @@ namespace System.Data.SqlClient.SNI
                 [Out] [MarshalAs(UnmanagedType.LPWStr)] StringBuilder sqlConnectionDataSource,
                 [In, Out]ref int bufferLength);
 
-        private LocalDBStartInstance localDBStartInsanceFunc = null;
+        private LocalDBStartInstance localDBStartInstanceFunc = null;
 
         private volatile SafeLibraryHandle _sqlUserInstanceLibraryHandle;
 
@@ -46,7 +46,7 @@ namespace System.Data.SqlClient.SNI
         {
             StringBuilder localDBConnectionString = new StringBuilder(MAX_LOCAL_DB_CONNECTION_STRING_SIZE + 1);
             int sizeOfbuffer = localDBConnectionString.Capacity;
-            localDBStartInsanceFunc(localDbInstance, 0, localDBConnectionString, ref sizeOfbuffer);
+            localDBStartInstanceFunc(localDbInstance, 0, localDBConnectionString, ref sizeOfbuffer);
             return localDBConnectionString.ToString();
         }
 
@@ -124,13 +124,21 @@ namespace System.Data.SqlClient.SNI
                 // Load the procs from the DLLs
                 _startInstanceHandle = Interop.Kernel32.GetProcAddress(libraryHandle, ProcLocalDBStartInstance);
 
-                // Set the delegate the invoke.
-                localDBStartInsanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
-
                 if (_startInstanceHandle == IntPtr.Zero)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
                     libraryHandle.Dispose();
+                    return false;
+                }
+
+                // Set the delegate the invoke.
+                localDBStartInstanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
+                
+                if (localDBStartInstanceFunc == null)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
+                    libraryHandle.Dispose();
+                    _startInstanceHandle = IntPtr.Zero;
                     return false;
                 }
 
@@ -208,14 +216,6 @@ namespace System.Data.SqlClient.SNI
                     errorState = LocalDBErrorState.NONE;
                     return dllPath;
                 }
-            }
-        }
-
-        ~LocalDB()
-        {
-            if (_sqlUserInstanceLibraryHandle != null)
-            {
-                _sqlUserInstanceLibraryHandle.Dispose();
             }
         }
     }
