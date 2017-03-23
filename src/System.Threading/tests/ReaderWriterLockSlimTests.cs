@@ -383,6 +383,7 @@ namespace System.Threading.Tests
 
         [Fact]
         [OuterLoop]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ReleaseReadersWhenWaitingWriterTimesOut()
         {
             using (var rwls = new ReaderWriterLockSlim())
