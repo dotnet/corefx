@@ -228,11 +228,18 @@
 
   <Target Name="BinPlaceFiles"
           Condition="'@(BinPlaceDir)' != ''"
-          DependsOnTargets="GetBinPlaceItems" >
+          DependsOnTargets="GetBinPlaceItems"
+          Inputs="@(BinPlaceDir);%(BinPlaceDir.ItemName)"
+          Outputs="unused" >
+
+    <PropertyGroup>
+      <_BinPlaceItemName>%(BinPlaceDir.ItemName)</_BinPlaceItemName>
+      <_BinPlaceItemName Condition="'$(_BinPlaceItemName)' == ''">BinPlaceItem</_BinPlaceItemName>
+    </PropertyGroup>
 
     <Message Importance="low" Text="BinPlaceDir: @(BinPlaceDir)" />
 
-    <Copy SourceFiles="@(BinPlaceItem)"
+    <Copy SourceFiles="@($(_BinPlaceItemName))"
           DestinationFolder="%(BinPlaceDir.Identity)" 
           SkipUnchangedFiles="true"
           OverwriteReadOnlyFiles="true"
@@ -297,8 +304,8 @@
     <ItemGroup>
       <_currentBinPlaceConfigurations Include="@(_bestBinlaceConfigurations)" Condition="'%(Identity)' == '$(Configuration)' OR '%(Identity)-$(ConfigurationGroup)' == '$(Configuration)'" />
 
-      <BinPlaceDir Condition="'$(BinPlaceRuntime)' == 'true'" Include="%(_currentBinPlaceConfigurations.RuntimePath)" />
-      <BinPlaceDir Condition="'$(BinPlaceRef)' == 'true'" Include="%(_currentBinPlaceConfigurations.RefPath)" />
+      <BinPlaceDir Condition="'$(BinPlaceRuntime)' == 'true'" Include="@(_currentBinPlaceConfigurations->'%(RuntimePath)')" />
+      <BinPlaceDir Condition="'$(BinPlaceRef)' == 'true'" Include="@(_currentBinPlaceConfigurations->'%(RefPath)')" />
 
       <PackageFileDir Condition="'$(BinPlaceRuntime)' == 'true'" Include="%(_currentBinPlaceConfigurations.PackageFileRuntimePath)" />
       <PackageFileDir Condition="'$(BinPlaceRef)' == 'true'" Include="%(_currentBinPlaceConfigurations.PackageFileRefPath)" />
