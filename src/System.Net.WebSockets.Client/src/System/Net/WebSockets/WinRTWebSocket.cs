@@ -154,13 +154,7 @@ namespace System.Net.WebSockets
 
             if (_webSocketReceiveResultTcs != null)
             {
-                var exception = new WebSocketException(
-                    WebSocketError.InvalidState,
-                    SR.Format(
-                        SR.net_WebSockets_InvalidState_ClosedOrAborted,
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"));
-
+                var exception = new OperationCanceledException("Aborted");
                 _webSocketReceiveResultTcs.TrySetException(exception);
             }
 

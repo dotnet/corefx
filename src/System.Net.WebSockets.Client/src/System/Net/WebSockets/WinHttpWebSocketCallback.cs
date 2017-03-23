@@ -315,13 +315,7 @@ namespace System.Net.WebSockets
 
             if (asyncResult.AsyncResult.dwError == Interop.WinHttp.ERROR_WINHTTP_OPERATION_CANCELLED)
             {
-                var exception = new WebSocketException(
-                    WebSocketError.InvalidState,
-                    SR.Format(
-                        SR.net_WebSockets_InvalidState_ClosedOrAborted,
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"),
-                    innerException);
+                var exception = new OperationCanceledException("Aborted");
 
                 state.UpdateState(WebSocketState.Aborted);
 
