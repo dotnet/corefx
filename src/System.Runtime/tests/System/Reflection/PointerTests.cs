@@ -115,6 +115,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Causes an assert to be fired at runtime in uapaot")]
         public void PointerFieldGetValue(int value)
         {
             var obj = new PointerHolder();
