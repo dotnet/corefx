@@ -192,10 +192,21 @@ namespace System.SpanTests
             Assert.Equal<TestValueTypeWithReference>(expected, actual);
         }
 
-        //[ActiveIssue(16492)]
-        //[OuterLoop]
         [Fact]
-        public unsafe static void ClearLongerThanUintMaxValueBytes()
+        [OuterLoop]
+        public unsafe static void ClearTests()
+        {
+            // These tests need to be run serially with no risk of them running in parallel
+            // or the sum of the allocations will run the test machine out of memory and result
+            // in failures.
+            // Also, the native version should come before the managed version since the memory
+            // allocation and free are explicit instead of relying on the GC, so we should be
+            // certain memory was freed from the first before the second is called.
+            ClearNativeLongerThanUintMaxValueBytes();
+            ClearLongerThanUintMaxValueBytes();
+        }
+
+        unsafe static void ClearLongerThanUintMaxValueBytes()
         {
             if (sizeof(IntPtr) == sizeof(long))
             {
@@ -239,10 +250,7 @@ namespace System.SpanTests
             }
         }
 
-        //[ActiveIssue(16492)]
-        //[OuterLoop]
-        [Fact]
-        public unsafe static void ClearNativeLongerThanUintMaxValueBytes()
+        unsafe static void ClearNativeLongerThanUintMaxValueBytes()
         {
             if (sizeof(IntPtr) == sizeof(long))
             {

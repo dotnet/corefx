@@ -16,10 +16,9 @@ namespace System.SpanTests
         //       but then the test may get killed by the OOM killer at the time the memory
         //       is accessed which triggers the full memory allocation.
 
-        //[ActiveIssue(16593)]
         [Fact]
+        [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        //[OuterLoop]
         public static void IndexOverflow()
         {
             // If this test is run in a 32-bit process, the 3GB allocation will fail.
