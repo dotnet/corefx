@@ -1477,7 +1477,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         // Binds to a specific port on 'connectTo' which on Unix may already be in use
-        // Also expected behavior is different on OSX and Linux (see ReceiveFromV4BoundToSpecificV6_NotReceived_Linux)
+        // Also expected behavior is different on OSX and Linux (ArgumentException instead of SocketException)
         [PlatformSpecific(TestPlatforms.Windows)]
         public void ReceiveFromV4BoundToSpecificV6_NotReceived()
         {
@@ -1486,27 +1486,6 @@ namespace System.Net.Sockets.Tests
                 ReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
             });
         }
-
-        // Binds to a specific port on 'connectTo' which on Unix may already be in use
-        // Test preserved if we change these tests to run in series (instead of parallel) to avoid port collision
-#if false
-        // NOTE: on Linux, the OS IP stack changes a dual-mode socket back to a
-        //       normal IPv6 socket once the socket is bound to an IPv6-specific
-        //       address. As a result, the argument validation checks in
-        //       ReceiveFrom that check that the supplied endpoint is compatible
-        //       with the socket's address family fail. We've decided that this is
-        //       an acceptable difference due to the extra state that would otherwise
-        //       be necessary to emulate the Winsock behavior.
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/982
-        [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
-        public void ReceiveFromV4BoundToSpecificV6_NotReceived_Linux()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                ReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
-            });
-        }
-#endif
 
         [Fact]
         // Binds to a specific port on 'connectTo' which on Unix may already be in use
@@ -1629,7 +1608,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         // Binds to a specific port on 'connectTo' which on Unix may already be in use
-        // Also expected behavior is different on OSX and Linux (see BeginReceiveFromV4BoundToSpecificV6_NotReceived_Linux)
+        // Also expected behavior is different on OSX and Linux (ArgumentException instead of TimeoutException)
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginReceiveFromV4BoundToSpecificV6_NotReceived()
         {
@@ -1638,27 +1617,6 @@ namespace System.Net.Sockets.Tests
                 BeginReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, expectedToTimeout: true);
             });
         }
-
-        // Binds to a specific port on 'connectTo' which on Unix may already be in use
-        // Test preserved if we change these tests to run in series (instead of parallel) to avoid port collision
-#if false
-        // NOTE: on Linux, the OS IP stack changes a dual-mode socket back to a
-        //       normal IPv6 socket once the socket is bound to an IPv6-specific
-        //       address. As a result, the argument validation checks in
-        //       ReceiveFrom that check that the supplied endpoint is compatible
-        //       with the socket's address family fail. We've decided that this is
-        //       an acceptable difference due to the extra state that would otherwise
-        //       be necessary to emulate the Winsock behavior.
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/982
-        [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
-        public void BeginReceiveFromV4BoundToSpecificV6_NotReceived_Linux()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                BeginReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, expectedToTimeout: true);
-            });
-        }
-#endif
 
         [Fact]
         // Binds to a specific port on 'connectTo' which on Unix may already be in use
