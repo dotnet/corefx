@@ -81,6 +81,7 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         private bool LoadUserInstanceDll()
         {
+            // Check in a non thread-safe way if the handle is already set for performance.
             if (_sqlUserInstanceLibraryHandle != null)
             {
                 return true;
@@ -90,7 +91,7 @@ namespace System.Data.SqlClient.SNI
             {
                 if(_sqlUserInstanceLibraryHandle !=null)
                 {
-                    return;
+                    return true;
                 }
                 //Get UserInstance Dll path
                 LocalDBErrorState registryQueryErrorState;
