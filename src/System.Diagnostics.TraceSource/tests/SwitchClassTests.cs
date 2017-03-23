@@ -42,7 +42,6 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var strongSwitch = new TestSwitch();
             var weakSwitch = new WeakReference(new TestSwitch());
-            Assert.True(weakSwitch.IsAlive);
             GC.Collect(2);
             Trace.Refresh();
             Assert.False(weakSwitch.IsAlive);
