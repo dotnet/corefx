@@ -279,6 +279,9 @@
     <MakeDir Condition="'$(CoverageEnabledForProject)'=='true'" Directories="$(CoverageReportDir)" />
     <Error Text="TestILCFolder property is required for running uapaot tests. Please pass in the full path to the directory that contains ilc.exe to msbuild using /p:TestILCFolder=path_to_ilc_dir.exe" Condition="'$(BuildingUAPAOTVertical)' == 'true' AND '$(TestILCFolder)' == ''" />
 
+    <!-- For UAP, make sure the Runner and Launcher folder exist, otherwise the tests cannot run -->
+    <Error Text="We cannot run the tests for UAP because either the Runner or the Launcher could not be found. You need to specify the UAPToolsFolder property when calling build.cmd to fix this." Condition="!Exists('$(NETCoreAppTestRootPath)\Runner') or !Exists('$(NETCoreAppTestRootPath)\Launcher')" />
+
     <Exec Command="$(TestPath)/$(RunnerScriptName) $(TestSharedFxDir)"
           CustomErrorRegularExpression="Failed: [^0]"
           ContinueOnError="true"
