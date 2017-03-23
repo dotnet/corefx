@@ -106,11 +106,8 @@ namespace System
         public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
 
         public static ReadOnlySpan<char> AsSpan(this string text) { throw null; }
-
         public static Span<T> AsSpan<T>(this T[] array) { throw null; }
-
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment) { throw null; }
-
     }
 }
 
