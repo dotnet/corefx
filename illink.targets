@@ -80,6 +80,15 @@
       <PreTrimmedItem Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimInputSymbols)')" Include="$(ILLinkTrimInputSymbols)" />
       <FileWrites Include="@(PreTrimmedItem)" />
     </ItemGroup>
-  </Target>
 
+    <ItemGroup Condition="Exists('$(ILLinkTrimInputAssembly)') AND '$(BinPlaceILLinkTrimAssembly)' == 'true'">
+      <BinPlaceConfiguration Include="$(BuildConfiguration)">
+        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/trimmed</RuntimePath>
+      </BinPlaceConfiguration>
+      <BinPlaceConfiguration Include="$(BuildConfiguration)">
+        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/pretrimmed</RuntimePath>
+        <ItemName>PreTrimmedItem</ItemName>
+      </BinPlaceConfiguration>
+    </ItemGroup>
+  </Target>
 </Project>
