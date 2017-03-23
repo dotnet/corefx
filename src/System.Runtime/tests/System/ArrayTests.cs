@@ -2904,7 +2904,7 @@ namespace System.Tests
         [Theory]
         [MemberData(nameof(Sort_Array_Array_NonGeneric_TestData))]
         [MemberData(nameof(Sort_Array_Array_Generic_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Causes an assert to be fired at runtime in uapaot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/17450")]
         public static void Sort_Array_Array_NonGeneric(Array keys, Array items, int index, int length, IComparer comparer, Array expectedKeys, Array expectedItems)
         {
             Array sortedKeysArray = null;
@@ -3254,6 +3254,59 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => iList.CopyTo(new int[7], -1)); // Index < 0
             AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => iList.CopyTo(new int[7], 8)); // Index > destinationArray.Length
         }
+
+#if !uapaot
+        [Fact]
+        public static unsafe void GetValue_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => new int*[2].GetValue(0));
+        }
+
+        [Fact]
+        public static unsafe void SetValue_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => new int*[2].SetValue(null, 0));
+        }
+
+        [Fact]
+        public static unsafe void Copy_PointerArrayToNonPointerArray_ThrowsArrayTypeMismatchException()
+        {
+            Copy_SourceAndDestinationNeverConvertible_ThrowsArrayTypeMismatchException(new int[1], new int*[1]);
+            Copy_SourceAndDestinationNeverConvertible_ThrowsArrayTypeMismatchException(new int*[1], new int[1]);
+        }
+
+        [Fact]
+        public static unsafe void GetEnumerator_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Array nonEmptyArray = new int*[2];
+            Assert.Throws<NotSupportedException>(() => { foreach (object obj in nonEmptyArray) { } });
+
+            Array emptyArray = new int*[0];
+            foreach (object obj in emptyArray) { }
+        }
+
+        [Fact]
+        public static unsafe void IndexOf_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.IndexOf((Array)new int*[2], null));
+            Assert.Equal(-1, Array.IndexOf((Array)new int*[0], null));
+        }
+
+        [Fact]
+        public static unsafe void LastIndexOf_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.LastIndexOf((Array)new int*[2], null));
+            Assert.Equal(-1, Array.LastIndexOf((Array)new int*[0], null));
+        }
+        
+        [Fact]
+        public static unsafe void Reverse_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.Reverse((Array)new int*[2]));
+            Array.Reverse((Array)new int*[0]);
+            Array.Reverse((Array)new int*[1]);
+        }
+#endif
 
         private static void VerifyArray(Array array, Type elementType, int[] lengths, int[] lowerBounds, object repeatedValue)
         {

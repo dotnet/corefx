@@ -14,6 +14,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
       <Link>Common\System\AssertExtensions.cs</Link>
@@ -42,7 +44,6 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="System\ActivatorTests.cs" />
     <Compile Include="System\ArrayTests.cs" />
-    <Compile Include="System\ArrayOfPointers.ArrayTests.cs" Condition="'$(TargetGroup)' != 'uap'" />
     <Compile Include="System\AttributeTests.cs" />
     <Compile Include="System\ArraySegmentTests.cs" />
     <Compile Include="System\BooleanTests.cs" />
@@ -151,7 +152,6 @@
     <Compile Include="System\AttributeTests.netstandard.cs" />
     <Compile Include="CompareToTests.cs" />
     <Compile Include="DBNullTests.netstandard.cs" />
-    <Compile Include="DBNullTests.InvalidCast.cs" Condition="'$(TargetGroup)' != 'uap'" />
     <Compile Include="DecimalTests.netstandard.cs" />
     <Compile Include="EnumTests.netstandard.cs" />
     <Compile Include="GetTypeCodeTests.cs" />
