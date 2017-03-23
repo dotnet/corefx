@@ -75,8 +75,6 @@ namespace System
     {
         public static System.Span<byte> AsBytes<T>(this Span<T> source) where T : struct { throw null; }
         public static System.ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source) where T : struct { throw null; }
-        public static System.Span<TTo> NonPortableCast<TFrom, TTo>(this System.Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
-        public static System.ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this System.ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
 
         public static ReadOnlySpan<char> Slice(this string text) { throw null; }
         public static ReadOnlySpan<char> Slice(this string text, int start) { throw null; }

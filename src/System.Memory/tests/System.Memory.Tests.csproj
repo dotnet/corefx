@@ -30,7 +30,6 @@
     <Compile Include="Span\IndexOfSequence.T.cs" />
     <Compile Include="Span\IndexOfSequence.byte.cs" />
     <Compile Include="Span\IndexOfSequence.char.cs" />
-    <Compile Include="Span\NonPortableCast.cs" />
     <Compile Include="Span\Overflow.cs" />
     <Compile Include="Span\SequenceEqual.T.cs" />
     <Compile Include="Span\SequenceEqual.byte.cs" />
@@ -58,7 +57,6 @@
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
-    <Compile Include="ReadOnlySpan\NonPortableCast.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
