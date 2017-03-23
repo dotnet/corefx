@@ -322,7 +322,7 @@ namespace MonoTests.System.Configuration
         {
             using (var temp = new TempDirectory())
             {
-                var configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
+                string configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
                 Assert.False(File.Exists(configPath));
 
                 var map = new ExeConfigurationFileMap();
@@ -371,7 +371,7 @@ namespace MonoTests.System.Configuration
         {
             using (var temp = new TempDirectory())
             {
-                var configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
+                string configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
                 Assert.False(File.Exists(configPath));
 
                 var map = new ExeConfigurationFileMap();
