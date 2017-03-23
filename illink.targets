@@ -41,10 +41,9 @@
       <ILLinkArgs>$(ILLinkArgs) -r "$(ILLinkTrimInputAssembly)"</ILLinkArgs>
       <!-- directories to examine for assembly dependencies -->
       <ILLinkArgs>$(ILLinkArgs) @(_ILLinkReferenceDirectory->'-d %(Identity)', ' ')</ILLinkArgs>
-      <!-- treat core assemblies the same way as other assemblies -->
-      <ILLinkArgs>$(ILLinkArgs) -c link</ILLinkArgs>
-      <!-- root everything in these assemblies -->
-      <!--ILLinkArgs>$(ILLinkArgs) -a System.Private.CoreLib -a mscorlib</ILLinkArgs-->
+      <!-- don't trim anything that's defined in core assemblies -->
+      <ILLinkArgs>$(ILLinkArgs) -c skip</ILLinkArgs>
+      <ILLinkArgs>$(ILLinkArgs) -p skip netstandard</ILLinkArgs>
       <!-- keep type-forward assemblies (facades) -->
       <ILLinkArgs>$(ILLinkArgs) -t</ILLinkArgs>
       <ILLinkArgs>$(ILLinkArgs) -out $(ILLinkTrimOutputPath)</ILLinkArgs>
