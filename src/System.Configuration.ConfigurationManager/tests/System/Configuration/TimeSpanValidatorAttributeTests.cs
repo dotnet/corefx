@@ -84,6 +84,20 @@ namespace System.ConfigurationTests
             Assert.Equal(test, "2.22:50:45.2563000");
         }
 
+        [Fact]
+        public void ExcludedRange_GetDefault()
+        {
+            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            Assert.False(attribute.ExcludeRange);
+        }
+
+        [Fact]
+        public void ExcludedRange_ChangeToTrue()
+        {
+            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            attribute.ExcludeRange = true;
+            Assert.True(attribute.ExcludeRange);
+        }
 
 
 
