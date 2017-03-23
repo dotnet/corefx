@@ -20,8 +20,6 @@ namespace System.Data.SqlClient.SNI
 
         private const string ProcLocalDBStartInstance = "LocalDBStartInstance";
 
-        private const string ProcLocalDBFormatMessage = "LocalDBFormatMessage";
-
         private const int MAX_LOCAL_DB_CONNECTION_STRING_SIZE = 260;
 
         private IntPtr _startInstanceHandle = IntPtr.Zero;
@@ -164,18 +162,17 @@ namespace System.Data.SqlClient.SNI
 
                 foreach (string subKey in key.GetSubKeyNames())
                 {
-                    try
-                    {
-                        Version currentKeyVersion = new Version(subKey);
-                        if(latestVersion.CompareTo(currentKeyVersion) < 0)
-                        {
-                            latestVersion = currentKeyVersion;
-                        }
-                    }
-                    catch (FormatException)
+                    Version currentKeyVersion;
+
+                    if (!Version.TryParse(subKey, out currentKeyVersion))
                     {
                         errorState = LocalDBErrorState.INVALID_CONFIG;
                         return null;
+                    }
+
+                    if (latestVersion.CompareTo(currentKeyVersion) < 0)
+                    {
+                        latestVersion = currentKeyVersion;
                     }
                 }
 
@@ -191,6 +188,7 @@ namespace System.Data.SqlClient.SNI
                 {
 
                     object instanceAPIPathRegistryObject = latestVersionKey.GetValue(InstanceAPIPathValueName);
+
                     if (instanceAPIPathRegistryObject == null)
                     {
                         errorState = LocalDBErrorState.NO_SQLUSERINSTANCEDLL_PATH;
@@ -204,11 +202,9 @@ namespace System.Data.SqlClient.SNI
                         errorState = LocalDBErrorState.INVALID_SQLUSERINSTANCEDLL_PATH;
                         return null;
                     }
-                    else
-                    {
-                        dllPath = (string)instanceAPIPathRegistryObject;
-                    }
-
+                    
+                    dllPath = (string)instanceAPIPathRegistryObject;
+                    
                     errorState = LocalDBErrorState.NONE;
                     return dllPath;
                 }

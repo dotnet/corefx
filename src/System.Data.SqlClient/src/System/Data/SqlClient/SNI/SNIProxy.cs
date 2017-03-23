@@ -599,17 +599,16 @@ namespace System.Data.SqlClient.SNI
         {
             string localDBConnectionString = null;
             bool isBadLocalDBDataSource;
-            string localDbInstance = DataSource.GetLocalDBInstance(fullServerName, out isBadLocalDBDataSource);
+            string localDBInstance = DataSource.GetLocalDBInstance(fullServerName, out isBadLocalDBDataSource);
 
             if (isBadLocalDBDataSource)
             {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                 error = true;
                 return null;
             }
-            else if (!string.IsNullOrEmpty(localDbInstance))
+            else if (!string.IsNullOrEmpty(localDBInstance))
             {
-                localDBConnectionString = LocalDB.GetLocalDBConnectionString(localDbInstance);
+                localDBConnectionString = LocalDB.GetLocalDBConnectionString(localDBInstance);
                 if (fullServerName == null)
                 {
                     // The Last error is set in LocalDB.GetLocalDBConnectionString. We don't need to set Last here.
@@ -709,23 +708,29 @@ namespace System.Data.SqlClient.SNI
         {
             Debug.Assert(!string.IsNullOrEmpty(dataSource), "Empty data source");
 
-            error = false;
-
             string instanceName = null;
 
             string workingDataSource = dataSource.ToLowerInvariant();
 
             string[] tokensByBackSlash = workingDataSource.Split(BackSlashSeparator);
 
+            error = false;
+
             // All LocalDb endpoints are of the format host\instancename where host is always (LocalDb) (case-insensitive)
             if (tokensByBackSlash.Length == 2 && LocalDbHost.Equals(tokensByBackSlash[0].Trim()))
             {
-                if (!string.IsNullOrEmpty(tokensByBackSlash[1].Trim()))
+                if (!string.IsNullOrWhiteSpace(tokensByBackSlash[1]))
                 {
-                    instanceName = tokensByBackSlash[1];
+                    instanceName = tokensByBackSlash[1].Trim();
+                }
+                else
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBNoInstanceName, string.Empty);
+                    error = true;
+                    return null;
                 }
             }
-
+            
             return instanceName;
         }
 

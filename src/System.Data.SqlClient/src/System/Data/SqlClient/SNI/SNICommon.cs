@@ -76,6 +76,7 @@ namespace System.Data.SqlClient.SNI
         internal const int MultiSubnetFailoverWithInstanceSpecified = 48;
         internal const int MultiSubnetFailoverWithNonTcpProtocol = 49;
         internal const int MaxErrorValue = 50157;
+        internal const int LocalDBNoInstanceName = 51;
         internal const int LocalDBNoInstallation = 52;
         internal const int LocalDBInvalidConfig = 53;
         internal const int LocalDBNoSqlUserInstanceDllPath = 54;
