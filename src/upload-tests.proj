@@ -115,20 +115,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- Zips up the tools used for UAP-style execution.  TODO:  NuPkg-ify these tools. -->
-  <Target Name="CompressUapTools" Condition="'$(SkipArchive)' != 'true' and '$(TargetGroup)'=='uap'">
-    <Error Condition="'$(UAPToolsFolder)'==''" Text="For TargetGroup 'uap', please provide value for UAPToolsFolder" />
-  
-    <ZipFileCreateFromDirectory
-        SourceDirectory="$(UAPToolsFolder)"
-        DestinationArchive="$(ArchivesRoot)UapTools.zip"
-        OverwriteDestination="true" />
-        
-    <ItemGroup>
-      <HelixCorrelationPayloadFile Include="$(ArchivesRoot)UapTools.zip" />
-    </ItemGroup>
-  </Target>
-
   <!-- Import this at the end so that it can compose properties as needed -->
   <Import Project="$(ToolsDir)CloudTest.Helix.targets" />
 
@@ -136,7 +122,7 @@
   <Target Name="Build">
     <Message Text="CoreFX-specific Helix test upload project, beginning submission to Helix" />
     <Message Condition="'$(EnableCloudTest)' == 'false'" Text="... skipping upload / submission due to property 'EnableCloudTest' being set to 'false'" />
-    <CallTarget Condition="'$(EnableCloudTest)' != 'false'" Targets="CoreFXPreCloudBuild;CompressRuntimeDir;CompressUapTools;HelixCloudBuild" />
+    <CallTarget Condition="'$(EnableCloudTest)' != 'false'" Targets="CoreFXPreCloudBuild;CompressRuntimeDir;HelixCloudBuild" />
   </Target>
   
 </Project>
