@@ -150,7 +150,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void ClearValueTypeWithoutReferencesPointerSizeLonger()
+        public static void ClearValueTypeWithoutReferencesPointerSize()
         {
             long[] actual = new long[15];
             for (int i = 0; i < actual.Length; i++)
@@ -220,7 +220,7 @@ namespace System.SpanTests
 
         [ActiveIssue(16492)]
         [OuterLoop]
-        //[Fact]
+        [Fact]
         public unsafe static void ClearLongerThanUintMaxValueBytes()
         {
             if (sizeof(IntPtr) == sizeof(long))
@@ -267,7 +267,7 @@ namespace System.SpanTests
 
         [ActiveIssue(16492)]
         [OuterLoop]
-        //[Fact]
+        [Fact]
         public unsafe static void ClearNativeLongerThanUintMaxValueBytes()
         {
             if (sizeof(IntPtr) == sizeof(long))
