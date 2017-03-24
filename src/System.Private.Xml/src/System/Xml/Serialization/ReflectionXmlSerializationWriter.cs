@@ -783,7 +783,7 @@ namespace System.Xml.Serialization
             throw new InvalidOperationException();
         }
 
-        private void WriteMember(object memberValue, AttributeAccessor attribute, TypeDesc memberTypeDesc, object parent)
+        private void WriteMember(object memberValue, AttributeAccessor attribute, TypeDesc memberTypeDesc, object container)
         {
             if (memberTypeDesc.IsAbstract) return;
             if (memberTypeDesc.IsArrayLike)
@@ -855,7 +855,7 @@ namespace System.Xml.Serialization
                             }
                             else
                             {
-                                WriteAttribute(ai, attribute, parent);
+                                WriteAttribute(ai, attribute, container);
                             }
 
                             shouldAppendWhitespace = true;
@@ -882,18 +882,18 @@ namespace System.Xml.Serialization
             }
             else
             {
-                WriteAttribute(memberValue, attribute, parent);
+                WriteAttribute(memberValue, attribute, container);
             }
         }
 
-        bool CanOptimizeWriteListSequence(TypeDesc listElementTypeDesc) {
+        private bool CanOptimizeWriteListSequence(TypeDesc listElementTypeDesc) {
             // check to see if we can write values of the attribute sequentially
             // currently we have only one data type (XmlQualifiedName) that we can not write "inline", 
             // because we need to output xmlns:qx="..." for each of the qnames
             return (listElementTypeDesc != null && listElementTypeDesc != QnameTypeDesc);
         }
 
-        private void WriteAttribute(object memberValue, AttributeAccessor attribute, object parent)
+        private void WriteAttribute(object memberValue, AttributeAccessor attribute, object container)
         {
             if (attribute.Mapping is SpecialMapping)
             {
@@ -901,7 +901,7 @@ namespace System.Xml.Serialization
                 SpecialMapping special = (SpecialMapping)attribute.Mapping;
                 if (special.TypeDesc.Kind == TypeKind.Attribute || special.TypeDesc.CanBeAttributeValue)
                 {
-                    WriteXmlAttribute((XmlNode)memberValue, parent);
+                    WriteXmlAttribute((XmlNode)memberValue, container);
                 }
                 else
                     throw new InvalidOperationException(SR.XmlInternalError);
