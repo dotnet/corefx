@@ -14,26 +14,6 @@ namespace System.SpanTests
         private static readonly Mutex MemoryLock = new Mutex();
         private static readonly TimeSpan WaitTimeout = TimeSpan.FromSeconds(120);
 
-        public static bool TryAllocArray<T>(int count, out T[] buffer)
-        {
-            buffer = null;
-
-            if (!MemoryLock.WaitOne(WaitTimeout))
-                return false;
-
-            try
-            {
-                buffer = new T[count];
-            }
-            catch (OutOfMemoryException)
-            {
-                buffer = null;
-                MemoryLock.ReleaseMutex();
-            }
-
-            return buffer != null;
-        }
-
         public static bool TryAllocNative(IntPtr size, out IntPtr memory)
         {
             memory = IntPtr.Zero;
@@ -52,19 +32,6 @@ namespace System.SpanTests
             }
 
             return memory != IntPtr.Zero;
-        }
-
-        public static void ReleaseArray<T>(ref T[] array)
-        {
-            try
-            {
-                array = null;
-                GC.Collect();
-            }
-            finally
-            {
-                MemoryLock.ReleaseMutex();
-            }
         }
 
         public static void ReleaseNative(ref IntPtr memory)

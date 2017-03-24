@@ -199,60 +199,13 @@ namespace System.SpanTests
         {
             if (sizeof(IntPtr) == sizeof(long))
             {
-                // The maximum index in any single dimension is 2,147,483,591 (0x7FFFFFC7)
-                // for byte arrays and arrays of single-byte structures,
-                // and 2,146,435,071 (0X7FEFFFFF) for other types.
-                const int maxArraySizeForLargerThanByteTypes = 0X7FEFFFFF;
-
-                if (!AllocationHelper.TryAllocArray<int>(maxArraySizeForLargerThanByteTypes, out int[] a))
-                {
-                    Console.WriteLine($"Span.Clear test {nameof(ClearLongerThanUintMaxValueBytes)} skipped; couldn't allocate memory.");
-                    return;
-                }
-
-                try
-                {
-                    int initial = 5;
-                    for (int i = 0; i < a.Length; i++)
-                    {
-                        a[i] = initial;
-                    }
-
-                    var span = new Span<int>(a);
-                    span.Clear();
-                    span = new Span<int>(); // make sure the span no longer references the large array.
-
-                    // Assert using custom code for perf and to avoid allocating extra memory
-                    for (int i = 0; i < a.Length; i++)
-                    {
-                        var actual = a[i];
-                        if (actual != 0)
-                        {
-                            Assert.Equal(0, actual);
-                        }
-                    }
-                }
-                finally
-                {
-                    AllocationHelper.ReleaseArray<int>(ref a);
-                    ClearNativeLongerThanUintMaxValueBytes();
-                }
-            }
-        }
-
-        [Fact]
-        [OuterLoop]
-        unsafe static void ClearNativeLongerThanUintMaxValueBytes()
-        {
-            if (sizeof(IntPtr) == sizeof(long))
-            {
                 // Arrange
                 IntPtr bytes = (IntPtr)(((long)int.MaxValue) * sizeof(int));
                 int length = (int)(((long)bytes) / sizeof(int));
 
                 if (!AllocationHelper.TryAllocNative(bytes, out IntPtr memory))
                 {
-                    Console.WriteLine($"Span.Clear test {nameof(ClearNativeLongerThanUintMaxValueBytes)} skipped (could not alloc memory).");
+                    Console.WriteLine($"Span.Clear test {nameof(ClearLongerThanUintMaxValueBytes)} skipped (could not alloc memory).");
                     return;
                 }
 
