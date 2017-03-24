@@ -23,5 +23,5 @@ extern "C" int64_t SystemNative_GetSystemTimeAsTicks()
         return 0;
     }
     
-    return ((int64_t) time.tv_sec) * SECS_TO_100NS + (time.tv_usec * MICROSECONDS_TO_100NS); 
+    return reinterpret_cast<int64_t>(time.tv_sec) * SECS_TO_100NS + (time.tv_usec * MICROSECONDS_TO_100NS); 
 }
