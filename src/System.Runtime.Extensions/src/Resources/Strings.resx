@@ -368,6 +368,6 @@
     <value>Code Access Security is not supported on this platform.</value>
   </data>
   <data name="PlatformNotSupported_AppDomain_ResMon" xml:space="preserve">
-    <value>AppDomain Resource Monitoring is not supported on this platform.</value>
+    <value>AppDomain resource monitoring is not supported on this platform.</value>
   </data>
 </root>
