@@ -23,19 +23,12 @@ namespace System.SpanTests
 
             try
             {
-                try
-                {
-                    buffer = new T[count];
-                }
-                catch (OutOfMemoryException)
-                {
-                    buffer = null;
-                }
+                buffer = new T[count];
             }
-            finally
+            catch (OutOfMemoryException)
             {
-                if (buffer == null)
-                    MemoryLock.ReleaseMutex();
+                buffer = null;
+                MemoryLock.ReleaseMutex();
             }
 
             return buffer != null;
@@ -50,19 +43,12 @@ namespace System.SpanTests
 
             try
             {
-                try
-                {
-                    memory = Marshal.AllocHGlobal(size);
-                }
-                catch (OutOfMemoryException)
-                {
-                    memory = IntPtr.Zero;
-                }
+                memory = Marshal.AllocHGlobal(size);
             }
-            finally
+            catch (OutOfMemoryException)
             {
-                if (memory == IntPtr.Zero)
-                    MemoryLock.ReleaseMutex();
+                memory = IntPtr.Zero;
+                MemoryLock.ReleaseMutex();
             }
 
             return memory != IntPtr.Zero;
