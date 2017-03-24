@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 #include <sys/time.h>
 
 static const int64_t TICKS_PER_SECOND = 10000000; /* 10^7 */
