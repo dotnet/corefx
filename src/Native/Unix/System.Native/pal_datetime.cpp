@@ -10,8 +10,11 @@
 #include <sys/time.h>
 
 static const int64_t TICKS_PER_SECOND = 10000000; /* 10^7 */
-static const int64_t TICKS_PER_MICROSECOND = 10; /* 1000 / 100 */
+#if HAVE_CLOCK_REALTIME
 static const int64_t NANOSECONDS_PER_TICK = 100;
+#else
+static const int64_t TICKS_PER_MICROSECOND = 10; /* 1000 / 100 */
+#endif
 
 //
 // SystemNative_GetSystemTimeAsTicks return the system time as ticks (100 nanoseconds) 
