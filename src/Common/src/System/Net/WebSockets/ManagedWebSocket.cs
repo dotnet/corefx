@@ -732,8 +732,9 @@ namespace System.Net.WebSockets
             }
             catch (Exception exc)
             {
-                if (_state == WebSocketState.Aborted) {
-                    throw new OperationCanceledException("Aborted");
+                if (_state == WebSocketState.Aborted)
+                {
+                    throw new OperationCanceledException(nameof(WebSocketState.Aborted), exc);
                 }
                 throw new WebSocketException(WebSocketError.ConnectionClosedPrematurely, exc);
             }

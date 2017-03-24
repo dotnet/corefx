@@ -118,7 +118,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
         
-        [OuterLoop]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_CancelThenReceive_ThrowsOperationCanceledException(Uri server)
         {
@@ -134,7 +134,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
         
-        [OuterLoop]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_ReceiveThenCancel_ThrowsOperationCanceledException(Uri server)
         {
@@ -150,7 +150,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
         
-        [OuterLoop]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_AfterCancellationDoReceiveAsync_ThrowsWebSocketException(Uri server)
         {
