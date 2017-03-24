@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include "pal_config.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -18,13 +20,13 @@ extern "C" int64_t SystemNative_GetSystemTimeAsTicks()
 {
 #if HAVE_CLOCK_REALTIME
     struct timespec time;
-    if (clock_gettime(CLOCK_REALTIME, &Time) == 0)
+    if (clock_gettime(CLOCK_REALTIME, &time) == 0)
     {
         return static_cast<int64_t>(time.tv_sec) * TICKS_PER_SECOND + (time.tv_nsec / NANOSECONDS_PER_TICK); 
     }
 #else
-    struct timeval Time;
-    if (gettimeofday(&Time, NULL) == 0)
+    struct timeval time;
+    if (gettimeofday(&time, NULL) == 0)
     {
         return static_cast<int64_t>(time.tv_sec) * TICKS_PER_SECOND + (time.tv_usec * TICKS_PER_MICROSECOND); 
     }
