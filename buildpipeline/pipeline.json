@@ -298,7 +298,7 @@
           }
         },
         {
-          "Name": "DotNet-CoreFx-Trusted-Windows-UapWithTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows",
           "Parameters": {
             "PB_Platform": "x64",
             "PB_BuildArguments": "-framework=uap -buildArch=x64 -Release -- /p:SignType=real /p:RuntimeOS=win10",
