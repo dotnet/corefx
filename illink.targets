@@ -22,6 +22,8 @@
     <ILLinkTrimInputSymbols>$(ILLinkTrimInputPath)$(TargetName).pdb</ILLinkTrimInputSymbols>
     <ILLinkTrimOutputPath>$(IntermediateOutputPath)</ILLinkTrimOutputPath>
 
+    <ILLinkTrimXml Condition="'$(ILLinkTrimXml)' == '' AND Exists('$(MSBuildProjectDirectory)/ILLinkTrim.xml')">$(MSBuildProjectDirectory)/ILLinkTrim.xml</ILLinkTrimXml>
+
     <!-- if building a portable PDB, tell illink to rewrite the symbols file -->
     <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
   </PropertyGroup>
@@ -47,6 +49,7 @@
       <!-- keep type-forward assemblies (facades) -->
       <ILLinkArgs>$(ILLinkArgs) -t</ILLinkArgs>
       <ILLinkArgs>$(ILLinkArgs) -out $(ILLinkTrimOutputPath)</ILLinkArgs>
+      <ILLinkArgs Condition="'$(ILLinkTrimXml)' != ''">$(ILLinkArgs) -x $(ILLinkTrimXml)</ILLinkArgs>
       <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true'">$(ILLinkArgs) -p true</ILLinkArgs>
     </PropertyGroup>
 
