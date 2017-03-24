@@ -227,6 +227,18 @@ namespace System.IO.Tests
             Assert.False(Path.IsPathRooted(uncPath));
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
         }
+        
+        // Testing invalid drive letters !(a-zA-Z)
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"@:\foo")]    // 064 = @     065 = A
+        [InlineData(@"[:\\")]       // 091 = [     090 = Z
+        [InlineData(@"`:\foo")]    // 096 = `     097 = a
+        [InlineData(@"{:\\")]       // 123 = {     122 = z
+        public static void IsPathRooted_Windows_Invalid(string value)
+        {
+            Assert.False(Path.IsPathRooted(value));
+        }
 
         [Fact]
         public static void GetRandomFileName()
@@ -697,7 +709,7 @@ namespace System.IO.Tests
         }
 
         // Windows-only P/Invoke to create 8.3 short names from long names
-        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        [DllImport("kernel32.dll", EntryPoint = "GetShortPathNameW" ,CharSet = CharSet.Unicode)]
         private static extern uint GetShortPathName(string lpszLongPath, StringBuilder lpszShortPath, int cchBuffer);
     }
 }

@@ -32,6 +32,7 @@
     <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
       <PackageFileRefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</PackageFileRefPath>
       <PackageFileRuntimePath>$(NETCoreAppPackageRuntimePath)</PackageFileRuntimePath>
+      <RuntimePath Condition="'$(BinPlaceNETCoreAppPackage)' == 'true'">$(NETCoreAppPackageRuntimePath)\..\runtime</RuntimePath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-$(_bc_OSGroup)">
       <PackageFileRefPath Condition="'$(IsUAPRef)'=='true'">$(UAPPackageRefPath)</PackageFileRefPath>
@@ -50,7 +51,10 @@
     <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-$(_bc_OSGroup)">
       <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
     </BinPlaceConfiguration>
-
+    <!-- And the UAP folder for the F5 (CoreCLR UAP-debugging) scenario -->
+    <BinPlaceConfiguration Condition="'$(BinPlaceUAPFramework)' == 'true'" Include="uap-$(_bc_OSGroup)">
+      <RuntimePath>$(UAPTestSharedFrameworkPath)</RuntimePath>
+    </BinPlaceConfiguration>
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
     <BinPlaceConfiguration Include="netstandard">
       <RefPath>$(RefRootPath)netstandard/</RefPath>
@@ -73,7 +77,7 @@
           DependsOnTargets="GetBinPlaceDirs;BinPlaceFiles;BinPlaceProps"
           AfterTargets="CopyFilesToOutputDirectory"
           Condition="'$(BinPlaceRef)' == 'true' OR '$(BinPlaceRuntime)' == 'true'" />
-  
+
   <Target Name="BinPlaceFiles"
           Condition="'@(BinPlaceDir)' != ''"
           DependsOnTargets="GetBinPlaceItems" >
@@ -81,7 +85,7 @@
     <Message Importance="low" Text="BinPlaceDir: @(BinPlaceDir)" />
 
     <Copy SourceFiles="@(BinPlaceItem)"
-          DestinationFolder="%(BinPlaceDir.Identity)" 
+          DestinationFolder="%(BinPlaceDir.Identity)"
           SkipUnchangedFiles="true"
           OverwriteReadOnlyFiles="true"
           Retries="$(CopyRetryCount)"
@@ -100,13 +104,13 @@
       <_propsFilename Condition="'$(_propsFilename)' == ''">$(MSBuildProjectName)</_propsFilename>
       <_projectDirLength>$(ProjectDir.Length)</_projectDirLength>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <_itemsToSave Include="@(BinPlaceItem)">
         <!-- intentionally empty: to be set by pkgproj -->
         <TargetPath></TargetPath>
       </_itemsToSave>
-      
+
       <!-- Include source files. -->
       <_itemsToSave Condition="'@(Compile)' != ''" Include="@(Compile->'%(FullPath)')">
         <TargetPath>src</TargetPath>
@@ -114,7 +118,7 @@
         <IsSourceCodeFile>true</IsSourceCodeFile>
       </_itemsToSave>
     </ItemGroup>
-    
+
     <Message Importance="low" Text="PackageFileDir: @(PackageFileDir)" />
 
     <SaveItems ItemName="FileToPackage"
