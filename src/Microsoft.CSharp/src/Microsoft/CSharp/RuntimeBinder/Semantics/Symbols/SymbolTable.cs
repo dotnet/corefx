@@ -104,7 +104,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             public bool Equals(Key other) => other != null && _name.Equals(other._name) && _parent.Equals(other._parent);
 
+#if  DEBUG 
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
+#endif
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");

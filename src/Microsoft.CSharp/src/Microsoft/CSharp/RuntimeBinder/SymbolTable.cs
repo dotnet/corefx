@@ -48,7 +48,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             public bool Equals(NameHashKey other) => other != null && type.Equals(other.type) && name.Equals(other.name);
 
+#if  DEBUG 
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
+#endif
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");

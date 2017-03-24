@@ -330,7 +330,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 CType[] types = _types;
                 CType[] otherTypes = other._types;
-                if (other._types == _types)
+                if (otherTypes == types)
                 {
                     return true;
                 }
@@ -340,7 +340,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                for (int i = 0; i < otherTypes.Length; i++)
+                for (int i = 0; i < types.Length; i++)
                 {
                     if (!types[i].Equals(otherTypes[i]))
                     {
@@ -351,7 +351,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
+#if  DEBUG 
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
+#endif
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
