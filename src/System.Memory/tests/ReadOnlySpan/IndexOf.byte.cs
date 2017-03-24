@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Numerics;
 using Xunit;
 
 namespace System.SpanTests
@@ -67,13 +68,46 @@ namespace System.SpanTests
                     byte val = (byte)(i + 1);
                     a[i] = val == target ? (byte)(target + 1) : val;
                 }
-                Span<byte> span = new Span<byte>(a);
-                if (length % 16 == 0 || length == 39)
-                {
-                    rnd = new Random(42);
-                }
+                ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
+
                 int idx = span.IndexOf(target);
                 Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
+        public static void TestAllignmentNoMatch_Byte()
+        {
+            byte[] array = new byte[4 * Vector<byte>.Count];
+            for (var i = 0; i < Vector<byte>.Count; i++)
+            {
+                var span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count);
+                int idx = span.IndexOf((byte)'1');
+                Assert.Equal(-1, idx);
+
+                span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count - 3);
+                idx = span.IndexOf((byte)'1');
+                Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
+        public static void TestAllignmentMatch_Byte()
+        {
+            byte[] array = new byte[4 * Vector<byte>.Count];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = 5;
+            }
+            for (var i = 0; i < Vector<byte>.Count; i++)
+            {
+                var span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count);
+                int idx = span.IndexOf(5);
+                Assert.Equal(0, idx);
+
+                span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count - 3);
+                idx = span.IndexOf(5);
+                Assert.Equal(0, idx);
             }
         }
 
