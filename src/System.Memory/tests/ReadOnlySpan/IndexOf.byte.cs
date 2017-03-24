@@ -17,9 +17,26 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void DefaultFilledIndexOf_Byte()
+        {
+            for (int length = 0; length <= byte.MaxValue; length++)
+            {
+                byte[] a = new byte[length];
+                ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
+
+                for (int i = 0; i < length; i++)
+                {
+                    byte target0 = default(byte);
+                    int idx = span.IndexOf(target0);
+                    Assert.Equal(0, idx);
+                }
+            }
+        }
+
+        [Fact]
         public static void TestMatch_Byte()
         {
-            for (int length = 0; length < 32; length++)
+            for (int length = 0; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
                 for (int i = 0; i < length; i++)
@@ -38,14 +55,38 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void TestNoMatch_Byte()
+        {
+            var rnd = new Random(42);
+            for (int length = 0; length <= byte.MaxValue; length++)
+            {
+                byte[] a = new byte[length];
+                byte target = (byte)rnd.Next(0, 256);
+                for (int i = 0; i < length; i++)
+                {
+                    byte val = (byte)(i + 1);
+                    a[i] = val == target ? (byte)(target + 1) : val;
+                }
+                Span<byte> span = new Span<byte>(a);
+                if (length % 16 == 0 || length == 39)
+                {
+                    rnd = new Random(42);
+                }
+                int idx = span.IndexOf(target);
+                Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
         public static void TestMultipleMatch_Byte()
         {
-            for (int length = 2; length < 32; length++)
+            for (int length = 2; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length];
                 for (int i = 0; i < length; i++)
                 {
-                    a[i] = (byte)(i + 1);
+                    byte val = (byte)(i + 1);
+                    a[i] = val == 200 ? (byte)201 : val;
                 }
 
                 a[length - 1] = 200;
@@ -60,7 +101,7 @@ namespace System.SpanTests
         [Fact]
         public static void MakeSureNoChecksGoOutOfRange_Byte()
         {
-            for (int length = 0; length < 100; length++)
+            for (int length = 0; length < byte.MaxValue; length++)
             {
                 byte[] a = new byte[length + 2];
                 a[0] = 99;
