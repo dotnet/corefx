@@ -6,8 +6,9 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-static const int64_t SECS_TO_100NS = 10000000; /* 10^7 */
-static const int64_t MICROSECONDS_TO_100NS = 10; /* 1000 / 100 */
+static const int64_t TICKS_PER_SECOND = 10000000; /* 10^7 */
+static const int64_t TICKS_PER_MICROSECOND = 10; /* 1000 / 100 */
+static const int64_t NANOSECONDS_PER_TICK = 100;
 
 //
 // SystemNative_GetSystemTimeAsTicks return the system time as ticks (100 nanoseconds) 
@@ -15,13 +16,19 @@ static const int64_t MICROSECONDS_TO_100NS = 10; /* 1000 / 100 */
 //
 extern "C" int64_t SystemNative_GetSystemTimeAsTicks()
 {
-    struct timeval time;
-
-    if (gettimeofday(&time, NULL) != 0)
+#if HAVE_CLOCK_REALTIME
+    struct timespec time;
+    if (clock_gettime(CLOCK_REALTIME, &Time) == 0)
     {
-        // in failure we return 00:00 01 January 1970 UTC (Unix epoch)
-        return 0;
+        return static_cast<int64_t>(time.tv_sec) * TICKS_PER_SECOND + (time.tv_nsec / NANOSECONDS_PER_TICK); 
     }
-    
-    return reinterpret_cast<int64_t>(time.tv_sec) * SECS_TO_100NS + (time.tv_usec * MICROSECONDS_TO_100NS); 
+#else
+    struct timeval Time;
+    if (gettimeofday(&Time, NULL) == 0)
+    {
+        return static_cast<int64_t>(time.tv_sec) * TICKS_PER_SECOND + (time.tv_usec * TICKS_PER_MICROSECOND); 
+    }
+#endif
+    // in failure we return 00:00 01 January 1970 UTC (Unix epoch)
+    return 0;
 }
