@@ -8,6 +8,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="AllocationHelper.cs" />
     <Compile Include="TInt.cs" />
   </ItemGroup>
   <ItemGroup>

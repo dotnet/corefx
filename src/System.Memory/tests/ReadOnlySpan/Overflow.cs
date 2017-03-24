@@ -28,27 +28,22 @@ namespace System.SpanTests
                 // Although Span constrains indexes to 0..2Gb, it does not similarly constrain index * sizeof(T).
                 // Make sure that internal offset calculcations handle the >2Gb case properly.
                 //
+
                 unsafe
                 {
-                    byte* pMemory;
-                    try
-                    {
-                        pMemory = (byte*)Marshal.AllocHGlobal((IntPtr)ThreeGiB);
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        return;  // It's not implausible to believe that a 3gb allocation will fail - if so, skip this test to avoid unnecessary test flakiness.
-                    }
+                    if (!AllocationHelper.TryAllocNative((IntPtr)ThreeGiB, out IntPtr memBlock))
+                        return; // It's not implausible to believe that a 3gb allocation will fail - if so, skip this test to avoid unnecessary test flakiness.
 
                     try
                     {
-                        ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>(pMemory, GuidThreeGiBLimit);
+                        ref Guid memory = ref Unsafe.AsRef<Guid>(memBlock.ToPointer());
+                        var span = new ReadOnlySpan<Guid>(memBlock.ToPointer(), GuidThreeGiBLimit);
 
                         int bigIndex = checked(GuidTwoGiBLimit + 1);
                         uint byteOffset = checked((uint)bigIndex * (uint)sizeof(Guid));
                         Assert.True(byteOffset > (uint)int.MaxValue);  // Make sure byteOffset actually overflows 2Gb, or this test is pointless.
-                        ref Guid expected = ref Unsafe.AsRef<Guid>(((byte*)pMemory) + byteOffset);
                         Guid expectedGuid = Guid.NewGuid();
+                        ref Guid expected = ref Unsafe.Add<Guid>(ref memory, bigIndex);
                         expected = expectedGuid;
                         Guid actualGuid = span[bigIndex];
                         Assert.Equal(expectedGuid, actualGuid);
@@ -61,7 +56,7 @@ namespace System.SpanTests
                     }
                     finally
                     {
-                        Marshal.FreeHGlobal((IntPtr)pMemory);
+                        AllocationHelper.ReleaseNative(ref memBlock);
                     }
                 }
             }
