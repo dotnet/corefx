@@ -71,6 +71,19 @@
     </PropertyGroup>
 
     <Exec Command="$(ILLinkCmd) $(ILLinkArgs)" />
+
+    <PropertyGroup>
+      <AsmDiffReport>$(IntermediateOutputPath)$(TargetName).diff.html</AsmDiffReport>
+
+      <AsmDiffArgs>$(AsmDiffArgs) -unchanged -changed -added -removed</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) -includePrivateApis -includeInternalApis -alwaysDiffMembers</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimInputAssembly)</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimAssemblyPath)</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) -out:$(AsmDiffReport)</AsmDiffArgs>
+    </PropertyGroup>
+
+    <Exec Condition="'$(AsmDiffCmd)' != ''" Command="$(AsmDiffCmd) $(AsmDiffArgs)" />
+    <Message Condition="'$(AsmDiffCmd)' != ''" Text="$(AsmDiffReport)" />
   </Target>
   
   <!-- Similar to _CheckForCompileOutputs and runs in the same places, 
