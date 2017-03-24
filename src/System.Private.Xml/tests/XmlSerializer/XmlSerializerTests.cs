@@ -3018,7 +3018,9 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     {
         string memberName = "GetData";
         var getDataRequestBodyValue = new GetDataRequestBody(3);
-        var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(getDataRequestBodyValue, memberName, "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>");
+        var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(getDataRequestBodyValue, memberName,
+            "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>",
+            wrapperName: "wrapper");
 
         Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
@@ -3057,7 +3059,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         var getDataRequestBody = new GetDataRequestBody() { value = 3 };
         var value = new object[] { getDataRequestBody };
-        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+        var actual = RoundTripWithXmlMembersMapping(
             value,
             null,
             "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>",
@@ -3080,7 +3082,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         var getDataRequestBody = new GetDataRequestBody() { value = 3 };
         var value = new object[] { getDataRequestBody, true };
-        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+        var actual = RoundTripWithXmlMembersMapping(
             value,
             null,
             "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n  <GetDataSpecified>true</GetDataSpecified>\r\n</wrapper>",
@@ -3104,7 +3106,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         var getDataRequestBody = new GetDataRequestBody() { value = 3 };
         var value = new object[] { getDataRequestBody, true };
-        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+        var actual = RoundTripWithXmlMembersMapping(
             value,
             null,
             "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n </wrapper>",
@@ -3127,7 +3129,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         var getDataRequestBody = new GetDataRequestBody() { value = 3 };
         var value = new object[] { getDataRequestBody, false };
-        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+        var actual = RoundTripWithXmlMembersMapping(
             value,
             null,
             "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <valueSpecified>false</valueSpecified>\r\n</wrapper>",
@@ -3146,7 +3148,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var member1 = GetReflectionMember<GetDataRequestBody>("value");
         var member2 = GetReflectionMember<bool>("valueSpecified");
         var value = new object[] { new GetDataRequestBody() { value = 3 }, false };
-        var actual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(
+        var actual = RoundTripWithXmlMembersMapping(
             value,
             null,
             "<?xml version=\"1.0\"?>\r\n<valueSpecified xmlns=\"http://tempuri.org/\">false</valueSpecified>",
@@ -3202,23 +3204,21 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(requestBodyValue.IntArray, requestBodyActual.IntArray));
     }
 
+    private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
+        string ns = s_defaultNs;
         object[] value = new object[] { requestBodyValue };
-        object[] actual = RoundTripWithXmlMembersMapping<T>(value, memberName, baseline, skipStringCompare, members: null, wrapperName: wrapperName);
+        XmlReflectionMember member = GetReflectionMember<T>(memberName, ns);
+        var members = new XmlReflectionMember[] { member };
+        object[] actual = RoundTripWithXmlMembersMapping(value, memberName, baseline, skipStringCompare, members: members, wrapperName: wrapperName);
         Assert.Equal(value.Length, actual.Length);
         return (T)actual[0];
     }
 
-    private static object[] RoundTripWithXmlMembersMapping<T>(object[] value, string memberName, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string wrapperName = null)
+    private static object[] RoundTripWithXmlMembersMapping(object[] value, string memberName, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null)
     {
-        string ns = "http://tempuri.org/";
-        if (members == null)
-        {
-            XmlReflectionMember member = GetReflectionMember<T>(memberName, ns);
-            members = new XmlReflectionMember[] { member };
-        }
-
+        ns = ns ?? s_defaultNs;
         var importer = new XmlReflectionImporter(null, ns);
         var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
@@ -3246,7 +3246,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
     private static XmlReflectionMember GetReflectionMember<T>(string memberName, string ns = null)
     {
-        ns = ns ?? "http://tempuri.org/";
+        ns = ns ?? s_defaultNs;
         var member = new XmlReflectionMember();
         member.MemberName = memberName;
         member.MemberType = typeof(T);
