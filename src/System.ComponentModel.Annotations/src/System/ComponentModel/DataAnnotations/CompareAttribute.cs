@@ -38,8 +38,6 @@ namespace System.ComponentModel.DataAnnotations
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            // TODO - check that GetRuntimeProperty() returns the same as old ObjectType.GetProperty()
-            // in all situations regardless of property modifiers
             var otherPropertyInfo = validationContext.ObjectType.GetRuntimeProperty(OtherProperty);
             if (otherPropertyInfo == null)
             {
