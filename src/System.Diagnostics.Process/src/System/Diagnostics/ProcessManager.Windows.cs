@@ -27,19 +27,21 @@ namespace System.Diagnostics
         /// <returns>true if the process is running; otherwise, false.</returns>
         public static bool IsProcessRunning(int processId, string machineName)
         {
-            //Performance optimization for the local machine: 
-            //First try to OpenProcess by id, if valid handle is returned, the process is definitely running
-            //Otherwise enumerate all processes and compare ids
+            // Performance optimization for the local machine: 
+            // First try to OpenProcess by id, if valid handle is returned, the process is definitely running
+            // Otherwise enumerate all processes and compare ids
             if (!IsRemoteMachine(machineName))
             {
-                SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId);
-                if (!processHandle.IsInvalid)
+                using (SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId))
                 {
-                    return true;
+                    if (!processHandle.IsInvalid)
+                    {
+                        return true;
+                    }
                 }
             }
 
-            return IsProcessRunning(processId, GetProcessIds(machineName));
+            return Array.IndexOf(GetProcessIds(machineName), processId) >= 0;
         }
 
         /// <summary>Gets the ProcessInfo for the specified process ID on the specified machine.</summary>
@@ -178,11 +180,6 @@ namespace System.Diagnostics
                     tokenHandle.Dispose();
                 }
             }
-        }
-
-        private static bool IsProcessRunning(int processId, int[] processIds)
-        {
-            return Array.IndexOf(processIds, processId) >= 0;
         }
 
         public static SafeProcessHandle OpenProcess(int processId, int access, bool throwIfExited)
