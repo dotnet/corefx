@@ -18,7 +18,7 @@ namespace System.Diagnostics
         /// <returns>true if the process is running; otherwise, false.</returns>
         public static bool IsProcessRunning(int processId)
         {
-            return IsProcessRunning(processId, GetProcessIds());
+            return IsProcessRunning(processId, ".");
         }
 
         /// <summary>Gets whether the process with the specified ID on the specified machine is currently running.</summary>
@@ -27,6 +27,18 @@ namespace System.Diagnostics
         /// <returns>true if the process is running; otherwise, false.</returns>
         public static bool IsProcessRunning(int processId, string machineName)
         {
+            //Performance optimization for the local machine: 
+            //First try to OpenProcess by id, if valid handle is returned, the process is definitely running
+            //Otherwise enumerate all processes and compare ids
+            if (!IsRemoteMachine(machineName))
+            {
+                SafeProcessHandle processHandle = Interop.Kernel32.OpenProcess(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION, false, processId);
+                if (!processHandle.IsInvalid)
+                {
+                    return true;
+                }
+            }
+
             return IsProcessRunning(processId, GetProcessIds(machineName));
         }
 
