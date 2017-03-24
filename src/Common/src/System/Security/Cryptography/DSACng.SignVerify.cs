@@ -58,29 +58,13 @@ namespace System.Security.Cryptography
 
                 int qLength = ComputeQLength();
 
-                // FIPS 186-3 has this to say about hash output length vs Q (section 4.2):
-                //
-                //    "It is recommended that the security strength of the (L, N) pair
-                //     and the security strength of the hash function used for the generation
-                //     of digital signatures be the same unless an agreement has been made
-                //     between participating entities to use a stronger hash function.
-                //     When the length of the output of the hash function is greater than
-                //     N (i.e., the bit length of q), then the leftmost N bits of the hash
-                //     function output block **shall** be used in any calculation using the hash
-                //     function output during the generation or verification of a digital
-                //     signature. A hash function that provides a lower security strength
-                //     than the (L, N) pair ordinarily **should not** be used, since this would
-                //     reduce the security strength of the digital signature process to a
-                //     level no greater than that provided by the hash function."
-                // (Emphasis in original)
-                //
-                // Windows CNG requires that the hash output and q match, but we can better
+                // Windows CNG requires that the hash output and q match sizes, but we can better
                 // interoperate with other FIPS 186-3 implementations if we perform truncation
                 // here, before sending it to CNG. Since this is a scenario presented in the
                 // CAVP reference test suite, we can confirm our implementation.
                 //
-                // If, on the other hand, Q is too big, we need to left-pad the hash with zeroes,
-                // since it gets treated as a big-endian number. Since this is also a scenario
+                // If, on the other hand, Q is too big, we need to left-pad the hash with zeroes
+                // (since it gets treated as a big-endian number). Since this is also a scenario
                 // presented in the CAVP reference test suite, we can confirm our implementation.
 
                 if (qLength == hash.Length)
