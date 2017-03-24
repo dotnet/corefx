@@ -115,7 +115,7 @@ namespace System.Xml.Serialization
                 TopLevelElement();
             }
 
-            WriteMember(o, null, new ElementAccessor[] { element }, null, null, mapping.TypeDesc, !element.IsSoap, xmlMapping);
+            WriteMember(o, null, new ElementAccessor[] { element }, null, null, mapping.TypeDesc, !element.IsSoap);
 
             if (mapping.IsSoap)
             {
@@ -123,7 +123,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteMember(object o, object choiceSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc memberTypeDesc, bool writeAccessors, XmlMapping parentMapping = null)
+        private void WriteMember(object o, object choiceSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc memberTypeDesc, bool writeAccessors)
         {
             if (memberTypeDesc.IsArrayLike &&
                 !(elements.Length == 1 && elements[0].Mapping is ArrayMapping))
@@ -132,7 +132,7 @@ namespace System.Xml.Serialization
             }
             else
             {
-                WriteElements(o, choiceSource, elements, text, choice, "a", writeAccessors, memberTypeDesc.IsNullable, parentMapping);
+                WriteElements(o, choiceSource, elements, text, choice, "a", writeAccessors, memberTypeDesc.IsNullable);
             }
         }
 
@@ -180,12 +180,12 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteElements(object o, object enumSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, string arrayName, bool writeAccessors, bool isNullable, XmlMapping parentMapping = null)
+        private void WriteElements(object o, object enumSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, string arrayName, bool writeAccessors, bool isNullable)
         {
             if (elements.Length == 0 && text == null) return;
             if (elements.Length == 1 && text == null)
             {
-                WriteElement(o, elements[0], arrayName, writeAccessors, parentMapping);
+                WriteElement(o, elements[0], arrayName, writeAccessors);
             }
             else
             {
@@ -316,7 +316,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteElement(object o, ElementAccessor element, string arrayName, bool writeAccessor, XmlMapping parentMapping = null)
+        private void WriteElement(object o, ElementAccessor element, string arrayName, bool writeAccessor)
         {
             string name = writeAccessor ? element.Name : element.Mapping.TypeName;
             string ns = element.Any && element.Name.Length == 0 ? null : (element.Form == XmlSchemaForm.Qualified ? (writeAccessor ? element.Namespace : element.Mapping.Namespace) : "");
@@ -424,7 +424,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    WriteStructMethod(mapping, name, ns, o, element.IsNullable, needType: false, parentMapping: parentMapping);
+                    WriteStructMethod(mapping, name, ns, o, element.IsNullable, needType: false);
                 }
             }
             else if (element.Mapping is SpecialMapping)
@@ -490,7 +490,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteStructMethod(StructMapping mapping, string n, string ns, object o, bool isNullable, bool needType, XmlMapping parentMapping = null)
+        private void WriteStructMethod(StructMapping mapping, string n, string ns, object o, bool isNullable, bool needType)
         {
             if (mapping.IsSoap && mapping.TypeDesc.IsRoot) return;
 
@@ -512,7 +512,7 @@ namespace System.Xml.Serialization
 
                     if (mapping.TypeDesc.IsRoot)
                     {
-                        if (WriteEnumAndArrayTypes(mapping, o, n, ns, parentMapping))
+                        if (WriteEnumAndArrayTypes(mapping, o, n, ns))
                         {
                             return;
                         }
@@ -628,7 +628,7 @@ namespace System.Xml.Serialization
 
                     if (isSpecified && shouldPersist)
                     {
-                        WriteMember(memberValue, choiceSource, m.ElementsSortedByDerivation, m.Text, m.ChoiceIdentifier, m.TypeDesc, true, parentMapping);
+                        WriteMember(memberValue, choiceSource, m.ElementsSortedByDerivation, m.Text, m.ChoiceIdentifier, m.TypeDesc, true);
                     }
                 }
                 if (!mapping.IsSoap)
@@ -653,7 +653,7 @@ namespace System.Xml.Serialization
             return memberValue;
         }
 
-        private bool WriteEnumAndArrayTypes(StructMapping structMapping, object o, string n, string ns, XmlMapping parentMapping)
+        private bool WriteEnumAndArrayTypes(StructMapping structMapping, object o, string n, string ns)
         {
             if (o is Enum)
             {
@@ -661,7 +661,7 @@ namespace System.Xml.Serialization
 
                 EnumMapping enumMapping = null;
                 Type enumType = o.GetType();
-                foreach (var m in parentMapping.Scope.TypeMappings)
+                foreach (var m in _mapping.Scope.TypeMappings)
                 {
                     var em = m as EnumMapping;
                     if (em != null && em.TypeDesc.Type == enumType)
@@ -681,11 +681,10 @@ namespace System.Xml.Serialization
 
             if (o is Array)
             {
-                Debug.Assert(parentMapping != null);
                 Writer.WriteStartElement(n, ns);
                 ArrayMapping arrayMapping = null;
                 Type arrayType = o.GetType();
-                foreach (var m in parentMapping.Scope.TypeMappings)
+                foreach (var m in _mapping.Scope.TypeMappings)
                 {
                     var am = m as ArrayMapping;
                     if (am != null && am.TypeDesc.Type == arrayType)
