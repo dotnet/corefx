@@ -13,9 +13,17 @@ namespace System.SpanTests
         {
             ReadOnlySpan<int> span = new ReadOnlySpan<int>(new int[0]);
 
+            try
+            {
 #pragma warning disable 0618
-            Assert.Throws<NotSupportedException>(() => span.GetHashCode());
+                int result = span.GetHashCode();
 #pragma warning restore 0618
+                Assert.True(false);
+            }
+            catch (Exception ex)
+            {
+                Assert.True(ex is NotSupportedException);
+            }
         }
     }
 }
