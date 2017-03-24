@@ -96,6 +96,11 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                return new HashSet<TResult>(1, comparer) { _current };
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 return _count;

@@ -186,8 +186,9 @@ namespace System.Linq
                 throw new ArgumentNullException(nameof(source));
             }
 
-            // Don't pre-allocate based on knowledge of size, as potentially many elements will be dropped.
-            return new HashSet<TSource>(source, comparer);
+            // Don't pre-allocate based on knowledge of size as potentially many elements will be dropped.
+            IIListProvider<TSource> listProvider = source as IIListProvider<TSource>;
+            return listProvider != null ? listProvider.ToHashSet(comparer) : new HashSet<TSource>(source, comparer);
         }
     }
 }

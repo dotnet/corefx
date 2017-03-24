@@ -172,6 +172,18 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                foreach (TSource item in _source)
+                {
+                    hashSet.Add(_selector(item));
+                }
+
+                return hashSet;
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 // In case someone uses Count() to force evaluation of
@@ -258,6 +270,20 @@ namespace System.Linq
             {
                 TSource[] source = _source;
                 var results = new List<TResult>(source.Length);
+                for (int i = 0; i < source.Length; i++)
+                {
+                    results.Add(_selector(source[i]));
+                }
+
+                return results;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                TSource[] source = _source;
+
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
+
                 for (int i = 0; i < source.Length; i++)
                 {
                     results.Add(_selector(source[i]));
@@ -399,6 +425,20 @@ namespace System.Linq
             {
                 int count = _source.Count;
                 var results = new List<TResult>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    results.Add(_selector(_source[i]));
+                }
+
+                return results;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                int count = _source.Count;
+
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
+
                 for (int i = 0; i < count; i++)
                 {
                     results.Add(_selector(_source[i]));
@@ -557,6 +597,20 @@ namespace System.Linq
             {
                 int count = _source.Count;
                 var results = new List<TResult>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    results.Add(_selector(_source[i]));
+                }
+
+                return results;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                int count = _source.Count;
+
+                HashSet<TResult> results = new HashSet<TResult>(comparer);
+
                 for (int i = 0; i < count; i++)
                 {
                     results.Add(_selector(_source[i]));
@@ -795,6 +849,18 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                foreach (TSource input in _source)
+                {
+                    hashSet.Add(_selector(input));
+                }
+
+                return hashSet;
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 // In case someone uses Count() to force evaluation of
@@ -960,6 +1026,27 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                int count = Count;
+
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                if (count == 0)
+                {
+                    return hashSet;
+                }
+
+                int end = _minIndexInclusive + count;
+
+                for (int i = _minIndexInclusive; i != end; ++i)
+                {
+                    hashSet.Add(_selector(_source[i]));
+                }
+
+                return hashSet;
             }
 
             public int GetCount(bool onlyIfCheap)

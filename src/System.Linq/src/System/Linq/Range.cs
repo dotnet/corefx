@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using static System.Linq.Utilities;
 
 namespace System.Linq
 {
@@ -99,6 +100,20 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<int> ToHashSet(IEqualityComparer<int> comparer)
+            {
+                HashSet<int> hashSet = AreEqualityComparersEqual(comparer, null) ?
+                                       new HashSet<int>(_end - _start, comparer) :
+                                       new HashSet<int>(comparer);
+
+                for (int cur = _start; cur != _end; cur++)
+                {
+                    hashSet.Add(cur);
+                }
+
+                return hashSet;
             }
 
             public int GetCount(bool onlyIfCheap)

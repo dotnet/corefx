@@ -93,6 +93,8 @@ namespace System.Linq
 
             public abstract List<TSource> ToList();
 
+            public abstract HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer);
+
             public abstract int GetCount(bool onlyIfCheap);
         }
 
@@ -179,7 +181,7 @@ namespace System.Linq
                 Debug.Assert(GetCount(onlyIfCheap: true) == -1);
 
                 var builder = new LargeArrayBuilder<TSource>(initialize: true);
-                
+
                 if (!_appending)
                 {
                     builder.SlowAdd(_item);
@@ -241,6 +243,15 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = _source.ToHashSet(comparer);
+
+                hashSet.Add(_item);
+
+                return hashSet;
             }
 
             public override int GetCount(bool onlyIfCheap)
@@ -445,6 +456,23 @@ namespace System.Linq
                 }
 
                 return !onlyIfCheap || _source is ICollection<TSource> ? _source.Count() + _appendCount + _prependCount : -1;
+            }
+
+            public override HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = _source.ToHashSet(comparer);
+
+                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                {
+                    hashSet.Add(node.Item);
+                }
+
+                for (SingleLinkedNode<TSource> node = _appended; node != null; node = node.Linked)
+                {
+                    hashSet.Add(node.Item);
+                }
+
+                return hashSet;
             }
         }
     }

@@ -27,6 +27,13 @@ namespace System.Linq
         List<TElement> ToList();
 
         /// <summary>
+        /// Produce a <see cref="HashSet{TElement}"/> of the sequence through an optimized path.
+        /// </summary>
+        /// <param name="comparer">The equality comparer for the new <see cref="HashSet{TElement}"/>.</param>
+        /// <returns>The <see cref="HashSet{TElement}"/>.</returns>
+        HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer);
+
+        /// <summary>
         /// Returns the count of elements in the sequence.
         /// </summary>
         /// <param name="onlyIfCheap">If true then the count should only be calculated if doing
@@ -143,6 +150,8 @@ namespace System.Linq
         public TElement[] ToArray() => Array.Empty<TElement>();
 
         public List<TElement> ToList() => new List<TElement>();
+		
+        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer) => new HashSet<TElement>(comparer);
 
         public int GetCount(bool onlyIfCheap) => 0;
     }
@@ -216,6 +225,11 @@ namespace System.Linq
         public List<TElement> ToList()
         {
             return _source.ToList(_minIndexInclusive, _maxIndexInclusive);
+        }
+
+        public HashSet<TElement> ToHashSet(IEqualityComparer<TElement> comparer)
+        {
+            return _source.ToHashSet(_minIndexInclusive, _maxIndexInclusive, comparer);
         }
 
         public int GetCount(bool onlyIfCheap)
@@ -369,6 +383,26 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+                int count = Count;
+
+                if (count == 0)
+                {
+                    return hashSet;
+                }
+
+                int end = _minIndexInclusive + count;
+
+                for (int i = _minIndexInclusive; i != end; ++i)
+                {
+                    hashSet.Add(_source[i]);
+                }
+
+                return hashSet;
             }
 
             public int GetCount(bool onlyIfCheap)
@@ -675,6 +709,29 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+
+                using (IEnumerator<TSource> en = _source.GetEnumerator())
+                {
+                    if (SkipBeforeFirst(en) && en.MoveNext())
+                    {
+                        int remaining = Limit - 1; // Max number of items left, not counting the current element.
+                        int comparand = HasLimit ? 0 : int.MinValue; // If we don't have an upper bound, have the comparison always return true.
+
+                        do
+                        {
+                            remaining--;
+                            hashSet.Add(en.Current);
+                        }
+                        while (remaining >= comparand && en.MoveNext());
+                    }
+                }
+
+                return hashSet;
             }
 
             private bool SkipBeforeFirst(IEnumerator<TSource> en) => SkipBefore(_minIndexInclusive, en);

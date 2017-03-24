@@ -195,6 +195,21 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(item);
+                    }
+                }
+
+                return hashSet;
+            }
+
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
                 return new WhereEnumerableIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
@@ -299,6 +314,21 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(item);
+                    }
+                }
+
+                return hashSet;
             }
 
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
@@ -417,6 +447,23 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                HashSet<TSource> hashSet = new HashSet<TSource>(comparer);
+
+                for (int i = 0; i < _source.Count; i++)
+                {
+                    TSource item = _source[i];
+
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(item);
+                    }
+                }
+
+                return hashSet;
+            }
+
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
                 return new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
@@ -529,6 +576,21 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(_selector(item));
+                    }
+                }
+
+                return hashSet;
             }
         }
 
@@ -648,6 +710,23 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                for (int i = 0; i < _source.Count; i++)
+                {
+                    TSource item = _source[i];
+
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(_selector(item));
+                    }
+                }
+
+                return hashSet;
             }
         }
 
@@ -775,6 +854,21 @@ namespace System.Linq
                 }
 
                 return list;
+            }
+
+            public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+            {
+                HashSet<TResult> hashSet = new HashSet<TResult>(comparer);
+
+                foreach (TSource item in _source)
+                {
+                    if (_predicate(item))
+                    {
+                        hashSet.Add(_selector(item));
+                    }
+                }
+
+                return hashSet;
             }
         }
     }

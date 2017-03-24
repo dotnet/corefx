@@ -243,6 +243,11 @@ namespace System.Linq
             return Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).ToList(_resultSelector);
         }
 
+        public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+        {
+            return Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).ToHashSet(_resultSelector, comparer);
+        }
+
         public int GetCount(bool onlyIfCheap)
         {
             return onlyIfCheap ? -1 : Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).Count;
@@ -298,6 +303,11 @@ namespace System.Linq
         public List<TResult> ToList()
         {
             return Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).ToList(_resultSelector);
+        }
+
+        public HashSet<TResult> ToHashSet(IEqualityComparer<TResult> comparer)
+        {
+            return Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).ToHashSet(_resultSelector, comparer);
         }
 
         public int GetCount(bool onlyIfCheap)
@@ -358,6 +368,12 @@ namespace System.Linq
             return lookup.ToList();
         }
 
+        public HashSet<IGrouping<TKey, TElement>> ToHashSet(IEqualityComparer<IGrouping<TKey, TElement>> comparer)
+        {
+            IIListProvider<IGrouping<TKey, TElement>> lookup = Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer);
+            return lookup.ToHashSet(comparer);
+        }
+
         public int GetCount(bool onlyIfCheap)
         {
             return onlyIfCheap ? -1 : Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).Count;
@@ -407,6 +423,12 @@ namespace System.Linq
         {
             IIListProvider<IGrouping<TKey, TSource>> lookup = Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer);
             return lookup.ToList();
+        }
+
+        public HashSet<IGrouping<TKey, TSource>> ToHashSet(IEqualityComparer<IGrouping<TKey, TSource>> comparer)
+        {
+            IIListProvider<IGrouping<TKey, TSource>> lookup = Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer);
+            return lookup.ToHashSet(comparer);
         }
 
         public int GetCount(bool onlyIfCheap)

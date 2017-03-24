@@ -102,6 +102,12 @@ namespace System.Linq
                 return list;
             }
 
+            public HashSet<TSource> ToHashSet(IEqualityComparer<TSource> comparer)
+            {
+                // HashSet is not guaranteed to be ordered, ignoring reverse
+                return _source.ToHashSet(comparer);
+            }
+
             public int GetCount(bool onlyIfCheap)
             {
                 if (onlyIfCheap)
