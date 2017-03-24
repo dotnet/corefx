@@ -47,6 +47,11 @@ namespace System.ComponentModel.DataAnnotations
                     new ValidationResult(string.Format(CultureInfo.CurrentCulture,
                         SR.CompareAttribute_UnknownProperty, OtherProperty));
             }
+            if (otherPropertyInfo.GetIndexParameters().Any())
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
+                    SR.Common_PropertyNotFound, validationContext.ObjectType.FullName, OtherProperty));
+            }
 
             object otherPropertyValue = otherPropertyInfo.GetValue(validationContext.ObjectInstance, null);
             if (!Equals(value, otherPropertyValue))
@@ -66,8 +71,7 @@ namespace System.ComponentModel.DataAnnotations
                 .SingleOrDefault(
                     prop =>
                         IsPublic(prop) &&
-                        string.Equals(propertyName, prop.Name, StringComparison.OrdinalIgnoreCase) &&
-                        !prop.GetIndexParameters().Any());
+                        string.Equals(propertyName, prop.Name, StringComparison.OrdinalIgnoreCase));
 
             if (property == null)
             {
