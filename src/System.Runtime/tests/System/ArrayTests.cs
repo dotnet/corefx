@@ -3255,7 +3255,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => iList.CopyTo(new int[7], 8)); // Index > destinationArray.Length
         }
 
-#if !uapaot
+#if !uapaot //Issue https://github.com/dotnet/corefx/issues/17480
         [Fact]
         public static unsafe void GetValue_ArrayOfPointers_ThrowsNotSupportedException()
         {
