@@ -132,7 +132,7 @@ namespace System.Xml.Serialization
             }
             else
             {
-                WriteElements(o, choiceSource, elements, text, choice, "a", writeAccessors, memberTypeDesc.IsNullable);
+                WriteElements(o, choiceSource, elements, text, choice, writeAccessors, memberTypeDesc.IsNullable);
             }
         }
 
@@ -175,17 +175,17 @@ namespace System.Xml.Serialization
                 while (e.MoveNext())
                 {
                     object ai = e.Current;
-                    WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, (string)null/*arrayName + "a"*/, true, true);
+                    WriteElements(ai, null/*choiceName + "i"*/, elements, text, choice, true, true);
                 }
             }
         }
 
-        private void WriteElements(object o, object enumSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, string arrayName, bool writeAccessors, bool isNullable)
+        private void WriteElements(object o, object enumSource, ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, bool writeAccessors, bool isNullable)
         {
             if (elements.Length == 0 && text == null) return;
             if (elements.Length == 1 && text == null)
             {
-                WriteElement(o, elements[0], arrayName, writeAccessors);
+                WriteElement(o, elements[0], writeAccessors);
             }
             else
             {
@@ -215,7 +215,7 @@ namespace System.Xml.Serialization
                     {
                         if (o != null && o.GetType() == element.Mapping.TypeDesc.Type)
                         {
-                            WriteElement(o, element, arrayName, writeAccessors);
+                            WriteElement(o, element, writeAccessors);
                             return;
                         }
                     }
@@ -224,7 +224,7 @@ namespace System.Xml.Serialization
                         TypeDesc td = element.IsUnbounded ? element.Mapping.TypeDesc.CreateArrayTypeDesc() : element.Mapping.TypeDesc;
                         if (o.GetType() == td.Type)
                         {
-                            WriteElement(o, element, arrayName, writeAccessors);
+                            WriteElement(o, element, writeAccessors);
                             return;
                         }
                     }
@@ -239,7 +239,7 @@ namespace System.Xml.Serialization
                         {
                             if (element.Name == elem.Name && element.Namespace == elem.NamespaceURI)
                             {
-                                WriteElement(elem, element, arrayName, writeAccessors);
+                                WriteElement(elem, element, writeAccessors);
                                 return;
                             }
                         }
@@ -251,7 +251,7 @@ namespace System.Xml.Serialization
 
                         if (unnamedAny != null)
                         {
-                            WriteElement(elem, unnamedAny, arrayName, writeAccessors);
+                            WriteElement(elem, unnamedAny, writeAccessors);
                             return;
                         }
 
@@ -316,7 +316,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void WriteElement(object o, ElementAccessor element, string arrayName, bool writeAccessor)
+        private void WriteElement(object o, ElementAccessor element, bool writeAccessor)
         {
             string name = writeAccessor ? element.Name : element.Mapping.TypeName;
             string ns = element.Any && element.Name.Length == 0 ? null : (element.Form == XmlSchemaForm.Qualified ? (writeAccessor ? element.Namespace : element.Mapping.Namespace) : "");
@@ -327,7 +327,7 @@ namespace System.Xml.Serialization
                 {
                     ElementAccessor e = element.Clone();
                     e.Mapping = ((NullableMapping)element.Mapping).BaseMapping;
-                    WriteElement(o, e, arrayName, writeAccessor);
+                    WriteElement(o, e, writeAccessor);
                 }
                 else if (element.IsNullable)
                 {
@@ -371,7 +371,7 @@ namespace System.Xml.Serialization
                     foreach (var e in enumerable)
                     {
                         element.IsUnbounded = false;
-                        WriteElement(e, element, arrayName, writeAccessor);
+                        WriteElement(e, element, writeAccessor);
                         element.IsUnbounded = true;
                     }
                 }
