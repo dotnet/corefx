@@ -33,11 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return mi1 == null && mi2 == null;
             }
 
-#if UNSUPPORTEDAPI
             if (mi1 == mi2 || (mi1.DeclaringType.IsGenericallyEqual(mi2.DeclaringType) && mi1.MetadataToken == mi2.MetadataToken))
-#else
-            if (mi1.Equals(mi2))
-#endif
             {
                 return true;
             }
@@ -239,55 +235,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        // s_MemberEquivalence will replace itself with one version or another
-        // depending on what works at run time
-        private static Func<MemberInfo, MemberInfo, bool> s_MemberEquivalence = (m1, m2) =>
-            {
-                try
-                {
-                    // See if MetadataToken property is available.
-                    Type memberInfo = typeof(MemberInfo);
-                    PropertyInfo property = memberInfo.GetProperty("MetadataToken", typeof(int), Array.Empty<Type>());
-
-                    if ((object)property != null && property.CanRead)
-                    {
-                        // (parameter1, parameter2) => parameter1.MetadataToken == parameter2.MetadataToken
-                        var parameter1 = Expression.Parameter(memberInfo);
-                        var parameter2 = Expression.Parameter(memberInfo);
-                        var memberEquivalence = Expression.Lambda<Func<MemberInfo, MemberInfo, bool>>(
-                            Expression.Equal(
-                                Expression.Property(parameter1, property),
-                                Expression.Property(parameter2, property)),
-                                parameter1, parameter2).Compile();
-
-                        var result = memberEquivalence(m1, m2);
-                        // it worked, so publish it
-                        s_MemberEquivalence = memberEquivalence;
-
-                        return result;
-                    }
-                }
-                catch
-                {
-                    // Platform might not allow access to the property
-                }
-
-                // MetadataToken is not available in some contexts. Looks like this is one of those cases.
-                // fallback to "IsEquivalentTo"
-                Func<MemberInfo, MemberInfo, bool> fallbackMemberEquivalence = (m1param, m2param) => m1param.IsEquivalentTo(m2param);
-
-                // fallback must work 
-                s_MemberEquivalence = fallbackMemberEquivalence;
-                return fallbackMemberEquivalence(m1, m2);
-            };
-
         public static bool HasSameMetadataDefinitionAs(this MemberInfo mi1, MemberInfo mi2)
         {
-#if UNSUPPORTEDAPI
-            return (mi1.MetadataToken == mi2.MetadataToken) && (mi1.Module == mi2.Module));
-#else
-            return mi1.Module.Equals(mi2.Module) && s_MemberEquivalence(mi1, mi2);
-#endif
+            return mi1.MetadataToken == mi2.MetadataToken && mi1.Module == mi2.Module;
         }
     }
 }
