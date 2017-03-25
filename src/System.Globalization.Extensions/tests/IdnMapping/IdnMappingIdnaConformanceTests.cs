@@ -90,7 +90,15 @@ namespace System.Globalization.Tests
                 if (!entry.GetUnicodeResult.Success)
                 {
                     var map = new IdnMapping();
-                    Assert.Throws<ArgumentException>(() => map.GetUnicode(entry.Source));
+                    try
+                    {
+                        map.GetUnicode(entry.Source);
+                        throw new Exception(entry.LineNumber.ToString());
+                    }
+                    catch (ArgumentException)
+                    {
+                        continue;
+                    }
                 }
             }
         }

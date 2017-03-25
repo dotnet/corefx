@@ -12,7 +12,7 @@ namespace System.Globalization.Tests
         /// <summary>
         /// Determines if the intended result is a success or failure
         /// </summary>
-        public bool Success { get; private set; }
+        public bool Success { get; internal set; }
 
         /// <summary>
         /// If Success is true, then the value shows the expected value of the test 
