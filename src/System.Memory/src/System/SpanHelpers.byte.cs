@@ -125,7 +125,7 @@ namespace System
                 nLength = (IntPtr)(uint)((length - (uint)index) & ~(Vector<byte>.Count - 1));
                 // Get comparision Vector
                 Vector<byte> vComparision = GetVector(value);
-                while ((byte*)nLength >= (byte*)index)
+                while ((byte*)nLength > (byte*)index)
                 {
                     var vMatches = Vector.Equals(vComparision, Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)));
                     if (Vector<byte>.Zero.Equals(vMatches))
