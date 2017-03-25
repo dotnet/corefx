@@ -11,9 +11,9 @@ namespace System.Threading.Tests
 {
     public partial class InterlockedTests
     {
-        // Taking this lock on the same thread repeatedly is very fast because of it has no interlocked operations. 
+        // Taking this lock on the same thread repeatedly is very fast because it has no interlocked operations. 
         // Switching the thread where the lock is taken is expensive because of allocation and FlushProcessWriteBuffers.
-        class AsymmetricLock
+        private class AsymmetricLock
         {
             public class LockCookie
             {
@@ -33,7 +33,7 @@ namespace System.Threading.Tests
                 internal bool Taken;
             }
 
-            LockCookie _current = new LockCookie(-1);
+            private LockCookie _current = new LockCookie(-1);
 
             // Returning LockCookie to call Exit on is the fastest implementation because of it works naturally with the RCU pattern.
             // The traditional Enter/Exit lock interface would require thread local storage or some other scheme to reclaim the cookie.
@@ -67,7 +67,7 @@ namespace System.Threading.Tests
 
             private LockCookie EnterSlow()
             {
-                // Attempt to steal the ownership. Take a regular lock to make sure that only thread is trying to steal it at a time.
+                // Attempt to steal the ownership. Take a regular lock to ensure that only one thread is trying to steal it at a time.
                 lock (this)
                 {
                     // We are the new fast thread now!
