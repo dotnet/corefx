@@ -9,6 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="GetStringComparerTests.cs" />
+    <Compile Include="IdnMapping\Data\ConformanceIdnaUnicodeTestResult.cs" />
     <Compile Include="IdnMapping\Data\Unicode_9_0\Unicode_9_0_IdnaTest.cs" />
     <Compile Include="IdnMapping\IdnMappingIdnaConformanceTests.cs" />
     <Compile Include="IdnMapping\Data\Factory.cs" />

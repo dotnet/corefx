@@ -12,7 +12,7 @@ namespace System.Globalization.Tests
         /// <summary>
         /// Determines if the intended result is a success or failure
         /// </summary>
-        public bool Success { get; internal set; }
+        public bool Success { get; private set; }
 
         /// <summary>
         /// If Success is true, then the value shows the expected value of the test 
@@ -21,10 +21,6 @@ namespace System.Globalization.Tests
         /// For details, see the explanation in IdnaTest.txt for the Unicode version being tested
         /// </summary>
         public string Value { get; private set; }
-
-        public ConformanceIdnaTestResult(string entry)
-            : this(entry, null)
-        { }
 
         public ConformanceIdnaTestResult(string entry, string fallbackValue)
         {
@@ -36,16 +32,8 @@ namespace System.Globalization.Tests
 
         private void SetValues(string entry)
         {
-            if (entry.Trim().StartsWith("[", StringComparison.Ordinal))
-            {
-                Success = false;
-                Value = entry.Trim();
-            }
-            else
-            {
-                Success = true;
-                Value = entry.Trim();
-            }
+            Value = entry.Trim();
+            Success = !Value.StartsWith("[", StringComparison.Ordinal);
         }
     }
 }

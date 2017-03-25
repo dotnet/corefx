@@ -16,13 +16,13 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetAscii_Success()
         {
-            foreach (var entry in Factory.GetDataset())
+            foreach (IConformanceIdnaTest entry in Factory.GetDataset())
             {
-                if (entry.GetASCIIResult.Success)
+                if (entry.ASCIIResult.Success)
                 {
                     var map = new IdnMapping();
                     var asciiResult = map.GetAscii(entry.Source);
-                    Assert.Equal(entry.GetASCIIResult.Value, asciiResult, StringComparer.OrdinalIgnoreCase);
+                    Assert.Equal(entry.ASCIIResult.Value, asciiResult, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -36,20 +36,20 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetUnicode_Succes()
         {
-            foreach (var entry in Factory.GetDataset())
+            foreach (IConformanceIdnaTest entry in Factory.GetDataset())
             {
-                if (entry.GetUnicodeResult.Success)
+                if (entry.UnicodeResult.Success && entry.UnicodeResult.ValidDomainName)
                 {
                     try
                     {
                         var map = new IdnMapping { UseStd3AsciiRules = true, AllowUnassigned = true };
                         var unicodeResult = map.GetUnicode(entry.Source);
-
-                        Assert.Equal(entry.GetUnicodeResult.Value, unicodeResult, StringComparer.OrdinalIgnoreCase);
+                        
+                        Assert.Equal(entry.UnicodeResult.Value, unicodeResult, StringComparer.OrdinalIgnoreCase);
                     }
                     catch (ArgumentException)
                     {
-                        Assert.Equal(entry.GetUnicodeResult.Value, entry.Source, StringComparer.OrdinalIgnoreCase);
+                        Assert.Equal(entry.UnicodeResult.Value, entry.Source, StringComparer.OrdinalIgnoreCase);
                     }
                 }
             }
@@ -65,9 +65,9 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetAscii_Invalid()
         {
-            foreach (var entry in Factory.GetDataset())
+            foreach (IConformanceIdnaTest entry in Factory.GetDataset())
             {
-                if (!entry.GetASCIIResult.Success)
+                if (!entry.ASCIIResult.Success)
                 {
                     var map = new IdnMapping();
                     Assert.Throws<ArgumentException>(() => map.GetAscii(entry.Source));
@@ -85,20 +85,12 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetUnicode_Invalid()
         {
-            foreach (var entry in Factory.GetDataset())
+            foreach (IConformanceIdnaTest entry in Factory.GetDataset())
             {
-                if (!entry.GetUnicodeResult.Success)
+                if (!entry.UnicodeResult.Success)
                 {
                     var map = new IdnMapping();
-                    try
-                    {
-                        map.GetUnicode(entry.Source);
-                        throw new Exception(entry.LineNumber.ToString());
-                    }
-                    catch (ArgumentException)
-                    {
-                        continue;
-                    }
+                    Assert.Throws<ArgumentException>(() => map.GetUnicode(entry.Source));
                 }
             }
         }

@@ -23,20 +23,19 @@ namespace System.Globalization.Tests
     {
         public IdnType Type { get; set; }
         public string Source { get; set; }
-        public ConformanceIdnaTestResult GetUnicodeResult { get; set; }
-        public ConformanceIdnaTestResult GetASCIIResult { get; set; }
-        public bool NV8 { get; set; }
+        public ConformanceIdnaUnicodeTestResult UnicodeResult { get; set; }
+        public ConformanceIdnaTestResult ASCIIResult { get; set; }
         public int LineNumber { get; set; }
 
         public Unicode_9_0_IdnaTest(string line, int lineNumber)
         {
-            var split = line.Split(';');
+            string[] split = line.Split(';');
 
             Type = ConvertStringToType(split[0].Trim());
             Source = EscapedToLiteralString(split[1], lineNumber);
-            GetUnicodeResult = new ConformanceIdnaTestResult(EscapedToLiteralString(split[2], lineNumber), Source);
-            GetASCIIResult = new ConformanceIdnaTestResult(EscapedToLiteralString(split[3], lineNumber), GetUnicodeResult.Value);
-            NV8 = (split.Length == 5 && split[4].Trim() == "NV8");
+            bool validDomainName = (split.Length != 5 || split[4].Trim() != "NV8");
+            UnicodeResult = new ConformanceIdnaUnicodeTestResult(EscapedToLiteralString(split[2], lineNumber), Source, validDomainName);
+            ASCIIResult = new ConformanceIdnaTestResult(EscapedToLiteralString(split[3], lineNumber), UnicodeResult.Value);
             LineNumber = lineNumber;
         }
 
