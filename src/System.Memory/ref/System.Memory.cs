@@ -99,8 +99,10 @@ namespace System
 
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2) { throw null; }
+        public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2) { throw null; }
+        public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
         public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T:struct, IEquatable<T> { throw null; }
         public static bool SequenceEqual(this Span<byte> first, ReadOnlySpan<byte> second) { throw null; }
