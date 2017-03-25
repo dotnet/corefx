@@ -1260,14 +1260,13 @@ namespace System.Xml.Serialization
                 int xmlnsMember = FindXmlnsIndex(mapping.Members);
                 if (xmlnsMember >= 0)
                 {
-                    throw new NotImplementedException("xmlnsMember >= 0");
-                    //MemberMapping member = mapping.Members[xmlnsMember];
-                    //var source = (XmlSerializerNamespaces)p[xmlnsMember];
+                    MemberMapping member = mapping.Members[xmlnsMember];
+                    var source = (XmlSerializerNamespaces)p[xmlnsMember];
 
-                    //if (pLength > xmlnsMember)
-                    //{
-                    //    WriteNamespaceDeclarations(source);
-                    //}
+                    if (pLength > xmlnsMember)
+                    {
+                        WriteNamespaceDeclarations(source);
+                    }
                 }
 
                 for (int i = 0; i < mapping.Members.Length; i++)

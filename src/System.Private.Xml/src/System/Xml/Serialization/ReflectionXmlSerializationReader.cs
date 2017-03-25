@@ -136,27 +136,27 @@ namespace System.Xml.Serialization
 
             ArrayList membersList = new ArrayList();
             ArrayList textOrArrayMembersList = new ArrayList();
-            var attributeMembersList = new List<MemberMapping>();
+            var attributeMembersList = new List<Member>();
 
             int pLength = p.Length;
             for (int i = 0; i < mappings.Length; i++)
             {
-                MemberMapping mapping = mappings[i];
                 int index = i;
+                MemberMapping mapping = mappings[index];                
                 Action<object> source = (o) => p[index] = o;
-
-                //object arraySource = source;
-                if (mapping.Xmlns != null)
-                {
-                    throw new NotImplementedException("mapping.Xmlns != null");
-                    //arraySource = "((" + mapping.TypeDesc.CSharpName + ")" + source + ")";
-                }
 
                 //string choiceSource = GetChoiceIdentifierSource(mappings, mapping);
                 //Member member = new Member(this, source, arraySource, "a", i, mapping, choiceSource);
                 //Member anyMember = new Member(this, source, null, "a", i, mapping, choiceSource);
                 Member member = new Member(mapping);
                 Member anyMember = new Member(mapping);
+
+                if (mapping.Xmlns != null)
+                {
+                    var xmlns = new XmlSerializerNamespaces();
+                    p[index] = xmlns;
+                    member.XmlnsSource = (ns, name) => xmlns.Add(ns, name);
+                }               
 
                 member.Source = source;
                 anyMember.Source = source;
@@ -179,7 +179,7 @@ namespace System.Xml.Serialization
                 if (mapping.Attribute != null && mapping.Attribute.Any)
                     anyAttribute = anyMember;
                 if (mapping.Attribute != null || mapping.Xmlns != null)
-                    attributeMembersList.Add(member.Mapping);
+                    attributeMembersList.Add(member);
                 else if (mapping.Text != null)
                     textOrArrayMembersList.Add(member);
 
@@ -230,10 +230,10 @@ namespace System.Xml.Serialization
 
             if (attributeMembersList.Count > 0)
             {
-                throw new NotImplementedException();
-                //var attributeMembers = attributeMembersList.ToArray();
-                //WriteAttributes(attributeMembers, anyAttribute.Mapping, UnknownNode, ref o);
-                //Reader.MoveToElement();
+                var attributeMembers = attributeMembersList.ToArray();
+                object tempObject = null;
+                WriteAttributes(attributeMembers, anyAttribute?.Mapping, UnknownNode, ref tempObject);
+                Reader.MoveToElement();
             }
 
             if (hasWrapperElement)
@@ -1200,7 +1200,7 @@ namespace System.Xml.Serialization
                 fixup = WriteMemberFixupBegin(members, o);
 
                 Action<object> unknownNodeAction = (n) => UnknownNode(n);
-                WriteAttributes(mappings, null, unknownNodeAction, ref o);
+                WriteAttributes(members, null, unknownNodeAction, ref o);
                 Reader.MoveToElement();
                 if (Reader.IsEmptyElement)
                 {
@@ -1499,7 +1499,18 @@ namespace System.Xml.Serialization
                         }
                         else
                         {
-                            member.Source = (value) => SetMemberValue(o, value, member.Mapping.Name);
+                            if (member.Mapping.Xmlns != null)
+                            {
+                                var xmlSerializerNamespaces = new XmlSerializerNamespaces();
+                                SetMemberValue(o, xmlSerializerNamespaces, member.Mapping.Name);
+                                member.XmlnsSource = (ns, name) => {
+                                    xmlSerializerNamespaces.Add(ns, name);
+                                };
+                            }
+                            else
+                            {
+                                member.Source = (value) => SetMemberValue(o, value, member.Mapping.Name);
+                            }
                         }
                     }
 
@@ -1539,7 +1550,7 @@ namespace System.Xml.Serialization
                 var allMemberMappings = allMemberMappingList.ToArray();
 
                 Action<object> unknownNodeAction = (n) => UnknownNode(n);
-                WriteAttributes(allMemberMappings, anyAttribute, unknownNodeAction, ref o);
+                WriteAttributes(allMembers, anyAttribute, unknownNodeAction, ref o);
 
                 Reader.MoveToElement();
                 if (Reader.IsEmptyElement)
@@ -1631,25 +1642,30 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        private void WriteAttributes(MemberMapping[] members, MemberMapping anyAttribute, Action<object> elseCall, ref object o)
+        private void WriteAttributes(Member[] members, MemberMapping anyAttribute, Action<object> elseCall, ref object o)
         {
-            MemberMapping xmlnsMember = null;
+            Member xmlnsMember = null;
             var attributes = new List<AttributeAccessor>();
+            foreach (var member in members)
+            {
+                if (member.Mapping.Xmlns != null)
+                {
+                    xmlnsMember = member;
+                    break;
+                }
+            }
 
             while (Reader.MoveToNextAttribute())
             {
                 bool memberFound = false;
                 foreach (var member in members)
                 {
-                    if (member.Xmlns != null)
+                    if (member.Mapping.Xmlns != null || member.Mapping.Ignore)
                     {
-                        xmlnsMember = member;
                         continue;
                     }
 
-                    if (member.Ignore)
-                        continue;
-                    AttributeAccessor attribute = member.Attribute;
+                    AttributeAccessor attribute = member.Mapping.Attribute;
 
                     if (attribute == null) continue;
                     if (attribute.Any) continue;
@@ -1661,11 +1677,13 @@ namespace System.Xml.Serialization
                         memberFound = XmlNodeEqual(Reader, attribute.Name, XmlReservedNs.NsXml);
                     }
                     else
+                    {
                         memberFound = XmlNodeEqual(Reader, attribute.Name, attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : "");
+                    }
 
                     if (memberFound)
                     {
-                        WriteAttribute(o, member);
+                        WriteAttribute(o, member.Mapping);
                         memberFound = true;
                         break;
                     }
@@ -1681,21 +1699,8 @@ namespace System.Xml.Serialization
                 {
                     if (IsXmlnsAttribute(Reader.Name))
                     {
-                        if (GetMemberType(xmlnsMember.MemberInfo) == typeof(XmlSerializerNamespaces))
-                        {
-                            var xmlnsMemberSource = GetMemberValue(o, xmlnsMember.MemberInfo) as XmlSerializerNamespaces;
-                            if (xmlnsMemberSource == null)
-                            {
-                                xmlnsMemberSource = new XmlSerializerNamespaces();
-                                SetMemberValue(o, xmlnsMemberSource, xmlnsMember.MemberInfo);
-                            }
-
-                            xmlnsMemberSource.Add(Reader.Name.Length == 5 ? "" : Reader.LocalName, Reader.Value);
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("xmlnsMemberSource is not of type XmlSerializerNamespaces");
-                        }
+                        Debug.Assert(xmlnsMember.XmlnsSource != null, "Xmlns member's source was not set.");
+                        xmlnsMember.XmlnsSource(Reader.Name.Length == 5 ? "" : Reader.LocalName, Reader.Value);
                     }
                     else
                     {
@@ -1848,6 +1853,7 @@ namespace System.Xml.Serialization
             public Action<object> ArraySource;
             public Action<object> CheckSpecifiedSource;
             public Action<object> ChoiceSource;
+            public Action<string, string> XmlnsSource;
 
             public Member(MemberMapping mapping)
             {

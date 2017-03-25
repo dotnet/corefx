@@ -3019,8 +3019,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         string memberName = "GetData";
         var getDataRequestBodyValue = new GetDataRequestBody(3);
         var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<GetDataRequestBody>(getDataRequestBodyValue, memberName,
-            "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>",
-            wrapperName: "wrapper");
+            "<?xml version=\"1.0\"?>\r\n<GetData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <value>3</value>\r\n</GetData>");
 
         Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
@@ -3204,6 +3203,63 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(Enumerable.SequenceEqual(requestBodyValue.IntArray, requestBodyActual.IntArray));
     }
 
+    [Fact]
+    public static void XmlMembersMapping_TypeWithXmlAttributes()
+    {
+        string memberName = "data";
+        string ns = s_defaultNs;
+        XmlReflectionMember member = GetReflectionMember<TypeWithXmlAttributes>(memberName, ns);
+        var members = new XmlReflectionMember[] { member };
+
+        TypeWithXmlAttributes value = new TypeWithXmlAttributes { MyName = "fooname", Today = DateTime.Now };
+        var actual = RoundTripWithXmlMembersMapping<TypeWithXmlAttributes>(value,
+            memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <data d2p1:MyName=\"fooname\" CreationDate=\"2017-03-24\" xmlns:d2p1=\"http://www.MyNs.org\" />\r\n</wrapper>",
+            skipStringCompare: false,
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_Xmlns_True()
+    {
+        string memberName = "MyXmlNs";
+        string ns = s_defaultNs;
+        XmlReflectionMember member = GetReflectionMemberNoXmlElement<XmlSerializerNamespaces>(memberName, ns);
+        member.XmlAttributes.Xmlns = true;
+        var members = new XmlReflectionMember[] { member };
+        var xmlns = new XmlSerializerNamespaces();
+        xmlns.Add("MyNS", "myNS.tempuri.org");
+        xmlns.Add("common", "common.tempuri.org");
+        var value = new object[] { xmlns };
+        var actual = RoundTripWithXmlMembersMapping(
+            value,
+            memberName,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:MyNS=\"myNS.tempuri.org\" xmlns:common=\"common.tempuri.org\" xmlns=\"http://tempuri.org/\" />",
+            skipStringCompare: false,
+            members: members,
+            wrapperName: "wrapper");
+
+        var xmlnsActual = (XmlSerializerNamespaces)actual[0];
+        Assert.NotNull(xmlnsActual);
+        var xmlnsActualArray = xmlnsActual.ToArray();
+        foreach (var nsString in xmlns.ToArray())
+        {
+            bool existInActualArray = false;
+            foreach (var actualNs in xmlnsActualArray)
+            {
+                if (nsString.Equals(actualNs))
+                {
+                    existInActualArray = true;
+                    break;
+                }
+            }
+
+            Assert.True(existInActualArray);
+        }
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
@@ -3255,6 +3311,16 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         elementAttribute.ElementName = memberName;
         elementAttribute.Namespace = ns;
         member.XmlAttributes.XmlElements.Add(elementAttribute);
+        return member;
+    }
+
+    private static XmlReflectionMember GetReflectionMemberNoXmlElement<T>(string memberName, string ns = null)
+    {
+        ns = ns ?? s_defaultNs;
+        var member = new XmlReflectionMember();
+        member.MemberName = memberName;
+        member.MemberType = typeof(T);
+        member.XmlAttributes = new XmlAttributes();
         return member;
     }
 

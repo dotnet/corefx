@@ -4186,3 +4186,12 @@ public class XmlMembersMappingTypeHavingIntArray
 {
     public int[] IntArray;
 }
+
+public class TypeWithXmlAttributes
+{
+    [XmlAttribute(Namespace = "http://www.MyNs.org")]
+    public string MyName;
+
+    [XmlAttribute(DataType = "date", AttributeName = "CreationDate")]
+    public DateTime Today;
+}
