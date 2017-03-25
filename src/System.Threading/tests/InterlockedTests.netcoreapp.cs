@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Threading.Tests
@@ -35,6 +36,12 @@ namespace System.Threading.Tests
 
             private LockCookie _current = new LockCookie(-1);
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            private static T VolatileReadWithoutBarrier<T>(ref T location)
+            {
+                return location;
+            }
+
             // Returning LockCookie to call Exit on is the fastest implementation because of it works naturally with the RCU pattern.
             // The traditional Enter/Exit lock interface would require thread local storage or some other scheme to reclaim the cookie.
             public LockCookie Enter()
@@ -50,11 +57,12 @@ namespace System.Threading.Tests
                     //
                     // If other thread started stealing the ownership, we need to take slow path.
                     //
-                    // Volatile works here, but it is too big of a hammer because of it will result into memory barrier on ARM that 
-                    // we do not need here. We really just need to make sure that the compiler won't reorder the read with the above write.
-                    // RyuJIT won't reorder them today, but more advanced optimizers might.
+                    // Make sure that the compiler won't reorder the read with the above write by wrapping the read in no-inline method.
+                    // RyuJIT won't reorder them today, but more advanced optimizers might. Regular Volatile.Read would be too big of 
+                    // a hammer because of it will result into memory barrier on ARM that we do not need here.
                     //
-                    if (Volatile.Read(ref _current) == entry)
+                    //
+                    if (VolatileReadWithoutBarrier(ref _current) == entry)
                     {
                         return entry;
                     }
