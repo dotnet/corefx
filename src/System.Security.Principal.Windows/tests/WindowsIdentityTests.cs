@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.Serialization.Formatters.Tests;
 using System.Security.Principal;
@@ -23,7 +24,7 @@ public class WindowsIdentityTests
     public static void ConstructorsAndProperties()
     {
         // Retrieve the Windows account token for the current user.
-        var token = WindowsIdentity.GetCurrent().AccessToken;
+        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
         bool gotRef = false;
         try
         {
@@ -54,7 +55,7 @@ public class WindowsIdentityTests
     [InlineData(true)]
     public static void CloneAndProperties(bool cloneViaSerialization)
     {
-        var token = WindowsIdentity.GetCurrent().AccessToken;
+        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
         bool gotRef = false;
         try
         {
