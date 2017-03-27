@@ -32,6 +32,17 @@ namespace System.Net.NameResolution.PalTests
             Assert.NotNull(hostEntry.Aliases);
         }
 
+        public static object[][] InvalidHostNames = new object[][] {
+            new object[] { "fkdsfsjfsrH:" },
+            new object[] { "..." }
+        };
+
+        [Theory, MemberData(nameof(InvalidHostNames))]
+        public void GetHostByName_Invalid_HostName(string hostName)
+        {
+            Assert.Throws<SocketException>(() => NameResolutionPal.GetHostByName(hostName));
+        }
+
         [Fact]
         public void GetHostByName_HostName()
         {

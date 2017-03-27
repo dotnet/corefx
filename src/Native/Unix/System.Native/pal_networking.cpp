@@ -570,14 +570,10 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         hostent* result = reinterpret_cast<hostent*>(buffer);
         char* scratch = reinterpret_cast<char*>(&buffer[sizeof(hostent)]);
 
-        int getHostErrno;
+        int getHostErrno = 0;
         int err = gethostbyname_r(reinterpret_cast<const char*>(hostname), result, scratch, scratchLen, entry, &getHostErrno);
         switch (err)
         {
-            case 0:
-                *entry = result;
-                return 0;
-
             case ERANGE:
                 free(buffer);
                 size_t tmpScratchLen;
@@ -588,6 +584,14 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
                 }
                 scratchLen = tmpScratchLen;
                 break;
+
+            case 0:
+                if (!getHostErrno)
+                {
+                    *entry = result;
+                    return 0;
+                }
+                // Error; fall through
 
             default:
                 free(buffer);
@@ -649,14 +653,10 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         hostent* result = reinterpret_cast<hostent*>(buffer);
         char* scratch = reinterpret_cast<char*>(&buffer[sizeof(hostent)]);
 
-        int getHostErrno;
+        int getHostErrno = 0;
         int err = gethostbyaddr_r(addr, addrLen, type, result, scratch, scratchLen, entry, &getHostErrno);
         switch (err)
         {
-            case 0:
-                *entry = result;
-                return 0;
-
             case ERANGE:
                 free(buffer);
                 size_t tmpScratchLen;
@@ -667,6 +667,14 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
                 }
                 scratchLen = tmpScratchLen;
                 break;
+
+            case 0:
+                if (!getHostErrno)
+                {
+                    *entry = result;
+                    return 0;
+                }
+                // Error; fall through
 
             default:
                 free(buffer);
