@@ -79,7 +79,7 @@
       <AsmDiffReport>$(IntermediateOutputPath)$(TargetName).diff.html</AsmDiffReport>
 
       <AsmDiffArgs>$(AsmDiffArgs) -unchanged -changed -added -removed</AsmDiffArgs>
-      <AsmDiffArgs>$(AsmDiffArgs) -includePrivateApis -includeInternalApis -alwaysDiffMembers</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) -includePrivateApis -includeInternalApis -alwaysDiffMembers -diffAttributes</AsmDiffArgs>
       <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimInputAssembly)</AsmDiffArgs>
       <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimAssemblyPath)</AsmDiffArgs>
       <AsmDiffArgs>$(AsmDiffArgs) -out:$(AsmDiffReport)</AsmDiffArgs>
