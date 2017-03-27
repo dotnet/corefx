@@ -39,8 +39,11 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <!-- root public entry points in this assembly -->
-      <ILLinkArgs>$(ILLinkArgs) -r "$(ILLinkTrimInputAssembly)"</ILLinkArgs>
+      <!-- Root public entry points in this assembly.
+           Currently this must be passed as name and directory.
+           Directory of this assembly *must* occur before directory of references. -->
+      <ILLinkArgs>$(ILLinkArgs) -r $(TargetName)</ILLinkArgs>
+      <ILLinkArgs>$(ILLinkArgs) -d $(ILLinkTrimInputPath)</ILLinkArgs>
       <!-- directories to examine for assembly dependencies -->
       <ILLinkArgs>$(ILLinkArgs) @(_ILLinkReferenceDirectory->'-d %(Identity)', ' ')</ILLinkArgs>
       <!-- don't trim anything that's defined in core assemblies -->
