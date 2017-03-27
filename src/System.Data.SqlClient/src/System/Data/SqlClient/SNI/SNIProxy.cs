@@ -20,7 +20,7 @@ namespace System.Data.SqlClient.SNI
     {
         private const char SemicolonSeparator = ';';
         private const int SqlServerBrowserPort = 1434;
-        internal const int DefaultSqlServerPort = 1433;
+        private const int DefaultSqlServerPort = 1433;
         private const string SqlServerSpnHeader = "MSSQLSvc";
 
         internal class SspiClientContextResult
