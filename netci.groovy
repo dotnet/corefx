@@ -222,13 +222,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 }
 
                 def archGroup = "x64"
-                def osJobName = osShortName[osName]
-
-                if (targetGroup == 'netfx') {
-                    osJobName = 'netfx'
-                }
-
-                def newJobName = "outerloop_${osJobName}_${configurationGroup.toLowerCase()}"
+                def newJobName = "outerloop_${targetGroup}_${osShortName[osName]}_${configurationGroup.toLowerCase()}"
 
                 def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     steps {
