@@ -1275,50 +1275,46 @@ namespace System.Xml.Serialization
 
                     if (member.Attribute != null && !member.Ignore)
                     {
-                        throw new NotImplementedException("member.Attribute != null && !member.Ignore");
-                        //string source = "p[" + i.ToString(CultureInfo.InvariantCulture) + "]";
+                        object source = p[i];
 
                         //string specifiedSource = null;
                         //int specifiedPosition = 0;
-                        //if (member.CheckSpecified != SpecifiedAccessor.None)
-                        //{
-                        //    string memberNameSpecified = member.Name + "Specified";
-                        //    for (int j = 0; j < mapping.Members.Length; j++)
-                        //    {
-                        //        if (mapping.Members[j].Name == memberNameSpecified)
-                        //        {
-                        //            specifiedSource = "((bool) p[" + j.ToString(CultureInfo.InvariantCulture) + "])";
-                        //            specifiedPosition = j;
-                        //            break;
-                        //        }
-                        //    }
-                        //}
+                        if (member.CheckSpecified != SpecifiedAccessor.None)
+                        {
+                            throw new NotImplementedException("member.CheckSpecified != SpecifiedAccessor.None");
+                            //string memberNameSpecified = member.Name + "Specified";
+                            //for (int j = 0; j < mapping.Members.Length; j++)
+                            //{
+                            //    if (mapping.Members[j].Name == memberNameSpecified)
+                            //    {
+                            //        specifiedSource = "((bool) p[" + j.ToString(CultureInfo.InvariantCulture) + "])";
+                            //        specifiedPosition = j;
+                            //        break;
+                            //    }
+                            //}
+                        }
 
-                        //Writer.Write("if (pLength > ");
-                        //Writer.Write(i.ToString(CultureInfo.InvariantCulture));
-                        //Writer.WriteLine(") {");
-                        //Writer.Indent++;
+                        if (pLength > i)
+                        {
 
-                        //if (specifiedSource != null)
-                        //{
-                        //    Writer.Write("if (pLength <= ");
-                        //    Writer.Write(specifiedPosition.ToString(CultureInfo.InvariantCulture));
-                        //    Writer.Write(" || ");
-                        //    Writer.Write(specifiedSource);
-                        //    Writer.WriteLine(") {");
-                        //    Writer.Indent++;
-                        //}
+                            //if (specifiedSource != null)
+                            //{
+                            //    Writer.Write("if (pLength <= ");
+                            //    Writer.Write(specifiedPosition.ToString(CultureInfo.InvariantCulture));
+                            //    Writer.Write(" || ");
+                            //    Writer.Write(specifiedSource);
+                            //    Writer.WriteLine(") {");
+                            //    Writer.Indent++;
+                            //}
 
-                        //WriteMember(source, member.Attribute, member.TypeDesc, "p");
+                            WriteMember(source, member.Attribute, member.TypeDesc, null);
 
-                        //if (specifiedSource != null)
-                        //{
-                        //    Writer.Indent--;
-                        //    Writer.WriteLine("}");
-                        //}
-
-                        //Writer.Indent--;
-                        //Writer.WriteLine("}");
+                            //if (specifiedSource != null)
+                            //{
+                            //    Writer.Indent--;
+                            //    Writer.WriteLine("}");
+                            //}
+                        }
                     }
                 }
             }

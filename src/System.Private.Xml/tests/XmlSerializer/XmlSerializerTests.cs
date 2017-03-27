@@ -3260,6 +3260,48 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
+    [Fact]
+    public static void XmlMembersMapping_Member_With_XmlAnyAttribute()
+    {
+        string memberName1 = "StringMember";
+        XmlReflectionMember member1 = GetReflectionMember<string>(memberName1, s_defaultNs);
+        string memberName2 = "XmlAttributes";
+        XmlReflectionMember member2 = GetReflectionMemberNoXmlElement<XmlAttribute[]>(memberName2, s_defaultNs);
+        member2.XmlAttributes.XmlAnyAttribute = new XmlAnyAttributeAttribute();
+
+        var members = new XmlReflectionMember[] { member1, member2 };
+
+        var importer = new XmlReflectionImporter(null, s_defaultNs);
+        var membersMapping = importer.ImportMembersMapping("wrapper", s_defaultNs, members, true);
+        var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
+        var ms = new MemoryStream();
+
+        string output =
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" myattribute1=\"myAttribute1\" myattribute2=\"myAttribute2\" xmlns=\"http://tempuri.org/\" >\r\n  <StringMember>string value</StringMember>\r\n </wrapper>";
+        var sw = new StreamWriter(ms);
+        sw.Write(output);
+        sw.Flush();
+        ms.Position = 0;
+        var deserialized = serializer.Deserialize(ms) as object[];
+        Assert.True(deserialized != null, "deserialized was null.");
+        Assert.Equal("string value", (string)deserialized[0]);
+        var xmlAttributes = deserialized[1] as XmlAttribute[];
+        Assert.True(xmlAttributes != null, "xmlAttributes was null.");
+        Assert.Equal(2, xmlAttributes.Length);
+        Assert.Equal("myattribute1", xmlAttributes[0].Name);
+        Assert.Equal("myattribute2", xmlAttributes[1].Name);
+
+        ms = new MemoryStream();
+        serializer.Serialize(ms, deserialized);
+        ms.Flush();
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+
+        Utils.CompareResult result = Utils.Compare(output, actualOutput);
+        Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
+            Environment.NewLine, result.ErrorMessage, deserialized, output, actualOutput));
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
