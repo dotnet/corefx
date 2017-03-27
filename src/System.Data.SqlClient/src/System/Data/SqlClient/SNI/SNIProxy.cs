@@ -317,13 +317,9 @@ namespace System.Data.SqlClient.SNI
 
             if (isIntegratedSecurity)
             {
-                string hostName = details.ServerName;
-                int connPort = details.Port;
-                string connInstanceName = details.InstanceName;
-
                 try
                 {
-                    spnBuffer = GetSqlServerSPN(hostName, (connPort >= 0 ? connPort.ToString() : connInstanceName));
+                    spnBuffer = GetSqlServerSPN(details);
                 }
                 catch (Exception e)
                 {
@@ -334,16 +330,43 @@ namespace System.Data.SqlClient.SNI
             return sniHandle;
         }
 
+        private static byte[] GetSqlServerSPN(DataSource dataSource)
+        {
+            byte[] spnByte = null;
+
+            string hostName = dataSource.ServerName;
+            if (!string.IsNullOrWhiteSpace(hostName))
+            {
+                string postfix = null;
+                if (dataSource.Port != -1)
+                {
+                    postfix = dataSource.Port.ToString();
+                }
+                else if (!string.IsNullOrWhiteSpace(dataSource.InstanceName))
+                {
+                    postfix = dataSource.InstanceName;
+                }
+                // For handling tcp:<hostname> format
+                else if (dataSource.ConnectionProtocol == DataSource.Protocol.TCP)
+                {
+                    postfix = DefaultSqlServerPort.ToString();
+                }
+
+                spnByte = GetSqlServerSPN(hostName, postfix);
+            }
+            return spnByte;
+        }
+
         private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress));
             IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
             string fullyQualifiedDomainName = hostEntry.HostName;
-            if (string.IsNullOrWhiteSpace(portOrInstanceName))
+            string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName;
+            if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
-                portOrInstanceName = DefaultSqlServerPort.ToString();
+                serverSpn += ":" + portOrInstanceName;
             }
-            string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName + ":" + portOrInstanceName;
             return Encoding.UTF8.GetBytes(serverSpn);
         }
 
@@ -362,10 +385,35 @@ namespace System.Data.SqlClient.SNI
             // tcp:<host name>,<TCP/IP port number>
 
             string hostName = details.ServerName;
-            int port = details.Port;
+            if (string.IsNullOrWhiteSpace(hostName))
+            {
+                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
+                return null;
+            }
 
-            return (hostName != null && port > 0) ?
-                new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel) : null;
+            int port = -1;
+            if (details.IsSsrpRequired)
+            {
+                try
+                {
+                    port = GetPortByInstanceName(hostName, details.InstanceName);
+                }
+                catch (SocketException se)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
+                    return null;
+                }
+            }
+            else if (details.Port != -1)
+            {
+                port = details.Port;
+            }
+            else
+            {
+                port = DefaultSqlServerPort;
+            }
+
+            return new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
         }
 
         /// <summary>
@@ -596,6 +644,7 @@ namespace System.Data.SqlClient.SNI
         private const string PipeToken = "pipe";
         private const string LocalDbHost = "(localdb)";
         private const string NamedPipeInstanceNameHeader = "mssql$";
+        private const string DefaultPipeName = "sql\\query";
 
         internal enum Protocol { TCP, NP, None, Admin };
 
@@ -630,6 +679,8 @@ namespace System.Data.SqlClient.SNI
         private string _workingDataSource;
         private string _dataSourceAfterTrimmingProtocol;
         internal bool IsBadDataSource { get; private set; } = false;
+
+        internal bool IsSsrpRequired { get; private set; } = false;
 
         private DataSource(string dataSource)
         {
@@ -708,7 +759,7 @@ namespace System.Data.SqlClient.SNI
                     return null;
                 }
             }
-            
+
             return instanceName;
         }
 
@@ -767,20 +818,8 @@ namespace System.Data.SqlClient.SNI
                         : tokensByCommaAndSlash[1].Trim();
 
                 // Bad Data Source like "server, "
-                if (string.IsNullOrEmpty(parameter))
+                if (string.IsNullOrWhiteSpace(parameter))
                 {
-                    ReportSNIError(SNIProviders.INVALID_PROV);
-                    return false;
-                }
-
-                // For Tcp and Only Tcp are parameters allowed.
-                if (ConnectionProtocol == DataSource.Protocol.None)
-                {
-                    ConnectionProtocol = DataSource.Protocol.TCP;
-                }
-                else if (ConnectionProtocol != DataSource.Protocol.TCP)
-                {
-                    // Parameter has been specified for non-TCP protocol. This is not allowed.
                     ReportSNIError(SNIProviders.INVALID_PROV);
                     return false;
                 }
@@ -796,6 +835,18 @@ namespace System.Data.SqlClient.SNI
                 if (port < 1)
                 {
                     ReportSNIError(SNIProviders.TCP_PROV);
+                    return false;
+                }
+
+                // For Tcp and Only Tcp are parameters allowed.
+                if (ConnectionProtocol == DataSource.Protocol.None)
+                {
+                    ConnectionProtocol = DataSource.Protocol.TCP;
+                }
+                else if (ConnectionProtocol != DataSource.Protocol.TCP)
+                {
+                    // Parameter has been specified for non-TCP protocol. This is not allowed.
+                    ReportSNIError(SNIProviders.INVALID_PROV);
                     return false;
                 }
 
@@ -819,19 +870,17 @@ namespace System.Data.SqlClient.SNI
                     return false;
                 }
 
-                try
+                if (ConnectionProtocol == DataSource.Protocol.None)
                 {
-                    Port = SNIProxy.GetPortByInstanceName(ServerName, InstanceName);
+                    ConnectionProtocol = DataSource.Protocol.TCP;
                 }
-                catch
+                else if (ConnectionProtocol != DataSource.Protocol.TCP)
                 {
                     ReportSNIError(SNIProviders.INVALID_PROV);
                     return false;
                 }
-            }
-            else
-            {
-                Port = SNIProxy.DefaultSqlServerPort;
+
+                IsSsrpRequired = true;
             }
 
             InferLocalServerName();
@@ -847,7 +896,7 @@ namespace System.Data.SqlClient.SNI
 
         private bool InferNamedPipesInformation()
         {
-            // If we have a datasource beginning with a pipe or we have already determined that the protocol is NamedPipe
+            // If we have a datasource beginning with a pipe or we have already determined that the protocol is Named Pipe
             if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
@@ -887,24 +936,23 @@ namespace System.Data.SqlClient.SNI
                         return false;
                     }
 
-                    if(tokensByBackSlash[4].StartsWith(NamedPipeInstanceNameHeader))
+                    if (tokensByBackSlash[4].StartsWith(NamedPipeInstanceNameHeader))
                     {
-                        InstanceName = tokensByBackSlash[4].Replace(NamedPipeInstanceNameHeader, "");
+                        InstanceName = tokensByBackSlash[4].Substring(NamedPipeInstanceNameHeader.Length);
                     }
 
                     StringBuilder pipeNameBuilder = new StringBuilder();
 
-                    for ( int i = 4; i < tokensByBackSlash.Length-1; i++)
+                    for (int i = 4; i < tokensByBackSlash.Length - 1; i++)
                     {
                         pipeNameBuilder.Append(tokensByBackSlash[i]);
                         pipeNameBuilder.Append(Path.DirectorySeparatorChar);
                     }
                     // Append the last part without a "/"
                     pipeNameBuilder.Append(tokensByBackSlash[tokensByBackSlash.Length - 1]);
-
                     PipeName = pipeNameBuilder.ToString();
 
-                    if(string.IsNullOrWhiteSpace(InstanceName))
+                    if (string.IsNullOrWhiteSpace(InstanceName) && !DefaultPipeName.Equals(PipeName))
                     {
                         InstanceName = PipeToken + PipeName;
                     }
