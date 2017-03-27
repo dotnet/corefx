@@ -25,6 +25,9 @@
     <Project Include="..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Data.SqlClient\pkg\System.Data.SqlClient.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="System.Diagnostics.DiagnosticSource\pkg\System.Diagnostics.DiagnosticSource.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>       
