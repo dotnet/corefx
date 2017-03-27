@@ -268,8 +268,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 if (isPR) {
                     // Set PR trigger.
                     // TODO: More elaborate regex trigger?
-                    def testRunName = targetGroup == 'netfx' ? 'netfx' : osName
-                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${testRunName} ${configurationGroup} ${archGroup}", "(?i).*test\\W+outerloop\\W+${testRunName}\\W+${configurationGroup}.*")
+                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${targetGroup} ${osName} ${configurationGroup} ${archGroup}", "(?i).*test\\W+outerloop\\W+${targetGroup} ${osName}\\W+${configurationGroup}.*")
                 }
                 else {
                     // Set a periodic trigger
