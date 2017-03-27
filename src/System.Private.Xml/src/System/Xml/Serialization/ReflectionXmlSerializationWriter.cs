@@ -1276,44 +1276,26 @@ namespace System.Xml.Serialization
                     if (member.Attribute != null && !member.Ignore)
                     {
                         object source = p[i];
-
-                        //string specifiedSource = null;
-                        //int specifiedPosition = 0;
+                        bool? specifiedSource = null;
                         if (member.CheckSpecified != SpecifiedAccessor.None)
                         {
-                            throw new NotImplementedException("member.CheckSpecified != SpecifiedAccessor.None");
-                            //string memberNameSpecified = member.Name + "Specified";
-                            //for (int j = 0; j < mapping.Members.Length; j++)
-                            //{
-                            //    if (mapping.Members[j].Name == memberNameSpecified)
-                            //    {
-                            //        specifiedSource = "((bool) p[" + j.ToString(CultureInfo.InvariantCulture) + "])";
-                            //        specifiedPosition = j;
-                            //        break;
-                            //    }
-                            //}
+                            string memberNameSpecified = member.Name + "Specified";
+                            for (int j = 0; j < Math.Min(pLength, mapping.Members.Length); j++)
+                            {
+                                if (mapping.Members[j].Name == memberNameSpecified)
+                                {
+                                    specifiedSource = (bool) p[j];
+                                    break;
+                                }
+                            }
                         }
 
                         if (pLength > i)
                         {
-
-                            //if (specifiedSource != null)
-                            //{
-                            //    Writer.Write("if (pLength <= ");
-                            //    Writer.Write(specifiedPosition.ToString(CultureInfo.InvariantCulture));
-                            //    Writer.Write(" || ");
-                            //    Writer.Write(specifiedSource);
-                            //    Writer.WriteLine(") {");
-                            //    Writer.Indent++;
-                            //}
-
-                            WriteMember(source, member.Attribute, member.TypeDesc, null);
-
-                            //if (specifiedSource != null)
-                            //{
-                            //    Writer.Indent--;
-                            //    Writer.WriteLine("}");
-                            //}
+                            if (specifiedSource == null || specifiedSource.Value)
+                            {
+                                WriteMember(source, member.Attribute, member.TypeDesc, null);
+                            }
                         }
                     }
                 }
@@ -1328,7 +1310,6 @@ namespace System.Xml.Serialization
                     continue;
 
                 bool? specifiedSource = null;
-                int specifiedPosition = 0;
                 if (member.CheckSpecified != SpecifiedAccessor.None)
                 {
                     string memberNameSpecified = member.Name + "Specified";
@@ -1338,7 +1319,6 @@ namespace System.Xml.Serialization
                         if (mapping.Members[j].Name == memberNameSpecified)
                         {
                             specifiedSource = (bool)p[j];
-                            specifiedPosition = j;
                             break;
                         }
                     }
@@ -1346,7 +1326,7 @@ namespace System.Xml.Serialization
 
                 if (pLength > i)
                 {
-                    if (specifiedSource == null || (specifiedSource != null && (pLength <= specifiedPosition || specifiedSource.Value)))
+                    if (specifiedSource == null || specifiedSource.Value)
                     {
 
                         object source = p[i];
