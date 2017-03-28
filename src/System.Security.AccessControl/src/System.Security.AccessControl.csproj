@@ -132,7 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\System.Collections.NonGeneric\src\System\Collections\ReadOnlyCollectionBase.cs">
-      <Link>Common\ReadOnlyCollectionBase.cs</Link>
+      <Link>Common\System\Collections\ReadOnlyCollectionBase.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
