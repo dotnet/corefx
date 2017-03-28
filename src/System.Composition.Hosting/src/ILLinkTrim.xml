@@ -1,0 +1,22 @@
+<linker>
+  <assembly fullname="System.Composition.Hosting">
+    <type fullname="System.Composition.Hosting.Providers.ExportFactory.ExportFactoryExportDescriptorProvider">
+      <method name="GetExportFactoryDescriptors" />
+    </type>
+    <type fullname="System.Composition.Hosting.Providers.ExportFactory.ExportFactoryWithMetadataExportDescriptorProvider">
+      <method name="GetExportFactoryDescriptors" />
+    </type>
+    <type fullname="System.Composition.Hosting.Providers.ImportMany.ImportManyExportDescriptorProvider">
+      <method name="GetImportManyDescriptor" />
+    </type>
+    <type fullname="System.Composition.Hosting.Providers.Lazy.LazyExportDescriptorProvider">
+      <method name="GetLazyDefinitions" />
+    </type>
+    <type fullname="System.Composition.Hosting.Providers.Lazy.LazyWithMetadataExportDescriptorProvider">
+      <method name="GetLazyDefinitions" />
+    </type>
+    <type fullname="System.Composition.Hosting.Providers.Metadata.MetadataViewProvider">
+      <method name="GetMetadataValue" />
+    </type>
+  </assembly>
+</linker>
