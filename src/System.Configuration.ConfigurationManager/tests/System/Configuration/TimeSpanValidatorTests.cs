@@ -133,5 +133,3 @@ namespace System.ConfigurationTests
         }
     }
 }
-
-0
