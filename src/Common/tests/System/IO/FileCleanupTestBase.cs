@@ -22,7 +22,7 @@ namespace System.IO
 
             // Make 3 attempts since we have seen this on rare occasions fail with access denied, perhaps due to machine
             // configuration, and it doesn't make sense to fail arbitrary tests for this reason.
-            string failure = String.Empty;
+            string failure = string.Empty;
             for (int i = 0; i <= 2; i++)
             {
                 TestDirectory = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName());
