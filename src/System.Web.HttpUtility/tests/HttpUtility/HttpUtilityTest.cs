@@ -412,6 +412,7 @@ namespace System.Collections.Specialized.Tests
 
         [Theory]
         [MemberData(nameof(UrlDecodeData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework assumes the current codepage is UTF8")]
         public void UrlDecodeToBytes(string decoded, string encoded)
         {
             Assert.Equal(decoded, Encoding.UTF8.GetString(HttpUtility.UrlDecodeToBytes(encoded, Encoding.UTF8)));
