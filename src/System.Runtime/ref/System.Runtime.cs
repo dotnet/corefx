@@ -6139,7 +6139,7 @@ namespace System.Reflection
     public delegate bool TypeFilter(Type m, Object filterCriteria);
     public abstract partial class TypeInfo : System.Type, System.Reflection.IReflectableType
     {
-        internal TypeInfo() { }
+        protected TypeInfo() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> DeclaredConstructors { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> DeclaredEvents { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> DeclaredFields { get { throw null; } }
