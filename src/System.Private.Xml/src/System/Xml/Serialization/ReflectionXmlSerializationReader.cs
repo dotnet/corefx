@@ -14,7 +14,14 @@ using System.Threading.Tasks;
 using System.Xml.Extensions;
 using System.Xml.Schema;
 
+#if XMLSERIALIZERGENERATOR
+using System.Xml;
+using System.Xml.Serialization;
+
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     internal class ReflectionXmlSerializationReader : XmlSerializationReader
     {

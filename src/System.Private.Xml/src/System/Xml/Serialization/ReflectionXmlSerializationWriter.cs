@@ -12,7 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 
+#if XMLSERIALIZERGENERATOR
+using System.Xml;
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {

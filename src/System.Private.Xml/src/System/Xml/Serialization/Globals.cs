@@ -7,7 +7,13 @@ using System.Security;
 using System.Reflection;
 
 
+#if XMLSERIALIZERGENERATOR
+using System;
+
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     internal static class Globals
     {

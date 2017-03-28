@@ -14,7 +14,13 @@ using System.Xml.Schema;
 using System.Xml.Extensions;
 
 #if !uapaot
+#if XMLSERIALIZERGENERATOR
+using System.Xml;
+
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     internal class XmlSerializationWriterILGen : XmlSerializationILGen
     {

@@ -3,7 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 #if !uapaot
+#if XMLSERIALIZERGENERATOR
+using System.Xml;
+
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System;
     using System.Collections;
