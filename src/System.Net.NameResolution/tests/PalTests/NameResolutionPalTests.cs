@@ -33,14 +33,14 @@ namespace System.Net.NameResolution.PalTests
         }
 
         public static object[][] InvalidHostNames = new object[][] {
-            new object[] { "fkdsfsjfsrH:" },
+            new object[] { ":" },
             new object[] { "..." }
         };
 
         [Theory, MemberData(nameof(InvalidHostNames))]
-        public void GetHostByName_Invalid_HostName(string hostName)
+        public void GetHostByName_InvalidHostName_Throws(string hostName)
         {
-            Assert.Throws<SocketException>(() => NameResolutionPal.GetHostByName(hostName));
+            Assert.ThrowsAny<SocketException>(() => NameResolutionPal.GetHostByName(hostName));
         }
 
         [Fact]
