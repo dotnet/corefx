@@ -47,7 +47,7 @@
       <UAPToolsPackageVersion>1.0.1</UAPToolsPackageVersion>
       <UAPToolsPackageName>Microsoft.DotNet.UAP.TestTools</UAPToolsPackageName>
 
-      <UAPToolsFolder>$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools</UAPToolsFolder>
+      <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools</UAPToolsFolder>
       <UAPToolsFolder>$(UAPToolsFolder.Replace('/', '\'))</UAPToolsFolder>
     </PropertyGroup>
 
