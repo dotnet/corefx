@@ -798,21 +798,11 @@ namespace System.Data.SqlClient.SNI
 
         private bool InferConnectionDetails()
         {
-            // For Tcp and Only Tcp are parameters allowed.
-            if (ConnectionProtocol == DataSource.Protocol.None)
-            {
-                ConnectionProtocol = DataSource.Protocol.TCP;
-            }
-            else if (ConnectionProtocol != DataSource.Protocol.TCP)
-            {
-                // Parameter has been specified for non-TCP protocol. This is not allowed.
-                ReportSNIError(SNIProviders.INVALID_PROV);
-                return false;
-            }
-
             string[] tokensByCommaAndSlash = _dataSourceAfterTrimmingProtocol.Split(BackSlashSeparator, ',');
             ServerName = tokensByCommaAndSlash[0].Trim();
+
             int commaIndex = _dataSourceAfterTrimmingProtocol.IndexOf(',');
+
             int backSlashIndex = _dataSourceAfterTrimmingProtocol.IndexOf(BackSlashSeparator);
 
             // Check the parameters. The parameters are Comma separated in the Data Source. The parameter we really care about is the port
@@ -830,6 +820,18 @@ namespace System.Data.SqlClient.SNI
                     return false;
                 }
 
+                // For Tcp and Only Tcp are parameters allowed.
+                if (ConnectionProtocol == DataSource.Protocol.None)
+                {
+                    ConnectionProtocol = DataSource.Protocol.TCP;
+                }
+                else if (ConnectionProtocol != DataSource.Protocol.TCP)
+                {
+                    // Parameter has been specified for non-TCP protocol. This is not allowed.
+                    ReportSNIError(SNIProviders.INVALID_PROV);
+                    return false;
+                }
+
                 int port;
                 if (!int.TryParse(parameter, out port))
                 {
@@ -838,7 +840,7 @@ namespace System.Data.SqlClient.SNI
                 }
 
                 // If the user explicitly specified a invalid port in the connection string.
-                if (port < 0)
+                if (port < 1)
                 {
                     ReportSNIError(SNIProviders.TCP_PROV);
                     return false;
