@@ -41,7 +41,6 @@
     </Exec>
 
     <Exec Command="$(ApiCompatCmd) &quot;$(NetStandardRefPath)&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatNSBaselineFile)"
-          Condition="'$(TargetGroup)' != 'netfx'"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"
@@ -50,7 +49,6 @@
     </Exec>
 
     <Exec Command="$(ApiCompatCmd) &quot;$(NetStandardRefPath)/netstandard.dll&quot; @&quot;$(ApiCompatResponseFile)&quot; &gt; $(ApiCompatNSOnlyBaselineFile)"
-          Condition="'$(TargetGroup)' != 'netfx'"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"
