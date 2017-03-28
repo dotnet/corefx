@@ -332,29 +332,25 @@ namespace System.Data.SqlClient.SNI
 
         private static byte[] GetSqlServerSPN(DataSource dataSource)
         {
-            byte[] spnByte = null;
-
+            Debug.Assert(!string.IsNullOrWhiteSpace(dataSource.ServerName));
+            
             string hostName = dataSource.ServerName;
-            if (!string.IsNullOrWhiteSpace(hostName))
+            string postfix = null;
+            if (dataSource.Port != -1)
             {
-                string postfix = null;
-                if (dataSource.Port != -1)
-                {
-                    postfix = dataSource.Port.ToString();
-                }
-                else if (!string.IsNullOrWhiteSpace(dataSource.InstanceName))
-                {
-                    postfix = dataSource.InstanceName;
-                }
-                // For handling tcp:<hostname> format
-                else if (dataSource.ConnectionProtocol == DataSource.Protocol.TCP)
-                {
-                    postfix = DefaultSqlServerPort.ToString();
-                }
-
-                spnByte = GetSqlServerSPN(hostName, postfix);
+                postfix = dataSource.Port.ToString();
             }
-            return spnByte;
+            else if (!string.IsNullOrWhiteSpace(dataSource.InstanceName))
+            {
+                postfix = dataSource.InstanceName;
+            }
+            // For handling tcp:<hostname> format
+            else if (dataSource.ConnectionProtocol == DataSource.Protocol.TCP)
+            {
+                postfix = DefaultSqlServerPort.ToString();
+            }
+
+            return GetSqlServerSPN(hostName, postfix);
         }
 
         private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
@@ -446,7 +442,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="browserHostname">SQL Sever Browser hostname</param>
         /// <param name="instanceName">instance name to find port number</param>
         /// <returns>port number for given instance name</returns>
-        internal static int GetPortByInstanceName(string browserHostname, string instanceName)
+        private static int GetPortByInstanceName(string browserHostname, string instanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(browserHostname));
             Debug.Assert(!string.IsNullOrWhiteSpace(instanceName));
@@ -818,7 +814,7 @@ namespace System.Data.SqlClient.SNI
                         : tokensByCommaAndSlash[1].Trim();
 
                 // Bad Data Source like "server, "
-                if (string.IsNullOrWhiteSpace(parameter))
+                if (string.IsNullOrEmpty(parameter))
                 {
                     ReportSNIError(SNIProviders.INVALID_PROV);
                     return false;
