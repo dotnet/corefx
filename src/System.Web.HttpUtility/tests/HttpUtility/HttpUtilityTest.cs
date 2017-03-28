@@ -431,7 +431,7 @@ namespace System.Web.Tests
 
         [Theory]
         [MemberData(nameof(UrlDecodeDataToBytes_netcoreapp))]
-        //[SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17627")]
         public void UrlDecodeToBytes_Netcoreapp(string decoded, string encoded)
         {
             Assert.Equal(decoded, Encoding.UTF8.GetString(HttpUtility.UrlDecodeToBytes(encoded, Encoding.UTF8)));
