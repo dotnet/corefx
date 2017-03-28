@@ -39,13 +39,18 @@ namespace System.Security.Cryptography.Xml
 
             // rgbWKCS = rgbWrappedKeyData | (first 8 bytes of the hash)
             byte[] rgbWKCKS = new byte[rgbWrappedKeyData.Length + 8];
-            TripleDES tripleDES = TripleDES.Create();
-            // Don't add padding, use CBC mode: for example, a 192 bits key will yield 40 bytes of encrypted data
-            tripleDES.Padding = PaddingMode.None;
-            ICryptoTransform enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
-            ICryptoTransform enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
+            TripleDES tripleDES = null;
+            ICryptoTransform enc1 = null;
+            ICryptoTransform enc2 = null;
+
             try
             {
+                tripleDES = TripleDES.Create();
+                // Don't add padding, use CBC mode: for example, a 192 bits key will yield 40 bytes of encrypted data
+                tripleDES.Padding = PaddingMode.None;
+                enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
+                enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
+
                 Buffer.BlockCopy(rgbWrappedKeyData, 0, rgbWKCKS, 0, rgbWrappedKeyData.Length);
                 Buffer.BlockCopy(rgbCKS, 0, rgbWKCKS, rgbWrappedKeyData.Length, 8);
                 byte[] temp1 = enc1.TransformFinalBlock(rgbWKCKS, 0, rgbWKCKS.Length);
@@ -59,9 +64,9 @@ namespace System.Security.Cryptography.Xml
             }
             finally
             {
-                tripleDES.Dispose();
-                enc1.Dispose();
-                enc2.Dispose();
+                enc2?.Dispose();
+                enc1?.Dispose();
+                tripleDES?.Dispose();
             }
         }
 
@@ -73,13 +78,17 @@ namespace System.Security.Cryptography.Xml
                 && rgbEncryptedWrappedKeyData.Length != 48)
                 throw new CryptographicException(SR.Cryptography_Xml_KW_BadKeySize);
 
-            TripleDES tripleDES = TripleDES.Create();
-            // Assume no padding, use CBC mode
-            tripleDES.Padding = PaddingMode.None;
-            ICryptoTransform dec1 = tripleDES.CreateDecryptor(rgbKey, s_rgbTripleDES_KW_IV);
+            TripleDES tripleDES = null;
+            ICryptoTransform dec1 = null;
             ICryptoTransform dec2 = null;
+
             try
             {
+                tripleDES = TripleDES.Create();
+                // Assume no padding, use CBC mode
+                tripleDES.Padding = PaddingMode.None;
+                dec1 = tripleDES.CreateDecryptor(rgbKey, s_rgbTripleDES_KW_IV);
+
                 byte[] temp2 = dec1.TransformFinalBlock(rgbEncryptedWrappedKeyData, 0, rgbEncryptedWrappedKeyData.Length);
                 Array.Reverse(temp2);
                 // Get the IV and temp1
@@ -105,9 +114,9 @@ namespace System.Security.Cryptography.Xml
             }
             finally
             {
-                tripleDES.Dispose();
-                dec1.Dispose();
-                dec2.Dispose();
+                dec2?.Dispose();
+                dec1?.Dispose();
+                tripleDES?.Dispose();
             }
         }
 
@@ -119,14 +128,17 @@ namespace System.Security.Cryptography.Xml
             if ((rgbWrappedKeyData.Length % 8 != 0) || N <= 0)
                 throw new CryptographicException(SR.Cryptography_Xml_KW_BadKeySize);
 
-            RijndaelManaged rijn = new RijndaelManaged();
-            rijn.Key = rgbKey;
-            // Use ECB mode, no padding
-            rijn.Mode = CipherMode.ECB;
-            rijn.Padding = PaddingMode.None;
-            ICryptoTransform enc = rijn.CreateEncryptor();
+            Aes aes = null;
+            ICryptoTransform enc = null;
+
             try
             {
+                aes = Aes.Create();
+                aes.Key = rgbKey;
+                // Use ECB mode, no padding
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                enc = aes.CreateEncryptor();
                 // special case: only 1 block -- 8 bytes
                 if (N == 1)
                 {
@@ -166,8 +178,8 @@ namespace System.Security.Cryptography.Xml
             }
             finally
             {
-                rijn.Dispose();
-                enc.Dispose();
+                enc?.Dispose();
+                aes?.Dispose();
             }
         }
 
@@ -179,14 +191,18 @@ namespace System.Security.Cryptography.Xml
                 throw new CryptographicException(SR.Cryptography_Xml_KW_BadKeySize);
 
             byte[] rgbOutput = new byte[N << 3];
-            RijndaelManaged rijn = new RijndaelManaged();
-            rijn.Key = rgbKey;
-            // Use ECB mode, no padding
-            rijn.Mode = CipherMode.ECB;
-            rijn.Padding = PaddingMode.None;
-            ICryptoTransform dec = rijn.CreateDecryptor();
+            Aes aes = null;
+            ICryptoTransform dec = null;
+
             try
             {
+                aes = Aes.Create();
+                aes.Key = rgbKey;
+                // Use ECB mode, no padding
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.None;
+                dec = aes.CreateDecryptor();
+
                 // special case: only 1 block -- 8 bytes
                 if (N == 1)
                 {
@@ -231,8 +247,8 @@ namespace System.Security.Cryptography.Xml
             }
             finally
             {
-                rijn.Dispose();
-                dec.Dispose();
+                dec?.Dispose();
+                aes?.Dispose();
             }
         }
     }
