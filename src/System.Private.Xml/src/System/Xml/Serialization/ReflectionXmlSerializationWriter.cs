@@ -1272,7 +1272,6 @@ namespace System.Xml.Serialization
                 for (int i = 0; i < mapping.Members.Length; i++)
                 {
                     MemberMapping member = mapping.Members[i];
-
                     if (member.Attribute != null && !member.Ignore)
                     {
                         object source = p[i];
@@ -1333,15 +1332,14 @@ namespace System.Xml.Serialization
                         object enumSource = null;
                         if (member.ChoiceIdentifier != null)
                         {
-                            throw new NotImplementedException("(member.ChoiceIdentifier != null)");
-                            //for (int j = 0; j < mapping.Members.Length; j++)
-                            //{
-                            //    if (mapping.Members[j].Name == member.ChoiceIdentifier.MemberName)
-                            //    {
-                            //        enumSource = p[j];
-                            //        break;
-                            //    }
-                            //}
+                            for (int j = 0; j < mapping.Members.Length; j++)
+                            {
+                                if (mapping.Members[j].Name == member.ChoiceIdentifier.MemberName)
+                                {
+                                    enumSource = p[j];
+                                    break;
+                                }
+                            }
                         }
 
                         if (isRpc && member.IsReturnValue && member.Elements.Length > 0)

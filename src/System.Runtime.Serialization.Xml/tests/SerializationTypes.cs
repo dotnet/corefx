@@ -2807,6 +2807,22 @@ namespace SerializationTypes
         Amount
     }
 
+    public class TypeWithPropertyHavingChoice
+    {
+        // The ManyChoices field can contain an array
+        // of choices. Each choice must be matched to
+        // an array item in the ChoiceArray field.
+        [XmlChoiceIdentifier("ChoiceArray")]
+        [XmlElement("Item", typeof(string))]
+        [XmlElement("Amount", typeof(int))]
+        public object[] ManyChoices { get; set; }
+
+        // TheChoiceArray field contains the enumeration
+        // values, one for each item in the ManyChoices array.
+        [XmlIgnore]
+        public MoreChoices[] ChoiceArray;
+    }
+
     public class TypeWithFieldsOrdered
     {
         [XmlElement(Order = 0)]

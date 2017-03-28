@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Reflection;
 using System.Threading;
@@ -3392,6 +3393,37 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Utils.CompareResult result = Utils.Compare(expectedOutput, actualOutput);
         Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
             Environment.NewLine, result.ErrorMessage, deserialized, expectedOutput, actualOutput));
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_With_ChoiceIdentifier()
+    {
+        string ns = s_defaultNs;
+        string memberName1 = "items";
+        XmlReflectionMember member1 = GetReflectionMemberNoXmlElement<object[]>(memberName1, ns);
+        PropertyInfo itemProperty = typeof(TypeWithPropertyHavingChoice).GetProperty("ManyChoices");
+        member1.XmlAttributes = new XmlAttributes(itemProperty);
+
+        string memberName2 = "ChoiceArray";
+        XmlReflectionMember member2 = GetReflectionMemberNoXmlElement<MoreChoices[]>(memberName2, ns);
+        member2.XmlAttributes.XmlIgnore = true;
+
+        var members = new XmlReflectionMember[] { member1, member2 };
+
+        object[] items = { "Food", 5 };
+        var itemChoices = new MoreChoices[] { MoreChoices.Item, MoreChoices.Amount };
+        object[] value = { items, itemChoices };
+
+        object[] actual = RoundTripWithXmlMembersMapping(value, memberName1,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <Item>Food</Item>\r\n  <Amount>5</Amount>\r\n</wrapper>",
+            false,
+            members,
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+        var actualItems = actual[0] as object[];
+        Assert.NotNull(actualItems);
+        Assert.True(items.SequenceEqual(actualItems));
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";
