@@ -131,10 +131,5 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\System.Collections.NonGeneric\src\System\Collections\ReadOnlyCollectionBase.cs">
-      <Link>Common\System\Collections\ReadOnlyCollectionBase.cs</Link>
-    </Compile>
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
