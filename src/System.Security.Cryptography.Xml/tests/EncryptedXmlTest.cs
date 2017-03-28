@@ -437,7 +437,7 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
-        public void DecryptKey_AESCorruptedKey8Bit()
+        public void DecryptKey_AESCorruptedKey8Bytes()
         {
             using (Aes aes = Aes.Create())
             {
