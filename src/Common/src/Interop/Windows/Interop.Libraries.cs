@@ -4,7 +4,7 @@
 
 internal static partial class Interop
 {
-    internal static class Libraries
+    internal static partial class Libraries
     {
         internal const string Advapi32 = "advapi32.dll";
         internal const string BCrypt = "BCrypt.dll";
