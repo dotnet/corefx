@@ -31,27 +31,31 @@ namespace System.Security.Cryptography.Xml
             }
 
             // generate a random IV
-            RandomNumberGenerator rng = RandomNumberGenerator.Create();
             byte[] rgbIV = new byte[8];
-            rng.GetBytes(rgbIV);
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(rgbIV);
+            }
 
             // rgbWKCS = rgbWrappedKeyData | (first 8 bytes of the hash)
             byte[] rgbWKCKS = new byte[rgbWrappedKeyData.Length + 8];
-            TripleDESCryptoServiceProvider tripleDES = new TripleDESCryptoServiceProvider();
-            // Don't add padding, use CBC mode: for example, a 192 bits key will yield 40 bytes of encrypted data
-            tripleDES.Padding = PaddingMode.None;
-            ICryptoTransform enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
-            Buffer.BlockCopy(rgbWrappedKeyData, 0, rgbWKCKS, 0, rgbWrappedKeyData.Length);
-            Buffer.BlockCopy(rgbCKS, 0, rgbWKCKS, rgbWrappedKeyData.Length, 8);
-            byte[] temp1 = enc1.TransformFinalBlock(rgbWKCKS, 0, rgbWKCKS.Length);
-            byte[] temp2 = new byte[rgbIV.Length + temp1.Length];
-            Buffer.BlockCopy(rgbIV, 0, temp2, 0, rgbIV.Length);
-            Buffer.BlockCopy(temp1, 0, temp2, rgbIV.Length, temp1.Length);
-            // temp2 = REV (rgbIV | E_k(rgbWrappedKeyData | rgbCKS))
-            Array.Reverse(temp2);
+            using (TripleDES tripleDES = TripleDES.Create())
+            {
+                // Don't add padding, use CBC mode: for example, a 192 bits key will yield 40 bytes of encrypted data
+                tripleDES.Padding = PaddingMode.None;
+                ICryptoTransform enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
+                Buffer.BlockCopy(rgbWrappedKeyData, 0, rgbWKCKS, 0, rgbWrappedKeyData.Length);
+                Buffer.BlockCopy(rgbCKS, 0, rgbWKCKS, rgbWrappedKeyData.Length, 8);
+                byte[] temp1 = enc1.TransformFinalBlock(rgbWKCKS, 0, rgbWKCKS.Length);
+                byte[] temp2 = new byte[rgbIV.Length + temp1.Length];
+                Buffer.BlockCopy(rgbIV, 0, temp2, 0, rgbIV.Length);
+                Buffer.BlockCopy(temp1, 0, temp2, rgbIV.Length, temp1.Length);
+                // temp2 = REV (rgbIV | E_k(rgbWrappedKeyData | rgbCKS))
+                Array.Reverse(temp2);
 
-            ICryptoTransform enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
-            return enc2.TransformFinalBlock(temp2, 0, temp2.Length);
+                ICryptoTransform enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
+                return enc2.TransformFinalBlock(temp2, 0, temp2.Length);
+            }
         }
 
         [SuppressMessage("Microsoft.Cryptography", "CA5350", Justification = "Explicitly requested by the message contents")]
@@ -62,31 +66,33 @@ namespace System.Security.Cryptography.Xml
                 && rgbEncryptedWrappedKeyData.Length != 48)
                 throw new CryptographicException(SR.Cryptography_Xml_KW_BadKeySize);
 
-            TripleDESCryptoServiceProvider tripleDES = new TripleDESCryptoServiceProvider();
-            // Assume no padding, use CBC mode
-            tripleDES.Padding = PaddingMode.None;
-            ICryptoTransform dec1 = tripleDES.CreateDecryptor(rgbKey, s_rgbTripleDES_KW_IV);
-            byte[] temp2 = dec1.TransformFinalBlock(rgbEncryptedWrappedKeyData, 0, rgbEncryptedWrappedKeyData.Length);
-            Array.Reverse(temp2);
-            // Get the IV and temp1
-            byte[] rgbIV = new byte[8];
-            Buffer.BlockCopy(temp2, 0, rgbIV, 0, 8);
-            byte[] temp1 = new byte[temp2.Length - rgbIV.Length];
-            Buffer.BlockCopy(temp2, 8, temp1, 0, temp1.Length);
-
-            ICryptoTransform dec2 = tripleDES.CreateDecryptor(rgbKey, rgbIV);
-            byte[] rgbWKCKS = dec2.TransformFinalBlock(temp1, 0, temp1.Length);
-
-            // checksum the key
-            byte[] rgbWrappedKeyData = new byte[rgbWKCKS.Length - 8];
-            Buffer.BlockCopy(rgbWKCKS, 0, rgbWrappedKeyData, 0, rgbWrappedKeyData.Length);
-            using (var sha = SHA1.Create())
+            using (TripleDES tripleDES = TripleDES.Create())
             {
-                byte[] rgbCKS = sha.ComputeHash(rgbWrappedKeyData);
-                for (int index = rgbWrappedKeyData.Length, index1 = 0; index < rgbWKCKS.Length; index++, index1++)
-                    if (rgbWKCKS[index] != rgbCKS[index1])
-                        throw new CryptographicException(SR.Cryptography_Xml_BadWrappedKeySize);
-                return rgbWrappedKeyData;
+                // Assume no padding, use CBC mode
+                tripleDES.Padding = PaddingMode.None;
+                ICryptoTransform dec1 = tripleDES.CreateDecryptor(rgbKey, s_rgbTripleDES_KW_IV);
+                byte[] temp2 = dec1.TransformFinalBlock(rgbEncryptedWrappedKeyData, 0, rgbEncryptedWrappedKeyData.Length);
+                Array.Reverse(temp2);
+                // Get the IV and temp1
+                byte[] rgbIV = new byte[8];
+                Buffer.BlockCopy(temp2, 0, rgbIV, 0, 8);
+                byte[] temp1 = new byte[temp2.Length - rgbIV.Length];
+                Buffer.BlockCopy(temp2, 8, temp1, 0, temp1.Length);
+
+                ICryptoTransform dec2 = tripleDES.CreateDecryptor(rgbKey, rgbIV);
+                byte[] rgbWKCKS = dec2.TransformFinalBlock(temp1, 0, temp1.Length);
+
+                // checksum the key
+                byte[] rgbWrappedKeyData = new byte[rgbWKCKS.Length - 8];
+                Buffer.BlockCopy(rgbWKCKS, 0, rgbWrappedKeyData, 0, rgbWrappedKeyData.Length);
+                using (var sha = SHA1.Create())
+                {
+                    byte[] rgbCKS = sha.ComputeHash(rgbWrappedKeyData);
+                    for (int index = rgbWrappedKeyData.Length, index1 = 0; index < rgbWKCKS.Length; index++, index1++)
+                        if (rgbWKCKS[index] != rgbCKS[index1])
+                            throw new CryptographicException(SR.Cryptography_Xml_BadWrappedKeySize);
+                    return rgbWrappedKeyData;
+                }
             }
         }
 
