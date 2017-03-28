@@ -368,21 +368,19 @@ namespace System.IO.MemoryMappedFiles.Tests
         [InlineData(10000)]
         public void ValidArgumentCombinationsWithPath_ModeCreate(long capacity)
         {
-            string mapName = CreateUniqueMapName();
-
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, mapName, capacity))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, null, capacity))
             {
                 ValidateMemoryMappedFile(mmf, capacity);
             }
 
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, mapName, capacity, MemoryMappedFileAccess.ReadWrite))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, null, capacity, MemoryMappedFileAccess.ReadWrite))
             {
                 ValidateMemoryMappedFile(mmf, capacity, MemoryMappedFileAccess.ReadWrite);
             }
 
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(GetTestFilePath(), FileMode.Create, mapName, capacity))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(GetTestFilePath(), FileMode.Create, null, capacity))
             {
                 ValidateMemoryMappedFile(mmf, capacity);
             }
