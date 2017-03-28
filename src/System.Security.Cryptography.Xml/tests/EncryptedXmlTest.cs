@@ -404,7 +404,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 byte[] key = Encoding.ASCII.GetBytes("123456781234567812345678");
 
                 byte[] encryptedKey = EncryptedXml.EncryptKey(key, tripleDES);
-                encryptedKey[0] = (byte)(encryptedKey[0] > 0 ? encryptedKey[0] - 1 : 1);
+                encryptedKey[0] ^= 0xFF;
 
                 Assert.Throws<CryptographicException>(() => EncryptedXml.DecryptKey(encryptedKey, tripleDES));
             }
