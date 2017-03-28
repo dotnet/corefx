@@ -9,7 +9,7 @@ using System.Text;
 using System.Web;
 using Xunit;
 
-namespace System.Web.HttpUtility.Tests
+namespace System.Web.Tests
 {
     public class HttpUtilityTest
     {
@@ -431,7 +431,7 @@ namespace System.Web.HttpUtility.Tests
 
         [Theory]
         [MemberData(nameof(UrlDecodeDataToBytes_netcoreapp))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        //[SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void UrlDecodeToBytes_Netcoreapp(string decoded, string encoded)
         {
             Assert.Equal(decoded, Encoding.UTF8.GetString(HttpUtility.UrlDecodeToBytes(encoded, Encoding.UTF8)));
