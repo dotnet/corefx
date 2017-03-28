@@ -31,7 +31,7 @@ namespace System.Security.Cryptography.Xml
             }
 
             // generate a random IV
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            RandomNumberGenerator rng = RandomNumberGenerator.Create();
             byte[] rgbIV = new byte[8];
             rng.GetBytes(rgbIV);
 
