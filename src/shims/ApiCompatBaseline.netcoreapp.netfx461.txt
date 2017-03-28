@@ -816,7 +816,6 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Security.SuppressUnmanagedCodeSec
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.UnverifiableCodeAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.VerificationException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Security.XmlSyntaxException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Security.AccessControl.AuthorizationRuleCollection' does not inherit from base type 'System.Collections.ReadOnlyCollectionBase' in the implementation but it does in the contract.
 TypesMustExist : Type 'System.Security.AccessControl.CryptoKeyAccessRule' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.AccessControl.CryptoKeyAuditRule' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.AccessControl.CryptoKeyRights' does not exist in the implementation but it does exist in the contract.

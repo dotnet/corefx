@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Resources.ResourceManager" />
@@ -129,11 +130,6 @@
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\System.Collections.NonGeneric\src\System\Collections\ReadOnlyCollectionBase.cs">
-      <Link>Common\System\Collections\ReadOnlyCollectionBase.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
