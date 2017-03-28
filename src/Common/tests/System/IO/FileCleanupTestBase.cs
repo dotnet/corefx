@@ -4,6 +4,7 @@
 
 using Xunit;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.IO
 {
@@ -33,6 +34,7 @@ namespace System.IO
                 catch (Exception ex)
                 {
                     failure += ex.ToString() + "\n";
+                    Thread.Sleep(10); // Give a transient condition like antivirus/indexing a chance to go away
                 }
             }
 
