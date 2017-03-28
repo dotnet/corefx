@@ -39,11 +39,13 @@ namespace System.Security.Cryptography.Xml
 
             // rgbWKCS = rgbWrappedKeyData | (first 8 bytes of the hash)
             byte[] rgbWKCKS = new byte[rgbWrappedKeyData.Length + 8];
-            using (TripleDES tripleDES = TripleDES.Create())
+            TripleDES tripleDES = TripleDES.Create();
+            ICryptoTransform enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
+            ICryptoTransform enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
+            try
             {
                 // Don't add padding, use CBC mode: for example, a 192 bits key will yield 40 bytes of encrypted data
                 tripleDES.Padding = PaddingMode.None;
-                ICryptoTransform enc1 = tripleDES.CreateEncryptor(rgbKey, rgbIV);
                 Buffer.BlockCopy(rgbWrappedKeyData, 0, rgbWKCKS, 0, rgbWrappedKeyData.Length);
                 Buffer.BlockCopy(rgbCKS, 0, rgbWKCKS, rgbWrappedKeyData.Length, 8);
                 byte[] temp1 = enc1.TransformFinalBlock(rgbWKCKS, 0, rgbWKCKS.Length);
@@ -53,8 +55,13 @@ namespace System.Security.Cryptography.Xml
                 // temp2 = REV (rgbIV | E_k(rgbWrappedKeyData | rgbCKS))
                 Array.Reverse(temp2);
 
-                ICryptoTransform enc2 = tripleDES.CreateEncryptor(rgbKey, s_rgbTripleDES_KW_IV);
                 return enc2.TransformFinalBlock(temp2, 0, temp2.Length);
+            }
+            finally
+            {
+                tripleDES.Dispose();
+                enc1.Dispose();
+                enc2.Dispose();
             }
         }
 
