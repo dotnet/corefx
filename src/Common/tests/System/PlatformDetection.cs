@@ -99,6 +99,8 @@ namespace System
 
         public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
 
+        public static bool IsFedora => IsDistroAndVersion("fedora");
+
         private static bool GetIsWindowsSubsystemForLinux()
         {
             // https://github.com/Microsoft/BashOnWindows/issues/423#issuecomment-221627364
@@ -130,6 +132,7 @@ namespace System
         public static bool IsFedora25 { get; } = IsDistroAndVersion("fedora", "25");
         public static bool IsFedora26 { get; } = IsDistroAndVersion("fedora", "26");
         public static bool IsCentos7 { get; } = IsDistroAndVersion("centos", "7");
+
 
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.
