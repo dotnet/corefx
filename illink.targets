@@ -76,17 +76,24 @@
     <Exec Command="$(ILLinkCmd) $(ILLinkArgs)" />
 
     <PropertyGroup>
-      <AsmDiffReport>$(IntermediateOutputPath)$(TargetName).diff.html</AsmDiffReport>
-
-      <AsmDiffArgs>$(AsmDiffArgs) -unchanged -changed -added -removed</AsmDiffArgs>
-      <AsmDiffArgs>$(AsmDiffArgs) -includePrivateApis -includeInternalApis -alwaysDiffMembers -diffAttributes</AsmDiffArgs>
       <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimInputAssembly)</AsmDiffArgs>
       <AsmDiffArgs>$(AsmDiffArgs) $(ILLinkTrimAssemblyPath)</AsmDiffArgs>
-      <AsmDiffArgs>$(AsmDiffArgs) -out:$(AsmDiffReport)</AsmDiffArgs>
+      <AsmDiffArgs>$(AsmDiffArgs) -includePrivateApis -includeInternalApis -alwaysDiffMembers -diffAttributes</AsmDiffArgs>
+
+      <AsmDiffReport>$(IntermediateOutputPath)$(TargetName).diff.html</AsmDiffReport>
+      <AsmDiffReportArgs>$(AsmDiffArgs) -out:$(AsmDiffReport)</AsmDiffReportArgs>
+      <AsmDiffReportArgs>$(AsmDiffReportArgs) -unchanged -changed -added -removed</AsmDiffReportArgs>
+
+      <AsmDiffList>$(IntermediateOutputPath)$(TargetName).diff.csv</AsmDiffList>
+      <AsmDiffListArgs>$(AsmDiffArgs) -out:$(AsmDiffList)</AsmDiffListArgs>
+      <AsmDiffListArgs>$(AsmDiffListArgs) -unchanged -changed -added -removed </AsmDiffListArgs>
+      <AsmDiffListArgs>$(AsmDiffListArgs) -diffWriter:CSV</AsmDiffListArgs>
     </PropertyGroup>
 
-    <Exec Condition="'$(AsmDiffCmd)' != ''" Command="$(AsmDiffCmd) $(AsmDiffArgs)" />
+    <Exec Condition="'$(AsmDiffCmd)' != ''" Command="$(AsmDiffCmd) $(AsmDiffReportArgs)" />
     <Message Condition="'$(AsmDiffCmd)' != ''" Text="$(AsmDiffReport)" />
+    <Exec Condition="'$(AsmDiffCmd)' != ''" Command="$(AsmDiffCmd) $(AsmDiffListArgs)" />
+    <Message Condition="'$(AsmDiffCmd)' != ''" Text="$(AsmDiffList)" />
   </Target>
   
   <!-- Similar to _CheckForCompileOutputs and runs in the same places, 
@@ -98,11 +105,18 @@
       <PreTrimmedItem Condition="Exists('$(ILLinkTrimInputAssembly)')" Include="$(ILLinkTrimInputAssembly)" />
       <PreTrimmedItem Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimInputSymbols)')" Include="$(ILLinkTrimInputSymbols)" />
       <FileWrites Include="@(PreTrimmedItem)" />
+
+      <TrimmingReport Condition="Exists('$(AsmDiffReport)')" Include="$(AsmDiffReport)" />
+      <TrimmingReport Condition="Exists('$(AsmDiffList)')" Include="$(AsmDiffList)" />
     </ItemGroup>
 
     <ItemGroup Condition="Exists('$(ILLinkTrimInputAssembly)') AND '$(BinPlaceILLinkTrimAssembly)' == 'true'">
       <BinPlaceConfiguration Include="$(BuildConfiguration)">
         <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/trimmed</RuntimePath>
+      </BinPlaceConfiguration>
+      <BinPlaceConfiguration Include="$(BuildConfiguration)">
+        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/reports</RuntimePath>
+        <ItemName>TrimmingReport</ItemName>
       </BinPlaceConfiguration>
       <BinPlaceConfiguration Include="$(BuildConfiguration)">
         <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/pretrimmed</RuntimePath>
