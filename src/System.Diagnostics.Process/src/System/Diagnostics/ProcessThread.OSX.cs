@@ -13,8 +13,11 @@ namespace System.Diagnostics
         /// </summary>
         private ThreadPriorityLevel PriorityLevelCore
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            // We couldn't find a POSIX API on OSX
+            // Ther is a scheduling policy API, whether to schedule by fifo, roundrobin and some priority number with it,
+            // but it's not the behavior this API exposes.
+            get { throw new PlatformNotSupportedException(SR.ThreadPriorityNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ThreadPriorityNotSupported); }
         }
 
         /// <summary>
@@ -26,7 +29,7 @@ namespace System.Diagnostics
         /// <summary>Returns the time the associated thread was started.</summary>
         public DateTime StartTime
         {
-            get { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(); } // OSX does not provide a way to get this data
         }
 
         /// <summary>

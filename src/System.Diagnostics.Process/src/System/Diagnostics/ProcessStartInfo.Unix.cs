@@ -13,26 +13,26 @@ namespace System.Diagnostics
 
         public string UserName
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); } // Do we expect to map this to sudo in due course?
-            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); } // Do we expect to map this to sudo in due course?
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
 
         public string PasswordInClearText
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
 
         public string Domain
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
 
         public bool LoadUserProfile
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
 
         public bool UseShellExecute { get; set; }
@@ -42,8 +42,8 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public SecureString Password
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
-            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
     }
 }

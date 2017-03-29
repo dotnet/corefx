@@ -25,7 +25,7 @@ namespace System.Diagnostics
             }
             set
             {
-                throw new PlatformNotSupportedException();
+                throw new PlatformNotSupportedException(); // Why is this not supported? 
             }
         }
 
