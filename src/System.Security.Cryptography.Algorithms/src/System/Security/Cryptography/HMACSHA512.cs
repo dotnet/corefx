@@ -40,11 +40,9 @@ namespace System.Security.Cryptography
             }
             set
             {
-                // We don't have a managed implementation of HMAC
-                // so we can't support this
                 if (value)
                 {
-                    throw new PlatformNotSupportedException();
+                    throw new PlatformNotSupportedException(); // We don't have a managed implementation of HMAC so we can't support this 
                 }
             }
         }
