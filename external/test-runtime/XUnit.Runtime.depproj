@@ -6,7 +6,8 @@
          This RID value doesn't really matter, since the assets we are copying are not RID specific, so defaulting to Windows here
     -->
     <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
-    <OutputPath>$(RuntimePath)</OutputPath>
+    <OutputPath Condition="'$(BinPlaceNETCoreAppTestDependencies)' == 'true'">$(NETCoreAppPackageRuntimePath)\..\dependencies</OutputPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">$(RuntimePath)</OutputPath>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' != 'netfx'">xunit.console.netcore</XUnitRunnerPackageId>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' == 'netfx'">xunit.runner.console</XUnitRunnerPackageId>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'uapaot'">.NETStandard,Version=v2.0</NuGetTargetMoniker>
