@@ -363,24 +363,24 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [InlineData(1)]
-        [InlineData(256)]
-        [InlineData(10000)]
-        public void ValidArgumentCombinationsWithPath_ModeCreate(long capacity)
+        [MemberData(nameof(MemberData_ValidNameCapacityCombinationsWithPath),
+            new string[] { null, "CreateUniqueMapName()" },
+            new long[] { 1, 256, -1 /*pagesize*/, 10000 })]
+        public void ValidArgumentCombinationsWithPath_ModeCreate(string mapName, long capacity)
         {
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, null, capacity))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, mapName, capacity))
             {
                 ValidateMemoryMappedFile(mmf, capacity);
             }
 
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, null, capacity, MemoryMappedFileAccess.ReadWrite))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Create, mapName, capacity, MemoryMappedFileAccess.ReadWrite))
             {
                 ValidateMemoryMappedFile(mmf, capacity, MemoryMappedFileAccess.ReadWrite);
             }
 
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(GetTestFilePath(), FileMode.Create, null, capacity))
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(GetTestFilePath(), FileMode.Create, mapName, capacity))
             {
                 ValidateMemoryMappedFile(mmf, capacity);
             }
@@ -405,31 +405,39 @@ namespace System.IO.MemoryMappedFiles.Tests
         public static IEnumerable<object[]> MemberData_ValidArgumentCombinationsWithPath(
             FileMode[] modes, string[] mapNames, long[] capacities, MemoryMappedFileAccess[] accesses)
         {
-            foreach (FileMode mode in modes)
+            foreach (object[] namesCaps in MemberData_ValidNameCapacityCombinationsWithPath(mapNames, capacities))
             {
-                foreach (string tmpMapName in mapNames)
+                foreach (FileMode mode in modes)
                 {
-                    if (tmpMapName != null && !MapNamesSupported)
+                    foreach (MemoryMappedFileAccess access in accesses)
                     {
-                        continue;
-                    }
-
-                    foreach (long tmpCapacity in capacities)
-                    {
-                        long capacity = tmpCapacity == -1 ? s_pageSize.Value : tmpCapacity;
-
-                        foreach (MemoryMappedFileAccess access in accesses)
+                        if ((mode == FileMode.Create || mode == FileMode.CreateNew || mode == FileMode.Truncate) &&
+                            !IsWritable(access))
                         {
-                            if ((mode == FileMode.Create || mode == FileMode.CreateNew || mode == FileMode.Truncate) &&
-                                !IsWritable(access))
-                            {
-                                continue;
-                            }
-
-                            string mapName = tmpMapName == "CreateUniqueMapName()" ? CreateUniqueMapName() : tmpMapName;
-                            yield return new object[] { mode, mapName, capacity, access };
+                            continue;
                         }
+
+                        yield return new object[] { mode, namesCaps[0], namesCaps[1], access };
                     }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> MemberData_ValidNameCapacityCombinationsWithPath(
+            string[] mapNames, long[] capacities)
+        {
+            foreach (string tmpMapName in mapNames)
+            {
+                if (tmpMapName != null && !MapNamesSupported)
+                {
+                    continue;
+                }
+
+                foreach (long tmpCapacity in capacities)
+                {
+                    long capacity = tmpCapacity == -1 ? s_pageSize.Value : tmpCapacity;
+                    string mapName = tmpMapName == "CreateUniqueMapName()" ? CreateUniqueMapName() : tmpMapName;
+                    yield return new object[] { mapName, capacity, };
                 }
             }
         }
