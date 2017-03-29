@@ -19,6 +19,7 @@ namespace System.Globalization.Tests
             }
             else
             {
+                // Fedora, Ubuntu, <= Windows 8
                 return new int[] { 3, 2 };
             }
         }
