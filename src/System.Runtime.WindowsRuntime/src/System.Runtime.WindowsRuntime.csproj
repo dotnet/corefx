@@ -12,8 +12,6 @@
     <ProjectGuid>{844A2A0B-4169-49C3-B367-AFDC4894E487}</ProjectGuid>
     <PackageTargetRuntime>win8</PackageTargetRuntime>
     <PackageTargetRuntime Condition="'$(TargetGroup)' == 'uapaot'">win8-aot</PackageTargetRuntime>
-    <!-- ILLink cannot handle the windows.winmd reference -->
-    <ILLinkTrimAssembly>false</ILLinkTrimAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap'">
     <DefineConstants>$(DefineConstants);netstandard;FEATURE_APPX</DefineConstants>
