@@ -189,29 +189,7 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether the specified sequence appears at the start of the span.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text)
-        {
-            if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
-
-            int textLength = text.Length;
-
-            if (textLength == 0) return ReadOnlySpan<char>.Empty;
-
-            unsafe
-            {
-                fixed (char* charPointer = text)
-                {
-                    return ReadOnlySpan<char>.DangerousCreate(text, ref *charPointer, textLength);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the specified sequence appears at the start of the span.
+        /// Creates a new  span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[] array)
@@ -220,7 +198,7 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether the specified sequence appears at the start of the span.
+        /// Creates a new  span over the portion of the target array segment.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment)
