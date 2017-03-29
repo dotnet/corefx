@@ -133,7 +133,6 @@ namespace System
         public static bool IsFedora26 { get; } = IsDistroAndVersion("fedora", "26");
         public static bool IsCentos7 { get; } = IsDistroAndVersion("centos", "7");
 
-
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.
         /// </summary>
