@@ -104,7 +104,7 @@
 
   <Target Name="CopyTestILCToTestHostDir" Condition="'$(BuildingUAPAOTVertical)' == 'true'">
     <PropertyGroup>
-      <_TestILCFolderCopy>$(TestSharedFXDir)TestILC/</_TestILCFolderCopy>
+      <_TestILCFolderCopy>$(ArchivePayloadRootDir)TestILC/</_TestILCFolderCopy>
     </PropertyGroup>
     <ItemGroup>
       <_TestILCFiles Include="$(TestILCFolder)/**/*" />
@@ -116,7 +116,7 @@
   <!-- Zips up the runtime directory;  unzip location of this file will be used as the first argument to RunTests.cmd/sh. -->
   <Target Name="CompressRuntimeDir" DependsOnTargets="CopyTestILCToTestHostDir" Condition="'$(SkipArchive)' != 'true'">
     <ZipFileCreateFromDirectory
-        SourceDirectory="$(TestSharedFxDir)"
+        SourceDirectory="$(ArchivePayloadRootDir)"
         DestinationArchive="$(TestRuntimeArchiveFile)"
         OverwriteDestination="true" />
     <ItemGroup>

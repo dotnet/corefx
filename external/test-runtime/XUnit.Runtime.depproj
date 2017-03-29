@@ -61,12 +61,12 @@
 
     <Copy Condition="'$(UAPToolsFolder)'!=''"
           SourceFiles="@(RunnerFolderContents)" 
-          DestinationFolder="$(NETCoreAppTestRootPath)\Runner\%(RecursiveDir)"
+          DestinationFolder="$(TestHostRootPath)\Runner\%(RecursiveDir)"
           SkipUnchangedFiles="true"/>
 
     <Copy Condition="'$(UAPToolsFolder)'!=''"
           SourceFiles="@(LauncherFolderContents)" 
-          DestinationFolder="$(NETCoreAppTestRootPath)\Launcher\%(RecursiveDir)"
+          DestinationFolder="$(TestHostRootPath)\Launcher\%(RecursiveDir)"
           SkipUnchangedFiles="true"/>
   </Target>
 
