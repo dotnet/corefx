@@ -53,7 +53,7 @@
       <ILLinkArgs>$(ILLinkArgs) -t</ILLinkArgs>
       <ILLinkArgs>$(ILLinkArgs) -out $(ILLinkTrimOutputPath)</ILLinkArgs>
       <ILLinkArgs Condition="'$(ILLinkTrimXml)' != ''">$(ILLinkArgs) -x $(ILLinkTrimXml)</ILLinkArgs>
-      <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true'">$(ILLinkArgs) -b true</ILLinkArgs>
+      <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimAssemblySymbols)')">$(ILLinkArgs) -b true</ILLinkArgs>
     </PropertyGroup>
 
     <MakeDir Directories="$(ILLinkTrimInputPath)" />
@@ -66,7 +66,7 @@
     <!-- Move the PDB into a subdirectory for ILLink if we are rewriting PDBs -->
     <Move SourceFiles="$(ILLinkTrimAssemblySymbols)"
           DestinationFolder="$(ILLinkTrimInputPath)"
-          Condition="'$(ILLinkRewritePDBs)' == 'true'"
+          Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimAssemblySymbols)')"
     />
 
     <PropertyGroup>
