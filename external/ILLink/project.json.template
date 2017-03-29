@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "Microsoft.NETCore.ILLink": {
-      "version": "0.1.5-preview",
+      "version": "0.1.6-preview",
       "exclude": "compile"
     }
   },
