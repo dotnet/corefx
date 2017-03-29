@@ -437,7 +437,7 @@ namespace System.Xml.Serialization
                     SerializePrimitive(xmlWriter, o, namespaces);
                 }
 #if !uapaot
-                else if (ShouldUseReflectionBasedSerialization())
+                else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
                     XmlMapping mapping;
                     if (_mapping != null && _mapping.GenerateSerializer)
@@ -584,7 +584,7 @@ namespace System.Xml.Serialization
                     return DeserializePrimitive(xmlReader, events);
                 }
 #if !uapaot
-                else if (ShouldUseReflectionBasedSerialization())
+                else if (ShouldUseReflectionBasedSerialization(_mapping))
                 {
                     XmlMapping mapping;
                     if (_mapping != null && _mapping.GenerateSerializer)
@@ -679,10 +679,10 @@ namespace System.Xml.Serialization
             }
         }
 
-        private bool ShouldUseReflectionBasedSerialization()
+        private static bool ShouldUseReflectionBasedSerialization(XmlMapping mapping)
         {
             return Mode == SerializationMode.ReflectionOnly
-                || (_mapping != null && _mapping.IsSoap);
+                || (mapping != null && mapping.IsSoap);
         }
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.CanDeserialize"]/*' />
@@ -733,18 +733,25 @@ namespace System.Xml.Serialization
         public static XmlSerializer[] FromMappings(XmlMapping[] mappings, Type type)
         {
             if (mappings == null || mappings.Length == 0) return Array.Empty<XmlSerializer>();
-
 #if uapaot
-            var serializers = new XmlSerializer[mappings.Length];
-            for(int i=0;i<mappings.Length;i++)
-            {
-                serializers[i] = new XmlSerializer();
-                serializers[i].rootType = type;
-                serializers[i]._mapping = mappings[i];
-            }
-
+            XmlSerializer[] serializers = GetReflectionBasedSerializers(mappings, type);
             return serializers;
 #else
+            bool anySoapMapping = false;
+            foreach (var mapping in mappings)
+            {
+                if (mapping.IsSoap)
+                {
+                    anySoapMapping = true;
+                }
+            }
+
+            if ((anySoapMapping && ReflectionMethodEnabled) || Mode == SerializationMode.ReflectionOnly)
+            {
+                XmlSerializer[] serializers = GetReflectionBasedSerializers(mappings, type);
+                return serializers;
+            }
+
             XmlSerializerImplementation contract = null;
             Assembly assembly = type == null ? null : TempAssembly.LoadGeneratedAssembly(type, null, out contract);
             TempAssembly tempAssembly = null;
@@ -786,6 +793,19 @@ namespace System.Xml.Serialization
                 return serializers;
             }
 #endif
+        }
+
+        private static XmlSerializer[] GetReflectionBasedSerializers(XmlMapping[] mappings, Type type)
+        {
+            var serializers = new XmlSerializer[mappings.Length];
+            for (int i = 0; i < serializers.Length; i++)
+            {
+                serializers[i] = new XmlSerializer();
+                serializers[i].rootType = type;
+                serializers[i]._mapping = mappings[i];
+            }
+
+            return serializers;
         }
 
         private static XmlSerializer[] GetSerializersFromCache(XmlMapping[] mappings, Type type)

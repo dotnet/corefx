@@ -2581,6 +2581,31 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void SoapEncodedSerializationTest_Basic_FromMappings()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
+        var ser = XmlSerializer.FromMappings(new XmlMapping[] { myTypeMapping });
+        var value = new SoapEncodedTestType1()
+        {
+            IntValue = 11,
+            DoubleValue = 12.0,
+            StringValue = "abc",
+            DateTimeValue = new DateTime(1000)
+        };
+
+        var actual = SerializeAndDeserialize(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<SoapEncodedTestType1 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <IntValue xsi:type=\"xsd:int\">11</IntValue>\r\n  <DoubleValue xsi:type=\"xsd:double\">12</DoubleValue>\r\n  <StringValue xsi:type=\"xsd:string\">abc</StringValue>\r\n  <DateTimeValue xsi:type=\"xsd:dateTime\">0001-01-01T00:00:00.0001</DateTimeValue>\r\n</SoapEncodedTestType1>",
+            () => ser[0]);
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.IntValue, actual.IntValue);
+        Assert.Equal(value.DoubleValue, actual.DoubleValue);
+        Assert.Equal(value.StringValue, actual.StringValue);
+        Assert.Equal(value.DateTimeValue, actual.DateTimeValue);
+    }
+
+    [Fact]
     public static void SoapEncodedSerializationTest_With_SoapIgnore()
     {
         var soapAttributes = new SoapAttributes();
