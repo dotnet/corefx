@@ -34,7 +34,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(cookies1.Capacity, cookies2.Capacity);
             Assert.Equal(cookies1.Count, cookies2.Count);
             Assert.Equal(cookies1.MaxCookieSize, cookies2.MaxCookieSize);
-            Assert.Equal(cookies2.PerDomainCapacity, cookies2.PerDomainCapacity);
+            Assert.Equal(cookies1.PerDomainCapacity, cookies2.PerDomainCapacity);
         }
     }
 }
