@@ -53,7 +53,7 @@
       <ILLinkArgs>$(ILLinkArgs) -t</ILLinkArgs>
       <ILLinkArgs>$(ILLinkArgs) -out $(ILLinkTrimOutputPath)</ILLinkArgs>
       <ILLinkArgs Condition="'$(ILLinkTrimXml)' != ''">$(ILLinkArgs) -x $(ILLinkTrimXml)</ILLinkArgs>
-      <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true'">$(ILLinkArgs) -p true</ILLinkArgs>
+      <ILLinkArgs Condition="'$(ILLinkRewritePDBs)' == 'true'">$(ILLinkArgs) -b true</ILLinkArgs>
     </PropertyGroup>
 
     <MakeDir Directories="$(ILLinkTrimInputPath)" />
