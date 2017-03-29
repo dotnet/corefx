@@ -1,0 +1,3 @@
+Compat issues with assembly System.Memory:
+MembersMustExist : Member 'System.Span.AsSpan(System.String)' does not exist in the implementation but it does exist in the contract.
+Total Issues: 1
