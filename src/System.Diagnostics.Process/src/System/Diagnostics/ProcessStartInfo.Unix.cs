@@ -13,26 +13,26 @@ namespace System.Diagnostics
 
         public string UserName
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); } // Do we expect to map this to sudo in due course?
+            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
         }
 
         public string PasswordInClearText
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
         }
 
         public string Domain
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
         }
 
         public bool LoadUserProfile
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
         }
 
         public bool UseShellExecute { get; set; }
@@ -42,8 +42,8 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public SecureString Password
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
+            set { throw new PlatformNotSupportedException(SR.ProcessStartInfoNotSupported); }
         }
     }
 }

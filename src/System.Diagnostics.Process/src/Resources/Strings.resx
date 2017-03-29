@@ -187,6 +187,9 @@
   <data name="ProcessorAffinityNotSupported" xml:space="preserve">
     <value>Processor affinity for processes or threads is not supported.</value>
   </data>
+  <data name="ProcessStartInfoNotSupported" xml:space="preserve">
+    <value>ProcessStartInfo is not supported on this platform.</value>
+  </data>
   <data name="RUsageFailure" xml:space="preserve">
     <value>Failed to set or retrieve rusage information. See the error code for OS-specific error information.</value>
   </data>
