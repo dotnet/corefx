@@ -127,7 +127,6 @@ namespace System
         public static bool IsUbuntu1510 { get; } = IsDistroAndVersion("ubuntu", "15.10");
         public static bool IsUbuntu1604 { get; } = IsDistroAndVersion("ubuntu", "16.04");
         public static bool IsUbuntu1610 { get; } = IsDistroAndVersion("ubuntu", "16.10");
-        public static bool IsFedora23 { get; } = IsDistroAndVersion("fedora", "23");
         public static bool IsFedora24 { get; } = IsDistroAndVersion("fedora", "24");
         public static bool IsFedora25 { get; } = IsDistroAndVersion("fedora", "25");
         public static bool IsFedora26 { get; } = IsDistroAndVersion("fedora", "26");
