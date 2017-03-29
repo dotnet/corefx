@@ -230,6 +230,6 @@
     <value>Socket.IOControl handles Windows-specific control codes and is not supported on this platform.</value>
   </data>
   <data name="PlatformNotSupported_IPProtectionLevel" xml:space="preserve">
-    <value>IP protection level cannot be manipulated on this platform.</value>
+    <value>IP protection level cannot be controlled on this platform.</value>
   </data>
 </root>
