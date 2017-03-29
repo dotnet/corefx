@@ -1692,10 +1692,9 @@ namespace System.IO.Ports
                 {
                     WaitForCommEvent();
                 }
-                catch
+                catch(Exception ex)
                 {
-                    //TODO What is the correct behaviour for discarding exceptions
-                    // in this situation?  Should we log them in any way?
+                    Debug.Fail("Unhandled exception thrown from WaitForCommEvent", ex.ToString());
                 }
             }
 
