@@ -1698,8 +1698,15 @@ namespace System.IO.Ports
                 {
                     WaitForCommEvent();
                 }
-                catch(Exception ex)
+                catch (ObjectDisposedException)
                 {
+                    // These can happen in some messy tear-down situations (e.g. unexpected USB unplug)
+                    // See GH issue #17661
+                }
+                catch (Exception ex)
+                {
+                    // We don't know of any reason why this should happen, but we still
+                    // don't want process termination
                     Debug.Fail("Unhandled exception thrown from WaitForCommEvent", ex.ToString());
                 }
             }
