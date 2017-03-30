@@ -12,7 +12,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void MinValueString_GetString()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
             string test = attribute.MinValueString;
             Assert.Equal(test, TimeSpan.MinValue.ToString());
         }
@@ -20,7 +20,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void MinValueString_SetValidTimeSpan()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
             
             attribute.MinValueString = "05:55:55";
             string test = attribute.MinValueString;
@@ -46,7 +46,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void MaxValueString_GetAndSetCorrectly()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
             attribute.MaxValueString = "05:55:55";
             string test = attribute.MaxValueString;
@@ -72,14 +72,14 @@ namespace System.ConfigurationTests
         [Fact]
         public void ExcludedRange_GetDefault()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
             Assert.False(attribute.ExcludeRange);
         }
 
         [Fact]
         public void ExcludedRange_ChangeToTrue()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
             attribute.ExcludeRange = true;
             Assert.True(attribute.ExcludeRange);
         }
@@ -87,7 +87,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void MinValue_Get()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
             attribute.MinValueString = "05:55:55";
             TimeSpan test = attribute.MinValue;
@@ -113,7 +113,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void MinValueString_TooSmall()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
             attribute.MaxValueString = new TimeSpan(2, 2, 2, 2).ToString();
             ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() => attribute.MinValueString = new TimeSpan(3, 3, 3, 3).ToString());
@@ -124,17 +124,12 @@ namespace System.ConfigurationTests
         [Fact]
         public void MaxValueString_TooBig()
         {
-            TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
+            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
             attribute.MinValueString = new TimeSpan(2, 2, 2, 2).ToString();
             ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() => attribute.MaxValueString = new TimeSpan(1, 1, 1, 1).ToString());
             ArgumentOutOfRangeException expectedException = new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
             Assert.Equal(expectedException.Message, result.Message);
-        }
-
-        private TimeSpanValidatorAttribute MakeTimeSpanValidatorAttribute()
-        {
-            return new TimeSpanValidatorAttribute();
         }
     }
 }
