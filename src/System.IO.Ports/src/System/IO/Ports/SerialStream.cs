@@ -714,7 +714,7 @@ namespace System.IO.Ports
 
                 // prep. for starting event cycle.
                 _eventRunner = new EventLoopRunner(this);
-                Thread eventLoopThread = new Thread(new ThreadStart(_eventRunner.WaitForCommEvent));
+                Thread eventLoopThread = new Thread(_eventRunner.SafelyWaitForCommEvent);
                 eventLoopThread.IsBackground = true;
                 eventLoopThread.Start();
 
@@ -1304,6 +1304,8 @@ namespace System.IO.Ports
             // Later the user may change this via the NullDiscard property.
             SetDcbFlag(NativeMethods.FNULL, discardNull ? 1 : 0);
 
+            // SerialStream does not handle the fAbortOnError behaviour, so we must make sure it's not enabled
+            SetDcbFlag(NativeMethods.FABORTONOERROR, 0);
 
             // Setting RTS control, which is RTS_CONTROL_HANDSHAKE if RTS / RTS-XOnXOff handshaking
             // used, RTS_ENABLE (RTS pin used during operation) if rtsEnable true but XOnXoff / No handshaking
@@ -1681,9 +1683,27 @@ namespace System.IO.Ports
                 }
             }
 
+            /// <summary>
+            /// Call WaitForCommEvent (which is a thread function for a background thread)
+            /// within an exception handler, so that unhandled exceptions in WaitForCommEvent
+            /// don't cause process termination
+            /// </summary>
+            internal void SafelyWaitForCommEvent()
+            {
+                try
+                {
+                    WaitForCommEvent();
+                }
+                catch
+                {
+                    //TODO What is the correct behaviour for discarding exceptions
+                    // in this situation?  Should we log them in any way?
+                }
+            }
+
             // This is the blocking method that waits for an event to occur.  It wraps the SDK's WaitCommEvent function.
             [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke", Justification = "this is debug-only code")]
-            internal unsafe void WaitForCommEvent()
+            private unsafe void WaitForCommEvent()
             {
                 int unused = 0;
                 bool doCleanup = false;
