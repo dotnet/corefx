@@ -189,13 +189,13 @@ function cross_build_corefx_with_docker {
         # TODO: For arm, we are going to embed RootFS inside Docker image.
         case $__linuxCodeName in
         trusty)
-            __dockerImage=" microsoft/dotnet-buildtools-prereqs:ubuntu1404_cross_prereqs_v2"
+            __dockerImage=" microsoft/dotnet-buildtools-prereqs:ubuntu1404_cross_prereqs_v3"
             __skipRootFS=1
             __dockerEnvironmentVariables="-e ROOTFS_DIR=/crossrootfs/arm"
             __runtimeOS="ubuntu.14.04"
         ;;
         xenial)
-            __dockerImage=" microsoft/dotnet-buildtools-prereqs:ubuntu1604_cross_prereqs_v2"
+            __dockerImage=" microsoft/dotnet-buildtools-prereqs:ubuntu1604_cross_prereqs_v3"
             __skipRootFS=1
             __dockerEnvironmentVariables="-e ROOTFS_DIR=/crossrootfs/arm"
             __runtimeOS="ubuntu.16.04"
@@ -249,17 +249,21 @@ function cross_build_corefx_with_docker {
         # Construct runtime directory
         if [[ "$__buildConfig" == "release" ]]; then
             __runtimePath="./bin/runtime/netcoreapp-Linux-Release-armel"
+            __nativePath="./bin/Linux.armel.Release/native"
             __managedPath="./bin/runtime/netcoreapp-Linux-Release-x64"
         else
             __runtimePath="./bin/runtime/netcoreapp-Linux-Debug-armel"
+            __nativePath="./bin/Linux.armel.Debug/native"
             __managedPath="./bin/runtime/netcoreapp-Linux-Debug-x64"
         fi
 
+        mkdir $__runtimePath
         pushd $__managedPath
         rm apphost corerun dotnet
         rm *.so
         rm *.ni.dll
         popd
+        cp $__nativePath/* $__runtimePath/
         mv $__managedPath/* $__runtimePath/
         rmdir $__managedPath
     fi 

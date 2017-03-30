@@ -474,8 +474,6 @@ namespace System.Data.SqlClient
             else
             {
                 session = _physicalStateObj;
-                // But for CoreCLR we are now relying on the owner to ensure that cancellation owner comes from one source
-                session.Owner = owner;
             }
             Debug.Assert(session._outputPacketNumber == 1, "The packet number is expected to be 1");
             return session;
@@ -5328,7 +5326,10 @@ namespace System.Data.SqlClient
             int i;
 
             if (null == bits)
+            {
                 bits = new int[4];
+                stateObj._decimalBits = bits;
+            }
             else
             {
                 for (i = 0; i < bits.Length; i++)
