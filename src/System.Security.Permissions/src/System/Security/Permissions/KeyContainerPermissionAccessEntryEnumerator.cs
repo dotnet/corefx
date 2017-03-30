@@ -13,5 +13,4 @@ namespace System.Security.Permissions
         public bool MoveNext() { return false; }
         public void Reset() { }
     }
-
 }

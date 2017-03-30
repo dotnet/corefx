@@ -21,5 +21,4 @@ namespace System.Security.Permissions
         public bool IsSynchronized { get; }
         public object SyncRoot { get; }
     }
-
 }

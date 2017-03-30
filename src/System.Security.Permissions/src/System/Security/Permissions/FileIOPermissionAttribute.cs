@@ -5,7 +5,6 @@
 namespace System.Security.Permissions
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-    [Serializable]
     public sealed class FileIOPermissionAttribute : CodeAccessSecurityAttribute
     {
         public FileIOPermissionAttribute(SecurityAction action) : base(action) { }
