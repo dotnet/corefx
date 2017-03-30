@@ -22,7 +22,6 @@ namespace System.ConfigurationTests
         public void MinValueString_SetValidTimeSpan()
         {
             TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
-
             
             attribute.MinValueString = "05:55:55";
             string test = attribute.MinValueString;
@@ -45,23 +44,10 @@ namespace System.ConfigurationTests
             Assert.Equal(test, "2.22:50:45.2563000");
         }
 
-
-        [Fact]
-        public void MinValueString_SetValueHigherThanMax()
-        {
-            // Not implemented.  Can't find a way to make TimeSpanValidatorAttribute throw ArgumentOutOfRangeException
-            // Because trying to assign a TimeSpan greater than TimeSpan max throws a StackOverFlowException.
-            // So, this can't happen
-            // TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
-            // attribute.MinValueString = "10675200.02:48:05.4775807"
-            // test = attribute.MinValueString //This calls TimeSpan.Parse, which will throw a StackOverflowException.
-        }
-
         [Fact]
         public void MaxValueString_GetAndSetCorrectly()
         {
             TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
-
 
             attribute.MaxValueString = "05:55:55";
             string test = attribute.MaxValueString;
@@ -103,7 +89,6 @@ namespace System.ConfigurationTests
         public void MinValue_Get()
         {
             TimeSpanValidatorAttribute attribute = MakeTimeSpanValidatorAttribute();
-
 
             attribute.MinValueString = "05:55:55";
             TimeSpan test = attribute.MinValue;
@@ -147,7 +132,6 @@ namespace System.ConfigurationTests
             ArgumentOutOfRangeException expectedException = new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
             Assert.Equal(expectedException.Message, result.Message);
         }
-
 
         private TimeSpanValidatorAttribute MakeTimeSpanValidatorAttribute()
         {
