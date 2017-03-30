@@ -109,21 +109,18 @@ namespace System.Security.AccessControl
         {
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public MutexSecurity(String name, AccessControlSections includeSections)
             : base(true, ResourceType.KernelObject, name, includeSections, HandleErrorCode, null)
         {
             // Let the underlying ACL API's demand unmanaged code permission.
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal MutexSecurity(SafeWaitHandle handle, AccessControlSections includeSections)
             : base(true, ResourceType.KernelObject, handle, includeSections, HandleErrorCode, null)
         {
             // Let the underlying ACL API's demand unmanaged code permission.
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private static Exception HandleErrorCode(int errorCode, string name, SafeHandle handle, object context)
         {
             System.Exception exception = null;
@@ -167,7 +164,6 @@ namespace System.Security.AccessControl
             return persistRules;
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal void Persist(SafeWaitHandle handle)
         {
             // Let the underlying ACL API's demand unmanaged code.
