@@ -10,7 +10,7 @@ namespace System
     /// <summary>
     /// Extension methods for Span&lt;T&gt;.
     /// </summary>
-    public static class SpanExtensions
+    public static partial class SpanExtensions
     {
         /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
