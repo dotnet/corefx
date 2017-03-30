@@ -16,7 +16,6 @@ namespace System.Security.Permissions
         public string ChangeAccessControl { get; set; }
         [Obsolete]
         public string All { get; set; }
-        // Read, Write, Append, PathDiscovery, but no ACL-related permissions
         public string ViewAndModify { get; set; }
         public FileIOPermissionAccess AllFiles { get; set; }
         public FileIOPermissionAccess AllLocalFiles { get; set; }

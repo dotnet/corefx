@@ -381,7 +381,6 @@ namespace System.Security.Permissions
         public string ChangeAccessControl { get; set; }
         [Obsolete]
         public string All { get; set; }
-        // Read, Write, Append, PathDiscovery, but no ACL-related permissions
         public string ViewAndModify { get; set; }
         public FileIOPermissionAccess AllFiles { get; set; }
         public FileIOPermissionAccess AllLocalFiles { get; set; }
@@ -449,7 +448,6 @@ namespace System.Security.Permissions
         AssemblyIsolationByRoamingUser = 0x60,
         ApplicationIsolationByRoamingUser = 0x65,
         AdministerIsolatedStorageByUser = 0x70,
-        //AdministerIsolatedStorageByMachine    = 0x80,
         UnrestrictedIsolatedStorage = 0xF0
     }
     public sealed class IsolatedStorageFilePermission : IsolatedStoragePermission
@@ -558,20 +556,15 @@ namespace System.Security.Permissions
     public enum KeyContainerPermissionFlags
     {
         NoFlags = 0x0000,
-
         Create = 0x0001,
         Open = 0x0002,
         Delete = 0x0004,
-
         Import = 0x0010,
         Export = 0x0020,
-
         Sign = 0x0100,
         Decrypt = 0x0200,
-
         ViewAcl = 0x1000,
         ChangeAcl = 0x2000,
-
         AllFlags = 0x3337
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)109, AllowMultiple = true, Inherited = false)]
@@ -722,70 +715,23 @@ namespace System.Security.Permissions
     {
         public const string Any = "*";
         public const string Local = ".";
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected ResourcePermissionBase() { }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected ResourcePermissionBase(PermissionState state) { }
-        // Put this in one central place.  Some resource types may require a
-        // different form of string comparison.  If we need to fix this, then
-        // consider making this protected & virtual, and override it where 
-        // necessary.  Or consider doing this all internally so we could 
-        // reimplement this permission to use a generic collection, etc.
         private static Hashtable CreateHashtable() { return null; }
         private string ComputerName { get; set; }
         private bool IsEmpty { get; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected Type PermissionAccessType { get; set; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected string[] TagNames { get; set; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected void AddPermissionAccess(ResourcePermissionBaseEntry entry) { }
         protected void Clear() { }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override IPermission Copy() { return null; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected ResourcePermissionBaseEntry[] GetPermissionEntries() { return null; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override void FromXml(SecurityElement securityElement) { }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override IPermission Intersect(IPermission target) { return null; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override bool IsSubsetOf(IPermission target) { return false; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public bool IsUnrestricted() { return false; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         protected void RemovePermissionAccess(ResourcePermissionBaseEntry entry) { }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override SecurityElement ToXml() { return null; }
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public override IPermission Union(IPermission target) { return null; }
     }
     public class ResourcePermissionBaseEntry
