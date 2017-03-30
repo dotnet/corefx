@@ -15,8 +15,8 @@ namespace System.Tests
             yield return new object[] {new TimeSpan(14, 2, 30, 0), 192.0, TimeSpan.FromDays(2708)};
             yield return new object[] {TimeSpan.FromDays(366), Math.PI, new TimeSpan(993446995288779)};
             yield return new object[] {TimeSpan.FromDays(366), -Math.E, new TimeSpan(-859585952922633)};
-            yield return new object[] {TimeSpan.FromDays(29.530587981), 13.0, TimeSpan.FromDays(383.897643819444)};
-            yield return new object[] {TimeSpan.FromDays(-29.530587981), -12.0, TimeSpan.FromDays(354.367055833333)};
+            yield return new object[] {TimeSpan.FromDays(29.530587981), (Double) TimeSpan.FromDays(383.897643819444).Ticks / (Double)TimeSpan.FromDays(29.530587981).Ticks, TimeSpan.FromDays(383.897643819444)};
+            yield return new object[] {TimeSpan.FromDays(-29.530587981), (Double) TimeSpan.FromDays(354.367055833333).Ticks / (Double) TimeSpan.FromDays(-29.530587981).Ticks, TimeSpan.FromDays(354.367055833333)};
             yield return new object[] {TimeSpan.FromDays(-29.530587981), 0.0, TimeSpan.Zero};
             yield return new object[] {TimeSpan.MaxValue, 0.5, TimeSpan.FromTicks((long)(long.MaxValue * 0.5))};
         }
@@ -65,6 +65,49 @@ namespace System.Tests
         public static void NaNDivision()
         {
             Assert.Throws<ArgumentException>("divisor", () => TimeSpan.FromDays(1) / double.NaN);
+        }
+
+        [Theory, MemberData(nameof(MultiplicationTestData))]
+        public static void NamedMultiplication(TimeSpan timeSpan, double factor, TimeSpan expected)
+        {
+            Assert.Equal(expected, timeSpan.Multiply(factor));
+        }
+
+        [Fact]
+        public static void NamedOverflowingMultiplication()
+        {
+            Assert.Throws<OverflowException>(() => TimeSpan.MaxValue.Multiply(1.000000001));
+        }
+
+        [Fact]
+        public static void NamedNaNMultiplication()
+        {
+            Assert.Throws<ArgumentException>("factor", () => TimeSpan.FromDays(1).Multiply(double.NaN));
+        }
+
+        [Theory, MemberData(nameof(MultiplicationTestData))]
+        public static void NamedDivision(TimeSpan timeSpan, double factor, TimeSpan expected)
+        {
+            Assert.Equal(factor, expected.Divide(timeSpan), 14);
+            double divisor = 1.0 / factor;
+            Assert.Equal(expected, timeSpan.Divide(divisor));
+        }
+
+        [Fact]
+        public static void NamedDivideByZero()
+        {
+            Assert.Throws<OverflowException>(() => TimeSpan.FromDays(1).Divide(0));
+            Assert.Throws<OverflowException>(() => TimeSpan.FromDays(-1).Divide(0));
+            Assert.Throws<OverflowException>(() => TimeSpan.Zero.Divide(0));
+            Assert.Equal(double.PositiveInfinity, TimeSpan.FromDays(1).Divide(TimeSpan.Zero));
+            Assert.Equal(double.NegativeInfinity, TimeSpan.FromDays(-1).Divide(TimeSpan.Zero));
+            Assert.True(double.IsNaN(TimeSpan.Zero.Divide(TimeSpan.Zero)));
+        }
+
+        [Fact]
+        public static void NamedNaNDivision()
+        {
+            Assert.Throws<ArgumentException>("divisor", () => TimeSpan.FromDays(1).Divide(double.NaN));
         }
     }
 }

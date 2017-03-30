@@ -42,12 +42,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed partial class ExpressionBinder
     {
         private delegate bool ConversionFunc(
-            EXPR pSourceExpr,
+            Expr pSourceExpr,
             CType pSourceType,
-            EXPRTYPEORNAMESPACE pDestinationTypeExpr,
+            ExprTypeOrNamespace pDestinationTypeExpr,
             CType pDestinationTypeForLambdaErrorReporting,
             bool needsExprDest,
-            out EXPR ppDestinationExpr,
+            out Expr ppDestinationExpr,
             CONVERTTYPE flags);
 
         private static void RoundToFloat(double d, out float f)
@@ -67,9 +67,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // 13.1.2 Implicit numeric conversions
-        // 
+        //
         // The implicit numeric conversions are:
-        // 
+        //
         // *   From sbyte to short, int, long, float, double, or decimal.
         // *   From byte to short, ushort, int, uint, long, ulong, float, double, or decimal.
         // *   From short to int, long, float, double, or decimal.
@@ -80,12 +80,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // *   From ulong to float, double, or decimal.
         // *   From char to ushort, int, uint, long, ulong, float, double, or decimal.
         // *   From float to double.
-        // 
+        //
         // Conversions from int, uint, long or ulong to float and from long or ulong to double can cause a
-        // loss of precision, but will never cause a loss of magnitude. The other implicit numeric 
+        // loss of precision, but will never cause a loss of magnitude. The other implicit numeric
         // conversions never lose any information.
-        // 
-        // There are no implicit conversions to the char type, so values of the other integral types do not 
+        //
+        // There are no implicit conversions to the char type, so values of the other integral types do not
         // automatically convert to the char type.
         //
         // 13.2.1 Explicit numeric conversions
@@ -258,7 +258,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
         /***************************************************************************************************
-            Determined which conversion to a predefined type is better relative to a given type. It is 
+            Determined which conversion to a predefined type is better relative to a given type. It is
             assumed that the given type is implicitly convertible to both of the predefined types
             (possibly via a user defined conversion, method group conversion, etc).
         ***************************************************************************************************/
@@ -341,7 +341,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // returns true if an implicit conversion exists from source type to dest type. flags is an optional parameter.
         private bool canConvert(CType src, CType dest, CONVERTTYPE flags)
         {
-            EXPRCLASS exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.MakeClass(dest);
             return BindImplicitConversion(null, src, exprDest, dest, flags);
         }
 
@@ -351,60 +351,60 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // returns true if a implicit conversion exists from source expr to dest type. flags is an optional parameter.
-        private bool canConvert(EXPR expr, CType dest)
+        private bool canConvert(Expr expr, CType dest)
         {
             return canConvert(expr, dest, 0);
         }
 
-        private bool canConvert(EXPR expr, CType dest, CONVERTTYPE flags)
+        private bool canConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            EXPRCLASS exprDest = ExprFactory.MakeClass(dest);
-            return BindImplicitConversion(expr, expr.type, exprDest, dest, flags);
+            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            return BindImplicitConversion(expr, expr.Type, exprDest, dest, flags);
         }
 
         // performs an implicit conversion if it's possible. otherwise displays an error. flags is an optional parameter.
 
-        private EXPR mustConvertCore(EXPR expr, EXPRTYPEORNAMESPACE destExpr)
+        private Expr mustConvertCore(Expr expr, ExprTypeOrNamespace destExpr)
         {
             return mustConvertCore(expr, destExpr, 0);
         }
 
-        private EXPR mustConvertCore(EXPR expr, EXPRTYPEORNAMESPACE destExpr, CONVERTTYPE flags)
+        private Expr mustConvertCore(Expr expr, ExprTypeOrNamespace destExpr, CONVERTTYPE flags)
         {
-            EXPR exprResult;
+            Expr exprResult;
             CType dest = destExpr.TypeOrNamespace as CType;
 
-            if (BindImplicitConversion(expr, expr.type, destExpr, dest, out exprResult, flags))
+            if (BindImplicitConversion(expr, expr.Type, destExpr, dest, out exprResult, flags))
             {
                 // Conversion works.
-                checkUnsafe(expr.type); // added to the binder so we don't bind to pointer ops
+                checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
                 checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
                 return exprResult;
             }
 
-            if (expr.isOK() && !dest.IsErrorType())
+            if (expr.IsOK && !dest.IsErrorType())
             {
                 // don't report cascading error.
 
                 // For certain situations, try to give a better error.
 
-                FUNDTYPE ftSrc = expr.type.fundType();
+                FUNDTYPE ftSrc = expr.Type.fundType();
                 FUNDTYPE ftDest = dest.fundType();
 
                 if (expr.isCONSTANT_OK() &&
-                    expr.type.isSimpleType() && dest.isSimpleType())
+                    expr.Type.isSimpleType() && dest.isSimpleType())
                 {
                     if ((ftSrc == FUNDTYPE.FT_I4 && (ftDest <= FUNDTYPE.FT_LASTNONLONG || ftDest == FUNDTYPE.FT_U8)) ||
                         (ftSrc == FUNDTYPE.FT_I8 && ftDest == FUNDTYPE.FT_U8))
                     {
                         // Failed because value was out of range. Report nifty error message.
-                        string value = expr.asCONSTANT().I64Value.ToString(CultureInfo.InvariantCulture);
+                        string value = expr.asCONSTANT().Int64Value.ToString(CultureInfo.InvariantCulture);
                         ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
                         exprResult = ExprFactory.CreateCast(0, destExpr, expr);
                         exprResult.SetError();
                         return exprResult;
                     }
-                    else if (ftSrc == FUNDTYPE.FT_R8 && (0 != (expr.flags & EXPRFLAG.EXF_LITERALCONST)) &&
+                    else if (ftSrc == FUNDTYPE.FT_R8 && (0 != (expr.Flags & EXPRFLAG.EXF_LITERALCONST)) &&
                              (dest.isPredefType(PredefinedType.PT_FLOAT) || dest.isPredefType(PredefinedType.PT_DECIMAL)))
                     {
                         // Tried to assign a literal of type double (the default) to a float or decimal. Suggest use
@@ -416,7 +416,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                if (expr.type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
+                if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
                 {
                     ErrorContext.Error(dest is TypeParameterType ? ErrorCode.ERR_TypeVarCantBeNull : ErrorCode.ERR_ValueCantBeNull, dest);
                 }
@@ -425,15 +425,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     BindGrpConversion(expr.asMEMGRP(), dest, true);
                 }
-                else if (!TypeManager.TypeContainsAnonymousTypes(dest) && canCast(expr.type, dest, flags))
+                else if (!TypeManager.TypeContainsAnonymousTypes(dest) && canCast(expr.Type, dest, flags))
                 {
                     // can't convert, but explicit exists and can be specified by the user (no anonymous types).
-                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConvCast, new ErrArg(expr.type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConvCast, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
                 }
                 else
                 {
                     // Generic "can't convert" error.
-                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+                    ErrorContext.Error(ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
                 }
             }
             exprResult = ExprFactory.CreateCast(0, destExpr, expr);
@@ -447,59 +447,59 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // If the conversion is possible it will modify an Anonymous Method expr thus changing results of
         // future conversions.  It will also produce possible binding errors for method groups.
 
-        public EXPR tryConvert(EXPR expr, CType dest)
+        public Expr tryConvert(Expr expr, CType dest)
         {
             return tryConvert(expr, dest, 0);
         }
 
-        private EXPR tryConvert(EXPR expr, CType dest, CONVERTTYPE flags)
+        private Expr tryConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            EXPR exprResult;
-            EXPRCLASS exprDest = ExprFactory.MakeClass(dest);
-            if (BindImplicitConversion(expr, expr.type, exprDest, dest, out exprResult, flags))
+            Expr exprResult;
+            ExprClass exprDest = ExprFactory.MakeClass(dest);
+            if (BindImplicitConversion(expr, expr.Type, exprDest, dest, out exprResult, flags))
             {
-                checkUnsafe(expr.type); // added to the binder so we don't bind to pointer ops
+                checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
                 checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
                 // Conversion works.
                 return exprResult;
             }
             return null;
         }
-        public EXPR mustConvert(EXPR expr, CType dest)
+        public Expr mustConvert(Expr expr, CType dest)
         {
             return mustConvert(expr, dest, (CONVERTTYPE)0);
         }
 
-        private EXPR mustConvert(EXPR expr, CType dest, CONVERTTYPE flags)
+        private Expr mustConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            EXPRCLASS exprClass = ExprFactory.MakeClass(dest);
+            ExprClass exprClass = ExprFactory.MakeClass(dest);
             return mustConvert(expr, exprClass, flags);
         }
-        private EXPR mustConvert(EXPR expr, EXPRTYPEORNAMESPACE dest, CONVERTTYPE flags)
+        private Expr mustConvert(Expr expr, ExprTypeOrNamespace dest, CONVERTTYPE flags)
         {
             return mustConvertCore(expr, dest, flags);
         }
 
-        //        public bool canCast(EXPR expr, CType dest)
+        //        public bool canCast(Expr expr, CType dest)
         //        {
         //            EXPRCLASS destExpr = GetExprFactory().MakeClass(dest);
         //            return BindExplicitConversion(expr, expr.type, destExpr, dest, 0);
         //        }
 
         // performs an explicit conversion if its possible. otherwise displays an error.
-        private EXPR mustCastCore(EXPR expr, EXPRTYPEORNAMESPACE destExpr, CONVERTTYPE flags)
+        private Expr mustCastCore(Expr expr, ExprTypeOrNamespace destExpr, CONVERTTYPE flags)
         {
-            EXPR exprResult;
+            Expr exprResult;
 
             CType dest = destExpr.TypeOrNamespace as CType;
 
             SemanticChecker.CheckForStaticClass(null, dest, ErrorCode.ERR_ConvertToStaticClass);
-            if (expr.isOK())
+            if (expr.IsOK)
             {
-                if (BindExplicitConversion(expr, expr.type, destExpr, dest, out exprResult, flags))
+                if (BindExplicitConversion(expr, expr.Type, destExpr, dest, out exprResult, flags))
                 {
                     // Conversion works.
-                    checkUnsafe(expr.type); // added to the binder so we don't bind to pointer ops
+                    checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
                     checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
                     return exprResult;
                 }
@@ -507,9 +507,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 { // don't report cascading error.
                     // For certain situations, try to give a better error.
                     string value = "";
-                    EXPR exprConst = expr.GetConst();
-                    FUNDTYPE expr_type = expr.type.fundType();
-                    bool simpleConstToSimpleDestination = exprConst != null && expr.type.isSimpleOrEnum() &&
+                    Expr exprConst = expr.GetConst();
+                    FUNDTYPE expr_type = expr.Type.fundType();
+                    bool simpleConstToSimpleDestination = exprConst != null && expr.Type.isSimpleOrEnum() &&
                         dest.isSimpleOrEnum();
 
                     if (simpleConstToSimpleDestination && expr_type == FUNDTYPE.FT_STRUCT)
@@ -517,12 +517,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // We have a constant decimal that is out of range of the destination type.
                         // In both checked and unchecked contexts we issue an error. No need to recheck conversion in unchecked context.
                         // Decimal is a SimpleType represented in a FT_STRUCT
-                        ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, exprConst.asCONSTANT().Val.decVal.ToString(CultureInfo.InvariantCulture), dest);
+                        ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, exprConst.asCONSTANT().Val.DecimalVal.ToString(CultureInfo.InvariantCulture), dest);
                     }
                     else if (simpleConstToSimpleDestination && Context.CheckedConstant)
                     {
                         // check if we failed because we are in checked mode...
-                        bool okNow = canExplicitConversionBeBoundInUncheckedContext(expr, expr.type, destExpr, flags | CONVERTTYPE.NOUDC);
+                        bool okNow = canExplicitConversionBeBoundInUncheckedContext(expr, expr.Type, destExpr, flags | CONVERTTYPE.NOUDC);
 
                         if (!okNow)
                         {
@@ -533,14 +533,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Failed because value was out of range. Report nifty error message.
                         if (expr_type <= FUNDTYPE.FT_LASTINTEGRAL)
                         {
-                            if (expr.type.isUnsigned())
-                                value = ((ulong)(exprConst.asCONSTANT()).I64Value).ToString(CultureInfo.InvariantCulture);
+                            if (expr.Type.isUnsigned())
+                                value = ((ulong)(exprConst.asCONSTANT()).Int64Value).ToString(CultureInfo.InvariantCulture);
                             else
-                                value = ((long)(exprConst.asCONSTANT()).I64Value).ToString(CultureInfo.InvariantCulture);
+                                value = ((long)(exprConst.asCONSTANT()).Int64Value).ToString(CultureInfo.InvariantCulture);
                         }
                         else if (expr_type <= FUNDTYPE.FT_LASTNUMERIC)
                         {
-                            value = (exprConst.asCONSTANT()).Val.doubleVal.ToString(CultureInfo.InvariantCulture);
+                            value = (exprConst.asCONSTANT()).Val.DoubleVal.ToString(CultureInfo.InvariantCulture);
                         }
                         else
                         {
@@ -551,7 +551,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         ErrorContext.Error(ErrorCode.ERR_ConstOutOfRangeChecked, value, dest);
                     }
 
-                    else if (expr.type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
+                    else if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
                     {
                         ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
                     }
@@ -571,25 +571,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return exprResult;
         }
 
-        private void CantConvert(EXPR expr, CType dest)
+        private void CantConvert(Expr expr, CType dest)
         {
             // Generic "can't convert" error.
             // Only report if we don't have an error type.
-            if (expr.type != null && !(expr.type is ErrorType))
+            if (expr.Type != null && !(expr.Type is ErrorType))
             {
-                ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+                ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
             }
         }
-        public EXPR mustCast(EXPR expr, CType dest)
+        public Expr mustCast(Expr expr, CType dest)
         {
             return mustCast(expr, dest, 0);
         }
-        public EXPR mustCast(EXPR expr, CType dest, CONVERTTYPE flags)
+        public Expr mustCast(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            EXPRCLASS exprDest = ExprFactory.MakeClass(dest);
+            ExprClass exprDest = ExprFactory.MakeClass(dest);
             return mustCastCore(expr, exprDest, flags);
         }
-        private EXPR mustCastInUncheckedContext(EXPR expr, CType dest, CONVERTTYPE flags)
+        private Expr mustCastInUncheckedContext(Expr expr, CType dest, CONVERTTYPE flags)
         {
             CheckedContext ctx = CheckedContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
             return (new ExpressionBinder(ctx)).mustCast(expr, dest, flags);
@@ -598,18 +598,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // returns true if an explicit conversion exists from source type to dest type. flags is an optional parameter.
         private bool canCast(CType src, CType dest, CONVERTTYPE flags)
         {
-            EXPRCLASS destExpr = ExprFactory.MakeClass(dest);
+            ExprClass destExpr = ExprFactory.MakeClass(dest);
             return BindExplicitConversion(null, src, destExpr, dest, flags);
         }
 
         /***************************************************************************************************
             Convert a method group to a delegate type.
- 
+
             NOTE: Currently it is not well defined when there is an implicit conversion from a method
             group to a delegate type. There are several possibilities. On the two extremes are:
- 
+
             (1) (Most permissive) When there is at least one applicable method in the method group.
- 
+
             (2) (Most restrictive) When all of the following are satisfied:
                 * Overload resolution does not produce an error
                 * The method's parameter types don't require any conversions other than implicit reference
@@ -617,16 +617,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 * The method's return type is compatible.
                 * The method's constraints are satisfied.
                 * The method is not conditional.
- 
+
             For (1), it may be the case that an error is produced whenever the conversion is actually used.
             For example, if the result of overload resolution is ambiguous or if the result of overload
             resolution is a method with the wrong return result or with unsatisfied constraints.
- 
+
             For (2), the intent is that if the answer is yes, then an error is never produced.
- 
+
             Note that (2) is not monotone: adding a method to the method group may cause the answer
             to go from yes to no. This has a very odd effect in certain situations:
- 
+
             Suppose:
                 * I1 and J1 are interfaces with I1 : J1.
                 * I2, J2 and K2 are interfaces with I2 : J2, K2.
@@ -636,29 +636,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     void M(J1)
                     void M(J2)
                     void M(K2)
- 
+
             Under any of the definitions we're considering:
- 
+
                 * If M is { M(J1), M(J2) } then F(M) is an error (ambiguous between F(D1) and F(D2)).
                 * If M is { M(J1), M(K2) } then F(M) is an error (ambiguous between F(D1) and F(D2)).
                 * If M is { M(J2), M(K2) } then F(M) is an error (M -> D2 is ambiguous).
- 
+
             If M is { M(J1), M(J2), M(K2) } what should F(M) be? It seems logical for F(M) to be ambiguous
             in this case as well. However, under definition (2), there is no implicit conversion from M
             to D2 (since overload resolution is ambiguous). Thus F(M) is unambiguously taken to mean
             F(D1) applied to M(J1). Note that the user has just made the situation more ambiguous by having
             all three methods in the method group, but we ignore this additional ambiguity and pick a
             winner (rather arbitrarily).
- 
+
             We currently implement (1). The spec needs to be tightened up.
         ***************************************************************************************************/
-        private bool BindGrpConversion(EXPRMEMGRP grp, CType typeDst, bool fReportErrors)
+        private bool BindGrpConversion(ExprMemberGroup grp, CType typeDst, bool fReportErrors)
         {
-            EXPRCALL dummy;
+            ExprCall dummy;
             return BindGrpConversion(grp, typeDst, false, out dummy, fReportErrors);
         }
 
-        private bool BindGrpConversion(EXPRMEMGRP grp, CType typeDst, bool needDest, out EXPRCALL pexprDst, bool fReportErrors)
+        private bool BindGrpConversion(ExprMemberGroup grp, CType typeDst, bool needDest, out ExprCall pexprDst, bool fReportErrors)
         {
             pexprDst = null;
 
@@ -695,10 +695,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 isExtensionMethod = true;
                 TypeArray extParams = GetTypes().SubstTypeArray(mwiWrap.Meth().Params, mwiWrap.GetType());
-                // The this parameter must be a reference type. 
+                // The this parameter must be a reference type.
                 if (extParams[0].IsTypeParameterType() ? !@params[0].IsRefType() : !extParams[0].IsRefType())
                 {
-                    // We should issue a better message here. 
+                    // We should issue a better message here.
                     // We were only disallowing value types, hence the error message specific to value types.
                     // Now we are issuing the same error message for not-known to be reference types, not just value types.
                     ErrorContext.Error(ErrorCode.ERR_ValueTypeExtDelegate, mwiWrap, extParams[0].IsTypeParameterType() ? @params[0] : extParams[0]);
@@ -743,16 +743,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            EXPR obj = !isExtensionMethod ? grp.GetOptionalObject() : null;
+            Expr obj = !isExtensionMethod ? grp.OptionalObject: null;
             bool bIsMatchingStatic;
             bool constrained;
-            PostBindMethod(0 != (grp.flags & EXPRFLAG.EXF_BASECALL), ref mwiWrap, obj);
+            PostBindMethod(0 != (grp.Flags & EXPRFLAG.EXF_BASECALL), ref mwiWrap, obj);
             obj = AdjustMemberObject(mwiWrap, obj, out constrained, out bIsMatchingStatic);
             if (!bIsMatchingStatic)
             {
                 grp.SetMismatchedStaticBit();
             }
-            obj = isExtensionMethod ? grp.GetOptionalObject() : obj;
+            obj = isExtensionMethod ? grp.OptionalObject: obj;
             Debug.Assert(mwiWrap.Meth().getKind() == SYMKIND.SK_MethodSymbol);
             if (mwiWrap.TypeArgs.Count > 0)
             {
@@ -767,15 +767,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!needDest)
                 return true;
 
-            EXPRFUNCPTR funcPtr = ExprFactory.CreateFunctionPointer(grp.flags & EXPRFLAG.EXF_BASECALL, getVoidType(), null, mwiWrap);
+            ExprFuncPtr funcPtr = ExprFactory.CreateFunctionPointer(grp.Flags & EXPRFLAG.EXF_BASECALL, getVoidType(), null, mwiWrap);
             if (!mwiWrap.Meth().isStatic || isExtensionMethod)
             {
                 if (mwiWrap.Meth().getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL))
                 {
                     ErrorContext.Error(ErrorCode.ERR_DelegateOnNullable, mwiWrap);
                 }
-                funcPtr.SetOptionalObject(obj);
-                if (obj != null && obj.type.fundType() != FUNDTYPE.FT_REF)
+                funcPtr.OptionalObject = obj;
+                if (obj != null && obj.Type.fundType() != FUNDTYPE.FT_REF)
                 {
                     // Must box the object before creating a delegate to it.
                     obj = mustConvert(obj, GetReqPDT(PredefinedType.PT_OBJECT));
@@ -783,19 +783,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                funcPtr.SetOptionalObject(null);
+                funcPtr.OptionalObject = null;
                 obj = ExprFactory.CreateNull();
             }
 
             MethWithInst mwi = new MethWithInst(methCtor, type);
-            grp.SetOptionalObject(null);
-            EXPRCALL call = ExprFactory.CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, type, ExprFactory.CreateList(obj, funcPtr), grp/*pMemGroup*/, mwi);
+            grp.OptionalObject = null;
+            ExprCall call = ExprFactory.CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, type, ExprFactory.CreateList(obj, funcPtr), grp/*pMemGroup*/, mwi);
 
             pexprDst = call;
             return true;
         }
 
-        private bool BindGrpConversionCore(out MethPropWithInst pmpwi, BindingFlag bindFlags, EXPRMEMGRP grp, ref TypeArray args, AggregateType atsDelegate, bool fReportErrors, out MethPropWithInst pmpwiAmbig)
+        private bool BindGrpConversionCore(out MethPropWithInst pmpwi, BindingFlag bindFlags, ExprMemberGroup grp, ref TypeArray args, AggregateType atsDelegate, bool fReportErrors, out MethPropWithInst pmpwiAmbig)
         {
             bool retval = false;
             int carg = args.Count;
@@ -815,11 +815,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
          * bindInstanceParamForExtension
          *
          * This method is called by canConvert for the case of the instance parameter on the extension method
-         * 
+         *
          */
-        private bool canConvertInstanceParamForExtension(EXPR exprSrc, CType typeDest)
+        private bool canConvertInstanceParamForExtension(Expr exprSrc, CType typeDest)
         {
-            CType typeSrc = exprSrc?.type;
+            CType typeSrc = exprSrc?.Type;
             return typeSrc != null && canConvertInstanceParamForExtension(typeSrc, typeDest);
         }
 
@@ -827,8 +827,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // 26.2.3 Extension method invocations
             //
-            // The following conversions are defined of instance params on Extension methods 
-            // 
+            // The following conversions are defined of instance params on Extension methods
+            //
             // *   Identity conversions
             // *   Implicit reference conversions
             // *   Boxing conversions
@@ -839,12 +839,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         CConversions.FBoxingConv(GetSymbolLoader(), typeSrc, typeDest);
         }
 
-        private bool BindImplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, false, flags);
             return binder.Bind();
         }
-        private bool BindImplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out EXPR ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, true, flags);
             bool result = binder.Bind();
@@ -852,7 +852,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindImplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out EXPR ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, needsExprDest, flags);
             bool result = binder.Bind();
@@ -860,7 +860,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindExplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out EXPR ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, needsExprDest, flags);
             bool result = binder.Bind();
@@ -868,7 +868,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindExplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out EXPR ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, true, flags);
             bool result = binder.Bind();
@@ -876,7 +876,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindExplicitConversion(EXPR pSourceExpr, CType pSourceType, EXPRTYPEORNAMESPACE pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprTypeOrNamespace pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
         {
             ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, false, flags);
             return binder.Bind();
@@ -885,27 +885,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /***************************************************************************************************
             Binds a user-defined conversion. The parameters to this procedure are the same as
             BindImplicitConversion, except the last: implicitOnly - only consider implicit conversions.
-         
+
             This is a helper routine for BindImplicitConversion and BindExplicitConversion.
-         
+
             It's non trivial to get this right in the presence of generics. e.g.
-         
+
                 class D<B,C> {
                     static implicit operator B (D<B,C> x) { ... }
                 }
-         
+
                 class E<A> : D<List<A>, A> { }
-         
+
                 E<int> x;
                 List<int> y = x;
-         
+
             The locals below would have the following values:
-         
+
                 typeList->sym: D<List<A>, A>
                 typeCur: E<int>
                 typeConv = subst(typeList->sym, typeCur)
                          = subst(D<List<!0>, !0>, <int>) = D<List<int>, int>
-         
+
                 retType: B
                 typeTo = subst(retType, typeConv)
                        = subst(!0, <List<int>, int>) = List<int>
@@ -913,7 +913,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeFrom = subst(params->Item(0), typeConv)
                          = subst(D<!0,!1>, <List<int>, int>)
                          = D<List<int>, int> = typeConv
-         
+
             For lifting over nullable:
             * Look in the most base types for the conversions (not in System.Nullable).
             * We only lift if both the source type and destination type are nullable and the input
@@ -922,10 +922,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
               A conversion that needs fewer lifts is better than one that requires more (if the lifted
               forms have identical signatures).
         ***************************************************************************************************/
-        private bool bindUserDefinedConversion(EXPR exprSrc, CType typeSrc, CType typeDst, bool needExprDest, out EXPR pexprDst, bool fImplicitOnly)
+        private bool bindUserDefinedConversion(Expr exprSrc, CType typeSrc, CType typeDst, bool needExprDest, out Expr pexprDst, bool fImplicitOnly)
         {
             pexprDst = null;
-            Debug.Assert(exprSrc == null || exprSrc.type == typeSrc);
+            Debug.Assert(exprSrc == null || exprSrc.Type == typeSrc);
 
             // If either type is an interface we should never employ a UD conversion.
             if (typeSrc == null || typeDst == null || typeSrc.isInterfaceType() || typeDst.isInterfaceType())
@@ -1034,7 +1034,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         if (convCur.Params.Count != 1)
                         {
-                            // If we have a user-defined conversion that 
+                            // If we have a user-defined conversion that
                             // does not specify the correct number of parameters, we may
                             // still get here. At this point, we don't want to consider
                             // the broken conversion, so we simply skip it and move on.
@@ -1115,8 +1115,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             //    class C { void M () { B b = new A<C>(); } }
                             //
                             // Note that, this UD implicit conversion is legal. C#20.1.11:
-                            //    "If a pre-defined explicit conversion (Section 6.2) exists from type S to type T, 
-                            //     any user-defined explicit conversions from S to T are ignored. However, 
+                            //    "If a pre-defined explicit conversion (Section 6.2) exists from type S to type T,
+                            //     any user-defined explicit conversions from S to T are ignored. However,
                             //     user-defined implicit conversions from S to T are still considered."
                             // Also notice that this check is O(n2) in found UD conversions.
                             continue;
@@ -1313,13 +1313,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             typeFrom = GetTypes().SubstType(mwiBest.Meth().Params[0], mwiBest.GetType());
             typeTo = GetTypes().SubstType(mwiBest.Meth().RetType, mwiBest.GetType());
 
-            EXPR exprDst;
-            EXPR pTransformedArgument = exprSrc;
+            Expr exprDst;
+            Expr pTransformedArgument = exprSrc;
 
             if (ctypeLiftBest > 0 && !typeFrom.IsNullableType() && fDstHasNull)
             {
                 // Create the memgroup.
-                EXPRMEMGRP pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
+                ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
 
                 // Need to lift over the null.
                 Debug.Assert(fLiftSrc || fLiftDst);
@@ -1327,20 +1327,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(exprDst.isCALL());
 
                 // We want to bind the unlifted conversion first.
-                EXPR nonLiftedArg = mustCast(exprSrc, typeFrom);
+                Expr nonLiftedArg = mustCast(exprSrc, typeFrom);
                 MarkAsIntermediateConversion(nonLiftedArg);
-                EXPR nonLiftedResult = BindUDConversionCore(nonLiftedArg, typeFrom, typeTo, typeDst, mwiBest);
-                EXPRCALL call = exprDst.asCALL();
+                Expr nonLiftedResult = BindUDConversionCore(nonLiftedArg, typeFrom, typeTo, typeDst, mwiBest);
+                ExprCall call = exprDst.asCALL();
 
-                call.castOfNonLiftedResultToLiftedType = mustCast(nonLiftedResult, typeDst);
-                call.nubLiftKind = NullableCallLiftKind.UserDefinedConversion;
+                call.CastOfNonLiftedResultToLiftedType = mustCast(nonLiftedResult, typeDst);
+                call.NullableCallLiftKind = NullableCallLiftKind.UserDefinedConversion;
 
                 if (fLiftSrc)
                 {
-                    // If lifting of the source is required, we need to figure out the intermediate conversion 
+                    // If lifting of the source is required, we need to figure out the intermediate conversion
                     // from the type of the source to the type of the UD conversion parameter. Note that typeFrom
                     // is not a nullable type.
-                    EXPR pConversionArgument = null;
+                    Expr pConversionArgument = null;
                     if (typeFrom != typeSrcBase)
                     {
                         // There is an intermediate conversion.
@@ -1361,16 +1361,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                     }
                     Debug.Assert(pConversionArgument != null);
-                    EXPR pConversionCall = ExprFactory.CreateCall(0, typeDst, pConversionArgument, pMemGroup, mwiBest);
+                    Expr pConversionCall = ExprFactory.CreateCall(0, typeDst, pConversionArgument, pMemGroup, mwiBest);
                     Debug.Assert(pConversionCall.isCALL());
-                    pConversionCall.asCALL().nubLiftKind = NullableCallLiftKind.NotLiftedIntermediateConversion;
-                    call.pConversions = pConversionCall;
+                    pConversionCall.asCALL().NullableCallLiftKind = NullableCallLiftKind.NotLiftedIntermediateConversion;
+                    call.PConversions = pConversionCall;
                 }
                 else
                 {
-                    EXPR pConversionCall = BindUDConversionCore(nonLiftedArg, typeFrom, typeTo, typeDst, mwiBest);
+                    Expr pConversionCall = BindUDConversionCore(nonLiftedArg, typeFrom, typeTo, typeDst, mwiBest);
                     MarkAsIntermediateConversion(pConversionCall);
-                    call.pConversions = pConversionCall;
+                    call.PConversions = pConversionCall;
                 }
             }
             else
@@ -1382,34 +1382,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private EXPR HandleAmbiguity(EXPR exprSrc, CType typeSrc, CType typeDst, List<UdConvInfo> prguci, int iuciBestSrc, int iuciBestDst)
+        private Expr HandleAmbiguity(Expr exprSrc, CType typeSrc, CType typeDst, List<UdConvInfo> prguci, int iuciBestSrc, int iuciBestDst)
         {
             Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count);
             Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count);
             ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].mwt, prguci[iuciBestDst].mwt, typeSrc, typeDst);
-            EXPRCLASS exprClass = ExprFactory.MakeClass(typeDst);
-            EXPR pexprDst = ExprFactory.CreateCast(0, exprClass, exprSrc);
+            ExprClass exprClass = ExprFactory.MakeClass(typeDst);
+            Expr pexprDst = ExprFactory.CreateCast(0, exprClass, exprSrc);
             pexprDst.SetError();
             return pexprDst;
         }
 
-        private void MarkAsIntermediateConversion(EXPR pExpr)
+        private void MarkAsIntermediateConversion(Expr pExpr)
         {
             Debug.Assert(pExpr != null);
             if (pExpr.isCALL())
             {
-                switch (pExpr.asCALL().nubLiftKind)
+                switch (pExpr.asCALL().NullableCallLiftKind)
                 {
                     default:
                         break;
                     case NullableCallLiftKind.NotLifted:
-                        pExpr.asCALL().nubLiftKind = NullableCallLiftKind.NotLiftedIntermediateConversion;
+                        pExpr.asCALL().NullableCallLiftKind = NullableCallLiftKind.NotLiftedIntermediateConversion;
                         break;
                     case NullableCallLiftKind.NullableConversion:
-                        pExpr.asCALL().nubLiftKind = NullableCallLiftKind.NullableIntermediateConversion;
+                        pExpr.asCALL().NullableCallLiftKind = NullableCallLiftKind.NullableIntermediateConversion;
                         break;
                     case NullableCallLiftKind.NullableConversionConstructor:
-                        MarkAsIntermediateConversion(pExpr.asCALL().GetOptionalArguments());
+                        MarkAsIntermediateConversion(pExpr.asCALL().OptionalArguments);
                         break;
                 }
             }
@@ -1419,21 +1419,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private EXPR BindUDConversionCore(EXPR pFrom, CType pTypeFrom, CType pTypeTo, CType pTypeDestination, MethWithInst mwiBest)
+        private Expr BindUDConversionCore(Expr pFrom, CType pTypeFrom, CType pTypeTo, CType pTypeDestination, MethWithInst mwiBest)
         {
-            EXPR ppTransformedArgument;
+            Expr ppTransformedArgument;
             return BindUDConversionCore(pFrom, pTypeFrom, pTypeTo, pTypeDestination, mwiBest, out ppTransformedArgument);
         }
 
-        private EXPR BindUDConversionCore(EXPR pFrom, CType pTypeFrom, CType pTypeTo, CType pTypeDestination, MethWithInst mwiBest, out EXPR ppTransformedArgument)
+        private Expr BindUDConversionCore(Expr pFrom, CType pTypeFrom, CType pTypeTo, CType pTypeDestination, MethWithInst mwiBest, out Expr ppTransformedArgument)
         {
-            EXPRCLASS pClassFrom = ExprFactory.MakeClass(pTypeFrom);
-            EXPR pTransformedArgument = mustCastCore(pFrom, pClassFrom, CONVERTTYPE.NOUDC);
+            ExprClass pClassFrom = ExprFactory.MakeClass(pTypeFrom);
+            Expr pTransformedArgument = mustCastCore(pFrom, pClassFrom, CONVERTTYPE.NOUDC);
             Debug.Assert(pTransformedArgument != null);
-            EXPRMEMGRP pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
-            EXPRCALL pCall = ExprFactory.CreateCall(0, pTypeTo, pTransformedArgument, pMemGroup, mwiBest);
-            EXPRCLASS pDestination = ExprFactory.MakeClass(pTypeDestination);
-            EXPR pCast = mustCastCore(pCall, pDestination, CONVERTTYPE.NOUDC);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwiBest);
+            ExprCall pCall = ExprFactory.CreateCall(0, pTypeTo, pTransformedArgument, pMemGroup, mwiBest);
+            ExprClass pDestination = ExprFactory.MakeClass(pTypeDestination);
+            Expr pCast = mustCastCore(pCall, pDestination, CONVERTTYPE.NOUDC);
             Debug.Assert(pCast != null);
             ppTransformedArgument = pTransformedArgument;
             return pCast;
@@ -1442,23 +1442,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
          * Fold a constant cast. Returns true if the constant could be folded.
          */
-        private ConstCastResult bindConstantCast(EXPR exprSrc, EXPRTYPEORNAMESPACE exprTypeDest, bool needExprDest, out EXPR pexprDest, bool explicitConversion)
+        private ConstCastResult bindConstantCast(Expr exprSrc, ExprTypeOrNamespace exprTypeDest, bool needExprDest, out Expr pexprDest, bool explicitConversion)
         {
             pexprDest = null;
-            Int64 valueInt = 0;
+            long valueInt = 0;
             double valueFlt = 0;
             CType typeDest = exprTypeDest.TypeOrNamespace.AsType();
-            FUNDTYPE ftSrc = exprSrc.type.fundType();
+            FUNDTYPE ftSrc = exprSrc.Type.fundType();
             FUNDTYPE ftDest = typeDest.fundType();
             bool srcIntegral = (ftSrc <= FUNDTYPE.FT_LASTINTEGRAL);
             bool srcNumeric = (ftSrc <= FUNDTYPE.FT_LASTNUMERIC);
 
-            EXPRCONSTANT constSrc = exprSrc.GetConst().asCONSTANT();
+            ExprConstant constSrc = exprSrc.GetConst().asCONSTANT();
             Debug.Assert(constSrc != null);
             if (ftSrc == FUNDTYPE.FT_STRUCT || ftDest == FUNDTYPE.FT_STRUCT)
             {
                 // Do constant folding involving decimal constants.
-                EXPR expr = bindDecimalConstCast(exprTypeDest, exprSrc.type, constSrc);
+                Expr expr = bindDecimalConstCast(exprTypeDest, exprSrc.Type, constSrc);
 
                 if (expr == null)
                 {
@@ -1487,25 +1487,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Get the source constant value into valueInt or valueFlt.
             if (srcIntegral)
             {
-                if (constSrc.type.fundType() == FUNDTYPE.FT_U8)
+                if (constSrc.Type.fundType() == FUNDTYPE.FT_U8)
                 {
                     // If we're going from ulong to something, make sure we can fit.
                     if (ftDest == FUNDTYPE.FT_U8)
                     {
-                        CONSTVAL cv = GetExprConstants().Create(constSrc.getU64Value());
+                        ConstVal cv = ConstVal.Get(constSrc.UInt64Value);
                         pexprDest = ExprFactory.CreateConstant(typeDest, cv);
                         return ConstCastResult.Success;
                     }
-                    valueInt = (Int64)(constSrc.getU64Value() & 0xFFFFFFFFFFFFFFFF);
+                    valueInt = (long)(constSrc.UInt64Value& 0xFFFFFFFFFFFFFFFF);
                 }
                 else
                 {
-                    valueInt = constSrc.getI64Value();
+                    valueInt = constSrc.Int64Value;
                 }
             }
             else if (srcNumeric)
             {
-                valueFlt = constSrc.getVal().doubleVal;
+                valueFlt = constSrc.Val.DoubleVal;
             }
             else
             {
@@ -1519,48 +1519,48 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_I1:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = unchecked((sbyte)(valueInt & 0xFF));
                     break;
                 case FUNDTYPE.FT_I2:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = unchecked((short)(valueInt & 0xFFFF));
                     break;
                 case FUNDTYPE.FT_I4:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = unchecked((int)(valueInt & 0xFFFFFFFF));
                     break;
                 case FUNDTYPE.FT_I8:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     break;
                 case FUNDTYPE.FT_U1:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = (byte)(valueInt & 0xFF);
                     break;
                 case FUNDTYPE.FT_U2:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = (ushort)(valueInt & 0xFFFF);
                     break;
                 case FUNDTYPE.FT_U4:
                     if (!srcIntegral)
                     {
-                        valueInt = (Int64)valueFlt;
+                        valueInt = (long)valueFlt;
                     }
                     valueInt = (uint)(valueInt & 0xFFFFFFFF);
                     break;
@@ -1571,11 +1571,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         const double two63 = 2147483648.0 * 4294967296.0;
                         if (valueFlt < two63)
                         {
-                            valueInt = (Int64)valueFlt;
+                            valueInt = (long)valueFlt;
                         }
                         else
                         {
-                            valueInt = ((Int64)(valueFlt - two63)) + I64(0x8000000000000000);
+                            valueInt = ((long)(valueFlt - two63)) + I64(0x8000000000000000);
                         }
                     }
                     break;
@@ -1609,24 +1609,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Create a new constant with the value in "valueInt" or "valueFlt".
             {
-                CONSTVAL cv = new CONSTVAL();
+                ConstVal cv;
                 if (ftDest == FUNDTYPE.FT_U4)
                 {
-                    cv.uiVal = (uint)valueInt;
+                    cv = ConstVal.Get((uint)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTNONLONG)
                 {
-                    cv.iVal = (int)valueInt;
+                    cv = ConstVal.Get((int)valueInt);
                 }
                 else if (ftDest <= FUNDTYPE.FT_LASTINTEGRAL)
                 {
-                    cv = GetExprConstants().Create(valueInt);
+                    cv = ConstVal.Get(valueInt);
                 }
                 else
                 {
-                    cv = GetExprConstants().Create(valueFlt);
+                    cv = ConstVal.Get(valueFlt);
                 }
-                EXPRCONSTANT expr = ExprFactory.CreateConstant(typeDest, cv);
+                ExprConstant expr = ExprFactory.CreateConstant(typeDest, cv);
                 pexprDest = expr;
             }
             return ConstCastResult.Success;
@@ -1638,7 +1638,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             standard implicit conversion from base to type(1|2). If fImplicit(1|2) is false there should
             be a standard explicit conversion from base to type(1|2). The partial ordering used is as
             follows:
-         
+
             * If exactly one of fImplicit(1|2) is true then the corresponding type is closer.
             * Otherwise if there is a standard implicit conversion in neither direction or both directions
               then neither is closer.
@@ -1650,7 +1650,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 * If there is a standard implicit conversion from type(1|2) to type(2|1) then type(2|1)
                   is closer.
                 * Otherwise neither is closer.
-         
+
             The return value is -1 if type1 is closer, +1 if type2 is closer and 0 if neither is closer.
         ***************************************************************************************************/
         private int CompareSrcTypesBased(CType type1, bool fImplicit1, CType type2, bool fImplicit2)
@@ -1671,7 +1671,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             standard implicit conversion from type(1|2) to base. If fImplicit(1|2) is false there should
             be a standard explicit conversion from type(1|2) to base. The partial ordering used is as
             follows:
-         
+
             * If exactly one of fImplicit(1|2) is true then the corresponding type is closer.
             * Otherwise if there is a standard implicit conversion in neither direction or both directions
               then neither is closer.
@@ -1683,7 +1683,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 * If there is a standard implicit conversion from type(1|2) to type(2|1) then type(1|2)
                   is closer.
                 * Otherwise neither is closer.
-         
+
             The return value is -1 if type1 is closer, +1 if type2 is closer and 0 if neither is closer.
         ***************************************************************************************************/
         private int CompareDstTypesBased(CType type1, bool fImplicit1, CType type2, bool fImplicit2)
@@ -1700,11 +1700,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
          * Bind a constant cast to or from decimal. Return null if cast can't be done.
          */
-        private EXPR bindDecimalConstCast(EXPRTYPEORNAMESPACE exprDestType, CType srcType, EXPRCONSTANT src)
+        private Expr bindDecimalConstCast(ExprTypeOrNamespace exprDestType, CType srcType, ExprConstant src)
         {
             CType destType = exprDestType.TypeOrNamespace.AsType();
             CType typeDecimal = SymbolLoader.GetOptPredefType(PredefinedType.PT_DECIMAL);
-            CONSTVAL cv = new CONSTVAL();
+            ConstVal cv;
 
             if (typeDecimal == null)
                 return null;
@@ -1714,38 +1714,38 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Casting to decimal.
 
                 FUNDTYPE ftSrc = srcType.fundType();
-                Decimal result;
+                decimal result;
 
                 switch (ftSrc)
                 {
                     case FUNDTYPE.FT_I1:
                     case FUNDTYPE.FT_I2:
                     case FUNDTYPE.FT_I4:
-                        result = Convert.ToDecimal(src.getVal().iVal);
+                        result = Convert.ToDecimal(src.Val.Int32Val);
                         break;
                     case FUNDTYPE.FT_U1:
                     case FUNDTYPE.FT_U2:
                     case FUNDTYPE.FT_U4:
-                        result = Convert.ToDecimal(src.getVal().uiVal);
+                        result = Convert.ToDecimal(src.Val.UInt32Val);
                         break;
                     case FUNDTYPE.FT_R4:
-                        result = Convert.ToDecimal((float)src.getVal().doubleVal);
+                        result = Convert.ToDecimal((float)src.Val.DoubleVal);
                         break;
                     case FUNDTYPE.FT_R8:
-                        result = Convert.ToDecimal(src.getVal().doubleVal);
+                        result = Convert.ToDecimal(src.Val.DoubleVal);
                         break;
                     case FUNDTYPE.FT_U8:
-                        result = Convert.ToDecimal((ulong)src.getVal().longVal);
+                        result = Convert.ToDecimal((ulong)src.Val.Int64Val);
                         break;
                     case FUNDTYPE.FT_I8:
-                        result = Convert.ToDecimal(src.getVal().longVal);
+                        result = Convert.ToDecimal(src.Val.Int64Val);
                         break;
                     default:
                         return null;  // Not supported cast.
                 }
 
-                cv = GetExprConstants().Create(result);
-                EXPRCONSTANT exprConst = ExprFactory.CreateConstant(typeDecimal, cv);
+                cv = ConstVal.Get(result);
+                ExprConstant exprConst = ExprFactory.CreateConstant(typeDecimal, cv);
 
                 return exprConst;
             }
@@ -1753,46 +1753,46 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (srcType == typeDecimal)
             {
                 // Casting from decimal
-                Decimal decTrunc = 0;
+                decimal decTrunc = 0;
 
                 FUNDTYPE ftDest = destType.fundType();
                 try
                 {
                     if (ftDest != FUNDTYPE.FT_R4 && ftDest != FUNDTYPE.FT_R8)
                     {
-                        decTrunc = Decimal.Truncate(src.getVal().decVal);
+                        decTrunc = decimal.Truncate(src.Val.DecimalVal);
                     }
                     switch (ftDest)
                     {
                         case FUNDTYPE.FT_I1:
-                            cv.iVal = Convert.ToSByte(decTrunc);
+                            cv = ConstVal.Get(Convert.ToSByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_U1:
-                            cv.uiVal = Convert.ToByte(decTrunc);
+                            cv = ConstVal.Get((uint)Convert.ToByte(decTrunc));
                             break;
                         case FUNDTYPE.FT_I2:
-                            cv.iVal = Convert.ToInt16(decTrunc);
+                            cv = ConstVal.Get(Convert.ToInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_U2:
-                            cv.uiVal = Convert.ToUInt16(decTrunc);
+                            cv = ConstVal.Get((uint)Convert.ToUInt16(decTrunc));
                             break;
                         case FUNDTYPE.FT_I4:
-                            cv.iVal = Convert.ToInt32(decTrunc);
+                            cv = ConstVal.Get(Convert.ToInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_U4:
-                            cv.uiVal = Convert.ToUInt32(decTrunc);
+                            cv = ConstVal.Get(Convert.ToUInt32(decTrunc));
                             break;
                         case FUNDTYPE.FT_I8:
-                            cv = GetExprConstants().Create(Convert.ToInt64(decTrunc));
+                            cv = ConstVal.Get(Convert.ToInt64(decTrunc));
                             break;
                         case FUNDTYPE.FT_U8:
-                            cv = GetExprConstants().Create(Convert.ToUInt64(decTrunc));
+                            cv = ConstVal.Get(Convert.ToUInt64(decTrunc));
                             break;
                         case FUNDTYPE.FT_R4:
-                            cv = GetExprConstants().Create(Convert.ToSingle(src.getVal().decVal));
+                            cv = ConstVal.Get(Convert.ToSingle(src.Val.DecimalVal));
                             break;
                         case FUNDTYPE.FT_R8:
-                            cv = GetExprConstants().Create(Convert.ToDouble(src.getVal().decVal));
+                            cv = ConstVal.Get(Convert.ToDouble(src.Val.DecimalVal));
                             break;
                         default:
                             return null; // Not supported cast.
@@ -1802,14 +1802,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return null;
                 }
-                EXPRCONSTANT exprConst = ExprFactory.CreateConstant(destType, cv);
+                ExprConstant exprConst = ExprFactory.CreateConstant(destType, cv);
                 // Create the cast that was the original tree for this thing.
                 return exprConst;
             }
             return null;
         }
 
-        private bool canExplicitConversionBeBoundInUncheckedContext(EXPR exprSrc, CType typeSrc, EXPRTYPEORNAMESPACE typeDest, CONVERTTYPE flags)
+        private bool canExplicitConversionBeBoundInUncheckedContext(Expr exprSrc, CType typeSrc, ExprTypeOrNamespace typeDest, CONVERTTYPE flags)
         {
             CheckedContext ctx = CheckedContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
             Debug.Assert(typeDest != null);

@@ -33,7 +33,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CSemanticChecker pSemanticChecker,
                 ExprFactory exprFactory,
                 OutputContext outputContext,
-                NameGenerator nameGenerator,
                 bool bflushLocalVariableTypesForEachStatement,
                 bool bAllowUnsafeBlocks,
                 bool bIsOptimizingSwitchAndArrayInit,
@@ -47,7 +46,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pSemanticChecker,
                 exprFactory,
                 outputContext,
-                nameGenerator,
                 bflushLocalVariableTypesForEachStatement,
                 bAllowUnsafeBlocks,
                 bIsOptimizingSwitchAndArrayInit,
@@ -61,7 +59,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CSemanticChecker pSemanticChecker,
             ExprFactory exprFactory,
             OutputContext outputContext,
-            NameGenerator nameGenerator,
             bool bflushLocalVariableTypesForEachStatement,
             bool bAllowUnsafeBlocks,
             bool bIsOptimizingSwitchAndArrayInit,
@@ -73,7 +70,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             m_ExprFactory = exprFactory;
             m_outputContext = outputContext;
-            m_pNameGenerator = nameGenerator;
             m_pInputFile = null;
             m_pParentDecl = null;
             m_pContainingAgg = null;
@@ -120,7 +116,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             m_ExprFactory = parent.m_ExprFactory;
             m_outputContext = parent.m_outputContext;
-            m_pNameGenerator = parent.m_pNameGenerator;
             m_pInputFile = parent.m_pInputFile;
             m_pParentDecl = parent.m_pParentDecl;
             m_pContainingAgg = parent.m_pContainingAgg;
@@ -206,9 +201,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return m_bInFieldInitializer;
         }
-        public bool IsThisPointer(EXPR expr)
+        public bool IsThisPointer(Expr expr)
         {
-            bool localThis = expr.isANYLOCAL() && expr.asANYLOCAL().local == m_outputContext.m_pThisPointer;
+            bool localThis = expr.isANYLOCAL() && expr.asANYLOCAL().Local == m_outputContext.m_pThisPointer;
             bool baseThis = false;
             return localThis || baseThis;
         }
@@ -246,7 +241,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory m_ExprFactory;
         private OutputContext m_outputContext;
-        private NameGenerator m_pNameGenerator;
 
         // Methods.
 
@@ -281,7 +275,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Scope m_pCurrentScope; // current scope
         private Scope m_pSwitchScope;  // innermost switch, or null if none
 
-        private EXPRBLOCK m_pCurrentBlock;
+        private ExprBlock m_pCurrentBlock;
 
         // m_ppamis points to the list of child anonymous methods of the current context.
         // That is, m_ppamis is where we will add an anonymous method should we find a
@@ -290,11 +284,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // anonymous method then it points to m_pamiCurrent.pamis.  If we are presently
         // in a context in which anonymous methods cannot occur (eg, binding an attribute)
         // then it is null.
-        private List<EXPRBOUNDLAMBDA> m_ppamis;
+        private List<ExprBoundLambda> m_ppamis;
         // If we are presently binding an anonymous method body then m_pamiCurrent points
         // to the anon meth info.  If we are binding either a method body or some other
         // statement context (eg, binding an attribute, etc) then m_pamiCurrent is null.
-        private EXPRBOUNDLAMBDA m_pamiCurrent;
+        private ExprBoundLambda m_pamiCurrent;
 
         // Unsafe states.
 
