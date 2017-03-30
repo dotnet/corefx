@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <PropertyGroup>
-    <!-- todo: improve this condition -->
-    <ILLinkTrimAssembly Condition="'$(ILLinkTrimAssembly)' == '' AND '$(IsRuntimeAssembly)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'">true</ILLinkTrimAssembly>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <TargetsTriggeredByCompilation Condition="'$(ILLinkTrimAssembly)' == 'true'">
-      $(TargetsTriggeredByCompilation);ILLinkTrimAssembly
+    <TargetsTriggeredByCompilation>
+      $(TargetsTriggeredByCompilation);
+      _SetILLinkTrimAssembly;
+      ILLinkTrimAssembly
     </TargetsTriggeredByCompilation>
   </PropertyGroup>
 
@@ -28,11 +24,35 @@
     <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(BinPlaceILLinkTrimAssembly)' == 'true'">
+    <BinPlaceConfiguration Include="$(BuildConfiguration)">
+      <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/trimmed</RuntimePath>
+      <ItemName>TrimmedItem</ItemName>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Include="$(BuildConfiguration)">
+      <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/reports</RuntimePath>
+      <ItemName>TrimmingReport</ItemName>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Include="$(BuildConfiguration)">
+      <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/pretrimmed</RuntimePath>
+      <ItemName>PreTrimmedItem</ItemName>
+    </BinPlaceConfiguration>
+  </ItemGroup>
+
+  <Target Name="_SetILLinkTrimAssembly" 
+          Condition="'$(ILLinkTrimAssembly)' == ''"
+          DependsOnTargets="GetBinPlaceConfiguration">
+    <PropertyGroup>
+      <!-- Currently ILLink cannot handle type projections from Windows.winmd, disable if the project references it -->
+      <ILLinkTrimAssembly Condition="'%(ReferencePath.FileName)%(ReferencePath.Extension)' == 'Windows.winmd'">false</ILLinkTrimAssembly>
+    </PropertyGroup>
+  </Target>
+
   <!-- ILLinkTrimAssembly
        Examines the "input assembly" for IL that is unreachable from public API and trims that,
        rewriting the assembly to an "output assembly"
   -->
-  <Target Name="ILLinkTrimAssembly" DependsOnTargets="EnsureBuildToolsRuntime">
+  <Target Name="ILLinkTrimAssembly" Condition="'$(ILLinkTrimAssembly)' == 'true'" DependsOnTargets="EnsureBuildToolsRuntime">
     <ItemGroup>
       <!-- currently only directories are supported by ILLink. -->
       <_ILLinkReferenceDirectory Include="%(ReferencePath.RootDir)%(ReferencePath.Directory)" />
@@ -106,22 +126,11 @@
       <PreTrimmedItem Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimInputSymbols)')" Include="$(ILLinkTrimInputSymbols)" />
       <FileWrites Include="@(PreTrimmedItem)" />
 
+      <TrimmedItem Condition="Exists('$(ILLinkTrimAssemblyPath)')" Include="$(ILLinkTrimAssemblyPath)" />
+      <TrimmedItem Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimAssemblySymbols)')" Include="$(ILLinkTrimAssemblySymbols)" />
+
       <TrimmingReport Condition="Exists('$(AsmDiffReport)')" Include="$(AsmDiffReport)" />
       <TrimmingReport Condition="Exists('$(AsmDiffList)')" Include="$(AsmDiffList)" />
-    </ItemGroup>
-
-    <ItemGroup Condition="Exists('$(ILLinkTrimInputAssembly)') AND '$(BinPlaceILLinkTrimAssembly)' == 'true'">
-      <BinPlaceConfiguration Include="$(BuildConfiguration)">
-        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/trimmed</RuntimePath>
-      </BinPlaceConfiguration>
-      <BinPlaceConfiguration Include="$(BuildConfiguration)">
-        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/reports</RuntimePath>
-        <ItemName>TrimmingReport</ItemName>
-      </BinPlaceConfiguration>
-      <BinPlaceConfiguration Include="$(BuildConfiguration)">
-        <RuntimePath>$(BinDir)ILLinkTrimAssembly/$(BuildConfiguration)/pretrimmed</RuntimePath>
-        <ItemName>PreTrimmedItem</ItemName>
-      </BinPlaceConfiguration>
     </ItemGroup>
   </Target>
 </Project>
