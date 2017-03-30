@@ -714,10 +714,13 @@ namespace System.IO.Ports
 
                 // prep. for starting event cycle.
                 _eventRunner = new EventLoopRunner(this);
+
+                // We should consider migrating to a Task here rather than simple background Thread
+                // This would let any exceptions be marshalled back to the owner of the SerialPort
+                // Some discussion in GH issue #17666
                 Thread eventLoopThread = new Thread(_eventRunner.SafelyWaitForCommEvent);
                 eventLoopThread.IsBackground = true;
                 eventLoopThread.Start();
-
             }
             catch
             {
@@ -1685,6 +1688,9 @@ namespace System.IO.Ports
             /// Call WaitForCommEvent (which is a thread function for a background thread)
             /// within an exception handler, so that unhandled exceptions in WaitForCommEvent
             /// don't cause process termination
+            /// Ultimately it would be good to migrate to a Task here rather than simple background Thread
+            /// This would let any exceptions be marshalled back to the owner of the SerialPort
+            /// Some discussion in GH issue #17666
             /// </summary>
             internal void SafelyWaitForCommEvent()
             {
