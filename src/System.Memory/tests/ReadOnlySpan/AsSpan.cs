@@ -9,7 +9,7 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
-        [Fact]
+        [Fact(Skip = "AsSpan not in coreclr yet, PR #10544")]
         public static void StringAsSpanNullary()
         {
             string s = "Hello";
@@ -18,7 +18,7 @@ namespace System.SpanTests
             span.Validate(expected);
         }
 
-        [Fact]
+        [Fact(Skip = "AsSpan not in coreclr yet, PR #10544")]
         public static void StringAsSpanEmptyString()
         {
             string s = "";
@@ -27,7 +27,7 @@ namespace System.SpanTests
             span.Validate(expected);
         }
 
-        [Fact]
+        [Fact(Skip= "AsSpan not in coreclr yet, PR #10544")]
         public static void StringAsSpanNullChecked()
         {
             string s = null;
