@@ -187,7 +187,7 @@
   <data name="ProcessorAffinityNotSupported" xml:space="preserve">
     <value>Processor affinity for processes or threads is not supported.</value>
   </data>
-  <data name="ProcessIdentityNotSupported" xml:space="preserve">
+  <data name="ProcessStartIdentityNotSupported" xml:space="preserve">
     <value>Process start with identity is not supported on this platform.</value>
   </data>
   <data name="RUsageFailure" xml:space="preserve">
