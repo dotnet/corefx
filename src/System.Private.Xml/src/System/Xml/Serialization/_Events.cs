@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
@@ -14,6 +12,7 @@ namespace System.Xml.Serialization
     using System;
     using System.Collections;
     using System.ComponentModel;
+    using System.Xml;
 
     /// <include file='doc\_Events.uex' path='docs/doc[@for="XmlAttributeEventHandler"]/*' />
     /// <devdoc>

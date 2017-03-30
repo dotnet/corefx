@@ -15,14 +15,14 @@ using System.Xml.Extensions;
 using System.Xml.Schema;
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System.Xml;
+    using System.Xml.Serialization;
+
     internal class ReflectionXmlSerializationReader : XmlSerializationReader
     {
         private static TypeDesc StringTypeDesc { get; set; } = (new TypeScope()).GetTypeDesc(typeof(string));

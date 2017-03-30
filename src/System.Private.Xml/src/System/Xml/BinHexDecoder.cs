@@ -234,7 +234,7 @@ namespace System.Xml
                 else
                 {
 #if XMLSERIALIZERGENERATOR
-                    throw new XmlException(SR.Format(SR.Xml_InvalidBinHexValueOddCount, new string(pChars, 0, (int)(pCharsEndPos - pChars))));
+                    throw new XmlException(SR.Format(SR.Xml_InvalidBinHexValue, new string(pChars, 0, (int)(pCharsEndPos - pChars))));
 #else
                     throw new XmlException(SR.Xml_InvalidBinHexValue, new string(pChars, 0, (int)(pCharsEndPos - pChars)));
 #endif

@@ -3,19 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System;
+
 #if XMLSERIALIZERGENERATOR
     internal class XmlSerializationPrimitiveWriter : Microsoft.XmlSerializer.Generator.XmlSerializationWriter
 #else
     internal class XmlSerializationPrimitiveWriter : System.Xml.Serialization.XmlSerializationWriter
 #endif
     {
+
         internal void Write_string(object o)
         {
             WriteStartDocument();

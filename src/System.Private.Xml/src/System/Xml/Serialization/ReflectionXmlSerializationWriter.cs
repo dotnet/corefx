@@ -13,12 +13,13 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System.Xml;
+
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {
         private XmlMapping _mapping;

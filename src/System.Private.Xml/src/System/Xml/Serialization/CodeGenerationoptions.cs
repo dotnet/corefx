@@ -3,13 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System;
     using System.ComponentModel;
 
     /// <include file='doc\CodeGenerationOptions.uex' path='docs/doc[@for="CodeGenerationOptions"]/*' />

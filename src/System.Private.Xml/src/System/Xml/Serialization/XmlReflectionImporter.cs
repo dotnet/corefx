@@ -37,7 +37,9 @@ namespace System.Xml.Serialization
         private NameTable _xsdAttributes;   // xmlattributetname + xmlns -> AttributeAccessor
         private Hashtable _specials;   // type -> SpecialMapping
         private Hashtable _anonymous = new Hashtable();   // type -> AnonymousMapping
+#if !XMLSERIALIZERGENERATOR
         private NameTable _serializables;  // type name --> new SerializableMapping
+#endif
         private StructMapping _root;
         private string _defaultNs;
         private ModelScope _modelScope;
@@ -515,7 +517,7 @@ namespace System.Xml.Serialization
                     XmlQualifiedName qname = serializableMapping.XsiType;
                     if (qname != null && !qname.IsEmpty)
                     {
-                        #if !XMLSERIALIZERGENERATOR
+#if !XMLSERIALIZERGENERATOR
                         if (_serializables == null)
                             _serializables = new NameTable();
                         SerializableMapping existingMapping = (SerializableMapping)_serializables[qname];

@@ -8,13 +8,13 @@ using System.Reflection;
 
 
 #if XMLSERIALIZERGENERATOR
-using System;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System;
+
     internal static class Globals
     {
         [SecurityCritical]

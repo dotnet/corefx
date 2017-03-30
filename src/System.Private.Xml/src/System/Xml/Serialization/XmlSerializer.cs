@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
@@ -22,6 +21,7 @@ namespace System.Xml.Serialization
     using System.Diagnostics;
     using System.Collections.Generic;
     using System.Runtime.Versioning;
+    using System.Xml;
 
     /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlDeserializationEvents"]/*' />
     /// <devdoc>

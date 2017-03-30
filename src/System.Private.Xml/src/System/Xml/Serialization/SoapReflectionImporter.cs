@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
@@ -18,6 +16,7 @@ namespace System.Xml.Serialization
     using System.ComponentModel;
     using System.Threading;
     using System.Linq;
+    using System.Xml;
 
     /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter"]/*' />
     /// <devdoc>
