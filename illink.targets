@@ -20,8 +20,8 @@
 
     <ILLinkTrimXml Condition="'$(ILLinkTrimXml)' == '' AND Exists('$(MSBuildProjectDirectory)/ILLinkTrim.xml')">$(MSBuildProjectDirectory)/ILLinkTrim.xml</ILLinkTrimXml>
 
-    <!-- if building a portable PDB, tell illink to rewrite the symbols file -->
-    <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false' AND '$(DebugType)'=='Portable'">true</ILLinkRewritePDBs>
+    <!-- if building a PDB, tell illink to rewrite the symbols file -->
+    <ILLinkRewritePDBs Condition="'$(ILLinkRewritePDBs)' == '' AND '$(DebugSymbols)' != 'false'">true</ILLinkRewritePDBs>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BinPlaceILLinkTrimAssembly)' == 'true'">
