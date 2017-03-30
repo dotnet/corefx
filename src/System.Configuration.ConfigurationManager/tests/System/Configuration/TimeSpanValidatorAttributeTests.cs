@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration;
-using System.Globalization;
 using Xunit;
 
 namespace System.ConfigurationTests
