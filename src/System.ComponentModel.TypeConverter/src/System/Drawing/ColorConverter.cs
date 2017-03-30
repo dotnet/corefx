@@ -226,10 +226,6 @@ namespace System.Drawing
                     {
                         member = typeof(Color).GetField("Empty");
                     }
-                    else if (c.IsSystemColor)
-                    {
-                        member = typeof(SystemColors).GetProperty(c.Name);
-                    }
                     else if (c.IsKnownColor)
                     {
                         member = typeof(Color).GetProperty(c.Name);

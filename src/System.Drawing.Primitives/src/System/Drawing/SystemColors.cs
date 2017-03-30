@@ -4,7 +4,7 @@
 
 namespace System.Drawing
 {
-    public static class SystemColors
+    internal static class SystemColors
     {
         public static Color ActiveBorder => new Color(KnownColor.ActiveBorder);
 
