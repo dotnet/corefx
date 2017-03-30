@@ -134,7 +134,7 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap' Or '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Security\Permissions\FileIOPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\IsolatedStorageContainment.cs" />
     <Compile Include="System\Security\Permissions\IsolatedStorageFilePermission.cs" />
