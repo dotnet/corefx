@@ -13,9 +13,7 @@ namespace System.Xml.Serialization
     using System.Text;
     using System;
     using System.Xml.Schema;
-#if XMLSERIALIZERGENERATOR
     using System.Xml;
-#endif
 
     internal class XmlCountingReader : XmlReader, IXmlTextParser, IXmlLineInfo
     {

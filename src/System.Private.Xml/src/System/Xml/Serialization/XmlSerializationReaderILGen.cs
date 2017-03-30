@@ -4,11 +4,7 @@
 
 
 #if !uapaot
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     using System;
     using System.Collections;

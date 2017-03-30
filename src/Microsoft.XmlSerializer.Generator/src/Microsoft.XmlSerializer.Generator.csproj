@@ -209,9 +209,6 @@
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlSerializerNamespaces.cs">
       <Link>System\Xml\Serialization\XmlSerializerNamespaces.cs</Link>
     </Compile>
-    <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlSerializerVersionAttribute.cs">
-      <Link>System\Xml\Serialization\XmlSerializerVersionAttribute.cs</Link>
-    </Compile>
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlTextAttribute.cs">
       <Link>System\Xml\Serialization\XmlTextAttribute.cs</Link>
     </Compile>
