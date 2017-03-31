@@ -200,15 +200,20 @@
 
     <PropertyGroup Condition="'$(UseDotNetNativeToolchain)' == 'true'">
       <ILCBuildType Condition="'$(ILCBuildType)' == ''">ret</ILCBuildType>
+      <_TestILCFolder>$(TestILCFolder)</_TestILCFolder>
+      <!--When archiving tests, ilc.exe will be located at %RUNTIME_PATH%\..\TestILC-->
+      <_TestILCFolder Condition="'$(ArchiveTests)' == 'true'">%RUNTIME_PATH%\..\TestILC</_TestILCFolder>
+      <!--Temporarily comment out the test command line when executing on Helix so that we can analyze how many projects fail ilc compilation-->
+      <TestCommandLine Condition="'$(ArchiveTests)' == 'true'">:: $(TestCommandLine)</TestCommandLine>
     </PropertyGroup>
     
     <!-- For .NET Native compilation, we first need to generate a native executable if possible. -->
     <ItemGroup Condition="'$(UseDotNetNativeToolchain)' == 'true' AND '$(Performance)'!='true'" >
       <IlcInputFolderContents Include="$(ILCFXInputFolder)/*" />
-      <TestCommandLines Include="mklink /H %(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension) %(IlcInputFolderContents.FullPath)" />
-      <TestCommandLines Include="copy /y $(TestILCFolder)\default.rd.xml  %EXECUTION_DIR%" />
-      <TestCommandLines Include="call $(TestILCFolder)\ilc.exe -ExeName xunit.console.netcore.exe -in %EXECUTION_DIR% -out %EXECUTION_DIR%\native -usedefaultpinvoke -buildtype $(ILCBuildType) -v diag || exit /b %ERRORLEVEL%"/>
-      <TestCommandLines Include="copy /y $(TestILCFolder)\CRT\vcruntime140_app.dll %EXECUTION_DIR%\native" />
+      <TestCommandLines Include="mklink /H %(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension) %RUNTIME_PATH%\%(IlcInputFolderContents.Filename)%(IlcInputFolderContents.Extension)" />
+      <TestCommandLines Include="copy /y $(_TestILCFolder)\default.rd.xml  %EXECUTION_DIR%" />
+      <TestCommandLines Include="call $(_TestILCFolder)\ilc.exe -ExeName xunit.console.netcore.exe -in %EXECUTION_DIR% -out %EXECUTION_DIR%\native -usedefaultpinvoke -buildtype $(ILCBuildType) -v diag || exit /b %ERRORLEVEL%"/>
+      <TestCommandLines Include="copy /y $(_TestILCFolder)\CRT\vcruntime140_app.dll %EXECUTION_DIR%\native" />
       <TestCommandLines Include="echo > %EXECUTION_DIR%\native\$(XunitTestAssembly)"/>
       <TestCommandLines Include="cd native"/>
       <PostExecutionTestCommandLines Include="type Xunit.Console.Output.txt" />

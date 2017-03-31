@@ -428,10 +428,25 @@
       </ForUpload>
     </ItemGroup>
   </Target>
+  
+  <Target Name="CopyTestILCToRuntimeDir" Condition="'$(BuildingUAPAOTVertical)' == 'true'">
+    <PropertyGroup>
+      <_TestILCFolderCopy>$(TestSharedFxDir)/../TestILC/</_TestILCFolderCopy>
+    </PropertyGroup>
+    <ItemGroup>
+      <TestILCFiles Include="$(TestILCFolder)/**/*" />
+    </ItemGroup>
+    <MakeDir Condition="!Exists('$(_TestILCFolderCopy)')" Directories="$(_TestILCFolderCopy)" />
+    <Copy SourceFiles="%(TestILCFiles.FullPath)" DestinationFiles="$(_TestILCFolderCopy)%(TestILCFiles.RecursiveDir)%(TestILCFiles.Filename)%(TestILCFiles.Extension)" />
+  </Target>
 
-  <Target Name="CompressRuntimeDir" Condition="'$(SkipArchive)' != 'true'">
+  <Target Name="CompressRuntimeDir" Condition="'$(SkipArchive)' != 'true'" DependsOnTargets="CopyTestILCToRuntimeDir">
+    <PropertyGroup>
+      <_ZipSourceDir>$(TestSharedFxDir)</_ZipSourceDir>
+      <_ZipSourceDir Condition="'$(BuildingUAPAOTVertical)' == 'true'">$(TestSharedFxDir)/../</_ZipSourceDir>
+    </PropertyGroup>
     <ZipFileCreateFromDirectory
-        SourceDirectory="$(TestSharedFxDir)"
+        SourceDirectory="$(_ZipSourceDir)"
         DestinationArchive="$(TestRuntimeArchiveFile)"
         OverwriteDestination="true" />
     <ItemGroup>
