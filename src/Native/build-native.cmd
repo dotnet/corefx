@@ -78,7 +78,7 @@ exit /b 1
 
 :VS2017
 :: Setup vars for VS2017
-set __VSVersion=vs2017
+set __VSVersion="15 2017"
 set __PlatformToolset=v141
 if NOT "%__BuildArch%" == "arm64" (
     :: Set the environment for the native build
@@ -88,7 +88,7 @@ goto :SetupDirs
 
 :VS2015
 :: Setup vars for VS2015
-set __VSVersion=vs2015
+set __VSVersion="14 2015"
 set __PlatformToolset=v140
 if NOT "%__BuildArch%" == "arm64" (
     :: Set the environment for the native build
