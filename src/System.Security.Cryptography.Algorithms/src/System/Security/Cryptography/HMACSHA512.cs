@@ -42,7 +42,7 @@ namespace System.Security.Cryptography
             {
                 if (value)
                 {
-                    throw new PlatformNotSupportedException(); // We don't have a managed implementation of HMAC so we can't support this 
+                    throw new PlatformNotSupportedException(); // This relates to a quirk in the Desktop managed implementation; ours is native.
                 }
             }
         }

@@ -7,13 +7,16 @@ using System.Security;
 
 namespace System.Diagnostics
 {
+    // We know of no way to achieve this on Unix, particularly providing the password
+    // without a prompt. If we find a way, we should implement it. It may make more sense to provide
+    // similar functionality through an API specific to Unix.
     public sealed partial class ProcessStartInfo
     {
         private const bool CaseSensitiveEnvironmentVariables = true;
 
         public string UserName
         {
-            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); } // Do we expect to map this to sudo in due course?
+            get { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
             set { throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported); }
         }
 

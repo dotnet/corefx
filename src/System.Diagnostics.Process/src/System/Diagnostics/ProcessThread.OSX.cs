@@ -13,9 +13,9 @@ namespace System.Diagnostics
         /// </summary>
         private ThreadPriorityLevel PriorityLevelCore
         {
-            // We couldn't find a POSIX API on OSX
-            // Ther is a scheduling policy API, whether to schedule by fifo, roundrobin and some priority number with it,
-            // but it's not the behavior this API exposes.
+            // Does not appear to be a POSIX API to do this on macOS. 
+            // Considered the posix pthread_getschedparam, and pthread_setschedparam, 
+            // but those seems to specify the scheduling policy with the priority.
             get { throw new PlatformNotSupportedException(SR.ThreadPriorityNotSupported); }
             set { throw new PlatformNotSupportedException(SR.ThreadPriorityNotSupported); }
         }
@@ -29,11 +29,11 @@ namespace System.Diagnostics
         /// <summary>Returns the time the associated thread was started.</summary>
         public DateTime StartTime
         {
-            get { throw new PlatformNotSupportedException(); } // OSX does not provide a way to get this data
+            get { throw new PlatformNotSupportedException(); } // macOS does not provide a way to get this data
         }
 
         /// <summary>
-        /// Returns the amount of time the associated thread has spent utilizing the CPU.
+        /// Returns the amount of time the associated thread has spent using the CPU.
         /// It is the sum of the System.Diagnostics.ProcessThread.UserProcessorTime and
         /// System.Diagnostics.ProcessThread.PrivilegedProcessorTime.
         /// </summary>
