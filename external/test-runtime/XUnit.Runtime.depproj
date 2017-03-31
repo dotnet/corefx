@@ -80,7 +80,7 @@
           Condition="'$(TargetGroup)' == 'uapaot'">
     <PropertyGroup>
       <TestILCToolsPackageName>TestILCNugetPackageForCoreFX</TestILCToolsPackageName>
-      <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\1.0.0-$(ProjectNTfsTestILCExpectedPrerelease)\TestILC</TestILCFolder>
+      <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\$(ProjectNTfsTestILCPackageVersion)\TestILC</TestILCFolder>
       <TestILCFolder>$(TestILCFolder.Replace('/', '\'))</TestILCFolder>
     </PropertyGroup>
 
