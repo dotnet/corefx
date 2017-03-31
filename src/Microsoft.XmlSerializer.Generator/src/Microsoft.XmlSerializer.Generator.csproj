@@ -232,7 +232,7 @@
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationGeneratedCode.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationReader.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationWriter.cs" />
-    <Compile Include="Sgen2.cs" />
+    <Compile Include="Sgen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Resources.ResourceManager" />
