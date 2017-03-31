@@ -70,6 +70,28 @@
           SkipUnchangedFiles="true"/>
   </Target>
 
+  <Target Name="CopyTestILCToolsToTestHost"
+          AfterTargets="RestorePackages"
+          Condition="'$(TargetGroup)' == 'uapaot'">
+    <PropertyGroup>
+      <TestILCToolsPackageName>TestILCNugetPackageForCoreFX</TestILCToolsPackageName>
+      <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\1.0.0-$(ProjectNTfsTestILCExpectedPrerelease)\TestILC</TestILCFolder>
+      <TestILCFolder>$(TestILCFolder.Replace('/', '\'))</TestILCFolder>
+    </PropertyGroup>
+
+    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="'$(TestILCFolder)' == '' or !Exists('$(TestILCFolder)')" />
+
+    <ItemGroup Condition="'$(TestILCFolder)'!=''">
+      <TestILCFolderContents Include="$(TestILCFolder)\**\*" />
+    </ItemGroup>
+
+    <Copy Condition="'$(TestILCFolder)'!=''"
+          SourceFiles="%(TestILCFolderContents.FullPath)"
+          DestinationFiles="$(TestHostRootPath)\TestILC\%(TestILCFolderContents.RecursiveDir)%(TestILCFolderContents.Filename)%(TestILCFolderContents.Extension)"
+          SkipUnchangedFiles="true" />
+
+  </Target>
+
   <Target Name="AddXunitConsoleRunner" BeforeTargets="ResolveReferences" Condition="'$(TargetGroup)' == 'netfx'">
     <Error Condition="!Exists('$(PackagesDir)$(XUnitRunnerPackageId)\$(XUnitPackageVersion)\tools\xunit.console.exe')"
             Text="Error: looks the package $(PackagesDir)$(XUnitRunnerPackageId)\$(XUnitPackageVersion) not restored or missing xunit.console.exe."
