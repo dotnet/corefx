@@ -2,10 +2,12 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
   <PropertyGroup>
+    <PackageVersion>1.0.0</PackageVersion>
+    <SkipValidatePackage>true</SkipValidatePackage>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsNETCoreAppRef>false</IsNETCoreAppRef>
-    <IsUAP>true</IsUAP>
+    <IsUAP>false</IsUAP>
     <IsUAPRef>false</IsUAPRef>
   </PropertyGroup>
 </Project>
