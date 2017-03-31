@@ -51,11 +51,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (double.IsNaN(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (double.IsNegativeInfinity(expected))
@@ -65,11 +65,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (double.IsNegativeInfinity(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (double.IsPositiveInfinity(expected))
@@ -79,11 +79,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (double.IsPositiveInfinity(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (IsNegativeZero(expected))
@@ -95,7 +95,7 @@ namespace System.Tests
 
                 if (IsPositiveZero(variance) || IsNegativeZero(variance))
                 {
-                    throw new EqualException(ToString(expected), ToString(actual));
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
                 // When the variance is not ±0.0, then we are handling a case where
@@ -104,7 +104,14 @@ namespace System.Tests
             }
             else if (IsNegativeZero(actual))
             {
-                // Do nothing, since the actual result could still be within the allowed variance
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
+                {
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
+                }
+
+                // When the variance is not ±0.0, then we are handling a case where
+                // the actual result is expected to not be exactly -0.0 on some platforms
+                // and we should fallback to checking if it is within the allowed variance instead.
             }
 
             if (IsPositiveZero(expected))
@@ -114,9 +121,9 @@ namespace System.Tests
                     return;
                 }
 
-                if (IsPositiveZero(variance))
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
                 {
-                    throw new EqualException(ToString(expected), ToString(actual));
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
                 // When the variance is not ±0.0, then we are handling a case where
@@ -125,14 +132,21 @@ namespace System.Tests
             }
             else if (IsPositiveZero(actual))
             {
-                // Do nothing, since the actual result could still be within the allowed variance
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
+                {
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
+                }
+
+                // When the variance is not ±0.0, then we are handling a case where
+                // the actual result is expected to not be exactly +0.0 on some platforms
+                // and we should fallback to checking if it is within the allowed variance instead.
             }
 
             var delta = Math.Abs(actual - expected);
 
             if (delta > variance)
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
         }
 
@@ -150,11 +164,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (float.IsNaN(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (float.IsNegativeInfinity(expected))
@@ -164,11 +178,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (float.IsNegativeInfinity(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (float.IsPositiveInfinity(expected))
@@ -178,11 +192,11 @@ namespace System.Tests
                     return;
                 }
 
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
             else if (float.IsPositiveInfinity(actual))
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
 
             if (IsNegativeZero(expected))
@@ -194,7 +208,7 @@ namespace System.Tests
 
                 if (IsPositiveZero(variance) || IsNegativeZero(variance))
                 {
-                    throw new EqualException(ToString(expected), ToString(actual));
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
                 // When the variance is not ±0.0, then we are handling a case where
@@ -203,7 +217,14 @@ namespace System.Tests
             }
             else if (IsNegativeZero(actual))
             {
-                // Do nothing, since the actual result could still be within the allowed variance
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
+                {
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
+                }
+
+                // When the variance is not ±0.0, then we are handling a case where
+                // the actual result is expected to not be exactly -0.0 on some platforms
+                // and we should fallback to checking if it is within the allowed variance instead.
             }
 
             if (IsPositiveZero(expected))
@@ -213,9 +234,9 @@ namespace System.Tests
                     return;
                 }
 
-                if (IsPositiveZero(variance))
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
                 {
-                    throw new EqualException(ToString(expected), ToString(actual));
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
                 // When the variance is not ±0.0, then we are handling a case where
@@ -224,14 +245,21 @@ namespace System.Tests
             }
             else if (IsPositiveZero(actual))
             {
-                // Do nothing, since the actual result could still be within the allowed variance
+                if (IsPositiveZero(variance) || IsNegativeZero(variance))
+                {
+                    throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
+                }
+
+                // When the variance is not ±0.0, then we are handling a case where
+                // the actual result is expected to not be exactly +0.0 on some platforms
+                // and we should fallback to checking if it is within the allowed variance instead.
             }
 
             var delta = Math.Abs(actual - expected);
 
             if (delta > variance)
             {
-                throw new EqualException(ToString(expected), ToString(actual));
+                throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
             }
         }
 
@@ -255,7 +283,9 @@ namespace System.Tests
             return (*(uint*)(&value)) == 0x00000000;
         }
 
-        private static string ToString(double value)
+        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
+        // but also NaN and ±∞) are correctly and consistently represented.
+        private static string ToStringPadded(double value)
         {
             if (double.IsNaN(value))
             {
@@ -283,7 +313,9 @@ namespace System.Tests
             }
         }
 
-        private static string ToString(float value)
+        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
+        // but also NaN and ±∞) are correctly and consistently represented.
+        private static string ToStringPadded(float value)
         {
             if (double.IsNaN(value))
             {
@@ -1644,6 +1676,44 @@ namespace System.Tests
             Assert.Equal(0.0, Math.Truncate(0.12345));
             Assert.Equal(3.0, Math.Truncate(3.14159));
             Assert.Equal(-3.0, Math.Truncate(-3.14159));
+        }
+
+        [Fact]
+        public static void BigMul()
+        {
+            Assert.Equal(4611686014132420609L, Math.BigMul(2147483647, 2147483647));
+            Assert.Equal(0L, Math.BigMul(0, 0));
+        }
+
+        [Theory]
+        [InlineData(1073741, 2147483647, 2000, 1647)]
+        [InlineData(6, 13952, 2000, 1952)]
+        [InlineData(0, 0, 2000, 0)]
+        [InlineData(-7, -14032, 2000, -32)]
+        [InlineData(-1073741, -2147483648, 2000, -1648)]
+        [InlineData(-1073741, 2147483647, -2000, 1647)]
+        [InlineData(-6, 13952, -2000, 1952)]
+        public static void DivRem(int quotient, int dividend, int divisor, int expectedRemainder)
+        {
+            int remainder;
+            Assert.Equal(quotient, Math.DivRem(dividend, divisor, out remainder));
+            Assert.Equal(expectedRemainder, remainder);
+        }
+
+        [Theory]
+        [InlineData(4611686018427387L, 9223372036854775807L, 2000L, 1807L)]
+        [InlineData(4611686018427387L, -9223372036854775808L, -2000L, -1808L)]
+        [InlineData(-4611686018427387L, 9223372036854775807L, -2000L, 1807L)]
+        [InlineData(-4611686018427387L, -9223372036854775808L, 2000L, -1808L)]
+        [InlineData(6L, 13952L, 2000L, 1952L)]
+        [InlineData(0L, 0L, 2000L, 0L)]
+        [InlineData(-7L, -14032L, 2000L, -32L)]
+        [InlineData(-6L, 13952L, -2000L, 1952L)]
+        public static void DivRemLong(long quotient, long dividend, long divisor, long expectedRemainder)
+        {
+            long remainder;
+            Assert.Equal(quotient, Math.DivRem(dividend, divisor, out remainder));
+            Assert.Equal(expectedRemainder, remainder);
         }
     }
 }

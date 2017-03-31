@@ -21,7 +21,7 @@ namespace System
         public static bool IsNetBSD { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD"));
         public static bool IsOpenSUSE { get; } = IsDistroAndVersion("opensuse");
         public static bool IsUbuntu { get; } = IsDistroAndVersion("ubuntu");
-        public static bool IsNotWindowsNanoServer { get; } = (IsWindows &&
+        public static bool IsNotWindowsNanoServer { get; } = (!IsWindows ||
             File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
         public static bool IsWindows10Version1607OrGreater { get; } = IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
@@ -99,6 +99,8 @@ namespace System
 
         public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
 
+        public static bool IsFedora => IsDistroAndVersion("fedora");
+
         private static bool GetIsWindowsSubsystemForLinux()
         {
             // https://github.com/Microsoft/BashOnWindows/issues/423#issuecomment-221627364
@@ -125,7 +127,6 @@ namespace System
         public static bool IsUbuntu1510 { get; } = IsDistroAndVersion("ubuntu", "15.10");
         public static bool IsUbuntu1604 { get; } = IsDistroAndVersion("ubuntu", "16.04");
         public static bool IsUbuntu1610 { get; } = IsDistroAndVersion("ubuntu", "16.10");
-        public static bool IsFedora23 { get; } = IsDistroAndVersion("fedora", "23");
         public static bool IsFedora24 { get; } = IsDistroAndVersion("fedora", "24");
         public static bool IsFedora25 { get; } = IsDistroAndVersion("fedora", "25");
         public static bool IsFedora26 { get; } = IsDistroAndVersion("fedora", "26");

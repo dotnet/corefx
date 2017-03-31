@@ -602,7 +602,7 @@ namespace System.Net.Http
                     // Now propagate any failure that may have occurred while cleaning up
                     if (lastError != null)
                     {
-                        ExceptionDispatchInfo.Capture(lastError).Throw();
+                        ExceptionDispatchInfo.Throw(lastError);
                     }
                 }
                 finally
@@ -919,6 +919,17 @@ namespace System.Net.Http
                         if (size == 0)
                         {
                             return 0;
+                        }
+
+                        // Make sure we've not yet published the response. This could happen with trailer headers,
+                        // in which case we just ignore them (we don't want to add them to the response headers at
+                        // this point, as it'd contribute to a race condition, both in terms of headers appearing
+                        // "randomly" and in terms of accessing a non-thread-safe data structure from this thread
+                        // while the consumer might be accessing / mutating it elsewhere.)
+                        if (easy.Task.IsCompleted)
+                        {
+                            CurlHandler.EventSourceTrace("Response already published. Ignoring headers.", easy: easy);
+                            return size;
                         }
 
                         CurlResponseMessage response = easy._responseMessage;

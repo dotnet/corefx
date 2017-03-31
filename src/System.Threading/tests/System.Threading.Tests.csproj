@@ -4,7 +4,8 @@
   <PropertyGroup>
     <ProjectGuid>{18EF66B3-51EE-46D8-B283-1CB6A1197813}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
@@ -34,9 +35,8 @@
     <Compile Include="SpinWaitTests.cs" />
     <Compile Include="ThreadLocalTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
-    <Compile Include="ExecutionContextTests.netstandard.cs" />
-    <Compile Include="MonitorTests.netstandard.cs" />
-    <Compile Include="SynchronizationContextTests.netstandard.cs" />
+    <Compile Include="ExecutionContextTests.cs" />
+    <Compile Include="SynchronizationContextTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
       <Link>CommonTest\System\Diagnostics\Tracing\TestEventListener.cs</Link>
     </Compile>

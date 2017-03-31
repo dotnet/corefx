@@ -34,18 +34,6 @@
         {
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "PB_DockerTag": "fedora23_prereqs",
-            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 23",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Release"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux",
-          "Parameters": {
             "PB_DockerTag": "fedora24_prereqs_v4",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
           },
@@ -83,15 +71,15 @@
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
             "PB_DockerTag": "rhel7_prereqs_2",
-            "PB_BuildArguments": "-buildArch=x64 -Release -portableLinux",
-            "PB_SyncArguments": "-p -portableLinux -- /p:ArchGroup=x64",
+            "PB_BuildArguments": "-buildArch=x64 -Release -portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64",
             "PB_TargetQueue": "Redhat.72.Amd64+Debian.82.Amd64+Ubuntu.1404.Amd64+Ubuntu.1604.Amd64+Ubuntu.1610.Amd64+suse.421.amd64+fedora.25.amd64"
           },
           "ReportingParameters": {
             "OperatingSystem": "RedHat 7",
             "Type": "build/product/",
             "ConfigurationGroup": "Release",
-            "SubType": "PortableLinux"
+            "SubType": "PortableBuild"
           }
         },
         {
@@ -420,18 +408,6 @@
         {
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
-            "PB_DockerTag": "fedora23_prereqs",
-            "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 23",
-            "Type": "build/product/",
-            "ConfigurationGroup": "Debug"
-          }
-        },
-        {
-          "Name": "DotNet-CoreFx-Trusted-Linux",
-          "Parameters": {
             "PB_DockerTag": "fedora24_prereqs_v4",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Debug /p:\"EnableCloudTest=false\" /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=Linux\""
           },
@@ -469,15 +445,15 @@
           "Name": "DotNet-CoreFx-Trusted-Linux",
           "Parameters": {
             "PB_DockerTag": "rhel7_prereqs_2",
-            "PB_BuildArguments": "-buildArch=x64 -Debug -portableLinux",
-            "PB_SyncArguments": "-p -portableLinux -- /p:ArchGroup=x64",
+            "PB_BuildArguments": "-buildArch=x64 -Debug -portable",
+            "PB_SyncArguments": "-p -portable -- /p:ArchGroup=x64",
             "PB_TargetQueue": "Redhat.72.Amd64+Debian.82.Amd64+Ubuntu.1404.Amd64+Ubuntu.1604.Amd64+Ubuntu.1610.Amd64+suse.421.amd64+fedora.25.amd64"
           },
           "ReportingParameters": {
             "OperatingSystem": "RedHat 7",
             "Type": "build/product/",
             "ConfigurationGroup": "Debug",
-            "SubType": "PortableLinux"
+            "SubType": "PortableBuild"
           }
         },
         {

@@ -510,11 +510,6 @@ namespace System.Linq.Expressions
         internal static string NotAMemberOfAnyType(object p0) => SR.Format(SR.NotAMemberOfAnyType, p0);
 
         /// <summary>
-        /// A string like "The expression '{0}' is not supported for type '{1}'"
-        /// </summary>
-        internal static string ExpressionNotSupportedForType(object p0, object p1) => SR.Format(SR.ExpressionNotSupportedForType, p0, p1);
-
-        /// <summary>
         /// A string like "ParameterExpression of type '{0}' cannot be used for delegate parameter of type '{1}'"
         /// </summary>
         internal static string ParameterExpressionNotValidAsDelegate(object p0, object p1) => SR.Format(SR.ParameterExpressionNotValidAsDelegate, p0, p1);
@@ -575,11 +570,6 @@ namespace System.Linq.Expressions
         internal static string TypeNotIEnumerable(object p0) => SR.Format(SR.TypeNotIEnumerable, p0);
 
         /// <summary>
-        /// A string like "Unexpected coalesce operator."
-        /// </summary>
-        internal static string UnexpectedCoalesceOperator => SR.UnexpectedCoalesceOperator;
-
-        /// <summary>
         /// A string like "Cannot cast from type '{0}' to type '{1}"
         /// </summary>
         internal static string InvalidCast(object p0, object p1) => SR.Format(SR.InvalidCast, p0, p1);
@@ -598,11 +588,6 @@ namespace System.Linq.Expressions
         /// A string like "Unhandled Binding Type: {0}"
         /// </summary>
         internal static string UnhandledBindingType(object p0) => SR.Format(SR.UnhandledBindingType, p0);
-
-        /// <summary>
-        /// A string like "Unhandled convert: {0}"
-        /// </summary>
-        internal static string UnhandledConvert(object p0) => SR.Format(SR.UnhandledConvert, p0);
 
         /// <summary>
         /// A string like "Unhandled unary: {0}"
@@ -806,13 +791,6 @@ namespace System.Linq.Expressions
         /// A string like "DebugInfoGenerator created by CreatePdbGenerator can only be used with LambdaExpression.CompileToMethod."
         /// </summary>
         internal static string PdbGeneratorNeedsExpressionCompiler => SR.PdbGeneratorNeedsExpressionCompiler;
-#endif
-
-#if FEATURE_COMPILE
-        /// <summary>
-        /// A string like "The operator '{0}' is not implemented for type '{1}'"
-        /// </summary>
-        internal static string OperatorNotImplementedForType(object p0, object p1) => SR.Format(SR.OperatorNotImplementedForType, p0, p1);
 #endif
 
         /// <summary>

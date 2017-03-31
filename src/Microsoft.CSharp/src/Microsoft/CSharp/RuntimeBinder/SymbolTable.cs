@@ -170,14 +170,14 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         internal SymWithType LookupMember(
             string name,
-            EXPR callingObject,
+            Expr callingObject,
             ParentSymbol context,
             int arity,
             MemberLookup mem,
             bool allowSpecialNames,
             bool requireInvocable)
         {
-            CType type = callingObject.type;
+            CType type = callingObject.Type;
 
             if (type.IsArrayType())
             {
@@ -2047,11 +2047,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 type = type.GetGenericTypeDefinition();
             }
 
-            if (_typesWithConversionsLoaded.Contains(type))
+            if (!_typesWithConversionsLoaded.Add(type))
             {
                 return;
             }
-            _typesWithConversionsLoaded.Add(type);
 
             // Always make the aggregate for the type, regardless of whether or not
             // there are any conversions.

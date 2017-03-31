@@ -2192,6 +2192,8 @@ namespace System
         public static int Compare(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public int CompareTo(object value) { throw null; }
         public int CompareTo(System.TimeSpan value) { throw null; }
+        public System.TimeSpan Divide(double divisor) { throw null; }
+        public double Divide(System.TimeSpan ts) { throw null; }
         public System.TimeSpan Duration() { throw null; }
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.TimeSpan obj) { throw null; }
@@ -2203,6 +2205,7 @@ namespace System
         public static System.TimeSpan FromSeconds(double value) { throw null; }
         public static System.TimeSpan FromTicks(long value) { throw null; }
         public override int GetHashCode() { throw null; }
+        public System.TimeSpan Multiply(double factor) { throw null; }
         public System.TimeSpan Negate() { throw null; }
         public static System.TimeSpan operator +(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static double operator /(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
@@ -3645,6 +3648,8 @@ namespace System.Collections
     public partial struct DictionaryEntry
     {
         public DictionaryEntry(object key, object value) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public void Deconstruct(out object key, out object value) { throw null; }
         public object Key { get { throw null; } set { } }
         public object Value { get { throw null; } set { } }
     }
@@ -3807,6 +3812,8 @@ namespace System.Collections.Generic
     public partial struct KeyValuePair<TKey, TValue>
     {
         public KeyValuePair(TKey key, TValue value) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public void Deconstruct(out TKey key, out TValue value) { throw null; }
         public TKey Key { get { throw null; } }
         public TValue Value { get { throw null; } }
         public override string ToString() { throw null; }
@@ -6506,6 +6513,7 @@ namespace System.Runtime.ExceptionServices
         public System.Exception SourceException { get { throw null; } }
         public static System.Runtime.ExceptionServices.ExceptionDispatchInfo Capture(System.Exception source) { throw null; }
         public void Throw() { }
+        public static void Throw(Exception source) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), AllowMultiple=false, Inherited=false)]
     public sealed partial class HandleProcessCorruptedStateExceptionsAttribute : System.Attribute
