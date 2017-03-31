@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -7,7 +8,7 @@ namespace System
     {
         private readonly T[] _pinnable;
         private readonly IntPtr _byteOffset;
-        private readonly int _length;
+        private readonly long _length;
 
         public SpanDebugView(Span<T> collection)
         {
@@ -21,36 +22,31 @@ namespace System
         {
             get
             {
-                int elementSize = typeof(T).IsValueType ? Unsafe.SizeOf<T>() : IntPtr.Size;//Workaround to VIL bug where Unsafe.SizeOf<T> where T is a class, returns the size of its fields instead of IntPtr.Size
+                int elementSize = typeof(T).GetTypeInfo().IsValueType ? Unsafe.SizeOf<T>() : IntPtr.Size;//Workaround to VIL bug where Unsafe.SizeOf<T> where T is a class, returns the size of its fields instead of IntPtr.Size
+                T[] result = new T[_length];
 
                 if (_pinnable == null)
                 {
-                    var result = new T[_length];
                     byte* source = (byte*)_byteOffset.ToPointer();
-                    byte* fixedResult = (byte*)Unsafe.AsPointer(ref result[0]);
 
-                    int totalSize = _length * elementSize;
-
-                    for (int i = 0; i < totalSize; i++)
+                    for (long i = 0; i < result.LongLength; i++)
                     {
-                        *fixedResult = *source;
-                        fixedResult++;
-                        source++;
+                        result[i] = Unsafe.Read<T>(source);
+                        source = source + elementSize;
                     }
-
-                    return result;
                 }
                 else
                 {
-                    var _byteOffsetInt32 = _byteOffset.ToInt32();
-                    var sourceIndex = (_byteOffsetInt32 - IntPtr.Size) / elementSize;
+                    long _byteOffsetInt = _byteOffset.ToInt64();
+                    long sourceIndex = (_byteOffsetInt - IntPtr.Size) / elementSize;
 
-                    var result = new T[_length];
-
-                    Array.Copy(_pinnable, sourceIndex, result, 0, _length);
-
-                    return result;
+                    for (long i = 0; i < result.LongLength; i++)
+                    {
+                        result[i] = _pinnable[i + sourceIndex];
+                    }
                 }
+
+                return result;
             }
         }
     }
