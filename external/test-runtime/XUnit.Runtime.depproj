@@ -70,6 +70,11 @@
           SkipUnchangedFiles="true"/>
   </Target>
 
+  <Target Name="VerifyMatchingProjectNVersions"
+          BeforeTargets="Build">
+    <Error Condition="'$(ProjectNTfsExpectedPrerelease)' != '$(ProjectNTfsTestILCExpectedPrerelease)'" Text="The versions of ProjectN Targeting pack and TestILC have gone out of sync. Please make sure both of the prerelease versions on dependencies.props match." />
+  </Target>
+
   <Target Name="CopyTestILCToolsToTestHost"
           AfterTargets="RestorePackages"
           Condition="'$(TargetGroup)' == 'uapaot'">
