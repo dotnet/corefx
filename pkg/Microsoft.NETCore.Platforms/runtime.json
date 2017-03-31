@@ -519,13 +519,6 @@
             "#import": [ "fedora", "linux-x64" ]
         },
 
-        "fedora.23": {
-            "#import": [ "fedora" ]
-        },
-        "fedora.23-x64": {
-            "#import": [ "fedora.23", "fedora-x64" ]
-        },
-
         "fedora.24": {
             "#import": [ "fedora" ]
         },
@@ -922,18 +915,11 @@
             "#import": [ "fedora-corert", "linux-x64-corert", "fedora-x64" ]
         },
 
-        "fedora.23-corert": {
-            "#import": [ "fedora-corert", "fedora.23" ]
-        },
-        "fedora.23-x64-corert": {
-            "#import": [ "fedora.23-corert", "fedora-x64-corert", "fedora.23-x64" ]
-        },
-
         "fedora.24-corert": {
-            "#import": [ "fedora.23-corert", "fedora.24" ]
+            "#import": [ "fedora.24" ]
         },
         "fedora.24-x64-corert": {
-            "#import": [ "fedora.24-corert", "fedora.23-x64-corert", "fedora.24-x64" ]
+            "#import": [ "fedora.24-corert", "fedora.24-x64" ]
         },
 
         "opensuse-corert": {
