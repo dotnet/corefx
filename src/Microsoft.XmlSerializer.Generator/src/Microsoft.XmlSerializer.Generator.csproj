@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{80958E8B-2FEB-4F95-83F9-825CA1ED26E7}</ProjectGuid>
+    <ProjectGuid>{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}</ProjectGuid>
     <AssemblyName>Microsoft.XmlSerializer.Generator</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>..\..\System.Private.Xml\src\Resources\Strings.resx</StringResourcesPath>
@@ -232,7 +232,7 @@
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationGeneratedCode.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationReader.cs" />
     <Compile Include="Microsoft\XmlSerializer\Generator\XmlSerializationWriter.cs" />
-    <Compile Include="sgen.cs" />
+    <Compile Include="Sgen2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Resources.ResourceManager" />

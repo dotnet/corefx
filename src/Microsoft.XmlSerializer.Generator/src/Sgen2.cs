@@ -9,7 +9,7 @@ namespace Microsoft.XmlSerializer.Generator
     {
         public static int Main(string[] args)
         {
-            //TODO
+            //TODO SGEN
             return 0;
         }
     }

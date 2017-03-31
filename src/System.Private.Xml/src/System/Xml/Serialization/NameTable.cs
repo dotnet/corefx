@@ -3,14 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 #if XMLSERIALIZERGENERATOR
-using System.Xml;
-using System;
-
 namespace Microsoft.XmlSerializer.Generator
 #else
 namespace System.Xml.Serialization
 #endif
 {
+    using System.Xml;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
 

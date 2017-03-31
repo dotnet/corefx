@@ -17,6 +17,4 @@ namespace Microsoft.XmlSerializer.Generator.Tests
             Assert.Equal(0, n);
         }
     }
-
-
 }
