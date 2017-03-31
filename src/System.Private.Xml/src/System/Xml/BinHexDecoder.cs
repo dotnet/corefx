@@ -240,7 +240,7 @@ namespace System.Xml
 #endif
                 }
 
-                    if (hasHalfByteCached)
+                if (hasHalfByteCached)
                 {
                     *pByte++ = (byte)((cachedHalfByte << 4) + halfByte);
                     hasHalfByteCached = false;
