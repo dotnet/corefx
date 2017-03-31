@@ -3,10 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -40,23 +37,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Throws<ArgumentNullException>("type", () => FormatterServices.GetSafeUninitializedObject(null));
         }
 
-#if netcoreapp
         [Fact]
         public void GetUninitializedObject_NonRuntimeType_ThrowsSerializationException()
         {
-            AssemblyName assemblyName = new AssemblyName("AssemblyName");
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            ModuleBuilder mboduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
-
-            TypeBuilder typeBuilder = mboduleBuilder.DefineType("TestType", TypeAttributes.Public);
-
-            GenericTypeParameterBuilder[] typeParams = typeBuilder.DefineGenericParameters("T");
-            Type nonRuntimeType = typeParams[0].UnderlyingSystemType;
-
-            Assert.Throws<SerializationException>(() => FormatterServices.GetUninitializedObject(nonRuntimeType));
-            Assert.Throws<SerializationException>(() => FormatterServices.GetSafeUninitializedObject(nonRuntimeType));
+            Assert.Throws<SerializationException>(() => FormatterServices.GetUninitializedObject(new NonRuntimeType()));
+            Assert.Throws<SerializationException>(() => FormatterServices.GetSafeUninitializedObject(new NonRuntimeType()));
         }
-#endif
 
         public static IEnumerable<object[]> GetUninitializedObject_NotSupportedType_TestData()
         {
@@ -148,8 +134,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework supports GetUninitializedObject for shared generic instances")]
-        public void GetUniniitalizedObject_SharedGenericInstance_NetCore_ThrowsNotSupportedException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, "The coreclr doesn't support GetUninitializedObject for shared generic instances")]
+        public void GetUninitializedObject_SharedGenericInstance_NetCore_ThrowsNotSupportedException()
         {
             Type canonType = Type.GetType("System.__Canon");
             Assert.NotNull(canonType);
@@ -159,8 +145,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr doesn't support GetUninitializedObject for shared generic instances")]
-        public void GetUniniitalizedObject_SharedGenericInstance_Netfx_InitializesValue()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The full .NET framework partially supports GetUninitializedObject for shared generic instances")]
+        public void GetUninitializedObject_SharedGenericInstance_Netfx_InitializesValue()
         {
             Type canonType = Type.GetType("System.__Canon");
             Assert.NotNull(canonType);
@@ -181,23 +167,37 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(0, nullableSafe.Value);
         }
 
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework doesn't support GetUninitializedObject for COM objects")]
-        public void GetUninitializedObject_ContextBoundObjectSubclass_NetCore_InitializesValue()
+        [Fact]
+        public void GetUninitializedObject_COMObject_ThrowsNotSupportedException()
         {
-            Assert.Equal(0, ((COMObject)FormatterServices.GetUninitializedObject(typeof(COMObject))).Value);
-            Assert.Equal(0, ((COMObject)FormatterServices.GetSafeUninitializedObject(typeof(COMObject))).Value);
-        }
+            Type comObjectType = typeof(COMObject);
+            Assert.True(comObjectType.IsCOMObject);
 
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr supports GetUninitializedObject for COM objects")]
-        public void GetUninitializedObject_ContextBoundObjectSubclass_Netfx_ThrowsNotSupportedException()
-        {
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(typeof(COMObject)));
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(typeof(COMObject)));
         }
 
-        public class COMObject : ContextBoundObject
+        [ComImport]
+        [Guid("00000000-0000-0000-0000-000000000000")]
+        public class COMObject { }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework doesn't support GetUninitializedObject for subclasses of ContextBoundObject")]
+        public void GetUninitializedObject_ContextBoundObjectSubclass_NetCore_InitializesValue()
+        {
+            Assert.Equal(0, ((ContextBoundSubclass)FormatterServices.GetUninitializedObject(typeof(ContextBoundSubclass))).Value);
+            Assert.Equal(0, ((ContextBoundSubclass)FormatterServices.GetSafeUninitializedObject(typeof(ContextBoundSubclass))).Value);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr supports GetUninitializedObject for subclasses of ContextBoundObject")]
+        public void GetUninitializedObject_ContextBoundObjectSubclass_Netfx_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(typeof(ContextBoundSubclass)));
+            Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(typeof(ContextBoundSubclass)));
+        }
+
+        public class ContextBoundSubclass : ContextBoundObject
         {
             public int Value { get; set; }
         }
