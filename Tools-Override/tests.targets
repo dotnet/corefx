@@ -290,7 +290,6 @@
           >
 
     <MakeDir Condition="'$(CoverageEnabledForProject)'=='true'" Directories="$(CoverageReportDir)" />
-    <Message Text="" Importance="High" />
     <Error Text="TestILCFolder property is required for running uapaot tests. Please pass in the full path to the directory that contains ilc.exe to msbuild using /p:TestILCFolder=path_to_ilc_dir.exe" Condition="'$(BuildingUAPAOTVertical)' == 'true' AND !Exists('$(TestHostRootPath)\TestILC')" />
 
     <!-- For UAP, make sure the Runner and Launcher folder exist, otherwise the tests cannot run -->
