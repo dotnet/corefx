@@ -5,6 +5,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Reflection;
+using System;
 
 
 #if XMLSERIALIZERGENERATOR
@@ -13,8 +14,6 @@ namespace Microsoft.XmlSerializer.Generator
 namespace System.Xml.Serialization
 #endif
 {
-    using System;
-
     internal static class Globals
     {
         [SecurityCritical]

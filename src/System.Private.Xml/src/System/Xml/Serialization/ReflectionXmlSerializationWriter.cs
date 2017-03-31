@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
+using System.Xml;
 
 #if XMLSERIALIZERGENERATOR
 namespace Microsoft.XmlSerializer.Generator
@@ -18,7 +19,6 @@ namespace Microsoft.XmlSerializer.Generator
 namespace System.Xml.Serialization
 #endif
 {
-    using System.Xml;
 
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {

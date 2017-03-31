@@ -13,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Extensions;
 using System.Xml.Schema;
+using System.Xml;
+using System.Xml.Serialization;
 
 #if XMLSERIALIZERGENERATOR
 namespace Microsoft.XmlSerializer.Generator
@@ -20,9 +22,6 @@ namespace Microsoft.XmlSerializer.Generator
 namespace System.Xml.Serialization
 #endif
 {
-    using System.Xml;
-    using System.Xml.Serialization;
-
     internal class ReflectionXmlSerializationReader : XmlSerializationReader
     {
         private static TypeDesc StringTypeDesc { get; set; } = (new TypeScope()).GetTypeDesc(typeof(string));
