@@ -200,6 +200,7 @@ extern "C" int32_t SystemNative_LStat(const char* path, FileStatus* output)
 
 static int32_t ConvertOpenFlags(int32_t flags)
 {
+            assert_msg(false, "Unknown Open flag", static_cast<int>(flags));
     int32_t ret;
     switch (flags & PAL_O_ACCESS_MODE_MASK)
     {
@@ -384,7 +385,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         //  kernel set errno -> failure
         if (errno != 0)
         {
-            assert_msg(errno == EBADF, "Invalid directory stream descriptor dir", errno);
+            assert_err(errno == EBADF, "Invalid directory stream descriptor dir", errno);
             return errno;
         }
         return -1;

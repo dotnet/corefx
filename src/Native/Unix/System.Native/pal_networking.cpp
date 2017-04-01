@@ -231,7 +231,7 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
             return PAL_EAI_NONAME;
     }
 
-    assert_msg(false, "Unknown AddrInfo error flag", error);
+    assert_err(false, "Unknown AddrInfo error flag", error);
     return -1;
 }
 
@@ -411,7 +411,7 @@ static int ConvertGetHostErrorPlatformToPal(int error)
             return PAL_NO_DATA;
 
         default:
-            assert_msg(false, "Unknown gethostbyname/gethostbyaddr error code", error);
+            assert_err(false, "Unknown gethostbyname/gethostbyaddr error code", error);
             return PAL_HOST_NOT_FOUND;
     }
 }
