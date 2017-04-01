@@ -2558,7 +2558,7 @@ static SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
             break;
 
         default:
-            assert(false && "unexpected kqueue filter type");
+            assert_msg(false, "unexpected kqueue filter type", (int)filter);
             return PAL_SA_NONE;
     }
 
