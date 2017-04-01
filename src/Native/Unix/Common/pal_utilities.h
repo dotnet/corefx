@@ -16,6 +16,19 @@
 #include <type_traits>
 #include <unistd.h>
 
+#ifdef DEBUG
+#define assert_msg(cond, msg, errno) do \
+{ \
+  if(!(cond)) \
+  { \
+    fprintf(stderr, "%s (%d): error %d: %s. (%s)\n", __FILE__, __LINE__, errno, msg, strerror(errno)); \
+    assert(cond && "assert_msg failed"); \
+  } \
+} while(0)
+#else // DEBUG
+#define assert_msg(cond, msg, errno)
+#endif // DEBUG
+
 /**
  * ResultOf<T> is shorthand for typename std::result_of<T>::type.
  * Equivalent to C++14 std::result_of_t.
