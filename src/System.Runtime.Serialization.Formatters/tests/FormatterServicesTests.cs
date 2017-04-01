@@ -104,21 +104,28 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { typeof(ArgIterator) };
             yield return new object[] { typeof(RuntimeArgumentHandle) };
             yield return new object[] { typeof(TypedReference) };
-
-            yield return new object[] { typeof(Span<int>) };
-            yield return new object[] { typeof(ReadOnlySpan<int>) };
         }
 
         public static IEnumerable<object[]> GetUninitializedObject_ByRefLikeType_NetCore_TestData()
         {
+            yield return new object[] { typeof(Span<int>) };
+            yield return new object[] { typeof(ReadOnlySpan<int>) };
             yield return new object[] { Type.GetType("System.ByReference`1[System.Int32]") };
         }
 
         [Theory]
-        [MemberData(nameof(GetUninitializedObject_ByRefLikeType_TestData))]
         [MemberData(nameof(GetUninitializedObject_ByRefLikeType_NetCore_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework supports GetUninitializedObject for by ref like types")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, "Some runtimes don't support or recognise Span<T>, ReadOnlySpan<T> or ByReference<T> as ref types.")]
         public void GetUninitializedObject_ByRefLikeType_NetCore_ThrowsNotSupportedException(Type type)
+        {
+            Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(type));
+            Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(type));
+        }
+
+        [Theory]
+        [MemberData(nameof(GetUninitializedObject_ByRefLikeType_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework supports GetUninitializedObject for by ref like types")]
+        public void GetUninitializedObject_ByRefLikeType_NonNetfx_ThrowsNotSupportedException(Type type)
         {
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(type));
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(type));
