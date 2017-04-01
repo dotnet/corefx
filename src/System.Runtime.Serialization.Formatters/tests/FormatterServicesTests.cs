@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
-    public class FormatterServicesTests
+    public partial class FormatterServicesTests
     {
         [Fact]
         public void CheckTypeSecurity_Nop()
@@ -173,20 +173,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.True(nullableSafe.HasValue);
             Assert.Equal(0, nullableSafe.Value);
         }
-
-        [Fact]
-        public void GetUninitializedObject_COMObject_ThrowsNotSupportedException()
-        {
-            Type comObjectType = typeof(COMObject);
-            Assert.True(comObjectType.IsCOMObject);
-
-            Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(typeof(COMObject)));
-            Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(typeof(COMObject)));
-        }
-
-        [ComImport]
-        [Guid("00000000-0000-0000-0000-000000000000")]
-        public class COMObject { }
 
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework doesn't support GetUninitializedObject for subclasses of ContextBoundObject")]

@@ -14,6 +14,7 @@
     <Compile Include="OptionalFieldAttributeTests.cs" />
     <Compile Include="FormatterConverterTests.cs" />
     <Compile Include="FormatterServicesTests.cs" />
+    <Compile Include="FormatterServicesTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="FormatterTests.cs" />
     <Compile Include="SerializationBinderTests.cs" />
     <Compile Include="SerializationInfoTests.cs" />
