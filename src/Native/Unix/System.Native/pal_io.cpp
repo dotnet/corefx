@@ -200,7 +200,6 @@ extern "C" int32_t SystemNative_LStat(const char* path, FileStatus* output)
 
 static int32_t ConvertOpenFlags(int32_t flags)
 {
-            assert_msg(false, "Unknown Open flag", static_cast<int>(flags));
     int32_t ret;
     switch (flags & PAL_O_ACCESS_MODE_MASK)
     {

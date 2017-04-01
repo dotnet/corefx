@@ -22,7 +22,7 @@
   if(!(cond)) \
   { \
     fprintf(stderr, "%s (%d): error %d: %s. %s\n", __FILE__, __LINE__, err, msg, strerror(err)); \
-    assert(cond && "assert_msg failed"); \
+    assert(cond && "assert_err failed"); \
   } \
 } while(0)
 #define assert_msg(cond, msg, val) do \
