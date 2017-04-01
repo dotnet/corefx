@@ -213,13 +213,13 @@ static int32_t ConvertOpenFlags(int32_t flags)
             ret = O_WRONLY;
             break;
         default:
-            assert_msg(false, "Unknown Open access mode", (int)flags);
+            assert_msg(false, "Unknown Open access mode", static_cast<int>(flags));
             return -1;
     }
 
     if (flags & ~(PAL_O_ACCESS_MODE_MASK | PAL_O_CLOEXEC | PAL_O_CREAT | PAL_O_EXCL | PAL_O_TRUNC | PAL_O_SYNC))
     {
-        assert_msg(false, "Unknown Open flag", (int)flags);
+        assert_msg(false, "Unknown Open flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -417,7 +417,7 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
             flags = O_CLOEXEC;
             break;
         default:
-            assert_msg(false, "Unknown pipe flag", (int)flags);
+            assert_msg(false, "Unknown pipe flag", static_cast<int>(flags));
             errno = EINVAL;
             return -1;
     }
@@ -642,7 +642,7 @@ static int32_t ConvertMMapProtection(int32_t protection)
 
     if (protection & ~(PAL_PROT_READ | PAL_PROT_WRITE | PAL_PROT_EXEC))
     {
-        assert_msg(false, "Unknown protection", (int)protection)
+        assert_msg(false, "Unknown protection", static_cast<int>(protection));
         return -1;
     }
 
@@ -662,7 +662,7 @@ static int32_t ConvertMMapFlags(int32_t flags)
 {
     if (flags & ~(PAL_MAP_SHARED | PAL_MAP_PRIVATE | PAL_MAP_ANONYMOUS))
     {
-        assert_msg(false, "Unknown MMap flag", (int)flags)
+        assert_msg(false, "Unknown MMap flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -682,7 +682,7 @@ static int32_t ConvertMSyncFlags(int32_t flags)
 {
     if (flags & ~(PAL_MS_SYNC | PAL_MS_ASYNC | PAL_MS_INVALIDATE))
     {
-        assert_msg(false, "Unknown MSync flag", (int)flags)
+        assert_msg(false, "Unknown MSync flag", static_cast<int>(flags));
         return -1;
     }
 
@@ -774,7 +774,7 @@ extern "C" int32_t SystemNative_MAdvise(void* address, uint64_t length, MemoryAd
 #endif
     }
 
-    assert_msg(false, "Unknown MemoryAdvice", (int)advice);
+    assert_msg(false, "Unknown MemoryAdvice", static_cast<int>(advice));
     errno = EINVAL;
     return -1;
 }
@@ -849,7 +849,7 @@ extern "C" int64_t SystemNative_SysConf(SysConfName name)
             return sysconf(_SC_NPROCESSORS_ONLN);
     }
 
-    assert_msg(false, "Unknown SysConf name", (int)name)
+    assert_msg(false, "Unknown SysConf name", static_cast<int>(name));
     errno = EINVAL;
     return -1;
 }

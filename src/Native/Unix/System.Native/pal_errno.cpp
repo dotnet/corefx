@@ -385,7 +385,7 @@ extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
     // note that there is probably a corresponding missing case in the
     // other direction above, but the compiler can't warn in that case
     // because the platform values are not part of an enum.
-    assert_msg(false, "Unknown error code", (int)error);
+    assert_msg(false, "Unknown error code", static_cast<int>(error));
     return -1;
 }
 
