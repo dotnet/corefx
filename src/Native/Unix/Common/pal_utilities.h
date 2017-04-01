@@ -17,16 +17,16 @@
 #include <unistd.h>
 
 #ifdef DEBUG
-#define assert_msg(cond, msg, errno) do \
+#define assert_msg(cond, msg, err) do \
 { \
   if(!(cond)) \
   { \
-    fprintf(stderr, "%s (%d): error %d: %s. (%s)\n", __FILE__, __LINE__, errno, msg, strerror(errno)); \
+    fprintf(stderr, "%s (%d): error %d: %s. (if an error, it may be %s)\n", __FILE__, __LINE__, err, msg, strerror(err)); \
     assert(cond && "assert_msg failed"); \
   } \
 } while(0)
 #else // DEBUG
-#define assert_msg(cond, msg, errno)
+#define assert_msg(cond, msg, err)
 #endif // DEBUG
 
 /**
