@@ -8,7 +8,7 @@ namespace System
     {
         private readonly T[] _pinnable;
         private readonly IntPtr _byteOffset;
-        private readonly long _length;
+        private readonly int _length;
 
         public SpanDebugView(Span<T> collection)
         {
@@ -29,7 +29,7 @@ namespace System
                 {
                     byte* source = (byte*)_byteOffset.ToPointer();
 
-                    for (long i = 0; i < result.LongLength; i++)
+                    for (int i = 0; i < result.Length; i++)
                     {
                         result[i] = Unsafe.Read<T>(source);
                         source = source + elementSize;
@@ -38,12 +38,9 @@ namespace System
                 else
                 {
                     long _byteOffsetInt = _byteOffset.ToInt64();
-                    long sourceIndex = (_byteOffsetInt - IntPtr.Size) / elementSize;
+                    int sourceIndex = (int)((_byteOffsetInt - IntPtr.Size) / elementSize);
 
-                    for (long i = 0; i < result.LongLength; i++)
-                    {
-                        result[i] = _pinnable[i + sourceIndex];
-                    }
+                    Array.Copy(_pinnable, sourceIndex, result, 0, _length);
                 }
 
                 return result;
