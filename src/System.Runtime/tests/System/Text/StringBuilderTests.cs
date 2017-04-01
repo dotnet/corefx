@@ -455,7 +455,7 @@ namespace System.Text.Tests
         {
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
-            
+
             Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => builder.Append((uint)1));
         }
 
