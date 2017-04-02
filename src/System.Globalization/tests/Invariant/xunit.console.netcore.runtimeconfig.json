@@ -1,11 +1,11 @@
 {
 	"runtimeOptions": {
     "configProperties": {
-       "System.Globalization.Invariant": true
-     },
-     "framework": {
-        "name": "Microsoft.NETCore.App",
-         "version": "9.9.9"
-	   }
-  }
+      "System.Globalization.Invariant": true
+    },
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+        "version": "9.9.9"
+	    }
+    }
 }
