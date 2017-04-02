@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -14,7 +15,6 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
     public class HttpClientHandler_MaxResponseHeadersLength_Test : RemoteExecutorTestBase
     {
         [Fact]
@@ -22,7 +22,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var handler = new HttpClientHandler())
             {
-                Assert.Equal(64 * 1024, handler.MaxResponseHeadersLength);
+                Assert.Equal(64, handler.MaxResponseHeadersLength);
             }
         }
 
@@ -39,7 +39,7 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [InlineData(1)]
-        [InlineData(65 * 1024)]
+        [InlineData(65)]
         [InlineData(int.MaxValue)]
         public void ValidValue_SetGet_Roundtrips(int validValue)
         {
@@ -63,10 +63,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [InlineData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n", 37, false)]
-        [InlineData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n", 38, true)]
-        [InlineData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n", 39, true)]
+        [Theory, MemberData(nameof(ResponseWithManyHeadersData))]
         public async Task ThresholdExceeded_ThrowsException(string responseHeaders, int maxResponseHeadersLength, bool shouldSucceed)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -100,8 +97,34 @@ namespace System.Net.Http.Functional.Tests
                     });
                 }
             });
-
         }
 
+        public static IEnumerable<object[]> ResponseWithManyHeadersData
+        {
+            get
+            {
+                // Generate a response with lots of headers so that the
+                // total is greater than 1024 bytes but less than 2048 bytes.
+                var buffer = new StringBuilder();
+                buffer.Append("HTTP/1.1 200 OK\r\n");
+                for (int i = 0; i < 50; i++)
+                {
+                    buffer.Append($"Custom-{i}: 1234567890\r\n");
+                }
+                buffer.Append("Content-Length: 0\r\n\r\n");
+                string _responseWithManyHeaders = buffer.ToString();
+                Assert.InRange(_responseWithManyHeaders.Length, 1025, 2048);
+
+                // Failure case: response headers must be <= 1024 bytes.
+                {
+                    yield return new object[] { _responseWithManyHeaders, 1, false };
+                }
+
+                // Success case: response headers must be <= 2048 bytes.
+                {
+                    yield return new object[] { _responseWithManyHeaders, 2, true };
+                }
+            }
+        }
     }
 }

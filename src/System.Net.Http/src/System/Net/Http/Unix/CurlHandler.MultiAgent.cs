@@ -937,7 +937,7 @@ namespace System.Net.Http
 
                         // Validate that we haven't received too much header data.
                         ulong headerBytesReceived = response._headerBytesReceived + size;
-                        if (headerBytesReceived > (ulong)easy._handler.MaxResponseHeadersLength)
+                        if (headerBytesReceived > (ulong)(easy._handler.MaxResponseHeadersLength * 1024))
                         {
                             throw new HttpRequestException(
                                 SR.Format(SR.net_http_response_headers_exceeded_length, easy._handler.MaxResponseHeadersLength));
