@@ -549,10 +549,14 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void FileDoesNotExist(FileMode mode)
         {
             Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath()));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096, MemoryMappedFileAccess.ReadWrite));
+
+            if (!(PlatformDetection.IsFullFramework && mode == FileMode.Truncate)) // Bug in .NET Framework blocked CreateFromFile with Truncate
+            {
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096, MemoryMappedFileAccess.ReadWrite));
+            }
         }
 
         /// <summary>
