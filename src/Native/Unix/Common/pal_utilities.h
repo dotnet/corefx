@@ -21,16 +21,16 @@
 { \
   if(!(cond)) \
   { \
-    fprintf(stderr, "%s (%d): error %d: %s. %s\n", __FILE__, __LINE__, err, msg, strerror(err)); \
-    assert(cond && "assert_err failed"); \
+    fprintf(stderr, "%s (%d): error %d: %s. %s (%s failed)\n", __FILE__, __LINE__, err, msg, strerror(err), #cond); \
+    assert(false && "assert_err failed"); \
   } \
 } while(0)
 #define assert_msg(cond, msg, val) do \
 { \
   if(!(cond)) \
   { \
-    fprintf(stderr, "%s (%d): error %d: %s\n", __FILE__, __LINE__, val, msg); \
-    assert(cond && "assert_msg failed"); \
+    fprintf(stderr, "%s (%d): error %d: %s (%s failed)\n", __FILE__, __LINE__, val, msg, #cond); \
+    assert(false && "assert_msg failed"); \
   } \
 } while(0)
 #else // DEBUG
