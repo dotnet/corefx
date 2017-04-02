@@ -173,7 +173,7 @@ namespace System.Dynamic
 
             // Notify property changed outside the lock
             PropertyChangedEventHandler propertyChanged = _propertyChanged;
-            if (propertyChanged != null && value != oldValue)
+            if (propertyChanged != null && !RuntimeHelpers.Equals(value, oldValue))
             {
                 propertyChanged(this, new PropertyChangedEventArgs(data.Class.Keys[index]));
             }
