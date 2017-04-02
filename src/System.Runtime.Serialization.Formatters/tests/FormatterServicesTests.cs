@@ -50,6 +50,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { typeof(int[,]) };
             yield return new object[] { typeof(int).MakePointerType() };
             yield return new object[] { typeof(int).MakeByRefType() };
+            yield return new object[] { typeof(GenericClass<>).GetTypeInfo().GenericTypeParameters[0] };
         }
 
         [Theory]
