@@ -361,6 +361,11 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidArgumentCombinationsWithPath_ModesCreateOrTruncate(
             FileMode mode, string mapName, long capacity, MemoryMappedFileAccess access)
         {
+            if (PlatformDetection.IsFullFramework && mode == FileMode.Truncate)
+            {
+                return; // Bug in .NET Framework blocked CreateFromFile with Truncate
+            }
+
             // For FileMode.Create/Truncate, try existing files.  Only the overloads that take a capacity are valid because
             // both of these modes will cause the input file to be made empty, and an empty file doesn't work with the default capacity.
 
