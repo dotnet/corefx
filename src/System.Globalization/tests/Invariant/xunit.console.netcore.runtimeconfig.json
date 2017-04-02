@@ -1,5 +1,5 @@
 {
-	"runtimeOptions": {
+  "runtimeOptions": {
     "configProperties": {
       "System.Globalization.Invariant": true
     },
@@ -7,5 +7,5 @@
       "name": "Microsoft.NETCore.App",
         "version": "9.9.9"
 	    }
-    }
+  }
 }
