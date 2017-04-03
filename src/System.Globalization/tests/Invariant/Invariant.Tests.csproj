@@ -8,7 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup>
-    <!-- we are overriding the .json config file -->
+    <!-- 
+        We are overriding the .json config file to include "System.Globalization.Invariant": true 
+        which will enable the globalization invariant mode.
+    -->
     <SkipXunitRuntimeConfigCopying>true</SkipXunitRuntimeConfigCopying>
   </PropertyGroup>
     

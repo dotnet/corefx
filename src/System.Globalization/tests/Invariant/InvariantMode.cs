@@ -19,7 +19,7 @@ namespace System.Globalization.Tests
             yield return new object[] { "" };
         }
 
-        private static string[] s_cultureNames = new string[] { "en-US", "ja-JP", "fr-FR", "tr-TR", "" };
+        private static readonly string[] s_cultureNames = new string[] { "en-US", "ja-JP", "fr-FR", "tr-TR", "" };
 
         public static IEnumerable<object[]> IndexOf_TestData()
         {
@@ -488,7 +488,7 @@ namespace System.Globalization.Tests
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.DayNames, ci.DateTimeFormat.DayNames);
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.FirstDayOfWeek, ci.DateTimeFormat.FirstDayOfWeek);
 
-            for (var dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
+            for (DayOfWeek dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
                 Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedDayName(dow), ci.DateTimeFormat.GetAbbreviatedDayName(dow));
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedEraName(1), ci.DateTimeFormat.GetAbbreviatedEraName(1));
 
@@ -497,14 +497,14 @@ namespace System.Globalization.Tests
 
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns(), ci.DateTimeFormat.GetAllDateTimePatterns());
 
-            for (var dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
+            for (DayOfWeek dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
                 Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetDayName(dow), ci.DateTimeFormat.GetDayName(dow));
 
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetEra(CultureInfo.InvariantCulture.DateTimeFormat.GetEraName(1)), ci.DateTimeFormat.GetEra(ci.DateTimeFormat.GetEraName(1)));
 
             for (int i = 1; i <= 12; i++)
                 Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(i), ci.DateTimeFormat.GetMonthName(i));
-            for (var dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
+            for (DayOfWeek dow = DayOfWeek.Sunday; dow < DayOfWeek.Saturday; dow++)
                 Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.GetShortestDayName(dow), ci.DateTimeFormat.GetShortestDayName(dow));
 
             Assert.Equal(CultureInfo.InvariantCulture.DateTimeFormat.LongDatePattern, ci.DateTimeFormat.LongDatePattern);
@@ -527,7 +527,7 @@ namespace System.Globalization.Tests
 
             Assert.True(ci.Calendar is GregorianCalendar);
 
-            var ct = ci.Name == "" ? CultureInfo.InvariantCulture.CultureTypes : CultureInfo.InvariantCulture.CultureTypes | CultureTypes.UserCustomCulture;
+            CultureTypes ct = ci.Name == "" ? CultureInfo.InvariantCulture.CultureTypes : CultureInfo.InvariantCulture.CultureTypes | CultureTypes.UserCustomCulture;
             Assert.Equal(ct, ci.CultureTypes);
             Assert.Equal(CultureInfo.InvariantCulture.NativeName, ci.DisplayName);
             Assert.Equal(CultureInfo.InvariantCulture.EnglishName, ci.EnglishName);
@@ -618,7 +618,7 @@ namespace System.Globalization.Tests
         [MemberData(nameof(Cultures_TestData))]
         public void TestSortVersion(string cultureName)
         {
-            var version = new SortVersion(0, new Guid(0, 0, 0, 0, 0, 0, 0,
+            SortVersion version = new SortVersion(0, new Guid(0, 0, 0, 0, 0, 0, 0,
                                                             (byte)(0x7F >> 24),
                                                             (byte)((0x7F & 0x00FF0000) >> 16),
                                                             (byte)((0x7F & 0x0000FF00) >> 8),
@@ -650,10 +650,9 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(IndexOf_TestData))]
-
         public void TestIndexOf(string source, string value, int startIndex, int count, CompareOptions options, int result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).CompareInfo.IndexOf(source, value, startIndex, count, options));
                 Assert.Equal(result, source.IndexOf(value, startIndex, count, GetStringComparison(options)));
@@ -662,10 +661,9 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(LastIndexOf_TestData))]
-
         public void TestLastIndexOf(string source, string value, int startIndex, int count, CompareOptions options, int result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).CompareInfo.LastIndexOf(source, value, startIndex, count, options));
                 Assert.Equal(result, source.LastIndexOf(value, startIndex, count, GetStringComparison(options)));
@@ -674,10 +672,9 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(IsPrefix_TestData))]
-
         public void TestIsPrefix(string source, string value, CompareOptions options, bool result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).CompareInfo.IsPrefix(source, value, options));
                 Assert.Equal(result, source.StartsWith(value, GetStringComparison(options)));
@@ -686,10 +683,9 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(IsSuffix_TestData))]
-
         public void TestIsSuffix(string source, string value, CompareOptions options, bool result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).CompareInfo.IsSuffix(source, value, options));
                 Assert.Equal(result, source.EndsWith(value, GetStringComparison(options)));
@@ -699,10 +695,9 @@ namespace System.Globalization.Tests
         
         [Theory]
         [MemberData(nameof(Compare_TestData))]
-
         public void TestCompare(string source, string value, CompareOptions options, int result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 int res = CultureInfo.GetCultureInfo(cul).CompareInfo.Compare(source, value, options);
                 if (res < 0) res = -1;
@@ -718,10 +713,9 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(ToLower_TestData))]
-
         public void TestToLower(string upper, string lower, bool result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).TextInfo.ToLower(upper).Equals(lower, StringComparison.Ordinal));
                 Assert.Equal(result, upper.ToLower().Equals(lower, StringComparison.Ordinal));
@@ -730,16 +724,14 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(ToUpper_TestData))]
-
         public void TestToUpper(string lower, string upper, bool result)
         {
-            foreach (var cul in s_cultureNames)
+            foreach (string cul in s_cultureNames)
             {
                 Assert.Equal(result, CultureInfo.GetCultureInfo(cul).TextInfo.ToUpper(lower).Equals(upper, StringComparison.Ordinal));
                 Assert.Equal(result, lower.ToUpper().Equals(upper, StringComparison.Ordinal));
             }
         }
-
 
         [Theory]
         [InlineData("", NormalizationForm.FormC)]
