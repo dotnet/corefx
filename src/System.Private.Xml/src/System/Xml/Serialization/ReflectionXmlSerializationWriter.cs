@@ -1361,21 +1361,22 @@ namespace System.Xml.Serialization
 
             if (element.IsSoap)
             {
-                throw new NotImplementedException();
-                //if (!hasWrapperElement && !writeAccessors)
-                //{
-                //    // doc/bare case -- allow extra members
-                //    Writer.Write("if (pLength > ");
-                //    Writer.Write(mapping.Members.Length.ToString(CultureInfo.InvariantCulture));
-                //    Writer.WriteLine(") {");
-                //    Writer.Indent++;
+                if (!hasWrapperElement && !writeAccessors)
+                {
+                    // doc/bare case -- allow extra members
+                    if (pLength > mapping.Members.Length)
+                    {
+                        for (int i = mapping.Members.Length; i < pLength; i++)
+                        {
+                            if (p[i] != null)
+                            {
+                                WritePotentiallyReferencingElement(null, null, p[i], p[i].GetType(), true, false);
+                            }
+                        }
+                    }
+                }
 
-                //    WriteExtraMembers(mapping.Members.Length.ToString(CultureInfo.InvariantCulture), "pLength");
-
-                //    Writer.Indent--;
-                //    Writer.WriteLine("}");
-                //}
-                //Writer.WriteLine("WriteReferencedElements();");
+                WriteReferencedElements();
             }
         }
 
