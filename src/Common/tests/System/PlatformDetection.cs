@@ -25,7 +25,6 @@ namespace System
             File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
         public static bool IsWindows10Version1607OrGreater { get; } = IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
-        // TODO: Update with final RS2 version number
         public static bool IsWindows10Version1703OrGreater { get; } = IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
         public static bool IsWindows10VersionInsiderPreviewOrGreater { get; } = IsWindows &&
