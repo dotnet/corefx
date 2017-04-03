@@ -410,6 +410,9 @@ static int ConvertGetHostErrorPlatformToPal(int error)
         case NO_DATA:
             return PAL_NO_DATA;
 
+        case NO_ADDRESS:
+            return PAL_NO_ADDRESS;
+
         default:
             assert_err(false, "Unknown gethostbyname/gethostbyaddr error code", error);
             return PAL_HOST_NOT_FOUND;
