@@ -936,6 +936,7 @@ namespace System.Net.Http
                         CurlResponseHeaderReader reader = new CurlResponseHeaderReader(buffer, size);
 
                         // Validate that we haven't received too much header data.
+                        // MaxResponseHeadersLength property is in units in K (1024) bytes.
                         ulong headerBytesReceived = response._headerBytesReceived + size;
                         if (headerBytesReceived > (ulong)(easy._handler.MaxResponseHeadersLength * 1024))
                         {

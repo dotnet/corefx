@@ -103,28 +103,59 @@ namespace System.Net.Http.Functional.Tests
         {
             get
             {
-                // Generate a response with lots of headers so that the
-                // total is greater than 1024 bytes but less than 2048 bytes.
-                var buffer = new StringBuilder();
-                buffer.Append("HTTP/1.1 200 OK\r\n");
-                for (int i = 0; i < 50; i++)
+                // Success case: response headers of size 1023 bytes (less than 1024 bytes max).
                 {
-                    buffer.Append($"Custom-{i}: 1234567890\r\n");
-                }
-                buffer.Append("Content-Length: 0\r\n\r\n");
-                string _responseWithManyHeaders = buffer.ToString();
-                Assert.InRange(_responseWithManyHeaders.Length, 1025, 2048);
-
-                // Failure case: response headers must be <= 1024 bytes.
-                {
-                    yield return new object[] { _responseWithManyHeaders, 1, false };
+                    yield return new object[] { GenerateLargeResponseHeaders(1023), 1, true };
                 }
 
-                // Success case: response headers must be <= 2048 bytes.
+                // Success case: response headers of size 1024 bytes (equal to 1024 bytes max).
                 {
-                    yield return new object[] { _responseWithManyHeaders, 2, true };
+                    yield return new object[] { GenerateLargeResponseHeaders(1024), 1, true };
+                }
+
+                // Failure case: response headers of size 1025 (greater than 1024 bytes max).
+                {
+                    yield return new object[] { GenerateLargeResponseHeaders(1025), 1, false };
                 }
             }
+        }
+
+        private static string GenerateLargeResponseHeaders(int responseHeadersSizeInBytes)
+        {
+            // This helper method only supports generating sizes of 1023, 1024, or 1025 bytes.
+            // These are the only sizes needed to support the above tests.
+            Assert.InRange(responseHeadersSizeInBytes, 1023, 1025);
+
+            string statusHeader = "HTTP/1.1 200 OK\r\n";
+            string contentFooter = "Content-Length: 0\r\n\r\n";
+
+            var buffer = new StringBuilder();
+            buffer.Append(statusHeader);
+            for (int i = 0; i < 24; i++)
+            {
+                buffer.Append($"Custom-{i:D4}: 1234567890123456789012345\r\n");
+            }
+
+            if (responseHeadersSizeInBytes == 1023)
+            {
+                buffer.Append($"Custom-1023: 1234567890\r\n");
+            }
+            else if (responseHeadersSizeInBytes == 1024)
+            {
+                buffer.Append($"Custom-1024: 12345678901\r\n");
+            }
+            else
+            {
+                Assert.Equal(1025, responseHeadersSizeInBytes);
+                buffer.Append($"Custom-1025: 123456789012\r\n");
+            }
+
+            buffer.Append(contentFooter);
+
+            string response = buffer.ToString();            
+            Assert.Equal(responseHeadersSizeInBytes, response.Length);
+
+            return response;
         }
     }
 }
