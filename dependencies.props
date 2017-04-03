@@ -1,4 +1,4 @@
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+a1e3835a389e9953fba5a96988bf8b670fcae207<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
 
   <!-- There are situations where the live .Net Native targeting pack wouldn't be suitable to pick up.
@@ -17,24 +17,24 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>95c0dfc764c3083aa62e96c6eac211f40b6ce0df</CoreFxCurrentRef>
-    <CoreClrCurrentRef>924f71467ab898de4a865d14af4f0658b20c6693</CoreClrCurrentRef>
+    <CoreFxCurrentRef>a1e3835a389e9953fba5a96988bf8b670fcae207</CoreFxCurrentRef>
+    <CoreClrCurrentRef>a1e3835a389e9953fba5a96988bf8b670fcae207</CoreClrCurrentRef>
     <ExternalCurrentRef>3b8a99621d89ad9877f053ba8af25e0f25dcd9d8</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>2de789c24b595732e07a7f0923cd9646b9cdcbbe</ProjectNTfsCurrentRef>
+    <ProjectNTfsCurrentRef>a1e3835a389e9953fba5a96988bf8b670fcae207</ProjectNTfsCurrentRef>
     <ProjectNTfsTestILCCurrentRef>2de789c24b595732e07a7f0923cd9646b9cdcbbe</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>05650e53f2aa4497f74cd6e9b053d3f69f64b0bd</SniCurrentRef>
-    <StandardCurrentRef>95c0dfc764c3083aa62e96c6eac211f40b6ce0df</StandardCurrentRef>
+    <StandardCurrentRef>a1e3835a389e9953fba5a96988bf8b670fcae207</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview1-25131-05</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview1-25203-01</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview1-25203-01</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview1-25203-02</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-25016-01</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25131-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25131-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25131-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.0-preview1-25131-01</NETStandardPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25203-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25203-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25203-00</ProjectNTfsTestILCPackageVersion>
+    <NETStandardPackageVersion>2.0.0-preview1-25203-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0-beta-25007-02</SniPackageVersion>
