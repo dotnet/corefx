@@ -13,6 +13,12 @@ namespace System.Globalization.Tests
     /// </summary>
     public class IdnMappingIdnaConformanceTests
     {
+        /// <summary>
+        /// Tests positive cases for GetAscii.  Windows fails by design on some entries that should pass.  The recommendation is to take the source input
+        /// for this if needed.
+        /// 
+        /// There are some others that failed which have been commented out and marked in the dataset as "GETASCII DOES FAILS ON WINDOWS 8.1"
+        /// Same applies to Windows 10 >=RS2 in the IdnaTest_9.txt file
         [Fact]
         public void GetAscii_Success()
         {
@@ -32,6 +38,7 @@ namespace System.Globalization.Tests
         /// for this if needed.
         /// 
         /// There are some others that failed which have been commented out and marked in the dataset as "GETUNICODE DOES FAILS ON WINDOWS 8.1"
+        /// Same applies to Windows 10 >=RS2 in the IdnaTest_9.txt file
         /// </summary>
         [Fact]
         public void GetUnicode_Succes()
@@ -61,6 +68,7 @@ namespace System.Globalization.Tests
         /// <remarks>
         /// There are some failures on Windows 8.1 that have been commented out 
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETASCII DOES NOT FAIL ON WINDOWS 8.1"
+        /// Same applies to Windows 10 >=RS2 in the IdnaTest_9.txt file
         /// </remarks>
         [Fact]
         public void GetAscii_Invalid()
@@ -81,6 +89,7 @@ namespace System.Globalization.Tests
         /// <remarks>
         /// There are some failures on Windows 8.1 that have been commented out 
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETUNICODE DOES NOT FAIL ON WINDOWS 8.1"
+        /// Same applies to Windows 10 >=RS2 in the IdnaTest_9.txt file
         /// </remarks>
         [Fact]
         public void GetUnicode_Invalid()
