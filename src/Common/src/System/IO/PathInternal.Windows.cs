@@ -9,7 +9,11 @@ using System.Text;
 namespace System.IO
 {
     /// <summary>Contains internal path helpers that are shared between many projects.</summary>
+#if !MONO
     internal static partial class PathInternal
+#else
+    internal static class PathInternalWindows
+#endif
     {
         // All paths in Win32 ultimately end up becoming a path to a File object in the Windows object manager. Passed in paths get mapped through
         // DosDevice symbolic links in the object tree to actual File objects under \Devices. To illustrate, this is what happens with a typical

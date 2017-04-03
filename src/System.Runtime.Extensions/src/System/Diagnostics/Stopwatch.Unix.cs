@@ -4,14 +4,18 @@
 
 namespace System.Diagnostics
 {
+#if !MONO
     public partial class Stopwatch
+#else
+    internal static class StopwatchUnix
+#endif
     {
-        private static bool QueryPerformanceFrequency(out long value)
+        internal static bool QueryPerformanceFrequency(out long value)
         {
             return Interop.Sys.GetTimestampResolution(out value);
         }
 
-        private static bool QueryPerformanceCounter(out long value)
+        internal static bool QueryPerformanceCounter(out long value)
         {
             return Interop.Sys.GetTimestamp(out value);
         }

@@ -8,7 +8,11 @@ using System.Text;
 namespace System.IO
 {
     /// <summary>Contains internal path helpers that are shared between many projects.</summary>
+#if !MONO
     internal static partial class PathInternal
+#else
+    internal static class PathInternalUnix
+#endif
     {
         // There is only one invalid path character in Unix
         private const char InvalidPathChar = '\0';

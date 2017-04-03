@@ -4,8 +4,12 @@
 
 namespace System.Runtime.Versioning
 {
+#if !MONO
     public static partial class VersioningHelper
+#else
+    internal static class VersioningHelperWindows
+#endif
     {
-        private static int GetCurrentProcessId() => unchecked((int)Interop.Kernel32.GetCurrentProcessId());
+        internal static int GetCurrentProcessId() => unchecked((int)Interop.Kernel32.GetCurrentProcessId());
     }
 }

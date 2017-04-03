@@ -8,7 +8,11 @@ using System.Text;
 namespace System.IO
 {
     /// <summary>Contains internal volume helpers that are shared between many projects.</summary>
+#if !MONO
     internal static partial class DriveInfoInternal
+#else
+    internal static class DriveInfoInternalWin32
+#endif
     {
         public static string[] GetLogicalDrives()
         {
