@@ -51,7 +51,7 @@ namespace System.Globalization.Tests
                     {
                         var map = new IdnMapping { UseStd3AsciiRules = true, AllowUnassigned = true };
                         var unicodeResult = map.GetUnicode(entry.Source);
-                        
+
                         Assert.Equal(entry.UnicodeResult.Value, unicodeResult, StringComparer.OrdinalIgnoreCase);
                     }
                     catch (ArgumentException)
