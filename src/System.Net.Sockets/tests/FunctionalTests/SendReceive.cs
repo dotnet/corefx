@@ -719,6 +719,22 @@ namespace System.Net.Sockets.Tests
                 }
             }
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        public void SetSocketSendBufferSize_Zero()
+        {
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                SocketException e;
+                string expectedMessage = "Invalid argument";
+                e = Assert.Throws<SocketException>(() => socket.SendBufferSize = 0);
+                Assert.Equal(e.Message, expectedMessage);
+
+                e = Assert.Throws<SocketException>(() => socket.ReceiveBufferSize = 0);
+                Assert.Equal(e.Message, expectedMessage);
+            }
+        }
     }
 
     public sealed class SendReceiveUdpClient : MemberDatas
