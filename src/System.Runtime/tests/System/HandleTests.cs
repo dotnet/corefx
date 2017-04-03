@@ -46,7 +46,7 @@ public static class HandleTests
     {
         RuntimeTypeHandle r1 = typeof(int).TypeHandle;
         RuntimeTypeHandle r2 = typeof(uint).TypeHandle;
-        Assert.False(r1.Equals(r2));
+        Assert.NotEqual(r1, r2);
     }
     
     private class Base
