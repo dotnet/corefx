@@ -5,6 +5,9 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System;
+using System.Data;
+
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Data.SqlDbType))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Data.StatementCompletedEventArgs))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Data.StatementCompletedEventHandler))]
@@ -32,7 +35,7 @@
 
 namespace Microsoft.SqlServer.Server
 {
-    public partial class SqlDataRecord
+    public partial class SqlDataRecord : System.Data.IDataRecord
     {
         public SqlDataRecord(params Microsoft.SqlServer.Server.SqlMetaData[] metaData) { }
         public virtual int FieldCount { get { throw null; } }
@@ -116,6 +119,7 @@ namespace Microsoft.SqlServer.Server
         public virtual void SetTimeSpan(int ordinal, System.TimeSpan value) { }
         public virtual void SetValue(int ordinal, object value) { }
         public virtual int SetValues(params object[] values) { throw null; }
+        IDataReader System.Data.IDataRecord.GetData(int ordinal) { throw null; }
     }
     public sealed partial class SqlMetaData
     {
