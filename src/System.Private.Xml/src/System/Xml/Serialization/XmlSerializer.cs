@@ -791,10 +791,10 @@ namespace System.Xml.Serialization
 #if XMLSERIALIZERGENERATOR
         [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         [ResourceExposure(ResourceScope.None)]
-        public static FileStream GenerateSerializer(Type[] types, XmlMapping[] mappings, string codePath)
+        public static bool GenerateSerializer(Type[] types, XmlMapping[] mappings, string codePath)
         {
             if (types == null || types.Length == 0)
-                return null;
+                return false;
 
             if (mappings == null)
                 throw new ArgumentNullException(nameof(mappings));

@@ -1,19 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 
 namespace Microsoft.XmlSerializer.Generator
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using static TempAssembly;
-
     public class Sgen
     {
         public static int Main(string[] args)
@@ -28,7 +26,7 @@ namespace Microsoft.XmlSerializer.Generator
             string assembly = null;
             List<string> types = new List<string>();
             string codePath = null;
-            ArrayList errs = new ArrayList();
+            var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
 
@@ -224,17 +222,16 @@ namespace Microsoft.XmlSerializer.Generator
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, location));
                 }
 
-                FileStream serializer = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, codePath);
+                bool success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, codePath);
 
-                if (serializer == null)
+                if (success)
                 {
-                    Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
+                    Console.Out.WriteLine(SR.Format(SR.InfoAssemblyName, location));
+                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedAssembly, assembly.Location, location));
                 }
                 else
                 {
-                    var name = serializer.Name;
-                    Console.Out.WriteLine(SR.Format(SR.InfoAssemblyName, name));
-                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedAssembly, assembly.Location, location));
+                    Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
                 }
             }
         }
@@ -286,7 +283,7 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Framework, Version {0}]", ThisAssembly.InformationalVersion));
+            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Framework, Version {0}]", TempAssembly.ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 

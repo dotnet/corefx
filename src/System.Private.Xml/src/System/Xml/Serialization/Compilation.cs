@@ -267,7 +267,7 @@ namespace System.Xml.Serialization
             return sb.ToString();
         }
 
-        internal static FileStream GenerateSerializerFile(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, Assembly assembly, Hashtable assemblies, string codePath)
+        internal static bool GenerateSerializerFile(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, Assembly assembly, Hashtable assemblies, string codePath)
         {
             var compiler = new Compiler();
             try
@@ -306,7 +306,7 @@ namespace System.Xml.Serialization
                 }
 
                 compiler.AddImport(typeof(object).Assembly);
-                compiler.AddImport(typeof(XmlSerializer).Assembly);
+                compiler.AddImport(typeof(System.Xml.Serialization.XmlSerializer).Assembly);
                 var writer = new IndentedWriter(compiler.Source, false);
                 writer.WriteLine("[assembly:System.Security.AllowPartiallyTrustedCallers()]");
                 writer.WriteLine("[assembly:System.Security.SecurityTransparent()]");
@@ -318,7 +318,10 @@ namespace System.Xml.Serialization
                     {
                         Type type = types[i];
                         if (type == null)
+                        {
                             continue;
+                        }
+
                         if (DynamicAssemblies.IsTypeDynamic(type))
                         {
                             throw new InvalidOperationException(SR.Format(SR.XmlPregenTypeDynamic, types[i].FullName));
@@ -400,20 +403,25 @@ namespace System.Xml.Serialization
                 writer.WriteLine("}");
                 string serializerName = XmlSerializer.GetXmlSerializerAssemblyName(types[0], null);
                 string location = Path.Combine(codePath, serializerName + ".cs");
-                if (File.Exists(location))
+                try
                 {
-                    File.Delete(location);
-                }
+                    if (File.Exists(location))
+                    {
+                        File.Delete(location);
+                    }
 
-                FileStream fs;
-                using (fs = File.Create(location))
+                    using (FileStream fs = File.Create(location))
+                    {
+                        string codecontent = compiler.Source.ToString();
+                        Byte[] info = new UTF8Encoding(true).GetBytes(codecontent);
+                        fs.Write(info, 0, info.Length);
+                        return true;
+                    }
+                }
+                catch (UnauthorizedAccessException)
                 {
-                    string codecontent = compiler.Source.ToString();
-                    Byte[] info = new UTF8Encoding(true).GetBytes(codecontent);
-                    fs.Write(info, 0, info.Length);
+                    throw new UnauthorizedAccessException(SR.Format(SR.DicrectoryAccessDenied, location));
                 }
-
-                return fs;
             }
             finally
             {
