@@ -23,7 +23,7 @@ namespace Microsoft.XmlSerializer.Generator
             return 0;
         }
 
-        int Run(string[] args)
+        private int Run(string[] args)
         {
             string assembly = null;
             List<string> types = new List<string>();
@@ -50,8 +50,8 @@ namespace Microsoft.XmlSerializer.Generator
                             arg = arg.Substring(0, colonPos).Trim();
                         }
                     }
-                    arg = arg.ToLower(CultureInfo.InvariantCulture);
 
+                    arg = arg.ToLower(CultureInfo.InvariantCulture);
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
                         WriteHeader();
@@ -64,6 +64,7 @@ namespace Microsoft.XmlSerializer.Generator
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
                         }
+
                         assembly = arg;
                     }
                     else if (ArgumentMatch(arg, "force"))
@@ -80,6 +81,7 @@ namespace Microsoft.XmlSerializer.Generator
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
                         }
+
                         codePath = value;
                     }
                     else if (ArgumentMatch(arg, "type"))
@@ -100,12 +102,14 @@ namespace Microsoft.XmlSerializer.Generator
                         Console.Error.WriteLine(FormatMessage(true, SR.Format(SR.Warning, err)));
                     }
                 }
+
                 if (args.Length == 0 || assembly == null)
                 {
                     if (assembly == null)
                     {
                         Console.Error.WriteLine(FormatMessage(false, SR.Format(SR.ErrMissingRequiredArgument, SR.Format(SR.ErrAssembly, "assembly"))));
                     }
+
                     WriteHelp();
                     return 0;
                 }
@@ -118,18 +122,16 @@ namespace Microsoft.XmlSerializer.Generator
                 {
                     throw;
                 }
-                //string errorPrefix = parsableerrors ? "SGEN: error SGEN1: " : Res.GetString(Res.Error);
-                //Error(e, errorPrefix, parsableerrors);
+
                 return 1;
             }
 
             return 0;
         }
 
-        void GenerateAssembly(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string codePath)
+        private void GenerateAssembly(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string codePath)
         {
             Assembly assembly = LoadAssembly(assemblyName, true);
-
             Type[] types;
 
             if (typeNames == null || typeNames.Count == 0)
@@ -148,6 +150,7 @@ namespace Microsoft.XmlSerializer.Generator
                             loadedTypes.Add(type);
                         }
                     }
+
                     types = loadedTypes.ToArray();
                 }
             }
@@ -160,15 +163,16 @@ namespace Microsoft.XmlSerializer.Generator
                     Type type = assembly.GetType(typeName);
                     if (type == null)
                     {
-                        //Console.Error.WriteLine(FormatMessage(parsableerrors, false, Res.GetString(Res.ErrorDetails, Res.GetString(Res.ErrLoadType, typeName, assemblyName))));
+                        Console.Error.WriteLine(FormatMessage(false, SR.Format(SR.ErrorDetails, SR.Format(SR.ErrLoadType, typeName, assemblyName))));
                     }
+
                     types[typeIndex++] = type;
                 }
             }
 
-            ArrayList mappings = new ArrayList();
-            ArrayList importedTypes = new ArrayList();
-            XmlReflectionImporter importer = new XmlReflectionImporter();
+            var mappings = new ArrayList();
+            var importedTypes = new ArrayList();
+            var importer = new XmlReflectionImporter();
 
             for (int i = 0; i < types.Length; i++)
             {
@@ -186,6 +190,7 @@ namespace Microsoft.XmlSerializer.Generator
                             break;
                         }
                     }
+
                     if (isObsolete)
                     {
                         continue;
@@ -200,8 +205,8 @@ namespace Microsoft.XmlSerializer.Generator
 
             if (importedTypes.Count > 0)
             {
-                Type[] serializableTypes = (Type[])importedTypes.ToArray(typeof(Type));
-                XmlMapping[] allMappings = (XmlMapping[])mappings.ToArray(typeof(XmlMapping));
+                var serializableTypes = (Type[])importedTypes.ToArray(typeof(Type));
+                var allMappings = (XmlMapping[])mappings.ToArray(typeof(XmlMapping));
 
                 bool gac = assembly.GlobalAssemblyCache;
                 codePath = codePath == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : codePath;
@@ -213,6 +218,7 @@ namespace Microsoft.XmlSerializer.Generator
                     if (File.Exists(location))
                         throw new InvalidOperationException(SR.Format(SR.ErrSerializerExists, location, "force"));
                 }
+
                 if (Directory.Exists(location))
                 {
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, location));
@@ -234,20 +240,21 @@ namespace Microsoft.XmlSerializer.Generator
         }
 
         // assumes all same case.        
-        bool ArgumentMatch(string arg, string formal)
+        private bool ArgumentMatch(string arg, string formal)
         {
             if (arg[0] != '/' && arg[0] != '-')
             {
                 return false;
             }
+
             arg = arg.Substring(1);
             return (arg == formal || (arg.Length == 1 && arg[0] == formal[0]));
         }
 
-        void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, XmlReflectionImporter importer)
+        private void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, XmlReflectionImporter importer)
         {
             XmlTypeMapping xmlTypeMapping = null;
-            XmlReflectionImporter localImporter = new XmlReflectionImporter();
+            var localImporter = new XmlReflectionImporter();
             try
             {
                 xmlTypeMapping = localImporter.ImportTypeMapping(type);
@@ -268,7 +275,7 @@ namespace Microsoft.XmlSerializer.Generator
             }
         }
 
-        static Assembly LoadAssembly(string assemblyName, bool throwOnFail)
+        private static Assembly LoadAssembly(string assemblyName, bool throwOnFail)
         {
             Assembly assembly = null;
             string path = Path.GetFullPath(assemblyName);
@@ -289,12 +296,12 @@ namespace Microsoft.XmlSerializer.Generator
             Console.WriteLine("In Development");
         }
 
-        static string FormatMessage(bool warning, string message)
+        private static string FormatMessage(bool warning, string message)
         {
             return FormatMessage(warning, "SGEN1", message);
         }
 
-        static string FormatMessage(bool warning, string code, string message)
+        private static string FormatMessage(bool warning, string code, string message)
         {
             return "SGEN: " + (warning ? "warning " : "error ") + code + ": " + message;
         }

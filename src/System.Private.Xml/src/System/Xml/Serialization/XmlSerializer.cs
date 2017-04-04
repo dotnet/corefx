@@ -797,11 +797,11 @@ namespace System.Xml.Serialization
                 return null;
 
             if (mappings == null)
-                throw new ArgumentNullException("mappings");
+                throw new ArgumentNullException(nameof(mappings));
 
             if(!Directory.Exists(codePath))
             {
-                throw new ArgumentException("Invalid Path");
+                throw new ArgumentException(SR.Format(SR.XmlMelformMapping));
             }
 
             if (XmlMapping.IsShallow(mappings))
@@ -817,8 +817,11 @@ namespace System.Xml.Serialization
                 {
                     throw new InvalidOperationException(SR.Format(SR.XmlPregenTypeDynamic, type.FullName));
                 }
+
                 if (assembly == null)
+                {
                     assembly = type.Assembly;
+                }
                 else if (type.Assembly != assembly)
                 {
                     throw new ArgumentException(SR.Format(SR.XmlPregenOrphanType, type.FullName, assembly.Location), "types");
@@ -828,6 +831,7 @@ namespace System.Xml.Serialization
             return TempAssembly.GenerateSerializerFile(mappings, types, null, assembly, new Hashtable(), codePath);
         }
 #endif
+
         private static XmlSerializer[] GetSerializersFromCache(XmlMapping[] mappings, Type type)
         {
             XmlSerializer[] serializers = new XmlSerializer[mappings.Length];

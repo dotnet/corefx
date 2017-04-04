@@ -3352,4 +3352,10 @@
   <data name="ErrGenerationFailed" xml:space="preserve">
     <value>Sgen utility failed to pregenerate serialization assembly for {0}.</value>
   </data>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>Error: {0}.</value>
+  </data>
+  <data name="ErrLoadType" xml:space="preserve">
+    <value>Type '{0}' was not found in the assembly '{1}'.</value>
+  </data>
 </root>

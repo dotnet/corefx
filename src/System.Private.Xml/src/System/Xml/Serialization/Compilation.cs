@@ -246,38 +246,41 @@ namespace System.Xml.Serialization
             internal const string InformationalVersion = "1.0.0.0";
         }
 
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
-        [ResourceExposure(ResourceScope.None)]
-        static string GenerateAssemblyId(Type type)
+        private static string GenerateAssemblyId(Type type)
         {
             Module[] modules = type.Assembly.GetModules();
-            ArrayList list = new ArrayList();
+            var list = new ArrayList();
             for (int i = 0; i < modules.Length; i++)
             {
                 list.Add(modules[i].ModuleVersionId.ToString());
             }
+
             list.Sort();
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
+
             for (int i = 0; i < list.Count; i++)
             {
                 sb.Append(list[i].ToString());
                 sb.Append(",");
             }
+
             return sb.ToString();
         }
+
         internal static FileStream GenerateSerializerFile(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, Assembly assembly, Hashtable assemblies, string codePath)
         {
-            Compiler compiler = new Compiler();
+            var compiler = new Compiler();
             try
             {
-                Hashtable scopeTable = new Hashtable();
+                var scopeTable = new Hashtable();
                 foreach (XmlMapping mapping in xmlMappings)
                     scopeTable[mapping.Scope] = mapping;
-                TypeScope[] scopes = new TypeScope[scopeTable.Keys.Count];
-                scopeTable.Keys.CopyTo(scopes, 0);
 
+                var scopes = new TypeScope[scopeTable.Keys.Count];
+                scopeTable.Keys.CopyTo(scopes, 0);
                 assemblies.Clear();
-                Hashtable importedTypes = new Hashtable();
+                var importedTypes = new Hashtable();
+
                 foreach (TypeScope scope in scopes)
                 {
                     foreach (Type t in scope.Types)
@@ -286,27 +289,28 @@ namespace System.Xml.Serialization
                         Assembly a = t.Assembly;
                         string name = a.FullName;
                         if (assemblies[name] != null)
+                        {
                             continue;
+                        }
+
                         if (!a.GlobalAssemblyCache)
                         {
                             assemblies[name] = a;
                         }
                     }
                 }
+
                 for (int i = 0; i < types.Length; i++)
                 {
                     compiler.AddImport(types[i], importedTypes);
                 }
+
                 compiler.AddImport(typeof(object).Assembly);
                 compiler.AddImport(typeof(XmlSerializer).Assembly);
-
-                IndentedWriter writer = new IndentedWriter(compiler.Source, false);
-
-                writer.WriteLine("#if _DYNAMIC_XMLSERIALIZER_COMPILATION");
+                var writer = new IndentedWriter(compiler.Source, false);
                 writer.WriteLine("[assembly:System.Security.AllowPartiallyTrustedCallers()]");
                 writer.WriteLine("[assembly:System.Security.SecurityTransparent()]");
                 writer.WriteLine("[assembly:System.Security.SecurityRules(System.Security.SecurityRuleSet.Level1)]");
-                writer.WriteLine("#endif");
 
                 if (assembly != null && types.Length > 0)
                 {
@@ -320,6 +324,7 @@ namespace System.Xml.Serialization
                             throw new InvalidOperationException(SR.Format(SR.XmlPregenTypeDynamic, types[i].FullName));
                         }
                     }
+
                     writer.Write("[assembly:");
                     writer.Write(typeof(XmlSerializerVersionAttribute).FullName);
                     writer.Write("(");
@@ -332,12 +337,15 @@ namespace System.Xml.Serialization
                         writer.Write(", Namespace=");
                         ReflectionAwareCodeGen.WriteQuotedCSharpString(writer, defaultNamespace);
                     }
+
                     writer.WriteLine(")]");
                 }
-                CodeIdentifiers classes = new CodeIdentifiers();
+
+                var classes = new CodeIdentifiers();
                 classes.AddUnique("XmlSerializationWriter", "XmlSerializationWriter");
                 classes.AddUnique("XmlSerializationReader", "XmlSerializationReader");
                 string suffix = null;
+
                 if (types != null && types.Length == 1 && types[0] != null)
                 {
                     suffix = CodeIdentifier.MakeValid(types[0].Name);
@@ -349,13 +357,11 @@ namespace System.Xml.Serialization
 
                 writer.WriteLine("namespace " + GeneratedAssemblyNamespace + " {");
                 writer.Indent++;
-
                 writer.WriteLine();
 
                 string writerClass = "XmlSerializationWriter" + suffix;
                 writerClass = classes.AddUnique(writerClass, writerClass);
-                XmlSerializationWriterCodeGen writerCodeGen = new XmlSerializationWriterCodeGen(writer, scopes, "public", writerClass);
-
+                var writerCodeGen = new XmlSerializationWriterCodeGen(writer, scopes, "public", writerClass);
                 writerCodeGen.GenerateBegin();
                 string[] writeMethodNames = new string[xmlMappings.Length];
 
@@ -363,24 +369,24 @@ namespace System.Xml.Serialization
                 {
                     writeMethodNames[i] = writerCodeGen.GenerateElement(xmlMappings[i]);
                 }
-                writerCodeGen.GenerateEnd();
 
+                writerCodeGen.GenerateEnd();
                 writer.WriteLine();
 
                 string readerClass = "XmlSerializationReader" + suffix;
                 readerClass = classes.AddUnique(readerClass, readerClass);
-                XmlSerializationReaderCodeGen readerCodeGen = new XmlSerializationReaderCodeGen(writer, scopes, "public", readerClass);
-
+                var readerCodeGen = new XmlSerializationReaderCodeGen(writer, scopes, "public", readerClass);
                 readerCodeGen.GenerateBegin();
                 string[] readMethodNames = new string[xmlMappings.Length];
                 for (int i = 0; i < xmlMappings.Length; i++)
                 {
                     readMethodNames[i] = readerCodeGen.GenerateElement(xmlMappings[i]);
                 }
+
                 readerCodeGen.GenerateEnd(readMethodNames, xmlMappings, types);
 
                 string baseSerializer = readerCodeGen.GenerateBaseSerializer("XmlSerializer1", readerClass, writerClass, classes);
-                Hashtable serializers = new Hashtable();
+                var serializers = new Hashtable();
                 for (int i = 0; i < xmlMappings.Length; i++)
                 {
                     if (serializers[xmlMappings[i].Key] == null)
@@ -388,6 +394,7 @@ namespace System.Xml.Serialization
                         serializers[xmlMappings[i].Key] = readerCodeGen.GenerateTypedSerializer(readMethodNames[i], writeMethodNames[i], xmlMappings[i], classes, baseSerializer, readerClass, writerClass);
                     }
                 }
+
                 readerCodeGen.GenerateSerializerContract("XmlSerializerContract", xmlMappings, types, readerClass, readMethodNames, writerClass, writeMethodNames, serializers);
                 writer.Indent--;
                 writer.WriteLine("}");
