@@ -42,10 +42,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveOntoExistingDirectory()
+        public void MoveOntoSameDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<IOException>(() => Move(testDir.FullName, testDir.FullName));
+        }
+
+        [Fact]
+        public void MoveOntoExistingDirectory()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo secondDir = Directory.CreateDirectory(GetTestFilePath());
+            Assert.Throws<IOException>(() => Move(testDir.FullName, secondDir.FullName));
         }
 
         [Fact]
