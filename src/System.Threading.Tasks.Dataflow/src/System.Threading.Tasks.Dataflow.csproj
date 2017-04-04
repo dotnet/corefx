@@ -6,6 +6,7 @@
     <RootNamespace>System.Threading.Tasks.Dataflow</RootNamespace>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1' OR '$(TargetGroup)' == 'netstandard'">$(DefineConstants);CONCURRENT_COLLECTIONS;FEATURE_TRACING</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants);THREADING</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8+wpa81</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -49,6 +50,8 @@
     <Compile Include="Internal\SpscTargetCore.cs" />
     <Compile Include="Internal\TargetCore.cs" />
     <Compile Include="Internal\TargetRegistry.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.0' OR '$(TargetGroup)' == 'netstandard1.1'">
     <Compile Include="Internal\Threading.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.0'">
