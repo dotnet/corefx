@@ -361,6 +361,11 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidArgumentCombinationsWithPath_ModesCreateOrTruncate(
             FileMode mode, string mapName, long capacity, MemoryMappedFileAccess access)
         {
+            if (PlatformDetection.IsFullFramework && mode == FileMode.Truncate)
+            {
+                return; // Bug in .NET Framework blocked CreateFromFile with Truncate
+            }
+
             // For FileMode.Create/Truncate, try existing files.  Only the overloads that take a capacity are valid because
             // both of these modes will cause the input file to be made empty, and an empty file doesn't work with the default capacity.
 
@@ -549,10 +554,14 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void FileDoesNotExist(FileMode mode)
         {
             Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath()));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096));
-            Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096, MemoryMappedFileAccess.ReadWrite));
+
+            if (!(PlatformDetection.IsFullFramework && mode == FileMode.Truncate)) // Bug in .NET Framework blocked CreateFromFile with Truncate
+            {
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096));
+                Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.CreateFromFile(GetTestFilePath(), mode, null, 4096, MemoryMappedFileAccess.ReadWrite));
+            }
         }
 
         /// <summary>
@@ -620,6 +629,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test to validate we can create multiple concurrent read-only maps from the same file path.
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails with IOException: behavior changed in e3e764f2")]
         public void FileInUse_CreateFromFile_SucceedsWithReadOnly()
         {
             const int Capacity = 4096;
