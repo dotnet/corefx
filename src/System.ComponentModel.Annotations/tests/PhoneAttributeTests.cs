@@ -24,6 +24,21 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new PhoneAttribute(), "425-555-1212 ext.123");
             yield return new TestCase(new PhoneAttribute(), "425-555-1212 ext. 123");
             yield return new TestCase(new PhoneAttribute(), "1");
+
+            // Certain invalid phone numbers are reported as valid with .NET core.
+            // The full .NET framework considers them invalid. This is likely a bug
+            // in .NET core.
+            if (!PlatformDetection.IsFullFramework)
+            {
+                foreach (TestCase test in ValidValues_NetCore())
+                {
+                    yield return test;
+                }
+            }
+        }
+
+        protected static IEnumerable<TestCase> ValidValues_NetCore()
+        {
             yield return new TestCase(new PhoneAttribute(), "+4+2+5+-+5+5+5+-+1+2++1+2++");
             yield return new TestCase(new PhoneAttribute(), "425-555-1212    ");
             yield return new TestCase(new PhoneAttribute(), " \r \n 1  \t ");
@@ -46,6 +61,17 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new PhoneAttribute(), "425-555-1212 ext. xyz");
             yield return new TestCase(new PhoneAttribute(), "-.()");
             yield return new TestCase(new PhoneAttribute(), "ext.123 1");
+
+            // Certain invalid phone numbers are reported as valid with .NET core.
+            // The full .NET framework considers them invalid. This is likely a bug
+            // in .NET core.
+            if (PlatformDetection.IsFullFramework)
+            {
+                foreach (TestCase test in ValidValues_NetCore())
+                {
+                    yield return test;
+                }
+            }
         }
         
         [Fact]
