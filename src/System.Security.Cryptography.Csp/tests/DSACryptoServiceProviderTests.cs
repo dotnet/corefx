@@ -43,6 +43,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspParameters on Unix
         public static void CreateKey()
         {
             CspParameters cspParameters = new CspParameters(PROV_DSS_DH);
@@ -55,6 +56,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspParameters on Unix
         public static void CreateKey_RoundtripBlob()
         {
             const int KeySize = 512;
@@ -84,6 +86,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspKeyContainerInfo on Unix
         public static void DefaultKey_Parameters()
         {
             using (var dsa = new DSACryptoServiceProvider())
@@ -123,6 +126,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspParameters on Unix
         public static void NamedKey_DefaultProvider()
         {
             const int KeySize = 1024;
@@ -168,6 +172,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspParameters on Unix
         public static void NonExportable_Ephemeral()
         {
             CspParameters cspParameters = new CspParameters
@@ -187,6 +192,7 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // No support for CspParameters on Unix
         public static void NonExportable_Persisted()
         {
             CspParameters cspParameters = new CspParameters
@@ -206,6 +212,117 @@ namespace System.Security.Cryptography.Csp.Tests
                     Assert.Throws<CryptographicException>(() => dsa.ExportParameters(true));
                 }
             }
+        }
+
+        [Fact]
+        public static void ImportParameters_KeyTooBig_Throws()
+        {
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                // Verify that the Unix shims throws the same exception as Windows when large keys imported
+                Assert.ThrowsAny<CryptographicException>(() => dsa.ImportParameters(DSATestData.GetDSA2048Params()));
+            }
+        }
+
+        [Fact]
+        public static void VerifyHash_InvalidHashAlgorithm_Throws()
+        {
+            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                byte[] signVal = dsa.SignData(DSATestData.HelloBytes);
+                Assert.ThrowsAny<CryptographicException>(() => dsa.VerifyHash(hashVal, "SHA256", signVal));
+            }
+        }
+
+        [Fact]
+        public static void SignHash_DefaultAlgorithm_Success()
+        {
+            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                byte[] signVal = dsa.SignHash(hashVal, null);
+                Assert.True(dsa.VerifyHash(hashVal, null, signVal));
+            }
+        }
+
+        [Fact]
+        public static void SignHash_InvalidHashAlgorithm_Throws()
+        {
+            byte[] hashVal = SHA256.Create().ComputeHash(DSATestData.HelloBytes);
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                Assert.ThrowsAny<CryptographicException>(() => dsa.SignHash(hashVal, "SHA256"));
+            }
+        }
+
+        [Fact]
+        public static void VerifyHash_DefaultAlgorithm_Success()
+        {
+            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                byte[] signVal = dsa.SignData(DSATestData.HelloBytes);
+                Assert.True(dsa.VerifyHash(hashVal, null, signVal));
+            }
+        }
+
+        [Fact]
+        public static void VerifyHash_CaseInsensitive_Success()
+        {
+            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                byte[] signVal = dsa.SignData(DSATestData.HelloBytes, new HashAlgorithmName("SHA1"));
+                Assert.True(dsa.VerifyHash(hashVal, "SHA1", signVal));
+
+                signVal = dsa.SignData(DSATestData.HelloBytes, new HashAlgorithmName("SHA1")); // lowercase would fail here
+                Assert.True(dsa.VerifyHash(hashVal, "sha1", signVal));
+            }
+        }
+
+        [Fact]
+        public static void SignData_CaseInsensitive_Throws()
+        {
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                Assert.ThrowsAny<CryptographicException>(() => dsa.SignData(DSATestData.HelloBytes, new HashAlgorithmName("sha1")));
+            }
+        }
+
+        [Fact]
+        public static void SignData_InvalidHashAlgorithm_Throws()
+        {
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                Assert.ThrowsAny<CryptographicException>(() => dsa.SignData(DSATestData.HelloBytes, HashAlgorithmName.SHA256));
+                Assert.ThrowsAny<CryptographicException>(() => dsa.SignData(new System.IO.MemoryStream(), HashAlgorithmName.SHA256));
+                Assert.ThrowsAny<CryptographicException>(() => dsa.SignData(DSATestData.HelloBytes, 0, DSATestData.HelloBytes.Length, HashAlgorithmName.SHA256));
+            }
+        }
+
+        [Fact]
+        public static void VerifyData_InvalidHashAlgorithm_Throws()
+        {
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                byte[] signVal = dsa.SignData(DSATestData.HelloBytes);
+
+                Assert.ThrowsAny<CryptographicException>(() => dsa.VerifyData(DSATestData.HelloBytes, signVal, HashAlgorithmName.SHA256));
+                Assert.ThrowsAny<CryptographicException>(() => dsa.VerifyData(DSATestData.HelloBytes, 0, DSATestData.HelloBytes.Length, signVal, HashAlgorithmName.SHA256));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
+        public static void TestShimOverloads()
+        {
+            ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(DSACryptoServiceProvider));
         }
 
         private sealed class DsaKeyLifetime : IDisposable

@@ -1,0 +1,226 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Internal.Cryptography;
+using Internal.NativeCrypto;
+using System.IO;
+
+namespace System.Security.Cryptography
+{
+    public sealed class DSACryptoServiceProvider : DSA, ICspAsymmetricAlgorithm
+    {
+        private const int SHA1_HASHSIZE = 20;
+
+        private readonly DSA _impl;
+        private bool _publicOnly;
+
+        private static KeySizes[] s_legalKeySizes =
+        {
+            new KeySizes(512, 1024, 64)  // Use the same values as Csp Windows because the _impl has different values (512, 3072, 64)
+        };
+
+        public DSACryptoServiceProvider() : base()
+        {
+            // This class wraps DSA
+            _impl = DSA.Create();
+            KeySize = 1024;
+        }
+
+        public DSACryptoServiceProvider(int dwKeySize) : base()
+        {
+            if (dwKeySize < 0)
+                throw new ArgumentOutOfRangeException(nameof(dwKeySize), SR.ArgumentOutOfRange_NeedNonNegNum);
+
+            // This class wraps DSA
+            _impl = DSA.Create();
+            KeySize = dwKeySize;
+        }
+
+        public DSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public DSACryptoServiceProvider(CspParameters parameters)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "This is the implementation of DSACryptoServiceProvider")]
+        public override byte[] CreateSignature(byte[] rgbHash) => _impl.CreateSignature(rgbHash);
+
+        public CspKeyContainerInfo CspKeyContainerInfo
+        {
+            get { throw new PlatformNotSupportedException(); }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _impl.Dispose();
+                base.Dispose(disposing);
+            }
+        }
+
+        public byte[] ExportCspBlob(bool includePrivateParameters)
+        {
+            DSAParameters parameters = ExportParameters(includePrivateParameters);
+            return CapiHelper.ToKeyBlob(parameters);
+        }
+
+        public override DSAParameters ExportParameters(bool includePrivateParameters) =>
+            _impl.ExportParameters(includePrivateParameters);
+
+        public override void FromXmlString(string xmlString) => _impl.FromXmlString(xmlString);
+
+        protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name);
+
+            return AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
+        }
+
+        protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name);
+
+            return AsymmetricAlgorithmHelpers.HashData(data, hashAlgorithm);
+        }
+
+        public void ImportCspBlob(byte[] keyBlob)
+        {
+            bool includePrivateParameters = CapiHelper.GetKeyBlobType(keyBlob) != CapiHelper.PUBLICKEYBLOB;
+            DSAParameters parameters = keyBlob.ToDSAParameters(includePrivateParameters, null);
+            ImportParameters(parameters);
+        }
+
+        public override void ImportParameters(DSAParameters parameters)
+        {
+            // Although _impl supports key sizes > 1024, limit here for compat.
+            if (parameters.Y != null && parameters.Y.Length > 1024 / 8)
+                throw new CryptographicException(SR.Argument_InvalidValue);
+
+            _impl.ImportParameters(parameters);
+
+            _publicOnly = (parameters.X == null || parameters.X.Length == 0);
+        }
+
+        public override string KeyExchangeAlgorithm => _impl.KeyExchangeAlgorithm;
+
+        public override int KeySize
+        {
+            get { return _impl.KeySize; }
+            set
+            {
+                // Perform the check here because LegalKeySizes are more restrictive here than _impl
+                if (!value.IsLegalSize(s_legalKeySizes))
+                    throw new CryptographicException(SR.Cryptography_InvalidKeySize);
+
+                _impl.KeySize = value;
+            }
+        }
+
+        public override KeySizes[] LegalKeySizes => s_legalKeySizes.CloneKeySizesArray();
+
+        // PersistKeyInCsp has no effect in Unix
+        public bool PersistKeyInCsp { get; set; }
+
+        public bool PublicOnly
+        {
+            get { return _publicOnly; }
+        }
+
+        public override string SignatureAlgorithm => _impl.SignatureAlgorithm;
+
+        public byte[] SignData(byte[] buffer)
+        {
+            return _impl.SignData(buffer, HashAlgorithmName.SHA1);
+        }
+
+        public byte[] SignData(byte[] buffer, int offset, int count)
+        {
+            return _impl.SignData(buffer, offset, count, HashAlgorithmName.SHA1);
+        }
+
+        public byte[] SignData(Stream inputStream)
+        {
+            return _impl.SignData(inputStream, HashAlgorithmName.SHA1);
+        }
+
+        public override string ToXmlString(bool includePrivateParameters) =>
+            _impl.ToXmlString(includePrivateParameters);
+
+        public override byte[] SignData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+            return _impl.SignData(data, offset, count, hashAlgorithm);
+        }
+
+        public override byte[] SignData(Stream data, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+            return _impl.SignData(data, hashAlgorithm);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "This is the implementation of DSACryptoServiceProvider")]
+        public byte[] SignHash(byte[] rgbHash, string str)
+        {
+            if (rgbHash.Length != SHA1_HASHSIZE)
+                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
+            if (PublicOnly)
+                throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+
+            // Only SHA1 allowed; the default value is SHA1
+            if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+
+            return CreateSignature(rgbHash);
+        }
+
+        public bool VerifyData(byte[] rgbData, byte[] rgbSignature) =>
+            _impl.VerifyData(rgbData, rgbSignature, HashAlgorithmName.SHA1);
+
+        public bool VerifyHash(byte[] rgbHash, string str, byte[] rgbSignature)
+        {
+            if (rgbHash.Length != SHA1_HASHSIZE)
+                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
+
+            // Only SHA1 allowed; the default value is SHA1
+            if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+            return _impl.VerifySignature(rgbHash, rgbSignature);
+        }
+
+        public override bool VerifyData(byte[] data, int offset, int count, byte[] signature, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+            return _impl.VerifyData(data, offset, count, signature, hashAlgorithm);
+        }
+
+        public override bool VerifyData(Stream data, byte[] signature, HashAlgorithmName hashAlgorithm)
+        {
+            if (hashAlgorithm != HashAlgorithmName.SHA1)
+                throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
+
+            return _impl.VerifyData(data, signature, hashAlgorithm);
+        }
+
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) =>
+            _impl.VerifySignature(rgbHash, rgbSignature);
+
+        // UseMachineKeyStore has no effect in Unix
+        public static bool UseMachineKeyStore { get; set; }
+    }
+}

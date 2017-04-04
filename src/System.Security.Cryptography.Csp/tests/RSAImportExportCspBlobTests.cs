@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Rsa.Tests
 {
-    public class ImportExportCspBlob
+    public class RSAImportExportCspBlobTests
     {
         [Fact]
         public static void ExportImportPublicOnly()
@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 
                 Assert.Equal(exported, exported2);
 
-                Assert.Throws<CryptographicException>(() => rsa.ExportCspBlob(includePrivateParameters: true));
+                Assert.ThrowsAny<CryptographicException>(() => rsa.ExportCspBlob(includePrivateParameters: true));
             }
         }
 

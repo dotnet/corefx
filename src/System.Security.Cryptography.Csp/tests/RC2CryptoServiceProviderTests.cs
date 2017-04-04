@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.RC2.Tests
 {
+    using Csp.Tests;
     using RC2 = System.Security.Cryptography.RC2;
 
     public static partial class RC2CryptoServiceProviderTests
@@ -15,6 +16,8 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
         {
             using (RC2 rc2 = new RC2CryptoServiceProvider())
             {
+                Assert.Equal(128, rc2.KeySize);
+
                 rc2.KeySize = 40;
                 Assert.Equal(40 / 8, rc2.Key.Length);
                 Assert.Equal(40, rc2.KeySize);
@@ -26,6 +29,23 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
                 Assert.Throws<CryptographicException>(() => rc2.KeySize = 40 - 8);
                 Assert.Throws<CryptographicException>(() => rc2.KeySize = 128 + 8);
             }
+        }
+
+        [Fact]
+        public static void TestShimProperties()
+        {
+            // Test the Unix shims; but also run on Windows to ensure behavior is consistent.
+            using (var alg = new RC2CryptoServiceProvider())
+            {
+                ShimHelpers.TestSymmetricAlgorithmProperties(alg, blockSize: 64, keySize: 128);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
+        public static void TestShimOverloads()
+        {
+            ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(RC2CryptoServiceProvider));
         }
     }
 }
