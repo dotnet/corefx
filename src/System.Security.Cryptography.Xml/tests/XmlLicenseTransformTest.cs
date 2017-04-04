@@ -168,6 +168,181 @@ namespace System.Security.Cryptography.Xml.Tests
 
             return doc;
         }
+		
+        [Fact]
+        public static void ItDecryptsLicense()
+        {
+            using (var key = RSA.Create())
+            {
+                string expected;
+                string encryptedLicenseWithGrants = GenerateLicenseXmlWithEncryptedGrants(key, out expected);
+
+                Assert.Contains("hello", expected);
+                Assert.DoesNotContain("hello", encryptedLicenseWithGrants);
+
+                XmlNamespaceManager nsManager;
+                XmlDocument toDecrypt = LoadXmlWithLicenseNs(encryptedLicenseWithGrants, out nsManager);
+
+                var decryptor = new XmlLicenseEncryptedRef();
+                var transform = new XmlLicenseTransform()
+                {
+                    Decryptor = decryptor,
+                    Context = FindLicenseTransformContext(toDecrypt, nsManager)
+                };
+
+                decryptor.AddAsymmetricKey(key);
+
+                // Context is the input for this transform, argument is always ignored
+                transform.LoadInput(null);
+
+                XmlDocument decryptedDoc = transform.GetOutput() as XmlDocument;
+                Assert.NotNull(decryptedDoc);
+                string decrypted = decryptedDoc.OuterXml;
+                Assert.Equal(expected, decrypted);
+            }
+        }
+
+        static string GenerateLicenseXmlWithEncryptedGrants(RSA key, out string plainTextLicense)
+        {
+            plainTextLicense = @"<r:license xmlns:r=""urn:mpeg:mpeg21:2003:01-REL-R-NS"">
+    <r:title>Test License</r:title>
+    <r:grant>
+        <r:forAll varName=""licensor"" />
+        <r:forAll varName=""property"" />
+        <r:forAll varName=""p0"">
+            <r:propertyPossessor>
+                <r:propertyAbstract varRef=""property"" />
+            </r:propertyPossessor>
+        </r:forAll>
+        <r:keyHolder varRef=""licensor"" />
+        <r:issue />
+        <r:grant>
+            <r:principal varRef=""p0"" />
+            <x:bar xmlns:x=""urn:foo"" />
+            <r:digitalResource>
+                <testItem>hello</testItem>
+            </r:digitalResource>
+            <renderer xmlns=""urn:mpeg:mpeg21:2003:01-REL-MX-NS"">
+                <mx:wildcard xmlns:mx=""urn:mpeg:mpeg21:2003:01-REL-MX-NS"">
+                    <r:anXmlExpression>some-xpath-expression</r:anXmlExpression>
+                </mx:wildcard>
+                <mx:wildcard xmlns:mx=""urn:mpeg:mpeg21:2003:01-REL-MX-NS"">
+                    <r:anXmlExpression>some-other-xpath-expression</r:anXmlExpression>
+                </mx:wildcard>
+            </renderer>
+        </r:grant>
+        <validityIntervalFloating xmlns=""urn:mpeg:mpeg21:2003:01-REL-SX-NS"">
+            <sx:duration xmlns:sx=""urn:mpeg:mpeg21:2003:01-REL-SX-NS"">P2D</sx:duration>
+        </validityIntervalFloating>
+    </r:grant>
+    <r:grant>
+        <r:possessProperty />
+        <emailName xmlns=""urn:mpeg:mpeg21:2003:01-REL-SX-NS"">test@test</emailName>
+    </r:grant>
+    <r:issuer xmlns:r=""urn:mpeg:mpeg21:2003:01-REL-R-NS"">
+        <r:details>
+            <r:timeOfIssue>2099-11-11T11:11:11Z</r:timeOfIssue>
+        </r:details>
+    </r:issuer>
+</r:license>";
+
+            XmlNamespaceManager nsManager;
+            XmlDocument doc = LoadXmlWithLicenseNs(plainTextLicense, out nsManager);
+
+            XmlDocument encrypted = EncryptLicense(FindLicenseTransformContext(doc, nsManager), key);
+
+            return encrypted.OuterXml;
+        }
+
+        static XmlElement FindLicenseTransformContext(XmlDocument doc, XmlNamespaceManager nsManager)
+        {
+            XmlNodeList issuerList = doc.SelectNodes("//r:issuer", nsManager);
+            return issuerList[0] as XmlElement;
+        }
+
+        static XmlDocument LoadXmlWithLicenseNs(string xml, out XmlNamespaceManager nsManager)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.PreserveWhitespace = true;
+            nsManager = new XmlNamespaceManager(doc.NameTable);
+            nsManager.AddNamespace("r", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+            doc.LoadXml(xml);
+            return doc;
+        }
+
+        static void EncryptGrant(XmlNode grant, RSA key, XmlNamespaceManager nsMgr)
+        {
+            using (var ms = new MemoryStream())
+            using (var sw = new StreamWriter(ms))
+            {
+                sw.Write(grant.InnerXml);
+                sw.Flush();
+                ms.Position = 0;
+
+                KeyInfo keyInfo;
+                EncryptionMethod encryptionMethod;
+                CipherData cipherData;
+                XmlLicenseEncryptedRef.Encrypt(ms, key, out keyInfo, out encryptionMethod, out cipherData);
+                grant.RemoveAll();
+                XmlDocument doc = grant.OwnerDocument;
+                XmlElement encryptedGrant = doc.CreateElement("encryptedGrant", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+                grant.AppendChild(encryptedGrant);
+
+                encryptedGrant.AppendChild(doc.ImportNode(keyInfo.GetXml(), true));
+                encryptedGrant.AppendChild(doc.ImportNode(encryptionMethod.GetXml(), true));
+                encryptedGrant.AppendChild(doc.ImportNode(cipherData.GetXml(), true));
+            }
+        }
+
+        static XmlDocument EncryptLicense(XmlElement context, RSA key)
+        {
+            XmlDocument ret = new XmlDocument();
+            ret.PreserveWhitespace = true;
+
+            var nsMgr = new XmlNamespaceManager(ret.NameTable);
+            nsMgr.AddNamespace("dsig", SignedXml.XmlDsigNamespaceUrl);
+            nsMgr.AddNamespace("enc", EncryptedXml.XmlEncNamespaceUrl);
+            nsMgr.AddNamespace("r", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+
+            XmlElement currentIssuerContext = context.SelectSingleNode("ancestor-or-self::r:issuer[1]", nsMgr) as XmlElement;
+            Assert.NotEqual(currentIssuerContext, null);
+
+            XmlElement signatureNode = currentIssuerContext.SelectSingleNode("descendant-or-self::dsig:Signature[1]", nsMgr) as XmlElement;
+            if (signatureNode != null)
+            {
+                signatureNode.ParentNode.RemoveChild(signatureNode);
+            }
+
+            XmlElement currentLicenseContext = currentIssuerContext.SelectSingleNode("ancestor-or-self::r:license[1]", nsMgr) as XmlElement;
+            Assert.NotEqual(currentLicenseContext, null);
+
+            XmlNodeList issuerList = currentLicenseContext.SelectNodes("descendant-or-self::r:license[1]/r:issuer", nsMgr);
+            for (int i = 0; i < issuerList.Count; i++)
+            {
+                XmlNode issuer = issuerList[i];
+                if (issuer == currentIssuerContext)
+                {
+                    continue;
+                }
+
+                if (issuer.LocalName == "issuer"
+                    && issuer.NamespaceURI == "urn:mpeg:mpeg21:2003:01-REL-R-NS")
+                {
+                    issuer.ParentNode.RemoveChild(issuer);
+                }
+            }
+
+            XmlNodeList encryptedGrantList = currentLicenseContext.SelectNodes("/r:license/r:grant", nsMgr);
+
+            for (int i = 0; i < encryptedGrantList.Count; i++)
+            {
+                EncryptGrant(encryptedGrantList[i], key, nsMgr);
+            }
+
+            ret.InnerXml = currentLicenseContext.OuterXml;
+
+            return ret;
+        }
     }
 }
 
