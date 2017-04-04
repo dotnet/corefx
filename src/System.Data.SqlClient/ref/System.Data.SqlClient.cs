@@ -540,13 +540,14 @@ namespace System.Data.SqlClient
         public override string ToString() { throw null; }
     }
     public delegate void SqlInfoMessageEventHandler(object sender, System.Data.SqlClient.SqlInfoMessageEventArgs e);
-    public sealed partial class SqlParameter : System.Data.Common.DbParameter
+    public sealed partial class SqlParameter : System.Data.Common.DbParameter, System.ICloneable
     {
         public SqlParameter() { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType) { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size) { }
         public SqlParameter(string parameterName, System.Data.SqlDbType dbType, int size, string sourceColumn) { }
         public SqlParameter(string parameterName, object value) { }
+        object ICloneable.Clone() { throw null; }
         public System.Data.SqlTypes.SqlCompareOptions CompareInfo { get { throw null; } set { } }
         public override System.Data.DbType DbType { get { throw null; } set { } }
         public override System.Data.ParameterDirection Direction { get { throw null; } set { } }
@@ -559,6 +560,7 @@ namespace System.Data.SqlClient
         public override int Size { get { throw null; } set { } }
         public override string SourceColumn { get { throw null; } set { } }
         public override bool SourceColumnNullMapping { get { throw null; } set { } }
+        public override DataRowVersion SourceVersion { get { throw null; } set { } }
         public System.Data.SqlDbType SqlDbType { get { throw null; } set { } }
         public object SqlValue { get { throw null; } set { } }
         public string TypeName { get { throw null; } set { } }
