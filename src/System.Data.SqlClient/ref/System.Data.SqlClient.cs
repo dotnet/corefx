@@ -294,7 +294,7 @@ namespace System.Data.SqlClient
         public event System.Data.StatementCompletedEventHandler StatementCompleted { add { } remove { } }
         public override void Cancel() { }
         object System.ICloneable.Clone() { throw null; }
-        public SqlCommand Clone();
+        public SqlCommand Clone() { throw null;  }
         protected override System.Data.Common.DbParameter CreateDbParameter() { throw null; }
         public new System.Data.SqlClient.SqlParameter CreateParameter() { throw null; }
         protected override System.Data.Common.DbDataReader ExecuteDbDataReader(System.Data.CommandBehavior behavior) { throw null; }
