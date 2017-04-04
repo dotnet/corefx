@@ -394,20 +394,19 @@ namespace Microsoft.Win32
             return subkeys;
         }
 
-        private unsafe string[] InternalGetSubKeyNamesCore(int subkeys)
+        private string[] InternalGetSubKeyNamesCore(int subkeys)
         {
-            List<string> names = new List<string>(subkeys);
+            var names = new List<string>(subkeys);
             char[] name = ArrayPool<char>.Shared.Rent(MaxKeyLength + 1);
 
             try
             {
-                int index = 0;
                 int result;
                 int nameLength = name.Length;
 
                 while ((result = Interop.Advapi32.RegEnumKeyEx(
                     _hkey,
-                    index,
+                    names.Count,
                     name,
                     ref nameLength,
                     null,
@@ -420,7 +419,6 @@ namespace Microsoft.Win32
                         case Interop.Errors.ERROR_SUCCESS:
                             names.Add(new string(name, 0, nameLength));
                             nameLength = name.Length;
-                            index++;
                             break;
                         default:
                             // Throw the error
@@ -465,7 +463,7 @@ namespace Microsoft.Win32
         /// <returns>All value names.</returns>
         private unsafe string[] GetValueNamesCore(int values)
         {
-            List<string> names = new List<string>(values);
+            var names = new List<string>(values);
 
             // Names in the registry aren't usually very long, although they can go to as large
             // as 16383 characters (MaxValueLength).
@@ -479,13 +477,12 @@ namespace Microsoft.Win32
 
             try
             {
-                int index = 0;
                 int result;
                 int nameLength = name.Length;
 
                 while ((result = Interop.Advapi32.RegEnumValue(
                     _hkey,
-                    index,
+                    names.Count,
                     name,
                     ref nameLength,
                     IntPtr.Zero,
@@ -499,23 +496,29 @@ namespace Microsoft.Win32
                         // of ERROR_SUCCESS. It will almost always be changed, however.
                         case Interop.Errors.ERROR_SUCCESS:
                             names.Add(new string(name, 0, nameLength));
-                            index++;
                             break;
                         case Interop.Errors.ERROR_MORE_DATA:
                             if (IsPerfDataKey())
                             {
-                                // Enumerating the values for Perf keys always returns ERROR_MORE_DATA.
-                                names.Add(new string(name));
-                                index++;
-                                break;
+                                // Enumerating the values for Perf keys always returns
+                                // ERROR_MORE_DATA, but has a valid name. Buffer does need
+                                // to be big enough however. 8 characters is the largest
+                                // known name. The size isn't returned, but the string is
+                                // null terminated.
+                                fixed (char* c = &name[0])
+                                {
+                                    names.Add(new string(c));
+                                }
                             }
                             else
                             {
-                                nameLength = name.Length;
-                                ArrayPool<char>.Shared.Return(name);
-                                name = ArrayPool<char>.Shared.Rent(nameLength + 100);
-                                break;
+                                char[] oldName = name;
+                                int oldLength = oldName.Length;
+                                name = null;
+                                ArrayPool<char>.Shared.Return(oldName);
+                                name = ArrayPool<char>.Shared.Rent(checked(oldLength * 2));
                             }
+                            break;
                         default:
                             // Throw the error
                             Win32Error(result, null);
@@ -528,7 +531,8 @@ namespace Microsoft.Win32
             }
             finally
             {
-                ArrayPool<char>.Shared.Return(name);
+                if (name != null)
+                    ArrayPool<char>.Shared.Return(name);
             }
 
             return names.ToArray();
