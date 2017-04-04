@@ -111,7 +111,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             yield return new object[] { typeof(Span<int>) };
             yield return new object[] { typeof(ReadOnlySpan<int>) };
-            yield return new object[] { Type.GetType("System.ByReference`1[System.Int32]") };
+            yield return new object[] { typeof(StructWithSpanField) };
+        }
+
+        private struct StructWithSpanField
+        {
+            Span<byte> _bytes;
+            int _position;
         }
 
         [Theory]
@@ -125,20 +131,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(GetUninitializedObject_ByRefLikeType_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework supports GetUninitializedObject for by ref like types")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "full .NET Framework has bug that allows allocating instances of byref-like types.")]
         public void GetUninitializedObject_ByRefLikeType_NonNetfx_ThrowsNotSupportedException(Type type)
         {
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(type));
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(type));
-        }
-
-        [Theory]
-        [MemberData(nameof(GetUninitializedObject_ByRefLikeType_TestData))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr doesn't support GetUninitializedObject for by ref like types")]
-        public void GetUninitializedObject_ByRefLikeType_Netfx_ThrowsNotSupportedException(Type type)
-        {
-            Assert.NotNull(FormatterServices.GetUninitializedObject(type));
-            Assert.NotNull(FormatterServices.GetSafeUninitializedObject(type));
         }
 
         [Fact]
@@ -150,17 +147,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Type sharedGenericInstance = typeof(GenericClass<>).MakeGenericType(canonType);
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(sharedGenericInstance));
             Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(sharedGenericInstance));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The full .NET framework partially supports GetUninitializedObject for shared generic instances")]
-        public void GetUninitializedObject_SharedGenericInstance_Netfx_InitializesValue()
-        {
-            Type canonType = Type.GetType("System.__Canon");
-            Assert.NotNull(canonType);
-            Type sharedGenericInstance = typeof(GenericClass<>).MakeGenericType(canonType);
-            Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(sharedGenericInstance));
-            Assert.Equal(0, ((IGenericClass)FormatterServices.GetSafeUninitializedObject(sharedGenericInstance)).Value);
         }
 
         [Fact]
@@ -176,19 +162,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework doesn't support GetUninitializedObject for subclasses of ContextBoundObject")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework doesn't support GetUninitializedObject for subclasses of ContextBoundObject")]
         public void GetUninitializedObject_ContextBoundObjectSubclass_NetCore_InitializesValue()
         {
             Assert.Equal(0, ((ContextBoundSubclass)FormatterServices.GetUninitializedObject(typeof(ContextBoundSubclass))).Value);
             Assert.Equal(0, ((ContextBoundSubclass)FormatterServices.GetSafeUninitializedObject(typeof(ContextBoundSubclass))).Value);
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr supports GetUninitializedObject for subclasses of ContextBoundObject")]
-        public void GetUninitializedObject_ContextBoundObjectSubclass_Netfx_ThrowsNotSupportedException()
-        {
-            Assert.Throws<NotSupportedException>(() => FormatterServices.GetUninitializedObject(typeof(ContextBoundSubclass)));
-            Assert.Throws<NotSupportedException>(() => FormatterServices.GetSafeUninitializedObject(typeof(ContextBoundSubclass)));
         }
 
         public class ContextBoundSubclass : ContextBoundObject
