@@ -730,29 +730,24 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The .NET full framework throws a NotImplementedException. See https://github.com/dotnet/corefx/pull/2959.")]
-        public void Select_ResetCalledOnEnumerator_NetCore_ThrowsNotSupportedException()
+        public void Select_ResetCalledOnEnumerator_ThrowsException()
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
             Func<int, int> selector = i => i + 1;
 
-            var result = source.Select(selector);
-            var enumerator = result.GetEnumerator();
+            IEnumerable<int> result = source.Select(selector);
+            IEnumerator<int> enumerator = result.GetEnumerator();
 
-            Assert.Throws<NotSupportedException>(() => enumerator.Reset());
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET core throws a NotSupportedException. See https://github.com/dotnet/corefx/pull/2959.")]
-        public void Select_ResetCalledOnEnumerator_NetFx_ThrowsNotImplementedException()
-        {
-            int[] source = new[] { 1, 2, 3, 4, 5 };
-            Func<int, int> selector = i => i + 1;
-
-            var result = source.Select(selector);
-            var enumerator = result.GetEnumerator();
-
-            Assert.Throws<NotImplementedException>(() => enumerator.Reset());
+            // The.NET full framework throws a NotImplementedException.
+            // See https://github.com/dotnet/corefx/pull/2959.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<NotImplementedException>(() => enumerator.Reset());
+            }
+            else
+            {
+                Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+            }
         }
 
         [Fact]

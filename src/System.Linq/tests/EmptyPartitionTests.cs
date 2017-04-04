@@ -33,7 +33,7 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipSame()
         {
-            var empty = GetEmptyPartition<int>();
+            IEnumerable<int> empty = GetEmptyPartition<int>();
             // .NET Core returns the instance as an optimization.
             // see https://github.com/dotnet/corefx/pull/2401.
             Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(empty, empty.Skip(2)));
@@ -42,7 +42,7 @@ namespace System.Linq.Tests
         [Fact]
         public void TakeSame()
         {
-            var empty = GetEmptyPartition<int>();
+            IEnumerable<int> empty = GetEmptyPartition<int>();
             // .NET Core returns the instance as an optimization.
             // see https://github.com/dotnet/corefx/pull/2401.
             Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(empty, empty.Take(2)));

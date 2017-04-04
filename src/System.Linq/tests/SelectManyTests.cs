@@ -454,19 +454,10 @@ namespace System.Linq.Tests
 
             // .NET Core fixes an oversight where we wouldn't properly dispose
             // the SelectMany iterator. See https://github.com/dotnet/corefx/pull/13942.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                // Make sure the iterator's enumerator has been disposed properly.
-                Assert.Equal(0, e.Current); // Default value.
-                Assert.False(e.MoveNext());
-                Assert.Equal(0, e.Current);
-            }
-            else
-            {
-                Assert.Equal(subLength, e.Current);
-                Assert.False(e.MoveNext());
-                Assert.Equal(subLength, e.Current);
-            }
+            int expectedCurrent = PlatformDetection.IsFullFramework ? subLength : 0;
+            Assert.Equal(expectedCurrent, e.Current);
+            Assert.False(e.MoveNext());
+            Assert.Equal(expectedCurrent, e.Current);
         }
 
         public static IEnumerable<object[]> DisposeAfterEnumerationData()

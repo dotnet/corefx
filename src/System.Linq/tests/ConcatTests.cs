@@ -253,8 +253,8 @@ namespace System.Linq.Tests
 
             Action<Action> assertThrows = (testCode) =>
             {
-                // The full .NET framework uses unsigned arithmetic summing up collection counts.
-                // See https://github.com/dotnet/corefx/pull/6131.
+                // The full .NET Framework uses unsigned arithmetic summing up collection counts.
+                // See https://github.com/dotnet/corefx/pull/11492.
                 if (PlatformDetection.IsFullFramework)
                 {
                     testCode();

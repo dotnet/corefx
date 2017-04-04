@@ -154,19 +154,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET core fixed a bug where the input incorrectly ordered if the comparer returns int.MaxValue or int.MinValue.")]
-        public void OrderByExtremeComparer_NetCore()
+        public void OrderByExtremeComparer()
         {
-            var outOfOrder = new[] { 7, 1, 0, 9, 3, 5, 4, 2, 8, 6 };
-            Assert.Equal(Enumerable.Range(0, 10).Reverse(), outOfOrder.OrderByDescending(i => i, new ExtremeComparer()));
-        }
+            int[] outOfOrder = new[] { 7, 1, 0, 9, 3, 5, 4, 2, 8, 6 };
 
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug where the input is incorrectly ordered if the comparer returns int.MaxValue or int.MinValue.")]
-        public void OrderByExtremeComparer_NetFx()
-        {
-            var outOfOrder = new[] { 7, 1, 0, 9, 3, 5, 4, 2, 8, 6 };
-            Assert.Equal(new[] { 3, 5, 1, 4, 9, 2, 0, 8, 7, 6 }, outOfOrder.OrderByDescending(i => i, new ExtremeComparer()).ToArray());
+            // The full .NET Framework has a bug where the input is incorrectly ordered if the comparer
+            // returns int.MaxValue or int.MinValue.
+            IEnumerable<int> ordered = outOfOrder.OrderByDescending(i => i, new ExtremeComparer()).ToArray();
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Equal(new[] { 3, 5, 1, 4, 9, 2, 0, 8, 7, 6 }, ordered);
+            }
+            else
+            {
+                Assert.Equal(Enumerable.Range(0, 10).Reverse(), ordered);
+            }
         }
 
         [Fact]
