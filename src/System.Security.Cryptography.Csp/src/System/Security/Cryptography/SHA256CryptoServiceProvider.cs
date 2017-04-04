@@ -44,8 +44,8 @@ namespace System.Security.Cryptography
             if (disposing)
             {
                 _incrementalHash.Dispose();
-                base.Dispose(disposing);
             }
+            base.Dispose(disposing);
         }
     }
 }
