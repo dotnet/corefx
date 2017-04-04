@@ -293,7 +293,6 @@ namespace System.Data.SqlClient
         public override System.Data.UpdateRowSource UpdatedRowSource { get { throw null; } set { } }
         public event System.Data.StatementCompletedEventHandler StatementCompleted { add { } remove { } }
         public override void Cancel() { }
-        public SqlCommand Clone() { throw null; }
         object System.ICloneable.Clone() { throw null; }
         protected override System.Data.Common.DbParameter CreateDbParameter() { throw null; }
         public new System.Data.SqlClient.SqlParameter CreateParameter() { throw null; }

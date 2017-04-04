@@ -1693,7 +1693,7 @@ namespace System.Data.SqlClient
             destination._isNullable = _isNullable;
         }
 
-        override public DataRowVersion SourceVersion
+        public override DataRowVersion SourceVersion
         {
             get
             {
