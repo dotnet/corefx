@@ -182,9 +182,9 @@ namespace System.Runtime.InteropServices.Tests
         public class StringForwardingCustomMarshaler : ICustomMarshaler
         {
             public void CleanUpManagedData(object ManagedObj) { }
-            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeGlobalAllocAnsi(pNativeData); }
+            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeCoTaskMemAnsi(pNativeData); }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => Marshal.StringToCoTaskMemAnsi((string)ManagedObj);
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -198,9 +198,9 @@ namespace System.Runtime.InteropServices.Tests
         public class ArrayForwardingCustomMarshaler : ICustomMarshaler
         {
             public void CleanUpManagedData(object ManagedObj) { }
-            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeGlobalAllocAnsi(pNativeData); }
+            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeCoTaskMemAnsi(pNativeData); }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => Marshal.StringToCoTaskMemAnsi(((string[])ManagedObj)[0]);
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -209,14 +209,14 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [DllImport(LibcLibrary, EntryPoint = "atoi")]
-        public static extern int MarshalerOnArrayTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(ArrayForwardingCustomMarshaler))] string[] str);
+        public static extern int MarshalerOnArrayTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "System.Runtime.InteropServices.Tests.ICustomMarshalerTests+ArrayForwardingCustomMarshaler")] string[] str);
 
         public class BoxedValueTypeCustomMarshaler : ICustomMarshaler
         {
             public void CleanUpManagedData(object ManagedObj) { }
-            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeGlobalAllocAnsi(pNativeData); }
+            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeCoTaskMemAnsi(pNativeData); }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj)
             {
@@ -232,7 +232,6 @@ namespace System.Runtime.InteropServices.Tests
         [DllImport(LibcLibrary, EntryPoint = "atoi")]
         public static extern int MarshalerOnBoxedValueTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BoxedValueTypeCustomMarshaler))] object i);
 
-
         public class StringContainer
         {
             public string Value { get; set; }
@@ -243,10 +242,10 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) {}
             public void CleanUpNativeData(IntPtr pNativeData)
             {
-                Marshal.ZeroFreeGlobalAllocAnsi(pNativeData);
+                Marshal.ZeroFreeCoTaskMemAnsi(pNativeData);
             }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj)
             {
@@ -266,6 +265,7 @@ namespace System.Runtime.InteropServices.Tests
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(ClassForwardingCustomMarshaler))]
         public static extern StringContainer MarshalerOnClassTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(ClassForwardingCustomMarshaler))] StringContainer str);
 
+        // This should only be used *once*, as it uses static state.
         public class OrderTrackingCustomMarshaler : ICustomMarshaler
         {
             public static List<string> Events { get; } = new List<string>();
@@ -279,7 +279,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpNativeData(IntPtr pNativeData)
             {
                 Assert.Equal(MarshaledNativeData, pNativeData);
-                Marshal.ZeroFreeGlobalAllocAnsi(pNativeData);
+                Marshal.ZeroFreeCoTaskMemAnsi(pNativeData);
 
                 Events.Add("Called CleanUpNativeData");
             }
@@ -318,9 +318,9 @@ namespace System.Runtime.InteropServices.Tests
         public class OverridingCustomMarshaler : ICustomMarshaler
         {
             public void CleanUpManagedData(object ManagedObj) { }
-            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeGlobalAllocAnsi(pNativeData); }
+            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeCoTaskMemAnsi(pNativeData); }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => Marshal.StringToCoTaskMemAnsi("2");
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -329,16 +329,16 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [DllImport(LibcLibrary, EntryPoint = "atoi", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int BothTypeRefAndTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "System.Runtime.InteropServices.Tests.ICustomMarshalerTests+OverridingCustomMarshaler", MarshalTypeRef = typeof(OrderTrackingCustomMarshaler))] string str);
+        public static extern int BothTypeRefAndTypeMethod([MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "System.Runtime.InteropServices.Tests.ICustomMarshalerTests+OverridingCustomMarshaler", MarshalTypeRef = typeof(StringForwardingCustomMarshaler))] string str);
 
         public class CookieTrackingCustomMarshaler : ICustomMarshaler
         {
             public static string Cookie { get; set; }
 
             public void CleanUpManagedData(object ManagedObj) { }
-            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeGlobalAllocAnsi(pNativeData); }
+            public void CleanUpNativeData(IntPtr pNativeData) { Marshal.ZeroFreeCoTaskMemAnsi(pNativeData); }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => Marshal.StringToCoTaskMemAnsi((string)ManagedObj);
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -373,7 +373,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -389,7 +389,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -403,7 +403,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -418,7 +418,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -434,7 +434,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -450,7 +450,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -466,7 +466,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -482,7 +482,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => IntPtr.Zero;
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -498,7 +498,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) { }
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => throw new NotImplementedException();
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
@@ -514,7 +514,7 @@ namespace System.Runtime.InteropServices.Tests
             public void CleanUpManagedData(object ManagedObj) { }
             public void CleanUpNativeData(IntPtr pNativeData) => throw new NotImplementedException();
 
-            public int GetNativeDataSize() => -1;
+            public int GetNativeDataSize() => IntPtr.Size;
 
             public IntPtr MarshalManagedToNative(object ManagedObj) => Marshal.StringToCoTaskMemAnsi((string)ManagedObj);
             public object MarshalNativeToManaged(IntPtr pNativeData) => null;
