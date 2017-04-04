@@ -45,7 +45,7 @@ namespace System.Globalization.Tests
         [InlineData("en")]
         public void Ctor_InvalidName_ThrowsArgumentException(string name)
         {
-            Assert.Throws<ArgumentException>("name", () => new RegionInfo("en"));
+            Assert.Throws<ArgumentException>("name", () => new RegionInfo(name));
         }
 
         public static IEnumerable<object[]> Equals_TestData()
