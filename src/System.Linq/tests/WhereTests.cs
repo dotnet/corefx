@@ -814,13 +814,25 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_SourceThrowsOnReset()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The .NET full framework throws a NotImplementedException. See https://github.com/dotnet/corefx/pull/2959.")]
+        public void Select_Reset_NetCore_ThrowsNotSupportedException()
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
 
             var enumerator = source.Where(value => true).GetEnumerator();
 
             Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET core throws a NotSupportedException. See https://github.com/dotnet/corefx/pull/2959.")]
+        public void Select_Reset_NetFx_ThrowsNotImplementedException()
+        {
+            int[] source = new[] { 1, 2, 3, 4, 5 };
+
+            var enumerator = source.Where(value => true).GetEnumerator();
+
+            Assert.Throws<NotImplementedException>(() => enumerator.Reset());
         }
 
         [Fact]

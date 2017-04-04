@@ -452,10 +452,21 @@ namespace System.Linq.Tests
             Assert.All(subState, s => Assert.Equal(subLength + 1, s));
             Assert.All(subCollectionDisposed, t => Assert.True(t));
 
-            // Make sure the iterator's enumerator has been disposed properly.
-            Assert.Equal(0, e.Current); // Default value.
-            Assert.False(e.MoveNext());
-            Assert.Equal(0, e.Current);
+            // .NET Core fixes an oversight where we wouldn't properly dispose
+            // the SelectMany iterator. See https://github.com/dotnet/corefx/pull/13942.
+            if (!PlatformDetection.IsFullFramework)
+            {
+                // Make sure the iterator's enumerator has been disposed properly.
+                Assert.Equal(0, e.Current); // Default value.
+                Assert.False(e.MoveNext());
+                Assert.Equal(0, e.Current);
+            }
+            else
+            {
+                Assert.Equal(subLength, e.Current);
+                Assert.False(e.MoveNext());
+                Assert.Equal(subLength, e.Current);
+            }
         }
 
         public static IEnumerable<object[]> DisposeAfterEnumerationData()
