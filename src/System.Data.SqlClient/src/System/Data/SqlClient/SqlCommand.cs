@@ -3248,10 +3248,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        object ICloneable.Clone()
-        {
-            return new SqlCommand(this);
-        }
+        object ICloneable.Clone() => new SqlCommand(this);
 
     }
 }

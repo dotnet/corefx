@@ -116,7 +116,7 @@ namespace System.Data.SqlClient
 
         private SqlParameter(SqlParameter source) : this()
         {
-            ADP.CheckArgumentNull(source, "source");
+            ADP.CheckArgumentNull(source, nameof(source));
 
             source.CloneHelper(this);
 
@@ -1650,10 +1650,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        object ICloneable.Clone()
-        {
-            return new SqlParameter(this);
-        }
+        object ICloneable.Clone() => new SqlParameter(this);
 
         private void CloneHelper(SqlParameter destination)
         {

@@ -1277,14 +1277,11 @@ namespace System.Data.SqlClient
             Statistics.UpdateStatistics();
         }
 
-        object ICloneable.Clone()
-        {
-            return new SqlConnection(this);
-        }
+        object ICloneable.Clone() => new SqlConnection(this);
 
         private void CopyFrom(SqlConnection connection)
         {
-            ADP.CheckArgumentNull(connection, "connection");
+            ADP.CheckArgumentNull(connection, nameof(connection));
             _userConnectionOptions = connection.UserConnectionOptions;
             _poolGroup = connection.PoolGroup;
             
