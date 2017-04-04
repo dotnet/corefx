@@ -18,5 +18,12 @@
     <InboxOnTargetFramework Include="xamarintvos10" />
     <InboxOnTargetFramework Include="xamarinwatchos10" />
   </ItemGroup>
+  <!-- Added in release/1.1.0 to suppress package validation. In master this is controlled by Packaging.props -->
+  <ItemGroup>
+    <ValidatePackageSuppression Include="SuppressNETStandardInference">
+      <!-- desktop assemblies must version past NETStandard refs -->
+      <Value>.NETFramework,Version=v4.6;.NETFramework,Version=v4.6.1;.NETFramework,Version=v4.6.2;.NETFramework,Version=v4.6.3</Value>
+    </ValidatePackageSuppression>
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
