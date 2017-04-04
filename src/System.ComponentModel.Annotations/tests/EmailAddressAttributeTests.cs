@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Reflection;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
@@ -43,6 +44,18 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var attribute = new EmailAddressAttribute();
             Assert.Equal(DataType.EmailAddress, attribute.DataType);
             Assert.Null(attribute.CustomDataType);
+        }
+
+        [Fact]
+        public static void CustomErrorMessageSet_Get_ReturnsFalse()
+        {
+            var attribute = new EmailAddressAttribute();
+            PropertyInfo property = attribute.GetType().GetProperty("CustomErrorMessageSet", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(property);
+
+            // .NET core fixed a bug in .NET framework where EmailAddressAttribute would set
+            // CustomErrorMessageSet to true. See https://github.com/dotnet/corefx/issues/4481.
+            Assert.Equal(PlatformDetection.IsFullFramework, (bool)property.GetValue(attribute));
         }
     }
 }

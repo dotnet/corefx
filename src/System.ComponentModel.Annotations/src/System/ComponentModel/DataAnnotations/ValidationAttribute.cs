@@ -84,7 +84,6 @@ namespace System.ComponentModel.DataAnnotations
             {
                 _defaultErrorMessage = value;
                 _errorMessageResourceAccessor = null;
-                CustomErrorMessageSet = true;
             }
         }
 
