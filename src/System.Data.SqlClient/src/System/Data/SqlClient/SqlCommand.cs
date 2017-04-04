@@ -15,7 +15,7 @@ using Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient
 {
-    public sealed class SqlCommand : DbCommand
+    public sealed class SqlCommand : DbCommand, ICloneable
     {
         private string _commandText;
         private CommandType _commandType;
@@ -221,6 +221,23 @@ namespace System.Data.SqlClient
             CommandText = cmdText;
             Connection = connection;
             Transaction = transaction;
+        }
+
+        private SqlCommand(SqlCommand from) : this()
+        {
+            CommandText = from.CommandText;
+            CommandTimeout = from.CommandTimeout;
+            CommandType = from.CommandType;
+            Connection = from.Connection;
+            DesignTimeVisible = from.DesignTimeVisible;
+            Transaction = from.Transaction;
+            UpdatedRowSource = from.UpdatedRowSource;
+
+            SqlParameterCollection parameters = Parameters;
+            foreach (object parameter in from.Parameters)
+            {
+                parameters.Add((parameter is ICloneable) ? (parameter as ICloneable).Clone() : parameter);
+            }
         }
 
         new public SqlConnection Connection
@@ -3229,6 +3246,16 @@ namespace System.Data.SqlClient
             catch (Exception)
             {
             }
+        }
+
+        object ICloneable.Clone()
+        {
+            return Clone();
+        }
+
+        public SqlCommand Clone()
+        {
+            return new SqlCommand(this);
         }
     }
 }
