@@ -314,11 +314,12 @@ namespace System.Data.SqlClient
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override void Prepare() { }
     }
-    public sealed partial class SqlConnection : System.Data.Common.DbConnection
+    public sealed partial class SqlConnection : System.Data.Common.DbConnection, ICloneable
     {
         public SqlConnection() { }
         public SqlConnection(string connectionString) { }
         public System.Guid ClientConnectionId { get { throw null; } }
+        object ICloneable.Clone() { throw null; }
         public override string ConnectionString { get { throw null; } set { } }
         public override int ConnectionTimeout { get { throw null; } }
         public override string Database { get { throw null; } }
