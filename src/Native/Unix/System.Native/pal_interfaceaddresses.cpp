@@ -57,6 +57,10 @@ extern "C" int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onI
         }
         
         assert(result == actualName);
+        if (current->ifa_addr == nullptr)
+        {
+            continue;
+        }
         int family = current->ifa_addr->sa_family;
         if (family == AF_INET)
         {
