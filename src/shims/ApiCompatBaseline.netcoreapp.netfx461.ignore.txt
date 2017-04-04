@@ -21,6 +21,9 @@ MembersMustExist : Member 'System.Diagnostics.Debugger..ctor()' does not exist i
 // IRemotingFormatter won't be implemented in netcore20
 CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.Serialization.Formatters.Binary.BinaryFormatter' does not implement interface 'System.Runtime.Remoting.Messaging.IRemotingFormatter' in the implementation but it does in the contract.
 TypesMustExist : Type 'System.Runtime.Remoting.Messaging.IRemotingFormatter' does not exist in the implementation but it does exist in the contract.
+// SchemaImporter won't be implemented in netcore20
+TypesMustExist : Type 'System.Xml.Serialization.SchemaImporter' does not exist in the implementation but it does exist in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Xml.Serialization.XmlSchemaImporter' does not inherit from base type 'System.Xml.Serialization.SchemaImporter' in the implementation but it does in the contract.
 // Interfaces were intentional removals
 TypesMustExist : Type 'System.Runtime.InteropServices._Activator' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.InteropServices._Assembly' does not exist in the implementation but it does exist in the contract.
