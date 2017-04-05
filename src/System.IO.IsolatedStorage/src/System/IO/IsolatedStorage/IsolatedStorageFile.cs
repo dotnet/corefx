@@ -504,6 +504,50 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        public override long AvailableFreeSpace
+        {
+            get
+            {
+                return Quota - UsedSize;
+            }
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete("IsolatedStorage.MaximumSize has been deprecated because it is not CLS Compliant.  To get the maximum size use IsolatedStorage.Quota")]
+        public override ulong MaximumSize
+        {
+            get
+            {
+                return long.MaxValue;
+            }
+        }
+
+        public override long Quota
+        {
+            get
+            {
+                return long.MaxValue;
+            }
+        }
+
+        public override long UsedSize
+        {
+            get
+            {
+                throw new PlatformNotSupportedException(SR.PlatformNotSupported_IsolatedStorageSize);
+            }
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete("IsolatedStorage.CurrentSize has been deprecated because it is not CLS Compliant.  To get the current size use IsolatedStorage.UsedSize")]
+        public override ulong CurrentSize
+        {
+            get
+            {
+                throw new PlatformNotSupportedException(SR.PlatformNotSupported_IsolatedStorageSize);
+            }
+        }
+
         public static IsolatedStorageFile GetUserStoreForApplication()
         {
             return GetStore(IsolatedStorageScope.Application | IsolatedStorageScope.User);
