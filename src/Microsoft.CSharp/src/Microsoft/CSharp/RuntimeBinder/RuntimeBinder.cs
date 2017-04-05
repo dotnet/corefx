@@ -33,7 +33,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private CSemanticChecker _semanticChecker;
         private SymbolLoader SymbolLoader { get { return _semanticChecker.GetSymbolLoader(); } }
         private ExprFactory _exprFactory;
-        private OutputContext _outputContext;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
         private RuntimeBinderController _controller;
@@ -76,18 +75,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymbolLoader.SetSymbolTable(_symbolTable);
 
             _exprFactory = new ExprFactory(_semanticChecker.GetSymbolLoader().GetGlobalSymbolContext());
-            _outputContext = new OutputContext();
-            _bindingContext = BindingContext.CreateInstance(
-                _semanticChecker,
-                _exprFactory,
-                _outputContext,
-                false,
-                true,
-                false,
-                false,
-                false,
-                false,
-                0);
+            _bindingContext = BindingContext.CreateInstance(_semanticChecker, _exprFactory);
             _binder = new ExpressionBinder(_bindingContext);
         }
 
