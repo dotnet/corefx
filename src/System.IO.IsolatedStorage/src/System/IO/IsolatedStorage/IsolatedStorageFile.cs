@@ -534,7 +534,7 @@ namespace System.IO.IsolatedStorage
         {
             get
             {
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_IsolatedStorageSize);
+                return 0; // We do not have a mechanism for tracking usage.
             }
         }
 
@@ -544,7 +544,7 @@ namespace System.IO.IsolatedStorage
         {
             get
             {
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_IsolatedStorageSize);
+                return 0; // We do not have a mechanism for tracking usage.
             }
         }
 

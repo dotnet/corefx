@@ -142,7 +142,4 @@
   <data name="PlatformNotSupported_CAS" xml:space="preserve">
     <value>Code Access Security is not supported on this platform.</value>
   </data>  
-  <data name="PlatformNotSupported_IsolatedStorageSize" xml:space="preserve">
-    <value>Determining the size of an IsolatedStorageFile is not supported on this platform.</value>
-  </data>  
 </root>
