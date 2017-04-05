@@ -3481,6 +3481,52 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
+    [Fact]
+    public static void XmlMembersMapping_Soap_MemberSpecified_True()
+    {
+        string memberName1 = "StringMember";
+        XmlReflectionMember member1 = GetReflectionMember<string>(memberName1, s_defaultNs);
+        string memberName2 = "StringMemberSpecified";
+        XmlReflectionMember member2 = GetReflectionMemberNoXmlElement<bool>(memberName2, s_defaultNs);
+
+        var members = new XmlReflectionMember[] { member1, member2 };
+
+        object[] value = { "string value", true };
+        object[] actual = RoundTripWithXmlMembersMappingSoap(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <StringMember xsi:type=\"xsd:string\">string value</StringMember>\r\n  <StringMemberSpecified xsi:type=\"xsd:boolean\">true</StringMemberSpecified>\r\n</q1:wrapper>",
+            skipStringCompare: false,
+            members: members,
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.Length, actual.Length);
+        Assert.Equal(value[0], actual[0]);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_Soap_MemberSpecified_False()
+    {
+        string memberName1 = "StringMember";
+        XmlReflectionMember member1 = GetReflectionMember<string>(memberName1, s_defaultNs);
+        string memberName2 = "StringMemberSpecified";
+        XmlReflectionMember member2 = GetReflectionMemberNoXmlElement<bool>(memberName2, s_defaultNs);
+
+        var members = new XmlReflectionMember[] { member1, member2 };
+
+        object[] value = { "string value", false };
+        object[] actual = RoundTripWithXmlMembersMappingSoap(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n <StringMemberSpecified xsi:type=\"xsd:boolean\">false</StringMemberSpecified>\r\n</q1:wrapper>",
+            skipStringCompare: false,
+            members: members,
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.Length, actual.Length);
+        Assert.Null(actual[0]);
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
@@ -3532,11 +3578,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         return (T)actual[0];
     }
 
-    private static object[] RoundTripWithXmlMembersMappingSoap(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null, bool hasWrapperElement = false)
+    private static object[] RoundTripWithXmlMembersMappingSoap(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null, bool writeAccessors = false)
     {
         ns = ns ?? s_defaultNs;
         var importer = new SoapReflectionImporter(null, ns);
-        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null, hasWrapperElement);
+        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null, writeAccessors);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
         using (var ms = new MemoryStream())
         {

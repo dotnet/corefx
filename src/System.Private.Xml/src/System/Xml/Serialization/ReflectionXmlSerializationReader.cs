@@ -370,7 +370,7 @@ namespace System.Xml.Serialization
                 Reader.MoveToContent();
                 while (Reader.NodeType == XmlNodeType.Element)
                 {
-                    string root = Reader.GetAttribute("root", "http://schemas.xmlsoap.org/soap/encoding/");
+                    string root = Reader.GetAttribute("root", Soap.Encoding);
                     if (root == null || XmlConvert.ToBoolean(root))
                         break;
 
@@ -395,20 +395,8 @@ namespace System.Xml.Serialization
             {
                 int index = i;
                 MemberMapping mapping = mappings[index];
-                Action<object> source = (value) => p[index] = value;
-                Action<object> arraySource = source;
-                if (mapping.Xmlns != null)
-                {
-                    throw new NotImplementedException("mapping.Xmlns != null");
-                    //arraySource = "((" + mapping.TypeDesc.CSharpName + ")" + source + ")";
-                }
-                Member member = new Member(mapping);
-                member.Source = source;
-                //if (!mapping.IsSequence)
-                //{
-                //    throw new NotImplementedException("!mapping.IsSequence");
-                //    //member.ParamsReadSource = "paramsRead[" + i.ToString(CultureInfo.InvariantCulture) + "]";
-                //}
+                var member = new Member(mapping);
+                member.Source = (value) => p[index] = value;
 
                 members[index] = member;
                 if (mapping.CheckSpecified == SpecifiedAccessor.ReadWrite)
@@ -418,9 +406,9 @@ namespace System.Xml.Serialization
                     {
                         if (mappings[j].Name == nameSpecified)
                         {
-                            throw new NotImplementedException("mappings[j].Name == nameSpecified");
-                            //member.CheckSpecifiedSource = "p[" + j.ToString(CultureInfo.InvariantCulture) + "]";
-                            //break;
+                            int indexOfSpecifiedMember = j;
+                            member.CheckSpecifiedSource = (value) => p[indexOfSpecifiedMember] = value;
+                            break;
                         }
                     }
                 }
