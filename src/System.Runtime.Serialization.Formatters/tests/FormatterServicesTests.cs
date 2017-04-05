@@ -114,11 +114,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             yield return new object[] { typeof(StructWithSpanField) };
         }
 
+#pragma warning disable 0169 // The private field 'class member' is never used
         private struct StructWithSpanField
         {
             Span<byte> _bytes;
             int _position;
         }
+#pragma warning restore 0169
 
         [Theory]
         [MemberData(nameof(GetUninitializedObject_ByRefLikeType_NetCore_TestData))]
