@@ -57,6 +57,15 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void MoveOntoFile()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            string testFile = GetTestFilePath();
+            File.WriteAllText(testFile, "");
+            Assert.Throws<IOException>(() => Move(testDir.FullName, testFile));
+        }
+
+        [Fact]
         public void MoveIntoCurrentDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -267,31 +276,6 @@ namespace System.IO.Tests
                 Assert.Throws<IOException>(() => Move(path, "C:\\DoesntExist"));
             else
                 Assert.Throws<IOException>(() => Move(path, "D:\\DoesntExist"));
-        }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Moving to existing directory allowed for empty directory, but causes IOException for non-empty directory
-        public void UnixExistingDirectory()
-        {
-            // Moving to an-empty directory is supported on Unix, but moving to a non-empty directory is not
-            string testDirSource = GetTestFilePath();
-            string testDirDestEmpty = GetTestFilePath();
-            string testDirDestNonEmpty = GetTestFilePath();
-
-            Directory.CreateDirectory(testDirSource);
-            Directory.CreateDirectory(testDirDestEmpty);
-            Directory.CreateDirectory(testDirDestNonEmpty);
-
-            using (File.Create(Path.Combine(testDirDestNonEmpty, GetTestFileName())))
-            {
-                Assert.Throws<IOException>(() => Move(testDirSource, testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirSource));
-            }
-
-            Move(testDirSource, testDirDestEmpty);
-            Assert.True(Directory.Exists(testDirDestEmpty));
-            Assert.False(Directory.Exists(testDirSource));
         }
 
         #endregion
