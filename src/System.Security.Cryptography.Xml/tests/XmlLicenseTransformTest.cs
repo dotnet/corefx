@@ -46,6 +46,8 @@ namespace System.Security.Cryptography.Xml.Tests
 
     public class XmlLicenseTransformTest
     {
+        public const string LicenseTransformUrl = "urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform";
+        public const string LicenseTransformNsUrl = "urn:mpeg:mpeg21:2003:01-REL-R-NS";
         private UnprotectedXmlLicenseTransform transform;
 
         public XmlLicenseTransformTest()
@@ -56,8 +58,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact] // ctor ()
         public void Constructor1()
         {
-            Assert.Equal("urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform",
-                transform.Algorithm);
+            Assert.Equal(LicenseTransformUrl, transform.Algorithm);
             Assert.Null(transform.Decryptor);
 
             Type[] input = transform.InputTypes;
@@ -249,9 +250,9 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlNamespaceManager nsManager;
             XmlDocument doc = LoadXmlWithLicenseNs(plainTextLicense, out nsManager);
 
-            XmlDocument encrypted = EncryptLicense(FindLicenseTransformContext(doc, nsManager), key);
+            EncryptLicense(FindLicenseTransformContext(doc, nsManager), key);
 
-            return encrypted.OuterXml;
+            return doc.OuterXml;
         }
 
         static XmlElement FindLicenseTransformContext(XmlDocument doc, XmlNamespaceManager nsManager)
@@ -265,7 +266,7 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDocument doc = new XmlDocument();
             doc.PreserveWhitespace = true;
             nsManager = new XmlNamespaceManager(doc.NameTable);
-            nsManager.AddNamespace("r", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+            nsManager.AddNamespace("r", LicenseTransformNsUrl);
             doc.LoadXml(xml);
             return doc;
         }
@@ -285,7 +286,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 XmlLicenseEncryptedRef.Encrypt(ms, key, out keyInfo, out encryptionMethod, out cipherData);
                 grant.RemoveAll();
                 XmlDocument doc = grant.OwnerDocument;
-                XmlElement encryptedGrant = doc.CreateElement("encryptedGrant", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+                XmlElement encryptedGrant = doc.CreateElement("encryptedGrant", LicenseTransformNsUrl);
                 grant.AppendChild(encryptedGrant);
 
                 encryptedGrant.AppendChild(doc.ImportNode(keyInfo.GetXml(), true));
@@ -294,15 +295,14 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        static XmlDocument EncryptLicense(XmlElement context, RSA key)
+        static void EncryptLicense(XmlElement context, RSA key)
         {
-            XmlDocument ret = new XmlDocument();
-            ret.PreserveWhitespace = true;
+            XmlDocument doc = context.OwnerDocument;
 
-            var nsMgr = new XmlNamespaceManager(ret.NameTable);
+            var nsMgr = new XmlNamespaceManager(doc.NameTable);
             nsMgr.AddNamespace("dsig", SignedXml.XmlDsigNamespaceUrl);
             nsMgr.AddNamespace("enc", EncryptedXml.XmlEncNamespaceUrl);
-            nsMgr.AddNamespace("r", "urn:mpeg:mpeg21:2003:01-REL-R-NS");
+            nsMgr.AddNamespace("r", LicenseTransformNsUrl);
 
             XmlElement currentIssuerContext = context.SelectSingleNode("ancestor-or-self::r:issuer[1]", nsMgr) as XmlElement;
             Assert.NotEqual(currentIssuerContext, null);
@@ -326,7 +326,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 }
 
                 if (issuer.LocalName == "issuer"
-                    && issuer.NamespaceURI == "urn:mpeg:mpeg21:2003:01-REL-R-NS")
+                    && issuer.NamespaceURI == LicenseTransformNsUrl)
                 {
                     issuer.ParentNode.RemoveChild(issuer);
                 }
@@ -338,10 +338,6 @@ namespace System.Security.Cryptography.Xml.Tests
             {
                 EncryptGrant(encryptedGrantList[i], key, nsMgr);
             }
-
-            ret.InnerXml = currentLicenseContext.OuterXml;
-
-            return ret;
         }
     }
 }
