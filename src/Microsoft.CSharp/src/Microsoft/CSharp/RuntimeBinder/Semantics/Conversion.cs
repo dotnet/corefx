@@ -591,7 +591,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         private Expr mustCastInUncheckedContext(Expr expr, CType dest, CONVERTTYPE flags)
         {
-            CheckedContext ctx = CheckedContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
+            BindingContext ctx = BindingContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
             return (new ExpressionBinder(ctx)).mustCast(expr, dest, flags);
         }
 
@@ -1813,7 +1813,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool canExplicitConversionBeBoundInUncheckedContext(Expr exprSrc, CType typeSrc, ExprClass typeDest, CONVERTTYPE flags)
         {
-            CheckedContext ctx = CheckedContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
+            BindingContext ctx = BindingContext.CreateInstance(Context, false /*checkedNormal*/, false /*checkedConstant*/);
             Debug.Assert(typeDest != null);
             Debug.Assert(typeDest.Type != null);
             return (new ExpressionBinder(ctx)).BindExplicitConversion(exprSrc, typeSrc, typeDest, typeDest.Type, flags);

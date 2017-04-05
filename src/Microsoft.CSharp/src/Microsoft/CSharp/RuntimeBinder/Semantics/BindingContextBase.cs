@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -13,7 +11,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // consumed by the StatementBinder.
     // ----------------------------------------------------------------------------
 
-    internal class BindingContext
+    internal sealed class BindingContext
     {
         public static BindingContext CreateInstance(
                 CSemanticChecker pSemanticChecker,
@@ -23,6 +21,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new BindingContext(
                 pSemanticChecker,
                 exprFactory);
+        }
+
+        public static BindingContext CreateInstance(
+            BindingContext parentCtx,
+            bool checkedNormal,
+            bool checkedConstant)
+        {
+            return new BindingContext(parentCtx, checkedNormal, checkedConstant);
         }
 
         private BindingContext(
@@ -38,7 +44,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CheckedNormal = false;
             CheckedConstant = false;
         }
-        protected BindingContext(BindingContext parent)
+
+        private BindingContext(BindingContext parent, bool checkedNormal, bool checkedConstant)
         {
             m_ExprFactory = parent.m_ExprFactory;
             UnsafeErrorGiven = parent.UnsafeErrorGiven;
@@ -48,6 +55,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(parent.SemanticChecker != null);
             SemanticChecker = parent.SemanticChecker;
             SymbolLoader = SemanticChecker.GetSymbolLoader();
+            CheckedNormal = checkedNormal;
+            CheckedConstant = checkedConstant;
         }
 
 
