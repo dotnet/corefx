@@ -23,16 +23,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             yield return new TestCase(new MaxLengthAttribute(16), new int[4, 4]);
             yield return new TestCase(new MaxLengthAttribute(16), new string[3, 4]);
-
-            // MaxLengthAttribute in the full .NET framework doesn't support ICollection.Count.
-            // See https://github.com/dotnet/corefx/pull/2650".
-            if (!PlatformDetection.IsFullFramework)
-            {
-                foreach (object[] test in ValidValues_ICollection())
-                {
-                    yield return new TestCase((ValidationAttribute)test[0], test[1]);
-                }
-            }
         }
 
         protected static IEnumerable<object[]> ValidValues_ICollection()
@@ -51,16 +41,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new MaxLengthAttribute(12), new byte[13]);
 
             yield return new TestCase(new MaxLengthAttribute(12), new int[4, 4]);
-
-            // MaxLengthAttribute in the full .NET framework doesn't support ICollection.Count.
-            // See https://github.com/dotnet/corefx/pull/2650".
-            if (!PlatformDetection.IsFullFramework)
-            {
-                foreach (object[] test in InvalidValues_ICollection())
-                {
-                    yield return new TestCase((ValidationAttribute)test[0], test[1]);
-                }
-            }
         }
 
         protected static IEnumerable<object> InvalidValues_ICollection()
@@ -87,8 +67,26 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
         [Theory]
         [MemberData(nameof(ValidValues_ICollection))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxLengthAttribute in the .NET Framework doesn't support ICollection.Count. See https://github.com/dotnet/corefx/pull/2650")]
+        public void Validate_ICollection_NetCore_Valid(MaxLengthAttribute attribute, object value)
+        {
+            attribute.Validate(value, new ValidationContext(new object()));
+            Assert.True(attribute.IsValid(value));
+        }
+
+        [Theory]
         [MemberData(nameof(InvalidValues_ICollection))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "MaxLengthAttribute in the full .NET framework doesn't support ICollection.Count. See https://github.com/dotnet/corefx/pull/2650")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxLengthAttribute in the .NET Framework doesn't support ICollection.Count. See https://github.com/dotnet/corefx/pull/2650")]
+        public void Validate_ICollection_NetCore_Invalid(MaxLengthAttribute attribute, object value)
+        {
+            Assert.Throws<ValidationException>(() => attribute.Validate(value, new ValidationContext(new object())));
+            Assert.False(attribute.IsValid(value));
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidValues_ICollection))]
+        [MemberData(nameof(InvalidValues_ICollection))]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "MaxLengthAttribute in the .NET Core supports ICollection.Count. See https://github.com/dotnet/corefx/pull/2650")]
         public void Validate_ICollection_NetFx_ThrowsInvalidCastException(MaxLengthAttribute attribute, object value)
         {
             Assert.Throws<InvalidCastException>(() => attribute.Validate(value, new ValidationContext(new object())));
