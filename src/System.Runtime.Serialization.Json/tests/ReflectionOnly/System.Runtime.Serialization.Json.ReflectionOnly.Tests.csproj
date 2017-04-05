@@ -15,8 +15,8 @@
     <Compile Include="$(TestSourceFolder)..\DataContractJsonSerializer.cs" />
   </ItemGroup>
     <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
-    <Compile Include="$(TestSourceFolder)DataContractJsonSerializer.CoreCLR.cs" />
-    <Compile Include="$(TestSourceFolder)..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.CoreCLR.cs" />
+    <Compile Include="$(TestSourceFolder)..\DataContractJsonSerializer.CoreCLR.cs" />
+    <Compile Include="$(TestSourceFolder)..\..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.CoreCLR.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

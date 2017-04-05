@@ -24,8 +24,8 @@
     <Compile Include="$(TestSourceFolder)..\XmlDictionaryWriterTest.cs" />
   </ItemGroup>
     <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
-    <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
+    <Compile Include="$(TestSourceFolder)..\SerializationTypes.CoreCLR.cs" />
+    <Compile Include="$(TestSourceFolder)..\DataContractSerializer.CoreCLR.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
