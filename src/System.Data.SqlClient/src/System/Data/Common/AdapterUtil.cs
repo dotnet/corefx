@@ -1152,7 +1152,7 @@ namespace System.Data.Common
                 case DataRowVersion.Current:
                 case DataRowVersion.Original:
                 case DataRowVersion.Proposed:
-                    Debug.Assert(false, "valid DataRowVersion " + value.ToString());
+                    Debug.Fail($"Invalid DataRowVersion {value}");
                     break;
             }
 #endif
