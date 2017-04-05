@@ -1,0 +1,195 @@
+{
+  "locked": false,
+  "version": -9998,
+  "projectFileDependencyGroups": {
+    "": [
+      "System.Runtime >= 4.0.20-beta-22809",
+      "System.Runtime.Extensions >= 4.0.10-beta-22809",
+      "System.Runtime.InteropServices >= 4.0.20-beta-22809",
+      "System.Collections >= 4.0.10-beta-22809",
+      "System.IO >= 4.0.10-beta-22809",
+      "System.IO.FileSystem >= 4.0.0-beta-22809",
+      "System.IO.FileSystem.Primitives >= 4.0.0-beta-22809",
+      "System.Text.Encoding >= 4.0.10-beta-22809",
+      "System.Threading.Tasks >= 4.0.10-beta-22809"
+    ]
+  },
+  "libraries": {
+    "System.Collections/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "7oEXVtSyqOg+97BUWbOVBxoTUjXMbJEsZHmZjzrdvY7j/uCk/oW4MAFTlDo2jNCs4hxLw3da8C9ildh/vsSprQ==",
+      "files": [
+        "System.Collections.4.0.10-beta-22809.nupkg",
+        "System.Collections.4.0.10-beta-22809.nupkg.sha512",
+        "System.Collections.nuspec",
+        "aot/netcore50/System.Collections.dll",
+        "lib/DNXCore50/System.Collections.dll",
+        "lib/net46/System.Collections.dll",
+        "lib/netcore50/System.Collections.dll",
+        "ref/any/System.Collections.dll",
+        "ref/net46/System.Collections.dll"
+      ]
+    },
+    "System.IO/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "Grbgw9y7VX7WM2v/ZROKCaxHv8VgtNjsGDOIQdC8aQOo+newNcuzzoV8eQaNjS9OWVX7Q5lPKBlCCuagONX/kg==",
+      "files": [
+        "System.IO.4.0.10-beta-22809.nupkg",
+        "System.IO.4.0.10-beta-22809.nupkg.sha512",
+        "System.IO.nuspec",
+        "aot/netcore50/System.IO.dll",
+        "lib/DNXCore50/System.IO.dll",
+        "lib/net46/System.IO.dll",
+        "lib/netcore50/System.IO.dll",
+        "ref/any/System.IO.dll",
+        "ref/net46/System.IO.dll"
+      ]
+    },
+    "System.IO.FileSystem/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "d61Y81lALFoEZCV/CNqoWbw2r741VPFipRVDvM8EQBDGa46xwdNW9gH180W3iXZDx0//GX3pszxas8ejb7XnVw==",
+      "files": [
+        "System.IO.FileSystem.4.0.0-beta-22809.nupkg",
+        "System.IO.FileSystem.4.0.0-beta-22809.nupkg.sha512",
+        "System.IO.FileSystem.nuspec",
+        "lib/DNXCore50/System.IO.FileSystem.dll",
+        "lib/net46/System.IO.FileSystem.dll",
+        "lib/netcore50/System.IO.FileSystem.dll",
+        "ref/any/System.IO.FileSystem.dll",
+        "ref/net46/System.IO.FileSystem.dll"
+      ]
+    },
+    "System.IO.FileSystem.Primitives/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "783vrG0OlwpC3LqeLqhaogepJli3luoCfsTMS9BUpXgPcpgYRw+AFM3Y3UvIyGXAVzMq+UO6o5FIW9XHdeXhow==",
+      "files": [
+        "System.IO.FileSystem.Primitives.4.0.0-beta-22809.nupkg",
+        "System.IO.FileSystem.Primitives.4.0.0-beta-22809.nupkg.sha512",
+        "System.IO.FileSystem.Primitives.nuspec",
+        "lib/any/System.IO.FileSystem.Primitives.dll",
+        "lib/net46/System.IO.FileSystem.Primitives.dll",
+        "ref/any/System.IO.FileSystem.Primitives.dll",
+        "ref/net46/System.IO.FileSystem.Primitives.dll"
+      ]
+    },
+    "System.Reflection/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "J5I07YZMgum0A/69EhUq4IcKFyDn/Xw33T/O8jT9Bg+b1ZSspS2sKJMJFCsq5vIlCgbq9fvkNDVOK8yprzBBAA==",
+      "files": [
+        "License.rtf",
+        "System.Reflection.4.0.0-beta-22809.nupkg",
+        "System.Reflection.4.0.0-beta-22809.nupkg.sha512",
+        "System.Reflection.nuspec",
+        "lib/net45/_._",
+        "lib/win8/_._",
+        "ref/any/System.Reflection.dll",
+        "ref/net45/_._",
+        "ref/win8/_._"
+      ]
+    },
+    "System.Reflection.Primitives/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "cJRUQO2rvD7o3S95oHA9Luyz19xi5GkT7HH0P6GDPSovwnrrZp92A2pOHF7GCybf3DH/W19ql85JL5JOFRzMnQ==",
+      "files": [
+        "System.Reflection.Primitives.4.0.0-beta-22809.nupkg",
+        "System.Reflection.Primitives.4.0.0-beta-22809.nupkg.sha512",
+        "System.Reflection.Primitives.nuspec",
+        "aot/netcore50/System.Reflection.Primitives.dll",
+        "lib/DNXCore50/System.Reflection.Primitives.dll",
+        "lib/net46/System.Reflection.Primitives.dll",
+        "lib/netcore50/System.Reflection.Primitives.dll",
+        "ref/any/System.Reflection.Primitives.dll",
+        "ref/net46/System.Reflection.Primitives.dll"
+      ]
+    },
+    "System.Runtime/4.0.20-beta-22809": {
+      "serviceable": false,
+      "sha": "3sERRS94e9hoabtoc7uu1WQx4K3PS+Y0ZVplWay4ckiggqPH+LFbeccWG/8L92hhJn4btgmfzayOe6UFd8pa/Q==",
+      "files": [
+        "System.Runtime.4.0.20-beta-22809.nupkg",
+        "System.Runtime.4.0.20-beta-22809.nupkg.sha512",
+        "System.Runtime.nuspec",
+        "aot/netcore50/System.Runtime.dll",
+        "lib/DNXCore50/System.Runtime.dll",
+        "lib/net46/System.Runtime.dll",
+        "lib/netcore50/System.Runtime.dll",
+        "ref/any/mscorlib.dll",
+        "ref/any/System.Runtime.dll",
+        "ref/net46/System.Runtime.dll"
+      ]
+    },
+    "System.Runtime.Extensions/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "z4DBIgW1BZkDZ4pdA+j89g6vI7wYv9Mo3r0EJGdtY1ADXjlq6dGG9fch2yv/Lcn3oPcNbSWM8uup/QyuyUc/hA==",
+      "files": [
+        "System.Runtime.Extensions.4.0.10-beta-22809.nupkg",
+        "System.Runtime.Extensions.4.0.10-beta-22809.nupkg.sha512",
+        "System.Runtime.Extensions.nuspec",
+        "aot/netcore50/System.Runtime.Extensions.dll",
+        "lib/DNXCore50/System.Runtime.Extensions.dll",
+        "lib/net46/System.Runtime.Extensions.dll",
+        "lib/netcore50/System.Runtime.Extensions.dll",
+        "ref/any/System.Runtime.Extensions.dll",
+        "ref/net46/System.Runtime.Extensions.dll"
+      ]
+    },
+    "System.Runtime.Handles/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "cOc/qjtoN19oPbBfEVEr1PURRyv5noYxkSPZ4HgrhhCf1aPWtI2gdWlqcTuBkJwezz3XblGefMSahgcInSNVHQ==",
+      "files": [
+        "System.Runtime.Handles.4.0.0-beta-22809.nupkg",
+        "System.Runtime.Handles.4.0.0-beta-22809.nupkg.sha512",
+        "System.Runtime.Handles.nuspec",
+        "aot/netcore50/System.Runtime.Handles.dll",
+        "lib/DNXCore50/System.Runtime.Handles.dll",
+        "lib/net46/System.Runtime.Handles.dll",
+        "lib/netcore50/System.Runtime.Handles.dll",
+        "ref/any/System.Runtime.Handles.dll",
+        "ref/net46/System.Runtime.Handles.dll"
+      ]
+    },
+    "System.Runtime.InteropServices/4.0.20-beta-22809": {
+      "serviceable": false,
+      "sha": "m/sO2DiNK3oLuau9M7QAKgAyEizHpnODxxX/ayiVteSJiJ3zIubWXaz8dk9ta6eOe12eCm6fPaOW65aoYP3gnw==",
+      "files": [
+        "System.Runtime.InteropServices.4.0.20-beta-22809.nupkg",
+        "System.Runtime.InteropServices.4.0.20-beta-22809.nupkg.sha512",
+        "System.Runtime.InteropServices.nuspec",
+        "aot/netcore50/System.Runtime.InteropServices.dll",
+        "lib/DNXCore50/System.Runtime.InteropServices.dll",
+        "lib/net46/System.Runtime.InteropServices.dll",
+        "ref/any/System.Runtime.InteropServices.dll",
+        "ref/net46/System.Runtime.InteropServices.dll"
+      ]
+    },
+    "System.Text.Encoding/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "G5Jb4IkkhFZaeCDdVhZl23yLHyUntHANuQh5k1P5rjVv+J3KN719TdhgPIc2hKdswyA3uA/ZOwCuNSU8z+V15Q==",
+      "files": [
+        "System.Text.Encoding.4.0.10-beta-22809.nupkg",
+        "System.Text.Encoding.4.0.10-beta-22809.nupkg.sha512",
+        "System.Text.Encoding.nuspec",
+        "aot/netcore50/System.Text.Encoding.dll",
+        "lib/DNXCore50/System.Text.Encoding.dll",
+        "lib/net46/System.Text.Encoding.dll",
+        "lib/netcore50/System.Text.Encoding.dll",
+        "ref/any/System.Text.Encoding.dll",
+        "ref/net46/System.Text.Encoding.dll"
+      ]
+    },
+    "System.Threading.Tasks/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "MvL4sZkNhUx8PLQY+TtnQVCFUE8blYlMf1OR1LtNCOytB5YOOqBiwBiq/8LbropRGn/wCicPYkAoi7VjumpLjA==",
+      "files": [
+        "System.Threading.Tasks.4.0.10-beta-22809.nupkg",
+        "System.Threading.Tasks.4.0.10-beta-22809.nupkg.sha512",
+        "System.Threading.Tasks.nuspec",
+        "lib/DNXCore50/System.Threading.Tasks.dll",
+        "lib/net46/System.Threading.Tasks.dll",
+        "lib/netcore50/System.Threading.Tasks.dll",
+        "ref/any/System.Threading.Tasks.dll",
+        "ref/net46/System.Threading.Tasks.dll"
+      ]
+    }
+  }
+}

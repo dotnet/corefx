@@ -1,0 +1,164 @@
+{
+  "locked": false,
+  "version": -9998,
+  "projectFileDependencyGroups": {
+    "": [
+      "System.Runtime >= 4.0.20-beta-22809",
+      "System.Runtime.Extensions >= 4.0.10-beta-22809",
+      "System.Runtime.InteropServices >= 4.0.20-beta-22809",
+      "System.Security.Cryptography.Encryption >= 4.0.0-beta-22809",
+      "System.Threading.Tasks >= 4.0.10-beta-22809"
+    ]
+  },
+  "libraries": {
+    "System.IO/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "GT4kLndm4amrN01r+gs5XCUTkTRUIZadn0b8pFeXoxQtMo1jPgoeq8/jfObsX4SdAwiWxbUC7EzHnO3UYrofPg==",
+      "files": [
+        "License.rtf",
+        "System.IO.4.0.0-beta-22809.nupkg",
+        "System.IO.4.0.0-beta-22809.nupkg.sha512",
+        "System.IO.nuspec",
+        "lib/net45/_._",
+        "lib/win8/_._",
+        "ref/any/System.IO.dll",
+        "ref/net45/_._",
+        "ref/win8/_._"
+      ]
+    },
+    "System.Reflection/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "J5I07YZMgum0A/69EhUq4IcKFyDn/Xw33T/O8jT9Bg+b1ZSspS2sKJMJFCsq5vIlCgbq9fvkNDVOK8yprzBBAA==",
+      "files": [
+        "License.rtf",
+        "System.Reflection.4.0.0-beta-22809.nupkg",
+        "System.Reflection.4.0.0-beta-22809.nupkg.sha512",
+        "System.Reflection.nuspec",
+        "lib/net45/_._",
+        "lib/win8/_._",
+        "ref/any/System.Reflection.dll",
+        "ref/net45/_._",
+        "ref/win8/_._"
+      ]
+    },
+    "System.Reflection.Primitives/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "cJRUQO2rvD7o3S95oHA9Luyz19xi5GkT7HH0P6GDPSovwnrrZp92A2pOHF7GCybf3DH/W19ql85JL5JOFRzMnQ==",
+      "files": [
+        "System.Reflection.Primitives.4.0.0-beta-22809.nupkg",
+        "System.Reflection.Primitives.4.0.0-beta-22809.nupkg.sha512",
+        "System.Reflection.Primitives.nuspec",
+        "aot/netcore50/System.Reflection.Primitives.dll",
+        "lib/DNXCore50/System.Reflection.Primitives.dll",
+        "lib/net46/System.Reflection.Primitives.dll",
+        "lib/netcore50/System.Reflection.Primitives.dll",
+        "ref/any/System.Reflection.Primitives.dll",
+        "ref/net46/System.Reflection.Primitives.dll"
+      ]
+    },
+    "System.Runtime/4.0.20-beta-22809": {
+      "serviceable": false,
+      "sha": "3sERRS94e9hoabtoc7uu1WQx4K3PS+Y0ZVplWay4ckiggqPH+LFbeccWG/8L92hhJn4btgmfzayOe6UFd8pa/Q==",
+      "files": [
+        "System.Runtime.4.0.20-beta-22809.nupkg",
+        "System.Runtime.4.0.20-beta-22809.nupkg.sha512",
+        "System.Runtime.nuspec",
+        "aot/netcore50/System.Runtime.dll",
+        "lib/DNXCore50/System.Runtime.dll",
+        "lib/net46/System.Runtime.dll",
+        "lib/netcore50/System.Runtime.dll",
+        "ref/any/mscorlib.dll",
+        "ref/any/System.Runtime.dll",
+        "ref/net46/System.Runtime.dll"
+      ]
+    },
+    "System.Runtime.Extensions/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "z4DBIgW1BZkDZ4pdA+j89g6vI7wYv9Mo3r0EJGdtY1ADXjlq6dGG9fch2yv/Lcn3oPcNbSWM8uup/QyuyUc/hA==",
+      "files": [
+        "System.Runtime.Extensions.4.0.10-beta-22809.nupkg",
+        "System.Runtime.Extensions.4.0.10-beta-22809.nupkg.sha512",
+        "System.Runtime.Extensions.nuspec",
+        "aot/netcore50/System.Runtime.Extensions.dll",
+        "lib/DNXCore50/System.Runtime.Extensions.dll",
+        "lib/net46/System.Runtime.Extensions.dll",
+        "lib/netcore50/System.Runtime.Extensions.dll",
+        "ref/any/System.Runtime.Extensions.dll",
+        "ref/net46/System.Runtime.Extensions.dll"
+      ]
+    },
+    "System.Runtime.Handles/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "cOc/qjtoN19oPbBfEVEr1PURRyv5noYxkSPZ4HgrhhCf1aPWtI2gdWlqcTuBkJwezz3XblGefMSahgcInSNVHQ==",
+      "files": [
+        "System.Runtime.Handles.4.0.0-beta-22809.nupkg",
+        "System.Runtime.Handles.4.0.0-beta-22809.nupkg.sha512",
+        "System.Runtime.Handles.nuspec",
+        "aot/netcore50/System.Runtime.Handles.dll",
+        "lib/DNXCore50/System.Runtime.Handles.dll",
+        "lib/net46/System.Runtime.Handles.dll",
+        "lib/netcore50/System.Runtime.Handles.dll",
+        "ref/any/System.Runtime.Handles.dll",
+        "ref/net46/System.Runtime.Handles.dll"
+      ]
+    },
+    "System.Runtime.InteropServices/4.0.20-beta-22809": {
+      "serviceable": false,
+      "sha": "m/sO2DiNK3oLuau9M7QAKgAyEizHpnODxxX/ayiVteSJiJ3zIubWXaz8dk9ta6eOe12eCm6fPaOW65aoYP3gnw==",
+      "files": [
+        "System.Runtime.InteropServices.4.0.20-beta-22809.nupkg",
+        "System.Runtime.InteropServices.4.0.20-beta-22809.nupkg.sha512",
+        "System.Runtime.InteropServices.nuspec",
+        "aot/netcore50/System.Runtime.InteropServices.dll",
+        "lib/DNXCore50/System.Runtime.InteropServices.dll",
+        "lib/net46/System.Runtime.InteropServices.dll",
+        "ref/any/System.Runtime.InteropServices.dll",
+        "ref/net46/System.Runtime.InteropServices.dll"
+      ]
+    },
+    "System.Security.Cryptography.Encryption/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "eo47X+Ur20UPNdHPVe2TnEQ5zR87pf5Tv02pS5WNEe4r+RoqeykcR4YD16EHYus+sROhj7ij6NT15br8gt9q4w==",
+      "files": [
+        "System.Security.Cryptography.Encryption.4.0.0-beta-22809.nupkg",
+        "System.Security.Cryptography.Encryption.4.0.0-beta-22809.nupkg.sha512",
+        "System.Security.Cryptography.Encryption.nuspec",
+        "aot/netcore50/System.Security.Cryptography.Encryption.dll",
+        "lib/DNXCore50/System.Security.Cryptography.Encryption.dll",
+        "lib/net46/System.Security.Cryptography.Encryption.dll",
+        "lib/netcore50/System.Security.Cryptography.Encryption.dll",
+        "ref/any/System.Security.Cryptography.Encryption.dll",
+        "ref/net46/System.Security.Cryptography.Encryption.dll"
+      ]
+    },
+    "System.Text.Encoding/4.0.0-beta-22809": {
+      "serviceable": false,
+      "sha": "TtTrT/fWkiRqCBNTfsowWvRJwKHZ6rzByXO66WrJ6xcb5ApSqLN+dIyMYetQ19qqdtqmZ5MD1Q+8iMF2r8RFMA==",
+      "files": [
+        "License.rtf",
+        "System.Text.Encoding.4.0.0-beta-22809.nupkg",
+        "System.Text.Encoding.4.0.0-beta-22809.nupkg.sha512",
+        "System.Text.Encoding.nuspec",
+        "lib/net45/_._",
+        "lib/win8/_._",
+        "ref/any/System.Text.Encoding.dll",
+        "ref/net45/_._",
+        "ref/win8/_._"
+      ]
+    },
+    "System.Threading.Tasks/4.0.10-beta-22809": {
+      "serviceable": false,
+      "sha": "MvL4sZkNhUx8PLQY+TtnQVCFUE8blYlMf1OR1LtNCOytB5YOOqBiwBiq/8LbropRGn/wCicPYkAoi7VjumpLjA==",
+      "files": [
+        "System.Threading.Tasks.4.0.10-beta-22809.nupkg",
+        "System.Threading.Tasks.4.0.10-beta-22809.nupkg.sha512",
+        "System.Threading.Tasks.nuspec",
+        "lib/DNXCore50/System.Threading.Tasks.dll",
+        "lib/net46/System.Threading.Tasks.dll",
+        "lib/netcore50/System.Threading.Tasks.dll",
+        "ref/any/System.Threading.Tasks.dll",
+        "ref/net46/System.Threading.Tasks.dll"
+      ]
+    }
+  }
+}
