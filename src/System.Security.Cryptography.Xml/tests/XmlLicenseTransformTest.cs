@@ -156,19 +156,6 @@ namespace System.Security.Cryptography.Xml.Tests
         {
             Assert.Throws<ArgumentException>(() => transform.GetOutput(typeof(string)));
         }
-
-        private XmlDocument GetDocumentFromResource(string resourceName)
-        {
-            XmlDocument doc = new XmlDocument();
-            using (Stream stream = TestHelpers.LoadResourceStream(resourceName))
-            using (StreamReader streamReader = new StreamReader(stream))
-            {
-                string originalXml = streamReader.ReadToEnd();
-                doc.LoadXml(originalXml);
-            }
-
-            return doc;
-        }
 		
         [Fact]
         public static void ItDecryptsLicense()
@@ -201,6 +188,19 @@ namespace System.Security.Cryptography.Xml.Tests
                 string decrypted = decryptedDoc.OuterXml;
                 Assert.Equal(expected, decrypted);
             }
+        }
+
+        private XmlDocument GetDocumentFromResource(string resourceName)
+        {
+            XmlDocument doc = new XmlDocument();
+            using (Stream stream = TestHelpers.LoadResourceStream(resourceName))
+            using (StreamReader streamReader = new StreamReader(stream))
+            {
+                string originalXml = streamReader.ReadToEnd();
+                doc.LoadXml(originalXml);
+            }
+
+            return doc;
         }
 
         private static string GenerateLicenseXmlWithEncryptedGrants(RSA key, out string plainTextLicense)
@@ -245,7 +245,7 @@ namespace System.Security.Cryptography.Xml.Tests
             <r:timeOfIssue>2099-11-11T11:11:11Z</r:timeOfIssue>
         </r:details>
     </r:issuer>
-</r:license>";
+</r:license>".Replace("\r\n", "\n");
 
             XmlNamespaceManager nsManager;
             XmlDocument doc = LoadXmlWithLicenseNs(plainTextLicense, out nsManager);

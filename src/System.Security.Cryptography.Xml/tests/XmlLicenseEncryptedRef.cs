@@ -144,18 +144,16 @@ namespace System.Security.Cryptography.Xml.Tests
             // Get the encrypted content following the IV.
             toDecrypt.Read(encryptedContentValue, 0, encryptedContentValue.Length);
 
-            byte[] decryptedContent;
+            var msDecrypt = new MemoryStream();
+
             using (ICryptoTransform decryptor = alg.CreateDecryptor(alg.Key, IV))
-            using (var msDecrypt = new MemoryStream())
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write))
+            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write, leaveOpen: true))
             {
                 csDecrypt.Write(encryptedContentValue, 0, encryptedContentValue.Length);
-                csDecrypt.FlushFinalBlock();
-
-                decryptedContent = msDecrypt.ToArray();
             }
 
-            return new MemoryStream(decryptedContent);
+            msDecrypt.Position = 0;
+            return msDecrypt;
         }
 
         public static void Encrypt(Stream toEncrypt, RSA key, out KeyInfo keyInfo, out EncryptionMethod encryptionMethod, out CipherData cipherData)
