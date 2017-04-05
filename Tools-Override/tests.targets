@@ -198,6 +198,13 @@
       Overwrite="true"
       Encoding="Ascii" />
 
+      <!--======================================================
+                      Section for netfx test runs
+            ====================================================== -->
+    <ItemGroup Condition="'$(BuildingNETFxVertical)' == 'true'" >
+      <TestCommandLines Include="set DEVPATH=%RUNTIME_PATH%" />
+    </ItemGroup>
+
         <!--======================================================
                       Section for uapaot ilc test runs
             ====================================================== -->

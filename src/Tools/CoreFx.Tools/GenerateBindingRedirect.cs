@@ -94,14 +94,16 @@ namespace Microsoft.DotNet.Build.Tasks
                 {
                     XElement codeBase = new XElement(ns + "codeBase",
                                                 new XAttribute("version", result.Version),
-                                                new XAttribute("href", Path.GetFullPath(assembly.ItemSpec)));
+                                                new XAttribute("href", Path.GetFileName(assembly.ItemSpec)));
                     dependentAssembly.Add(codeBase);
                 }
 
                 bindingRedirectAssemblies.Add(dependentAssembly);
 
             }
-            XDocument doc = new XDocument(new XElement("configuration", new XElement("runtime", bindingRedirectAssemblies)));
+
+            XElement developmentMode = new XElement("developmentMode", new XAttribute("developerInstallation", true));
+            XDocument doc = new XDocument(new XElement("configuration", new XElement("runtime", developmentMode, bindingRedirectAssemblies)));
             foreach (ITaskItem executable in Executables)
             {
                 string executableName = Path.GetFileName(executable.ItemSpec);
