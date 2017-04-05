@@ -46,8 +46,8 @@ namespace System.Security.Cryptography.Xml.Tests
 
     public class XmlLicenseTransformTest
     {
-        public const string LicenseTransformUrl = "urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform";
         public const string LicenseTransformNsUrl = "urn:mpeg:mpeg21:2003:01-REL-R-NS";
+        public const string LicenseTransformUrl = LicenseTransformNsUrl + ":licenseTransform";
         private UnprotectedXmlLicenseTransform transform;
 
         public XmlLicenseTransformTest()
@@ -203,7 +203,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        static string GenerateLicenseXmlWithEncryptedGrants(RSA key, out string plainTextLicense)
+        private static string GenerateLicenseXmlWithEncryptedGrants(RSA key, out string plainTextLicense)
         {
             plainTextLicense = @"<r:license xmlns:r=""urn:mpeg:mpeg21:2003:01-REL-R-NS"">
     <r:title>Test License</r:title>
@@ -255,13 +255,13 @@ namespace System.Security.Cryptography.Xml.Tests
             return doc.OuterXml;
         }
 
-        static XmlElement FindLicenseTransformContext(XmlDocument doc, XmlNamespaceManager nsManager)
+        private static XmlElement FindLicenseTransformContext(XmlDocument doc, XmlNamespaceManager nsManager)
         {
             XmlNodeList issuerList = doc.SelectNodes("//r:issuer", nsManager);
             return issuerList[0] as XmlElement;
         }
 
-        static XmlDocument LoadXmlWithLicenseNs(string xml, out XmlNamespaceManager nsManager)
+        private static XmlDocument LoadXmlWithLicenseNs(string xml, out XmlNamespaceManager nsManager)
         {
             XmlDocument doc = new XmlDocument();
             doc.PreserveWhitespace = true;
@@ -271,7 +271,7 @@ namespace System.Security.Cryptography.Xml.Tests
             return doc;
         }
 
-        static void EncryptGrant(XmlNode grant, RSA key, XmlNamespaceManager nsMgr)
+        private static void EncryptGrant(XmlNode grant, RSA key, XmlNamespaceManager nsMgr)
         {
             using (var ms = new MemoryStream())
             using (var sw = new StreamWriter(ms))
@@ -295,7 +295,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        static void EncryptLicense(XmlElement context, RSA key)
+        private static void EncryptLicense(XmlElement context, RSA key)
         {
             XmlDocument doc = context.OwnerDocument;
 

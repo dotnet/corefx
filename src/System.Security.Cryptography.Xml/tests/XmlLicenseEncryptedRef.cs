@@ -15,7 +15,7 @@ namespace System.Security.Cryptography.Xml.Tests
 {
     public class XmlLicenseEncryptedRef : IRelDecryptor
     {
-        List<AsymmetricAlgorithm> asymmetricKeys = new List<AsymmetricAlgorithm>();
+        List<AsymmetricAlgorithm> _asymmetricKeys = new List<AsymmetricAlgorithm>();
 
         public XmlLicenseEncryptedRef()
         {
@@ -26,30 +26,12 @@ namespace System.Security.Cryptography.Xml.Tests
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            asymmetricKeys.Add(key);
-        }
-
-        private static bool ArrayEqual(byte[] a, byte[] b)
-        {
-            if (a.Length != b.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (a[i] != b[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            _asymmetricKeys.Add(key);
         }
 
         private static bool PublicKeysEqual(RSAParameters a, RSAParameters b)
         {
-            return ArrayEqual(a.Exponent, b.Exponent) && ArrayEqual(a.Modulus, b.Modulus);
+            return a.Exponent.SequenceEqual(b.Exponent) && a.Modulus.SequenceEqual(b.Modulus);
         }
 
         public Stream Decrypt(EncryptionMethod encryptionMethod, KeyInfo keyInfo, Stream toDecrypt)
@@ -63,7 +45,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
             Assert.Equal(keyInfo.Count, 1);
 
-            Aes aes = null;
+            byte[] decryptedKey = null;
 
             foreach (KeyInfoClause clause in keyInfo)
             {
@@ -74,7 +56,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
                     Assert.Equal(encryptedKey.EncryptionMethod.KeyAlgorithm, EncryptedXml.XmlEncRSAOAEPUrl);
                     Assert.Equal(encryptedKey.KeyInfo.Count, 1);
-                    Assert.NotEqual(asymmetricKeys.Count, 0);
+                    Assert.NotEqual(_asymmetricKeys.Count, 0);
 
                     RSAParameters rsaParams = new RSAParameters();
                     RSAParameters rsaInputParams = new RSAParameters();
@@ -87,11 +69,13 @@ namespace System.Security.Cryptography.Xml.Tests
                             break;
                         }
                         else
+                        {
                             Assert.True(false, "Invalid License - MalformedKeyInfoClause");
+                        }
                     }
 
                     bool keyMismatch = true;
-                    foreach (AsymmetricAlgorithm key in asymmetricKeys)
+                    foreach (AsymmetricAlgorithm key in _asymmetricKeys)
                     {
                         RSA rsaKey = key as RSA;
                         Assert.NotNull(rsaKey);
@@ -111,18 +95,8 @@ namespace System.Security.Cryptography.Xml.Tests
                         if (encryptedKeyValue == null)
                             throw new CryptographicException("MissingKeyCipher");
 
-                        byte[] decryptedKey = EncryptedXml.DecryptKey(encryptedKeyValue,
+                        decryptedKey = EncryptedXml.DecryptKey(encryptedKeyValue,
                                                                      rsaKey, true);
-
-                        if (decryptedKey == null)
-                        {
-                            throw new CryptographicException("KeyDecryptionFailure");
-                        }
-
-                        aes = Aes.Create();
-                        aes.Key = decryptedKey;
-                        aes.Padding = PaddingMode.PKCS7;
-                        aes.Mode = CipherMode.CBC;
                         break;
                     }
 
@@ -136,19 +110,32 @@ namespace System.Security.Cryptography.Xml.Tests
                     Assert.True(false, "This test should not have KeyInfoName clauses");
                 }
                 else
+                {
                     throw new CryptographicException("MalformedKeyInfoClause");
+                }
 
                 break;
             }
 
-            return DecryptStream(toDecrypt, aes);
+            if (decryptedKey == null)
+            {
+                throw new CryptographicException("KeyDecryptionFailure");
+            }
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = decryptedKey;
+                aes.Padding = PaddingMode.PKCS7;
+                aes.Mode = CipherMode.CBC;
+                return DecryptStream(toDecrypt, aes);
+            }
         }
 
-        private static Stream DecryptStream(Stream toDecrypt, SymmetricAlgorithm aes)
+        private static Stream DecryptStream(Stream toDecrypt, SymmetricAlgorithm alg)
         {
-            Assert.NotNull(aes);
+            Assert.NotNull(alg);
 
-            byte[] IV = new byte[aes.BlockSize / 8];
+            byte[] IV = new byte[alg.BlockSize / 8];
 
             // Get the IV from the encrypted content.
             toDecrypt.Read(IV, 0, IV.Length);
@@ -158,8 +145,7 @@ namespace System.Security.Cryptography.Xml.Tests
             toDecrypt.Read(encryptedContentValue, 0, encryptedContentValue.Length);
 
             byte[] decryptedContent;
-            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, IV);
-
+            using (ICryptoTransform decryptor = alg.CreateDecryptor(alg.Key, IV))
             using (var msDecrypt = new MemoryStream())
             using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write))
             {
@@ -221,7 +207,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 {
                     byte[] decryptedBytes = new byte[decrypted.Length];
                     decrypted.Read(decryptedBytes, 0, (int)decrypted.Length);
-                    Assert.True(ArrayEqual(input, decryptedBytes));
+                    Assert.Equal(input, decryptedBytes);
                 }
             }
         }
