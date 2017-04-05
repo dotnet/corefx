@@ -3467,6 +3467,20 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(getDataRequestBodyValue.value, getDataRequestBodyActual.value);
     }
 
+    [Fact]
+    public static void XmlMembersMapping_Soap_PrimitiveValue_HasWrapperElement()
+    {
+        string memberName = "value";
+        var getDataRequestBodyValue = 3;
+        var getDataRequestBodyActual = RoundTripWithXmlMembersMappingSoap<int>(getDataRequestBodyValue,
+            memberName,
+            "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <value xsi:type=\"xsd:int\">3</value>\r\n</q1:wrapper>",
+            wrapperName: "wrapper");
+
+        Assert.NotNull(getDataRequestBodyActual);
+        Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {

@@ -364,19 +364,30 @@ namespace System.Xml.Serialization
             object[] p = new object[mappings.Length];
             InitializeValueTypes(p, mappings);
 
+            bool isEmptyWrapper = true;
             if (hasWrapperElement)
             {
-                throw new NotImplementedException("hasWrapperElement");
-                //WriteReadNonRoots();
+                Reader.MoveToContent();
+                while (Reader.NodeType == XmlNodeType.Element)
+                {
+                    string root = Reader.GetAttribute("root", "http://schemas.xmlsoap.org/soap/encoding/");
+                    if (root == null || XmlConvert.ToBoolean(root))
+                        break;
 
-                //if (membersMapping.ValidateRpcWrapperElement)
-                //{
-                //    Writer.Write("if (!");
-                //    WriteXmlNodeEqual("Reader", element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
-                //    Writer.WriteLine(") throw CreateUnknownNodeException();");
-                //}
-                //Writer.WriteLine("bool isEmptyWrapper = Reader.IsEmptyElement;");
-                //Writer.WriteLine("Reader.ReadStartElement();");
+                    ReadReferencedElement();
+                    Reader.MoveToContent();
+                }
+
+                if (membersMapping.ValidateRpcWrapperElement)
+                {
+                    throw new NotImplementedException("membersMapping.ValidateRpcWrapperElement");
+                    //Writer.Write("if (!");
+                    //WriteXmlNodeEqual("Reader", element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
+                    //Writer.WriteLine(") throw CreateUnknownNodeException();");
+                }
+
+                isEmptyWrapper = Reader.IsEmptyElement;
+                Reader.ReadStartElement();
             }
 
             var members = new Member[mappings.Length];
@@ -453,15 +464,13 @@ namespace System.Xml.Serialization
                       };
                 }
 
-                WriteMemberElements(members, unrecognizedElementSource, (_) => UnknownNode(p), null, null, checkTypeHrefsSource: checkTypeHrefSource);
+                WriteMemberElements(members, unrecognizedElementSource, (_) => UnknownNode(p), null, null, fixup: fixup, checkTypeHrefsSource: checkTypeHrefSource);
                 Reader.MoveToContent();
             }
 
-            if (hasWrapperElement)
+            if (!isEmptyWrapper)
             {
-                throw new NotImplementedException("hasWrapperElement");
-                //if (!isEmptyWrapper)
-                //    ReadEndElement();
+                ReadEndElement();
             }
 
             if (checkTypeHrefSource != null)
