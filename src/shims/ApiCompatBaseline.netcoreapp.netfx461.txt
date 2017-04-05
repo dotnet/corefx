@@ -1045,6 +1045,10 @@ TypesMustExist : Type 'System.Diagnostics.InstanceDataCollection' does not exist
 TypesMustExist : Type 'System.Diagnostics.InstanceDataCollectionCollection' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Diagnostics.MonitoringDescriptionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 TypesMustExist : Type 'System.Diagnostics.OverflowAction' does not exist in the implementation but it does exist in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Diagnostics.PerformanceCounter' does not inherit from base type 'System.ComponentModel.Component' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.Diagnostics.PerformanceCounter.CloseSharedResources()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Diagnostics.PerformanceCounter.Decrement()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Diagnostics.PerformanceCounter.Dispose(System.Boolean)' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterCategory' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterCategoryType' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterManager' does not exist in the implementation but it does exist in the contract.
@@ -1400,7 +1404,6 @@ TypesMustExist : Type 'Microsoft.SqlServer.Server.Format' does not exist in the 
 TypesMustExist : Type 'Microsoft.SqlServer.Server.IBinarySerialize' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'Microsoft.SqlServer.Server.InvalidUdtException' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'Microsoft.SqlServer.Server.SqlContext' does not exist in the implementation but it does exist in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'Microsoft.SqlServer.Server.SqlDataRecord' does not implement interface 'System.Data.IDataRecord' in the implementation but it does in the contract.
 TypesMustExist : Type 'Microsoft.SqlServer.Server.SqlFacetAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'Microsoft.SqlServer.Server.SqlFunctionAttribute' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.String, System.Data.SqlDbType, System.Type)' does not exist in the implementation but it does exist in the contract.
@@ -3346,4 +3349,4 @@ MembersMustExist : Member 'System.Xml.Serialization.XmlSerializer.GenerateSerial
 MembersMustExist : Member 'System.Xml.Serialization.XmlSerializer.GenerateSerializer(System.Type[], System.Xml.Serialization.XmlMapping[], System.CodeDom.Compiler.CompilerParameters)' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Xml.Serialization.XmlTextAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Xml.Serialization.XmlTypeAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
-Total Issues: 3329
+Total Issues: 3332
