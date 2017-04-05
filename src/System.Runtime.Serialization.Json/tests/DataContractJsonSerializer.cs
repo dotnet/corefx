@@ -2393,6 +2393,95 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(value.Area, actual.Area);
     }
 
+    [Fact]
+    public static void DifferentDateTimeStylesForDeserialization()
+    {
+        string dateTimeFormat = "O";
+        var original = new DateTime(2011, 9, 8, 7, 6, 54, 32);
+
+        Dictionary<DateTimeStyles, Func<string, string>> styleToFormatDictionary = new Dictionary<DateTimeStyles, Func<string, string>>()
+            {
+                { DateTimeStyles.AllowLeadingWhite, (str) => str.Replace("2011", "           2011") },
+                { DateTimeStyles.AllowTrailingWhite, (str) => str.Replace("0320000", "0320000   ") },
+                { DateTimeStyles.AllowInnerWhite, (str) => str.Replace(":", " : ") },
+                { DateTimeStyles.AllowWhiteSpaces, (str) => str.Replace(":", " : ") },
+
+                { DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowInnerWhite , (str) => str.Replace("2011", "           2011") },
+            };
+
+        foreach (DateTimeStyles style in styleToFormatDictionary.Keys)
+        {
+            DataContractJsonSerializerSettings dcjss = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var actual = SerializeAndDeserialize(original, null, dcjss, null, true);
+            Assert.NotNull(actual);
+            Assert.Equal(original, actual);
+        }
+    }
+
+    [Fact]
+    public static void NegativeDateTimeStylesTest_IncorrectDateTimeStyles()
+    {
+        string dateTimeFormat = "f";
+        DateTimeStyles[] dateTimeStyles = { DateTimeStyles.AssumeUniversal | DateTimeStyles.RoundtripKind, (DateTimeStyles)Int32.MaxValue };
+
+        foreach (DateTimeStyles style in dateTimeStyles)
+        {
+            DataContractJsonSerializerSettings dcjss = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var original = DateTime.Now;
+
+            try
+            {
+                SerializeAndDeserialize(original, null, dcjss, null, true);
+
+                throw new Exception(string.Format(
+                    "An exception should be thrown in deserailization of '{0}' with DateTimeStyles='{1}' but no exception was thrown",
+                    original.ToString(dateTimeFormat), style));
+            }
+            catch (ArgumentException e)
+            {
+                Assert.NotNull(e);
+            }
+        }
+    }
+
+    [Fact]
+    public static void RoundtrippingDateTime()
+    {
+        string dateTimeFormat = "o";
+        DateTimeStyles[] dateTimeStyles =
+        {
+                DateTimeStyles.None, DateTimeStyles.RoundtripKind,
+                DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.RoundtripKind
+        };
+
+        foreach (DateTimeStyles style in dateTimeStyles)
+        {
+            DataContractJsonSerializerSettings dcjss = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var original = DateTime.Now;
+            var actual = SerializeAndDeserialize(original, null, dcjss, null, true);
+            Assert.NotNull(actual);
+            Assert.Equal(original, actual);
+        }
+    }
+    
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
