@@ -9,20 +9,13 @@ namespace System.ConfigurationTests
 {
     public class SubclassTypeValidatorAttributeTests
     {
-        [Fact]
-        public void GetBaseClass_PassValidTypeToConstructor()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(string))]
+        public void GetBaseClass_FlowFromConstructor_Equals(Type expected)
         {
-            SubclassTypeValidatorAttribute attribute = new SubclassTypeValidatorAttribute(typeof(string));
-            Type test = attribute.BaseClass;
-            Assert.Equal(test, typeof(string));
-        }
-
-        [Fact]
-        public void GetBaseClass_PassNullIntoConstructor()
-        {
-            SubclassTypeValidatorAttribute attribute = new SubclassTypeValidatorAttribute(null);
-            Type test = attribute.BaseClass;
-            Assert.Null(test);
+            SubclassTypeValidatorAttribute attr = new SubclassTypeValidatorAttribute(expected);
+            Assert.Equal(expected, attr.BaseClass);
         }
     }
 }
