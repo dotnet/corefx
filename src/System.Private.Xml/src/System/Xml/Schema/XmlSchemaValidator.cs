@@ -2065,22 +2065,6 @@ namespace System.Xml.Schema
             }
         }
 
-        internal bool ProcessInlineSchema
-        {
-            get
-            {
-                return (_validationFlags & XmlSchemaValidationFlags.ProcessInlineSchema) != 0;
-            }
-        }
-
-        internal bool ProcessSchemaLocation
-        {
-            get
-            {
-                return (_validationFlags & XmlSchemaValidationFlags.ProcessSchemaLocation) != 0;
-            }
-        }
-
         internal bool ProcessSchemaHints
         {
             get

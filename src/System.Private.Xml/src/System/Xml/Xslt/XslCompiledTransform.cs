@@ -492,19 +492,6 @@ namespace System.Xml.Xsl
         {
             _command.Execute(inputUri, documentResolver, arguments, results);
         }
-
-        internal static void PrintQil(object qil, XmlWriter xw, bool printComments, bool printTypes, bool printLineInfo)
-        {
-            QilExpression qilExpr = (QilExpression)qil;
-            QilXmlWriter.Options options = QilXmlWriter.Options.None;
-            QilValidationVisitor.Validate(qilExpr);
-            if (printComments) options |= QilXmlWriter.Options.Annotations;
-            if (printTypes) options |= QilXmlWriter.Options.TypeInfo;
-            if (printLineInfo) options |= QilXmlWriter.Options.LineInfo;
-            QilXmlWriter qw = new QilXmlWriter(xw, options);
-            qw.ToXml(qilExpr);
-            xw.Flush();
-        }
     }
 #endif // ! HIDE_XSL
         }

@@ -1468,14 +1468,6 @@ namespace System.Xml.Schema
             }
         }
 
-        internal bool CompileAll
-        {
-            get
-            {
-                return _compileAll;
-            }
-        }
-
         //Private Methods
         private void RemoveSchemaFromCaches(XmlSchema schema)
         {

@@ -402,11 +402,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal string ArrayLengthName
-        {
-            get { return _kind == TypeKind.Array ? "Length" : "Count"; }
-        }
-
         internal TypeDesc ArrayElementTypeDesc
         {
             get { return _arrayElementTypeDesc; }
@@ -703,11 +698,6 @@ namespace System.Xml.Serialization
             return GetTypeDesc(type, null, true, true);
         }
 
-        internal TypeDesc GetTypeDesc(Type type, MemberInfo source)
-        {
-            return GetTypeDesc(type, source, true, true);
-        }
-
         internal TypeDesc GetTypeDesc(Type type, MemberInfo source, bool directReference)
         {
             return GetTypeDesc(type, source, directReference, true);
@@ -749,6 +739,7 @@ namespace System.Xml.Serialization
             return typeDesc;
         }
 
+#if XMLSERIALIZERGENERATOR
         internal TypeMapping GetTypeMappingFromTypeDesc(TypeDesc typeDesc)
         {
             foreach (TypeMapping typeMapping in TypeMappings)
@@ -770,6 +761,7 @@ namespace System.Xml.Serialization
             }
             return null;
         }
+#endif
 
         private TypeDesc ImportTypeDesc(Type type, MemberInfo memberInfo, bool directReference)
         {

@@ -868,17 +868,8 @@ namespace System.Xml.Xsl.Qil
             return XmlQueryTypeFactory.StringX;
         }
 
-        #endregion // Node properties
-
-        #region Copy operators
-        //-----------------------------------------------
-        // Copy operators
-        //-----------------------------------------------
-        public XmlQueryType CheckDeepCopy(QilUnary node)
-        {
-            CheckXmlType(node.Child, XmlQueryTypeFactory.NodeNotRtf);
-            return node.XmlType;
-        }
+#endregion // Node properties
+#region Copy operators
 
         #endregion // Copy operators
 

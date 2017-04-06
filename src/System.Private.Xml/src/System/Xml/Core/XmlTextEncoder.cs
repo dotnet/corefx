@@ -459,15 +459,6 @@ namespace System.Xml
             return;
         }
 
-        internal void WriteRaw(string value)
-        {
-            if (_cacheAttrValue)
-            {
-                _attrValue.Append(value);
-            }
-            _textWriter.Write(value);
-        }
-
         internal void WriteRaw(char[] array, int offset, int count)
         {
             if (null == array)
@@ -525,10 +516,6 @@ namespace System.Xml
                 _attrValue.Append(';');
             }
             WriteEntityRefImpl(name);
-        }
-
-        internal void Flush()
-        {
         }
 
         //

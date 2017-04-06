@@ -40,25 +40,7 @@ namespace System.Xml.Schema
         {
         }
 
-        internal XmlSchemaInferenceException(string res, string[] args) : base(res, args, null, null, 0, 0, null)
-        {
-        }
-
         internal XmlSchemaInferenceException(string res, string arg) : base(res, new string[] { arg }, null, null, 0, 0, null)
-        {
-        }
-        internal XmlSchemaInferenceException(string res, string arg, string sourceUri, int lineNumber, int linePosition) :
-            base(res, new string[] { arg }, null, sourceUri, lineNumber, linePosition, null)
-        {
-        }
-
-        internal XmlSchemaInferenceException(string res, string sourceUri, int lineNumber, int linePosition) :
-            base(res, (string[])null, null, sourceUri, lineNumber, linePosition, null)
-        {
-        }
-
-        internal XmlSchemaInferenceException(string res, string[] args, string sourceUri, int lineNumber, int linePosition) :
-            base(res, args, null, sourceUri, lineNumber, linePosition, null)
         {
         }
 

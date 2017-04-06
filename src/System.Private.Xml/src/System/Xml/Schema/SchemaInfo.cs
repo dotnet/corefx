@@ -172,26 +172,6 @@ namespace System.Xml.Schema
             return null;
         }
 
-        internal XmlSchemaAttribute GetAttribute(XmlQualifiedName qname)
-        {
-            SchemaAttDef attdef = (SchemaAttDef)_attributeDecls[qname];
-            if (attdef != null)
-            {
-                return attdef.SchemaAttribute;
-            }
-            return null;
-        }
-
-        internal XmlSchemaElement GetType(XmlQualifiedName qname)
-        {
-            SchemaElementDecl ed = GetElementDecl(qname);
-            if (ed != null)
-            {
-                return ed.SchemaElement;
-            }
-            return null;
-        }
-
         internal bool HasSchema(string ns)
         {
             return _targetNamespaces.ContainsKey(ns);

@@ -117,7 +117,7 @@ namespace System.Xml.Xsl
         /// </summary>
         public abstract XmlValueConverter ClrMapping { get; }
 
-
+        
         //-----------------------------------------------
         // Type Operations
         //-----------------------------------------------

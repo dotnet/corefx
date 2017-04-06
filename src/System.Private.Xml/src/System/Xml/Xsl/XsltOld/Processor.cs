@@ -322,11 +322,6 @@ namespace System.Xml.Xsl.XsltOld
             get { return _actionStack; }
         }
 
-        internal RecordBuilder Builder
-        {
-            get { return _builder; }
-        }
-
         internal XsltOutput Output
         {
             get { return _output; }

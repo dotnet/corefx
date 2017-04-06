@@ -57,11 +57,6 @@ namespace System.Xml.Schema
             get { return _last + 1; }
         }
 
-        public int CountOfNames
-        {
-            get { return _names.Count; }
-        }
-
         /// <summary>
         /// True is particle can be deterministically attributed from the symbol and conversion to DFA is possible.
         /// </summary>
@@ -281,11 +276,6 @@ namespace System.Xml.Schema
         public abstract void ExpandTree(InteriorNode parent, SymbolsDictionary symbols, Positions positions);
 
         /// <summary>
-        /// Clone the syntaxTree. We need to pass symbolsByPosition because leaf nodes have to add themselves to it.
-        /// </summary>
-        public abstract SyntaxTreeNode Clone(Positions positions);
-
-        /// <summary>
         /// From a regular expression to a DFA
         /// Compilers by Aho, Sethi, Ullman.
         /// ISBN 0-201-10088-6, p135 
@@ -340,11 +330,6 @@ namespace System.Xml.Schema
             // do nothing
         }
 
-        public override SyntaxTreeNode Clone(Positions positions)
-        {
-            return new LeafNode(positions.Add(positions[_pos].symbol, positions[_pos].particle));
-        }
-
         public override void ConstructPos(BitSet firstpos, BitSet lastpos, BitSet[] followpos)
         {
             firstpos.Set(_pos);
@@ -375,12 +360,6 @@ namespace System.Xml.Schema
         {
             this.namespaceList = namespaceList;
             this.particle = particle;
-        }
-
-        public override SyntaxTreeNode Clone(Positions positions)
-        {
-            // NamespaceListNode nodes have to be removed prior to that
-            throw new InvalidOperationException();
         }
 
         public virtual ICollection GetResolvedSymbols(SymbolsDictionary symbols)
@@ -457,17 +436,6 @@ namespace System.Xml.Schema
         {
             get { return _rightChild; }
             set { _rightChild = value; }
-        }
-
-        public override SyntaxTreeNode Clone(Positions positions)
-        {
-            InteriorNode other = (InteriorNode)this.MemberwiseClone();
-            other.LeftChild = _leftChild.Clone(positions);
-            if (_rightChild != null)
-            {
-                other.RightChild = _rightChild.Clone(positions);
-            }
-            return other;
         }
 
         //no recursive version of expand tree for Sequence and Choice node
@@ -952,11 +920,6 @@ namespace System.Xml.Schema
             }
         }
 
-        public override SyntaxTreeNode Clone(Positions positions)
-        {
-            return new LeafRangeNode(this.Pos, _min, _max);
-        }
-
         public override bool IsRangeNode
         {
             get
@@ -1286,11 +1249,6 @@ namespace System.Xml.Schema
                 node.LeftChild = _contentNode;
                 _contentNode = node;
             }
-        }
-
-        public ContentValidator Finish()
-        {
-            return Finish(true);
         }
 
         public ContentValidator Finish(bool useDFA)

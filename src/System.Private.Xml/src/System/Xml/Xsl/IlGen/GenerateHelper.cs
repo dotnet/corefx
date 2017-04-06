@@ -1634,15 +1634,6 @@ namespace System.Xml.Xsl.IlGen
             _ilgen.Emit(opcode, dblVal);
         }
 
-        public void Emit(OpCode opcode, float fltVal)
-        {
-#if DEBUG
-            if (XmlILTrace.IsEnabled)
-                this.writerDump.WriteLine("  {0, -10} {1}", opcode.Name, fltVal);
-#endif
-            _ilgen.Emit(opcode, fltVal);
-        }
-
         public void Emit(OpCode opcode, FieldInfo fldInfo)
         {
 #if DEBUG
@@ -1650,16 +1641,6 @@ namespace System.Xml.Xsl.IlGen
                 this.writerDump.WriteLine("  {0, -10} {1}", opcode.Name, fldInfo.Name);
 #endif
             _ilgen.Emit(opcode, fldInfo);
-        }
-
-        public void Emit(OpCode opcode, short shrtVal)
-        {
-            Debug.Assert(opcode.OperandType == OperandType.ShortInlineI);
-#if DEBUG
-            if (XmlILTrace.IsEnabled)
-                this.writerDump.WriteLine("  {0, -10} {1}", opcode.Name, shrtVal);
-#endif
-            _ilgen.Emit(opcode, shrtVal);
         }
 
         public void Emit(OpCode opcode, int intVal)
@@ -1713,16 +1694,6 @@ namespace System.Xml.Xsl.IlGen
                 this.writerDump.WriteLine("  {0, -10} {1} ({2})", opcode.Name, this.symbols[locBldr], locBldr.LocalType.Name);
 #endif
             _ilgen.Emit(opcode, locBldr);
-        }
-
-        public void Emit(OpCode opcode, MethodInfo methInfo)
-        {
-            Debug.Assert(!opcode.Equals(OpCodes.Call) && !opcode.Equals(OpCodes.Callvirt), "Use Call so that debug information will be output correctly.");
-#if DEBUG
-            if (XmlILTrace.IsEnabled)
-                this.writerDump.WriteLine("  {0, -10} {1}", opcode.Name, methInfo.Name);
-#endif
-            _ilgen.Emit(opcode, methInfo);
         }
 
         public void Emit(OpCode opcode, sbyte sbyteVal)

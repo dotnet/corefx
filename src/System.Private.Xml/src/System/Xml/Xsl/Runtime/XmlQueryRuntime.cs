@@ -470,19 +470,6 @@ namespace System.Xml.Xsl.Runtime
             return (GetAtomizedName(indexLocalName) == navigator.LocalName) && (GetAtomizedName(indexNamespaceUri) == navigator.NamespaceURI);
         }
 
-
-        //-----------------------------------------------
-        // Xml types
-        //-----------------------------------------------
-
-        /// <summary>
-        /// Get the array of xml types that are used within this query.
-        /// </summary>
-        internal XmlQueryType[] XmlTypes
-        {
-            get { return _types; }
-        }
-
         /// <summary>
         /// Get the Xml query type at the specified index in the array of types.
         /// </summary>

@@ -36,7 +36,6 @@ namespace System.Xml.Schema
 
 #if !SILVERLIGHT
         private bool _defaultValueChecked;
-        private bool _hasEntityRef;  // whether there is any entity reference in the default value
         private XmlSchemaAttribute _schemaAttribute;
 
         public static readonly SchemaAttDef Empty = new SchemaAttDef();
@@ -193,12 +192,6 @@ namespace System.Xml.Schema
             {
                 return _defaultValueChecked;
             }
-        }
-
-        internal bool HasEntityRef
-        {
-            get { return _hasEntityRef; }
-            set { _hasEntityRef = value; }
         }
 
         internal XmlSchemaAttribute SchemaAttribute

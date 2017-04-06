@@ -214,11 +214,6 @@ namespace System.Xml.Schema
             _linePosition = source.LinePosition;
         }
 
-        internal void SetResourceId(string resourceId)
-        {
-            _res = resourceId;
-        }
-
         public override string Message
         {
             get

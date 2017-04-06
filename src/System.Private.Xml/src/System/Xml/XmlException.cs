@@ -109,10 +109,6 @@ namespace System.Xml
             this(res, args, null, 0, 0, null)
         { }
 
-        internal XmlException(string res, string[] args, string sourceUri) :
-            this(res, args, null, 0, 0, sourceUri)
-        { }
-
         internal XmlException(string res, string arg) :
             this(res, new string[] { arg }, null, 0, 0, null)
         { }
@@ -129,10 +125,6 @@ namespace System.Xml
             this(res, new string[] { arg }, innerException, (lineInfo == null ? 0 : lineInfo.LineNumber), (lineInfo == null ? 0 : lineInfo.LinePosition), null)
         { }
 
-        internal XmlException(string res, String arg, IXmlLineInfo lineInfo, string sourceUri) :
-            this(res, new string[] { arg }, lineInfo, sourceUri)
-        { }
-
         internal XmlException(string res, string[] args, IXmlLineInfo lineInfo) :
             this(res, args, lineInfo, null)
         { }
@@ -141,10 +133,6 @@ namespace System.Xml
             this(res, args, null, (lineInfo == null ? 0 : lineInfo.LineNumber), (lineInfo == null ? 0 : lineInfo.LinePosition), sourceUri)
         {
         }
-
-        internal XmlException(string res, int lineNumber, int linePosition) :
-            this(res, (string[])null, null, lineNumber, linePosition)
-        { }
 
         internal XmlException(string res, string arg, int lineNumber, int linePosition) :
             this(res, new string[] { arg }, null, lineNumber, linePosition, null)
@@ -229,11 +217,6 @@ namespace System.Xml
         internal static string[] BuildCharExceptionArgs(string data, int invCharIndex)
         {
             return BuildCharExceptionArgs(data[invCharIndex], invCharIndex + 1 < data.Length ? data[invCharIndex + 1] : '\0');
-        }
-
-        internal static string[] BuildCharExceptionArgs(char[] data, int invCharIndex)
-        {
-            return BuildCharExceptionArgs(data, data.Length, invCharIndex);
         }
 
         internal static string[] BuildCharExceptionArgs(char[] data, int length, int invCharIndex)

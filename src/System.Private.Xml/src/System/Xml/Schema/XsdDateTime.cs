@@ -111,16 +111,6 @@ namespace System.Xml.Schema
         private static readonly int s_Lz___ = "---".Length;
         private static readonly int s_lz___dd = "---dd".Length;
 
-
-#if !SILVERLIGHT
-        /// <summary>
-        /// Constructs an XsdDateTime from a string trying all possible formats.
-        /// </summary>
-        public XsdDateTime(string text) : this(text, XsdDateTimeFlags.AllXsd)
-        {
-        }
-#endif
-
         /// <summary>
         /// Constructs an XsdDateTime from a string using specific format.
         /// </summary>
@@ -261,27 +251,6 @@ namespace System.Xml.Schema
         public XmlTypeCode TypeCode
         {
             get { return s_typeCodes[(int)InternalTypeCode]; }
-        }
-
-        /// <summary>
-        /// Returns whether object represent local, UTC or unspecified time
-        /// </summary>
-        public DateTimeKind Kind
-        {
-            get
-            {
-                switch (InternalKind)
-                {
-                    case XsdDateTimeKind.Unspecified:
-                        return DateTimeKind.Unspecified;
-                    case XsdDateTimeKind.Zulu:
-                        return DateTimeKind.Utc;
-                    default:
-                        // XsdDateTimeKind.LocalEastOfZulu:
-                        // XsdDateTimeKind.LocalWestOfZulu:
-                        return DateTimeKind.Local;
-                }
-            }
         }
 #endif
 
@@ -514,43 +483,6 @@ namespace System.Xml.Schema
             return result;
         }
 
-#if !SILVERLIGHT
-        /// <summary>
-        /// Compares two DateTime values, returning an integer that indicates
-        /// their relationship.
-        /// </summary>
-        public static int Compare(XsdDateTime left, XsdDateTime right)
-        {
-            if (left._extra == right._extra)
-            {
-                return DateTime.Compare(left._dt, right._dt);
-            }
-            else
-            {
-                // Xsd types should be the same for it to be comparable
-                if (left.InternalTypeCode != right.InternalTypeCode)
-                {
-                    throw new ArgumentException(SR.Format(SR.Sch_XsdDateTimeCompare, left.TypeCode, right.TypeCode));
-                }
-                // Convert both to UTC
-                return DateTime.Compare(left.GetZuluDateTime(), right.GetZuluDateTime());
-            }
-        }
-
-        // Compares this DateTime to a given object. This method provides an
-        // implementation of the IComparable interface. The object
-        // argument must be another DateTime, or otherwise an exception
-        // occurs.  Null is considered less than any instance.
-        //
-        // Returns a value less than zero if this  object
-        /// <include file='doc\DateTime.uex' path='docs/doc[@for="DateTime.CompareTo"]/*' />
-        public int CompareTo(Object value)
-        {
-            if (value == null) return 1;
-            return Compare(this, (XsdDateTime)value);
-        }
-#endif
-
         /// <summary>
         /// Serialization to a string
         /// </summary>
@@ -700,25 +632,6 @@ namespace System.Xml.Schema
             text[start] = (char)(value / 10 + '0');
             text[start + 1] = (char)(value % 10 + '0');
         }
-
-#if !SILVERLIGHT
-        // Auxiliary for compare. 
-        // Returns UTC DateTime
-        private DateTime GetZuluDateTime()
-        {
-            switch (InternalKind)
-            {
-                case XsdDateTimeKind.Zulu:
-                    return _dt;
-                case XsdDateTimeKind.LocalEastOfZulu:
-                    return _dt.Subtract(new TimeSpan(ZoneHour, ZoneMinute, 0));
-                case XsdDateTimeKind.LocalWestOfZulu:
-                    return _dt.Add(new TimeSpan(ZoneHour, ZoneMinute, 0));
-                default:
-                    return _dt.ToUniversalTime();
-            }
-        }
-#endif
 
         private static readonly XmlTypeCode[] s_typeCodes = {
             XmlTypeCode.DateTime,

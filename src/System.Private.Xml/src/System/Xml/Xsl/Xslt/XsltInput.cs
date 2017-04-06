@@ -602,7 +602,6 @@ namespace System.Xml.Xsl.Xslt
         public bool IsKeyword(string kwd) { return Ref.Equal(kwd, LocalName); }
         public bool IsXsltNamespace() { return IsNs(_atoms.UriXsl); }
         public bool IsNullNamespace() { return IsNs(string.Empty); }
-        public bool IsXsltAttribute(string kwd) { return IsKeyword(kwd) && IsNullNamespace(); }
         public bool IsXsltKeyword(string kwd) { return IsKeyword(kwd) && IsXsltNamespace(); }
 
         // -------------------- Scope Management --------------------

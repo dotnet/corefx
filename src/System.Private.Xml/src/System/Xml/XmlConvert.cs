@@ -379,11 +379,6 @@ namespace System.Xml
             return null;
         }
 
-        internal static string VerifyQName(string name)
-        {
-            return VerifyQName(name, ExceptionType.XmlException);
-        }
-
         internal static unsafe string VerifyQName(string name, ExceptionType exceptionType)
         {
             if (name == null || name.Length == 0)
@@ -514,16 +509,6 @@ namespace System.Xml
                 return new XmlException(SR.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(name, endPos));
             }
             return null;
-        }
-
-
-        internal static string VerifyNormalizedString(string str)
-        {
-            if (str.IndexOfAny(crt) != -1)
-            {
-                throw new XmlSchemaException(SR.Sch_NotNormalizedString, str);
-            }
-            return str;
         }
 
         internal static Exception TryVerifyNormalizedString(string str)
@@ -1701,10 +1686,10 @@ namespace System.Xml
             StringBuilder sb = null;
             int i = 0;
             int start = 0;
-            while (i < value.Length)
+            while (i<value.Length)
             {
                 char ch = value[i];
-                if ((int)ch < 0x20 || ch == '"')
+                if ((int) ch < 0x20 || ch == '"')
                 {
                     if (sb == null)
                     {
@@ -1745,11 +1730,6 @@ namespace System.Xml
                 sb.Append(value, start, i - start);
             }
             return sb.ToString();
-        }
-
-        internal static Exception CreateException(string res, ExceptionType exceptionType)
-        {
-            return CreateException(res, exceptionType, 0, 0);
         }
 
         internal static Exception CreateException(string res, ExceptionType exceptionType, int lineNo, int linePos)
@@ -1830,11 +1810,6 @@ namespace System.Xml
         internal static Exception CreateInvalidHighSurrogateCharException(char hi, ExceptionType exceptionType, int lineNo, int linePos)
         {
             return CreateException(SR.Xml_InvalidSurrogateHighChar, ((uint)hi).ToString("X", CultureInfo.InvariantCulture), exceptionType, lineNo, linePos);
-        }
-
-        internal static Exception CreateInvalidCharException(char[] data, int length, int invCharPos)
-        {
-            return CreateInvalidCharException(data, length, invCharPos, ExceptionType.ArgumentException);
         }
 
         internal static Exception CreateInvalidCharException(char[] data, int length, int invCharPos, ExceptionType exceptionType)

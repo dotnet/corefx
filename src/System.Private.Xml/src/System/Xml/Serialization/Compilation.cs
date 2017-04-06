@@ -31,7 +31,7 @@ namespace System.Xml.Serialization
     internal class TempAssembly
     {
         internal const string GeneratedAssemblyNamespace = "Microsoft.Xml.Serialization.GeneratedAssembly";
-        private Assembly _assembly;
+        private Assembly _assembly = null;
         private XmlSerializerImplementation _contract = null;
         private IDictionary _writerMethods;
         private IDictionary _readerMethods;
@@ -102,13 +102,6 @@ namespace System.Xml.Serialization
             InitAssemblyMethods(xmlMappings);
         }
 
-        internal TempAssembly(XmlMapping[] xmlMappings, Assembly assembly, XmlSerializerImplementation contract)
-        {
-            _assembly = assembly;
-            InitAssemblyMethods(xmlMappings);
-            _contract = contract;
-        }
-
         internal static bool UseLegacySerializerGeneration
         {
             get
@@ -117,17 +110,15 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal TempAssembly(XmlSerializerImplementation contract)
-        {
-            _contract = contract;
-        }
-
         internal XmlSerializerImplementation Contract
         {
             get
             {
                 if (_contract == null)
                 {
+                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                    if (_assembly == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Failed to generate XmlSerializer assembly"));  // Remove after https://github.com/dotnet/corefx/issues/18015 is fixed
+
                     _contract = (XmlSerializerImplementation)Activator.CreateInstance(GetTypeFromAssembly(_assembly, "XmlSerializerContract"));
                 }
                 return _contract;

@@ -655,11 +655,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal bool HasElements
-        {
-            get { return _elements != null && _elements.Values.Count > 0; }
-        }
-
         internal bool HasExplicitSequence()
         {
             if (_members != null)
@@ -847,20 +842,6 @@ namespace System.Xml.Serialization
             else
             {
                 return element.IsNullable && element.Mapping.TypeDesc.IsValueType;
-            }
-        }
-
-        internal bool IsNeedNullable
-        {
-            get
-            {
-                if (_xmlns != null) return false;
-                if (_attribute != null) return false;
-                if (_elements != null && _elements.Length == 1)
-                {
-                    return IsNeedNullableMember(_elements[0]);
-                }
-                return false;
             }
         }
 

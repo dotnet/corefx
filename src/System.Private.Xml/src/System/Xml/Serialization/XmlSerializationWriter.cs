@@ -42,13 +42,6 @@ namespace System.Xml.Serialization
         private bool _escapeName = true;
 
         // this method must be called before any generated serialization methods are called
-        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase)
-        {
-            _w = w;
-            _namespaces = namespaces;
-        }
-
-        // this method must be called before any generated serialization methods are called
         internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
         {
             _w = w;
@@ -1149,16 +1142,6 @@ namespace System.Xml.Serialization
             _typeEntries[type] = entry;
         }
 
-        internal bool ExistTypeEntry(Type type)
-        {
-            if (_typeEntries == null)
-            {
-                _typeEntries = new Hashtable();
-            }
-
-            return _typeEntries.ContainsKey(type);
-        }
-
         private void WriteArray(string name, string ns, object o, Type type)
         {
             Type elementType = TypeScope.GetArrayElementType(type, null);
@@ -1495,7 +1478,7 @@ namespace System.Xml.Serialization
             return (bool)oIsTypeDynamic;
         }
 
-
+#if XMLSERIALIZERGENERATOR
         internal static bool IsTypeDynamic(Type[] arguments)
         {
             foreach (Type t in arguments)
@@ -1535,15 +1518,22 @@ namespace System.Xml.Serialization
                 }
             }
         }
+#endif
+
         internal static Assembly Get(string fullName)
         {
             return s_nameToAssemblyMap != null ? (Assembly)s_nameToAssemblyMap[fullName] : null;
         }
+
+#if XMLSERIALIZERGENERATOR
         internal static string GetName(Assembly a)
         {
-            return s_assemblyToNameMap != null ? (string)s_assemblyToNameMap[a] : null;
+            return s_assemblyToNameMap != null ? (string) s_assemblyToNameMap[a] : null;
         }
+#endif
     }
+
+#if XMLSERIALIZERGENERATOR
     internal class ReflectionAwareCodeGen
     {
         private const string hexDigits = "0123456789ABCDEF";
@@ -2197,4 +2187,5 @@ namespace System.Xml.Serialization
     }}
 ";
     }
+#endif
 }

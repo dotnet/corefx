@@ -160,17 +160,6 @@ namespace System.Xml.Xsl
         }
 
         /// <summary>
-        /// Compute a sequence with cardinality *= c.
-        /// </summary>
-        /// <param name="t">the type to sequence</param>
-        /// <param name="c">the cardinality multiplier</param>
-        /// <returns>the sequence of t with cardinality *= c</returns>
-        public static XmlQueryType Product(XmlQueryType t, XmlQueryCardinality c)
-        {
-            return PrimeProduct(t, t.Cardinality * c);
-        }
-
-        /// <summary>
         /// Compute a sequence of zero to some max cardinality.
         /// </summary>
         /// <param name="t">the type to sequence</param>

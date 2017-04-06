@@ -569,13 +569,6 @@ namespace System.Xml.Serialization
             return mapping;
         }
 
-        internal static void ValidationCallbackWithErrorCode(object sender, ValidationEventArgs args)
-        {
-            // CONSIDER: need the real type name
-            if (args.Severity == XmlSeverityType.Error)
-                throw new InvalidOperationException(SR.Format(SR.XmlSerializableSchemaError, typeof(IXmlSerializable).Name, args.Message));
-        }
-
 #if !XMLSERIALIZERGENERATOR
         internal void SetBase(SerializableMapping mapping, XmlQualifiedName baseQname)
         {
