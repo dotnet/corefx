@@ -3566,6 +3566,49 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void XmlMembersMapping_MultipleMembers_XmlAnyElement()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
+        var member2 = GetReflectionMember<int>("IntValue");
+        var member3 = GetReflectionMember<XmlElement[]>("XmlElementArray");
+        member3.XmlAttributes.XmlAnyElements.Add(new XmlAnyElementAttribute());
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        int intValue = 11;
+
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.LoadXml(@"<html></html>");
+        XmlElement element1 = xDoc.CreateElement("name1", "ns1");
+        element1.InnerText = "Element innertext1";
+        XmlElement element2 = xDoc.CreateElement("name2", "ns2");
+        element2.InnerText = "Element innertext2";
+
+        XmlElement[] xmlElementArray = { element1, element2 };
+        var value = new object[] { getDataRequestBody, intValue, xmlElementArray };
+        var actual = RoundTripWithXmlMembersMapping(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n  <IntValue>11</IntValue>\r\n  <XmlElementArray>\r\n    <name1 xmlns=\"ns1\">Element innertext1</name1>\r\n  </XmlElementArray>\r\n  <XmlElementArray>\r\n    <name2 xmlns=\"ns2\">Element innertext2</name2>\r\n  </XmlElementArray>\r\n</wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2, member3 },
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.Equal(intValue, (int)actual[1]);
+        XmlElement[] actualXmlElementArray = actual[2] as XmlElement[];
+        Assert.NotNull(actualXmlElementArray);
+
+        for (int i = 0; i < xmlElementArray.Length; i++)
+        {
+            Assert.Equal(xmlElementArray[i].Name, actualXmlElementArray[i].Name);
+            Assert.Equal(xmlElementArray[i].NamespaceURI, actualXmlElementArray[i].NamespaceURI);
+            Assert.Equal(xmlElementArray[i].InnerText, actualXmlElementArray[i].InnerText);
+        }
+    }
+
+    [Fact]
     public static void XmlMembersMapping_MultipleMembers_IsReturnValue()
     {
         var member1 = GetReflectionMember<GetDataRequestBody>("GetData", null);

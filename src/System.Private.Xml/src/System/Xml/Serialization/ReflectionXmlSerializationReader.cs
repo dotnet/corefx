@@ -136,8 +136,8 @@ namespace System.Xml.Serialization
             Member anyElement = null;
             Member anyAttribute = null;
 
-            ArrayList membersList = new ArrayList();
-            ArrayList textOrArrayMembersList = new ArrayList();
+            var membersList = new List<Member>();
+            var textOrArrayMembersList = new List<Member>();
             var attributeMembersList = new List<Member>();
 
             int pLength = p.Length;
@@ -147,9 +147,6 @@ namespace System.Xml.Serialization
                 MemberMapping mapping = mappings[index];
                 Action<object> source = (o) => p[index] = o;
 
-                //string choiceSource = GetChoiceIdentifierSource(mappings, mapping);
-                //Member member = new Member(this, source, arraySource, "a", i, mapping, choiceSource);
-                //Member anyMember = new Member(this, source, null, "a", i, mapping, choiceSource);
                 Member member = new Member(mapping);
                 Member anyMember = new Member(mapping);
 
@@ -208,8 +205,13 @@ namespace System.Xml.Serialization
                             anyElement = anyMember;
                             if (mapping.Attribute == null && mapping.Text == null)
                             {
-                                throw new NotImplementedException("mapping.Attribute == null && mapping.Text == null");
-                                //textOrArrayMembersList.Add(anyMember);
+                                anyMember.Collection = new CollectionMember();
+                                anyMember.ArraySource = (item) =>
+                                {
+                                    anyMember.Collection.Add(item);
+                                };
+
+                                textOrArrayMembersList.Add(anyMember);
                             }
 
                             foundAnyElement = true;
@@ -235,21 +237,19 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    //if (mapping.TypeDesc.IsArrayLike && !mapping.TypeDesc.IsArray)
-                    //    member.ParamsReadSource = null; // collection
                     membersList.Add(member);
                 }
             }
 
-            Member[] members = (Member[])membersList.ToArray(typeof(Member));
-            Member[] textOrArrayMembers = (Member[])textOrArrayMembersList.ToArray(typeof(Member));
+            Member[] members = membersList.ToArray();
+            Member[] textOrArrayMembers = textOrArrayMembersList.ToArray();
 
             if (members.Length > 0 && members[0].Mapping.IsReturnValue)
                 IsReturnValue = true;
 
             if (attributeMembersList.Count > 0)
             {
-                var attributeMembers = attributeMembersList.ToArray();
+                Member[] attributeMembers = attributeMembersList.ToArray();
                 object tempObject = null;
                 WriteAttributes(attributeMembers, anyAttribute, UnknownNode, ref tempObject);
                 Reader.MoveToElement();
@@ -265,11 +265,6 @@ namespace System.Xml.Serialization
                 }
 
                 Reader.ReadStartElement();
-            }
-            if (IsSequence(members))
-            {
-                throw new NotImplementedException();
-                //Writer.WriteLine("int state = 0;");
             }
 
             Reader.MoveToContent();
