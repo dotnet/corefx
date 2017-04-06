@@ -125,6 +125,14 @@ namespace Internal.Cryptography
             return true;
         }
 
+        internal static void AddRange<T>(this ICollection<T> coll, IEnumerable<T> newData)
+        {
+            foreach (T datum in newData)
+            {
+                coll.Add(datum);
+            }
+        }
+
         //
         // The following group of helpers emulates the non-public Calendar.IsValidDay() method used by X509Certificate.ToString(bool).
         //
