@@ -1344,8 +1344,7 @@ namespace System.Xml.Serialization
 
                         if (isRpc && member.IsReturnValue && member.Elements.Length > 0)
                         {
-                            throw new NotImplementedException("isRpc && member.IsReturnValue && member.Elements.Length > 0");
-                            //WriteRpcResult(member.Elements[0].Name, "");
+                            WriteRpcResult(member.Elements[0].Name, "");
                         }
 
                         // override writeAccessors choice when we've written a wrapper element

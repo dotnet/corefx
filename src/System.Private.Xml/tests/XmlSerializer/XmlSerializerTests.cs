@@ -3445,6 +3445,29 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void XmlMembersMapping_MultipleMembers()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData");
+        var member2 = GetReflectionMember<int>("IntValue");
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        int intValue = 11;
+        var value = new object[] { getDataRequestBody, intValue };
+        var actual = RoundTripWithXmlMembersMapping(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData>\r\n    <value>3</value>\r\n  </GetData>\r\n  <IntValue>11</IntValue>\r\n</wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper");
+
+        Assert.NotNull(actual);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.Equal(intValue, (int)actual[1]);
+    }
+
+    [Fact]
     public static void XmlMembersMapping_Soap_PrimitiveValue()
     {
         string memberName = "value";
@@ -3542,6 +3565,58 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual[0]);
     }
 
+    [Fact]
+    public static void XmlMembersMapping_MultipleMembers_IsReturnValue()
+    {
+        var member1 = GetReflectionMember<GetDataRequestBody>("GetData", null);
+        member1.IsReturnValue = true;
+
+        var member2 = GetReflectionMember<int>("IntValue", null);
+
+        var getDataRequestBody = new GetDataRequestBody() { value = 3 };
+        int intValue = 11;
+        var value = new object[] { getDataRequestBody, intValue };
+        var actual = RoundTripWithXmlMembersMapping(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/\">\r\n  <GetData xmlns=\"\">\r\n    <value xmlns=\"http://tempuri.org/\">3</value>\r\n  </GetData>\r\n  <IntValue xmlns=\"\">11</IntValue>\r\n</wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper",
+            rpc: true);
+
+        Assert.NotNull(actual);
+
+        var getDataRequestBodyActual = (GetDataRequestBody)actual[0];
+        Assert.Equal(getDataRequestBody.value, getDataRequestBodyActual.value);
+        Assert.Equal(intValue, (int)actual[1]);
+    }
+
+    [Fact]
+    public static void XmlMembersMapping_Soap_MultipleMembers_IsReturnValue()
+    {
+        var member1 = GetReflectionMember<int>("IntReturnValue", null);
+        member1.IsReturnValue = true;
+
+        var member2 = GetReflectionMember<int>("IntValue", null);
+
+        int intReturnValue = 3;
+        int intValue = 11;
+        var value = new object[] { intReturnValue, intValue };
+        var actual = RoundTripWithXmlMembersMappingSoap(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <IntReturnValue xsi:type=\"xsd:int\">3</IntReturnValue>\r\n  <IntValue xsi:type=\"xsd:int\">11</IntValue>\r\n</q1:wrapper>",
+            skipStringCompare: false,
+            members: new XmlReflectionMember[] { member1, member2 },
+            wrapperName: "wrapper",
+            writeAccessors: true);
+
+        Assert.NotNull(actual);
+
+        var intReturnValueActual = (int)actual[0];
+        Assert.Equal(intReturnValue, intReturnValueActual);
+        Assert.Equal(intValue, (int)actual[1]);
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
@@ -3554,11 +3629,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         return (T)actual[0];
     }
 
-    private static object[] RoundTripWithXmlMembersMapping(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null)
+    private static object[] RoundTripWithXmlMembersMapping(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null, bool rpc = false)
     {
         ns = ns ?? s_defaultNs;
         var importer = new XmlReflectionImporter(null, ns);
-        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null);
+        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null, rpc: rpc);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
         using (var ms = new MemoryStream())
         {
@@ -3621,9 +3696,13 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    private static XmlReflectionMember GetReflectionMember<T>(string memberName, string ns = null)
+    private static XmlReflectionMember GetReflectionMember<T>(string memberName)
     {
-        ns = ns ?? s_defaultNs;
+        return GetReflectionMember<T>(memberName, s_defaultNs);
+    }
+
+    private static XmlReflectionMember GetReflectionMember<T>(string memberName, string ns)
+    {
         var member = new XmlReflectionMember();
         member.MemberName = memberName;
         member.MemberType = typeof(T);

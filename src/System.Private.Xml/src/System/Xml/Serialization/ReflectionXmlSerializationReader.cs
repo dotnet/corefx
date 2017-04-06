@@ -418,11 +418,9 @@ namespace System.Xml.Serialization
             }
 
             Fixup fixup = WriteMemberFixupBegin(members, p);
-
             if (members.Length > 0 && members[0].Mapping.IsReturnValue)
             {
-                throw new NotImplementedException("members.Length > 0 && members[0].Mapping.IsReturnValue");
-                //Writer.WriteLine("IsReturnValue = true;");
+                IsReturnValue = true;
             }
 
             List<CheckTypeSource> checkTypeHrefSource = null;
