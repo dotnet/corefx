@@ -53,7 +53,7 @@ namespace System.Xml
                 // relative base Uri
                 if (!baseUri.IsAbsoluteUri)
                 {
-					// TODO: should this be SILVERLIGHT or desktop behavior?
+                    // TODO: should this be SILVERLIGHT or desktop behavior?
 #if SILVERLIGHT
                     // create temporary base for the relative URIs
                     Uri tmpBaseUri = new Uri("tmp:///");

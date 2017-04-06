@@ -160,7 +160,7 @@ namespace System.Xml
                 return FinishInitAsync().CallBoolTaskFuncWhenFinishAsync(thisRef => thisRef.ReadAsync(), this);
             }
 
-            for (; ;)
+            for (;;)
             {
                 switch (_parsingFunction)
                 {
@@ -2586,7 +2586,7 @@ namespace System.Xml
                 {
                     for (;;)
                     {
-                        if (_xmlCharType.IsNCNameSingleChar( tmpch2 = chars[pos]))
+                        if (_xmlCharType.IsNCNameSingleChar(tmpch2 = chars[pos]))
                         {
                             pos++;
                         }
@@ -2661,7 +2661,7 @@ namespace System.Xml
                 attr.SetLineInfo(_ps.LineNo, attrNameLinePos);
 
 #if DEBUG
-                Debug.Assert( attrNameLineNo == _ps.LineNo );
+                Debug.Assert(attrNameLineNo == _ps.LineNo);
 #endif
 
                 // parse equals and quote char; 
@@ -2706,9 +2706,10 @@ namespace System.Xml
                 {
 #if DEBUG
 #if !SILVERLIGHT
-                    if ( _normalize ) {
-                        string val = new string(chars, _ps.charPos, pos - _ps.charPos );
-                        Debug.Assert( val == XmlComplianceUtil.CDataNormalize( val ), "The attribute value is not CDATA normalized!" ); 
+                    if (_normalize)
+                    {
+                        string val = new string(chars, _ps.charPos, pos - _ps.charPos);
+                        Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!");
                     }
 #endif
 #endif
@@ -3444,7 +3445,7 @@ namespace System.Xml
                     orChars |= (int)c;
                     pos++;
                 }
-                
+
                 switch (c)
                 {
                     case (char)0x9:
@@ -5168,7 +5169,7 @@ namespace System.Xml
         //      - if (expand == true) then ps.charPos is changed to point to the replaced character
         private async Task<int> ParseNamedCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
         {
-            for (; ;)
+            for (;;)
             {
                 int newPos;
                 switch (newPos = ParseNamedCharRefInline(_ps.charPos, expand, internalSubsetBuilder))

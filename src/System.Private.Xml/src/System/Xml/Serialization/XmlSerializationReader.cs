@@ -784,7 +784,7 @@ namespace System.Xml.Serialization
                     value = default(Nullable<char>);
                 else if ((object)type.Name == (object)_guidID)
                     value = default(Nullable<Guid>);
-                else if ((object) type.Name == (object) _timeSpanID)
+                else if ((object)type.Name == (object)_timeSpanID)
                     value = default(Nullable<TimeSpan>);
                 else
                     value = null;
@@ -2125,5 +2125,4 @@ namespace System.Xml.Serialization
 
     ///<internalonly/>
     public delegate object XmlSerializationReadCallback();
-
 }

@@ -92,10 +92,12 @@ namespace MS.Internal.Xml.XPath
                         continue;
                     }
                 }
-				// TODO: this code was previously removed
+                // TODO: this code was previously removed
 #if DEBUG
-                if (_lastNode != null) {
-                    if (currentNode.GetType().ToString() == "Microsoft.VisualStudio.Modeling.StoreNavigator") {
+                if (_lastNode != null)
+                {
+                    if (currentNode.GetType().ToString() == "Microsoft.VisualStudio.Modeling.StoreNavigator")
+                    {
                         XmlNodeOrder order = CompareNodes(_lastNode, currentNode);
                         Debug.Assert(order == XmlNodeOrder.Before, "Algorith error. Nodes expected to be DocOrderDistinct");
                     }

@@ -18,7 +18,7 @@ namespace System.Xml.Xsl.Xslt
     internal class XsltInput : IErrorHelper
     {
 #if DEBUG
-        const int InitRecordsSize = 1;
+        private const int InitRecordsSize = 1;
 #else
         private const int InitRecordsSize = 1 + 21;
 #endif

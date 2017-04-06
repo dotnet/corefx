@@ -258,7 +258,7 @@ namespace System.Xml
 
             if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
-			// TODO: check what does this do and remove/keep
+            // TODO: check what does this do and remove/keep
 #if SILVERLIGHT
             if ( attrEndPos == bufPos ) {
                 bufChars[bufPos++] = (char)' ';
@@ -666,7 +666,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -856,7 +856,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1081,7 +1081,7 @@ namespace System.Xml
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + this.bufLen)
@@ -1135,7 +1135,7 @@ namespace System.Xml
         }
 
         // special-case the one string overload, as it's so common
-        protected Task RawTextAsync(string text) 
+        protected Task RawTextAsync(string text)
         {
             int writeLen = RawTextNoFlush(text, 0, text.Length);
             return writeLen >= 0 ?
@@ -1240,7 +1240,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1427,7 +1427,7 @@ namespace System.Xml
                     char* pDst = pDstBegin + bufPos;
 
                     int ch = 0;
-                    for (; ;)
+                    for (;;)
                     {
                         char* pDstEnd = pDst + (pSrcEnd - pSrc);
                         if (pDstEnd > pDstBegin + bufLen)
@@ -1600,7 +1600,7 @@ namespace System.Xml
                     char* pDst = pDstBegin + bufPos;
 
                     int ch = 0;
-                    for (; ;)
+                    for (;;)
                     {
                         char* pDstEnd = pDst + (pSrcEnd - pSrc);
                         if (pDstEnd > pDstBegin + bufLen)

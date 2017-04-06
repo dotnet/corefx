@@ -219,12 +219,12 @@ namespace System.Xml.Serialization
                         typeName = "guid";
                         typeNs = UrtTypes.Namespace;
                     }
-                    else if (type == typeof (TimeSpan))
+                    else if (type == typeof(TimeSpan))
                     {
                         typeName = "TimeSpan";
                         typeNs = UrtTypes.Namespace;
                     }
-                    else if (type == typeof (XmlNode[]))
+                    else if (type == typeof(XmlNode[]))
                     {
                         typeName = Soap.UrType;
                     }
@@ -615,8 +615,8 @@ namespace System.Xml.Serialization
             if (o != null && _objectsInUse != null)
             {
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (!_objectsInUse.ContainsKey(o)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "missing stack object of type " + o.GetType().FullName));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (!_objectsInUse.ContainsKey(o)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "missing stack object of type " + o.GetType().FullName));
 #endif
 
                 _objectsInUse.Remove(o);
@@ -1239,8 +1239,8 @@ namespace System.Xml.Serialization
             else
             {
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (!typeof(IEnumerable).IsAssignableFrom(type)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "not array like type " + type.FullName));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (!typeof(IEnumerable).IsAssignableFrom(type)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "not array like type " + type.FullName));
 #endif
 
                 int arrayLength = typeof(ICollection).IsAssignableFrom(type) ? ((ICollection)o).Count : -1;

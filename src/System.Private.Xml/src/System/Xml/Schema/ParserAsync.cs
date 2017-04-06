@@ -15,7 +15,6 @@ namespace System.Xml.Schema
 
     internal sealed partial class Parser
     {
-
         public async Task StartParsingAsync(XmlReader reader, string targetNamespace)
         {
             _reader = reader;

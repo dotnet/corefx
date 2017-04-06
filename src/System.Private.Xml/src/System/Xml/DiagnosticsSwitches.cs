@@ -7,7 +7,8 @@ namespace System.Xml
     using System.Diagnostics;
 
 #if DEBUG
-    public static class DiagnosticsSwitches {
+    public static class DiagnosticsSwitches
+    {
 #else
     internal static class DiagnosticsSwitches
     {

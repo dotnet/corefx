@@ -21,7 +21,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Xslt
 {
-
     internal class Scripts
     {
         private const string ScriptClassesNamespace = "System.Xml.Xsl.CompiledQuery";

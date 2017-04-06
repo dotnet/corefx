@@ -868,8 +868,8 @@ namespace System.Xml.Xsl.Qil
             return XmlQueryTypeFactory.StringX;
         }
 
-#endregion // Node properties
-#region Copy operators
+        #endregion // Node properties
+        #region Copy operators
 
         #endregion // Copy operators
 
@@ -954,7 +954,8 @@ namespace System.Xml.Xsl.Qil
             QilList actualArgs = node.Arguments;
             Check(actualArgs.Count == extFunc.Method.GetParameters().Length, actualArgs, "InvokeEarlyBound argument count must match function's argument count");
 
-            for (int i = 0; i < actualArgs.Count; i++) {
+            for (int i = 0; i < actualArgs.Count; i++)
+            {
                 Check(actualArgs[i].XmlType.IsSubtypeOf(extFunc.GetXmlArgumentType(i)), actualArgs[i], "InvokeEarlyBound argument must be a subtype of the invoked function's argument type");
             }
 #endif

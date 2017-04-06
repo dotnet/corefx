@@ -1686,10 +1686,10 @@ namespace System.Xml
             StringBuilder sb = null;
             int i = 0;
             int start = 0;
-            while (i<value.Length)
+            while (i < value.Length)
             {
                 char ch = value[i];
-                if ((int) ch < 0x20 || ch == '"')
+                if ((int)ch < 0x20 || ch == '"')
                 {
                     if (sb == null)
                     {

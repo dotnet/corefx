@@ -64,7 +64,7 @@ namespace MS.Internal.Xml.XPath
 
             string str = result as string;
             if (str != null)
-				return toBoolean(str);
+                return toBoolean(str);
 
             if (result is double) return toBoolean((double)result);
             if (result is bool) return (bool)result;

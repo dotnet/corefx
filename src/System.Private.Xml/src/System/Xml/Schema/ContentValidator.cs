@@ -342,7 +342,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             bb.Append("\"" + symbols.NameOf(positions[_pos].symbol) + "\"");
         }
 #endif
@@ -412,7 +413,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             bb.Append("[" + namespaceList.ToString() + "]");
         }
 #endif
@@ -572,7 +574,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        internal static void WritePos(BitSet firstpos, BitSet lastpos, BitSet[] followpos) {
+        internal static void WritePos(BitSet firstpos, BitSet lastpos, BitSet[] followpos)
+        {
             Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "FirstPos:  ");
             WriteBitSet(firstpos);
 
@@ -580,29 +583,36 @@ namespace System.Xml.Schema
             WriteBitSet(lastpos);
 
             Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "Followpos:  ");
-            for(int i =0; i < followpos.Length; i++) {
+            for (int i = 0; i < followpos.Length; i++)
+            {
                 WriteBitSet(followpos[i]);
             }
         }
-        internal static void WriteBitSet(BitSet curpos) {
+        internal static void WriteBitSet(BitSet curpos)
+        {
             int[] list = new int[curpos.Count];
-            for (int pos = curpos.NextSet(-1); pos != -1; pos = curpos.NextSet(pos)) {
+            for (int pos = curpos.NextSet(-1); pos != -1; pos = curpos.NextSet(pos))
+            {
                 list[pos] = 1;
             }
-            for(int i = 0; i < list.Length; i++) {
+            for (int i = 0; i < list.Length; i++)
+            {
                 Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, list[i] + " ");
             }
             Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
         }
-       
 
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             Stack<SequenceNode> nodeStack = new Stack<SequenceNode>();
             SequenceNode this_ = this;
 
-            while (true) {
+            while (true)
+            {
                 bb.Append("(");
-                if (this_.LeftChild is SequenceNode) {
+                if (this_.LeftChild is SequenceNode)
+                {
                     nodeStack.Push(this_);
                     this_ = (SequenceNode)this_.LeftChild;
                     continue;
@@ -676,13 +686,16 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             Stack<ChoiceNode> nodeStack = new Stack<ChoiceNode>();
             ChoiceNode this_ = this;
 
-            while (true) {
+            while (true)
+            {
                 bb.Append("(");
-                if (this_.LeftChild is ChoiceNode) {
+                if (this_.LeftChild is ChoiceNode)
+                {
                     nodeStack.Push(this_);
                     this_ = (ChoiceNode)this_.LeftChild;
                     continue;
@@ -720,7 +733,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             LeftChild.Dump(bb, symbols, positions);
             bb.Append("+");
         }
@@ -740,7 +754,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             LeftChild.Dump(bb, symbols, positions);
             bb.Append("?");
         }
@@ -764,7 +779,8 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions) {
+        public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
+        {
             LeftChild.Dump(bb, symbols, positions);
             bb.Append("*");
         }
@@ -1273,7 +1289,7 @@ namespace System.Xml.Schema
 #if DEBUG
             StringBuilder bb = new StringBuilder();
             _contentNode.Dump(bb, _symbols, _positions);
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled,  "\t\t\tContent :   " + bb.ToString());
+            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "\t\t\tContent :   " + bb.ToString());
 #endif
 
             // Add end marker
@@ -1288,7 +1304,7 @@ namespace System.Xml.Schema
 #if DEBUG
             bb = new StringBuilder();
             contentRoot.LeftChild.Dump(bb, _symbols, _positions);
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled,  "\t\t\tExpended:   " + bb.ToString());
+            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "\t\t\tExpended:   " + bb.ToString());
 #endif
 
             // calculate followpos
@@ -1340,7 +1356,7 @@ namespace System.Xml.Schema
                 }
 #if DEBUG
                 bb = new StringBuilder();
-                Dump(bb, followpos, transitionTable);    
+                Dump(bb, followpos, transitionTable);
                 Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, bb.ToString());
 #endif
                 if (transitionTable != null)
@@ -1558,7 +1574,7 @@ namespace System.Xml.Schema
         {
             // Temporary printout
             bb.AppendLine("Positions");
-            for (int i = 0; i < _positions.Count; i ++)
+            for (int i = 0; i < _positions.Count; i++)
             {
                 bb.AppendLine(i + " " + _positions[i].symbol.ToString(NumberFormatInfo.InvariantInfo) + " " + _symbols.NameOf(_positions[i].symbol));
             }
@@ -1569,7 +1585,7 @@ namespace System.Xml.Schema
                 {
                     bb.Append(followpos[i][j] ? "X" : "O");
                 }
-               bb.AppendLine();
+                bb.AppendLine();
             }
             if (transitionTable != null)
             {

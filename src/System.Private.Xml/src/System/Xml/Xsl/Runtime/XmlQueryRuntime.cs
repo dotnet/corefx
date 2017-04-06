@@ -22,7 +22,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     /// <summary>
     /// XmlQueryRuntime is passed as the first parameter to all generated query methods.
     ///

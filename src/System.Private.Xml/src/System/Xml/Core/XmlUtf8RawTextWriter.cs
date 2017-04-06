@@ -730,7 +730,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -836,7 +836,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -949,7 +949,7 @@ namespace System.Xml
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + this.bufLen)
@@ -995,7 +995,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1097,7 +1097,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1230,7 +1230,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)

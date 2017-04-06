@@ -665,7 +665,7 @@ namespace System.Xml.Serialization
             {
                 TempAssembly tempAssembly;
                 _cache.TryGetValue(new TempAssemblyCacheKey(ns, o), out tempAssembly);
-                return  tempAssembly;
+                return tempAssembly;
             }
         }
 

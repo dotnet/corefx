@@ -18,7 +18,7 @@ namespace MS.Internal.Xml.XPath
         //       For paths order is reversed: a/b -> ChildQuery_B(input: ChildQuery_A(input: ContextQuery()))
         // Input flags. We pass them Up->Down. 
         // Using them upper query set states which controls how inner query will be built.
-        enum Flags
+        private enum Flags
         {
             None = 0x00,
             SmartDesc = 0x01,
@@ -31,7 +31,7 @@ namespace MS.Internal.Xml.XPath
         // They have the following difference: 
         //      QueryProps describe property of node they are (belong like Reverse)
         //      these Props describe accumulated properties of the tree (like nonFlat)
-        enum Props
+        private enum Props
         {
             None = 0x00,
             PosFilter = 0x01,  // This filter or inner filter was positional: foo[1] or foo[1][true()]
@@ -438,7 +438,7 @@ namespace MS.Internal.Xml.XPath
             }
         }
 
-        List<Query> ProcessArguments(List<AstNode> args, out Props props)
+        private List<Query> ProcessArguments(List<AstNode> args, out Props props)
         {
             int numArgs = args != null ? args.Count : 0;
             List<Query> argList = new List<Query>(numArgs);

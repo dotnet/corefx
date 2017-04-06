@@ -11,7 +11,6 @@ using System.IO;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed partial class XmlCollation
     {

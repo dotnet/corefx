@@ -15,10 +15,10 @@ namespace System.Xml
     internal partial class XmlTextReaderImpl : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
     {
         private static UTF8Encoding s_utf8BomThrowing;
-        
+
         private static UTF8Encoding UTF8BomThrowing =>
             s_utf8BomThrowing ?? (s_utf8BomThrowing = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true, throwOnInvalidBytes: true));
-        
+
         //
         // Private helper types
         //
@@ -976,7 +976,7 @@ namespace System.Xml
         {
             get
             {
-				// TODO: check if this comment is valid
+                // TODO: check if this comment is valid
                 // Project-N: why is this true given that ResolveEntity always throws an exception in SL?
                 return true;
             }
@@ -3121,7 +3121,7 @@ namespace System.Xml
 
             switch (first2Bytes)
             {
-				// Removing USC4 encoding
+                // Removing USC4 encoding
                 case 0x0000:
                     switch (next2Bytes)
                     {
@@ -3903,7 +3903,7 @@ namespace System.Xml
             if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
                 mangoQuirks = true;
 #endif
-            for (; ;)
+            for (;;)
             {
                 bool needMoreChars = false;
                 int pos = _ps.charPos;
@@ -4138,7 +4138,7 @@ namespace System.Xml
         // Parses element content
         private bool ParseElementContent()
         {
-            for (; ;)
+            for (;;)
             {
                 int pos = _ps.charPos;
                 char[] chars = _ps.chars;
@@ -4962,7 +4962,7 @@ namespace System.Xml
                     if (_normalize)
                     {
                         string val = new string(chars, _ps.charPos, pos - _ps.charPos);
-                        Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!"); 
+                        Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!");
                     }
 #endif
                     attr.SetValue(chars, _ps.charPos, pos - _ps.charPos);
@@ -7130,9 +7130,9 @@ namespace System.Xml
             int wsCount = 0;
             char[] chars = _ps.chars;
 
-            for (; ;)
+            for (;;)
             {
-                for (; ;)
+                for (;;)
                 {
                     switch (chars[pos])
                     {
@@ -8226,15 +8226,15 @@ namespace System.Xml
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count) : "len");
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(index): "offset");
+                throw new ArgumentOutOfRangeException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(index) : "offset");
             }
             if (array.Length - index < count)
             {
-                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count): "len");
+                throw new ArgumentException((_incReadDecoder is IncrementalReadCharsDecoder) ? nameof(count) : "len");
             }
 
             if (count == 0)
@@ -9424,7 +9424,7 @@ namespace System.Xml
 
             _incReadDecoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (; ;)
+            for (;;)
             {
                 // read what is already cached in curNode
                 int charsRead = 0;

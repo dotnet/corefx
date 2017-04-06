@@ -270,13 +270,13 @@ namespace System.Xml.Xsl.XsltOld
         }
 
 #if DEBUG
-        private bool stringBuilderLocked = false;
+        private bool _stringBuilderLocked = false;
 #endif
 
         internal StringBuilder GetSharedStringBuilder()
         {
 #if DEBUG
-            Debug.Assert(! stringBuilderLocked);
+            Debug.Assert(!_stringBuilderLocked);
 #endif
             if (_sharedStringBuilder == null)
             {
@@ -287,7 +287,7 @@ namespace System.Xml.Xsl.XsltOld
                 _sharedStringBuilder.Length = 0;
             }
 #if DEBUG
-            stringBuilderLocked = true;
+            _stringBuilderLocked = true;
 #endif
             return _sharedStringBuilder;
         }
@@ -296,7 +296,7 @@ namespace System.Xml.Xsl.XsltOld
         {
             // don't clean stringBuilderLocked here. ToString() will happen after this call
 #if DEBUG
-            stringBuilderLocked = false;
+            _stringBuilderLocked = false;
 #endif
         }
 

@@ -348,7 +348,7 @@ namespace System.Xml.Xsl
             {
 #if DEBUG
                 Array arrEnum = Enum.GetValues(typeof(XmlTypeCode));
-                Debug.Assert((XmlTypeCode) arrEnum.GetValue(arrEnum.Length - 1) == XmlTypeCode.DayTimeDuration,
+                Debug.Assert((XmlTypeCode)arrEnum.GetValue(arrEnum.Length - 1) == XmlTypeCode.DayTimeDuration,
                              "DayTimeDuration is no longer the last item in XmlTypeCode.  This code expects it to be.");
 #endif
 

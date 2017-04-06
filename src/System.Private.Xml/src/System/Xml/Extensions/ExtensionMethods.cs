@@ -14,7 +14,6 @@ namespace System.Xml.Extensions
 {
     internal static class ExtensionMethods
     {
-
         #region Contract compliance for System.Type
 
         private static bool TypeSequenceEqual(Type[] seq1, Type[] seq2)
@@ -72,7 +71,7 @@ namespace System.Xml.Extensions
             return BinHexDecoder.Decode(s.ToCharArray(), allowOddCount);
         }
 #endif
-#endregion
+        #endregion
 
         internal static Uri ToUri(string s)
         {
