@@ -123,6 +123,8 @@
     </ItemGroup>
   </Target>
 
+  <!-- We need to generate a simple config file for desktop test executors to tell them to use DEVPATH environment variable to use their dependencies from there.
+  DEVPATH is being set for desktop runs in RunTests.cmd to the TestHostPath. We need this approach to have desktop Helix runs. -->
   <Target Name="GenerateDesktopExecutorsConfigFiles"
           BeforeTargets="GenerateTestExecutionScripts"
           Condition="'$(BuildingNETFxVertical)' == 'true'">
