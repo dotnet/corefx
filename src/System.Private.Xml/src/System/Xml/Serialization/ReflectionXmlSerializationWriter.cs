@@ -671,7 +671,8 @@ namespace System.Xml.Serialization
                     }
                 }
 
-                Debug.Assert(enumMapping != null);
+                if (enumMapping == null)
+                    throw new InvalidOperationException();
 
                 WriteXsiType(enumMapping.TypeName, ns);
                 Writer.WriteString(WriteEnumMethod(enumMapping, o));
@@ -694,7 +695,9 @@ namespace System.Xml.Serialization
                     }
                 }
 
-                Debug.Assert(arrayMapping != null);
+                if (arrayMapping == null)
+                    throw new InvalidOperationException();
+
                 WriteXsiType(arrayMapping.TypeName, ns);
                 WriteMember(o, null, arrayMapping.ElementsSortedByDerivation, null, null, arrayMapping.TypeDesc, true);
                 Writer.WriteEndElement();
