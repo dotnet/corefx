@@ -380,10 +380,12 @@ namespace System.Xml.Serialization
 
                 if (membersMapping.ValidateRpcWrapperElement)
                 {
-                    throw new NotImplementedException("membersMapping.ValidateRpcWrapperElement");
-                    //Writer.Write("if (!");
-                    //WriteXmlNodeEqual("Reader", element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
-                    //Writer.WriteLine(") throw CreateUnknownNodeException();");
+                    string name = element.Name;
+                    string ns = element.Form == XmlSchemaForm.Qualified ? element.Namespace : "";
+                    if (!XmlNodeEqual(Reader, name, ns))
+                    {
+                        throw CreateUnknownNodeException();
+                    }
                 }
 
                 isEmptyWrapper = Reader.IsEmptyElement;

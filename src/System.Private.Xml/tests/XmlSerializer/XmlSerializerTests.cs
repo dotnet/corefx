@@ -3482,6 +3482,21 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void XmlMembersMapping_Soap_PrimitiveValue_HasWrapperElement_Validate()
+    {
+        string memberName = "value";
+        var getDataRequestBodyValue = 3;
+        var getDataRequestBodyActual = RoundTripWithXmlMembersMappingSoap<int>(getDataRequestBodyValue,
+            memberName,
+            "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <value xsi:type=\"xsd:int\">3</value>\r\n</q1:wrapper>",
+            wrapperName: "wrapper",
+            validate: true);
+
+        Assert.NotNull(getDataRequestBodyActual);
+        Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
+    }
+
+    [Fact]
     public static void XmlMembersMapping_Soap_MemberSpecified_True()
     {
         string memberName1 = "StringMember";
@@ -3567,22 +3582,22 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         }
     }
 
-    private static T RoundTripWithXmlMembersMappingSoap<T>(object item, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
+    private static T RoundTripWithXmlMembersMappingSoap<T>(object item, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null, bool validate = false)
     {
         string ns = s_defaultNs;
         object[] value = new object[] { item };
         XmlReflectionMember member = GetReflectionMember<T>(memberName, ns);
         var members = new XmlReflectionMember[] { member };
-        object[] actual = RoundTripWithXmlMembersMappingSoap(value, baseline, skipStringCompare, members: members, wrapperName: wrapperName);
+        object[] actual = RoundTripWithXmlMembersMappingSoap(value, baseline, skipStringCompare, members: members, wrapperName: wrapperName, validate: validate);
         Assert.Equal(value.Length, actual.Length);
         return (T)actual[0];
     }
 
-    private static object[] RoundTripWithXmlMembersMappingSoap(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null, bool writeAccessors = false)
+    private static object[] RoundTripWithXmlMembersMappingSoap(object[] value, string baseline, bool skipStringCompare, XmlReflectionMember[] members, string ns = null, string wrapperName = null, bool writeAccessors = false, bool validate = false)
     {
         ns = ns ?? s_defaultNs;
         var importer = new SoapReflectionImporter(null, ns);
-        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, wrapperName != null, writeAccessors);
+        var membersMapping = importer.ImportMembersMapping(wrapperName, ns, members, hasWrapperElement: wrapperName != null, writeAccessors: writeAccessors, validate: validate);
         var serializer = XmlSerializer.FromMappings(new XmlMapping[] { membersMapping })[0];
         using (var ms = new MemoryStream())
         {
