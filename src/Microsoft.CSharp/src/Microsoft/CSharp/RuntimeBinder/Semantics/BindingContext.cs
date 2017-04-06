@@ -19,10 +19,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return new BindingContext(semanticChecker, exprFactory);
         }
 
-        public static BindingContext CreateInstance(BindingContext parent, bool checkedNormal, bool checkedConstant)
+        public static BindingContext CreateInstance(BindingContext parent)
         {
             Debug.Assert(parent.SemanticChecker != null);
-            return new BindingContext(parent, checkedNormal, checkedConstant);
+            return new BindingContext(parent);
         }
 
         private BindingContext(CSemanticChecker semanticChecker, ExprFactory exprFactory)
@@ -32,7 +32,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             SymbolLoader = semanticChecker.GetSymbolLoader();
         }
 
-        private BindingContext(BindingContext parent, bool checkedNormal, bool checkedConstant)
+        private BindingContext(BindingContext parent)
         {
             ExprFactory = parent.ExprFactory;
             ReportUnsafeErrors = parent.ReportUnsafeErrors;
@@ -40,8 +40,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
             SymbolLoader = (SemanticChecker = parent.SemanticChecker).GetSymbolLoader();
-            CheckedNormal = checkedNormal;
-            CheckedConstant = checkedConstant;
         }
 
 
