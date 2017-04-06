@@ -13,48 +13,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class BindingContext
     {
-        public static BindingContext CreateInstance(
-                CSemanticChecker pSemanticChecker,
-                ExprFactory exprFactory
-            )
+        public static BindingContext CreateInstance(CSemanticChecker semanticChecker, ExprFactory exprFactory)
         {
-            return new BindingContext(
-                pSemanticChecker,
-                exprFactory);
+            Debug.Assert(semanticChecker != null);
+            return new BindingContext(semanticChecker, exprFactory);
         }
 
-        public static BindingContext CreateInstance(
-            BindingContext parentCtx,
-            bool checkedNormal,
-            bool checkedConstant)
+        public static BindingContext CreateInstance(BindingContext parent, bool checkedNormal, bool checkedConstant)
         {
-            return new BindingContext(parentCtx, checkedNormal, checkedConstant);
+            Debug.Assert(parent.SemanticChecker != null);
+            return new BindingContext(parent, checkedNormal, checkedConstant);
         }
 
-        private BindingContext(
-            CSemanticChecker pSemanticChecker,
-            ExprFactory exprFactory
-            )
+        private BindingContext(CSemanticChecker semanticChecker, ExprFactory exprFactory)
         {
-            m_ExprFactory = exprFactory;
-            m_pParentDecl = null;
-            Debug.Assert(pSemanticChecker != null);
-            SemanticChecker = pSemanticChecker;
-            SymbolLoader = SemanticChecker.GetSymbolLoader();
-            CheckedNormal = false;
-            CheckedConstant = false;
+            ExprFactory = exprFactory;
+            SemanticChecker = semanticChecker;
+            SymbolLoader = semanticChecker.GetSymbolLoader();
         }
 
         private BindingContext(BindingContext parent, bool checkedNormal, bool checkedConstant)
         {
-            m_ExprFactory = parent.m_ExprFactory;
+            ExprFactory = parent.ExprFactory;
             ReportUnsafeErrors = parent.ReportUnsafeErrors;
-            m_pParentDecl = parent.m_pParentDecl;
+            ContextForMemberLookup = parent.ContextForMemberLookup;
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
-            Debug.Assert(parent.SemanticChecker != null);
-            SemanticChecker = parent.SemanticChecker;
-            SymbolLoader = SemanticChecker.GetSymbolLoader();
+            SymbolLoader = (SemanticChecker = parent.SemanticChecker).GetSymbolLoader();
             CheckedNormal = checkedNormal;
             CheckedConstant = checkedConstant;
         }
@@ -62,12 +47,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         //The SymbolLoader can be retrieved from m_pSemanticChecker,
         //but that is a virtual call that is showing up on the profiler. Retrieve
-        //the SymbolLoader once at ruction and return a cached copy.
+        //the SymbolLoader once at construction and return a cached copy.
 
         // PERFORMANCE: Is this cache still necessary?
-        public SymbolLoader SymbolLoader { get; private set; }
-        public Declaration m_pParentDecl;
-        public Declaration ContextForMemberLookup() { return m_pParentDecl; }
+        public SymbolLoader SymbolLoader { get; }
+
+        public Declaration ContextForMemberLookup { get; set; }
 
         // State boolean questions.
 
@@ -75,15 +60,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // Members.
 
-        private ExprFactory m_ExprFactory;
-
-        // The rest of the members.
-
         public CSemanticChecker SemanticChecker { get; }
 
-        public ExprFactory GetExprFactory() { return m_ExprFactory; }
+        public ExprFactory ExprFactory { get; }
 
         public bool CheckedNormal { get; set; }
+
         public bool CheckedConstant { get; set; }
     }
 }

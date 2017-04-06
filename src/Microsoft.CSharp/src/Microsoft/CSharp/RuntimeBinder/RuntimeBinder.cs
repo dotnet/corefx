@@ -234,11 +234,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 MemberLookup mem = new MemberLookup();
                 Expr callingObject = CreateCallingObjectForCall(callPayload, arguments, locals);
 
-                Debug.Assert(_bindingContext.ContextForMemberLookup() != null);
+                Debug.Assert(_bindingContext.ContextForMemberLookup != null);
                 SymWithType swt = _symbolTable.LookupMember(
                         callPayload.Name,
                         callingObject,
-                        _bindingContext.ContextForMemberLookup(),
+                        _bindingContext.ContextForMemberLookup,
                         arity,
                         mem,
                         (callPayload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -276,13 +276,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (t != null)
             {
                 AggregateSymbol agg = _symbolTable.GetCTypeFromType(t).AsAggregateType().GetOwningAggregate();
-                bindingContext.m_pParentDecl = _semanticChecker.GetGlobalSymbolFactory().CreateAggregateDecl(agg, null);
+                bindingContext.ContextForMemberLookup = _semanticChecker.GetGlobalSymbolFactory().CreateAggregateDecl(agg, null);
             }
             else
             {
                 // The binding context lives across invocations! If we don't reset this, then later calls might
                 // bind in a previous call's context.
-                bindingContext.m_pParentDecl = null;
+                bindingContext.ContextForMemberLookup = null;
             }
 
             bindingContext.CheckedConstant = bindingContext.CheckedNormal = payload.IsChecked;
@@ -888,11 +888,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             int arity = payload.TypeArguments?.Count ?? 0;
             MemberLookup mem = new MemberLookup();
 
-            Debug.Assert(_bindingContext.ContextForMemberLookup() != null);
+            Debug.Assert(_bindingContext.ContextForMemberLookup != null);
             SymWithType swt = _symbolTable.LookupMember(
                     payload.Name,
                     callingObject,
-                    _bindingContext.ContextForMemberLookup(),
+                    _bindingContext.ContextForMemberLookup,
                     arity,
                     mem,
                     (payload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -935,7 +935,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 SymWithType swtEvent = _symbolTable.LookupMember(
                         payload.Name.Split('_')[1],
                         callingObject,
-                        _bindingContext.ContextForMemberLookup(),
+                        _bindingContext.ContextForMemberLookup,
                         arity,
                         mem,
                         (payload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -1393,7 +1393,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             BindingFlag bindFlags = payload.BindingFlags;
 
             MemberLookup mem = new MemberLookup();
-            SymWithType swt = _symbolTable.LookupMember(name, callingObject, _bindingContext.ContextForMemberLookup(), 0, mem, false, false);
+            SymWithType swt = _symbolTable.LookupMember(name, callingObject, _bindingContext.ContextForMemberLookup, 0, mem, false, false);
             if (swt == null)
             {
                 if (optionalIndexerArguments != null)
@@ -1583,11 +1583,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.NullReferenceOnMemberException();
             }
 
-            Debug.Assert(_bindingContext.ContextForMemberLookup() != null);
+            Debug.Assert(_bindingContext.ContextForMemberLookup != null);
             SymWithType swt = _symbolTable.LookupMember(
                     binder.Name,
                     callingObject,
-                    _bindingContext.ContextForMemberLookup(),
+                    _bindingContext.ContextForMemberLookup,
                     0,
                     mem,
                     false,

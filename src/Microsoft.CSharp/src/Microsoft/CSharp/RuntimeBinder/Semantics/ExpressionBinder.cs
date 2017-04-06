@@ -356,7 +356,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory GetExprFactory() { return ExprFactory; }
 
-        private ExprFactory ExprFactory { get { return Context.GetExprFactory(); } }
+        private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
 
         private AggregateType GetReqPDT(PredefinedType pt)
         {
@@ -2481,7 +2481,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         private Declaration ContextForMemberLookup()
         {
-            return Context.ContextForMemberLookup();
+            return Context.ContextForMemberLookup;
         }
 
         private bool ReportUnsafeErrors()
@@ -2506,7 +2506,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static void RecordUnsafeUsage(BindingContext context)
         {
-            context.UnsafeErrorGiven = true;
+            context.ReportUnsafeErrors = false;
         }
 
         internal static int CountArguments(Expr args, out bool typeErrors)
