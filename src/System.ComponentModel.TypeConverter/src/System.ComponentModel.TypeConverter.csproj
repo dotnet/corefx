@@ -89,6 +89,9 @@
     <Compile Include="$(CommonPath)/System/Drawing/ColorTable.cs">
       <Link>System\Drawing\ColorTable.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Drawing\SystemColors.cs">
+      <Link>System\Drawing\SystemColors.cs</Link>
+    </Compile>
     <Compile Include="System\Drawing\ColorConverter.cs" />
     <Compile Include="System\Drawing\PointConverter.cs" />
     <Compile Include="System\Drawing\RectangleConverter.cs" />
