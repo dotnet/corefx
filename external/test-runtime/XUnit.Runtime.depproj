@@ -7,6 +7,7 @@
     -->
     <NugetRuntimeIdentifier>win7-x64</NugetRuntimeIdentifier>
     <OutputPath>$(RuntimePath)</OutputPath>
+    <OutputPath Condition="'$(BinPlaceNETCoreAppTestDependencies)' == 'true'">$(NETCoreAppPackageRuntimePath)\..\dependencies</OutputPath>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' != 'netfx'">xunit.console.netcore</XUnitRunnerPackageId>
     <XUnitRunnerPackageId Condition="'$(TargetGroup)' == 'netfx'">xunit.runner.console</XUnitRunnerPackageId>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'uapaot'">.NETStandard,Version=v2.0</NuGetTargetMoniker>

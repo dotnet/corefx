@@ -43,6 +43,7 @@
     <!-- if building desktop facade, we don't bin place the refs -->
     <BinPlaceRef Condition="'$(BinPlaceRef)' == '' And '$(BuildingDesktopFacade)' != 'true' And ('$(IsReferenceAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRef>
     <BinPlaceRuntime Condition="'$(BinPlaceRuntime)' == '' And ('$(IsRuntimeAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRuntime>
+    <BinPlaceRuntime Condition="'$(BinPlaceRuntime)' == '' And ('$(IsNETCoreApp)' == 'true' AND '$(IsTestProject)' == 'true' AND '$(BinPlaceNETCoreAppTests)' == 'true')">true</BinPlaceRuntime>
 
     <!-- if building desktop facade and bin placing the runtime, then we need to bin place the refs too -->
     <BinPlaceRef Condition="'$(BuildingDesktopFacade)' == 'true' And '$(BinPlaceRuntime)' == 'true'">true</BinPlaceRef>
@@ -55,8 +56,12 @@
       <RuntimePath>$(RuntimePath)</RuntimePath>
     </BinPlaceConfiguration>
 
+    <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(IsTestProject)' == 'true' AND '$(BinPlaceNETCoreAppTests)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
+      <RuntimePath>$(NETCoreAppPackageRuntimePath)\..\tests</RuntimePath>
+    </BinPlaceConfiguration>
+
     <!-- binplace to directories for packages -->
-    <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(IsTestProject)' != 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
       <PackageFileRefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</PackageFileRefPath>
       <PackageFileRuntimePath>$(NETCoreAppPackageRuntimePath)</PackageFileRuntimePath>
       <RuntimePath Condition="'$(BinPlaceNETCoreAppPackage)' == 'true'">$(NETCoreAppPackageRuntimePath)\..\runtime</RuntimePath>
