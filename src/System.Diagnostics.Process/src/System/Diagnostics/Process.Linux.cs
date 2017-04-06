@@ -23,7 +23,7 @@ namespace System.Diagnostics
                 processName = string.Empty;
             }
 
-            var reusableReader = new ReusableTextReader();
+            var reusableReader = new ReusableTextReader(Encoding.UTF8);
             var processes = new List<Process>();
             foreach (int pid in ProcessManager.EnumerateProcessIds())
             {
@@ -212,7 +212,7 @@ namespace System.Diagnostics
         {
             EnsureState(State.HaveId);
             Interop.procfs.ParsedStat stat;
-            if (!Interop.procfs.TryReadStatFile(_processId, out stat, new ReusableTextReader()))
+            if (!Interop.procfs.TryReadStatFile(_processId, out stat, new ReusableTextReader(Encoding.UTF8)))
             {
                 throw new Win32Exception(SR.ProcessInformationUnavailable);
             }

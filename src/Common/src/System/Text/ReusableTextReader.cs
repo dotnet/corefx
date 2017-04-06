@@ -7,10 +7,10 @@ using System.IO;
 namespace System.Text
 {
     /// <summary>Provides a reusable reader for reading all of the text from streams.</summary>
-    internal sealed class ReusableTextReader
+    internal struct ReusableTextReader
     {
         /// <summary>StringBuilder used to store intermediate text results.</summary>
-        private readonly StringBuilder _builder = new StringBuilder();
+        private readonly StringBuilder _builder;
         /// <summary>Decoder used to decode data read from the stream.</summary>
         private readonly Decoder _decoder;
         /// <summary>Bytes read from the stream.</summary>
@@ -19,27 +19,26 @@ namespace System.Text
         private readonly char[] _chars;
 
         /// <summary>Initializes a new reusable reader.</summary>
-        /// <param name="encoding">The Encoding to use.  Defaults to UTF8.</param>
+        /// <param name="encoding">The Encoding to use.</param>
         /// <param name="bufferSize">The size of the buffer to use when reading from the stream.</param>
-        public ReusableTextReader(Encoding encoding = null, int bufferSize = 1024)
+        public ReusableTextReader(Encoding encoding, int bufferSize = 1024)
         {
-            if (encoding == null)
-            {
-                encoding = Encoding.UTF8;
-            }
-
+            _builder = new StringBuilder();
             _decoder = encoding.GetDecoder();
             _bytes = new byte[bufferSize];
-            _chars = new char[encoding.GetMaxCharCount(_bytes.Length)];
+            _chars = new char[encoding.GetMaxCharCount(bufferSize)];
         }
 
         /// <summary>Read all of the text from the current position of the stream.</summary>
         public unsafe string ReadAllText(Stream source)
         {
+            byte[] bytes = _bytes;
+            int byteCount = bytes.Length;
+            
             int bytesRead;
-            while ((bytesRead = source.Read(_bytes, 0, _bytes.Length)) != 0)
+            while ((bytesRead = source.Read(bytes, 0, byteCount)) != 0)
             {
-                int charCount = _decoder.GetChars(_bytes, 0, bytesRead, _chars, 0);
+                int charCount = _decoder.GetChars(bytes, 0, bytesRead, _chars, 0);
                 _builder.Append(_chars, 0, charCount);
             }
 
