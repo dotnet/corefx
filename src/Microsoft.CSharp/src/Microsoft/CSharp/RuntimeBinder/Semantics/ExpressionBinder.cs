@@ -2486,7 +2486,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool ReportUnsafeErrors()
         {
-            return Context.ReportUnsafeErrors();
+            return Context.ReportUnsafeErrors;
         }
 
         private void RecordUnsafeUsage()

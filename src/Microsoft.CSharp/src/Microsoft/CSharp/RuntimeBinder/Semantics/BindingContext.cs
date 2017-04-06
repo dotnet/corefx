@@ -48,7 +48,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private BindingContext(BindingContext parent, bool checkedNormal, bool checkedConstant)
         {
             m_ExprFactory = parent.m_ExprFactory;
-            UnsafeErrorGiven = parent.UnsafeErrorGiven;
+            ReportUnsafeErrors = parent.ReportUnsafeErrors;
             m_pParentDecl = parent.m_pParentDecl;
             CheckedNormal = parent.CheckedNormal;
             CheckedConstant = parent.CheckedConstant;
@@ -69,14 +69,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Declaration m_pParentDecl;
         public Declaration ContextForMemberLookup() { return m_pParentDecl; }
 
-        public bool UnsafeErrorGiven { get; set; }
-
         // State boolean questions.
 
-        public bool ReportUnsafeErrors()
-        {
-            return !UnsafeErrorGiven;
-        }
+        public bool ReportUnsafeErrors { get; set; } = true;
 
         // Members.
 
