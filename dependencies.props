@@ -1,14 +1,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
 
-  <!-- There are situations where the live .Net Native targeting pack wouldn't be suitable to pick up.
-       These are usually temporary, but requires 'freezing' the .net native targeting pack on CoreFX.
-       Use the property below to control this behavior
-  -->
-  <PropertyGroup>
-    <DisableProjectNTfsAutoUpgrade Condition="'$(DisableProjectNTfsAutoUpgrade)'==''">false</DisableProjectNTfsAutoUpgrade>
-  </PropertyGroup>
-
   <!-- For detailed explanation of the reference versions see:
 
         https://github.com/dotnet/buildtools/blob/master/Documentation/project-nuget-dependencies.md
@@ -17,24 +9,24 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>95c0dfc764c3083aa62e96c6eac211f40b6ce0df</CoreFxCurrentRef>
-    <CoreClrCurrentRef>f97a0e337e4d5837783e0c7168df92bb64613e55</CoreClrCurrentRef>
+    <CoreFxCurrentRef>1871226e8e8a97d4be0f8ef9bcd4cf0dcb0dc740</CoreFxCurrentRef>
+    <CoreClrCurrentRef>c5d9786c02deba689dbb8134742b210db62381b8</CoreClrCurrentRef>
     <ExternalCurrentRef>3b8a99621d89ad9877f053ba8af25e0f25dcd9d8</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>2de789c24b595732e07a7f0923cd9646b9cdcbbe</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>2de789c24b595732e07a7f0923cd9646b9cdcbbe</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>9a927087508a6abdfa41bfe040ad9fb4cc4ac792</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>9a927087508a6abdfa41bfe040ad9fb4cc4ac792</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>05650e53f2aa4497f74cd6e9b053d3f69f64b0bd</SniCurrentRef>
-    <StandardCurrentRef>95c0dfc764c3083aa62e96c6eac211f40b6ce0df</StandardCurrentRef>
+    <StandardCurrentRef>9a927087508a6abdfa41bfe040ad9fb4cc4ac792</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview1-25131-05</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview1-25202-02</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview1-25205-01</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview1-25206-02</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-25016-01</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25131-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25131-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25131-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.0-preview1-25131-01</NETStandardPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25206-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25206-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25206-00</ProjectNTfsTestILCPackageVersion>
+    <NETStandardPackageVersion>2.0.0-preview1-25206-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0-beta-25007-02</SniPackageVersion>
@@ -75,15 +67,11 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)standard/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs">
+    <RemoteDependencyBuildInfo Include="ProjectNTfs">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs-TestILC">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
-      <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs-TestILC-PackageVersion">
+    <RemoteDependencyBuildInfo Include="ProjectNTfsTestILC">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
@@ -112,17 +100,17 @@
       <ElementName>NETStandardPackageVersion</ElementName>
       <PackageId>$(NETStandardPackageId)</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs">
+    <XmlUpdateStep Include="ProjectNTfs">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsExpectedPrerelease</ElementName>
       <BuildInfoName>ProjectNTfs</BuildInfoName>
     </XmlUpdateStep>
-    <XmlUpdateStep Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs-TestILC">
+    <XmlUpdateStep Include="ProjectNTfsTestILC">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsTestILCExpectedPrerelease</ElementName>
-      <BuildInfoName>ProjectNTfs-TestILC</BuildInfoName>
+      <BuildInfoName>ProjectNTfsTestILC</BuildInfoName>
     </XmlUpdateStep>
-    <XmlUpdateStep Condition="'$(DisableProjectNTfsAutoUpgrade)' != 'true'" Include="ProjectNTfs-TestILC-PackageVersion">
+    <XmlUpdateStep Include="ProjectNTfsTestILC">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsTestILCPackageVersion</ElementName>
       <PackageId>TestILCNugetPackageForCoreFX</PackageId>
