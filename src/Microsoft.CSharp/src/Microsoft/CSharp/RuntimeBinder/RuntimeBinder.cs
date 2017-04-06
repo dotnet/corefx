@@ -75,7 +75,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymbolLoader.SetSymbolTable(_symbolTable);
 
             _exprFactory = new ExprFactory(_semanticChecker.GetSymbolLoader().GetGlobalSymbolContext());
-            _bindingContext = BindingContext.CreateInstance(_semanticChecker, _exprFactory);
+            _bindingContext = new BindingContext(_semanticChecker, _exprFactory);
             _binder = new ExpressionBinder(_bindingContext);
         }
 

@@ -13,27 +13,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class BindingContext
     {
-        public static BindingContext CreateInstance(CSemanticChecker semanticChecker, ExprFactory exprFactory)
+        public BindingContext(CSemanticChecker semanticChecker, ExprFactory exprFactory)
         {
             Debug.Assert(semanticChecker != null);
-            return new BindingContext(semanticChecker, exprFactory);
-        }
-
-        public static BindingContext CreateInstance(BindingContext parent)
-        {
-            Debug.Assert(parent.SemanticChecker != null);
-            return new BindingContext(parent);
-        }
-
-        private BindingContext(CSemanticChecker semanticChecker, ExprFactory exprFactory)
-        {
             ExprFactory = exprFactory;
             SemanticChecker = semanticChecker;
             SymbolLoader = semanticChecker.GetSymbolLoader();
         }
 
-        private BindingContext(BindingContext parent)
+        public BindingContext(BindingContext parent)
         {
+            Debug.Assert(parent.SemanticChecker != null);
             ExprFactory = parent.ExprFactory;
             ReportUnsafeErrors = parent.ReportUnsafeErrors;
             ContextForMemberLookup = parent.ContextForMemberLookup;
@@ -43,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
 
-        //The SymbolLoader can be retrieved from m_pSemanticChecker,
+        //The SymbolLoader can be retrieved from SemanticChecker,
         //but that is a virtual call that is showing up on the profiler. Retrieve
         //the SymbolLoader once at construction and return a cached copy.
 
@@ -52,11 +42,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Declaration ContextForMemberLookup { get; set; }
 
-        // State boolean questions.
-
         public bool ReportUnsafeErrors { get; set; } = true;
-
-        // Members.
 
         public CSemanticChecker SemanticChecker { get; }
 
