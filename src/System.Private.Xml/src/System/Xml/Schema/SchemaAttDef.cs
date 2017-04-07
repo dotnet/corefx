@@ -30,10 +30,6 @@ namespace System.Xml.Schema
 
         private Reserve _reserved = Reserve.None; // indicate the attribute type, such as xml:lang or xml:space   
 
-#if SILVERLIGHT
-        XmlTokenizedType tokenizedType;
-#endif
-
 #if !SILVERLIGHT
         private bool _defaultValueChecked;
         private XmlSchemaAttribute _schemaAttribute;
@@ -108,11 +104,7 @@ namespace System.Xml.Schema
 
         object IDtdDefaultAttributeInfo.DefaultValueTyped
         {
-#if SILVERLIGHT
-            get { return null; }
-#else
             get { return ((SchemaAttDef)this).DefaultValueTyped; }
-#endif
         }
 
         int IDtdDefaultAttributeInfo.ValueLineNumber
@@ -163,19 +155,11 @@ namespace System.Xml.Schema
         {
             get
             {
-#if SILVERLIGHT
-                return tokenizedType;
-#else
                 return Datatype.TokenizedType;
-#endif
             }
             set
             {
-#if SILVERLIGHT
-                tokenizedType = value;
-#else
                 this.Datatype = XmlSchemaDatatype.FromXmlTokenizedType(value);
-#endif
             }
         }
 

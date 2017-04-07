@@ -258,13 +258,6 @@ namespace System.Xml
 
             if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
-            // TODO: check what does this do and remove/keep
-#if SILVERLIGHT
-            if ( attrEndPos == bufPos ) {
-                bufChars[bufPos++] = (char)' ';
-            }
-#endif
-
             if (prefix.Length == 0)
             {
                 await RawTextAsync(" xmlns=\"").ConfigureAwait(false);

@@ -863,7 +863,6 @@ namespace System.Xml.Schema
                 return false;
             }
 
-#if !SILVERLIGHT // XDR is not supported in Silverlight
             private bool ParseTimeAndWhitespace(int start)
             {
                 if (ParseTime(ref start))
@@ -876,7 +875,6 @@ namespace System.Xml.Schema
                 }
                 return false;
             }
-#endif
 
             private static int[] s_power10 = new int[maxFractionDigits] { -1, 10, 100, 1000, 10000, 100000, 1000000 };
             private bool ParseTime(ref int start)

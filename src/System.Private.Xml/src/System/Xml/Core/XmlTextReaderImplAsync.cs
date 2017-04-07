@@ -1095,12 +1095,8 @@ namespace System.Xml
         // Switches the reader's encoding
         private Task SwitchEncodingAsync(Encoding newEncoding)
         {
-#if SILVERLIGHT 
-            if ( ( newEncoding.WebName != ps.encoding.WebName || ps.decoder is SafeAsciiDecoder )) {
-#else 
             if ((newEncoding.WebName != _ps.encoding.WebName || _ps.decoder is SafeAsciiDecoder) && !_afterResetState)
             {
-#endif
                 Debug.Assert(_ps.stream != null);
                 UnDecodeChars();
                 _ps.appendMode = false;
@@ -1336,7 +1332,7 @@ namespace System.Xml
                             {
                                 Throw(SR.Xml_InvalidTextDecl);
                             }
-#if !SILVERLIGHT // Needed only for XmlTextReader
+                            // Needed only for XmlTextReader
                             if (_afterResetState)
                             {
                                 // check for invalid encoding switches to default encoding
@@ -1347,7 +1343,6 @@ namespace System.Xml
                                     Throw(SR.Xml_EncodingSwitchAfterResetState, (_ps.encoding.GetByteCount("A") == 1) ? "UTF-8" : "UTF-16");
                                 }
                             }
-#endif
                             if (_ps.decoder is SafeAsciiDecoder)
                             {
                                 await SwitchEncodingToUTF8Async().ConfigureAwait(false);
@@ -1563,7 +1558,7 @@ namespace System.Xml
             {
                 _parsingFunction = _nextParsingFunction;
             }
-#if !SILVERLIGHT // Needed only for XmlTextReader
+            // Needed only for XmlTextReader
             if (_afterResetState)
             {
                 // check for invalid encoding switches to default encoding
@@ -1574,7 +1569,6 @@ namespace System.Xml
                     Throw(SR.Xml_EncodingSwitchAfterResetState, (_ps.encoding.GetByteCount("A") == 1) ? "UTF-8" : "UTF-16");
                 }
             }
-#endif
             if (_ps.decoder is SafeAsciiDecoder)
             {
                 await SwitchEncodingToUTF8Async().ConfigureAwait(false);
@@ -1747,7 +1741,7 @@ namespace System.Xml
 
                 switch (tuple_3.Item2)
                 {
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                    // Needed only for XmlTextReader (reporting of entities)
                     case EntityType.Unexpanded:
                         if (_parsingFunction == ParsingFunction.EntityReference)
                         {
@@ -1755,7 +1749,6 @@ namespace System.Xml
                         }
                         await ParseEntityReferenceAsync().ConfigureAwait(false);
                         return true;
-#endif
                     case EntityType.CharacterDec:
                     case EntityType.CharacterHex:
                     case EntityType.CharacterNamed:
@@ -1823,15 +1816,11 @@ namespace System.Xml
 
                 if (InEntity)
                 {
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                        HandleEntityEnd( true );
-#else
                     if (HandleEntityEnd(true))
                     {
                         SetupEndEntityNodeInContent();
                         return true;
                     }
-#endif
                     return await ParseDocumentContentAsync().ConfigureAwait(false);
                 }
                 Debug.Assert(_index == 0);
@@ -1968,15 +1957,11 @@ namespace System.Xml
                     }
                     ThrowUnclosedElements();
                 }
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                    HandleEntityEnd( true );
-#else
                 if (HandleEntityEnd(true))
                 {
                     SetupEndEntityNodeInContent();
                     return true;
                 }
-#endif
             }
             return await ParseElementContentAsync().ConfigureAwait(false);
         }
@@ -2705,13 +2690,11 @@ namespace System.Xml
                 if (tmpch3 == quoteChar)
                 {
 #if DEBUG
-#if !SILVERLIGHT
                     if (_normalize)
                     {
                         string val = new string(chars, _ps.charPos, pos - _ps.charPos);
                         Debug.Assert(val == XmlComplianceUtil.CDataNormalize(val), "The attribute value is not CDATA normalized!");
                     }
-#endif
 #endif
                     attr.SetValue(chars, _ps.charPos, pos - _ps.charPos);
                     pos++;
@@ -2788,11 +2771,10 @@ namespace System.Xml
             int pos = curPos;
             char[] chars = _ps.chars;
             int attributeBaseEntityId = _ps.entityId;
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+            // Needed only for XmlTextReader (reporting of entities)
             int valueChunkStartPos = 0;
             LineInfo valueChunkLineInfo = new LineInfo(_ps.lineNo, _ps.LinePos);
             NodeData lastChunk = null;
-#endif
 
             Debug.Assert(_stringBuilder.Length == 0);
 
@@ -2879,10 +2861,9 @@ namespace System.Xml
                             }
                             _ps.charPos = pos;
 
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                            // Needed only for XmlTextReader (reporting of entities)
                             int enclosingEntityId = _ps.entityId;
                             LineInfo entityLineInfo = new LineInfo(_ps.lineNo, _ps.LinePos + 1);
-#endif
 
                             var tuple_8 = await HandleEntityReferenceAsync(true, EntityExpandType.All).ConfigureAwait(false);
                             pos = tuple_8.Item1;
@@ -2893,7 +2874,7 @@ namespace System.Xml
                                 case EntityType.CharacterHex:
                                 case EntityType.CharacterNamed:
                                     break;
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                                // Needed only for XmlTextReader (reporting of entities)
                                 case EntityType.Unexpanded:
                                     if (_parsingMode == ParsingMode.Full && _ps.entityId == attributeBaseEntityId)
                                     {
@@ -2966,7 +2947,6 @@ namespace System.Xml
                                     }
                                     pos = _ps.charPos;
                                     break;
-#endif
                                 default:
                                     pos = _ps.charPos;
                                     break;
@@ -3029,9 +3009,7 @@ namespace System.Xml
                             }
                             Throw(SR.Xml_UnclosedQuote);
                         }
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                        HandleEntityEnd( true );
-#else 
+
                         if (HandleEntityEnd(true))
                         { // no EndEntity reporting while parsing attributes
                             Debug.Assert(false);
@@ -3043,7 +3021,6 @@ namespace System.Xml
                             valueChunkStartPos = _stringBuilder.Length;
                             valueChunkLineInfo.Set(_ps.LineNo, _ps.LinePos);
                         }
-#endif
                     }
                 }
 
@@ -3051,7 +3028,7 @@ namespace System.Xml
                 chars = _ps.chars;
             }
 
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+            // Needed only for XmlTextReader (reporting of entities)
             if (attr.nextAttrValueChunk != null)
             {
                 // construct last text value chunk
@@ -3065,7 +3042,6 @@ namespace System.Xml
                     AddAttributeChunkToList(attr, textChunk, ref lastChunk);
                 }
             }
-#endif
 
             _ps.charPos = pos + 1;
 
@@ -3294,7 +3270,7 @@ namespace System.Xml
 
         private Task<bool> ParseTextAsync_IgnoreNode()
         {
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+            // Needed only for XmlTextReader (reporting of entities)
 
             // ignored whitespace at the end of manually resolved entity
             if (_parsingFunction == ParsingFunction.ReportEndEntity)
@@ -3308,7 +3284,6 @@ namespace System.Xml
                 _parsingFunction = _nextNextParsingFunction;
                 return ParseEntityReferenceAsync().ReturnTrueTaskWhenFinishAsync();
             }
-#endif
             return AsyncHelper.DoneTaskFalse;
         }
 
@@ -3576,7 +3551,7 @@ namespace System.Xml
 
                 switch (tuple_14.Item2)
                 {
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                    // Needed only for XmlTextReader (reporting of entities)
                     case EntityType.Unexpanded:
                         // make sure we will report EntityReference after the text node
                         _nextParsingFunction = _parsingFunction;
@@ -3585,7 +3560,6 @@ namespace System.Xml
                         _lastParseTextState = new ParseTextState(outOrChars, chars, pos, rcount, rpos, orChars, c);
                         _parseText_NextFunction = ParseTextFunction.NoValue;
                         return _parseText_dummyTask.Result;
-#endif
                     case EntityType.CharacterDec:
                         if (!_v1Compat)
                         {
@@ -3678,9 +3652,7 @@ namespace System.Xml
                         _parseText_NextFunction = ParseTextFunction.NoValue;
                         return _parseText_dummyTask.Result;
                     }
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                        HandleEntityEnd( true );
-#else
+
                     if (HandleEntityEnd(true))
                     {
                         // report EndEntity after the text node
@@ -3691,7 +3663,6 @@ namespace System.Xml
                         _parseText_NextFunction = ParseTextFunction.NoValue;
                         return _parseText_dummyTask.Result;
                     }
-#endif
                 }
             }
             pos = _ps.charPos;
@@ -3915,7 +3886,6 @@ namespace System.Xml
             return false;
         }
 
-#if !SILVERLIGHT
         private async Task ParseEntityReferenceAsync()
         {
             Debug.Assert(_ps.chars[_ps.charPos] == '&');
@@ -3924,7 +3894,6 @@ namespace System.Xml
             _curNode.SetLineInfo(_ps.LineNo, _ps.LinePos);
             _curNode.SetNamedNode(XmlNodeType.EntityReference, await ParseEntityNameAsync().ConfigureAwait(false));
         }
-#endif
 
         private async Task<ValueTuple<int, EntityType>> HandleEntityReferenceAsync(bool isInAttributeValue, EntityExpandType expandType)
         {
@@ -3965,7 +3934,7 @@ namespace System.Xml
                 }
 
                 // general entity reference
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                // Needed only for XmlTextReader (reporting of entities)
                 // NOTE: XmlValidatingReader compatibility mode: expand all entities in attribute values
                 // general entity reference
                 if (expandType == EntityExpandType.OnlyCharacter ||
@@ -3974,7 +3943,6 @@ namespace System.Xml
                 {
                     return new ValueTuple<int, EntityType>(charRefEndPos, EntityType.Unexpanded);
                 }
-#endif
                 int endPos;
 
                 _ps.charPos++;
@@ -4023,7 +3991,7 @@ namespace System.Xml
             if (_dtdInfo == null ||
                  ((entity = _dtdInfo.LookupEntity(name)) == null))
             {
-#if !SILVERLIGHT // Needed only for XmlTextReader (when used from XmlDocument)
+               // Needed only for XmlTextReader (when used from XmlDocument)
                 if (_disableUndeclaredEntityCheck)
                 {
                     SchemaEntity schemaEntity = new SchemaEntity(new XmlQualifiedName(name), false);
@@ -4031,13 +3999,12 @@ namespace System.Xml
                     entity = schemaEntity;
                 }
                 else
-#endif
                     Throw(SR.Xml_UndeclaredEntity, name, _ps.LineNo, entityStartLinePos);
             }
 
             if (entity.IsUnparsedEntity)
             {
-#if !SILVERLIGHT // Needed only for XmlTextReader (when used from XmlDocument)
+                // Needed only for XmlTextReader (when used from XmlDocument)
                 if (_disableUndeclaredEntityCheck)
                 {
                     SchemaEntity schemaEntity = new SchemaEntity(new XmlQualifiedName(name), false);
@@ -4045,7 +4012,6 @@ namespace System.Xml
                     entity = schemaEntity;
                 }
                 else
-#endif
                     Throw(SR.Xml_UnparsedEntityRef, name, _ps.LineNo, entityStartLinePos);
             }
 
@@ -4081,11 +4047,7 @@ namespace System.Xml
                 {
                     await PushExternalEntityAsync(entity).ConfigureAwait(false);
                     _curNode.entityId = _ps.entityId;
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                    return EntityType.Expanded; 
-#else 
                     return (isInAttributeValue && _validatingReaderCompatFlag) ? EntityType.ExpandedInAttribute : EntityType.Expanded;
-#endif
                 }
             }
             else
@@ -4098,11 +4060,7 @@ namespace System.Xml
                 PushInternalEntity(entity);
 
                 _curNode.entityId = _ps.entityId;
-#if SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
-                return EntityType.Expanded;
-#else 
                 return (isInAttributeValue && _validatingReaderCompatFlag) ? EntityType.ExpandedInAttribute : EntityType.Expanded;
-#endif
             }
         }
 
@@ -4689,12 +4647,8 @@ namespace System.Xml
 
             _dtdInfo = await dtdParser.ParseInternalDtdAsync(new DtdParserProxy(this), true).ConfigureAwait(false);
 
-#if SILVERLIGHT // Needed only for XmlTextReader and XmlValidatingReader
-            if (dtdInfo.HasDefaultAttributes || dtdInfo.HasNonCDataAttributes) {
-#else
             if ((_validatingReaderCompatFlag || !_v1Compat) && (_dtdInfo.HasDefaultAttributes || _dtdInfo.HasNonCDataAttributes))
             {
-#endif
                 _addDefaultAttributesAndNormalize = true;
             }
 
@@ -5330,7 +5284,6 @@ namespace System.Xml
             return new ValueTuple<int, bool>(pos, newDataRead);
         }
 
-#if !SILVERLIGHT
         private async Task<string> ParseEntityNameAsync()
         {
             int endPos;
@@ -5354,7 +5307,6 @@ namespace System.Xml
             _ps.charPos = endPos + 1;
             return entityName;
         }
-#endif
 
         // This method resolves and opens an external DTD subset or an external entity based on its SYSTEM or PUBLIC ID.
         // SxS: This method may expose a name if a resource in baseUri (ref) parameter. 
@@ -5396,11 +5348,7 @@ namespace System.Xml
                     throw;
                 }
                 string innerMessage;
-#if SILVERLIGHT // This is to remove the second "An error occurred" from "An error has occurred while opening external entity 'bla.ent': An error occurred."
-                innerMessage = string.Empty;
-#else 
                 innerMessage = e.Message;
-#endif
                 Throw(new XmlException(entityName == null ? SR.Xml_ErrorOpeningExternalDtd : SR.Xml_ErrorOpeningExternalEntity, new string[] { uri.ToString(), innerMessage }, e, 0, 0));
             }
 
@@ -5507,13 +5455,11 @@ namespace System.Xml
         // Note that this method calls ReadData() which may change the value of ps.chars and ps.charPos.
         private async Task<bool> ZeroEndingStreamAsync(int pos)
         {
-#if !SILVERLIGHT || FEATURE_NETCORE
             if (_v1Compat && pos == _ps.charsUsed - 1 && _ps.chars[pos] == (char)0 && await ReadDataAsync().ConfigureAwait(false) == 0 && _ps.isStreamEof)
             {
                 _ps.charsUsed--;
                 return true;
             }
-#endif
             return false;
         }
 
@@ -5526,12 +5472,8 @@ namespace System.Xml
             // Parse DTD
             _dtdInfo = await dtdParser.ParseFreeFloatingDtdAsync(_fragmentParserContext.BaseURI, _fragmentParserContext.DocTypeName, _fragmentParserContext.PublicId, _fragmentParserContext.SystemId, _fragmentParserContext.InternalSubset, new DtdParserProxy(this)).ConfigureAwait(false);
 
-#if SILVERLIGHT // Needed only for XmlTextReader or XmlValidatingReader
-            if (dtdInfo.HasDefaultAttributes || dtdInfo.HasNonCDataAttributes) {
-#else 
             if ((_validatingReaderCompatFlag || !_v1Compat) && (_dtdInfo.HasDefaultAttributes || _dtdInfo.HasNonCDataAttributes))
             {
-#endif
                 _addDefaultAttributesAndNormalize = true;
             }
         }

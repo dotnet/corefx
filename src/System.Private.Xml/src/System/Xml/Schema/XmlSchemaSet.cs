@@ -10,14 +10,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Schema
 {
-#if SILVERLIGHT
-    public class XmlSchemaSet
-    {
-        //Empty XmlSchemaSet class to enable backward compatibility of XmlSchemaProvideAttribute        
-        //Add private ctor to prevent constructing of this class
-        XmlSchemaSet() { }
-    }
-#else
     /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet"]/*' />
     /// <devdoc>
     ///    <para>The XmlSchemaSet contains a set of namespace URI's.
@@ -1630,5 +1622,4 @@ namespace System.Xml.Schema
             }
         }
     };
-#endif
 }
