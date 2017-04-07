@@ -71,9 +71,6 @@
     <Compile Include="$(CommonTestPath)\System\ObjectCloner.cs">
       <Link>Common\System\ObjectCloner.cs</Link>
     </Compile>
-    <Compile Include="C:\Users\Nate\Documents\Code\corefx\src\Common\tests\System\Collections\DictionaryExtensions.cs">
-      <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
-    </Compile>
     <!-- Generic tests -->
     <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs"  Condition="'$(TargetGroup)' == 'netcoreapp'"/>
     <Compile Include="Generic\SortedSet\SortedSet.TreeSubSet.Tests.cs" />
