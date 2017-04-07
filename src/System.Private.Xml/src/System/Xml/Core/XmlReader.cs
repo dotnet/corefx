@@ -1845,6 +1845,60 @@ namespace System.Xml
             return settings.CreateReader(reader);
         }
 
+        // !!!!!!
+        // NOTE: This method is called via reflection from System.Data.dll and from Analysis Services in Yukon. 
+        // Do not change its signature without notifying the appropriate teams!
+        // !!!!!!
+        internal static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+            if (settings == null)
+            {
+                settings = new XmlReaderSettings();
+            }
+
+            XmlReader reader;
+
+            // allocate byte buffer
+            byte[] bytes = new byte[CalcBufferSize(input)];
+
+            int byteCount = 0;
+            int read;
+            do
+            {
+                read = input.Read(bytes, byteCount, bytes.Length - byteCount);
+                byteCount += read;
+            } while (read > 0 && byteCount< 2);
+
+            // create text or binary XML reader depenting on the stream first 2 bytes
+            if (byteCount >= 2 && (bytes[0] == 0xdf && bytes[1] == 0xff))
+            {
+                if (inputContext != null)
+                    throw new ArgumentException(SR.XmlBinary_NoParserContext, nameof(inputContext));
+                reader = new XmlSqlBinaryReader(input, bytes, byteCount, string.Empty, settings.CloseInput, settings);
+            }
+            else
+            {
+                reader = new XmlTextReaderImpl(input, bytes, byteCount, settings, null, string.Empty, inputContext, settings.CloseInput);
+            }
+
+            // wrap with validating reader
+            if (settings.ValidationType != ValidationType.None)
+            {
+                reader = settings.AddValidation(reader);
+            }
+
+            if (settings.Async)
+            {
+                reader = XmlAsyncCheckReader.CreateAsyncCheckWrapper(reader);
+            }
+
+            return reader;
+        }
+
         internal static int CalcBufferSize(Stream input)
         {
             // determine the size of byte buffer

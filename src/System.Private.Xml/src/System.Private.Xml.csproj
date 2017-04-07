@@ -22,6 +22,9 @@
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>System\StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="System\Xml\BinaryXml\XmlBinaryReader.cs" />
+    <Compile Include="System\Xml\BinaryXml\BinXmlToken.cs" />
+    <Compile Include="System\Xml\BinaryXml\SqlUtils.cs" />
     <Compile Include="Misc\HResults.cs" />
     <Compile Include="System\Xml\AsyncHelper.cs" />
     <Compile Include="System\Xml\Base64Decoder.cs" />

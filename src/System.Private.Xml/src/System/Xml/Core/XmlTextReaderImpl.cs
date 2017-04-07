@@ -778,6 +778,17 @@ namespace System.Xml
             _laterInitParam = null;
         }
 
+        // Initializes a new instance of the XmlTextReaderImpl class for fragment parsing.
+        // This constructor is used by XmlBinaryReader for nested text XML
+        internal XmlTextReaderImpl(string xmlFragment, XmlParserContext context, XmlReaderSettings settings)
+            : this(null, settings, context)
+        {
+            Debug.Assert(xmlFragment != null);
+            InitStringInput(string.Empty, Encoding.Unicode, xmlFragment);
+            _reportedBaseUri = _ps.baseUriStr;
+            _reportedEncoding = _ps.encoding;
+        }
+
         //
         // XmlReader members
         //
