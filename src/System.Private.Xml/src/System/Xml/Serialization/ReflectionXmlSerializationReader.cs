@@ -1578,11 +1578,6 @@ namespace System.Xml.Serialization
             {
                 Mapping = mapping;
             }
-
-            public Member(MemberMapping mapping, CollectionMember collectionMember) : this(mapping)
-            {
-                Collection = collectionMember;
-            }
         }
 
         private enum UnknownNodeAction

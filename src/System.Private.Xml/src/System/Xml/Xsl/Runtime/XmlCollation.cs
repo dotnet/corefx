@@ -485,20 +485,5 @@ namespace System.Xml.Xsl.Runtime
             return Culture.CompareInfo.IsPrefix (str1, str2, this.compops);
         }
 #endif
-
-
-        //-----------------------------------------------
-        // Helper Functions
-        //-----------------------------------------------
-
-        private static int MakeLCID(int langid, int sortid)
-        {
-            return (langid & 0xffff) | ((sortid & 0xf) << 16);
-        }
-
-        private static int GetLangID(int lcid)
-        {
-            return (lcid & 0xffff);
-        }
     }
 }

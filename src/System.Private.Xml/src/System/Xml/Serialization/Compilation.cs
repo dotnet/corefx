@@ -412,7 +412,7 @@ namespace System.Xml.Serialization
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    throw new UnauthorizedAccessException(SR.Format(SR.DicrectoryAccessDenied, location));
+                    throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, location));
                 }
             }
             finally

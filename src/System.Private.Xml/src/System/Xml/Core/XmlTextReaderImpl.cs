@@ -3109,12 +3109,6 @@ namespace System.Xml
             _reportedEncoding = _ps.encoding;
         }
 
-        private void OpenUrlDelegate(object xmlResolver)
-        {
-            // Safe to have valid resolver here as it is not used to parse DTD
-            _ps.stream = (Stream)GetTempResolver().GetEntity(_ps.baseUri, null, typeof(Stream));
-        }
-
         // Stream input only: detect encoding from the first 4 bytes of the byte buffer starting at ps.bytes[ps.bytePos]
         private Encoding DetectEncoding()
         {

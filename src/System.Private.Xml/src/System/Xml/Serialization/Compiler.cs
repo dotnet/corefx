@@ -30,7 +30,6 @@ namespace System.Xml.Serialization
 #if !XMLSERIALIZERGENERATOR
         private bool _debugEnabled = DiagnosticsSwitches.KeepTempFiles.Enabled;
 #endif
-        private Hashtable _imports = new Hashtable();
         private StringWriter _writer = new StringWriter(CultureInfo.InvariantCulture);
 
 #if XMLSERIALIZERGENERATOR

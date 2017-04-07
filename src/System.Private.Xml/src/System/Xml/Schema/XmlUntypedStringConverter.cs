@@ -133,19 +133,9 @@ namespace System.Xml.Schema
             return (ulong)value;
         }
 
-        private string Base64BinaryToString(byte[] value)
-        {
-            return Convert.ToBase64String(value);
-        }
-
         private byte[] StringToBase64Binary(string value)
         {
             return Convert.FromBase64String(XmlConvert.TrimString(value));
-        }
-
-        private string DateTimeToString(DateTime value)
-        {
-            return (new XsdDateTime(value, XsdDateTimeFlags.DateTime)).ToString();
         }
 
         private static DateTime StringToDateTime(string value)
@@ -153,29 +143,14 @@ namespace System.Xml.Schema
             return (DateTime)(new XsdDateTime(value, XsdDateTimeFlags.AllXsd));
         }
 
-        private static string DateTimeOffsetToString(DateTimeOffset value)
-        {
-            return (new XsdDateTime(value, XsdDateTimeFlags.DateTime)).ToString();
-        }
-
         private static DateTimeOffset StringToDateTimeOffset(string value)
         {
             return (DateTimeOffset)(new XsdDateTime(value, XsdDateTimeFlags.AllXsd));
         }
 
-        private string DurationToString(TimeSpan value)
-        {
-            return new XsdDuration(value, XsdDuration.DurationType.Duration).ToString(XsdDuration.DurationType.Duration);
-        }
-
         private TimeSpan StringToDuration(string value)
         {
             return new XsdDuration(value, XsdDuration.DurationType.Duration).ToTimeSpan(XsdDuration.DurationType.Duration);
-        }
-
-        private string AnyUriToString(Uri value)
-        {
-            return value.OriginalString;
         }
 
         private static XmlQualifiedName StringToQName(string value, IXmlNamespaceResolver nsResolver)
@@ -261,21 +236,6 @@ namespace System.Xml.Schema
                 arrDst[i] = (T)_listItemConverter.FromString(stringArray[i], typeof(T), nsResolver);
             }
             return arrDst;
-        }
-
-        /// <summary>
-        /// Type.IsSubtypeOf does not return true if types are equal, this method does.
-        /// </summary>
-        private static bool IsDerivedFrom(Type derivedType, Type baseType)
-        {
-            while (derivedType != null)
-            {
-                if (derivedType == baseType)
-                    return true;
-
-                derivedType = derivedType.BaseType;
-            }
-            return false;
         }
 
         private Exception CreateInvalidClrMappingException(Type sourceType, Type destinationType)

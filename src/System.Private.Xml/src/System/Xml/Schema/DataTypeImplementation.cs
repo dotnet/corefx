@@ -2022,10 +2022,6 @@ namespace System.Xml.Schema
 
         public override XmlTypeCode TypeCode { get { return XmlTypeCode.DateTime; } }
 
-        internal Datatype_dateTimeBase()
-        {
-        }
-
         internal Datatype_dateTimeBase(XsdDateTimeFlags dateTimeFlags)
         {
             _dateTimeFlags = dateTimeFlags;

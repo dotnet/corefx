@@ -929,11 +929,6 @@ namespace System.Xml
             return InitStreamInputAsync(baseUri, baseUri.ToString(), stream, null, 0, encoding);
         }
 
-        private Task InitStreamInputAsync(Uri baseUri, string baseUriStr, Stream stream, Encoding encoding)
-        {
-            return InitStreamInputAsync(baseUri, baseUriStr, stream, null, 0, encoding);
-        }
-
         private async Task InitStreamInputAsync(Uri baseUri, string baseUriStr, Stream stream, byte[] bytes, int byteCount, Encoding encoding)
         {
             Debug.Assert(_ps.charPos == 0 && _ps.charsUsed == 0 && _ps.textReader == null);

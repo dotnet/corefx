@@ -329,19 +329,10 @@ namespace System.Xml.Serialization
                     importer.IncludeType(extraTypes[i]);
             }
             _mapping = importer.ImportTypeMapping(type, root, defaultNamespace);
-            if (location != null)
-            {
-                DemandForUserLocationOrEvidence();
-            }
 
 #if !uapaot
             _tempAssembly = GenerateTempAssembly(_mapping, type, defaultNamespace, location);
 #endif
-        }
-
-        private void DemandForUserLocationOrEvidence()
-        {
-            // Ensure full trust before asserting full file access to the user-provided location or evidence
         }
 
         internal static TempAssembly GenerateTempAssembly(XmlMapping xmlMapping)
