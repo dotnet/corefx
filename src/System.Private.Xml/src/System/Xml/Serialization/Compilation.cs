@@ -52,6 +52,13 @@ namespace System.Xml.Serialization
         {
         }
 
+        internal TempAssembly(XmlMapping[] xmlMappings, Assembly assembly, XmlSerializerImplementation contract)
+        {
+            _assembly = assembly;
+            InitAssemblyMethods(xmlMappings);
+            _contract = contract;
+        }
+
         internal TempAssembly(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, string location)
         {
 #if !uapaot
