@@ -3045,6 +3045,142 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(requestBodyValue.composite.StringValue, requestBodyActual.composite.StringValue);
     }
 
+    [Fact]
+    public static void Xml_HiddenDerivedFieldTest()
+    {
+        using (var ms = new MemoryStream())
+        {
+            var derived = new DerivedClass { value = "on derived" };
+            var ser = new XmlSerializer(typeof(BaseClass));
+            ser.Serialize(ms, derived);
+
+            ms.Position = 0;
+            var roundtripped = ser.Deserialize(ms) as BaseClass;
+
+            if (roundtripped.value == null && roundtripped.Value == null &&
+                ((DerivedClass)roundtripped).Value == null &&
+                ((DerivedClass)roundtripped).value == derived.value)
+            {
+                Assert.True(true);
+            }
+            else
+            {
+                Assert.True(false, "Roundtrip verification for HiddenDerivedField test failed");
+            }
+        }
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToNaNTest()
+    {
+        var xmlSerializer = new XmlSerializer(typeof(DefaultValuesSetToNaN));
+        var originalValue = new DefaultValuesSetToNaN();
+        using (var ms = new MemoryStream())
+        {
+            xmlSerializer.Serialize(ms, originalValue);
+            ms.Flush();
+            ms.Position = 0;
+            var roundtrippedValue = xmlSerializer.Deserialize(ms);
+            Assert.True(originalValue.Equals(roundtrippedValue), "originalValue doesn't equal the roundtrippedValue object!");
+        }
+    }
+
+    [Fact]
+    public static void Xml_NullRefInXmlSerializerCtorTest()
+    {
+        string defaultNamespace = "http://www.contoso.com";
+        var stream = new MemoryStream();
+        var order = PurchaseOrder.CreateInstance();
+        var serializer = new XmlSerializer(order.GetType(), null, null, null, defaultNamespace);
+        serializer.Serialize(stream, order);
+        stream.Position = 0;
+        object result = serializer.Deserialize(stream);
+        Assert.NotNull(result);
+        
+        stream = new MemoryStream();
+        serializer = new XmlSerializer(order.GetType(), null, null, null, defaultNamespace, null);
+        serializer.Serialize(stream, order);
+        stream.Position = 0;
+        result = serializer.Deserialize(stream);
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public static void Xml_AliasedPropertyTest()
+    {
+        using (var ms = new MemoryStream())
+        {
+            var inputList = new List<string> { "item0", "item1", "item2", "item3", "item4" };
+            var before = new AliasedTestType { Aliased = inputList };
+
+            var serializer = new XmlSerializer(typeof(AliasedTestType));
+            serializer.Serialize(ms, before);
+            ms.Position = 0;
+            var roundtripped = serializer.Deserialize(ms) as AliasedTestType;
+
+            if (roundtripped == null || roundtripped.Aliased == null)
+            {
+                Assert.True(false, "Verification Failed: roundtripped or roundtripped.Alias shouldn't be null");
+            }
+            else if (roundtripped.Aliased.GetType() != inputList.GetType() || ((List<string>)roundtripped.Aliased).Count != inputList.Count)
+            {
+                Assert.True(false, "Verification Failed: roundtripped.Alias has incorrect type or size");
+            }
+            else
+            {
+                for (int i = 0; i < inputList.Count; i++)
+                {
+                    if (((List<string>)roundtripped.Aliased).ElementAt(i) != inputList[i])
+                    {
+                        Assert.True(false, "Verification Failed: roundtripped.Alias' elements are incorrect");
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public static void Xml_DeserializeHiddenMembersTest()
+    {
+        var xmlSerializer = new XmlSerializer(typeof(DerivedClass1));
+        string inputXml = "<DerivedClass1><Prop>2012-07-07T00:18:29.7538612Z</Prop></DerivedClass1>";
+        using (var reader = new StringReader(inputXml))
+        {
+            var derivedClassInstance = (DerivedClass1)xmlSerializer.Deserialize(reader);
+            Assert.NotNull(derivedClassInstance.Prop);
+        }
+    }
+
+    [Fact]
+    public static void Xml_SerializeClassNestedInStaticClassTest()
+    {
+        using (var ms = new MemoryStream())
+        {
+            var serializer = new XmlSerializer(typeof(Outer.Person));
+            var person = new Outer.Person()
+            {
+                FirstName = "Harry",
+                MiddleName = "James",
+                LastName = "Potter"
+            };
+            serializer.Serialize(ms, person);
+
+            ms.Position = 0;
+            var roundtripped = serializer.Deserialize(ms) as Outer.Person;
+
+            if (roundtripped != null && roundtripped.FirstName == person.FirstName &&
+                roundtripped.MiddleName == person.MiddleName &&
+                roundtripped.LastName == person.LastName)
+            {
+                Assert.True(true);
+            }
+            else
+            {
+                Assert.True(false, "Roundtrip verification failed");
+            }
+        }
+    }
+
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false)
     {
         var member = new XmlReflectionMember();
