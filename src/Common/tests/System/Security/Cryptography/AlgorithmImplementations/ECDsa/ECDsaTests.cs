@@ -517,6 +517,21 @@ namespace System.Security.Cryptography.EcDsa.Tests
             Assert.True(ecdsa.VerifyData(halfData, dataSignature, HashAlgorithmName.SHA256));
         }
 
+        [Fact]
+        public void PublicKey_CannotSign()
+        {
+            ECParameters keyParameters = ECDsaTestData.GetNistP521DiminishedCoordsParameters();
+            keyParameters.D = null;
+
+            using (ECDsa ecdsa = ECDsaFactory.Create())
+            {
+                ecdsa.ImportParameters(keyParameters);
+
+                Assert.ThrowsAny<CryptographicException>(
+                    () => ecdsa.SignData(new byte[] { 1, 2, 3, 4, 5 }, HashAlgorithmName.SHA256));
+            }
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Theory]
