@@ -218,7 +218,7 @@ internal class IOServices
 
         var di = new DriveInfo(drive);
 
-        return String.Equals(di.DriveFormat, "NTFS", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(di.DriveFormat, "NTFS", StringComparison.OrdinalIgnoreCase);
     }
 
     public static long GetAvailableFreeBytes(string drive)
