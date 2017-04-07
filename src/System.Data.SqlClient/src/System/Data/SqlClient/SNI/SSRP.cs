@@ -125,7 +125,7 @@ namespace System.Data.SqlClient.SNI
         private static byte[] SendUDPRequest(string browserHostname, int port, byte[] requestPacket)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(browserHostname), "browserhostname should not be null, empty, or whitespace");
-            Debug.Assert(port >= 0 || port <= 65535, "Invalide port range");
+            Debug.Assert(port >= 0 && port <= 65535, "Invalide port range");
             Debug.Assert(requestPacket != null && requestPacket.Length > 0, "requestPacket should not be null or 0-length array");
 
             const int sendTimeOut = 1000;

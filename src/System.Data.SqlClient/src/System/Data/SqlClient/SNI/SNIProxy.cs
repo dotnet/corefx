@@ -330,7 +330,7 @@ namespace System.Data.SqlClient.SNI
         private static byte[] GetSqlServerSPN(DataSource dataSource)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(dataSource.ServerName));
-            
+
             string hostName = dataSource.ServerName;
             string postfix = null;
             if (dataSource.Port != -1)
@@ -385,53 +385,34 @@ namespace System.Data.SqlClient.SNI
             }
 
             int port = -1;
-            if (details.ConnectionProtocol == DataSource.Protocol.Admin)
+            bool isAdminConnection = details.ConnectionProtocol == DataSource.Protocol.Admin;
+            if (details.IsSsrpRequired)
             {
-                if (details.IsSsrpRequired)
+                try
                 {
-                    try
-                    {
-                        port = SSRP.GetDacPortByInstanceName(hostName, details.InstanceName);
-                    }
-                    catch (SocketException se)
-                    {
-                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
-                        return null;
-                    }
+                    port = isAdminConnection ?
+                            SSRP.GetDacPortByInstanceName(hostName, details.InstanceName) :
+                            SSRP.GetPortByInstanceName(hostName, details.InstanceName);
                 }
-                else
+                catch (SocketException se)
                 {
-                    port = DefaultSqlServerDacPort;
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
+                    return null;
                 }
+            }
+            else if (details.Port != -1)
+            {
+                port = details.Port;
             }
             else
             {
-                if (details.IsSsrpRequired)
-                {
-                    try
-                    {
-                        port = SSRP.GetPortByInstanceName(hostName, details.InstanceName);
-                    }
-                    catch (SocketException se)
-                    {
-                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, se);
-                        return null;
-                    }
-                }
-                else if (details.Port != -1)
-                {
-                    port = details.Port;
-                }
-                else
-                {
-                    port = DefaultSqlServerPort;
-                }
+                port = isAdminConnection ? DefaultSqlServerDacPort : DefaultSqlServerPort;
             }
 
             return new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
         }
 
-       
+
 
         /// <summary>
         /// Creates an SNINpHandle object
