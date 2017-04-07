@@ -11,6 +11,8 @@ namespace System.Security.Cryptography.Csp.Tests
     {
         const int PROV_DSS_DH = 13;
 
+        public static bool SupportsKeyGeneration => DSAFactory.SupportsKeyGeneration;
+
         [Fact]
         public static void DefaultKeySize()
         {
@@ -236,7 +238,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void SignHash_DefaultAlgorithm_Success()
         {
             byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
@@ -248,7 +250,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void SignHash_InvalidHashAlgorithm_Throws()
         {
             byte[] hashVal = SHA256.Create().ComputeHash(DSATestData.HelloBytes);
@@ -259,7 +261,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyHash_DefaultAlgorithm_Success()
         {
             byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
@@ -271,7 +273,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyHash_CaseInsensitive_Success()
         {
             byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
@@ -306,7 +308,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyData_InvalidHashAlgorithm_Throws()
         {
             using (var dsa = new DSACryptoServiceProvider())
