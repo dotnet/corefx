@@ -130,7 +130,7 @@ namespace System.Collections.Tests
         {
             IDictionary<string, string> dictionary = new SortedDictionary<string, string>();
             Assert.Equal(false, dictionary.Remove("key", out var value));
-            Assert.Equal("value", default(string));
+            Assert.Equal(default(string), value);
         }
     }
 }

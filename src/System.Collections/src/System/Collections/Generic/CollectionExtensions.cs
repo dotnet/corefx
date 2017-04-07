@@ -45,15 +45,13 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            try
+            if (!dictionary.ContainsKey(key))
             {
                 dictionary.Add(key, value);
                 return true;
             }
-            catch (Exception)
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public static bool Remove<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, out TValue value)
@@ -62,9 +60,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(dictionary));
             }
-
-            // Testing purposes
-            throw new NotImplementedException();
 
             value = default(TValue);
 
