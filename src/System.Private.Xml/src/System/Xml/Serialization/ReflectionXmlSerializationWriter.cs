@@ -895,7 +895,6 @@ namespace System.Xml.Serialization
         {
             if (attribute.Mapping is SpecialMapping)
             {
-                // TODO: this block is never hit by our tests. (Tracked by Issue 16683)
                 SpecialMapping special = (SpecialMapping)attribute.Mapping;
                 if (special.TypeDesc.Kind == TypeKind.Attribute || special.TypeDesc.CanBeAttributeValue)
                 {
