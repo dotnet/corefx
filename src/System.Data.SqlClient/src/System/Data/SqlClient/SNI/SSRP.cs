@@ -13,7 +13,6 @@ namespace System.Data.SqlClient.SNI
     internal class SSRP
     {
         private const char SemicolonSeparator = ';';
-        private const char NullChar = '\0';
         private const int SqlServerBrowserPort = 1434;
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace System.Data.SqlClient.SNI
             Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             const byte ClntUcastInst = 0x04;
-            instanceName = instanceName + Char.MinValue;
+            instanceName += Char.MinValue;
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 1];
@@ -107,7 +106,7 @@ namespace System.Data.SqlClient.SNI
 
             const byte ClntUcastDac = 0x0F;
             const byte ProtocolVersion = 0x01;
-            instanceName = instanceName + Char.MinValue;
+            instanceName += Char.MinValue;
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 2];
