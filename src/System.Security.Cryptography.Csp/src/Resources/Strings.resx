@@ -145,6 +145,9 @@
   <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
     <value>Cannot open an invalid handle.</value>
   </data>
+  <data name="Cryptography_Operation_Not_Supported" xml:space="preserve">
+    <value>'{0}' requires Windows Cryptographic API (CAPI), which is not available on this platform.</value>
+  </data>
   <data name="Cryptography_Padding_DecDataTooBig" xml:space="preserve">
     <value>Cryptographic padding data is too big</value>
   </data>

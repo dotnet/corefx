@@ -16,14 +16,9 @@ namespace System.Security.Cryptography
         private bool _publicOnly;
 
         public RSACryptoServiceProvider()
-            : this(DefaultKeySize)
-        {
-            // This class wraps RSA
-            _impl = RSA.Create(DefaultKeySize);
-        }
+            : this(DefaultKeySize) { }
 
         public RSACryptoServiceProvider(int dwKeySize)
-            : this(dwKeySize)
         {
             if (dwKeySize < 0)
                 throw new ArgumentOutOfRangeException(nameof(dwKeySize), SR.ArgumentOutOfRange_NeedNonNegNum);
@@ -34,17 +29,17 @@ namespace System.Security.Cryptography
 
         public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
         }
 
         public RSACryptoServiceProvider(CspParameters parameters)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
         }
 
         public CspKeyContainerInfo CspKeyContainerInfo
         {
-            get { throw new PlatformNotSupportedException(); }
+            get { throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspKeyContainerInfo))); }
         }
 
         public byte[] Decrypt(byte[] rgb, bool fOAEP)

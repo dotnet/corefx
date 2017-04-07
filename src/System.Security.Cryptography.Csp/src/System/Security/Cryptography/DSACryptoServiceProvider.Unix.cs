@@ -39,12 +39,12 @@ namespace System.Security.Cryptography
 
         public DSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
         }
 
         public DSACryptoServiceProvider(CspParameters parameters)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "This is the implementation of DSACryptoServiceProvider")]
@@ -52,7 +52,7 @@ namespace System.Security.Cryptography
 
         public CspKeyContainerInfo CspKeyContainerInfo
         {
-            get { throw new PlatformNotSupportedException(); }
+            get {throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspKeyContainerInfo))); }
         }
 
         protected override void Dispose(bool disposing)
