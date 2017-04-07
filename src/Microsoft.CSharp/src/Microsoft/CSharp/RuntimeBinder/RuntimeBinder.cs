@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -1415,9 +1416,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // Don't count single-ranked non-SZ arrays as that type cannot be handled directly in C#
                     // so the closest C# equivalent is to try to using indexing on a value of type System.Array
                     // which should fail.
-                    if ((argument.Type.IsArray && argument.Type.GetArrayRank() == numIndexArguments && (numIndexArguments > 1 || argument.Type.IsSZArray())) ||
+                    if (argument.Type.IsArray && (argument.Type.GetArrayRank() > 1 || argument.Type.IsSZArray()) ||
                         argument.Type == typeof(string))
                     {
+                        if (argument.Type.IsArray && numIndexArguments != argument.Type.GetArrayRank())
+                        {
+                            _semanticChecker.GetErrorContext().Error(ErrorCode.ERR_BadIndexCount, argument.Type.GetArrayRank());
+                        }
+
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
                 }
