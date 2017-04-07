@@ -512,7 +512,7 @@ namespace System.Xml.Serialization
                         else
                         {
                             XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                            mapping = importer.ImportTypeMapping(rootType, null, DefaultNamespace);
+                            mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
                         }
 
                         var writer = new ReflectionXmlSerializationWriter(mapping, xmlWriter, namespaces == null || namespaces.Count == 0 ? DefaultNamespaces : namespaces, encodingStyle, id);
@@ -520,7 +520,7 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this.rootType, typeof(XmlSerializer).Name));
+                        throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this._rootType, typeof(XmlSerializer).Name));
                     }
                 }
 #endif
@@ -660,7 +660,7 @@ namespace System.Xml.Serialization
                         else
                         {
                             XmlReflectionImporter importer = new XmlReflectionImporter(DefaultNamespace);
-                            mapping = importer.ImportTypeMapping(rootType, null, DefaultNamespace);
+                            mapping = importer.ImportTypeMapping(_rootType, null, DefaultNamespace);
                         }
 
                         var reader = new ReflectionXmlSerializationReader(mapping, xmlReader, events, encodingStyle);
@@ -669,7 +669,7 @@ namespace System.Xml.Serialization
                     else
                     {
 
-                        throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this.rootType, typeof(XmlSerializer).Name));
+                        throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this._rootType, typeof(XmlSerializer).Name));
                     }
                 }
 #endif
@@ -751,7 +751,7 @@ namespace System.Xml.Serialization
             for(int i=0;i<mappings.Length;i++)
             {
                 serializers[i] = new XmlSerializer();
-                serializers[i].rootType = type;
+                serializers[i]._rootType = type;
                 serializers[i]._mapping = mappings[i];
             }
 
