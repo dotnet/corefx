@@ -6,13 +6,8 @@ namespace System.Xml
 {
     using System.Diagnostics;
 
-#if DEBUG
-    public static class DiagnosticsSwitches
-    {
-#else
     internal static class DiagnosticsSwitches
     {
-#endif
         private static volatile BooleanSwitch s_xmlSchemaContentModel;
         private static volatile TraceSwitch s_xmlSchema;
         private static volatile BooleanSwitch s_keepTempFiles;

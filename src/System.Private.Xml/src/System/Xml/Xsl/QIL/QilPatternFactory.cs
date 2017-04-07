@@ -224,8 +224,6 @@ namespace System.Xml.Xsl.Qil
         //-----------------------------------------------
         // boolean operators
         //-----------------------------------------------
-
-        // ToDo: Why we have nulls here at all?
         private static void CheckLogicArg(QilNode arg)
         {
             Debug.Assert(arg != null, "Argulent shouldn't be null");

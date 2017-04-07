@@ -259,7 +259,6 @@ namespace System.Xml.Schema
                 SchemaCollectionCompiler compiler = new SchemaCollectionCompiler(nameTable, validationEventHandler);
                 _isCompiled = compiler.Execute(this, schemaInfo, CompileContentModel);
                 this.SetIsCompiled(_isCompiled);
-                //TODO includes isCompiled flag
                 return _isCompiled;
             }
         }

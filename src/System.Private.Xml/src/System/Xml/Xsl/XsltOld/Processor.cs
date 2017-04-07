@@ -222,7 +222,6 @@ namespace System.Xml.Xsl.XsltOld
             {
                 return null;
             }
-            // TODO: use typecode there.
             if (
                 parameter is XPathNodeIterator ||
                 parameter is XPathNavigator ||
@@ -664,7 +663,6 @@ namespace System.Xml.Xsl.XsltOld
             object result = query.Evaluate(context);
             if (result is XPathNodeIterator)
             {
-                // ToDo: We create XPathSelectionIterator to count positions, but it's better create special query in this case at compile time.
                 return new XPathSelectionIterator(context.Current, query);
             }
             throw XsltException.Create(SR.XPath_NodeSetExpected);

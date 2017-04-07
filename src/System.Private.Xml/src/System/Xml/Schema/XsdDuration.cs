@@ -226,9 +226,6 @@ namespace System.Xml.Schema
             get { return (int)(_nanoseconds & ~NegativeBit); }
         }
 
-#if !SILVERLIGHT
-#endif
-
         /// <summary>
         /// Internal helper method that converts an Xsd duration to a TimeSpan value.  This code uses the estimate
         /// that there are 365 days in the year and 30 days in a month.
@@ -253,12 +250,10 @@ namespace System.Xml.Schema
             return result;
         }
 
-#if !SILVERLIGHT
         internal Exception TryToTimeSpan(out TimeSpan result)
         {
             return TryToTimeSpan(DurationType.Duration, out result);
         }
-#endif
 
         internal Exception TryToTimeSpan(DurationType durationType, out TimeSpan result)
         {
@@ -431,12 +426,10 @@ namespace System.Xml.Schema
             return sb.ToString();
         }
 
-#if !SILVERLIGHT
         internal static Exception TryParse(string s, out XsdDuration result)
         {
             return TryParse(s, DurationType.Duration, out result);
         }
-#endif
 
         internal static Exception TryParse(string s, DurationType durationType, out XsdDuration result)
         {

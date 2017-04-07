@@ -1330,7 +1330,6 @@ namespace System.Xml.Xsl.Xslt
         // ----------------- Template level methods --------------------------
         // Each instruction in AST tree has nsdecl list attuched to it.
         // Load*() methods do this treek. Xsl*() methods rely on LoadOneInstruction() to do this.
-        // ToDo: check how LoadUnknown*() follows this gideline!
 
         private enum InstructionFlags
         {
@@ -2610,7 +2609,6 @@ namespace System.Xml.Xsl.Xslt
             _input.MoveToElement();
             ISourceLineInfo extElmLineInfo = _input.BuildNameLineInfo();
             List<XslNode> fallbacksArray = new List<XslNode>();
-            // TODO: Unknown element can have NS declarations that will be in affect in fallback clouse.
             /* Process children */
             if (_input.MoveToFirstChild())
             {
@@ -3077,8 +3075,6 @@ namespace System.Xml.Xsl.Xslt
             }
         }
 
-
-        // ToDo: We don't need separation on SkipEmptyContent() and CheckNoContent(). Merge them back when we are done with parsing.
         private void CheckNoContent()
         {
             _input.MoveToElement();

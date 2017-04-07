@@ -146,10 +146,8 @@ namespace System.Xml {
         protected bool              omitXmlDeclaration;
         protected string            newLineChars;
         protected bool              checkCharacters;
-#if !SILVERLIGHT
         protected XmlStandalone     standalone;
         protected XmlOutputMethod   outputMethod;
-#endif
         protected bool              autoXmlDeclaration;
         protected bool              mergeCDataSections;
 
@@ -172,11 +170,9 @@ namespace System.Xml {
             checkCharacters = settings.CheckCharacters;
             closeOutput = settings.CloseOutput;
 
-#if !SILVERLIGHT
             standalone = settings.Standalone;
             outputMethod = settings.OutputMethod;
             mergeCDataSections = settings.MergeCDataSections;
-#endif
 
             if ( checkCharacters && newLineHandling == NewLineHandling.Replace ) {
                 ValidateContentChars( newLineChars, "NewLineChars", false );
@@ -193,13 +189,11 @@ namespace System.Xml {
             // the buffer is allocated will OVERFLOW in order to reduce checks when writing out constant size markup
             this.bufChars = new _BUFFER_TYPE[BUFSIZE + OVERFLOW];
 
-#if !SILVERLIGHT
             // Write the xml declaration
             if (settings.AutoXmlDeclaration ) {
                 WriteXmlDeclaration( standalone );
                 autoXmlDeclaration = true;
             }
-#endif
         }
 #endif
 
@@ -250,13 +244,11 @@ namespace System.Xml {
             }
 #endif
 
-#if !SILVERLIGHT
             // Write the xml declaration
             if ( settings.AutoXmlDeclaration ) {
                 WriteXmlDeclaration( standalone );
                 autoXmlDeclaration = true;
             }
-#endif
         }
 
 //
@@ -275,11 +267,9 @@ namespace System.Xml {
                 settings.ConformanceLevel = ConformanceLevel.Auto;
                 settings.CheckCharacters = checkCharacters;
 
-#if !SILVERLIGHT
                 settings.AutoXmlDeclaration = autoXmlDeclaration;
                 settings.Standalone = standalone;
                 settings.OutputMethod = outputMethod;
-#endif
                 settings.ReadOnly = true;
                 return settings;
 
@@ -482,21 +472,6 @@ namespace System.Xml {
 
             // VSTFDEVDIV bug #583965: Inconsistency between Silverlight 2 and Dev10 in the way a single xmlns attribute is serialized	
             // Resolved as: Won't fix (breaking change)
-#if SILVERLIGHT
-            if ( attrEndPos == bufPos ) {
-                _BUFFER[bufPos++] = (_BUFFER_TYPE)' ';
-            }
-
-            if ( prefix.Length == 0 ) {
-                RawText( "xmlns=\"" );
-            }
-            else {
-                RawText( "xmlns:" );
-                RawText( prefix );
-                _BUFFER[bufPos++] = (_BUFFER_TYPE)'=';
-                _BUFFER[bufPos++] = (_BUFFER_TYPE)'"';
-            }
-#else
             if ( prefix.Length == 0 ) {
                 RawText( " xmlns=\"" );
             }
@@ -506,7 +481,6 @@ namespace System.Xml {
                 _BUFFER[bufPos++] = (_BUFFER_TYPE)'=';
                 _BUFFER[bufPos++] = (_BUFFER_TYPE)'"';
             }
-#endif
 
             inAttributeValue = true;
             _SET_TEXT_CONTENT_MARK(true)
@@ -635,9 +609,6 @@ namespace System.Xml {
         }
 
         // Serialize a whitespace node.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         public override unsafe void WriteWhitespace( string ws ) {
             Debug.Assert( ws != null );
             _SET_TEXT_CONTENT_MARK(false)
@@ -654,9 +625,6 @@ namespace System.Xml {
         }
 
         // Serialize either attribute or element text using XML rules.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         public override unsafe void WriteString( string text ) {
             Debug.Assert( text != null );
             _SET_TEXT_CONTENT_MARK(true)
@@ -687,9 +655,6 @@ namespace System.Xml {
 
         // Serialize either attribute or element text using XML rules.
         // Arguments are validated in the XmlWellformedWriter layer.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         public override unsafe void WriteChars( char[] buffer, int index, int count ) {
             Debug.Assert( buffer != null );
             Debug.Assert( index >= 0 );
@@ -709,9 +674,6 @@ namespace System.Xml {
 
         // Serialize raw data.
         // Arguments are validated in the XmlWellformedWriter layer
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         public override unsafe void WriteRaw( char[] buffer, int index, int count ) {
             Debug.Assert( buffer != null );
             Debug.Assert( index >= 0 );
@@ -726,9 +688,6 @@ namespace System.Xml {
         }
 
         // Serialize raw data.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         public override unsafe void WriteRaw( string data ) {
             Debug.Assert( data != null );
 
@@ -916,9 +875,6 @@ namespace System.Xml {
 
         // Serialize text that is part of an attribute value.  The '&', '<', '>', and '"' characters
         // are entitized.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecurityCritical]
-#endif
         protected unsafe void WriteAttributeTextBlock( char *pSrc, char *pSrcEnd ) {
             fixed ( _BUFFER_TYPE * pDstBegin = _BUFFER ) {
                 _BUFFER_TYPE * pDst = pDstBegin + this.bufPos;
@@ -1014,9 +970,6 @@ namespace System.Xml {
 
         // Serialize text that is part of element content.  The '&', '<', and '>' characters
         // are entitized.
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecurityCritical]
-#endif
         protected unsafe void WriteElementTextBlock( char *pSrc, char *pSrcEnd ) {
             fixed ( _BUFFER_TYPE * pDstBegin = _BUFFER ) {
                 _BUFFER_TYPE * pDst = pDstBegin + this.bufPos;
@@ -1109,9 +1062,6 @@ namespace System.Xml {
             }
         }
 
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         protected unsafe void RawText( string s ) {
             Debug.Assert( s != null );
             fixed ( char * pSrcBegin = s ) {
@@ -1119,9 +1069,6 @@ namespace System.Xml {
             }
         }
 
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecurityCritical]
-#endif
         protected unsafe void RawText( char * pSrcBegin, char * pSrcEnd ) {
             fixed ( _BUFFER_TYPE * pDstBegin = _BUFFER ) {
                 _BUFFER_TYPE * pDst = pDstBegin + this.bufPos;
@@ -1165,9 +1112,6 @@ namespace System.Xml {
             }
         }
 
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecurityCritical]
-#endif
         protected unsafe void WriteRawWithCharChecking( char * pSrcBegin, char * pSrcEnd ) {
             fixed ( _BUFFER_TYPE * pDstBegin = _BUFFER ) {
                 char * pSrc = pSrcBegin;
@@ -1246,9 +1190,6 @@ namespace System.Xml {
             }
         }
 
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         protected unsafe void WriteCommentOrPi( string text, int stopChar ) {
             if ( text.Length == 0 ) {
                 if ( bufPos >= bufLen ) {
@@ -1361,9 +1302,6 @@ namespace System.Xml {
             }
         }
 
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY
-        [System.Security.SecuritySafeCritical]
-#endif
         protected unsafe void WriteCDataSection( string text ) {
             if ( text.Length == 0 ) {
                 if ( bufPos >= bufLen ) {

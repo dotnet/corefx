@@ -23,11 +23,9 @@ namespace System.Xml.Schema
         GMonthDay = 0x20,
         GDay = 0x40,
         GMonth = 0x80,
-#if !SILVERLIGHT // XDR is not supported in Silverlight
         XdrDateTimeNoTz = 0x100,
         XdrDateTime = 0x200,
         XdrTimeNoTz = 0x400,  //XDRTime with tz is the same as xsd:time  
-#endif
         AllXsd = 0xFF //All still does not include the XDR formats
     }
 
@@ -62,9 +60,7 @@ namespace System.Xml.Schema
             GMonthDay,
             GDay,
             GMonth,
-#if !SILVERLIGHT // XDR is not supported in Silverlight
             XdrDateTime,
-#endif
         }
 
         // Internal representation of DateTimeKind
@@ -124,12 +120,10 @@ namespace System.Xml.Schema
             InitiateXsdDateTime(parser);
         }
 
-#if !SILVERLIGHT
         private XsdDateTime(Parser parser) : this()
         {
             InitiateXsdDateTime(parser);
         }
-#endif
 
         private void InitiateXsdDateTime(Parser parser)
         {
@@ -141,7 +135,6 @@ namespace System.Xml.Schema
             _extra = (uint)(((int)parser.typeCode << TypeShift) | ((int)parser.kind << KindShift) | (parser.zoneHour << ZoneHourShift) | parser.zoneMinute);
         }
 
-#if !SILVERLIGHT
         internal static bool TryParse(string text, XsdDateTimeFlags kinds, out XsdDateTime result)
         {
             Parser parser = new Parser();
@@ -153,7 +146,6 @@ namespace System.Xml.Schema
             result = new XsdDateTime(parser);
             return true;
         }
-#endif
 
         /// <summary>
         /// Constructs an XsdDateTime from a DateTime.
@@ -244,7 +236,6 @@ namespace System.Xml.Schema
             get { return (XsdDateTimeKind)((_extra & KindMask) >> KindShift); }
         }
 
-#if !SILVERLIGHT
         /// <summary>
         /// Returns XmlTypeCode of the value being stored
         /// </summary>
@@ -252,7 +243,6 @@ namespace System.Xml.Schema
         {
             get { return s_typeCodes[(int)InternalTypeCode]; }
         }
-#endif
 
         /// <summary>
         /// Returns the year part of XsdDateTime
@@ -343,7 +333,6 @@ namespace System.Xml.Schema
             }
         }
 
-#if !SILVERLIGHT
         public DateTime ToZulu()
         {
             switch (InternalKind)
@@ -361,7 +350,6 @@ namespace System.Xml.Schema
                     return _dt;
             }
         }
-#endif
 
         /// <summary>
         /// Cast to DateTime
@@ -679,13 +667,8 @@ namespace System.Xml.Schema
                     start++;
                 }
                 // Choose format starting from the most common and trying not to reparse the same thing too many times
-
-#if !SILVERLIGHT // XDR is not supported in Silverlight
                 if (Test(kinds, XsdDateTimeFlags.DateTime | XsdDateTimeFlags.Date | XsdDateTimeFlags.XdrDateTime | XsdDateTimeFlags.XdrDateTimeNoTz))
                 {
-#else
-                if (Test(kinds, XsdDateTimeFlags.DateTime | XsdDateTimeFlags.Date)) {
-#endif
                     if (ParseDate(start))
                     {
                         if (Test(kinds, XsdDateTimeFlags.DateTime))
@@ -704,7 +687,7 @@ namespace System.Xml.Schema
                                 return true;
                             }
                         }
-#if !SILVERLIGHT // XDR is not supported in Silverlight
+
                         if (Test(kinds, XsdDateTimeFlags.XdrDateTime))
                         {
                             if (ParseZoneAndWhitespace(start + s_lzyyyy_MM_dd) || (ParseChar(start + s_lzyyyy_MM_dd, 'T') && ParseTimeAndZoneAndWhitespace(start + s_lzyyyy_MM_ddT)))
@@ -729,7 +712,6 @@ namespace System.Xml.Schema
                                 return true;
                             }
                         }
-#endif
                     }
                 }
 
@@ -745,7 +727,6 @@ namespace System.Xml.Schema
                     }
                 }
 
-#if !SILVERLIGHT // XDR is not supported in Silverlight
                 if (Test(kinds, XsdDateTimeFlags.XdrTimeNoTz))
                 {
                     if (ParseTimeAndWhitespace(start))
@@ -757,7 +738,6 @@ namespace System.Xml.Schema
                         return true;
                     }
                 }
-#endif
 
                 if (Test(kinds, XsdDateTimeFlags.GYearMonth | XsdDateTimeFlags.GYear))
                 {

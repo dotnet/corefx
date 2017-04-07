@@ -123,9 +123,6 @@ namespace System.Xml.Serialization
             {
                 if (_contract == null)
                 {
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (_assembly == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Failed to generate XmlSerializer assembly"));  // Remove after https://github.com/dotnet/corefx/issues/18015 is fixed
-
                     _contract = (XmlSerializerImplementation)Activator.CreateInstance(GetTypeFromAssembly(_assembly, "XmlSerializerContract"));
                 }
                 return _contract;

@@ -232,7 +232,7 @@ namespace MS.Internal.Xml.XPath
             // We don't want DescendantOverDescendant pattern to be recognized here (in case descendent::foo[expr]/descendant::bar)
             // So we clean this flag here:
             flags &= ~Flags.SmartDesc;
-            // ToDo: Instead it would be nice to wrap descendent::foo[expr] into special query that will flatten it -- i.e.
+            // Suggestion: Instead it would be nice to wrap descendent::foo[expr] into special query that will flatten it -- i.e.
             //       remove all nodes that are descendant of other nodes. This is very easy because for sorted nodesets all children 
             //       follow its parent. One step caching. This can be easily done by rightmost DescendantQuery itself.
             //       Interesting note! Can we guarantee that DescendantOverDescendant returns flat nodeset? This definitely true if it's input is flat.

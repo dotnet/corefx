@@ -987,8 +987,6 @@ namespace System.Xml
         {
             get
             {
-                // TODO: check if this comment is valid
-                // Project-N: why is this true given that ResolveEntity always throws an exception in SL?
                 return true;
             }
         }

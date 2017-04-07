@@ -30,12 +30,10 @@ namespace System.Xml.Schema
 
         private Reserve _reserved = Reserve.None; // indicate the attribute type, such as xml:lang or xml:space   
 
-#if !SILVERLIGHT
         private bool _defaultValueChecked;
         private XmlSchemaAttribute _schemaAttribute;
 
         public static readonly SchemaAttDef Empty = new SchemaAttDef();
-#endif
 
         //
         // Constructors
@@ -45,12 +43,10 @@ namespace System.Xml.Schema
         {
         }
 
-#if !SILVERLIGHT
         public SchemaAttDef(XmlQualifiedName name) : base(name, null)
         {
         }
         private SchemaAttDef() { }
-#endif
 
         //
         // IDtdAttributeInfo interface
@@ -169,7 +165,6 @@ namespace System.Xml.Schema
             set { _reserved = value; }
         }
 
-#if !SILVERLIGHT
         internal bool DefaultValueChecked
         {
             get
@@ -217,6 +212,5 @@ namespace System.Xml.Schema
         {
             return (SchemaAttDef)MemberwiseClone();
         }
-#endif
     }
 }

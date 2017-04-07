@@ -168,12 +168,11 @@ namespace System.Xml
                         return ParseElementContentAsync();
                     case ParsingFunction.DocumentContent:
                         return ParseDocumentContentAsync();
-#if !SILVERLIGHT // Needed only for XmlTextReader
+                    // Needed only for XmlTextReader
                     //XmlTextReader can't execute Async method.
                     case ParsingFunction.OpenUrl:
                         Debug.Assert(false);
                         break;
-#endif
                     case ParsingFunction.SwitchToInteractive:
                         Debug.Assert(!_ps.appendMode);
                         _readState = ReadState.Interactive;
@@ -206,7 +205,7 @@ namespace System.Xml
                         PopElementContext();
                         _parsingFunction = _nextParsingFunction;
                         continue;
-#if !SILVERLIGHT // Needed only for XmlTextReader (reporting of entities)
+                    // Needed only for XmlTextReader (reporting of entities)
                     case ParsingFunction.EntityReference:
                         _parsingFunction = _nextParsingFunction;
                         return ParseEntityReferenceAsync().ReturnTrueTaskWhenFinishAsync();
@@ -228,12 +227,11 @@ namespace System.Xml
                         _reportedBaseUri = _ps.baseUriStr;
                         _parsingFunction = _nextParsingFunction;
                         return AsyncHelper.DoneTaskTrue;
-#endif
                     case ParsingFunction.InReadAttributeValue:
                         FinishAttributeValueIterator();
                         _curNode = _nodes[_index];
                         continue;
-#if !SILVERLIGHT // Needed only for XmlTextReader (ReadChars, ReadBase64, ReadBinHex)
+                    // Needed only for XmlTextReader (ReadChars, ReadBase64, ReadBinHex)
                     case ParsingFunction.InIncrementalRead:
                         FinishIncrementalRead();
                         return AsyncHelper.DoneTaskTrue;
@@ -243,7 +241,6 @@ namespace System.Xml
                         ParseXmlDeclarationFragment();
                         _parsingFunction = ParsingFunction.GoToEof;
                         return AsyncHelper.DoneTaskTrue;
-#endif
                     case ParsingFunction.GoToEof:
                         OnEof();
                         return AsyncHelper.DoneTaskFalse;
@@ -324,11 +321,10 @@ namespace System.Xml
                     case ParsingFunction.InReadAttributeValue:
                         Debug.Assert(false);
                         break;
-#if !SILVERLIGHT // Needed only for XmlTextReader (ReadChars, ReadBase64, ReadBinHex)
+                    // Needed only for XmlTextReader (ReadChars, ReadBase64, ReadBinHex)
                     case ParsingFunction.InIncrementalRead:
                         FinishIncrementalRead();
                         break;
-#endif
                     case ParsingFunction.PartialTextValue:
                         await SkipPartialTextValueAsync().ConfigureAwait(false);
                         break;
@@ -853,7 +849,6 @@ namespace System.Xml
             }
             catch (XmlException e)
             {
-#if !SILVERLIGHT
                 if (e.ResString == SR.Xml_UnexpectedEOF && _ps.entity != null)
                 {
                     SendValidationEvent(XmlSeverityType.Error, SR.Sch_ParEntityRefNesting, null, _ps.LineNo, _ps.LinePos);
@@ -862,9 +857,6 @@ namespace System.Xml
                 {
                     throw;
                 }
-#else 
-                throw e;
-#endif
             }
         }
 
@@ -937,12 +929,10 @@ namespace System.Xml
             return InitStreamInputAsync(baseUri, baseUri.ToString(), stream, null, 0, encoding);
         }
 
-#if !SILVERLIGHT
         private Task InitStreamInputAsync(Uri baseUri, string baseUriStr, Stream stream, Encoding encoding)
         {
             return InitStreamInputAsync(baseUri, baseUriStr, stream, null, 0, encoding);
         }
-#endif
 
         private async Task InitStreamInputAsync(Uri baseUri, string baseUriStr, Stream stream, byte[] bytes, int byteCount, Encoding encoding)
         {

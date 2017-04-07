@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// TODO: this code went through some modifications and generation comment might not be fully valid
+// Note: This code went through some modifications and generation comment might not be fully valid
 // WARNING: This file is generated and should not be modified directly.  Instead,
 // modify XmlTextWriterGenerator.cxx and run gen.bat in the same directory.
 // This batch file will execute the following commands:

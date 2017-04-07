@@ -2243,7 +2243,7 @@ namespace System.Xml.Schema
         public override void InitValidation(ValidationState context)
         {
             Debug.Assert(_elements.Count > 0);
-            context.AllElementsSet = new BitSet(_elements.Count); //TODO if already non-null can clear 
+            context.AllElementsSet = new BitSet(_elements.Count);
             context.CurrentState.AllElementsRequired = -1; // no elements at all
         }
 

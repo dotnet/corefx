@@ -738,7 +738,7 @@ namespace System.Xml.Schema
             }
 
             //Now add the baseTypes that are defined inside the union itself
-            XmlSchemaObjectCollection mainBaseTypes = mainUnion.BaseTypes; //TODO check for null
+            XmlSchemaObjectCollection mainBaseTypes = mainUnion.BaseTypes;
             if (mainBaseTypes != null)
             {
                 for (int i = 0; i < mainBaseTypes.Count; ++i)
