@@ -69,19 +69,29 @@ namespace System.Xml.Serialization
                 throw new ArgumentException(SR.Format(SR.XmlInternalError, "xmlMapping"));
 
             if (xmlMapping is XmlTypeMapping)
+            {
                 return GenerateTypeElement((XmlTypeMapping)xmlMapping);
+            }
             else if (xmlMapping is XmlMembersMapping)
+            {
                 return GenerateMembersElement((XmlMembersMapping)xmlMapping);
+            }
             else
+            {
                 throw new ArgumentException(SR.Format(SR.XmlInternalError, "xmlMapping"));
+            }
         }
 
         private object GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
         {
             if (xmlMembersMapping.Accessor.IsSoap)
+            {
                 return GenerateEncodedMembersElement(xmlMembersMapping);
+            }
             else
+            {
                 return GenerateLiteralMembersElement(xmlMembersMapping);
+            }
         }
 
         private object GenerateLiteralMembersElement(XmlMembersMapping xmlMembersMapping)
@@ -127,8 +137,6 @@ namespace System.Xml.Serialization
 
             return p;
         }
-
-        private void DummySource(object o) { }
 
         private bool GenerateLiteralMembersElementInternal(MemberMapping[] mappings, bool hasWrapperElement, object[] p)
         {
@@ -274,7 +282,7 @@ namespace System.Xml.Serialization
                 Reader.MoveToContent();
             }
 
-            foreach (var member in textOrArrayMembers)
+            foreach (Member member in textOrArrayMembers)
             {
                 object value = null;
                 SetCollectionObjectWithCollectionMember(ref value, member.Collection, member.Mapping.TypeDesc.Type);
@@ -295,11 +303,12 @@ namespace System.Xml.Serialization
         {
             if (IsSequence(members))
                 return "null";
+
             string qnames = string.Empty;
             bool firstElement = true;
             for (int i = 0; i < members.Length; i++)
             {
-                Member member = (Member)members[i];
+                Member member = members[i];
                 if (member.Mapping.Xmlns != null)
                     continue;
                 if (member.Mapping.Ignore)
@@ -308,7 +317,6 @@ namespace System.Xml.Serialization
                     continue;
 
                 ElementAccessor[] elements = member.Mapping.Elements;
-
                 for (int j = 0; j < elements.Length; j++)
                 {
                     ElementAccessor e = elements[j];
@@ -317,6 +325,7 @@ namespace System.Xml.Serialization
 
                     if (!firstElement)
                         qnames += ", ";
+
                     qnames += ns + ":" + e.Name;
                     firstElement = false;
                 }

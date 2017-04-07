@@ -1292,12 +1292,9 @@ namespace System.Xml.Serialization
                             }
                         }
 
-                        if (pLength > i)
+                        if (pLength > i && (specifiedSource == null || specifiedSource.Value))
                         {
-                            if (specifiedSource == null || specifiedSource.Value)
-                            {
-                                WriteMember(source, member.Attribute, member.TypeDesc, null);
-                            }
+                            WriteMember(source, member.Attribute, member.TypeDesc, null);
                         }
                     }
                 }
@@ -1308,6 +1305,7 @@ namespace System.Xml.Serialization
                 MemberMapping member = mapping.Members[i];
                 if (member.Xmlns != null)
                     continue;
+
                 if (member.Ignore)
                     continue;
 
@@ -1315,7 +1313,6 @@ namespace System.Xml.Serialization
                 if (member.CheckSpecified != SpecifiedAccessor.None)
                 {
                     string memberNameSpecified = member.Name + "Specified";
-
                     for (int j = 0; j < Math.Min(pLength, mapping.Members.Length); j++)
                     {
                         if (mapping.Members[j].Name == memberNameSpecified)
