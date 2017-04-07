@@ -13,6 +13,7 @@ namespace System.Data.SqlClient.SNI
     internal class SSRP
     {
         private const char SemicolonSeparator = ';';
+        private const char NullChar = '\0';
         private const int SqlServerBrowserPort = 1434;
 
         /// <summary>
@@ -58,6 +59,7 @@ namespace System.Data.SqlClient.SNI
             Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             const byte ClntUcastInst = 0x04;
+            instanceName = GetNullTerminatedString(instanceName);
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 1];
@@ -105,6 +107,7 @@ namespace System.Data.SqlClient.SNI
 
             const byte ClntUcastDac = 0x0F;
             const byte ProtocolVersion = 0x01;
+            instanceName = GetNullTerminatedString(instanceName);
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 2];
@@ -113,6 +116,37 @@ namespace System.Data.SqlClient.SNI
             Encoding.ASCII.GetBytes(instanceName, 0, instanceName.Length, requestPacket, 2);
 
             return requestPacket;
+        }
+
+        /// <summary>
+        /// Returns null-terminated string for given string.
+        /// </summary>
+        /// <param name="str">string to be null-terminated</param>
+        /// <returns>null-terminated string for given string</returns>
+        private static string GetNullTerminatedString(string str)
+        {
+            Debug.Assert(str != null, "str should not be null");
+
+            string result = null;
+            int nullCharIndex = str.IndexOf(NullChar);
+
+            // str does not have '\0'
+            if (nullCharIndex < 0)
+            {
+                result = str + NullChar;
+            }
+            // '\0' exists in the middle of str
+            else if (nullCharIndex < str.Length - 1) 
+            {
+                result = str.Substring(0, nullCharIndex + 1);
+            }
+            // str already has one '\0' at the end
+            else
+            {
+                result = str;
+            }
+
+            return str;
         }
 
         /// <summary>
@@ -125,21 +159,21 @@ namespace System.Data.SqlClient.SNI
         private static byte[] SendUDPRequest(string browserHostname, int port, byte[] requestPacket)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(browserHostname), "browserhostname should not be null, empty, or whitespace");
-            Debug.Assert(port >= 0 && port <= 65535, "Invalide port range");
+            Debug.Assert(port >= 0 && port <= 65535, "Invalid port");
             Debug.Assert(requestPacket != null && requestPacket.Length > 0, "requestPacket should not be null or 0-length array");
 
-            const int sendTimeOut = 1000;
-            const int receiveTimeOut = 1000;
+            const int sendTimeOutMs = 1000;
+            const int receiveTimeOutMs = 1000;
 
             IPAddress address = null;
-            IPAddress.TryParse(browserHostname, out address);
+            bool isIpAddress = IPAddress.TryParse(browserHostname, out address);
 
             byte[] responsePacket = null;
-            using (UdpClient client = new UdpClient(address == null ? AddressFamily.InterNetwork : address.AddressFamily))
+            using (UdpClient client = new UdpClient(!isIpAddress ? AddressFamily.InterNetwork : address.AddressFamily))
             {
                 Task<int> sendTask = client.SendAsync(requestPacket, requestPacket.Length, browserHostname, port);
                 Task<UdpReceiveResult> receiveTask = null;
-                if (sendTask.Wait(sendTimeOut) && (receiveTask = client.ReceiveAsync()).Wait(receiveTimeOut))
+                if (sendTask.Wait(sendTimeOutMs) && (receiveTask = client.ReceiveAsync()).Wait(receiveTimeOutMs))
                 {
                     responsePacket = receiveTask.Result.Buffer;
                 }
