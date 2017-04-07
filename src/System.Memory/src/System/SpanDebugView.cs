@@ -37,8 +37,8 @@ namespace System
                 }
                 else
                 {
-                    long _byteOffsetInt = _byteOffset.ToInt64();
-                    int sourceIndex = (int)((_byteOffsetInt - IntPtr.Size) / elementSize);
+                    long byteOffsetInt = _byteOffset.ToInt64();
+                    int sourceIndex = (int)((byteOffsetInt - IntPtr.Size) / elementSize);
 
                     Array.Copy(_pinnable, sourceIndex, result, 0, _length);
                 }
