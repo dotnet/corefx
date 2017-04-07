@@ -66,15 +66,11 @@ namespace System.Xml
 
             public QName(string prefix, string lname, string nsUri)
             {
-                this.prefix = prefix;
-                this.localname = lname;
-                this.namespaceUri = nsUri;
+                this.prefix = prefix; this.localname = lname; this.namespaceUri = nsUri;
             }
             public void Set(string prefix, string lname, string nsUri)
             {
-                this.prefix = prefix;
-                this.localname = lname;
-                this.namespaceUri = nsUri;
+                this.prefix = prefix; this.localname = lname; this.namespaceUri = nsUri;
             }
 
             public void Clear()
@@ -407,14 +403,11 @@ namespace System.Xml
             switch (settings.ConformanceLevel)
             {
                 case ConformanceLevel.Auto:
-                    _docState = 0;
-                    break;
+                    _docState = 0; break;
                 case ConformanceLevel.Fragment:
-                    _docState = 9;
-                    break;
+                    _docState = 9; break;
                 case ConformanceLevel.Document:
-                    _docState = 1;
-                    break;
+                    _docState = 1; break;
             }
             _checkCharacters = settings.CheckCharacters;
             _dtdProcessing = settings.DtdProcessing;
@@ -439,14 +432,11 @@ namespace System.Xml
                 switch (_docState)
                 {
                     case 0:
-                        settings.ConformanceLevel = ConformanceLevel.Auto;
-                        break;
+                        settings.ConformanceLevel = ConformanceLevel.Auto; break;
                     case 9:
-                        settings.ConformanceLevel = ConformanceLevel.Fragment;
-                        break;
+                        settings.ConformanceLevel = ConformanceLevel.Fragment; break;
                     default:
-                        settings.ConformanceLevel = ConformanceLevel.Document;
-                        break;
+                        settings.ConformanceLevel = ConformanceLevel.Document; break;
                 }
                 settings.CheckCharacters = _checkCharacters;
                 settings.IgnoreWhitespace = _ignoreWhitespace;
@@ -1049,8 +1039,8 @@ namespace System.Xml
                 // if we are already on a tag, then don't move
                 if (this.NodeType != XmlNodeType.Element && this.NodeType != XmlNodeType.EndElement)
                 {
-// advance over PIs and Comments
-Loop:
+                // advance over PIs and Comments
+                Loop:
                     if (Read())
                     {
                         switch (this.NodeType)
@@ -1159,7 +1149,7 @@ Loop:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsBoolean();
         }
 
@@ -1254,7 +1244,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsDateTime();
         }
 
@@ -1349,7 +1339,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsDouble();
         }
 
@@ -1444,7 +1434,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsFloat();
         }
 
@@ -1539,7 +1529,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsDecimal();
         }
 
@@ -1634,7 +1624,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsInt();
         }
 
@@ -1729,7 +1719,7 @@ Fallback:
             {
                 _pos = origPos;
             }
-Fallback:
+        Fallback:
             return base.ReadContentAsLong();
         }
 
@@ -1970,7 +1960,7 @@ Fallback:
             }
             qnametable[qnameNum].Set(prefixStr, lnameStr, nsUriStr);
             return;
-BadDecl:
+        BadDecl:
             throw new XmlException(SR.Xml_BadNamespaceDecl, (string[])null);
         }
 
@@ -1984,8 +1974,7 @@ BadDecl:
         private void SkipExtn()
         {
             int cb = ParseMB32();
-            checked
-            { _pos += cb; }
+            checked { _pos += cb; }
             Fill(-1);
         }
 
@@ -2089,8 +2078,7 @@ BadDecl:
         private ushort ReadUShort()
         {
             Fill(1);
-            int pos = _pos;
-            byte[] data = _data;
+            int pos = _pos; byte[] data = _data;
             ushort val = (ushort)(data[pos] + (data[pos + 1] << 8));
             _pos += 2;
             return val;
@@ -2286,8 +2274,7 @@ BadDecl:
                     case BinXmlToken.Name:
                         {
                             int cb = ParseMB32();
-                            checked
-                            { _pos += 2 * cb; }
+                            checked { _pos += 2 * cb; }
                             break;
                         }
                     case BinXmlToken.QName:
@@ -2298,8 +2285,7 @@ BadDecl:
                     case BinXmlToken.Extn:
                         {
                             int cb = ParseMB32();
-                            checked
-                            { _pos += cb; }
+                            checked { _pos += cb; }
                             break;
                         }
                     case BinXmlToken.NmFlush:
@@ -2333,8 +2319,7 @@ BadDecl:
             int cch = ParseMB32();
             int oldmark = _mark;
             int begin = _pos;
-            checked
-            { _pos += cch * 2; } // cch = num utf-16 chars
+            checked { _pos += cch * 2; } // cch = num utf-16 chars
             if (_pos > _end)
                 Fill(-1);
             // Fill call might have moved buffer
@@ -2607,7 +2592,7 @@ BadDecl:
             }
             return ReadDoc();
 
-Error:
+        Error:
             _state = ScanState.Error;
             throw new XmlException(err, (string[])null);
         }
@@ -2850,8 +2835,8 @@ Error:
                     break;
             }
 
-Read:
-// clear existing state
+        Read:
+            // clear existing state
             _nodetype = XmlNodeType.None;
             _mark = -1;
             if (_qnameOther.localname.Length != 0)
@@ -3370,8 +3355,7 @@ Read:
                     _mark = _pos;
                 _tokLen = ParseMB32();
                 _tokDataPos = _pos;
-                checked
-                { _pos += _tokLen * 2; }
+                checked { _pos += _tokLen * 2; }
                 Fill(-1);
                 // check chars (if this is the first pass and settings.CheckCharacters was set)
                 if (checkChars && _checkCharacters)
@@ -3599,7 +3583,7 @@ Read:
             if (_xmlspacePreserve)
                 return XmlNodeType.SignificantWhitespace;
             return XmlNodeType.Whitespace;
-NonWSText:
+        NonWSText:
             return XmlNodeType.Text;
         }
 
@@ -3810,8 +3794,7 @@ NonWSText:
                 case BinXmlToken.SQL_DATETIME:
                     {
                         int pos = _tokDataPos;
-                        int dateticks;
-                        uint timeticks;
+                        int dateticks; uint timeticks;
                         dateticks = GetInt32(pos);
                         timeticks = GetUInt32(pos + 4);
                         return BinXmlDateTime.SqlDateTimeToDateTime(dateticks, timeticks);
@@ -3820,8 +3803,7 @@ NonWSText:
                 case BinXmlToken.SQL_SMALLDATETIME:
                     {
                         int pos = _tokDataPos;
-                        short dateticks;
-                        ushort timeticks;
+                        short dateticks; ushort timeticks;
                         dateticks = GetInt16(pos);
                         timeticks = GetUInt16(pos + 2);
                         return BinXmlDateTime.SqlSmallDateTimeToDateTime(dateticks, timeticks);
@@ -3896,8 +3878,7 @@ NonWSText:
                 case BinXmlToken.SQL_DATETIME:
                     {
                         int pos = _tokDataPos;
-                        int dateticks;
-                        uint timeticks;
+                        int dateticks; uint timeticks;
                         dateticks = GetInt32(pos);
                         timeticks = GetUInt32(pos + 4);
                         return BinXmlDateTime.SqlDateTimeToString(dateticks, timeticks);
@@ -3906,8 +3887,7 @@ NonWSText:
                 case BinXmlToken.SQL_SMALLDATETIME:
                     {
                         int pos = _tokDataPos;
-                        short dateticks;
-                        ushort timeticks;
+                        short dateticks; ushort timeticks;
                         dateticks = GetInt16(pos);
                         timeticks = GetUInt16(pos + 2);
                         return BinXmlDateTime.SqlSmallDateTimeToString(dateticks, timeticks);
@@ -3995,8 +3975,7 @@ NonWSText:
 
                     case BinXmlToken.SQL_UUID:
                         {
-                            int a;
-                            short b, c;
+                            int a; short b, c;
                             int pos = _tokDataPos;
                             a = GetInt32(pos);
                             b = GetInt16(pos + 4);
@@ -4133,8 +4112,7 @@ NonWSText:
 
                 case BinXmlToken.SQL_UUID:
                     {
-                        int a;
-                        short b, c;
+                        int a; short b, c;
                         int pos = _tokDataPos;
                         a = GetInt32(pos);
                         b = GetInt16(pos + 4);
