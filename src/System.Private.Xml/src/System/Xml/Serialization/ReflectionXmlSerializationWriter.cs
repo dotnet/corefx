@@ -91,20 +91,21 @@ namespace System.Xml.Serialization
             WriteStartDocument();
             if (o == null)
             {
+                string ns = (element.Form == XmlSchemaForm.Qualified ? element.Namespace : string.Empty);
                 if (element.IsNullable)
-                {
+                {                    
                     if (mapping.IsSoap)
                     {
-                        throw new PlatformNotSupportedException();
+                        WriteNullTagEncoded(element.Name, ns);
                     }
                     else
                     {
-                        WriteNullTagLiteral(element.Name, (element.Form == XmlSchemaForm.Qualified ? element.Namespace : ""));
+                        WriteNullTagLiteral(element.Name, ns);
                     }
                 }
                 else
                 {
-                    WriteEmptyTag(element.Name, (element.Form == XmlSchemaForm.Qualified ? element.Namespace : ""));
+                    WriteEmptyTag(element.Name, ns);
                 }
 
                 return;
@@ -319,7 +320,7 @@ namespace System.Xml.Serialization
         private void WriteElement(object o, ElementAccessor element, bool writeAccessor)
         {
             string name = writeAccessor ? element.Name : element.Mapping.TypeName;
-            string ns = element.Any && element.Name.Length == 0 ? null : (element.Form == XmlSchemaForm.Qualified ? (writeAccessor ? element.Namespace : element.Mapping.Namespace) : "");
+            string ns = element.Any && element.Name.Length == 0 ? null : (element.Form == XmlSchemaForm.Qualified ? (writeAccessor ? element.Namespace : element.Mapping.Namespace) : string.Empty);
 
             if (element.Mapping is NullableMapping)
             {
@@ -340,7 +341,7 @@ namespace System.Xml.Serialization
 
                 if (element.IsNullable && o == null)
                 {
-                    WriteNullTagLiteral(element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
+                    WriteNullTagLiteral(element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : string.Empty);
                 }
                 else if (mapping.IsSoap)
                 {
@@ -352,7 +353,7 @@ namespace System.Xml.Serialization
                     var itemElement = mapping.Elements[0];
                     var itemMapping = itemElement.Mapping as StructMapping;
                     var itemName = writeAccessor ? itemElement.Name : itemMapping.TypeName;
-                    var itemNamespace = itemElement.Any && itemElement.Name.Length == 0 ? null : (itemElement.Form == XmlSchemaForm.Qualified ? (writeAccessor ? itemElement.Namespace : itemMapping.Namespace) : "");
+                    var itemNamespace = itemElement.Any && itemElement.Name.Length == 0 ? null : (itemElement.Form == XmlSchemaForm.Qualified ? (writeAccessor ? itemElement.Namespace : itemMapping.Namespace) : string.Empty);
 
                     if (!writeAccessor)
                     {
@@ -455,12 +456,18 @@ namespace System.Xml.Serialization
 
         private XmlSerializationWriteCallback CreateXmlSerializationWriteCallback(TypeMapping mapping, string name, string ns, bool isNullable)
         {
-            var structMapping = mapping as StructMapping;
-            if (structMapping != null)
+            if (mapping is StructMapping structMapping)
             {
                 return (o) =>
                 {
                     WriteStructMethod(structMapping, name, ns, o, isNullable, needType: false);
+                };
+            }
+            else if (mapping is EnumMapping enumMapping)
+            {
+                return (o) =>
+                {
+                    WriteEnumMethod(enumMapping, o);
                 };
             }
             else
@@ -477,16 +484,25 @@ namespace System.Xml.Serialization
 
             if (isSoap)
             {
-                throw new PlatformNotSupportedException();
-            }
-
-            if (nullable)
-            {
-                WriteNullableQualifiedNameLiteral(name, ns, o);
+                if (nullable)
+                {
+                    WriteNullableQualifiedNameEncoded(name, ns, o, new XmlQualifiedName(mapping.TypeName, mapping.Namespace));
+                }
+                else
+                {
+                    WriteElementQualifiedName(name, ns, o, new XmlQualifiedName(mapping.TypeName, mapping.Namespace));
+                }
             }
             else
             {
-                WriteElementQualifiedName(name, ns, o);
+                if (nullable)
+                {
+                    WriteNullableQualifiedNameLiteral(name, ns, o);
+                }
+                else
+                {
+                    WriteElementQualifiedName(name, ns, o);
+                }
             }
         }
 
@@ -798,7 +814,7 @@ namespace System.Xml.Serialization
                 {
                     if (canOptimizeWriteListSequence)
                     {
-                        Writer.WriteStartAttribute(null, attribute.Name, attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty);
+                        Writer.WriteStartAttribute(null, attribute.Name, attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : string.Empty);
                     }
                 }
 
@@ -911,7 +927,7 @@ namespace System.Xml.Serialization
             }
             else
             {
-                string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : "";
+                string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : string.Empty;
                 WritePrimitive(WritePrimitiveMethodRequirement.WriteAttribute, attribute.Name, ns, attribute.Default, memberValue, attribute.Mapping, false, false, false);
             }
         }
@@ -1258,7 +1274,7 @@ namespace System.Xml.Serialization
 
             if (hasWrapperElement)
             {
-                WriteStartElement(element.Name, (element.Form == XmlSchemaForm.Qualified ? element.Namespace : ""), mapping.IsSoap);
+                WriteStartElement(element.Name, (element.Form == XmlSchemaForm.Qualified ? element.Namespace : string.Empty), mapping.IsSoap);
 
                 int xmlnsMember = FindXmlnsIndex(mapping.Members);
                 if (xmlnsMember >= 0)
@@ -1344,7 +1360,7 @@ namespace System.Xml.Serialization
 
                         if (isRpc && member.IsReturnValue && member.Elements.Length > 0)
                         {
-                            WriteRpcResult(member.Elements[0].Name, "");
+                            WriteRpcResult(member.Elements[0].Name, string.Empty);
                         }
 
                         // override writeAccessors choice when we've written a wrapper element

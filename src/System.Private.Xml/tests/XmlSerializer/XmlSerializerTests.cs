@@ -1977,6 +1977,32 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void Xml_Soap_TypeWithEnumFlagPropertyHavingDefaultValue()
+    {
+        var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithEnumFlagPropertyHavingDefaultValue));
+        var serializer = new XmlSerializer(mapping);
+
+        var value = new TypeWithEnumFlagPropertyHavingDefaultValue() { EnumProperty = EnumFlags.Two | EnumFlags.Three };
+        var actual = SerializeAndDeserialize(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<TypeWithEnumFlagPropertyHavingDefaultValue xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <EnumProperty xsi:type=\"EnumFlags\">Two Three</EnumProperty>\r\n</TypeWithEnumFlagPropertyHavingDefaultValue>",
+            () => serializer);
+
+        Assert.NotNull(actual);
+        Assert.StrictEqual(value.EnumProperty, actual.EnumProperty);
+
+
+        value = new TypeWithEnumFlagPropertyHavingDefaultValue();
+        actual = SerializeAndDeserialize(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<TypeWithEnumFlagPropertyHavingDefaultValue xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <EnumProperty xsi:type=\"EnumFlags\">One Four</EnumProperty>\r\n</TypeWithEnumFlagPropertyHavingDefaultValue>",
+            () => serializer);
+
+        Assert.NotNull(actual);
+        Assert.StrictEqual(value.EnumProperty, actual.EnumProperty);
+    }
+
+    [Fact]
     public static void Xml_TypeWithXmlQualifiedName()
     {
         var value = new TypeWithXmlQualifiedName()
@@ -1985,6 +2011,26 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         };
 
         var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<TypeWithXmlQualifiedName xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Value xmlns=\"\">FooName</Value>\r\n</TypeWithXmlQualifiedName>", skipStringCompare: false);
+
+        Assert.NotNull(actual);
+        Assert.StrictEqual(value.Value, actual.Value);
+    }
+
+    [Fact]
+    public static void Xml_Soap_TypeWithXmlQualifiedName()
+    {
+        var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithXmlQualifiedName));
+        var serializer = new XmlSerializer(mapping);
+
+        var value = new TypeWithXmlQualifiedName()
+        {
+            Value = new XmlQualifiedName("FooName")
+        };
+
+        var actual = SerializeAndDeserialize(
+            value,
+            "<?xml version=\"1.0\"?>\r\n<TypeWithXmlQualifiedName xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <Value xmlns=\"\" xsi:type=\"xsd:QName\">FooName</Value>\r\n</TypeWithXmlQualifiedName>",
+            () => serializer);
 
         Assert.NotNull(actual);
         Assert.StrictEqual(value.Value, actual.Value);
@@ -2520,42 +2566,22 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_ComplexField()
+    public static void Xml_Soap_ComplexField()
     {
         XmlTypeMapping typeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType2));
-        var ser = new XmlSerializer(typeMapping);
+        var serializer = new XmlSerializer(typeMapping);
         var value = new SoapEncodedTestType2();
         value.TestType3 = new SoapEncodedTestType3() { StringValue = "foo" };
+        string baseline = "<root><SoapEncodedTestType2 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\"><TestType3 href=\"#id2\" /></SoapEncodedTestType2><SoapEncodedTestType3 id=\"id2\" d2p1:type=\"SoapEncodedTestType3\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\"><StringValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:string\">foo</StringValue></SoapEncodedTestType3></root>";
+        var actual = SerializeAndDeserializeWithWrapper(value, serializer, baseline);
 
-        using (var ms = new MemoryStream())
-        {
-            var writer = new XmlTextWriter(ms, Encoding.UTF8);
-            writer.WriteStartElement("root");
-            ser.Serialize(writer, value);
-            writer.WriteEndElement();
-            writer.Flush();
-            ms.Position = 0;
-
-            string expectedOutput = "<root><SoapEncodedTestType2 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\"><TestType3 href=\"#id2\" /></SoapEncodedTestType2><SoapEncodedTestType3 id=\"id2\" d2p1:type=\"SoapEncodedTestType3\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\"><StringValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:string\">foo</StringValue></SoapEncodedTestType3></root>";
-            string actualOutput = new StreamReader(ms).ReadToEnd();
-            Utils.CompareResult result = Utils.Compare(expectedOutput, actualOutput);
-            Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
-                Environment.NewLine, result.ErrorMessage, value, expectedOutput, actualOutput));
-
-            ms.Position = 0;
-            using (var reader = new XmlTextReader(ms))
-            {
-                reader.ReadStartElement("root");
-                var actual = (SoapEncodedTestType2)ser.Deserialize(reader);
-                Assert.NotNull(actual);
-                Assert.NotNull(actual.TestType3);
-                Assert.Equal(value.TestType3.StringValue, actual.TestType3.StringValue);
-            }
-        }
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.TestType3);
+        Assert.Equal(value.TestType3.StringValue, actual.TestType3.StringValue);
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Basic()
+    public static void Xml_Soap_Basic()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
         var ser = new XmlSerializer(myTypeMapping);
@@ -2580,7 +2606,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Basic_FromMappings()
+    public static void Xml_Soap_Basic_FromMappings()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
         var ser = XmlSerializer.FromMappings(new XmlMapping[] { myTypeMapping });
@@ -2605,7 +2631,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_With_SoapIgnore()
+    public static void Xml_Soap_With_SoapIgnore()
     {
         var soapAttributes = new SoapAttributes();
         soapAttributes.SoapIgnore = true;
@@ -2636,7 +2662,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_With_SoapElement()
+    public static void Xml_Soap_With_SoapElement()
     {
         var soapAttributes = new SoapAttributes();
         var soapElement = new SoapElementAttribute("MyStringValue");
@@ -2668,7 +2694,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_With_SoapType()
+    public static void Xml_Soap_With_SoapType()
     {
         var soapAttributes = new SoapAttributes();
         var soapType = new SoapTypeAttribute();
@@ -2701,7 +2727,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Enum()
+    public static void Xml_Soap_Enum()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestEnum));
         var ser = new XmlSerializer(myTypeMapping);
@@ -2716,7 +2742,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Enum_With_SoapEnumOverrides()
+    public static void Xml_Soap_Enum_With_SoapEnumOverrides()
     {
         var soapAtts = new SoapAttributes();
         var soapEnum = new SoapEnumAttribute();
@@ -2805,33 +2831,17 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCircularLink));
         var ser = new XmlSerializer(myTypeMapping);
         var value = new MyCircularLink(true);
-        var ms = new MemoryStream();
-        using (var writer = new XmlTextWriter(ms, Encoding.UTF8))
-        {
-            writer.Formatting = Formatting.Indented;
-            writer.WriteStartElement("wrapper");
-            ser.Serialize(writer, value);
-            writer.WriteEndElement();
-            writer.Flush();
-            ms.Position = 0;
-            string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "<wrapper>\r\n  <MyCircularLink xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <Link href=\"#id2\" />\r\n    <IntValue xsi:type=\"xsd:int\">0</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id2\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id3\" />\r\n    <IntValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:int\">1</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id3\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id1\" />\r\n    <IntValue xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:int\">2</IntValue>\r\n  </MyCircularLink>\r\n</wrapper>";
-            Utils.Compare(actualOutput, baseline);
-            ms.Position = 0;
-            using (var reader = new XmlTextReader(ms))
-            {
-                reader.ReadStartElement("wrapper");
-                var deserialized = (MyCircularLink)ser.Deserialize(reader);
-                Assert.NotNull(deserialized);
-                Assert.Equal(value.Link.IntValue, deserialized.Link.IntValue);
-                Assert.Equal(value.Link.Link.IntValue, deserialized.Link.Link.IntValue);
-                Assert.Equal(value.Link.Link.Link.IntValue, deserialized.Link.Link.Link.IntValue);
-            }
-        }
+
+        string baseline = "<root>\r\n  <MyCircularLink xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <Link href=\"#id2\" />\r\n    <IntValue xsi:type=\"xsd:int\">0</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id2\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id3\" />\r\n    <IntValue xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:int\">1</IntValue>\r\n  </MyCircularLink>\r\n  <MyCircularLink id=\"id3\" d2p1:type=\"MyCircularLink\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <Link href=\"#id1\" />\r\n    <IntValue xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:int\">2</IntValue>\r\n  </MyCircularLink>\r\n</root>";
+        var deserialized = SerializeAndDeserializeWithWrapper(value, ser, baseline);
+        Assert.NotNull(deserialized);
+        Assert.Equal(value.Link.IntValue, deserialized.Link.IntValue);
+        Assert.Equal(value.Link.Link.IntValue, deserialized.Link.Link.IntValue);
+        Assert.Equal(value.Link.Link.Link.IntValue, deserialized.Link.Link.Link.IntValue);
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Array()
+    public static void Xml_Soap_Array()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup));
         XmlSerializer ser = new XmlSerializer(myTypeMapping);
@@ -2842,35 +2852,18 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             MyItems = things
         };
 
-        var ms = new MemoryStream();
-        using (var writer = new XmlTextWriter(ms, Encoding.UTF8))
+        string baseline = "<root>\r\n  <MyGroup xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</root>";
+        var actual = SerializeAndDeserializeWithWrapper(value, ser, baseline);
+        Assert.Equal(value.GroupName, actual.GroupName);
+        Assert.Equal(value.MyItems.Count(), actual.MyItems.Count());
+        for (int i = 0; i < value.MyItems.Count(); i++)
         {
-            writer.Formatting = Formatting.Indented;
-            writer.WriteStartElement("wrapper");
-            ser.Serialize(writer, value);
-            writer.WriteEndElement();
-            writer.Flush();
-            ms.Position = 0;
-            string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "<wrapper>\r\n  <MyGroup xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</wrapper>";
-            Utils.Compare(actualOutput, baseline);
-            ms.Position = 0;
-            using (var reader = new XmlTextReader(ms))
-            {
-                reader.ReadStartElement("wrapper");
-                var actual = (MyGroup)ser.Deserialize(reader);
-                Assert.Equal(value.GroupName, actual.GroupName);
-                Assert.Equal(value.MyItems.Count(), actual.MyItems.Count());
-                for(int i = 0; i < value.MyItems.Count(); i++)
-                {
-                    Assert.Equal(value.MyItems[i].ItemName, actual.MyItems[i].ItemName);
-                }
-            }
+            Assert.Equal(value.MyItems[i].ItemName, actual.MyItems[i].ItemName);
         }
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_List()
+    public static void Xml_Soap_List()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup2));
         var ser = new XmlSerializer(myTypeMapping);
@@ -2881,41 +2874,58 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             MyItems = things
         };
 
-        var ms = new MemoryStream();
-        using (var writer = new XmlTextWriter(ms, Encoding.UTF8))
+        string baseline = "<root>\r\n  <MyGroup2 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup2>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</root>";
+        var actual = SerializeAndDeserializeWithWrapper(value, ser, baseline);
+
+        Assert.Equal(value.GroupName, actual.GroupName);
+        Assert.Equal(value.MyItems.Count(), actual.MyItems.Count());
+        for (int i = 0; i < value.MyItems.Count(); i++)
         {
-            writer.Formatting = Formatting.Indented;
-            writer.WriteStartElement("wrapper");
-            ser.Serialize(writer, value);
-            writer.WriteEndElement();
-            writer.Flush();
-            ms.Position = 0;
-            string actualOutput = new StreamReader(ms).ReadToEnd();
-            string baseline = "<wrapper>\r\n  <MyGroup2 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n    <GroupName xsi:type=\"xsd:string\">MyName</GroupName>\r\n    <MyItems href=\"#id2\" />\r\n  </MyGroup2>\r\n  <q1:Array id=\"id2\" q1:arrayType=\"MyItem[2]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n    <Item href=\"#id3\" />\r\n    <Item href=\"#id4\" />\r\n  </q1:Array>\r\n  <MyItem id=\"id3\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:string\">AAA</ItemName>\r\n  </MyItem>\r\n  <MyItem id=\"id4\" d2p1:type=\"MyItem\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n    <ItemName xmlns:q3=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q3:string\">BBB</ItemName>\r\n  </MyItem>\r\n</wrapper>";
-            Utils.Compare(actualOutput, baseline);
-            ms.Position = 0;
-            using (var reader = new XmlTextReader(ms))
-            {
-                reader.ReadStartElement("wrapper");
-                var actual = (MyGroup2)ser.Deserialize(reader);
-                Assert.Equal(value.GroupName, actual.GroupName);
-                Assert.Equal(value.MyItems.Count(), actual.MyItems.Count());
-                for (int i = 0; i < value.MyItems.Count(); i++)
-                {
-                    Assert.Equal(value.MyItems[i].ItemName, actual.MyItems[i].ItemName);
-                }
-            }
+            Assert.Equal(value.MyItems[i].ItemName, actual.MyItems[i].ItemName);
         }
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_Dictionary()
+    public static void Xml_Soap_Nullables()
+    {
+        var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithNullables));
+        var serializer = new XmlSerializer(mapping);
+
+        var value = new WithNullables() { Optional = IntEnum.Option1, OptionalInt = 42, Struct1 = new SomeStruct { A = 1, B = 2 } };
+        string baseline = "<root><WithNullables xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\"><Optional xsi:type=\"IntEnum\">Option1</Optional><OptionalInt xsi:type=\"xsd:int\">42</OptionalInt><Struct1 href=\"#id2\" /></WithNullables><SomeStruct id=\"id2\" d2p1:type=\"SomeStruct\" xmlns:d2p1=\"http://www.w3.org/2001/XMLSchema-instance\"><A xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q1:int\">1</A><B xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" d2p1:type=\"q2:int\">2</B></SomeStruct></root>";
+
+        WithNullables actual = SerializeAndDeserializeWithWrapper(value, serializer, baseline);
+
+        Assert.StrictEqual(value.OptionalInt, actual.OptionalInt);
+        Assert.StrictEqual(value.Optional, actual.Optional);
+        Assert.StrictEqual(value.Optionull, actual.Optionull);
+        Assert.StrictEqual(value.OptionullInt, actual.OptionullInt);
+        Assert.Null(actual.Struct2);
+        Assert.Null(actual.Struct1); // This behavior doesn't seem right. But this is the behavior on desktop.
+    }
+
+    [Fact]
+    public static void Xml_Soap_Enums()
+    {
+        var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithEnums));
+        var serializer = new XmlSerializer(mapping);
+        var item = new WithEnums() { Int = IntEnum.Option1, Short = ShortEnum.Option2 };
+        var actual = SerializeAndDeserialize(
+            item,
+            "<?xml version=\"1.0\"?>\r\n<WithEnums xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <Int xsi:type=\"IntEnum\">Option1</Int>\r\n  <Short xsi:type=\"ShortEnum\">Option2</Short>\r\n</WithEnums>",
+            () => serializer);
+        Assert.StrictEqual(item.Short, actual.Short);
+        Assert.StrictEqual(item.Int, actual.Int);
+    }
+
+    [Fact]
+    public static void Xml_Soap_Dictionary()
     {
         Assert.Throws<NotSupportedException>(() => { new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup3)); });
     }
 
     [Fact]
-    public static void SoapEncodedSerializationTest_NestedPublicType()
+    public static void Xml_Soap_NestedPublicType()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNestedPublicType.LevelData));
         var ser = new XmlSerializer(myTypeMapping);
@@ -2926,6 +2936,55 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
            baseline: "<?xml version=\"1.0\"?>\r\n<LevelData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <Name xsi:type=\"xsd:string\">AA</Name>\r\n</LevelData>",
            serializerFactory: () => ser);
         Assert.Equal(value.Name, actual.Name);
+    }
+
+    [Fact]
+    public static void Xml_Soap_ObjectAsRoot()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(object));
+        var ser = new XmlSerializer(myTypeMapping);
+        Assert.Equal(
+            1,
+            SerializeAndDeserialize<object>(
+                1,
+                "<?xml version=\"1.0\"?>\r\n<anyType d1p1:type=\"int\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">1</anyType>",
+                () => ser));
+
+        Assert.Equal(
+            true,
+            SerializeAndDeserialize<object>(
+                true,
+                "<?xml version=\"1.0\"?>\r\n<anyType d1p1:type=\"boolean\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">true</anyType>",
+                () => ser));
+
+        Assert.Equal(
+            "abc",
+            SerializeAndDeserialize<object>(
+                "abc",
+                "<?xml version=\"1.0\"?>\r\n<anyType d1p1:type=\"string\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">abc</anyType>",
+                () => ser));
+
+        var nullDeserialized = SerializeAndDeserialize<object>(
+                null,
+                "<?xml version=\"1.0\"?>\r\n<xsd:anyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />",
+                () => ser);
+        Assert.NotNull(nullDeserialized);
+        Assert.True(typeof(object) == nullDeserialized.GetType());
+    }
+
+    [Fact]
+    public static void Xml_Soap_ObjectAsRoot_Nullable()
+    {
+        XmlTypeMapping nullableTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNullableObject));
+        var ser = new XmlSerializer(nullableTypeMapping);
+
+        var value = new TypeWithNullableObject { MyObject = null };
+        TypeWithNullableObject actual = SerializeAndDeserialize(
+                value,
+                "<?xml version=\"1.0\"?>\r\n<TypeWithNullableObject xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <MyObject xsi:nil=\"true\" />\r\n</TypeWithNullableObject>",
+                () => ser);
+        Assert.NotNull(actual);
+        Assert.Null(actual.MyObject);
     }
 
     [Fact]
@@ -3813,5 +3872,33 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
             return deserialized;
         }
+    }
+
+    private static T SerializeAndDeserializeWithWrapper<T>(T value, XmlSerializer serializer, string baseline)
+    {
+        T actual;
+        using (var ms = new MemoryStream())
+        {
+            var writer = new XmlTextWriter(ms, Encoding.UTF8);
+            writer.WriteStartElement("root");
+            serializer.Serialize(writer, value);
+            writer.WriteEndElement();
+            writer.Flush();
+
+            ms.Position = 0;
+            string actualOutput = new StreamReader(ms).ReadToEnd();
+            Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
+            Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
+                Environment.NewLine, result.ErrorMessage, value, baseline, actualOutput));
+
+            ms.Position = 0;
+            using (var reader = new XmlTextReader(ms))
+            {
+                reader.ReadStartElement("root");
+                actual = (T)serializer.Deserialize(reader);
+            }
+        }
+
+        return actual;
     }
 }

@@ -1179,13 +1179,6 @@ namespace System.Xml.Serialization
         {
             if (mapping is EnumMapping)
             {
-                if (mapping.IsSoap)
-                {
-                    // #10676: As all SOAP relates APIs are not in CoreCLR yet, the reflection based method
-                    // currently throws PlatformNotSupportedException when types require SOAP serialization.
-                    throw new PlatformNotSupportedException();
-                }
-
                 return WriteEnumMethod((EnumMapping)mapping, readFunc);
             }
             else if (mapping.TypeDesc == StringTypeDesc)

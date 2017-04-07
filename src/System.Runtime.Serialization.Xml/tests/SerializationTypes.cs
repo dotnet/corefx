@@ -4211,3 +4211,9 @@ public class TypeWithXmlAttributes
     [XmlAttribute(DataType = "date", AttributeName = "CreationDate")]
     public DateTime Today;
 }
+
+public class TypeWithNullableObject
+{
+    [SoapElement(IsNullable = true)]
+    public object MyObject;
+}
