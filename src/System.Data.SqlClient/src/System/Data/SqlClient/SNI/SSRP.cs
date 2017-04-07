@@ -59,7 +59,7 @@ namespace System.Data.SqlClient.SNI
             Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             const byte ClntUcastInst = 0x04;
-            instanceName = GetNullTerminatedString(instanceName);
+            instanceName = instanceName + Char.MinValue;
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 1];
@@ -107,7 +107,7 @@ namespace System.Data.SqlClient.SNI
 
             const byte ClntUcastDac = 0x0F;
             const byte ProtocolVersion = 0x01;
-            instanceName = GetNullTerminatedString(instanceName);
+            instanceName = instanceName + Char.MinValue;
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
 
             byte[] requestPacket = new byte[byteCount + 2];
@@ -116,37 +116,6 @@ namespace System.Data.SqlClient.SNI
             Encoding.ASCII.GetBytes(instanceName, 0, instanceName.Length, requestPacket, 2);
 
             return requestPacket;
-        }
-
-        /// <summary>
-        /// Returns null-terminated string for given string.
-        /// </summary>
-        /// <param name="str">string to be null-terminated</param>
-        /// <returns>null-terminated string for given string</returns>
-        private static string GetNullTerminatedString(string str)
-        {
-            Debug.Assert(str != null, "str should not be null");
-
-            string result = null;
-            int nullCharIndex = str.IndexOf(NullChar);
-
-            // str does not have '\0'
-            if (nullCharIndex < 0)
-            {
-                result = str + NullChar;
-            }
-            // '\0' exists in the middle of str
-            else if (nullCharIndex < str.Length - 1) 
-            {
-                result = str.Substring(0, nullCharIndex + 1);
-            }
-            // str already has one '\0' at the end
-            else
-            {
-                result = str;
-            }
-
-            return str;
         }
 
         /// <summary>
