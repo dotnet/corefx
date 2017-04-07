@@ -63,17 +63,18 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            try
+            // Testing purposes
+            throw new NotImplementedException();
+
+            value = default(TValue);
+
+            if (dictionary.TryGetValue(key, out var foundValue))
             {
-                value = dictionary[key];
-                dictionary.Remove(key);
+                value = foundValue;
                 return true;
             }
-            catch (Exception)
-            {
-                value = default(TValue);
-                return false;
-            }
+
+            return false;
         }
     }
 }
