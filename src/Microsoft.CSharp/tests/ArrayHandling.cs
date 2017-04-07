@@ -22,6 +22,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        public void SingleRankNonSZArrayIndexed()
+        {
+            dynamic d = Array.CreateInstance(typeof(int), new[] { 8 }, new[] { -2 });
+            RuntimeBinderException error = Assert.Throws<RuntimeBinderException>(() => d[3] = 32);
+            // Should be similar to the error message for CS0021
+            Assert.Contains("[]", error.Message);
+            Assert.Contains("Array", error.Message);
+            error = Assert.Throws<RuntimeBinderException>(() => d[3]);
+            Assert.Contains("[]", error.Message);
+            Assert.Contains("Array", error.Message);
+        }
+
+        [Fact]
         public void ArrayTypeNames()
         {
             dynamic d = Array.CreateInstance(typeof(int), new[] { 8 }, new[] { -2 });

@@ -822,11 +822,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ctype = _typeManager.GetArray(
                     GetCTypeFromType(t.GetElementType()), 
                     t.GetArrayRank(),
-#if netcoreapp
-                    t.IsSZArray
-#else
-                    t.GetElementType().MakeArrayType() == t
-#endif
+                    t.IsSZArray()
                     );
                 return ctype;
             }

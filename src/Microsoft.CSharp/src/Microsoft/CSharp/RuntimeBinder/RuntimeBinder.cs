@@ -1411,8 +1411,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (optionalIndexerArguments != null)
                 {
                     int numIndexArguments = ExpressionIterator.Count(optionalIndexerArguments);
-                    // We could have an array access here. See if its just an array.
-                    if ((argument.Type.IsArray && argument.Type.GetArrayRank() == numIndexArguments) ||
+                    // We could have an array access here. See if it's just an array.
+                    // Don't count single-ranked non-SZ arrays as that type cannot be handled directly in C#
+                    // so the closest C# equivalent is to try to using indexing on a value of type System.Array
+                    // which should fail.
+                    if ((argument.Type.IsArray && argument.Type.GetArrayRank() == numIndexArguments && (numIndexArguments > 1 || argument.Type.IsSZArray())) ||
                         argument.Type == typeof(string))
                     {
                         return CreateArray(callingObject, optionalIndexerArguments);
