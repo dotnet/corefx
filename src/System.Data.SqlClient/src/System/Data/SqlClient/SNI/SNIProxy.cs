@@ -299,18 +299,13 @@ namespace System.Data.SqlClient.SNI
             SNIHandle sniHandle = null;
             switch (details.ConnectionProtocol)
             {
+                case DataSource.Protocol.Admin:
+                case DataSource.Protocol.None: // default to using tcp if no protocol is provided
                 case DataSource.Protocol.TCP:
                     sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel);
                     break;
                 case DataSource.Protocol.NP:
                     sniHandle = CreateNpHandle(details, timerExpire, callbackObject, parallel);
-                    break;
-                case DataSource.Protocol.Admin:
-                    sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel);
-                    break;
-                case DataSource.Protocol.None:
-                    // default to using tcp if no protocol is provided
-                    sniHandle = CreateTcpHandle(details, timerExpire, callbackObject, parallel);
                     break;
                 default:
                     Debug.Fail($"Unexpected connection protocol: {details.ConnectionProtocol}");
