@@ -10,29 +10,36 @@ namespace System.Security.Cryptography
 {
     public sealed partial class RSACryptoServiceProvider : RSA, ICspAsymmetricAlgorithm
     {
+        private const int DefaultKeySize = 1024;
+
         private readonly RSA _impl;
         private bool _publicOnly;
 
         public RSACryptoServiceProvider()
-            : this(0, true) { }
+            : this(DefaultKeySize)
+        {
+            // This class wraps RSA
+            _impl = RSA.Create(DefaultKeySize);
+        }
 
         public RSACryptoServiceProvider(int dwKeySize)
-            : this(dwKeySize, false) { }
-
-        public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
-            : this(dwKeySize, false) { }
-
-        public RSACryptoServiceProvider(CspParameters parameters)
-            : this(0, true) { }
-
-        private RSACryptoServiceProvider(int keySize, bool useDefaultKeySize)
+            : this(dwKeySize)
         {
-            if (keySize < 0)
-                throw new ArgumentOutOfRangeException(nameof(keySize), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (dwKeySize < 0)
+                throw new ArgumentOutOfRangeException(nameof(dwKeySize), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             // This class wraps RSA
-            _impl = RSA.Create();
-            _impl.KeySize = useDefaultKeySize ? 1024 : keySize;
+            _impl = RSA.Create(dwKeySize);
+        }
+
+        public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public RSACryptoServiceProvider(CspParameters parameters)
+        {
+            throw new PlatformNotSupportedException();
         }
 
         public CspKeyContainerInfo CspKeyContainerInfo
@@ -65,6 +72,7 @@ namespace System.Security.Cryptography
             }
             else if (padding == RSAEncryptionPadding.OaepSHA1)
             {
+                // For compat, this prevents OaepSHA2 options as fOAEP==true will cause Decrypt to use OaepSHA1
                 return Decrypt(data, fOAEP: true);
             }
             else
@@ -105,6 +113,7 @@ namespace System.Security.Cryptography
             }
             else if (padding == RSAEncryptionPadding.OaepSHA1)
             {
+                // For compat, this prevents OaepSHA2 options as fOAEP==true will cause Decrypt to use OaepSHA1
                 return Encrypt(data, fOAEP: true);
             }
             else
@@ -116,7 +125,7 @@ namespace System.Security.Cryptography
         public byte[] ExportCspBlob(bool includePrivateParameters)
         {
             RSAParameters parameters = ExportParameters(includePrivateParameters);
-            return CapiHelper.ToKeyBlob(parameters, CapiHelper.CALG_RSA_KEYX);
+            return parameters.ToKeyBlob();
         }
 
         public override RSAParameters ExportParameters(bool includePrivateParameters) =>
@@ -132,8 +141,7 @@ namespace System.Security.Cryptography
 
         public void ImportCspBlob(byte[] keyBlob)
         {
-            bool includePrivateParameters = CapiHelper.GetKeyBlobType(keyBlob) != CapiHelper.PUBLICKEYBLOB;
-            RSAParameters parameters = CapiHelper.ToRSAParameters(keyBlob, includePrivateParameters);
+            RSAParameters parameters = CapiHelper.ToRSAParameters(keyBlob, !IsPublic(keyBlob));
             ImportParameters(parameters);
         }
 
@@ -145,6 +153,7 @@ namespace System.Security.Cryptography
 
             _impl.ImportParameters(parameters);
 
+            // P was verified in ImportParameters
             _publicOnly = (parameters.P == null || parameters.P.Length == 0);
         }
 
@@ -167,7 +176,7 @@ namespace System.Security.Cryptography
             get { return _publicOnly; }
         }
 
-        public override string SignatureAlgorithm => _impl.SignatureAlgorithm;
+        public override string SignatureAlgorithm => "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
 
         public override byte[] SignData(Stream data, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding) =>
             _impl.SignData(data, hashAlgorithm, padding);
@@ -191,6 +200,8 @@ namespace System.Security.Cryptography
         {
             if (rgbHash == null)
                 throw new ArgumentNullException(nameof(rgbHash));
+            if (PublicOnly)
+                throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
 
             HashAlgorithmName algName = HashAlgorithmNames.NameOrOidToHashAlgorithmName(str);
             return _impl.SignHash(rgbHash, algName, RSASignaturePadding.Pkcs1);
@@ -208,6 +219,8 @@ namespace System.Security.Cryptography
         {
             if (signature == null)
                 throw new ArgumentNullException(nameof(signature));
+            if (padding != RSASignaturePadding.Pkcs1)
+                throw PaddingModeNotSupported();
 
             // _impl does remaining parameter validation
 
@@ -227,15 +240,38 @@ namespace System.Security.Cryptography
             return _impl.VerifyHash(rgbHash, rgbSignature, algName, RSASignaturePadding.Pkcs1);
         }
 
-        public static bool UseMachineKeyStore
-        {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
-        }
+        // UseMachineKeyStore has no effect in Unix
+        public static bool UseMachineKeyStore { get; set; }
 
         private static Exception PaddingModeNotSupported()
         {
             return new CryptographicException(SR.Cryptography_InvalidPaddingMode);
+        }
+
+        /// <summary>
+        /// find whether an RSA key blob is public.
+        /// </summary>
+        private static bool IsPublic(byte[] keyBlob)
+        {
+            if (keyBlob == null)
+                throw new ArgumentNullException(nameof(keyBlob));
+
+            // The CAPI RSA public key representation consists of the following sequence:
+            //  - BLOBHEADER
+            //  - RSAPUBKEY
+
+            // The first should be PUBLICKEYBLOB and magic should be RSA_PUB_MAGIC "RSA1"
+            if (keyBlob[0] != CapiHelper.PUBLICKEYBLOB)
+            {
+                return false;
+            }
+
+            if (keyBlob[11] != 0x31 || keyBlob[10] != 0x41 || keyBlob[9] != 0x53 || keyBlob[8] != 0x52)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -217,6 +217,23 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void Ctor_UseCspParameter_Throws_Unix()
+        {
+            var cspParameters = new CspParameters();
+            Assert.Throws<PlatformNotSupportedException>(() => new DSACryptoServiceProvider(cspParameters));
+            Assert.Throws<PlatformNotSupportedException>(() => new DSACryptoServiceProvider(0, cspParameters));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void CspKeyContainerInfo_Throws_Unix()
+        {
+            var dsa = new DSACryptoServiceProvider();
+            Assert.Throws<PlatformNotSupportedException>(() => (dsa.CspKeyContainerInfo));
+        }
+
+        [Fact]
         public static void ImportParameters_KeyTooBig_Throws()
         {
             using (var dsa = new DSACryptoServiceProvider())
@@ -229,7 +246,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [Fact]
         public static void VerifyHash_InvalidHashAlgorithm_Throws()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(DSATestData.HelloBytes);
+            }
 
             using (var dsa = new DSACryptoServiceProvider())
             {
@@ -241,7 +262,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void SignHash_DefaultAlgorithm_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(DSATestData.HelloBytes);
+            }
 
             using (var dsa = new DSACryptoServiceProvider())
             {
@@ -264,7 +289,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyHash_DefaultAlgorithm_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(DSATestData.HelloBytes);
+            }
 
             using (var dsa = new DSACryptoServiceProvider())
             {
@@ -276,7 +305,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyHash_CaseInsensitive_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(DSATestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(DSATestData.HelloBytes);
+            }
 
             using (var dsa = new DSACryptoServiceProvider())
             {
@@ -321,8 +354,17 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        public static void SignatureAlgorithm_Success()
+        {
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                Assert.Equal("http://www.w3.org/2000/09/xmldsig#dsa-sha1", dsa.SignatureAlgorithm);
+            }
+        }
+
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
-        public static void TestShimOverloads()
+        public static void TestShimOverloads_Unix()
         {
             ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(DSACryptoServiceProvider));
         }

@@ -67,7 +67,7 @@ namespace System.Security.Cryptography
         public byte[] ExportCspBlob(bool includePrivateParameters)
         {
             DSAParameters parameters = ExportParameters(includePrivateParameters);
-            return CapiHelper.ToKeyBlob(parameters);
+            return parameters.ToKeyBlob();
         }
 
         public override DSAParameters ExportParameters(bool includePrivateParameters) =>
@@ -93,8 +93,7 @@ namespace System.Security.Cryptography
 
         public void ImportCspBlob(byte[] keyBlob)
         {
-            bool includePrivateParameters = CapiHelper.GetKeyBlobType(keyBlob) != CapiHelper.PUBLICKEYBLOB;
-            DSAParameters parameters = keyBlob.ToDSAParameters(includePrivateParameters, null);
+            DSAParameters parameters = keyBlob.ToDSAParameters(!IsPublic(keyBlob), null);
             ImportParameters(parameters);
         }
 
@@ -106,7 +105,7 @@ namespace System.Security.Cryptography
 
             _impl.ImportParameters(parameters);
 
-            _publicOnly = (parameters.X == null || parameters.X.Length == 0);
+            _publicOnly = (parameters.X == null);
         }
 
         public override string KeyExchangeAlgorithm => _impl.KeyExchangeAlgorithm;
@@ -134,7 +133,7 @@ namespace System.Security.Cryptography
             get { return _publicOnly; }
         }
 
-        public override string SignatureAlgorithm => _impl.SignatureAlgorithm;
+        public override string SignatureAlgorithm => "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
 
         public byte[] SignData(byte[] buffer)
         {
@@ -173,15 +172,16 @@ namespace System.Security.Cryptography
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "This is the implementation of DSACryptoServiceProvider")]
         public byte[] SignHash(byte[] rgbHash, string str)
         {
-            if (rgbHash.Length != SHA1_HASHSIZE)
-                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
+            if (rgbHash == null)
+                throw new ArgumentNullException(nameof(rgbHash));
             if (PublicOnly)
                 throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+            if (rgbHash.Length != SHA1_HASHSIZE)
+                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
 
             // Only SHA1 allowed; the default value is SHA1
             if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm);
-
 
             return CreateSignature(rgbHash);
         }
@@ -191,8 +191,12 @@ namespace System.Security.Cryptography
 
         public bool VerifyHash(byte[] rgbHash, string str, byte[] rgbSignature)
         {
-            if (rgbHash.Length != SHA1_HASHSIZE)
-                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
+            if (rgbHash == null)
+                throw new ArgumentNullException(nameof(rgbHash));
+            if (rgbSignature == null)
+                throw new ArgumentNullException(nameof(rgbSignature));
+            
+            // For compat with Windows, no check for rgbHash.Length != SHA1_HASHSIZE
 
             // Only SHA1 allowed; the default value is SHA1
             if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
@@ -222,5 +226,32 @@ namespace System.Security.Cryptography
 
         // UseMachineKeyStore has no effect in Unix
         public static bool UseMachineKeyStore { get; set; }
+
+        /// <summary>
+        /// Find whether a DSS key blob is public.
+        /// </summary>
+        private static bool IsPublic(byte[] keyBlob)
+        {
+            if (keyBlob == null)
+                throw new ArgumentNullException(nameof(keyBlob));
+
+            // The CAPI DSS public key representation consists of the following sequence:
+            //  - BLOBHEADER (the first byte is bType)
+            //  - DSSPUBKEY or DSSPUBKEY_VER3 (the first field is the magic field)
+
+            // The first byte should be PUBLICKEYBLOB
+            if (keyBlob[0] != CapiHelper.PUBLICKEYBLOB)
+            {
+                return false;
+            }
+
+            // Magic should be DSS_MAGIC or DSS_PUB_MAGIC_VER3
+            if ((keyBlob[11] != 0x31 && keyBlob[11] != 0x33) || keyBlob[10] != 0x53 || keyBlob[9] != 0x53 || keyBlob[8] != 0x44)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

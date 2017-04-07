@@ -527,6 +527,16 @@ namespace System.Security.Cryptography.DeriveBytesTests
             }
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void CryptDeriveKey_Throws_Unix()
+        {
+            using (var deriveBytes = new PasswordDeriveBytes(TestPassword, s_testSalt))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => (deriveBytes.CryptDeriveKey("RC2", "SHA1", 128, null)));
+            }
+        }
+
         private static byte[] TestKnownValue_CryptDeriveKey(HashAlgorithmName hashName, string password, string alg, int keySize, byte[] salt, byte[] expected)
         {
             byte[] output;

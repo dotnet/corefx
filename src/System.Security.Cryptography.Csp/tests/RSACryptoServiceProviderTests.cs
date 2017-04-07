@@ -278,6 +278,23 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void Ctor_UseCspParameter_Throws_Unix()
+        {
+            var cspParameters = new CspParameters();
+            Assert.Throws<PlatformNotSupportedException>(() => new RSACryptoServiceProvider(cspParameters));
+            Assert.Throws<PlatformNotSupportedException>(() => new RSACryptoServiceProvider(0, cspParameters));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void CspKeyContainerInfo_Throws_Unix()
+        {
+            var rsa = new RSACryptoServiceProvider();
+            Assert.Throws<PlatformNotSupportedException>(() => (rsa.CspKeyContainerInfo));
+        }
+
+        [Fact]
         public static void ImportParameters_ExponentTooBig_Throws()
         {
             using (var rsa = new RSACryptoServiceProvider())
@@ -290,7 +307,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [Fact]
         public static void SignHash_DefaultAlgorithm_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(TestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(TestData.HelloBytes);
+            }
 
             using (var rsa = new RSACryptoServiceProvider())
             {
@@ -302,7 +323,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [Fact]
         public static void VerifyHash_DefaultAlgorithm_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(TestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(TestData.HelloBytes);
+            }
 
             using (var rsa = new RSACryptoServiceProvider())
             {
@@ -312,9 +337,40 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
+        public static void Encrypt_InvalidPaddingMode_Throws()
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                Assert.Throws<CryptographicException>(() => rsa.Encrypt(TestData.HelloBytes, RSAEncryptionPadding.OaepSHA256));
+            }
+        }
+
+        [Fact]
+        public static void Decrypt_InvalidPaddingMode_Throws()
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                Assert.Throws<CryptographicException>(() => rsa.Decrypt(TestData.HelloBytes, RSAEncryptionPadding.OaepSHA256));
+            }
+        }
+
+        [Fact]
+        public static void SignatureAlgorithm_Success()
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                Assert.Equal("http://www.w3.org/2000/09/xmldsig#rsa-sha1", rsa.SignatureAlgorithm);
+            }
+        }
+
+        [Fact]
         public static void SignData_VerifyHash_CaseInsensitive_Success()
         {
-            byte[] hashVal = SHA1.Create().ComputeHash(TestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                hashVal = sha1.ComputeHash(TestData.HelloBytes);
+            }
 
             using (var rsa = new RSACryptoServiceProvider())
             {
@@ -328,7 +384,7 @@ namespace System.Security.Cryptography.Csp.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
-        public static void TestShimOverloads()
+        public static void TestShimOverloads_Unix()
         {
             ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(RSACryptoServiceProvider));
         }

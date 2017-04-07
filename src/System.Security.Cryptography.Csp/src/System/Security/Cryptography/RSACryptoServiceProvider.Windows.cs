@@ -384,7 +384,7 @@ namespace System.Security.Cryptography
         /// </summary>
         public override void ImportParameters(RSAParameters parameters)
         {
-            byte[] keyBlob = parameters.ToKeyBlob(CapiHelper.CALG_RSA_KEYX);
+            byte[] keyBlob = parameters.ToKeyBlob();
             ImportCspBlob(keyBlob);
         }
 

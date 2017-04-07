@@ -99,8 +99,13 @@ namespace System.Security.Cryptography
 
         public bool UseSalt
         {
-            get { throw new PlatformNotSupportedException(); }
-            set { throw new PlatformNotSupportedException(); }
+            get { return false; }
+            set
+            {
+                // Don't allow a true value
+                if (value)
+                    throw new PlatformNotSupportedException();
+            }
         }
     }
 }

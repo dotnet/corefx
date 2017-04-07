@@ -24,7 +24,7 @@ namespace System.Security.Cryptography.Encryption.Des.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
-        public static void TestShimOverloads()
+        public static void TestShimOverloads_Unix()
         {
             ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(DESCryptoServiceProvider));
         }

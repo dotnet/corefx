@@ -69,13 +69,8 @@ namespace Internal.NativeCrypto
         /// <summary>
         /// Helper for RsaCryptoServiceProvider.ImportParameters()
         /// </summary>
-        internal static byte[] ToKeyBlob(this RSAParameters rsaParameters, int algId)
+        internal static byte[] ToKeyBlob(this RSAParameters rsaParameters)
         {
-            // The original FCall this helper emulates supports other algId's - however, the only algid we need to support is CALG_RSA_KEYX. We will not
-            // port the codepaths dealing with other algid's.
-            if (algId != CapiHelper.CALG_RSA_KEYX)
-                throw new PlatformNotSupportedException();
-
             // Validate the RSA structure first.
             if (rsaParameters.Modulus == null)
                 throw GetBadDataException();
@@ -117,7 +112,7 @@ namespace Internal.NativeCrypto
             bw.Write((byte)(isPrivate ? PRIVATEKEYBLOB : PUBLICKEYBLOB));  // BLOBHEADER.bType
             bw.Write((byte)(BLOBHEADER_CURRENT_BVERSION));                 // BLOBHEADER.bVersion
             bw.Write((ushort)0);                                           // BLOBHEADER.wReserved
-            bw.Write((uint)algId);                                         // BLOBHEADER.aiKeyAlg
+            bw.Write((uint)CapiHelper.CALG_RSA_KEYX);                      // BLOBHEADER.aiKeyAlg
 
             // Write the RSAPubKey header
             bw.Write((int)(isPrivate ? RSA_PRIV_MAGIC : RSA_PUB_MAGIC));   // RSAPubKey.magic
@@ -204,15 +199,6 @@ namespace Internal.NativeCrypto
                 // For compat reasons, we ignore the extra bits if the CAPI returns a larger blob than expected.
                 throw GetEFailException();
             }
-        }
-
-        internal static byte GetKeyBlobType(byte[] cspBlob)
-        {
-            if (cspBlob.Length < 8)
-                throw new EndOfStreamException(); // Simulate same exception as ReadKeyBlobHeader would throw
-
-            // First byte is bType: Expected to be 0x6 (PUBLICKEYBLOB) or 0x7 (PRIVATEKEYBLOB)
-            return cspBlob[0];
         }
 
         internal static byte GetKeyBlobHeaderVersion(byte[] cspBlob)

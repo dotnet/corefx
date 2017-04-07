@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.Encryption.RC2.Tests
@@ -31,6 +32,30 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
             }
         }
 
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void UseSalt_Success()
+        {
+            using (var rc2 = new RC2CryptoServiceProvider())
+            {
+                Assert.False(rc2.UseSalt);
+                rc2.UseSalt = true;
+                Assert.True(rc2.UseSalt);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void UseSalt_Throws_Unix()
+        {
+            using (var rc2 = new RC2CryptoServiceProvider())
+            {
+                Assert.False(rc2.UseSalt);
+                Assert.Throws<PlatformNotSupportedException>(() => (rc2.UseSalt = true));
+            }
+        }
+
         [Fact]
         public static void TestShimProperties()
         {
@@ -43,7 +68,7 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Only Unix has _impl shim pattern
-        public static void TestShimOverloads()
+        public static void TestShimOverloads_Unix()
         {
             ShimHelpers.VerifyAllBaseMembersOverloaded(typeof(RC2CryptoServiceProvider));
         }

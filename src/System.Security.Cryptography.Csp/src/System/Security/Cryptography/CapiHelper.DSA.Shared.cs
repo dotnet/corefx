@@ -240,14 +240,17 @@ namespace Internal.NativeCrypto
 
                         if (includePrivateParameters)
                         {
+                            // If a previous call to CAPI returned a v2 private blob, which was then passed
+                            // to ImportCspBlob(byte[] keyBlob) under Unix then that is not supported.
+                            // Only Unix calls ToDSAParameters from ImportCspBlob; Windows imports directly via CAPI.
+                            // This can only happen if a v2 private blob was obtained directly through
+                            // CAPI and saved away for later use, because exporting a private blob with ExportCspBlob
+                            // will always export a v3 blob which contains both public and private keys.
+                            if (cspPublicBlob == null)
+                                throw new CryptographicUnexpectedOperationException();
+
                             // Since DSSPUBKEY is used for either public or private key, we got X
                             // but not Y. To get Y, use the public key blob.
-
-                            if (cspPublicBlob == null)
-                            {
-                                throw new PlatformNotSupportedException(); // Edge case with Unix interop
-                            }
-
                             using (var msPublicBlob = new MemoryStream(cspPublicBlob))
                             using (var brPublicBlob = new BinaryReader(msPublicBlob))
                             {

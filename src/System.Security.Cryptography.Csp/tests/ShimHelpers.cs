@@ -28,6 +28,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
             alg.Key = key;
             Assert.Equal(key, alg.Key);
+            Assert.NotSame(key, alg.Key);
             alg.GenerateKey();
             Assert.NotEqual(key, alg.Key);
 
@@ -56,7 +57,7 @@ namespace System.Security.Cryptography.Csp.Tests
                 // Ensure the override is on the shim; ignore virtual methods on System.Object
                 bool methodOverriden = info.DeclaringType == shimType || info.DeclaringType == typeof(object);
 
-                Assert.True(methodOverriden, $"Member not overriden: {info.Name}");
+                Assert.True(methodOverriden, $"Member overriden: {info.Name}");
             }
         }
     }
