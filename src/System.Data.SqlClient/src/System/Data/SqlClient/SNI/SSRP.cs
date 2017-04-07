@@ -1,4 +1,8 @@
-﻿using System.Diagnostics;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -19,8 +23,8 @@ namespace System.Data.SqlClient.SNI
         /// <returns>port number for given instance name</returns>
         internal static int GetPortByInstanceName(string browserHostName, string instanceName)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostName));
-            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName));
+            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostName), "browserHostName should not be null, empty, or whitespace");
+            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             byte[] instanceInfoRequest = CreateInstanceInfoRequest(instanceName);
             byte[] responsePacket = SendUDPRequest(browserHostName, SqlServerBrowserPort, instanceInfoRequest);
@@ -51,7 +55,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>Byte array of instance port lookup request (CLNT_UCAST_INST)</returns>
         private static byte[] CreateInstanceInfoRequest(string instanceName)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName));
+            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             const byte ClntUcastInst = 0x04;
             int byteCount = Encoding.ASCII.GetByteCount(instanceName);
@@ -71,13 +75,11 @@ namespace System.Data.SqlClient.SNI
         /// <returns>DAC port for given instance name</returns>
         internal static int GetDacPortByInstanceName(string browserHostName, string instanceName)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostName));
-            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName));
+            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostName), "browserHostName should not be null, empty, or whitespace");
+            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             byte[] dacPortInfoRequest = CreateDacPortInfoRequest(instanceName);
             byte[] responsePacket = SendUDPRequest(browserHostName, SqlServerBrowserPort, dacPortInfoRequest);
-
-            Console.WriteLine("responsePacket: " + BitConverter.ToString(responsePacket));
 
             const byte SvrResp = 0x05;
             const byte ProtocolVersion = 0x01;
@@ -99,7 +101,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>Byte array of DAC port lookup request (CLNT_UCAST_DAC)</returns>
         private static byte[] CreateDacPortInfoRequest(string instanceName)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName));
+            Debug.Assert(!string.IsNullOrWhiteSpace(instanceName), "instanceName should not be null, empty, or whitespace");
 
             const byte ClntUcastDac = 0x0F;
             const byte ProtocolVersion = 0x01;
@@ -122,9 +124,9 @@ namespace System.Data.SqlClient.SNI
         /// <returns>response packet from UDP server</returns>
         private static byte[] SendUDPRequest(string browserHostname, int port, byte[] requestPacket)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostname));
-            Debug.Assert(port >= 0 || port <= 65535);
-            Debug.Assert(requestPacket != null && requestPacket.Length > 0);
+            Debug.Assert(!string.IsNullOrWhiteSpace(browserHostname), "browserhostname should not be null, empty, or whitespace");
+            Debug.Assert(port >= 0 || port <= 65535, "Invalide port range");
+            Debug.Assert(requestPacket != null && requestPacket.Length > 0, "requestPacket should not be null or 0-length array");
 
             const int sendTimeOut = 1000;
             const int receiveTimeOut = 1000;
