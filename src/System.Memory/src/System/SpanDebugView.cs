@@ -38,7 +38,8 @@ namespace System
                 else
                 {
                     long byteOffsetInt = _byteOffset.ToInt64();
-                    int sourceIndex = (int)((byteOffsetInt - IntPtr.Size) / elementSize);
+                    long arrayAdjustment = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.ToInt64();
+                    int sourceIndex = (int)((byteOffsetInt - arrayAdjustment) / elementSize);
 
                     Array.Copy(_pinnable, sourceIndex, result, 0, _length);
                 }
