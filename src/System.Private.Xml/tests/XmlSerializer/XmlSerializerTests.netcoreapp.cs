@@ -8,8 +8,6 @@ using Xunit;
 
 public static partial class XmlSerializerTests
 {
-
-#if ReflectionOnly
     private static readonly string SerializationModeSetterName = "set_Mode";
 
     static XmlSerializerTests()
@@ -18,6 +16,4 @@ public static partial class XmlSerializerTests
         Assert.True(method != null, $"No method named {SerializationModeSetterName}");
         method.Invoke(null, new object[] { 1 });
     }
-
-#endif
 }
