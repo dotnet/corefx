@@ -12,7 +12,7 @@ public static partial class XmlSerializerTests
 
     static XmlSerializerTests()
     {
-        var method = typeof(XmlSerializer).GetMethod(SerializationModeSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo method = typeof(XmlSerializer).GetMethod(SerializationModeSetterName, BindingFlags.NonPublic | BindingFlags.Static);
         Assert.True(method != null, $"No method named {SerializationModeSetterName}");
         method.Invoke(null, new object[] { 1 });
     }
