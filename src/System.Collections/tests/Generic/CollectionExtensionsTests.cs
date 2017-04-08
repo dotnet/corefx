@@ -123,6 +123,7 @@ namespace System.Collections.Tests
             IDictionary<string, string> dictionary = new SortedDictionary<string, string>() { ["key"] = "value" };
             Assert.Equal(true, dictionary.Remove("key", out var value));
             Assert.Equal("value", value);
+            Assert.Throws<KeyNotFoundException>(() => dictionary["key"]);
         }
 
         [Fact]

@@ -66,6 +66,7 @@ namespace System.Collections.Generic
             if (dictionary.TryGetValue(key, out var foundValue))
             {
                 value = foundValue;
+                dictionary.Remove(key);
                 return true;
             }
 
