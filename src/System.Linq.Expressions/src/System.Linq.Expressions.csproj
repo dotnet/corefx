@@ -72,9 +72,6 @@
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs">
       <Link>Common\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\TypeExtensions.cs">
-      <Link>Common\System\Dynamic\Utils\TypeExtensions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Linq\Expressions\Compiler\DelegateHelpers.cs">
       <Link>Common\System\Linq\Expressions\Compiler\DelegateHelpers.cs</Link>
     </Compile>
