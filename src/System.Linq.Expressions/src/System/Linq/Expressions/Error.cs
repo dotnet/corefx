@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 namespace System.Linq.Expressions
 {
     /// <summary>
     ///    Strongly-typed and parameterized exception factory.
     /// </summary>
-    internal static partial class Error
+    internal static class Error
     {
         /// <summary>
         /// ArgumentException with message like "reducible nodes must override Expression.Reduce()"

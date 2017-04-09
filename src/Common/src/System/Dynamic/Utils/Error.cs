@@ -7,7 +7,7 @@ namespace System.Dynamic.Utils
     /// <summary>
     ///    Strongly-typed and parameterized exception factory.
     /// </summary>
-    internal static partial class Error
+    internal static class Error
     {
         /// <summary>
         /// InvalidOperationException with message like "Enumeration has either not started or has already finished."
