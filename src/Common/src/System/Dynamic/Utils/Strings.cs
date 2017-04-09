@@ -42,9 +42,9 @@ namespace System.Dynamic.Utils
         internal static string CollectionModifiedWhileEnumerating => SR.CollectionModifiedWhileEnumerating;
 
         /// <summary>
-        /// A string like "Enumeration has either not started or has already finished."
+        /// A string like "Enumeration has either not started or has alreExpressionTypeDoesNotMatchConstructorParameterady finished."
         /// </summary>
-        internal static string EnumerationIsDone => SR.EnumerationIsDone;
+        internal static string EnumerationIsDone => SR.TypeContainsGenericParameters;
 
         /// <summary>
         /// A string like "Expression must be readable"

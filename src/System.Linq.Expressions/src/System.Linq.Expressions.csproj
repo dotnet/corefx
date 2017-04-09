@@ -51,7 +51,7 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />      
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
@@ -71,9 +71,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs">
       <Link>Common\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\Error.cs">
-      <Link>Common\System\Dynamic\Utils\Error.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\ExpressionUtils.cs">
       <Link>Common\System\Dynamic\Utils\ExpressionUtils.cs</Link>
