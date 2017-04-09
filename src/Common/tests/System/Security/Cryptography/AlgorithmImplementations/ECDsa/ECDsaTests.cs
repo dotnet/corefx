@@ -520,11 +520,10 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Fact]
         public void PublicKey_CannotSign()
         {
-            ECParameters keyParameters = ECDsaTestData.GetNistP521DiminishedCoordsParameters();
-            keyParameters.D = null;
-
+            using (ECDsa ecdsaPriv = ECDsaFactory.Create())
             using (ECDsa ecdsa = ECDsaFactory.Create())
             {
+                ECParameters keyParameters = ecdsaPriv.ExportParameters(false);
                 ecdsa.ImportParameters(keyParameters);
 
                 Assert.ThrowsAny<CryptographicException>(
