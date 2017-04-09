@@ -75,9 +75,6 @@
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\ExpressionUtils.cs">
       <Link>Common\System\Dynamic\Utils\ExpressionUtils.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\Strings.cs">
-      <Link>Common\System\Dynamic\Utils\Strings.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\TypeExtensions.cs">
       <Link>Common\System\Dynamic\Utils\TypeExtensions.cs</Link>
     </Compile>

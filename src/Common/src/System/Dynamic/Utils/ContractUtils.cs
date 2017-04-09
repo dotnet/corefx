@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Threading;
 
 namespace System.Dynamic.Utils
@@ -42,8 +43,10 @@ namespace System.Dynamic.Utils
 
             if (!precondition)
             {
-                throw new ArgumentException(Strings.InvalidArgumentValue, paramName);
+                throw Error.InvalidArgumentValue(paramName);
             }
+
+            Debug.Assert(precondition);
         }
 
         /// <summary>
@@ -111,8 +114,10 @@ namespace System.Dynamic.Utils
             RequiresNotNull(collection, paramName);
             if (collection.Count == 0)
             {
-                throw new ArgumentException(Strings.NonEmptyCollectionRequired, paramName);
+                throw Error.NonEmptyCollectionRequired(paramName);
             }
+
+            Debug.Assert(collection.Count != 0);
         }
 
         /// <summary>

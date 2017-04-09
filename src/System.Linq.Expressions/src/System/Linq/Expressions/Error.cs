@@ -1268,7 +1268,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// ArgumentException with message like "Type {0} contains generic parameters"
         /// </summary>
-        internal static Exception TypeContainsGenericParameters(object p0, string paramName)
+        private static Exception TypeContainsGenericParameters(object p0, string paramName)
         {
             return new ArgumentException(Strings.TypeContainsGenericParameters(p0), paramName);
         }
@@ -1385,6 +1385,27 @@ namespace System.Linq.Expressions
         {
             return ExpressionMustBeReadable(GetParamName(paramName, index));
         }
+
+        internal static Exception InvalidArgumentValue(string paramName)
+        {
+            return new ArgumentException(Strings.InvalidArgumentValue, paramName);
+        }
+
+        internal static Exception NonEmptyCollectionRequired(string paramName)
+        {
+            return new ArgumentException(Strings.NonEmptyCollectionRequired, paramName);
+        }
+
+        internal static Exception InvalidNullValue(Type type, string paramName)
+        {
+            return new ArgumentException(Strings.InvalidNullValue(type), paramName);
+        }
+
+        internal static Exception InvalidTypeException(object value, Type type, string paramName)
+        {
+            return new ArgumentException(Strings.InvalidObjectType(value?.GetType() as object ?? "null", type), paramName);
+        }
+
         private static string GetParamName(string paramName, int index)
         {
             if (index >= 0)
