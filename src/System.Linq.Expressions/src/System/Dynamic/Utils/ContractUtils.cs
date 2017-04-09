@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace System.Dynamic.Utils
 {
-    internal static partial class ContractUtils
+    internal static class ContractUtils
     {
         /// <summary>
         /// Returns an exception object to be thrown when code is supposed to be unreachable.
@@ -45,8 +45,6 @@ namespace System.Dynamic.Utils
             {
                 throw Error.InvalidArgumentValue(paramName);
             }
-
-            Debug.Assert(precondition);
         }
 
         /// <summary>
@@ -116,8 +114,6 @@ namespace System.Dynamic.Utils
             {
                 throw Error.NonEmptyCollectionRequired(paramName);
             }
-
-            Debug.Assert(collection.Count != 0);
         }
 
         /// <summary>
@@ -152,14 +148,23 @@ namespace System.Dynamic.Utils
             Debug.Assert(Monitor.IsEntered(lockObject), "Expected lock is not held.");
         }
 
-        private static string GetParamName(string paramName, int index)
-        {
-            if (index >= 0)
-            {
-                return $"{paramName}[{index}]";
-            }
+        private static string GetParamName(string paramName, int index) => index >= 0 ? $"{paramName}[{index}]" : paramName;
 
-            return paramName;
+        /// <summary>
+        /// Requires the range [offset, offset + count] to be a subset of [0, array.Count].
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Array is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Offset or count are out of range.</exception>
+        public static void RequiresArrayRange<T>(IList<T> array, int offset, int count, string offsetName, string countName)
+        {
+            Debug.Assert(!string.IsNullOrEmpty(offsetName));
+            Debug.Assert(!string.IsNullOrEmpty(countName));
+            Debug.Assert(array != null);
+
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(countName);
+            if (offset < 0 || array.Count - offset < count)
+                throw new ArgumentOutOfRangeException(offsetName);
         }
     }
 }

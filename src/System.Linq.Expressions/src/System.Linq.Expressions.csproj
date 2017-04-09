@@ -63,15 +63,8 @@
     <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
       <Link>Common\System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\CacheDict.cs">
-      <Link>Common\System\Dynamic\Utils\CacheDict.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\ContractUtils.cs">
-      <Link>Common\System\Dynamic\Utils\ContractUtils.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs">
-      <Link>Common\System\Dynamic\Utils\ContractUtils.RequiresArrayRange.cs</Link>
-    </Compile>
+    <Compile Include="System\Dynamic\Utils\CacheDict.cs" />
+    <Compile Include="System\Dynamic\Utils\ContractUtils.cs" />
     <Compile Include="$(CommonPath)\System\Linq\Expressions\Compiler\DelegateHelpers.cs">
       <Link>Common\System\Linq\Expressions\Compiler\DelegateHelpers.cs</Link>
     </Compile>
@@ -227,9 +220,7 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.RuntimeVariableList.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsInterpreting)' == 'true' Or '$(FeatureInterpret)' == 'true'">
-    <Compile Include="$(CommonPath)\System\Dynamic\Utils\DelegateHelpers.cs">
-      <Link>Common\System\Dynamic\Utils\DelegateHelpers.cs</Link>
-    </Compile>
+    <Compile Include="System\Dynamic\Utils\DelegateHelpers.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\AddInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\AndInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ArrayOperations.cs" />
