@@ -64,6 +64,12 @@ namespace System.Diagnostics
         /// <returns>true if the machine is remote; false if it's local.</returns>
         public static bool IsRemoteMachine(string machineName)
         {
+            if (machineName == null)
+                throw new ArgumentNullException(nameof(machineName));
+
+            if (machineName.Length == 0)
+                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
+
             return 
                 machineName != "." && 
                 machineName != Interop.Sys.GetHostName();

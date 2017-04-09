@@ -777,7 +777,19 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestGetProcessesByName()
+        public void GetProcesseses_NullMachineName_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("machineName", () => Process.GetProcesses(null));
+        }
+
+        [Fact]
+        public void GetProcesses_EmptyMachineName_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(null, () => Process.GetProcesses(""));
+        }
+
+        [Fact]
+        public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
             // Get the current process using its name
             Process currentProcess = Process.GetCurrentProcess();
@@ -836,6 +848,20 @@ namespace System.Diagnostics.Tests
         public void GetProcessesByName_NoSuchProcess_ReturnsEmpty(string processName)
         {
             Assert.Empty(Process.GetProcessesByName(processName));
+        }
+
+        [Fact]
+        public void GetProcessesByName_NullMachineName_ThrowsArgumentNullException()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Assert.Throws<ArgumentNullException>("machineName", () => Process.GetProcessesByName(currentProcess.ProcessName, null));
+        }
+
+        [Fact]
+        public void GetProcessesByName_EmptyMachineName_ThrowsArgumentException()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Assert.Throws<ArgumentException>(null, () => Process.GetProcessesByName(currentProcess.ProcessName, ""));
         }
 
         public static IEnumerable<object[]> GetTestProcess()
