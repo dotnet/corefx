@@ -230,7 +230,6 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(RAND_poll, true) \
     PER_FUNCTION_BLOCK(RSA_free, true) \
     PER_FUNCTION_BLOCK(RSA_generate_key_ex, true) \
-    PER_FUNCTION_BLOCK(RSA_get_default_method, true) \
     PER_FUNCTION_BLOCK(RSA_get_method, true) \
     PER_FUNCTION_BLOCK(RSA_new, true) \
     PER_FUNCTION_BLOCK(RSA_private_decrypt, true) \
@@ -520,7 +519,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RAND_poll RAND_poll_ptr
 #define RSA_free RSA_free_ptr
 #define RSA_generate_key_ex RSA_generate_key_ex_ptr
-#define RSA_get_default_method RSA_get_default_method_ptr
 #define RSA_get_method RSA_get_method_ptr
 #define RSA_new RSA_new_ptr
 #define RSA_private_decrypt RSA_private_decrypt_ptr

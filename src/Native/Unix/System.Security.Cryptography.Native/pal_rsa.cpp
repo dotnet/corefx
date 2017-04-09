@@ -45,10 +45,22 @@ static int HasNoPrivateKey(RSA* rsa)
     if (rsa == nullptr)
         return 1;
 
-    // Shared pointers, no leaks
-    // If the method is not the default method we don't know that we can safely check.
-    if (RSA_get_method(rsa) != RSA_get_default_method())
-        return 0;
+    // Shared pointer, don't free.
+    const RSA_METHOD* meth = RSA_get_method(rsa);
+
+    // The method has descibed itself as having the private key external to the structure.
+    // That doesn't mean it's actually present, but we can't tell.
+    if (meth->flags & RSA_FLAG_EXT_PKEY)
+       return 0;
+
+    // In the event that there's a middle-ground where we report failure when success is expected,
+    // one could do something like check if the RSA_METHOD intercepts all private key operations:
+    //
+    // * meth->rsa_priv_enc
+    // * meth->rsa_priv_dec
+    // * meth->rsa_sign (in 1.0.x this is only respected if the RSA_FLAG_SIGN_VER flag is asserted)
+    //
+    // But, for now, leave it at the EXT_PKEY flag test.
 
     // The module is documented as accepting either d or the full set of CRT parameters (p, q, dp, dq, qInv)
     // So if we see d, we're good. Otherwise, if any of the rest are missing, we're public-only.
