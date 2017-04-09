@@ -80,17 +80,10 @@ namespace System.Diagnostics
 
                     // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
                     IDictionaryEnumerator e = envVars.GetEnumerator();
-                    try
+                    while (e.MoveNext())
                     {
-                        while (e.MoveNext())
-                        {
-                            DictionaryEntry entry = e.Entry;
-                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
-                        }
-                    }
-                    finally
-                    {
-                        (e as IDisposable)?.Dispose();
+                        DictionaryEntry entry = e.Entry;
+                        _environmentVariables.Add((string)entry.Key, (string)entry.Value);
                     }
                 }
                 return _environmentVariables;
