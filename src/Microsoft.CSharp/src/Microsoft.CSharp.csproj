@@ -206,6 +206,7 @@
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\PredefinedType.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\TokenFacts.cs" />
     <Compile Include="Microsoft\CSharp\RuntimeBinder\Syntax\TokenKind.cs" />
+    <Compile Include="Microsoft\CSharp\RuntimeBinder\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

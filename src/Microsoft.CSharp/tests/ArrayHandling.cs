@@ -22,6 +22,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        public void SingleRankNonSZArrayIndexed()
+        {
+            dynamic d = Array.CreateInstance(typeof(int), new[] { 8 }, new[] { -2 });
+            RuntimeBinderException error = Assert.Throws<RuntimeBinderException>(() => d[3] = 32);
+            // Should be similar to the error message for CS0021
+            Assert.Contains("[]", error.Message);
+            Assert.Contains("Array", error.Message);
+            error = Assert.Throws<RuntimeBinderException>(() => d[3]);
+            Assert.Contains("[]", error.Message);
+            Assert.Contains("Array", error.Message);
+        }
+
+        [Fact]
         public void ArrayTypeNames()
         {
             dynamic d = Array.CreateInstance(typeof(int), new[] { 8 }, new[] { -2 });
@@ -39,6 +52,37 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             d = Array.CreateInstance(typeof(int), new[] { 3, 2, 1 }, new[] { -2, 2, -0 });
             ex = Assert.Throws<RuntimeBinderException>(() => { string s = d; });
             Assert.Contains("int[,,]", ex.Message);
+
+        }
+
+        [Fact]
+        public void IncorrectNumberOfIndices()
+        {
+            dynamic d = new int[2, 2, 2];
+            RuntimeBinderException ex = Assert.Throws<RuntimeBinderException>(() => d[1] = 0);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'3'", ex.Message);
+
+            ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4] = 0);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'3'", ex.Message);
+
+            ex = Assert.Throws<RuntimeBinderException>(() => d[1]);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'3'", ex.Message);
+
+            ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4]);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'3'", ex.Message);
+
+            d = new int[2];
+            ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4] = 0);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'1'", ex.Message);
+
+            ex = Assert.Throws<RuntimeBinderException>(() => d[1, 2, 3, 4]);
+            Assert.Contains("[]", ex.Message);
+            Assert.Contains("'1'", ex.Message);
 
         }
     }
