@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection;
 
 namespace System.Dynamic.Utils
@@ -15,6 +16,7 @@ namespace System.Dynamic.Utils
         /// </summary>
         public static MethodInfo GetAnyStaticMethodValidated(this Type type, string name, Type[] types)
         {
+            Debug.Assert(types != null);
             foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly))
             {
                 if (method.Name == name && method.MatchesArgumentTypes(types))
@@ -37,10 +39,8 @@ namespace System.Dynamic.Utils
         /// </summary>
         private static bool MatchesArgumentTypes(this MethodInfo mi, Type[] argTypes)
         {
-            if (mi == null || argTypes == null)
-            {
-                return false;
-            }
+            Debug.Assert(mi != null);
+            Debug.Assert(argTypes != null);
 
             ParameterInfo[] ps = mi.GetParametersCached();
 
