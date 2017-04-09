@@ -181,9 +181,7 @@
     <Compile Include="$(CommonPath)\System\Collections\Generic\ReferenceEqualityComparer.cs">
       <Link>Common\System\Collections\Generic\ReferenceEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Linq\Expressions\Compiler\AssemblyGen.cs">
-      <Link>Common\System\Linq\Expressions\Compiler\AssemblyGen.cs</Link>
-    </Compile>
+    <Compile Include="System\Linq\Expressions\Compiler\AssemblyGen.cs" />
     <Compile Include="System\Dynamic\Utils\Helpers.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\AnalyzedTree.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\BoundConstants.cs" />
