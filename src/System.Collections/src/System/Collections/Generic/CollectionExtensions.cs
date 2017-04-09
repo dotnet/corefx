@@ -61,15 +61,13 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            value = default(TValue);
-
-            if (dictionary.TryGetValue(key, out var foundValue))
+            if (dictionary.TryGetValue(key, out value))
             {
-                value = foundValue;
                 dictionary.Remove(key);
                 return true;
             }
 
+            value = default(TValue);
             return false;
         }
     }
