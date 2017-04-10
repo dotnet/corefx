@@ -1118,11 +1118,6 @@ namespace System.Xml.Serialization
                     if (rre != null)
                     {
                         WriteAddCollectionFixup(member.GetSource, member.Source, rre, td, readOnly);
-
-                        // member.Source has been set at this point. 
-                        // Setting the source to no-op to avoid setting the
-                        // source again.
-                        member.Source = NoopAction;
                     }
                 }
                 else
@@ -1134,6 +1129,11 @@ namespace System.Xml.Serialization
 
                     member.Source(rre);
                 }
+
+                // member.Source has been set at this point. 
+                // Setting the source to no-op to avoid setting the
+                // source again.
+                member.Source = NoopAction;
 
                 o = rre;
             }

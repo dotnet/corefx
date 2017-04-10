@@ -437,6 +437,23 @@ namespace SerializationTypes
         }
     }
 
+    public class TypeWithMyCollectionField
+    {
+        public MyCollection<string> Collection;
+    }
+
+    public class TypeWithReadOnlyMyCollectionProperty
+    {
+        private MyCollection<string> _ro = new MyCollection<string>();
+        public MyCollection<string> Collection
+        {
+            get
+            {
+                return _ro;
+            }
+        }
+    }
+
     public class MyList : IList
     {
         private List<object> _items = new List<object>();

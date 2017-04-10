@@ -3753,6 +3753,56 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(intValue, (int)actual[1]);
     }
 
+
+    [Fact]
+    public static void Xml_TypeWithMyCollectionField()
+    {
+        var value = new TypeWithMyCollectionField();
+        value.Collection = new MyCollection<string>() { "s1", "s2" };
+        var actual = SerializeAndDeserializeWithWrapper(value, new XmlSerializer(typeof(TypeWithMyCollectionField)), "<root><TypeWithMyCollectionField xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Collection><string>s1</string><string>s2</string></Collection></TypeWithMyCollectionField></root>");
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.Collection);
+        Assert.True(value.Collection.SequenceEqual(actual.Collection));
+    }
+
+    [Fact]
+    public static void Xml_Soap_TypeWithMyCollectionField()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithMyCollectionField));
+        var serializer = new XmlSerializer(myTypeMapping);
+        var value = new TypeWithMyCollectionField();
+        value.Collection = new MyCollection<string>() { "s1", "s2" };
+        var actual = SerializeAndDeserializeWithWrapper(value, serializer, "<root><TypeWithMyCollectionField xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\"><Collection href=\"#id2\" /></TypeWithMyCollectionField><q1:Array id=\"id2\" xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" q1:arrayType=\"q2:string[]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\"><Item>s1</Item><Item>s2</Item></q1:Array></root>");
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.Collection);
+        Assert.True(value.Collection.SequenceEqual(actual.Collection));
+    }
+
+    public static void Xml_TypeWithReadOnlyMyCollectionProperty()
+    {
+        var value = new TypeWithReadOnlyMyCollectionProperty();
+        value.Collection.Add("s1");
+        value.Collection.Add("s2");
+        var actual = SerializeAndDeserializeWithWrapper(value, new XmlSerializer(typeof(TypeWithReadOnlyMyCollectionProperty)), "<root><TypeWithReadOnlyMyCollectionProperty xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><Collection><string>s1</string><string>s2</string></Collection></TypeWithReadOnlyMyCollectionProperty></root>");
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.Collection);
+        Assert.True(value.Collection.SequenceEqual(actual.Collection));
+    }
+
+    [Fact]
+    public static void Xml_Soap_TypeWithReadOnlyMyCollectionProperty()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithReadOnlyMyCollectionProperty));
+        var serializer = new XmlSerializer(myTypeMapping);
+        var value = new TypeWithReadOnlyMyCollectionProperty();
+        value.Collection.Add("s1");
+        value.Collection.Add("s2");
+        var actual = SerializeAndDeserializeWithWrapper(value, serializer, "<root><TypeWithReadOnlyMyCollectionProperty xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\"><Collection href=\"#id2\" /></TypeWithReadOnlyMyCollectionProperty><q1:Array id=\"id2\" xmlns:q2=\"http://www.w3.org/2001/XMLSchema\" q1:arrayType=\"q2:string[]\" xmlns:q1=\"http://schemas.xmlsoap.org/soap/encoding/\"><Item>s1</Item><Item>s2</Item></q1:Array></root>");
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.Collection);
+        Assert.True(value.Collection.SequenceEqual(actual.Collection));
+    }
+
     private static readonly string s_defaultNs = "http://tempuri.org/";
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false, string wrapperName = null)
     {
