@@ -4294,6 +4294,7 @@ public class PurchaseOrder
         return po;
     }
 }
+
 public class Address
 {
     [XmlAttribute]
@@ -4313,6 +4314,7 @@ public class Address
         obj.Zip = "98052";
     }
 }
+
 public class OrderedItem
 {
     public string ItemName;
@@ -4350,21 +4352,21 @@ public class DerivedClass1 : BaseClass1
 
 public class MyCollection1 : IEnumerable<DateTime>, IEnumerable
 {
-    private List<DateTime> values = new List<DateTime>();
+    private List<DateTime> _values = new List<DateTime>();
 
     public void Add(DateTime value)
     {
-        this.values.Add(value);
+        this._values.Add(value);
     }
 
     IEnumerator<DateTime> IEnumerable<DateTime>.GetEnumerator()
     {
-        return this.values.GetEnumerator();
+        return this._values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return this.values.GetEnumerator();
+        return this._values.GetEnumerator();
     }
 }
 
