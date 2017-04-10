@@ -82,7 +82,6 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
-        [ActiveIssue(18016, TestPlatforms.AnyUnix)]
         public static void SignHash_BadAlgorithm()
         {
             using (var rsa = new RSACryptoServiceProvider())
@@ -92,7 +91,6 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
-        [ActiveIssue(18016, TestPlatforms.AnyUnix)]
         public static void SignHash_WrongSizeHash()
         {
             using (var rsa = new RSACryptoServiceProvider())
@@ -102,7 +100,6 @@ namespace System.Security.Cryptography.Csp.Tests
         }
 
         [Fact]
-        [ActiveIssue(18016, TestPlatforms.AnyUnix)]
         public static void SignHash_PublicKey()
         {
             using (var rsa = new RSACryptoServiceProvider())

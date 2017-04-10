@@ -29,17 +29,17 @@ namespace System.Security.Cryptography
 
         public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
         {
-            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspParameters)));
         }
 
         public RSACryptoServiceProvider(CspParameters parameters)
         {
-            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspParameters)));
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspParameters)));
         }
 
         public CspKeyContainerInfo CspKeyContainerInfo
         {
-            get { throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspKeyContainerInfo))); }
+            get { throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspKeyContainerInfo))); }
         }
 
         public byte[] Decrypt(byte[] rgb, bool fOAEP)

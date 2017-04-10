@@ -51,6 +51,7 @@ namespace System.Security.Cryptography.Encryption.RC2.Tests
         {
             using (var rc2 = new RC2CryptoServiceProvider())
             {
+                rc2.UseSalt = rc2.UseSalt; // Ensure we can assign false
                 Assert.False(rc2.UseSalt);
                 Assert.Throws<PlatformNotSupportedException>(() => (rc2.UseSalt = true));
             }

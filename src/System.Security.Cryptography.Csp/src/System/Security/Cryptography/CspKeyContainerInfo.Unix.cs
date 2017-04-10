@@ -22,7 +22,7 @@ namespace System.Security.Cryptography
 
         private static Exception GetPlatformNotSupported()
         {
-            return new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CspKeyContainerInfo)));
+            return new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CspKeyContainerInfo)));
         }
     }
 }

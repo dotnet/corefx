@@ -104,7 +104,7 @@ namespace System.Security.Cryptography
             {
                 // Don't allow a true value
                 if (value)
-                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(UseSalt)));
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(UseSalt)));
             }
         }
     }

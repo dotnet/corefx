@@ -8,7 +8,7 @@ namespace System.Security.Cryptography
     {
         public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
         {
-            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_Operation_Not_Supported, nameof(CryptDeriveKey)));
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CAPI_Required, nameof(CryptDeriveKey)));
         }
     }
 }

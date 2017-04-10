@@ -229,8 +229,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void CspKeyContainerInfo_Throws_Unix()
         {
-            var dsa = new DSACryptoServiceProvider();
-            Assert.Throws<PlatformNotSupportedException>(() => (dsa.CspKeyContainerInfo));
+
+            using (var dsa = new DSACryptoServiceProvider())
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => (dsa.CspKeyContainerInfo));
+            }
         }
 
         [Fact]
@@ -243,7 +246,7 @@ namespace System.Security.Cryptography.Csp.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void VerifyHash_InvalidHashAlgorithm_Throws()
         {
             byte[] hashVal;
@@ -278,7 +281,11 @@ namespace System.Security.Cryptography.Csp.Tests
         [ConditionalFact(nameof(SupportsKeyGeneration))]
         public static void SignHash_InvalidHashAlgorithm_Throws()
         {
-            byte[] hashVal = SHA256.Create().ComputeHash(DSATestData.HelloBytes);
+            byte[] hashVal;
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                hashVal = sha256.ComputeHash(DSATestData.HelloBytes);
+            }
 
             using (var dsa = new DSACryptoServiceProvider())
             {

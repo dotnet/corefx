@@ -290,8 +290,10 @@ namespace System.Security.Cryptography.Csp.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void CspKeyContainerInfo_Throws_Unix()
         {
-            var rsa = new RSACryptoServiceProvider();
-            Assert.Throws<PlatformNotSupportedException>(() => (rsa.CspKeyContainerInfo));
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => (rsa.CspKeyContainerInfo));
+            }
         }
 
         [Fact]
@@ -351,6 +353,25 @@ namespace System.Security.Cryptography.Csp.Tests
             using (var rsa = new RSACryptoServiceProvider())
             {
                 Assert.Throws<CryptographicException>(() => rsa.Decrypt(TestData.HelloBytes, RSAEncryptionPadding.OaepSHA256));
+            }
+        }
+
+        [Fact]
+        public static void Sign_InvalidPaddingMode_Throws()
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                Assert.Throws<CryptographicException>(() => rsa.SignData(TestData.HelloBytes, HashAlgorithmName.SHA1, RSASignaturePadding.Pss));
+            }
+        }
+
+        [Fact]
+        public static void Verify_InvalidPaddingMode_Throws()
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                byte[] sig = rsa.SignData(TestData.HelloBytes, "SHA1");
+                Assert.Throws<CryptographicException>(() => rsa.VerifyData(TestData.HelloBytes, sig, HashAlgorithmName.SHA1, RSASignaturePadding.Pss));
             }
         }
 
