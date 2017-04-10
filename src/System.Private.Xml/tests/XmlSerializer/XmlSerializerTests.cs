@@ -18,6 +18,20 @@ using Xunit;
 
 public static partial class XmlSerializerTests
 {
+#if ReflectionOnly
+    private static readonly string SerializationModeSetterName = "set_Mode";
+
+    static XmlSerializerTests()
+    {
+        if (!PlatformDetection.IsFullFramework)
+        {
+            MethodInfo method = typeof(XmlSerializer).GetMethod(SerializationModeSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.True(method != null, $"No method named {SerializationModeSetterName}");
+            method.Invoke(null, new object[] { 1 });    
+        }
+    }
+
+#endif
     [Fact]
     public static void Xml_BoolAsRoot()
     {
