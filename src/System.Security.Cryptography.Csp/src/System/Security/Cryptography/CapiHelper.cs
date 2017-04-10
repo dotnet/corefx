@@ -294,7 +294,7 @@ namespace Internal.NativeCrypto
                                                         (uint)CryptKeyError.NTE_BAD_KEYSET && hr !=
                                                         (uint)CryptKeyError.NTE_FILENOTFOUND)))
                 {
-                    throw new CryptographicException(SR.Format(SR.OpenCSP_Failed, Convert.ToString(hr)));
+                    ((int)hr).ToCryptographicException();
                 }
 
                 //Create a new CSP. This method throws exception on failure
@@ -329,7 +329,7 @@ namespace Internal.NativeCrypto
             int impTypeReturn = 0;
             if (!Interop.CryptGetProvParam(safeProvHandle, (int)flags, impType, ref cb, 0))
             {
-                throw new CryptographicException(SR.Format(SR.CryptGetProvParam_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             if (null != impType && cb == Constants.SIZE_OF_DWORD)
             {
@@ -523,7 +523,7 @@ namespace Internal.NativeCrypto
         {
             if (handle.IsInvalid)
             {
-                throw new CryptographicException(SR.Format(SR.Cryptography_OpenInvalidHandle, "Handle"));
+                throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
             }
         }
 
@@ -698,7 +698,7 @@ namespace Internal.NativeCrypto
                                             CspProviderFlags.UseUserProtectedKey);
                 if ((flags & keyFlags) != CspProviderFlags.NoFlags)
                 {
-                    throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, Convert.ToString(flags)));
+                    throw new ArgumentException(SR.Argument_InvalidValue, nameof(flags));
                 }
             }
         }
@@ -738,7 +738,7 @@ namespace Internal.NativeCrypto
                 (keyType == CspAlgorithmType.Dss && dwAlgId != CALG_DSS_SIGN))
             {
                 hKey.Dispose();
-                throw new CryptographicException(SR.Format(SR.Cryptography_CSP_WrongKeySpec, Convert.ToString(keyType)));
+                throw new CryptographicException(SR.Cryptography_CSP_WrongKeySpec);
             }
 
             return hKey;
