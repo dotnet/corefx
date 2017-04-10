@@ -25,17 +25,21 @@
     <Project Include="..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+
+    <!-- add specific builds / pkgproj's here to include in servicing builds -->
     <Project Include="System.Data.SqlClient\pkg\System.Data.SqlClient.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="System.Diagnostics.DiagnosticSource\pkg\System.Diagnostics.DiagnosticSource.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>       
+    </Project>
     <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <!-- add specific builds / pkgproj's here to include in servicing builds -->
     <Project Include="System.ValueTuple\pkg\System.ValueTuple.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Text.Encodings.Web\pkg\System.Text.Encodings.Web.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
