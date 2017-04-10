@@ -294,7 +294,7 @@ namespace Internal.NativeCrypto
                                                         (uint)CryptKeyError.NTE_BAD_KEYSET && hr !=
                                                         (uint)CryptKeyError.NTE_FILENOTFOUND)))
                 {
-                    ((int)hr).ToCryptographicException();
+                    throw ((int)hr).ToCryptographicException();
                 }
 
                 //Create a new CSP. This method throws exception on failure
