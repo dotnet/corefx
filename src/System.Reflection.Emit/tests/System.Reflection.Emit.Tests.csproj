@@ -18,6 +18,7 @@
     <Compile Include="ConstructorBuilder\ConstructorBuilderSetCustomAttribute.cs" />
     <Compile Include="ConstructorBuilder\ConstructorBuilderSetImplementationFlags.cs" />
     <Compile Include="ConstructorBuilder\ConstructorBuilderToString.cs" />
+    <Compile Include="DynamicMethodJumpStubTests.cs" />
     <Compile Include="EnumBuilder\EnumBuilder.Methods.Tests.cs" />
     <Compile Include="EnumBuilder\EnumBuilder.Properties.Tests.cs" />
     <Compile Include="EventBuilder\EventBuilderAddOtherMethod.cs" />
