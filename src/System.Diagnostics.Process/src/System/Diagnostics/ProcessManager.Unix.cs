@@ -59,17 +59,8 @@ namespace System.Diagnostics
             return (int)processHandle.DangerousGetHandle(); // not actually dangerous; just wraps a process ID
         }
 
-        /// <summary>Gets whether the named machine is remote or local.</summary>
-        /// <param name="machineName">The machine name.</param>
-        /// <returns>true if the machine is remote; false if it's local.</returns>
-        public static bool IsRemoteMachine(string machineName)
+        private static bool IsRemoteMachineCore(string machineName)
         {
-            if (machineName == null)
-                throw new ArgumentNullException(nameof(machineName));
-
-            if (machineName.Length == 0)
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
-
             return 
                 machineName != "." && 
                 machineName != Interop.Sys.GetHostName();

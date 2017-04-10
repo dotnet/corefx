@@ -528,25 +528,17 @@ namespace System.Diagnostics.Tests
             const string Extension = ".noemptykeyextension";
             const string FileName = "file" + Extension;
 
-            try
+            using (TempRegistryKey tempKey = new TempRegistryKey(Registry.ClassesRoot, Extension))
             {
-                Registry.ClassesRoot.CreateSubKey(Extension);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Skip this test if the user doesn't have permission to
-                // modify the registry.
-                return;
-            }
+                if (tempKey.Key == null)
+                {
+                    // Skip this test if the user doesn't have permission to
+                    // modify the registry.
+                    return;
+                }
 
-            try
-            {
                 var info = new ProcessStartInfo { FileName = FileName };
                 Assert.Empty(info.Verbs);
-            }
-            finally
-            {
-                Registry.ClassesRoot.DeleteSubKeyTree(Extension);
             }
         }
 
@@ -557,26 +549,19 @@ namespace System.Diagnostics.Tests
             const string Extension = ".emptystringextension";
             const string FileName = "file" + Extension;
 
-            try
+            using (TempRegistryKey tempKey = new TempRegistryKey(Registry.ClassesRoot, Extension))
             {
-                RegistryKey key = Registry.ClassesRoot.CreateSubKey(Extension);
-                key.SetValue("", "");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Skip this test if the user doesn't have permission to
-                // modify the registry.
-                return;
-            }
+                if (tempKey.Key == null)
+                {
+                    // Skip this test if the user doesn't have permission to
+                    // modify the registry.
+                    return;
+                }
 
-            try
-            {
+                tempKey.Key.SetValue("", "");
+
                 var info = new ProcessStartInfo { FileName = FileName };
                 Assert.Empty(info.Verbs);
-            }
-            finally
-            {
-                Registry.ClassesRoot.DeleteSubKeyTree(Extension);
             }
         }
 
@@ -588,26 +573,19 @@ namespace System.Diagnostics.Tests
             const string Extension = ".nonstringextension";
             const string FileName = "file" + Extension;
 
-            try
+            using (TempRegistryKey tempKey = new TempRegistryKey(Registry.ClassesRoot, Extension))
             {
-                RegistryKey key = Registry.ClassesRoot.CreateSubKey(Extension);
-                key.SetValue("", 123);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Skip this test if the user doesn't have permission to
-                // modify the registry.
-                return;
-            }
+                if (tempKey.Key == null)
+                {
+                    // Skip this test if the user doesn't have permission to
+                    // modify the registry.
+                    return;
+                }
+                
+                tempKey.Key.SetValue("", 123);
 
-            try
-            {
                 var info = new ProcessStartInfo { FileName = FileName };
                 Assert.Empty(info.Verbs);
-            }
-            finally
-            {
-                Registry.ClassesRoot.DeleteSubKeyTree(Extension);
             }
         }
 
@@ -618,26 +596,19 @@ namespace System.Diagnostics.Tests
             const string Extension = ".noshellsubkey";
             const string FileName = "file" + Extension;
 
-            try
+            using (TempRegistryKey tempKey = new TempRegistryKey(Registry.ClassesRoot, Extension))
             {
-                RegistryKey key = Registry.ClassesRoot.CreateSubKey(Extension);
-                key.SetValue("", "nosuchshell");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Skip this test if the user doesn't have permission to
-                // modify the registry.
-                return;
-            }
+                if (tempKey.Key == null)
+                {
+                    // Skip this test if the user doesn't have permission to
+                    // modify the registry.
+                    return;
+                }
+                
+                tempKey.Key.SetValue("", "nosuchshell");
 
-            try
-            {
                 var info = new ProcessStartInfo { FileName = FileName };
                 Assert.Empty(info.Verbs);
-            }
-            finally
-            {
-                Registry.ClassesRoot.DeleteSubKeyTree(Extension);
             }
         }
 
@@ -649,33 +620,25 @@ namespace System.Diagnostics.Tests
             const string FileName = "file" + Extension;
             const string SubKeyValue = "customregistryextensionshell";
 
-            try
+            using (TempRegistryKey extensionKey = new TempRegistryKey(Registry.ClassesRoot, Extension))
+            using (TempRegistryKey shellKey = new TempRegistryKey(Registry.ClassesRoot, SubKeyValue + "\\shell"))
             {
-                RegistryKey extensionKey = Registry.ClassesRoot.CreateSubKey(Extension);
-                extensionKey.SetValue("", SubKeyValue);
-                
-                RegistryKey shellKey = Registry.ClassesRoot.CreateSubKey(SubKeyValue + "\\shell");
-                shellKey.CreateSubKey("verb1");
-                shellKey.CreateSubKey("NEW");
-                shellKey.CreateSubKey("new");
-                shellKey.CreateSubKey("verb2");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Skip this test if the user doesn't have permission to
-                // modify the registry.
-                return;
-            }
+                if (extensionKey.Key == null)
+                {
+                    // Skip this test if the user doesn't have permission to
+                    // modify the registry.
+                    return;
+                }
 
-            try
-            {
+                extensionKey.Key.SetValue("", SubKeyValue);
+                
+                shellKey.Key.CreateSubKey("verb1");
+                shellKey.Key.CreateSubKey("NEW");
+                shellKey.Key.CreateSubKey("new");
+                shellKey.Key.CreateSubKey("verb2");
+
                 var info = new ProcessStartInfo { FileName = FileName };
                 Assert.Equal(new string[] { "verb1", "verb2" }, info.Verbs);
-            }
-            finally
-            {
-                Registry.ClassesRoot.DeleteSubKeyTree(Extension);
-                Registry.ClassesRoot.DeleteSubKeyTree(SubKeyValue + "\\shell");
             }
         }
 
@@ -881,10 +844,12 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Password_SetWindows_GetReturnsExpected()
         {
-            var password = new SecureString();
-            password.AppendChar('a');
-            var info = new ProcessStartInfo { Password = password };
-            Assert.Equal(password, info.Password);
+            using (SecureString password = new SecureString())
+            {
+                password.AppendChar('a');
+                var info = new ProcessStartInfo { Password = password };
+                Assert.Equal(password, info.Password);
+            }
         }
 
         [Fact]
