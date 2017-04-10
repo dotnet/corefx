@@ -799,11 +799,11 @@ namespace Internal.NativeCrypto
             VerifyValidHandle(safeKeyHandle);
             if (null == encryptedData)
             {
-                throw new CryptographicException(SR.Format(SR.Argument_InvalidValue, "Encrypted Data is null"));
+                throw new CryptographicException(SR.Argument_InvalidValue + " Encrypted Data is null");
             }
             if (encryptedDataLength < 0)
             {
-                throw new CryptographicException(SR.Format(SR.Argument_InvalidValue, "Encrypted data length is less than 0"));
+                throw new CryptographicException(SR.Argument_InvalidValue + " Encrypted data length is less than 0");
             }
             byte[] dataTobeDecrypted = new byte[encryptedDataLength];
             Buffer.BlockCopy(encryptedData, 0, dataTobeDecrypted, 0, encryptedDataLength);
@@ -864,11 +864,11 @@ namespace Internal.NativeCrypto
             VerifyValidHandle(safeKeyHandle);
             if (null == pbKey)
             {
-                throw new CryptographicException(SR.Format(SR.Argument_InvalidValue, "pbKey is null"));
+                throw new CryptographicException(SR.Argument_InvalidValue + " pbKey is null");
             }
             if (cbKey < 0)
             {
-                throw new CryptographicException(SR.Format(SR.Argument_InvalidValue, "cbKey is less than 0"));
+                throw new CryptographicException(SR.Argument_InvalidValue + " cbKey is less than 0");
             }
             int dwEncryptFlags = foep ? (int)CryptDecryptFlags.CRYPT_OAEP : 0;
             // Figure out how big the encrypted key will be
@@ -1312,7 +1312,7 @@ namespace Internal.NativeCrypto
                 }
             }
 
-            throw new ArgumentException(SR.Argument_InvalidValue);
+            throw new ArgumentException(SR.Argument_InvalidValue, nameof(hashAlg));
         }
 
         /// <summary>
@@ -1341,7 +1341,7 @@ namespace Internal.NativeCrypto
                     return SHA512.Create();
 
                 default:
-                    throw new ArgumentException(SR.Argument_InvalidValue);
+                    throw new ArgumentException(SR.Argument_InvalidValue, nameof(hashAlg));
             }
         }
 
