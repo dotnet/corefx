@@ -554,7 +554,7 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         hostent* result = reinterpret_cast<hostent*>(buffer);
         char* scratch = reinterpret_cast<char*>(&buffer[sizeof(hostent)]);
 
-        int getHostErrno;
+        int getHostErrno = 0;
         int err = gethostbyname_r(reinterpret_cast<const char*>(hostname), result, scratch, scratchLen, entry, &getHostErrno);
         if (!err && *entry != nullptr)
         {
@@ -576,7 +576,11 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         {
             free(buffer);
             *entry = nullptr;
-            return err ? err : HOST_NOT_FOUND;
+            if (!err || (err == EINVAL && (getHostErrno == HOST_NOT_FOUND || getHostErrno == NO_DATA)))
+            {
+                err = HOST_NOT_FOUND;
+            }
+            return err;
         }
     }
 }
@@ -633,7 +637,7 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         hostent* result = reinterpret_cast<hostent*>(buffer);
         char* scratch = reinterpret_cast<char*>(&buffer[sizeof(hostent)]);
 
-        int getHostErrno;
+        int getHostErrno = 0;
         int err = gethostbyaddr_r(addr, addrLen, type, result, scratch, scratchLen, entry, &getHostErrno);
         if (!err && *entry != nullptr)
         {
@@ -655,7 +659,11 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         {
             free(buffer);
             *entry = nullptr;
-            return err ? err : HOST_NOT_FOUND;
+            if (!err || (err == EINVAL && (getHostErrno == HOST_NOT_FOUND || getHostErrno == NO_DATA)))
+            {
+                err = HOST_NOT_FOUND;
+            }
+            return err;
         }
     }
 }
