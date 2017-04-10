@@ -18,7 +18,7 @@ namespace System.IO.MemoryMappedFiles
             Debug.Assert(view != null, "view is null");
 
             _view = view;
-            Initialize(_view.ViewHandle, _view.PointerOffset, _view.Size, MemoryMappedFile.GetFileAccess(_view.Access));
+            Initialize(_view.ViewHandle, _view.NativeViewOffset, _view.Size, MemoryMappedFile.GetFileAccess(_view.Access));
         }
 
         public SafeMemoryMappedViewHandle SafeMemoryMappedViewHandle
