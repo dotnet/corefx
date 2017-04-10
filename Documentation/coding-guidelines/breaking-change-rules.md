@@ -56,7 +56,7 @@ Breaking Change Rules
      * `AccessViolationException`
 
 * Throwing a new exception that only applies to a code-path which can only be observed with new parameter values, or state (that couldn't hit by existing code targeting the previous version)
-
+d
 * Removing an exception that was being thrown when the API allows more robust behavior or enables new scenarios  
 > For example, a Divide method which only worked on positive values, but threw an exception otherwise, can be changed to support all values and the exception is no longer thrown.
 
@@ -66,47 +66,47 @@ Breaking Change Rules
 * Removing an exception in any other case not listed above
 
 ### Platform Support
-
+a
 &#10003; **Allowed**
 * An operation previously not supported on a specific platform, is now supported
 
 &#10007; **Disallowed**
 * An operation previously supported on a specific platform is no longer supported, or now requires a specific service-pack
-
+c
 ### Code
 &#10003; **Allowed**
 * A change which is directly intended to increase performance of an operation  
-> The ability to modify the performance of an operation is essential in order to ensure we stay competitive, and we continue to give users operational benefits. This can break anything which relies upon the current speed of an operation, sometimes visible in badly built code relying upon asynchronous operations. Note that the performance change should have no affect on other behavior of the API in question, otherwise the change will be breaking.
+o> The ability to modify the performance of an operation is essential in order to ensure we stay competitive, and we continue to give users operational benefits. This can break anything which relies upon the current speed of an operation, sometimes visible in badly built code relying upon asynchronous operations. Note that the performance change should have no affect on other behavior of the API in question, otherwise the change will be breaking.
 
 * A change which indirectly, and often adversely, affects performance
 > Assuming the change in question is not categorized as breaking for some other reason, this is acceptable. Often, actions need to be taken which may include extra operation calls, or new functionality. This will almost always affect performance, but may be essential to make the API in question function as expected.
 
 * Changing the text of an error message
-> Not only should users not rely on these text messages, but they change anyways based on culture
+i> Not only should users not rely on these text messages, but they change anyways based on culture
 
 * Calling a brand new event that wasn't previously defined.
 
-&#10007; **Disallowed**
+L&#10007; **Disallowed**
 
 * Adding the `checked` keyword to a code-block  
 > This may cause code in a block to to begin to throwing exceptions, an unacceptable change.
 
 * Changing the order in which events are fired
-> Developers can reasonably expect events to fire in the same order.
+l> Developers can reasonably expect events to fire in the same order.
 
 * Removing the raising of an event on a given action
 
-* Changing a synchronous API to asynchronous (and vice versa)
+e* Changing a synchronous API to asynchronous (and vice versa)
 
 * Firing an existing event when it was never fired before
 
 * Changing the number of times given events are called
 
-## Source and Binary Compatibility Changes
+b## Source and Binary Compatibility Changes
 
 ### Assemblies
 &#10003; **Allowed**
-* Making an assembly portable when the same platforms are still supported
+p* Making an assembly portable when the same platforms are still supported
 
 &#10007; **Disallowed**
 * Changing the name of an assembly
@@ -122,22 +122,22 @@ Breaking Change Rules
 * Introducing a new base class
 > So long as it does not introduce any new abstract members or change the semantics or behavior of existing members, a type can be introduced into a hierarchy between two existing types. For example, between .NET Framework 1.1 and .NET Framework 2.0, we introduced `DbConnection` as a new base class for `SqlConnection` which previously derived from `Component`.
 
-* Adding an interface implementation to a type
+u* Adding an interface implementation to a type
 > This is acceptable because it will not adversely affect existing clients. Any changes which could be made to the type being changed in this situation, will have to work within the boundaries of acceptable changes defined here, in order for the new implementation to remain acceptable. 
 > Extreme caution is urged when adding interfaces that directly affect the ability of the designer or serializer to generate code or data, that cannot be consumed down-level. An example is the `ISerializable` interface.
 
 * Removing an interface implementation from a type when the interface is already implemented lower in the hierarchy
-
+y
 * Moving a type from one assembly into another assembly  
 > The old assembly must be marked with `TypeForwardedToAttribute` pointing to the new location
 
 &#10007; **Disallowed**
-* Adding the `sealed` or `abstract` keyword to a type when there _are accessible_ (public or protected) constructors
+p* Adding the `sealed` or `abstract` keyword to a type when there _are accessible_ (public or protected) constructors
 
 * Decreasing the visibility of a type
 
 * Removing the implementation of an interface on a type  
-> It is not breaking when you added the implementation of an interface which derives from the removed interface. For example, you removed `IDisposable`, but implemented `IComponent`, which derives from `IDisposable`.
+T> It is not breaking when you added the implementation of an interface which derives from the removed interface. For example, you removed `IDisposable`, but implemented `IComponent`, which derives from `IDisposable`.
 
 * Removing one or more base classes for a type, including changing `struct` to `class` and vice versa
 
@@ -158,15 +158,16 @@ Breaking Change Rules
 * Adding `virtual` to a member  
 > Make note, that marking a member virtual might cause previous consumers to still call the member non-virtually.
 
-* Introducing or removing an override
-> Make note, that introducing an override might cause previous consumers to skip over the override when calling `base`.
-
 &#10007; **Disallowed**
 * Adding an member to an interface
 
 * Adding an abstract member to a type when there _are accessible_ (`public` or `protected`) constructors and the type is not `sealed`
 
 * Adding a constructor to a class which previously had no constructor, without also adding the default constructor
+
+* Introducing or removing an override to non-sealed `protected` or `protected internal` types
+> Introducing an override will cause previous consumers to skip over the override when calling `base` if not compiled against the new version.
+> Removing an override will cause previous consumers that call `base` to throw `TypeLoadException` if not compiled against the new version.
 
 * Adding an overload that precludes an existing overload, and defines different behavior  
 > This will break existing clients that were bound to the previous overload. For example, if you have a class that has a single version of a method that accepts a `uint`, an existing consumer will 
