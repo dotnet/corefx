@@ -133,7 +133,7 @@ namespace Internal.NativeCrypto
             if (S_OK != ret)
             {
                 hProv.Dispose();
-                throw new CryptographicException(SR.Format(SR.OpenCSP_Failed, Convert.ToString(ret)));
+                throw ret.ToCryptographicException();
             }
             safeProvHandle = hProv;
         }
@@ -197,7 +197,7 @@ namespace Internal.NativeCrypto
             if (S_OK != ret)
             {
                 hProv.Dispose();
-                throw new CryptographicException(SR.Format(SR.OpenCSP_Failed, Convert.ToString(ret)));
+                throw ret.ToCryptographicException();
             }
 
             safeProvHandle = hProv;
@@ -797,14 +797,9 @@ namespace Internal.NativeCrypto
         internal static void DecryptKey(SafeKeyHandle safeKeyHandle, byte[] encryptedData, int encryptedDataLength, bool fOAEP, out byte[] decryptedData)
         {
             VerifyValidHandle(safeKeyHandle);
-            if (null == encryptedData)
-            {
-                throw new CryptographicException(SR.Argument_InvalidValue + " Encrypted Data is null");
-            }
-            if (encryptedDataLength < 0)
-            {
-                throw new CryptographicException(SR.Argument_InvalidValue + " Encrypted data length is less than 0");
-            }
+            Debug.Assert(encryptedData != null, SR.Argument_InvalidValue, "Encrypted Data is null");
+            Debug.Assert(encryptedDataLength >= 0, SR.Argument_InvalidValue, "Encrypted data length is less than 0");
+
             byte[] dataTobeDecrypted = new byte[encryptedDataLength];
             Buffer.BlockCopy(encryptedData, 0, dataTobeDecrypted, 0, encryptedDataLength);
             Array.Reverse(dataTobeDecrypted);
@@ -862,14 +857,9 @@ namespace Internal.NativeCrypto
         internal static void EncryptKey(SafeKeyHandle safeKeyHandle, byte[] pbKey, int cbKey, bool foep, ref byte[] pbEncryptedKey)
         {
             VerifyValidHandle(safeKeyHandle);
-            if (null == pbKey)
-            {
-                throw new CryptographicException(SR.Argument_InvalidValue + " pbKey is null");
-            }
-            if (cbKey < 0)
-            {
-                throw new CryptographicException(SR.Argument_InvalidValue + " cbKey is less than 0");
-            }
+            Debug.Assert(pbKey != null, SR.Argument_InvalidValue, "pbKey is null");
+            Debug.Assert(cbKey >= 0, SR.Argument_InvalidValue, "cbKey is less than 0");
+
             int dwEncryptFlags = foep ? (int)CryptDecryptFlags.CRYPT_OAEP : 0;
             // Figure out how big the encrypted key will be
             int cbEncryptedKey = cbKey;
