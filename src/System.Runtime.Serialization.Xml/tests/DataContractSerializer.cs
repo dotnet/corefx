@@ -30,7 +30,7 @@ public static partial class DataContractSerializerTests
     {
         if (!PlatformDetection.IsFullFramework)
         {
-            var method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName, BindingFlags.NonPublic | BindingFlags.Static);
             Assert.True(method != null, $"No method named {SerializationOptionSetterName}");
             method.Invoke(null, new object[] { 1 });
         }
