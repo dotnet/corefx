@@ -3052,7 +3052,12 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void Xml_HiddenDerivedFieldTest()
     {
         var value = new DerivedClass { value = "on derived" };
-        var actual = SerializeAndDeserialize<BaseClass>(value, null, null, skipStringCompare: true);
+        var actual = SerializeAndDeserialize<BaseClass>(value,
+@"<?xml version=""1.0""?>
+<BaseClass xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:type=""DerivedClass"">
+  <value>on derived</value>
+</BaseClass>");
+
         Assert.NotNull(actual);
         Assert.Null(actual.Value);
         Assert.Null(actual.value);
@@ -3064,7 +3069,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void Xml_DefaultValueAttributeSetToNaNTest()
     {
         var value = new DefaultValuesSetToNaN();
-        var actual = SerializeAndDeserialize(value, null, null, skipStringCompare: true);
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNaN xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
         Assert.Equal(actual, value);
     }
@@ -3074,18 +3086,39 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     {
         string defaultNamespace = "http://www.contoso.com";
         var value = PurchaseOrder.CreateInstance();
+        string baseline = 
+@"<?xml version=""1.0""?>
+<PurchaseOrder xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns=""http://www.cpandl.com"">
+  <ShipTo Name=""John Doe"">
+    <Line1>1 Main St.</Line1>
+    <City>AnyTown</City>
+    <State>WA</State>
+    <Zip>00000</Zip>
+  </ShipTo>
+  <OrderDate>Monday, April 10, 2017</OrderDate>
+  <Items>
+    <OrderedItem>
+      <ItemName>Widget S</ItemName>
+      <Description>Small widget</Description>
+      <UnitPrice>5.23</UnitPrice>
+      <Quantity>3</Quantity>
+      <LineTotal>15.69</LineTotal>
+    </OrderedItem>
+  </Items>
+  <SubTotal>15.69</SubTotal>
+  <ShipCost>12.51</ShipCost>
+  <TotalCost>28.20</TotalCost>
+</PurchaseOrder>";
 
         var actual = SerializeAndDeserialize(value,
-            "",
-            () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace),
-            skipStringCompare:true
+            baseline,
+            () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace)
             );
         Assert.NotNull(actual);
 
         actual = SerializeAndDeserialize(value,
-            "",
-            () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace, null),
-            skipStringCompare: true
+            baseline,
+            () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace, null)
             );
         Assert.NotNull(actual);
     }
@@ -3095,7 +3128,18 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     {
         var inputList = new List<string> { "item0", "item1", "item2", "item3", "item4" };
         var value = new AliasedTestType { Aliased = inputList };
-        var actual = SerializeAndDeserialize(value, null, null, skipStringCompare: true);
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<AliasedTestType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <Y>
+    <string>item0</string>
+    <string>item1</string>
+    <string>item2</string>
+    <string>item3</string>
+    <string>item4</string>
+  </Y>
+</AliasedTestType>");
+
         Assert.NotNull(actual);
         Assert.NotNull(actual.Aliased);
         Assert.Equal(actual.Aliased.GetType(), inputList.GetType());
@@ -3129,7 +3173,13 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             LastName = "Potter"
         };
 
-        var actual = SerializeAndDeserialize(value, null, null, true);
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<Person xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <FirstName>Harry</FirstName>
+  <MiddleName>James</MiddleName>
+  <LastName>Potter</LastName>
+</Person>");
 
         Assert.NotNull(actual);
         Assert.Equal(actual.FirstName, value.FirstName);
