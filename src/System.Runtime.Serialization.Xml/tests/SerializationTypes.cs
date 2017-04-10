@@ -4261,7 +4261,6 @@ public class PurchaseOrder
     public decimal ShipCost;
     public decimal TotalCost;
 
-
     public static PurchaseOrder CreateInstance()
     {
         PurchaseOrder po = new PurchaseOrder();
