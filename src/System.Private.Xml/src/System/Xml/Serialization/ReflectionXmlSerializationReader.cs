@@ -513,6 +513,7 @@ namespace System.Xml.Serialization
             var holder = new ObjectHolder();
             var member = new Member(memberMapping);
             member.Source = (value) => holder.Object = value;
+            member.GetSource = () => holder.Object;
             WriteMemberElements(new Member[] { member }, elementElseAction, elseAction, element.Any ? member : null, null);
             o = holder.Object;
 
@@ -1058,6 +1059,10 @@ namespace System.Xml.Serialization
             }
         }
 
+        private void NoopAction(object o)
+        {
+        }
+
         private object DummyReadArrayMethod()
         {
             UnknownNode(null);
@@ -1112,7 +1117,12 @@ namespace System.Xml.Serialization
                 {
                     if (rre != null)
                     {
-                        throw new NotImplementedException();
+                        WriteAddCollectionFixup(member.GetSource, member.Source, rre, td, readOnly);
+
+                        // member.Source has been set at this point. 
+                        // Setting the source to no-op to avoid setting the
+                        // source again.
+                        member.Source = NoopAction;
                     }
                 }
                 else
@@ -1505,7 +1515,14 @@ namespace System.Xml.Serialization
         {
             TypeDesc typeDesc = member.Mapping.TypeDesc;
             bool readOnly = member.Mapping.ReadOnly;
-            object memberSource = GetMemberValue(o, member.Mapping.MemberInfo);
+            Func<object> getSource = () => GetMemberValue(o, member.Mapping.MemberInfo);
+            Action<object> setSource = (value) => SetMemberValue(o, value, member.Mapping.MemberInfo);
+            WriteAddCollectionFixup(getSource, setSource, memberValue, typeDesc, readOnly);
+        }
+
+        private object WriteAddCollectionFixup(Func<object> getSource, Action<object> setSource, object memberValue, TypeDesc typeDesc, bool readOnly)
+        {
+            object memberSource = getSource();
             if (memberSource == null)
             {
                 if (readOnly)
@@ -1514,7 +1531,7 @@ namespace System.Xml.Serialization
                 }
 
                 memberSource = ReflectionCreateObject(typeDesc.Type);
-                SetMemberValue(o, memberSource, member.Mapping.MemberInfo);
+                setSource(memberSource);
             }
 
             var collectionFixup = new CollectionFixup(
@@ -1523,6 +1540,7 @@ namespace System.Xml.Serialization
                 memberValue);
 
             AddFixup(collectionFixup);
+            return memberSource;
         }
 
         private XmlSerializationCollectionFixupCallback GetCreateCollectionOfObjectsCallback(Type collectionType)
@@ -2093,6 +2111,7 @@ namespace System.Xml.Serialization
             public int FixupIndex = -1;
             public bool MultiRef = false;
             public Action<object> Source;
+            public Func<object> GetSource;
             public Action<object> ArraySource;
             public Action<object> CheckSpecifiedSource;
             public Action<object> ChoiceSource;

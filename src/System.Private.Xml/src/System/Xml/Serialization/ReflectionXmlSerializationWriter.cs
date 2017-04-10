@@ -350,11 +350,6 @@ namespace System.Xml.Serialization
                         throw new InvalidOperationException(SR.XmlInternalError);
                     }
 
-                    var itemElement = mapping.Elements[0];
-                    var itemMapping = itemElement.Mapping as StructMapping;
-                    var itemName = writeAccessor ? itemElement.Name : itemMapping.TypeName;
-                    var itemNamespace = itemElement.Any && itemElement.Name.Length == 0 ? null : (itemElement.Form == XmlSchemaForm.Qualified ? (writeAccessor ? itemElement.Namespace : itemMapping.Namespace) : string.Empty);
-
                     if (!writeAccessor)
                     {
                         WritePotentiallyReferencingElement(name, ns, o, mapping.TypeDesc.Type, true, element.IsNullable);

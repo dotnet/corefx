@@ -2886,6 +2886,40 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void Xml_Soap_MyCollection()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCollection<string>));
+        var serializer = new XmlSerializer(myTypeMapping);
+        var value = new MyCollection<string>("a1", "a2");
+
+        string baseline = "<?xml version=\"1.0\" encoding=\"utf-8\"?><ArrayOfString xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" d1p1:id=\"id1\" d1p1:itemType=\"xsd:string\" xmlns:d1p1=\"http://www.w3.org/2003/05/soap-encoding\"><Item>a1</Item><Item>a2</Item></ArrayOfString>";
+        MyCollection<string> actual;
+
+        using (var ms = new MemoryStream())
+        {
+            var writer = new XmlTextWriter(ms, Encoding.UTF8);
+            serializer.Serialize(writer, value, null, "http://www.w3.org/2003/05/soap-encoding");
+
+            ms.Position = 0;
+            string actualOutput = new StreamReader(ms).ReadToEnd();
+
+            Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
+            Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
+                Environment.NewLine, result.ErrorMessage, value, baseline, actualOutput));
+
+            ms.Position = 0;
+            using (var reader = new XmlTextReader(ms))
+            {
+                actual = (MyCollection<string>)serializer.Deserialize(reader, "http://www.w3.org/2003/05/soap-encoding");
+            }
+        }
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.Count, actual.Count);
+        Assert.True(value.SequenceEqual(actual));
+    }
+
+    [Fact]
     public static void Xml_Soap_Nullables()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithNullables));
