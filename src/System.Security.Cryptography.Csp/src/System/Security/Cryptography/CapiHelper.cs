@@ -87,7 +87,7 @@ namespace Internal.NativeCrypto
                                                 (int)GetDefaultProviderFlags.CRYPT_MACHINE_DEFAULT,
                                                 null, ref sizeofProviderName))
             {
-                throw new CryptographicException(SR.Format(SR.CryptGetDefaultProvider_Fail, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             //allocate memory for the provider name
             StringBuilder providerName = new StringBuilder((int)sizeofProviderName);
@@ -97,7 +97,7 @@ namespace Internal.NativeCrypto
                                                 (int)GetDefaultProviderFlags.CRYPT_MACHINE_DEFAULT,
                                                 providerName, ref sizeofProviderName))
             {
-                throw new CryptographicException(SR.Format(SR.CryptGetDefaultProvider_Fail, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             // check to see if there are upgrades available for the requested CSP
             string wszUpgrade = null;
@@ -365,7 +365,7 @@ namespace Internal.NativeCrypto
                         {
                             if (!Interop.CryptGetUserKey(safeProvHandle, keyNumber, out safeKeyHandle))
                             {
-                                throw new CryptographicException(SR.Format(SR.CryptGetUserKey_Failed, Convert.ToString(GetErrorCode())));
+                                throw GetErrorCode().ToCryptographicException();
                             }
                             byte[] permissions = null;
                             int permissionsReturn = 0;
@@ -373,7 +373,7 @@ namespace Internal.NativeCrypto
                             cb = sizeof(byte) * Constants.SIZE_OF_DWORD;
                             if (!Interop.CryptGetKeyParam(safeKeyHandle, (int)CryptGetKeyParamFlags.KP_PERMISSIONS, permissions, ref cb, 0))
                             {
-                                throw new CryptographicException(SR.Format(SR.CryptGetKeyParam_Failed, Convert.ToString(GetErrorCode())));
+                                throw GetErrorCode().ToCryptographicException();
                             }
                             permissionsReturn = BitConverter.ToInt32(permissions, 0);
                             retVal = IsFlagBitSet((uint)permissionsReturn, (uint)CryptGetKeyParamFlags.CRYPT_EXPORT);
@@ -465,7 +465,7 @@ namespace Internal.NativeCrypto
             }
             if (hr != S_OK)
             {
-                throw new CryptographicException(SR.Format(SR.CryptGenKey_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
 
             safeKeyHandle.KeySpec = algID;
@@ -545,12 +545,12 @@ namespace Internal.NativeCrypto
                     {
                         if (!Interop.CryptGetKeyParam(safeKeyHandle, (int)CryptGetKeyParamQueryType.KP_KEYLEN, null, ref cb, 0))
                         {
-                            throw new CryptographicException(SR.Format(SR.CryptGetKeyParam_Failed, Convert.ToString(GetErrorCode())));
+                            throw GetErrorCode().ToCryptographicException();
                         }
                         pb = new byte[cb];
                         if (!Interop.CryptGetKeyParam(safeKeyHandle, (int)CryptGetKeyParamQueryType.KP_KEYLEN, pb, ref cb, 0))
                         {
-                            throw new CryptographicException(SR.Format(SR.CryptGetKeyParam_Failed, Convert.ToString(GetErrorCode())));
+                            throw GetErrorCode().ToCryptographicException();
                         }
                         break;
                     }
@@ -565,12 +565,12 @@ namespace Internal.NativeCrypto
                         // returns the algorithm ID for the key
                         if (!Interop.CryptGetKeyParam(safeKeyHandle, (int)CryptGetKeyParamQueryType.KP_ALGID, null, ref cb, 0))
                         {
-                            throw new CryptographicException(SR.Format(SR.CryptGetKeyParam_Failed, Convert.ToString(GetErrorCode())));
+                            throw GetErrorCode().ToCryptographicException();
                         }
                         pb = new byte[cb];
                         if (!Interop.CryptGetKeyParam(safeKeyHandle, (int)CryptGetKeyParamQueryType.KP_ALGID, pb, ref cb, 0))
                         {
-                            throw new CryptographicException(SR.Format(SR.CryptGetKeyParam_Failed, Convert.ToString(GetErrorCode())));
+                            throw GetErrorCode().ToCryptographicException();
                         }
                         break;
                     }
@@ -721,7 +721,7 @@ namespace Internal.NativeCrypto
                 if (unchecked(IsFlagBitSet((uint)parameters.Flags, (uint)CspProviderFlags.UseExistingKey) ||
                                                                    (uint)hr != (uint)CryptKeyError.NTE_NO_KEY))
                 {
-                    throw new CryptographicException(SR.Format(SR.CryptGetUserKey_Failed, Convert.ToString(hr)));
+                    throw hr.ToCryptographicException();
                 }
 
                 // GenerateKey will check for failures and throw an exception
@@ -833,7 +833,7 @@ namespace Internal.NativeCrypto
                 }
                 else
                 {
-                    throw new CryptographicException(SR.Format(SR.CryptDecrypt_Failed, Convert.ToString(ErrCode)));
+                    throw ErrCode.ToCryptographicException();
                 }
             }
 
@@ -875,7 +875,7 @@ namespace Internal.NativeCrypto
             int cbEncryptedKey = cbKey;
             if (!Interop.CryptEncrypt(safeKeyHandle, SafeHashHandle.InvalidHandle, true, dwEncryptFlags, null, ref cbEncryptedKey, cbEncryptedKey))
             {
-                throw new CryptographicException(SR.Format(SR.CryptEncrypt_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             // pbData is an in/out buffer for CryptEncrypt. allocate space for the encrypted key, and copy the
             // plaintext key into that space.  Since encrypted keys will have padding applied, the size of the encrypted
@@ -919,7 +919,7 @@ namespace Internal.NativeCrypto
             int cbEncryptedData = inputCount;
             if (!Interop.CryptEncrypt(hKey, SafeHashHandle.InvalidHandle, isFinal, 0, null, ref cbEncryptedData, cbEncryptedData))
             {
-                throw new CryptographicException(SR.Format(SR.CryptEncrypt_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
 
             // encryptedData is an in/out buffer for CryptEncrypt. Allocate space for the encrypted data, and copy the
@@ -934,8 +934,7 @@ namespace Internal.NativeCrypto
             int encryptedDataLength = inputCount;
             if (!Interop.CryptEncrypt(hKey, SafeHashHandle.InvalidHandle, isFinal, 0, encryptedData, ref encryptedDataLength, cbEncryptedData))
             {
-                int errCode = GetErrorCode();
-                throw new CryptographicException(SR.CryptEncrypt_Failed, Convert.ToString(errCode));
+                throw GetErrorCode().ToCryptographicException();
             }
             Debug.Assert(encryptedDataLength == cbEncryptedData);
 
@@ -973,8 +972,7 @@ namespace Internal.NativeCrypto
             // Always call decryption with false (not final); deal with padding manually
             if (!Interop.CryptDecrypt(hKey, SafeHashHandle.InvalidHandle, false, 0, dataTobeDecrypted, ref decryptedDataLength))
             {
-                int errCode = GetErrorCode();
-                throw new CryptographicException(SR.CryptDecrypt_Failed, Convert.ToString(errCode));
+                throw GetErrorCode().ToCryptographicException();
             }
 
             Buffer.BlockCopy(dataTobeDecrypted, 0, output, outputOffset, outputCount);
@@ -1034,13 +1032,13 @@ namespace Internal.NativeCrypto
 
             if (!Interop.CryptExportKey(safeKeyHandle, SafeKeyHandle.InvalidHandle, dwBlobType, 0, null, ref cbRawData))
             {
-                throw new CryptographicException(SR.Format(SR.CryptExportKey_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             pbRawData = new byte[cbRawData];
 
             if (!Interop.CryptExportKey(safeKeyHandle, SafeKeyHandle.InvalidHandle, dwBlobType, 0, pbRawData, ref cbRawData))
             {
-                throw new CryptographicException(SR.Format(SR.CryptExportKey_Failed, Convert.ToString(GetErrorCode())));
+                throw GetErrorCode().ToCryptographicException();
             }
             return pbRawData;
         }
