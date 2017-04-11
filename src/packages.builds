@@ -28,6 +28,18 @@
     </Project>
 
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.Security\pkg\System.Net.Security.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.WebSockets.Client\pkg\System.Net.WebSockets.Client.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="System.Text.Encodings.Web\pkg\System.Text.Encodings.Web.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
