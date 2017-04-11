@@ -28,12 +28,15 @@
     </Project>
 
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="System.Text.Encodings.Web\pkg\System.Text.Encodings.Web.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
 
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
   <Target Name="GenerateNETStandardDocs">
-    <Error Condition="'$(WcfPackageReportDir)' == ''" 
+    <Error Condition="'$(WcfPackageReportDir)' == ''"
            Text="WcfPackageReportDir must be specified to point to the package report directory of the WCF repo.  EG: /p:WcfPackageReportDir=c:\src\wcf\bin\pkg\reports\" />
     <ItemGroup>
       <Reports Include="$(PackageReportDir)*.json" />
