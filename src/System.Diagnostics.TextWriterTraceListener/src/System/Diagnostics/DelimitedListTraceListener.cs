@@ -207,9 +207,13 @@ namespace System.Diagnostics
             foreach (object obj in stack)
             {
                 if (!first)
+                {
                     sb.Append(", ");
+                }
                 else
+                {
                     first = false;
+                }
                 
                 string operation = obj.ToString();
                 EscapeMessage(operation, sb);
