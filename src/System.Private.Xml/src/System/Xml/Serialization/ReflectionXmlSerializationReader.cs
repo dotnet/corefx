@@ -304,45 +304,6 @@ namespace System.Xml.Serialization
             return true;
         }
 
-        private string ExpectedElements(Member[] members)
-        {
-            if (IsSequence(members))
-                return "null";
-
-            string qnames = string.Empty;
-            bool firstElement = true;
-            for (int i = 0; i < members.Length; i++)
-            {
-                Member member = members[i];
-                if (member.Mapping.Xmlns != null)
-                    continue;
-
-                if (member.Mapping.Ignore)
-                    continue;
-
-                if (member.Mapping.IsText || member.Mapping.IsAttribute)
-                    continue;
-
-                ElementAccessor[] elements = member.Mapping.Elements;
-                for (int j = 0; j < elements.Length; j++)
-                {
-                    ElementAccessor e = elements[j];
-                    string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : string.Empty;
-                    if (e.Any && (e.Name == null || e.Name.Length == 0)) continue;
-
-                    if (!firstElement)
-                        qnames += ", ";
-
-                    qnames += ns + ":" + e.Name;
-                    firstElement = false;
-                }
-            }
-
-            var writer = new StringWriter(CultureInfo.InvariantCulture);
-            ReflectionAwareCodeGen.WriteQuotedCSharpString(new IndentedWriter(writer, true), qnames);
-            return writer.ToString();
-        }
-
         private void InitializeValueTypes(object[] p, MemberMapping[] mappings)
         {
             for (int i = 0; i < mappings.Length; i++)

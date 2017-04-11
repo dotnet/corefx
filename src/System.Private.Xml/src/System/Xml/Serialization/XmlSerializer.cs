@@ -804,7 +804,7 @@ namespace System.Xml.Serialization
             for (int i = 0; i < serializers.Length; i++)
             {
                 serializers[i] = new XmlSerializer();
-                serializers[i].rootType = type;
+                serializers[i]._rootType = type;
                 serializers[i]._mapping = mappings[i];
             }
 
