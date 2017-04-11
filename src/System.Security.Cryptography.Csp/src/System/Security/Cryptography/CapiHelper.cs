@@ -698,7 +698,7 @@ namespace Internal.NativeCrypto
                                             CspProviderFlags.UseUserProtectedKey);
                 if ((flags & keyFlags) != CspProviderFlags.NoFlags)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidValue, nameof(flags));
+                    throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, Convert.ToString(flags)), nameof(flags));
                 }
             }
         }
@@ -738,7 +738,7 @@ namespace Internal.NativeCrypto
                 (keyType == CspAlgorithmType.Dss && dwAlgId != CALG_DSS_SIGN))
             {
                 hKey.Dispose();
-                throw new CryptographicException(SR.Cryptography_CSP_WrongKeySpec);
+                throw new CryptographicException(SR.Format(SR.Cryptography_CSP_WrongKeySpec, Convert.ToString(keyType)));
             }
 
             return hKey;
@@ -797,8 +797,8 @@ namespace Internal.NativeCrypto
         internal static void DecryptKey(SafeKeyHandle safeKeyHandle, byte[] encryptedData, int encryptedDataLength, bool fOAEP, out byte[] decryptedData)
         {
             VerifyValidHandle(safeKeyHandle);
-            Debug.Assert(encryptedData != null, SR.Argument_InvalidValue, "Encrypted Data is null");
-            Debug.Assert(encryptedDataLength >= 0, SR.Argument_InvalidValue, "Encrypted data length is less than 0");
+            Debug.Assert(encryptedData != null, "Encrypted Data is null");
+            Debug.Assert(encryptedDataLength >= 0, "Encrypted data length is less than 0");
 
             byte[] dataTobeDecrypted = new byte[encryptedDataLength];
             Buffer.BlockCopy(encryptedData, 0, dataTobeDecrypted, 0, encryptedDataLength);
@@ -857,8 +857,8 @@ namespace Internal.NativeCrypto
         internal static void EncryptKey(SafeKeyHandle safeKeyHandle, byte[] pbKey, int cbKey, bool foep, ref byte[] pbEncryptedKey)
         {
             VerifyValidHandle(safeKeyHandle);
-            Debug.Assert(pbKey != null, SR.Argument_InvalidValue, "pbKey is null");
-            Debug.Assert(cbKey >= 0, SR.Argument_InvalidValue, "cbKey is less than 0");
+            Debug.Assert(pbKey != null, "pbKey is null");
+            Debug.Assert(cbKey >= 0, $"cbKey is less than 0 ({cbKey})");
 
             int dwEncryptFlags = foep ? (int)CryptDecryptFlags.CRYPT_OAEP : 0;
             // Figure out how big the encrypted key will be
