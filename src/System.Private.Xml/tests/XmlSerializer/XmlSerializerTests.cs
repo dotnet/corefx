@@ -2606,6 +2606,74 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void Xml_Soap_TypeWithNullableFields()
+    {
+        XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType4));
+        var ser = new XmlSerializer(myTypeMapping);
+        var value = new SoapEncodedTestType4()
+        {
+            IntValue = 11,
+            DoubleValue = 12.0
+        };
+
+        var actual = SerializeAndDeserialize(
+            value: value,
+            baseline: "<?xml version=\"1.0\"?>\r\n<SoapEncodedTestType4 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <IntValue xsi:type=\"xsd:int\">11</IntValue>\r\n  <DoubleValue xsi:type=\"xsd:double\">12</DoubleValue>\r\n</SoapEncodedTestType4>",
+            serializerFactory: () => ser);
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.IntValue, actual.IntValue);
+        Assert.Equal(value.DoubleValue, actual.DoubleValue);
+
+        value = new SoapEncodedTestType4()
+        {
+            IntValue = null,
+            DoubleValue = null
+        };
+
+        actual = SerializeAndDeserialize(
+            value: value,
+            baseline: "<?xml version=\"1.0\"?>\r\n<SoapEncodedTestType4 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <IntValue xsi:nil=\"true\" />\r\n  <DoubleValue xsi:nil=\"true\" />\r\n</SoapEncodedTestType4>",
+            serializerFactory: () => ser);
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.IntValue, actual.IntValue);
+        Assert.Equal(value.DoubleValue, actual.DoubleValue);
+    }
+
+    [Fact]
+    public static void Xml_Soap_Nullable()
+    {
+        XmlTypeMapping intMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(int?));
+        int? value = 11;
+
+        var actual = SerializeAndDeserialize(
+            value: value,
+            baseline: "<?xml version=\"1.0\"?>\r\n<int d1p1:type=\"int\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">11</int>",
+            serializerFactory: () => new XmlSerializer(intMapping));
+        Assert.Equal(value, actual);
+
+        XmlTypeMapping structMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SomeStruct?));
+        SomeStruct? structValue = new SomeStruct() { A = 1, B = 2 };
+
+        var structActual = SerializeAndDeserialize(
+            value: structValue,
+            baseline: "<?xml version=\"1.0\"?>\r\n<SomeStruct xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\">\r\n  <A xsi:type=\"xsd:int\">1</A>\r\n  <B xsi:type=\"xsd:int\">2</B>\r\n</SomeStruct>",
+            serializerFactory: () => new XmlSerializer(structMapping));
+        Assert.NotNull(structActual);
+        Assert.Equal(structValue.Value.A, structActual.Value.A);
+        Assert.Equal(structValue.Value.B, structActual.Value.B);
+
+        structActual = SerializeAndDeserialize(
+            value: (SomeStruct?)null,
+            baseline: "<?xml version=\"1.0\"?>\r\n<SomeStruct xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" />",
+            serializerFactory: () => new XmlSerializer(structMapping));
+        Assert.NotNull(structActual);
+        Assert.Equal(0, structActual.Value.A);
+        Assert.Equal(0, structActual.Value.B);
+    }
+
+    [Fact]
     public static void Xml_Soap_Basic_FromMappings()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
@@ -2920,7 +2988,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
-    public static void Xml_Soap_Nullables()
+    public static void Xml_Soap_WithNullables()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithNullables));
         var serializer = new XmlSerializer(mapping);

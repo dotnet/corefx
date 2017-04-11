@@ -4085,6 +4085,14 @@ public class SoapEncodedTestType3
     public string StringValue;
 }
 
+public class SoapEncodedTestType4
+{
+    [SoapElement(IsNullable = true)]
+    public int? IntValue;
+    [SoapElement(IsNullable = true)]
+    public double? DoubleValue;
+}
+
 public class SoapEncodedTestType5
 {
     public string Name;

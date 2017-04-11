@@ -596,14 +596,13 @@ namespace System.Xml.Serialization
             if (collectionType.IsArray)
             {
                 Array a;
-                Type elementType = collectionType.GetElementType();
-                var currentArray = collection as Array;
-                if (currentArray != null && currentArray.Length == collectionMember.Count)
+                if (collection is Array currentArray && currentArray.Length == collectionMember.Count)
                 {
                     a = currentArray;
                 }
                 else
                 {
+                    Type elementType = collectionType.GetElementType();
                     a = Array.CreateInstance(elementType, collectionMember.Count);
                 }
 
@@ -1041,22 +1040,20 @@ namespace System.Xml.Serialization
 
         private XmlSerializationReadCallback CreateXmlSerializationReadCallback(TypeMapping mapping)
         {
-            if (mapping is StructMapping)
+            if (mapping is StructMapping structMapping)
             {
-                return () => WriteStructMethod((StructMapping)mapping, mapping.TypeDesc.IsNullable, true, defaultNamespace: null);
+                return () => WriteStructMethod(structMapping, mapping.TypeDesc.IsNullable, true, defaultNamespace: null);
             }
-            else if (mapping is EnumMapping)
+            else if (mapping is EnumMapping enumMapping)
             {
-                return () => WriteEnumMethodSoap((EnumMapping)mapping);
+                return () => WriteEnumMethodSoap(enumMapping);
             }
-            else if (mapping is ArrayMapping)
+            else if (mapping is NullableMapping nullableMapping)
             {
-                return DummyReadArrayMethod;
+                return () => WriteNullableMethod(nullableMapping, false, null);
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+
+            return DummyReadArrayMethod;
         }
 
         private void NoopAction(object o)
@@ -1554,8 +1551,7 @@ namespace System.Xml.Serialization
                     return;
 
                 var listOfItems = new List<object>();
-                var enumerableItems = collectionItems as IEnumerable;
-                if (enumerableItems != null)
+                if (collectionItems is IEnumerable enumerableItems)
                 {
                     foreach (var item in enumerableItems)
                     {
@@ -1564,7 +1560,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
                 }
 
                 AddObjectsIntoTargetCollection(collection, listOfItems, collectionType);
