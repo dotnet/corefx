@@ -128,6 +128,9 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
+            
+            if (certificate.Handle == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(certificate));
 
             if (_storePal == null)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotOpen);
