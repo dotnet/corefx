@@ -29,7 +29,7 @@ namespace System.Globalization.Tests
             Assert.Equal(expected, format.PercentNegativePattern);
         }
 
-        [Theory]
+        [Fact]
         public void PercentNegativePattern_Invariant_Get()
         {
             Assert.Equal(0, NumberFormatInfo.InvariantInfo.PercentNegativePattern);
