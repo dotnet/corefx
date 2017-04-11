@@ -576,11 +576,8 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         {
             free(buffer);
             *entry = nullptr;
-            if (!err || (err == EINVAL && (getHostErrno == HOST_NOT_FOUND || getHostErrno == NO_DATA)))
-            {
-                err = HOST_NOT_FOUND;
-            }
-            return err;
+            assert(getHostErrno != 0);
+            return getHostErrno;
         }
     }
 }
@@ -659,11 +656,8 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         {
             free(buffer);
             *entry = nullptr;
-            if (!err || (err == EINVAL && (getHostErrno == HOST_NOT_FOUND || getHostErrno == NO_DATA)))
-            {
-                err = HOST_NOT_FOUND;
-            }
-            return err;
+            assert(getHostErrno != 0);
+            return getHostErrno;
         }
     }
 }
