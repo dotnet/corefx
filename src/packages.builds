@@ -36,6 +36,15 @@
     <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.Security\pkg\System.Net.Security.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.Net.WebSockets.Client\pkg\System.Net.WebSockets.Client.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="System.ValueTuple\pkg\System.ValueTuple.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>

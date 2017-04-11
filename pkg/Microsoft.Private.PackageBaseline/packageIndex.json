@@ -1399,7 +1399,8 @@
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
-        "4.0.1.0": "4.3.0"
+        "4.0.1.0": "4.3.0",
+        "4.0.1.1": "4.3.1"
       }
     },
     "System.Net.NameResolution": {
@@ -1477,7 +1478,8 @@
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
-        "4.0.1.0": "4.3.0"
+        "4.0.1.0": "4.3.0",
+        "4.0.1.1": "4.3.1"
       }
     },
     "System.Net.Sockets": {
@@ -1525,7 +1527,8 @@
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
-        "4.0.1.0": "4.3.0"
+        "4.0.1.0": "4.3.0",
+        "4.0.1.1": "4.3.1"
       }
     },
     "System.Numerics.Vectors": {
