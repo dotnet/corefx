@@ -24,13 +24,12 @@ namespace System.Threading.ThreadPools.Tests
         public static void ConcurrentInitializeTest()
         {
             int processorCount = Environment.ProcessorCount;
-            var threadReady = new AutoResetEvent(false);
-            var continueThreads = new ManualResetEvent(false);
+            var countdownEvent = new CountdownEvent(processorCount);
             Action threadMain =
                 () =>
                 {
-                    threadReady.Set();
-                    continueThreads.CheckedWait();
+                    countdownEvent.Signal();
+                    countdownEvent.Wait(ThreadTestHelpers.UnexpectedTimeoutMilliseconds);
                     Assert.True(ThreadPool.SetMinThreads(processorCount, processorCount));
                 };
 
@@ -40,10 +39,7 @@ namespace System.Threading.ThreadPools.Tests
                 var t = ThreadTestHelpers.CreateGuardedThread(out waitForThreadArray[i], threadMain);
                 t.IsBackground = true;
                 t.Start();
-                threadReady.CheckedWait();
             }
-
-            continueThreads.Set();
 
             foreach (Action waitForThread in waitForThreadArray)
             {
