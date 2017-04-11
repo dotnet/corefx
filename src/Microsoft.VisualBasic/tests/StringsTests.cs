@@ -37,7 +37,7 @@ namespace Microsoft.VisualBasic.Tests
         public void ChrW_CharCodeInRange(int charCode)
         {
             char result = Strings.ChrW(charCode);
-            Assert.Equal(System.Convert.ToChar(charCode & 0XFFFF), result);
+            Assert.Equal(Convert.ToChar(charCode & 0XFFFF), result);
         }
     }
 }
