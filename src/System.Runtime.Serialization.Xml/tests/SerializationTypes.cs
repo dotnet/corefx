@@ -4249,7 +4249,7 @@ public class DefaultValuesSetToNaN
     }
 }
 
-[XmlRootAttribute("PurchaseOrder", Namespace = "http://www.cpandl.com", IsNullable = false)]
+[XmlRootAttribute("PurchaseOrder", Namespace = "http://www.contoso1.com", IsNullable = false)]
 public class PurchaseOrder
 {
     public Address ShipTo;

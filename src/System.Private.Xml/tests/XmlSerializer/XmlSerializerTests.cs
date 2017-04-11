@@ -3062,7 +3062,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Null(actual.Value);
         Assert.Null(actual.value);
         Assert.Null(((DerivedClass)actual).Value);
-        Assert.Equal(((DerivedClass)actual).value, value.value);
+        Assert.Equal(value.value, ((DerivedClass)actual).value);
     }
 
     [Fact]
@@ -3078,7 +3078,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
   <FloatProp>0</FloatProp>
 </DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
-        Assert.Equal(actual, value);
+        Assert.Equal(value, actual);
     }
 
     [Fact]
@@ -3088,7 +3088,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var value = PurchaseOrder.CreateInstance();
         string baseline = 
 @"<?xml version=""1.0""?>
-<PurchaseOrder xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns=""http://www.cpandl.com"">
+<PurchaseOrder xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns=""http://www.contoso1.com"">
   <ShipTo Name=""John Doe"">
     <Line1>1 Main St.</Line1>
     <City>AnyTown</City>
@@ -3115,12 +3115,48 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
             () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace)
             );
         Assert.NotNull(actual);
+        Assert.Equal(value.OrderDate, actual.OrderDate);
+        Assert.Equal(value.ShipCost, actual.ShipCost);
+        Assert.Equal(value.SubTotal, actual.SubTotal);
+        Assert.Equal(value.TotalCost, actual.TotalCost);
+        Assert.Equal(value.ShipTo.City, actual.ShipTo.City);
+        Assert.Equal(value.ShipTo.Line1, actual.ShipTo.Line1);
+        Assert.Equal(value.ShipTo.Name, actual.ShipTo.Name);
+        Assert.Equal(value.ShipTo.State, actual.ShipTo.State);
+        Assert.Equal(value.ShipTo.Zip, actual.ShipTo.Zip);
+        Assert.Equal(value.OrderedItems.Length, actual.OrderedItems.Length);
+        for (int i = 0; i < value.OrderedItems.Length; i++)
+        {
+            Assert.Equal(value.OrderedItems.ElementAt(i).Description, actual.OrderedItems.ElementAt(i).Description);
+            Assert.Equal(value.OrderedItems.ElementAt(i).ItemName, actual.OrderedItems.ElementAt(i).ItemName);
+            Assert.Equal(value.OrderedItems.ElementAt(i).LineTotal, actual.OrderedItems.ElementAt(i).LineTotal);
+            Assert.Equal(value.OrderedItems.ElementAt(i).Quantity, actual.OrderedItems.ElementAt(i).Quantity);
+            Assert.Equal(value.OrderedItems.ElementAt(i).UnitPrice, actual.OrderedItems.ElementAt(i).UnitPrice);
+        }
 
         actual = SerializeAndDeserialize(value,
             baseline,
             () => new XmlSerializer(value.GetType(), null, null, null, defaultNamespace, null)
             );
         Assert.NotNull(actual);
+        Assert.Equal(value.OrderDate, actual.OrderDate);
+        Assert.Equal(value.ShipCost, actual.ShipCost);
+        Assert.Equal(value.SubTotal, actual.SubTotal);
+        Assert.Equal(value.TotalCost, actual.TotalCost);
+        Assert.Equal(value.ShipTo.City, actual.ShipTo.City);
+        Assert.Equal(value.ShipTo.Line1, actual.ShipTo.Line1);
+        Assert.Equal(value.ShipTo.Name, actual.ShipTo.Name);
+        Assert.Equal(value.ShipTo.State, actual.ShipTo.State);
+        Assert.Equal(value.ShipTo.Zip, actual.ShipTo.Zip);
+        Assert.Equal(value.OrderedItems.Length, actual.OrderedItems.Length);
+        for (int i = 0; i < value.OrderedItems.Length; i++)
+        {
+            Assert.Equal(value.OrderedItems.ElementAt(i).Description, actual.OrderedItems.ElementAt(i).Description);
+            Assert.Equal(value.OrderedItems.ElementAt(i).ItemName, actual.OrderedItems.ElementAt(i).ItemName);
+            Assert.Equal(value.OrderedItems.ElementAt(i).LineTotal, actual.OrderedItems.ElementAt(i).LineTotal);
+            Assert.Equal(value.OrderedItems.ElementAt(i).Quantity, actual.OrderedItems.ElementAt(i).Quantity);
+            Assert.Equal(value.OrderedItems.ElementAt(i).UnitPrice, actual.OrderedItems.ElementAt(i).UnitPrice);
+        }
     }
 
     [Fact]
@@ -3142,11 +3178,11 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         Assert.NotNull(actual);
         Assert.NotNull(actual.Aliased);
-        Assert.Equal(actual.Aliased.GetType(), inputList.GetType());
-        Assert.Equal(((List<string>)actual.Aliased).Count, inputList.Count);
+        Assert.Equal(inputList.GetType(), actual.Aliased.GetType());
+        Assert.Equal(inputList.Count, ((List<string>)actual.Aliased).Count);
         for (int i = 0; i < inputList.Count; i++)
         {
-            Assert.Equal(((List<string>)actual.Aliased).ElementAt(i), inputList[i]);
+            Assert.Equal(inputList[i], ((List<string>)actual.Aliased).ElementAt(i));
         }
     }
 
@@ -3155,11 +3191,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     {
         var xmlSerializer = new XmlSerializer(typeof(DerivedClass1));
         string inputXml = "<DerivedClass1><Prop>2012-07-07T00:18:29.7538612Z</Prop></DerivedClass1>";
+        var dateTime = new DateTime(634772171097538612);
 
         using (var reader = new StringReader(inputXml))
         {
             var derivedClassInstance = (DerivedClass1)xmlSerializer.Deserialize(reader);
             Assert.NotNull(derivedClassInstance.Prop);
+            Assert.Equal(1, derivedClassInstance.Prop.Count<DateTime>());
+            Assert.Equal(dateTime, derivedClassInstance.Prop.ElementAt(0));
         }
     }
 
@@ -3182,9 +3221,9 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </Person>");
 
         Assert.NotNull(actual);
-        Assert.Equal(actual.FirstName, value.FirstName);
-        Assert.Equal(actual.MiddleName, value.MiddleName);
-        Assert.Equal(actual.LastName, value.LastName);
+        Assert.Equal(value.FirstName, actual.FirstName);
+        Assert.Equal(value.MiddleName, actual.MiddleName);
+        Assert.Equal(value.LastName, actual.LastName);
     }
 
     private static T RoundTripWithXmlMembersMapping<T>(object requestBodyValue, string memberName, string baseline, bool skipStringCompare = false)
