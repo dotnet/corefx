@@ -12,18 +12,27 @@ namespace System.Globalization.Tests
     {
         public static IEnumerable<object[]> PercentPositivePattern_TestData()
         {
-            yield return new object[] { NumberFormatInfo.InvariantInfo, 0, 0 };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, 0, 1 };
-            yield return new object[] { new CultureInfo("en-MY").NumberFormat, 1, 1 };
-            yield return new object[] { new CultureInfo("tr").NumberFormat, 2, 2 };
+            yield return new object[] { new CultureInfo("en-US").NumberFormat, 1 };
+            yield return new object[] { new CultureInfo("en-MY").NumberFormat, 1 };
+            yield return new object[] { new CultureInfo("tr").NumberFormat, 2 };
+        }
+
+        /// <summary>
+        /// Not testing for Windows as the culture data can change
+        /// https://blogs.msdn.microsoft.com/shawnste/2005/04/05/culture-data-shouldnt-be-considered-stable-except-for-invariant/
+        /// </summary>
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [MemberData(nameof(PercentPositivePattern_TestData))]
+        public void PercentPositivePattern_Get(NumberFormatInfo format, int expected)
+        {
+            Assert.Equal(expected, format.PercentPositivePattern);
         }
 
         [Theory]
-        [MemberData(nameof(PercentPositivePattern_TestData))]
-        public void PercentPositivePattern_Get(NumberFormatInfo format, int expectedWindows, int expectedIcu)
+        public void PercentPositivePattern_Invariant_Get()
         {
-            int expected = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? expectedWindows : expectedIcu;
-            Assert.Equal(expected, format.PercentPositivePattern);
+            Assert.Equal(0, NumberFormatInfo.InvariantInfo.PercentPositivePattern);
         }
 
         [Theory]
