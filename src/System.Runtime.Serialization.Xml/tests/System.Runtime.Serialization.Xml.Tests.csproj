@@ -10,23 +10,71 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="$(TestSourceFolder)SerializationTypes.netcoreapp.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.netcoreapp.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializerStressTests.netcoreapp.cs" />
+  <ItemGroup>
+    <Compile Include="$(TestSourceFolder)DataContractSerializer.cs" />
+    <Compile Include="DataContractSerializer.CoreCLR.cs" />
+    <Compile Include="DataContractSerializer.netcoreapp.cs" />
+    <Compile Include="DataContractSerializerStressTests.netcoreapp.cs" />
+    <Compile Include="DataContractSerializerTestData.cs" />
+    <Compile Include="DesktopTestData\ArrayDataContract.cs" />
+    <Compile Include="DesktopTestData\ClassDataContract.cs" />
+    <Compile Include="DesktopTestData\CollectionDataContract.cs" />
+    <Compile Include="DesktopTestData\Collections.cs" />
+    <Compile Include="DesktopTestData\Common.cs" />
+    <Compile Include="DesktopTestData\ComparisonHelper.cs" />
+    <Compile Include="DesktopTestData\DataContract.cs" />
+    <Compile Include="DesktopTestData\DataContractInstanceCreator.cs" />
+    <Compile Include="DesktopTestData\DataContractResolverLibrary.cs" />
+    <Compile Include="DesktopTestData\DataMember.cs" />
+    <Compile Include="DesktopTestData\DCRImpIVariations.cs" />
+    <Compile Include="DesktopTestData\DCRSampleType.cs" />
+    <Compile Include="DesktopTestData\DCRTypeLibrary.cs" />
+    <Compile Include="DesktopTestData\EnumDataContract.cs" />
+    <Compile Include="DesktopTestData\ExceptionHelpers.cs" />
+    <Compile Include="DesktopTestData\Globals.cs" />
+    <Compile Include="DesktopTestData\InheritenceCases.cs" />
+    <Compile Include="DesktopTestData\InheritenceObjectRef.cs" />
+    <Compile Include="DesktopTestData\InstanceCreator.cs" />
+    <Compile Include="DesktopTestData\ObjectRefUtil.cs" />
+    <Compile Include="DesktopTestData\ObjRefSample.cs" />
+    <Compile Include="DesktopTestData\POCOInstanceCreator.cs" />
+    <Compile Include="DesktopTestData\PrimitiveCreator.cs" />
+    <Compile Include="DesktopTestData\PrimitiveDataContract.cs" />
+    <Compile Include="DesktopTestData\Primitives1.cs" />
+    <Compile Include="DesktopTestData\RoundTripTestDriver.cs" />
+    <Compile Include="DesktopTestData\SampleIObjectRef.cs" />
+    <Compile Include="DesktopTestData\SampleTypes.cs" />
+    <Compile Include="DesktopTestData\SelfRefAndCycles.cs" />
+    <Compile Include="DesktopTestData\TestDriverCommon.cs" />
+    <Compile Include="DesktopTestData\Util.cs" />
+    <Compile Include="MyResolver.cs" />
+    <Compile Include="Performance\DcsPerformanceTest.cs" />
+    <Compile Include="Performance\PerformanceTestsCommon.cs" />
+    <Compile Include="Performance\XmlUTF8TextReaderTests.cs" />
+    <Compile Include="SerializationTypes.CoreCLR.cs" />
+    <Compile Include="SerializationTypes.cs" />
+    <Compile Include="SerializationTypes.netcoreapp.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="XmlDictionaryReaderTests.cs" />
+    <Compile Include="XmlDictionaryWriterTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(TestSourceFolder)Utils.cs" />
-    <Compile Include="$(TestSourceFolder)SerializationTypes.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializerTestData.cs" />
-    <Compile Include="$(TestSourceFolder)MyResolver.cs" />
-    <Compile Include="$(TestSourceFolder)XmlDictionaryReaderTests.cs" />
-    <Compile Include="$(TestSourceFolder)XmlDictionaryWriterTest.cs" />
+    <None Include="Configurations.props" />
+    <None Include="Performance\Configurations.props" />
+    <None Include="ReflectionOnly\Configurations.props" />
+    <None Include="System.Runtime.Serialization.Xml.Tests.settings.targets" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
-    <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
+  <ItemGroup>
+    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Performance\System.Runtime.Serialization.Xml.Performance.Tests.csproj" />
+    <Content Include="ReflectionOnly\System.Runtime.Serialization.Xml.ReflectionOnly.Tests.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Performance\Common\System\" />
+    <Folder Include="Performance\Properties\" />
+    <Folder Include="ReflectionOnly\Properties\" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

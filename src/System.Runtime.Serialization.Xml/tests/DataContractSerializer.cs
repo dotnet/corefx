@@ -2761,6 +2761,68 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.IntProperty, actual.IntProperty);
     }
 
+    #region
+    [Fact]
+    public static void DCS_BasicRoundTripResolvePrimitiveTypes()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new DesktopTestData.PrimitiveTypeResolver()
+            , IgnoreExtensionDataObject = false
+            , KnownTypes = null
+            , MaxItemsInObjectGraph = int.MaxValue
+            , PreserveObjectReferences = false
+
+        };
+        string baseline = "";
+
+        
+        var value = new DesktopTestData.ObjectContainer(new DesktopTestData.PrimitiveContainer());
+        // 
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings, null, true);
+        DesktopTestData.ComparisonHelper.CompareRecursively(value, actual);
+
+        var instance = new DesktopTestData.ObjectContainer(new DesktopTestData.PrimitiveContainer());
+
+        object result = DesktopTestData.DCRUtils.SingleRoundTripTest(DesktopTestData.SerializerFactory.GetSerializer(typeof(DesktopTestData.ObjectContainer), DesktopTestData.SerializerEnum.DataContractSerializer, new DesktopTestData.PrimitiveTypeResolver()), instance);
+        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
+
+        result = DesktopTestData.DCRUtils.SingleRoundtripPerEpisode(DesktopTestData.SerializerEnum.DataContractSerializer, typeof(DesktopTestData.ObjectContainer), instance, new DesktopTestData.PrimitiveTypeResolver());
+        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundTripResolveEnumStructTypes()
+    {
+        var dataContractResolver = new DesktopTestData.PrimitiveTypeResolver();
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = dataContractResolver
+            , IgnoreExtensionDataObject = false
+            , KnownTypes = null
+            , MaxItemsInObjectGraph = int.MaxValue
+            , PreserveObjectReferences = false
+
+        };
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/DesktopTestData"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><data i:type=""a:EnumStructContainer"" xmlns:a=""http://www.default.com""><enumArrayData xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><b:anyType i:type=""a:1munemy"">red</b:anyType><b:anyType i:type=""a:1munemy"">black</b:anyType><b:anyType i:type=""a:1munemy"">blue</b:anyType><b:anyType i:type=""a:1"">Autumn</b:anyType><b:anyType i:type=""a:2"">Spring</b:anyType></enumArrayData><p1 i:type=""a:VT_foo""><b>10</b></p1><p2 i:type=""a:NotSer_foo""><a>0</a></p2><p3 i:type=""a:MyStruct_foo""><globName i:nil=""true""/><value>0</value></p3></data><data2 i:type=""a:EnumStructContainer"" xmlns:a=""http://www.default.com""><enumArrayData xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><b:anyType i:type=""a:1munemy"">red</b:anyType><b:anyType i:type=""a:1munemy"">black</b:anyType><b:anyType i:type=""a:1munemy"">blue</b:anyType><b:anyType i:type=""a:1"">Autumn</b:anyType><b:anyType i:type=""a:2"">Spring</b:anyType></enumArrayData><p1 i:type=""a:VT_foo""><b>10</b></p1><p2 i:type=""a:NotSer_foo""><a>0</a></p2><p3 i:type=""a:MyStruct_foo""><globName i:nil=""true""/><value>0</value></p3></data2></ObjectContainer>";
+
+        
+
+        var value = new DesktopTestData.ObjectContainer(new DesktopTestData.EnumStructContainer());
+
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
+        DesktopTestData.ComparisonHelper.CompareRecursively(value, actual);
+
+        var instance = new DesktopTestData.ObjectContainer(new DesktopTestData.EnumStructContainer());
+
+        object result = DesktopTestData.DCRUtils.SingleRoundTripTest(DesktopTestData.SerializerFactory.GetSerializer(typeof(ObjectContainer), DesktopTestData.SerializerEnum.DataContractSerializer, new DesktopTestData.PrimitiveTypeResolver()), instance);
+        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
+
+        result = DesktopTestData.DCRUtils.SingleRoundtripPerEpisode(DesktopTestData.SerializerEnum.DataContractSerializer, typeof(ObjectContainer), instance, new DesktopTestData.PrimitiveTypeResolver());
+        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
+    }
+    #endregion
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;
@@ -2793,6 +2855,8 @@ public static partial class DataContractSerializerTests
             return deserialized;
         }
     }
+
+
 
     private static T DeserializeString<T>(string stringToDeserialize, bool shouldReportDeserializationExceptions = true, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null)
     {
