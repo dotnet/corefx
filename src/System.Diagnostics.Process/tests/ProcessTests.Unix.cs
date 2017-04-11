@@ -16,8 +16,8 @@ namespace System.Diagnostics.Tests
 {
     public partial class ProcessTests : ProcessTestBase
     {
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         public void TestStartOnUnixWithBadPermissions()
         {
             string path = GetTestFilePath();
@@ -28,8 +28,8 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes to set permissions
         public void TestStartOnUnixWithBadFormat()
         {
             string path = GetTestFilePath();
