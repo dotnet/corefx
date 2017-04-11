@@ -744,7 +744,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        bool IsSequence(Member[] members)
+        private bool IsSequence(Member[] members)
         {
             // #10586: Currently the reflection based method treat this kind of type as normal types. 
             // But potentially we can do some optimization for types that have ordered properties. 
@@ -895,7 +895,6 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-
                         if (element.Mapping.TypeDesc.FormatterName == "ByteArrayBase64")
                         {
                             value = ToByteArrayBase64(false);
@@ -980,7 +979,6 @@ namespace System.Xml.Serialization
                             XmlQualifiedName tser = GetXsiType();
                             if (tser == null || QNameEqual(tser, sm.XsiType.Name, sm.XsiType.Namespace, defaultNamespace))
                             {
-
                             }
                             else
                             {
@@ -1860,7 +1858,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        bool WriteDerivedTypes(out object o, StructMapping mapping, XmlQualifiedName xsiType, string defaultNamespace, bool checkType, bool isNullable)
+        private bool WriteDerivedTypes(out object o, StructMapping mapping, XmlQualifiedName xsiType, string defaultNamespace, bool checkType, bool isNullable)
         {
             for (StructMapping derived = mapping.DerivedMappings; derived != null; derived = derived.NextDerivedMapping)
             {
@@ -1960,7 +1958,6 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-
                         elseCall(o);
                     }
                 }
@@ -1989,7 +1986,6 @@ namespace System.Xml.Serialization
             {
                 if (attribute.IsList)
                 {
-
                     string listValues = Reader.Value;
                     string[] vals = listValues.Split(null);
                     Array arrayValue = Array.CreateInstance(member.Mapping.TypeDesc.Type.GetElementType(), vals.Length);

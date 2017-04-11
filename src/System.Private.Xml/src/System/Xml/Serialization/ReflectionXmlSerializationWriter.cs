@@ -19,7 +19,6 @@ namespace Microsoft.XmlSerializer.Generator
 namespace System.Xml.Serialization
 #endif
 {
-
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {
         private XmlMapping _mapping;
@@ -499,7 +498,7 @@ namespace System.Xml.Serialization
             if (mapping.IsSoap && mapping.TypeDesc.IsRoot) return;
 
             if (!mapping.IsSoap)
-            { 
+            {
                 if (o == null)
                 {
                     if (isNullable) WriteNullTagLiteral(n, ns);
@@ -547,7 +546,6 @@ namespace System.Xml.Serialization
 
                 if (!mapping.IsSoap)
                 {
-
                     WriteStartElement(n, ns, o, false, xmlnsSource);
 
                     if (!mapping.TypeDesc.IsRoot)
@@ -616,7 +614,7 @@ namespace System.Xml.Serialization
 
                     if (m.Xmlns != null)
                         continue;
-                    
+
                     bool checkShouldPersist = m.CheckShouldPersist && (m.Elements.Length > 0 || m.Text != null);
 
                     if (!checkShouldPersist)
@@ -640,7 +638,6 @@ namespace System.Xml.Serialization
                     WriteEndElement(o);
                 }
             }
-
         }
 
         private object GetMemberValue(object o, string memberName)
@@ -744,7 +741,6 @@ namespace System.Xml.Serialization
                             }
 
                             returnString = FromEnum(enumValue, xmlNames, valueIds);
-
                         }
                         else
                         {
@@ -802,7 +798,7 @@ namespace System.Xml.Serialization
 
                 if (memberValue != null)
                 {
-                    var a = (IEnumerable) memberValue;
+                    var a = (IEnumerable)memberValue;
                     IEnumerator e = a.GetEnumerator();
                     bool shouldAppendWhitespace = false;
                     if (e != null)
@@ -928,7 +924,7 @@ namespace System.Xml.Serialization
             return -1;
         }
 
-        bool WriteDerivedTypes(StructMapping mapping, string n, string ns, object o, bool isNullable)
+        private bool WriteDerivedTypes(StructMapping mapping, string n, string ns, object o, bool isNullable)
         {
             Type t = o.GetType();
             for (StructMapping derived = mapping.DerivedMappings; derived != null; derived = derived.NextDerivedMapping)
@@ -1380,7 +1376,7 @@ namespace System.Xml.Serialization
         }
 
         [Flags]
-        enum WritePrimitiveMethodRequirement
+        private enum WritePrimitiveMethodRequirement
         {
             None = 0,
             Raw = 1,

@@ -19,6 +19,11 @@ namespace System.Diagnostics
     /// relationships for the activities and sets Activity.Current.
     /// 
     /// When activity is finished, it should be stopped with static Activity.Stop method.
+    /// 
+    /// No methods on Activity allow exceptions to escape as a response to bad inputs.
+    /// They are thrown and caught (that allows Debuggers and Monitors to see the error)
+    /// but the exception is supressed, and the operation does something reasonable (typically
+    /// doing nothing).  
     /// </summary>
     public partial class Activity
     {
@@ -55,7 +60,7 @@ namespace System.Diagnostics
         public DateTime StartTimeUtc { get; private set; }
 
         /// <summary>
-        /// If the Activity that created this activity is  from the same process you can get 
+        /// If the Activity that created this activity is from the same process you can get 
         /// that Activity with Parent.  However, this can be null if the Activity has no
         /// parent (a root activity) or if the Parent is from outside the process.
         /// </summary>
@@ -65,13 +70,12 @@ namespace System.Diagnostics
         /// <summary>
         /// If the parent for this activity comes from outside the process, the activity
         /// does not have a Parent Activity but MAY have a ParentId (which was deserialized from
-        /// from the parent) .   This accessor fetches the parent ID if it exists at all.  
+        /// from the parent).   This accessor fetches the parent ID if it exists at all.  
         /// Note this can be null if this is a root Activity (it has no parent)
         /// <para/>
         /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
         public string ParentId { get; private set; }
-
 
         /// <summary>
         /// Root Id is substring from Activity.Id (or ParentId) between '|' (or beginning) and first '.'.
@@ -120,7 +124,7 @@ namespace System.Diagnostics
         /// Baggage is string-string key-value pairs that represent information that will
         /// be passed along to children of this activity.   Baggage is serialized 
         /// when requests leave the process (along with the ID).   Typically Baggage is
-        /// used to do fine-grained control over logging of the activty and any children.  
+        /// used to do fine-grained control over logging of the activity and any children.  
         /// In general, if you are not using the data at runtime, you should be using Tags 
         /// instead. 
         /// </summary> 
@@ -149,20 +153,24 @@ namespace System.Diagnostics
         /* Constructors  Builder methods */
 
         /// <summary>
-        /// Note that Activity has a 'builder' pattern, where you call the constructor, a number of 'With*' APIs and then
+        /// Note that Activity has a 'builder' pattern, where you call the constructor, a number of 'Set*' and 'Add*' APIs and then
         /// call <see cref="Start"/> to build the activity.  You MUST call <see cref="Start"/> before using it.
         /// </summary>
         /// <param name="operationName">Operation's name <see cref="OperationName"/></param>
         public Activity(string operationName)
         {
             if (string.IsNullOrEmpty(operationName))
-                throw new ArgumentException($"{nameof(operationName)} must not be null or empty");
+            {
+                NotifyError(new ArgumentException($"{nameof(operationName)} must not be null or empty"));
+                return;
+            }
+
             OperationName = operationName;
         }
 
         /// <summary>
         /// Update the Activity to have a tag with an additional 'key' and value 'value'.
-        /// This shows up in the <see cref="Tags"/>  eumeration.   It is meant for information that
+        /// This shows up in the <see cref="Tags"/>  enumeration.   It is meant for information that
         /// is useful to log but not needed for runtime control (for the latter, <see cref="Baggage"/>)
         /// </summary>
         /// <returns>'this' for convenient chaining</returns>
@@ -174,8 +182,8 @@ namespace System.Diagnostics
 
         /// <summary>
         /// Update the Activity to have baggage with an additional 'key' and value 'value'.
-        /// This shows up in the <see cref="Baggage"/> eumeration as well as the <see cref="GetBaggageItem(string)"/>
-        /// mathod.
+        /// This shows up in the <see cref="Baggage"/> enumeration as well as the <see cref="GetBaggageItem(string)"/>
+        /// method.
         /// Baggage is meant for information that is needed for runtime control.   For information 
         /// that is simply useful to show up in the log with the activity use <see cref="Tags"/>.
         /// Returns 'this' for convenient chaining.
@@ -199,17 +207,21 @@ namespace System.Diagnostics
         public Activity SetParentId(string parentId)
         {
             if (Parent != null)
-                throw new InvalidOperationException(
-                    $"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}");
-
-            if (ParentId != null)
-                throw new InvalidOperationException(
-                    $"{nameof(ParentId)} is already set");
-
-            if (string.IsNullOrEmpty(parentId))
-                throw new ArgumentException($"{nameof(parentId)} must not be null or empty");
-
-            ParentId = parentId;
+            {
+                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+            }
+            else if (ParentId != null)
+            {
+                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+            }
+            else if (string.IsNullOrEmpty(parentId))
+            {
+                NotifyError(new ArgumentException($"{nameof(parentId)} must not be null or empty"));
+            }
+            else
+            {
+                ParentId = parentId;
+            }
             return this;
         }
 
@@ -221,10 +233,16 @@ namespace System.Diagnostics
         public Activity SetStartTime(DateTime startTimeUtc)
         {
             if (startTimeUtc.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC");
-            StartTimeUtc = startTimeUtc;
+            {
+                NotifyError(new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC"));
+            }
+            else
+            {
+                StartTimeUtc = startTimeUtc;
+            }
             return this;
         }
+
         /// <summary>
         /// Update the Activity to set <see cref="Duration"/>
         /// as a difference between <see cref="StartTimeUtc"/>
@@ -235,23 +253,27 @@ namespace System.Diagnostics
         public Activity SetEndTime(DateTime endTimeUtc)
         {
             if (endTimeUtc.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC");
-
-            Duration = endTimeUtc - StartTimeUtc;
-            if (Duration.Ticks <= 0)
-                Duration = new TimeSpan(1); // We want Duration of 0 to mean  'EndTime not set)
+            {
+                NotifyError(new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC"));
+            }
+            else
+            {
+                Duration = endTimeUtc - StartTimeUtc;
+                if (Duration.Ticks <= 0)
+                    Duration = new TimeSpan(1); // We want Duration of 0 to mean  'EndTime not set)
+            }
             return this;
         }
 
         /// <summary>
-        /// If the Activity has ended (<see cref="Stop"/> was called) then this is the delta
-        /// between start and end.   If the activity is not ended then this is 
+        /// If the Activity has ended (<see cref="Stop"/> or <see cref="SetEndTime"/> was called) then this is the delta
+        /// between <see cref="StartTimeUtc"/> and end.   If Activity is not ended and <see cref="SetEndTime"/> was not called then this is 
         /// <see cref="TimeSpan.Zero"/>.
         /// </summary>
         public TimeSpan Duration { get; private set; }
 
         /// <summary>
-        /// Starts activity:
+        /// Starts activity
         /// <list type="bullet">
         /// <item>Sets <see cref="Parent"/> to hold <see cref="Current"/>.</item>
         /// <item>Sets <see cref="Current"/> to this activity.</item>
@@ -265,24 +287,27 @@ namespace System.Diagnostics
         public Activity Start()
         {
             if (Id != null)
-                throw new InvalidOperationException("Trying to start an Activity that was already started");
-
-            if (ParentId == null)
             {
-                var parent = Current;
-                if (parent != null)
-                {
-                    ParentId = parent.Id;
-                    Parent = parent;
-                }
+                NotifyError(new InvalidOperationException("Trying to start an Activity that was already started"));
             }
+            else
+            {
+                if (ParentId == null)
+                {
+                    var parent = Current;
+                    if (parent != null)
+                    {
+                        ParentId = parent.Id;
+                        Parent = parent;
+                    }
+                }
 
-            if (StartTimeUtc == default(DateTime))
-                StartTimeUtc = DateTime.UtcNow;
+                if (StartTimeUtc == default(DateTime))
+                    StartTimeUtc = DateTime.UtcNow;
 
-            Id = GenerateId();
-
-            Current = this;
+                Id = GenerateId();
+                Current = this;
+            }
             return this;
         }
 
@@ -296,7 +321,10 @@ namespace System.Diagnostics
         public void Stop()
         {
             if (Id == null)
-                throw new InvalidOperationException("Trying to stop an Activity that was not started");
+            {
+                NotifyError(new InvalidOperationException("Trying to stop an Activity that was not started"));
+                return;
+            }
 
             if (!isFinished)
             {
@@ -310,6 +338,18 @@ namespace System.Diagnostics
         }
 
         #region private 
+        private static void NotifyError(Exception exception)
+        {
+            // Throw and catch the exception.  This lets it be seen by the debugger
+            // ETW, and other monitoring tools.   However we immediately swallow the
+            // exception.   We may wish in the future to allow users to hook this 
+            // in other useful ways but for now we simply swallow the exceptions.  
+            try
+            {
+                throw exception;
+            }
+            catch { }
+        }
 
         private string GenerateId()
         {
@@ -328,11 +368,13 @@ namespace System.Diagnostics
                 //sanitize external RequestId as it may not be hierarchical. 
                 //we cannot update ParentId, we must let it be logged exactly as it was passed.
                 string parentId = ParentId[0] == RootIdPrefix ? ParentId : RootIdPrefix + ParentId;
-                if (parentId[parentId.Length - 1] != '.')
+
+                char lastChar = parentId[parentId.Length - 1];
+                if (lastChar != '.' && lastChar != '_')
                 {
                     parentId += '.';
                 }
-                
+
                 ret = AppendSuffix(parentId, Interlocked.Increment(ref s_currentRootId).ToString("x"), '_');
             }
             else
@@ -379,7 +421,7 @@ namespace System.Diagnostics
                 return GenerateRootId();
 
             //generate overflow suffix
-            string overflowSuffix = ((int) GetRandomNumber()).ToString("x8");
+            string overflowSuffix = ((int)GetRandomNumber()).ToString("x8");
             return parentId.Substring(0, trimPosition) + overflowSuffix + '#';
         }
 
@@ -416,7 +458,7 @@ namespace System.Diagnostics
 
         //A unique number inside the appdomain, randomized between appdomains. 
         //Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
-        private static long s_currentRootId = (uint)GetRandomNumber();  
+        private static long s_currentRootId = (uint)GetRandomNumber();
 
         private const int RequestIdMaxLength = 1024;
         private const char RootIdPrefix = '|';

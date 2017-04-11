@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -509,7 +510,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             boundLambda.ArgumentScope = pScope;
 
             ExprReturn returnStatement = _exprFactory.CreateReturn(0, pScope, call);
-            ExprBlock block = _exprFactory.CreateBlock(null, returnStatement, pScope);
+            ExprBlock block = _exprFactory.CreateBlock(returnStatement, pScope);
             boundLambda.OptionalBody = block;
             return boundLambda;
         }
@@ -860,7 +861,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     throw Error.InternalCompilerError();
                 }
 
-                callingObject = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(t), null, t.ContainsGenericParameters ?
+                callingObject = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(t), t.ContainsGenericParameters ?
                         _exprFactory.CreateTypeArguments(SymbolLoader.getBSymmgr().AllocParams(_symbolTable.GetCTypeArrayFromTypes(t.GetGenericArguments())), null) : null);
             }
             else
@@ -1052,7 +1053,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // WindowsRuntimeMarshal.Add\RemoveEventHandler(...)
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             _symbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
-            ExprClass marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType), null, null);
+            ExprClass marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType), null);
             ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new List<Type> { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             Expr expr = _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
@@ -1233,7 +1234,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 if (result == null)
                 {
-                    result = _binder.bindUDUnop(op == OperatorKind.OP_TRUE ? ExpressionKind.EK_TRUE : ExpressionKind.EK_FALSE, arg1);
+                    result = _binder.bindUDUnop(op == OperatorKind.OP_TRUE ? ExpressionKind.True : ExpressionKind.False, arg1);
                 }
 
                 // If the result is STILL null, then that means theres no implicit conversion to bool,
@@ -1270,9 +1271,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             arg1.ErrorString = Operators.GetDisplayName(GetOperatorKind(payload.Operation, payload.IsLogicalOperation));
             arg2.ErrorString = Operators.GetDisplayName(GetOperatorKind(payload.Operation, payload.IsLogicalOperation));
 
-            if (ek > ExpressionKind.EK_MULTIOFFSET)
+            if (ek > ExpressionKind.MultiOffset)
             {
-                ek = (ExpressionKind)(ek - ExpressionKind.EK_MULTIOFFSET);
+                ek = (ExpressionKind)(ek - ExpressionKind.MultiOffset);
             }
             return _binder.BindStandardBinop(ek, arg1, arg2);
         }
@@ -1387,7 +1388,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             // If our argument is a static type, then we're calling a static property.
             Expr callingObject = argument.Info.IsStaticType ?
-                _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(argument.Value as Type), null, null) :
+                _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(argument.Value as Type), null) :
                 CreateLocal(argument.Type, argument.Info.IsOut, local);
 
             if (!argument.Info.UseCompileTimeType && argument.Value == null)
@@ -1412,9 +1413,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     int numIndexArguments = ExpressionIterator.Count(optionalIndexerArguments);
                     // We could have an array access here. See if its just an array.
-                    if ((argument.Type.IsArray && argument.Type.GetArrayRank() == numIndexArguments) ||
-                        argument.Type == typeof(string))
+                    Type type = argument.Type;
+                    if (type.IsArray || type == typeof(string))
                     {
+                        if (type.IsArray && type.GetArrayRank() != numIndexArguments)
+                        {
+                            _semanticChecker.GetErrorContext().Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
+                        }
+
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
                 }
@@ -1570,7 +1576,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.BindBinaryAssignmentFailedNullReference();
             }
 
-            return _binder.bindAssignment(lhs, rhs, bIsCompound);
+            return _binder.BindAssignment(lhs, rhs, bIsCompound);
         }
         #endregion
 

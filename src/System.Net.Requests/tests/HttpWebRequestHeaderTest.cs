@@ -29,12 +29,22 @@ namespace System.Net.Tests
             Assert.False(request.HaveResponse);
             Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
             Assert.Null(request.CookieContainer);
-            Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength); // NetFX behavior difference (64 on NetFX).
             Assert.Equal(64, HttpWebRequest.DefaultMaximumResponseHeadersLength);
             Assert.Null(request.CookieContainer);
             Assert.True(request.AllowWriteStreamBuffering);
             Assert.NotNull(request.ClientCertificates);
-            Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName); //NetFX behavior difference.
+
+            // TODO: Issue #17842
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength);
+                Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName);
+            }
+            else
+            {
+                Assert.Equal(64, HttpWebRequest.DefaultMaximumErrorResponseLength);
+                Assert.Null(request.ConnectionGroupName);
+            }
         }
 
         [OuterLoop]
@@ -73,12 +83,13 @@ namespace System.Net.Tests
             Assert.Equal(request.CookieContainer.GetCookies(remoteServer).Count, 2);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17842")] // Difference in behavior
         [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public void HttpWebRequest_ServicePoint_Throws(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint); // NetFX Behavior difference.
+            Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint);
         }
 
         [OuterLoop]
@@ -91,7 +102,7 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        public void HttpWebRequest_EndGetRequestStreamContext_Null(Uri remoteServer)
+        public void HttpWebRequest_EndGetRequestStreamContext_ExpectedValue(Uri remoteServer)
         {
             System.Net.TransportContext context;
             HttpWebRequest httpWebRequest = HttpWebRequest.CreateHttp(remoteServer);
@@ -99,7 +110,14 @@ namespace System.Net.Tests
 
             using (httpWebRequest.EndGetRequestStream(httpWebRequest.BeginGetRequestStream(null, null), out context))
             {
-                Assert.Equal(null, context); // NetFX behavior difference.
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.NotNull(context);
+                }
+                else
+                {
+                    Assert.Null(context);
+                }
             }
         }
 
@@ -116,6 +134,7 @@ namespace System.Net.Tests
             Assert.Equal(Cache.RequestCacheLevel.BypassCache, HttpWebRequest.DefaultCachePolicy.Level);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17842")] //Test hangs in desktop.
         [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public void HttpWebRequest_ProxySetAfterGetResponse_Fails(Uri remoteServer)
