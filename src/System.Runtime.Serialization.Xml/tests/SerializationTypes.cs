@@ -4271,7 +4271,7 @@ public class PurchaseOrder
         billAddress.State = "WA";
         billAddress.Zip = "00000";
         po.ShipTo = billAddress;
-        po.OrderDate = System.DateTime.Now.ToLongDateString();
+        po.OrderDate = new DateTime(2017,4,10).ToLongDateString();
 
         OrderedItem item = new OrderedItem();
         item.ItemName = "Widget S";
