@@ -151,7 +151,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void AddDisposedThrowsArgumentNullException()
+        public static void AddDisposedThrowsCryptographicException()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
@@ -159,7 +159,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 store.Open(OpenFlags.ReadWrite);
 
                 cert.Dispose();
-                Assert.ThrowsAny<ArgumentNullException>(() => store.Add(cert));
+                Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
             }
         }
 
