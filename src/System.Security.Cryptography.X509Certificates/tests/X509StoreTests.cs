@@ -159,7 +159,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 store.Open(OpenFlags.ReadWrite);
 
                 cert.Dispose();
-                Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
+                Assert.Throws<CryptographicException>(() => store.Add(cert));
             }
         }
 
