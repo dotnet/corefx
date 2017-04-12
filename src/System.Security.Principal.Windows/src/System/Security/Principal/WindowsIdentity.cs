@@ -1067,13 +1067,6 @@ namespace System.Security.Principal
         Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
     }
 
-    internal enum ImpersonationQueryResult
-    {
-        Impersonated = 0,    // current thread is impersonated
-        NotImpersonated = 1,    // current thread is not impersonated
-        Failed = 2     // failed to query 
-    }
-
     [Serializable]
     internal enum TokenType : int
     {
