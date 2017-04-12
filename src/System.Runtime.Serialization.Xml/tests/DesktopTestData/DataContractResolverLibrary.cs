@@ -2,10 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace DesktopTestData
@@ -72,7 +69,7 @@ namespace DesktopTestData
         }
     }
 
-        [Serializable]
+    [Serializable]
     public class PrimitiveTypeResolver : DataContractResolver
     {
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
@@ -361,7 +358,6 @@ namespace DesktopTestData
             }
 
             System.Diagnostics.Debug.WriteLine("Resolving namespace {0} and type {1} using default KnownTypeResolver", typeNamespace, typeName);
-            //throw new TestCaseException("Cannot resolve typaname {0}", typeName);
             Type result = KTResolver.ResolveName(typeName, typeNamespace, declaredType, null);
             return result;
         }

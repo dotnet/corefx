@@ -127,21 +127,18 @@ namespace DesktopTestData
             dataContract = null;
             itemType = Globals.TypeOfObject;
 
-
             MethodInfo addMethod, getEnumeratorMethod;
             bool hasCollectionDataContract = IsCollectionDataContract(type);
             Type baseType = type.BaseType;
             bool isBaseTypeCollection = (baseType != null && baseType != Globals.TypeOfObject
                 && baseType != Globals.TypeOfValueType && baseType != Globals.TypeOfUri) ? IsCollection(baseType) : false;
-
-
+            
             if (!Globals.TypeOfIEnumerable.IsAssignableFrom(type) ||
                 IsDC(type) || Globals.TypeOfIXmlSerializable.IsAssignableFrom(type))
             {
                 return false;
             }
-
-
+            
             if (type.IsInterface)
             {
                 Type interfaceTypeToCheck = type.IsGenericType ? type.GetGenericTypeDefinition() : type;

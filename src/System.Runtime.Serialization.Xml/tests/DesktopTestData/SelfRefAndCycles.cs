@@ -267,7 +267,6 @@ namespace DesktopTestData
             Data4.Data.Data = Data2;
             Data2.Data.Data.Data.Data = Data;
             Data3 = Data.Data;
-
         }
     }
 
@@ -394,5 +393,4 @@ namespace DesktopTestData
     }
 
     #endregion
-
 }

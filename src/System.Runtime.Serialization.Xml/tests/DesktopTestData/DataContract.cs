@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace DesktopTestData
@@ -377,10 +375,7 @@ namespace DesktopTestData
                 hasDataContract = false;
                 return primitiveContract.StableName;
             }
-
-            //TODO, joezhou: add logic for handling of IXmlSerializable 
-
-
+            
             string name = null, ns = null;
             if (type.IsArray)
             {
@@ -461,7 +456,6 @@ namespace DesktopTestData
                 }
                 else
                 {
-
                     object[] collectionDataContractAttributes = type.GetCustomAttributes(Globals.TypeOfCollectionDataContractAttribute, false);
                     if (supportCollectionDataContract && collectionDataContractAttributes != null && collectionDataContractAttributes.Length > 0)
                     {

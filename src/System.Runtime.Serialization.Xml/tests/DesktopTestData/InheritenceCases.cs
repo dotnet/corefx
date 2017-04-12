@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DesktopTestData
 {
@@ -105,7 +101,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse : BaseWithIsRefTrue
     {
         [DataMember]
@@ -121,7 +116,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse2 : DerivedWithIsRefFalse
     {
         [DataMember]
@@ -137,7 +131,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse3 : DerivedWithIsRefFalse2
     {
         [DataMember]
@@ -153,7 +146,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse4 : DerivedWithIsRefFalse3
     {
         [DataMember]
@@ -169,7 +161,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalse5 : DerivedWithIsRefFalse4
     {
         [DataMember]
@@ -185,7 +176,6 @@ namespace DesktopTestData
 
     // Negative ?
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrue6 : DerivedWithIsRefFalse5
     {
         [DataMember]
@@ -231,7 +221,6 @@ namespace DesktopTestData
 
     // Negative
     [DataContract]
-
     public class DerivedWithIsRefFalseNoRefdObjects : BaseWithIsRefTrue
     {
         [DataMember]
@@ -261,7 +250,6 @@ namespace DesktopTestData
 
     // Positive
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrue : BaseNoIsRef
     {
         [DataMember]
@@ -277,7 +265,6 @@ namespace DesktopTestData
 
     // Positive
     [DataContract(IsReference = true)]
-
     public class DerivedWithIsRefTrueNoRefdObjects : BaseNoIsRef
     {
         [DataMember]
@@ -359,7 +346,6 @@ namespace DesktopTestData
     [DataContract]
     [KnownType(typeof(DerivedSerializable))]
     [KnownType(typeof(Derived2Serializable))]
-
     public class TestInheritence9
     {
         [DataMember]
@@ -735,7 +721,6 @@ namespace DesktopTestData
         [DataMember]
         public Derived2DC derived2DC;
 
-
         public TestInheritence6()
         {
         }
@@ -776,7 +761,6 @@ namespace DesktopTestData
     /// data member in derived2 DC refering to another data member in *Derived2* DC 
     /// </summary>
     [DataContract]
-
     public class TestInheritence13
     {
         public BaseSerializable baseDC;
@@ -830,7 +814,6 @@ namespace DesktopTestData
 
         [DataMember]
         public Derived2DC derived2DC;
-
 
         public TestInheritence7()
         {

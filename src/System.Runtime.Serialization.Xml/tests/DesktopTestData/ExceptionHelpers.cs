@@ -30,14 +30,15 @@ namespace DesktopTestData
             MethodDelegate tryCode,
             bool checkValidationException)
         {
-            /*
-            if (exceptionType == typeof(System.Activities.ValidationException)
-                && checkValidationException == false)
-            {
-                throw new Exception("Please do not use this method to check for ValidationExceptions and"
-                            + "use \"TestRuntime.ValidateWorkflowErrors\" method instead.");
-            }
-            */
+            #region System.Activities.ValidationException Not support int corefx
+
+            //if (exceptionType == typeof(System.Activities.ValidationException)
+            //    && checkValidationException == false)
+            //{
+            //    throw new Exception("Please do not use this method to check for ValidationExceptions and"
+            //                + "use \"TestRuntime.ValidateWorkflowErrors\" method instead.");
+            //}
+            #endregion
 
             // The normal state for this method is for an exception to be thrown
             bool exceptionThrown = true;
@@ -122,8 +123,6 @@ namespace DesktopTestData
                     }
                 }
             }
-
-            //Log.TraceInternal("Exception was validated successfully");
         }
 
         public delegate void MethodDelegate();

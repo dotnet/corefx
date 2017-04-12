@@ -361,7 +361,7 @@ namespace DesktopTestData
 
         public void RemoveAt(int index)
         {
-
+            internalData.RemoveAt(index);
         }
 
         public string this[int index]

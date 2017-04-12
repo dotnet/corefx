@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DesktopTestData
 {
@@ -41,7 +38,6 @@ namespace DesktopTestData
                     object fieldValue = InstanceCreator.CreateInstanceOf(field.FieldType, rndGen);
                     field.SetValue(obj, fieldValue);
                 }
-
             }
         }
         private static void SetPublicProperties(Type dcType, object obj, Random rndGen, bool setInternalSetters)
@@ -105,7 +101,6 @@ namespace DesktopTestData
                     }
                     else
                     {
-
                         throw new ArgumentException("Don't know how to create an instance of " + pocoType.FullName);
                     }
 

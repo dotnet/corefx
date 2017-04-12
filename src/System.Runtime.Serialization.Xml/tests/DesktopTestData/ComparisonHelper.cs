@@ -24,13 +24,8 @@ namespace DesktopTestData
     {
         private const string LogMessage = "Comparing Type = {0} & Value = {1} with Type {2} & Value = {3}";
 
-        //public static void CompareRecursively(object originalData, object deserializedData)
-        //{
-        //    CompareRecursively(originalData, deserializedData, false);
-        //}
         public static void CompareRecursively(object originalData, object deserializedData, bool approxComparisonForFloatingPointAnd64BitValues = false)
         {
-
             ComparisionType cmpType = ComparisionType.DCS;
             SerializationMechanism att = ComparisonHelper.GetSerializationMechanism(originalData);
             if (att.Equals(SerializationMechanism.POCO))
@@ -45,16 +40,13 @@ namespace DesktopTestData
             if (data == null) return SerializationMechanism.POCO;
             SerializationMechanism att = SerializationMechanism.POCO;
 
-
             bool hasDataContractAttribute = data.GetType().GetCustomAttributes(typeof(DataContractAttribute), false).Length > 0;
             bool hasSerializableAttribute = data.GetType().IsSerializable;
-            //bool hasMessageContract = data.GetType().GetCustomAttributes(typeof(MessageContractAttribute), false).Length > 0;
             bool hasISerializable = typeof(ISerializable).IsAssignableFrom(data.GetType());
             bool hasIXmlSerializable = typeof(IXmlSerializable).IsAssignableFrom(data.GetType());
 
             if (
                 (!hasDataContractAttribute) &&
-                //(!hasMessageContract) 
                 (!hasISerializable) &&
                 (!hasIXmlSerializable) &&
                 (!hasSerializableAttribute)
@@ -64,7 +56,6 @@ namespace DesktopTestData
             }
             else
             {
-
                 if (hasDataContractAttribute || hasIXmlSerializable)
                 {
                     att = SerializationMechanism.DataContractAttribute;
@@ -115,8 +106,6 @@ namespace DesktopTestData
             {
                 return;
             }
-
-
 
             //Fail if only one of the objects is null
             if ((null == originalData) != (null == deserializedData))
@@ -215,7 +204,6 @@ namespace DesktopTestData
                 {
                     throw new Exception(String.Format("Comparision failed: Original Datetime ticks {0} is not same as deserialized Datetime ticks {1}", ((DateTime)originalData).Ticks.ToString(), ((DateTime)deserializedData).Ticks.ToString()));
                 }
-
             }
             else if (
                 (originalDataType.Equals(typeof(TimeSpan)))
@@ -288,8 +276,7 @@ namespace DesktopTestData
                 #endregion
             }
             #endregion
-
-
+            
             #region Types which know how to compare themselves
             else if (equalsMethod.DeclaringType == originalData.GetType())
             {
@@ -306,7 +293,6 @@ namespace DesktopTestData
             //Hashtables
             else if (originalData is IDictionary)
             {
-
                 if (deserializedData is IDictionary)
                 {
                     IDictionaryEnumerator originalDataEnum = ((IDictionary)originalData).GetEnumerator();
@@ -400,7 +386,6 @@ namespace DesktopTestData
 
             foreach (System.Reflection.PropertyInfo property in originalData.GetType().GetProperties(flag))
             {
-
                 object newData = property.GetValue(originalData, null);
                 SerializationMechanism fieldAttribute = ComparisonHelper.GetSerializationMechanism(newData);
                 if (cmpType.Equals(ComparisionType.DCS))
@@ -422,7 +407,6 @@ namespace DesktopTestData
                             {
                                 CompareData(newData, property.GetValue(deserializedData, null), containerTypeAttribute, cmpType);
                             }
-
                         }
                     }
                     else if (containerTypeAttribute.Equals(SerializationMechanism.SerializableAttribute))
@@ -470,14 +454,12 @@ namespace DesktopTestData
                             {
                                 CompareData(newData, property.GetValue(deserializedData, null), containerTypeAttribute, cmpType);
                             }
-
                         }
                     }
                 }
             }
         }
-
-
+        
         /// <summary>
         /// </summary>
         /// <param name="data"></param>
@@ -516,7 +498,6 @@ namespace DesktopTestData
 
             foreach (System.Reflection.FieldInfo field in originalData.GetType().GetFields(flag))
             {
-
                 object newData = field.GetValue(originalData);
                 SerializationMechanism fieldAttribute = GetSerializationMechanism(newData);
                 if (cmpType.Equals(ComparisionType.DCS))
@@ -558,7 +539,6 @@ namespace DesktopTestData
                 }
                 else if (cmpType.Equals(ComparisionType.POCO))
                 {
-
                     //ReadOnly fields should be ignored for POCO type
                     //Ignore member with [IgnoreDataMember] attribute on a POCO type
                     if ((!field.IsInitOnly) && (field.GetCustomAttributes(typeof(IgnoreDataMemberAttribute), false).Length == 0))

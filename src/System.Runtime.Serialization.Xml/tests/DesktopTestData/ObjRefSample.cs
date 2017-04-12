@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DesktopTestData
 {
@@ -115,7 +111,6 @@ namespace DesktopTestData
         [DataMember]
         public DCVersioned2 RefDataVersion2;
 
-
         public DCVersionedContainerVersion1() { }
         public DCVersionedContainerVersion1(bool init)
         {
@@ -220,7 +215,6 @@ namespace DesktopTestData
         #endregion
     }
 
-
     #region Simple Class Structs with Ref
 
     [DataContract(IsReference = true)]
@@ -268,7 +262,6 @@ namespace DesktopTestData
             Data = new SimpleDC(true);
             RefData = Data;
         }
-
     }
 
     [DataContract(IsReference = true)]
@@ -350,7 +343,6 @@ namespace DesktopTestData
         }
     }
 
-
     [DataContract(IsReference = true)]
     public enum EnumNegative1
     {
@@ -377,7 +369,6 @@ namespace DesktopTestData
         [EnumMember]
         One
     }
-
 
     [DataContract]//(IsReference = true)]
     public struct SimpleStructDCWithRef
@@ -447,7 +438,6 @@ namespace DesktopTestData
         {
             return base.GetHashCode();
         }
-
 
         #region ISerializable Members
 

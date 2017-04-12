@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -74,7 +73,6 @@ namespace DesktopTestData
         public CircularLinkDerived(bool inti) : base() { }
     }
 
-
     #region KT Methods
     [DataContract(IsReference = true)]
     [KnownType("GetKT")]
@@ -83,8 +81,7 @@ namespace DesktopTestData
         [DataMember]
         public KT1Base BData;
 
-        public KT1Base()
-        { }
+        public KT1Base() { }
         public KT1Base(bool init)
         {
             BData = new KT1Derived();
@@ -108,7 +105,6 @@ namespace DesktopTestData
             {
                 return this.BData.Equals(kt1.BData);
             }
-
         }
 
         public override int GetHashCode()
@@ -185,7 +181,6 @@ namespace DesktopTestData
         }
     }
 
-
     [DataContract(IsReference = true)]
     [KnownType("GetKT")]
     public class KT3BaseKTMReturnsPrivateType
@@ -193,8 +188,8 @@ namespace DesktopTestData
         [DataMember]
         public KT3BaseKTMReturnsPrivateType BData;
 
-        public KT3BaseKTMReturnsPrivateType()
-        { }
+        public KT3BaseKTMReturnsPrivateType() { }
+
         public KT3BaseKTMReturnsPrivateType(bool init)
         {
             BData = new KT3DerivedPrivate();
@@ -329,7 +324,6 @@ namespace DesktopTestData
     [KnownType(typeof(DerivedFromPriC))]
     public class ArrayListWithCDCFilledWithMixedTypes
     {
-
         [DataMember]
         public ArrayList List = new ArrayList();
         public ArrayListWithCDCFilledWithMixedTypes() { }
@@ -494,7 +488,6 @@ namespace DesktopTestData
     {
         [DataMember]
         CustomGeneric1<PrivateDC> data1 = new CustomGeneric1<PrivateDC>();
-
     }
 
 
@@ -503,7 +496,6 @@ namespace DesktopTestData
     {
         [DataMember]
         CustomGeneric2<PrivateDC, PrivateDC> data1 = new CustomGeneric2<PrivateDC, PrivateDC>();
-
     }
 
     [DataContract(IsReference = true)]
@@ -511,7 +503,6 @@ namespace DesktopTestData
     {
         [DataMember]
         CustomGeneric2<PublicDC, PublicDCClassPublicDM_DerivedDCClassPrivate> data1 = new CustomGeneric2<PublicDC, PublicDCClassPublicDM_DerivedDCClassPrivate>();
-
     }
 
     [DataContract(IsReference = true)]
@@ -519,7 +510,6 @@ namespace DesktopTestData
     {
         [DataMember]
         CustomGeneric2<PublicDC, PublicDCClassPrivateDM> data1 = new CustomGeneric2<PublicDC, PublicDCClassPrivateDM>();
-
     }
 
 
@@ -528,7 +518,6 @@ namespace DesktopTestData
     {
         [DataMember]
         public CustomGeneric1<PublicDC> data1 = new CustomGeneric1<PublicDC>();
-
     }
 
 
@@ -537,7 +526,6 @@ namespace DesktopTestData
     {
         [DataMember]
         public CustomGeneric2<PublicDC, PublicDC> data1 = new CustomGeneric2<PublicDC, PublicDC>();
-
     }
 
     [DataContract(IsReference = true)]
@@ -545,7 +533,6 @@ namespace DesktopTestData
     {
         [DataMember]
         public CustomGeneric2<PublicDC, PublicDCClassPublicDM_DerivedDCClassPublic> data1 = new CustomGeneric2<PublicDC, PublicDCClassPublicDM_DerivedDCClassPublic>();
-
     }
 
     [DataContract(IsReference = true)]
@@ -553,10 +540,7 @@ namespace DesktopTestData
     {
         [DataMember]
         public CustomGeneric2<PublicDC, PublicDCClassPublicDM> data1 = new CustomGeneric2<PublicDC, PublicDCClassPublicDM>();
-
     }
-
-
 
     [DataContract(IsReference = true)]
     public class CustomGeneric1<T> where T : new()
@@ -577,11 +561,9 @@ namespace DesktopTestData
         public K k = new K();
     }
 
-
     #endregion
 
     #region Generics with KnownTypes
-
 
     [DataContract(IsReference = true)]
     [KnownType(typeof(GenericBase<SimpleBaseContainer>))]
@@ -650,8 +632,7 @@ namespace DesktopTestData
         [DataMember]
         public object Base2;
 
-        public SimpleBaseContainer()
-        { }
+        public SimpleBaseContainer() { }
         public SimpleBaseContainer(bool init)
         {
             Base1 = new SimpleBaseDerived();
@@ -662,7 +643,6 @@ namespace DesktopTestData
     #endregion
 
     #endregion
-
 
     [DataContract(IsReference = true)]
     [KnownType(typeof(PrivateDC))]
@@ -2750,8 +2730,6 @@ namespace DesktopTestData
             this.internalList.Add(dc1);
         }
 
-
-
         #region ICollection<DC> Members
 
         public void Add(DC item)
@@ -2824,7 +2802,6 @@ namespace DesktopTestData
             this.internalList.Add(dc1);
         }
 
-
         #region ICollection<DC> Members
 
         public void Add(DC item)
@@ -2895,8 +2872,7 @@ namespace DesktopTestData
             this.internalList.Add(new DC());
             this.internalList.Add(dc1);
         }
-
-
+        
         #region ICollection<DC> Members
 
         public void Add(DC item)
@@ -3039,7 +3015,6 @@ namespace DesktopTestData
             this.internalList.Add(dc1);
         }
 
-
         #region ICollection<DC> Members
 
         void ICollection<DC>.Add(DC item)
@@ -3110,7 +3085,6 @@ namespace DesktopTestData
             this.internalList.Add(new DC());
             this.internalList.Add(dc1);
         }
-
 
         #region ICollection<DC> Members
 
@@ -3401,7 +3375,6 @@ namespace DesktopTestData
             this.internalList.Add(dc1);
         }
 
-
         #region IEnumerable<DC> Members
 
         public IEnumerator<DC> GetEnumerator()
@@ -3648,7 +3621,6 @@ namespace DesktopTestData
             this.internalList.Add(dc1);
         }
 
-
         public void Add(object PrivateDC)
         {
             internalList.Add((PrivateDC)PrivateDC);
@@ -3736,7 +3708,6 @@ namespace DesktopTestData
             return this.internalList.Count;
         }
 
-
         #region ICollection Members
 
         public void CopyTo(Array array, int index)
@@ -3760,8 +3731,6 @@ namespace DesktopTestData
         }
 
         #endregion
-
-
 
         #region IEnumerable Members
 
@@ -3820,8 +3789,6 @@ namespace DesktopTestData
 
         #endregion
 
-
-
         #region IEnumerable Members
 
         public IEnumerator GetEnumerator()
@@ -3853,7 +3820,6 @@ namespace DesktopTestData
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
 
         #region ICollection Members
 
@@ -3911,7 +3877,6 @@ namespace DesktopTestData
             return this.internalList.Count;
         }
 
-
         #region ICollection Members
 
         public void CopyTo(Array array, int index)
@@ -3965,7 +3930,6 @@ namespace DesktopTestData
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
 
         #region ICollection Members
 
@@ -4023,8 +3987,6 @@ namespace DesktopTestData
             return this.internalList.Count;
         }
 
-
-
         #region ICollection Members
 
         void ICollection.CopyTo(Array array, int index)
@@ -4074,13 +4036,11 @@ namespace DesktopTestData
             this.internalList.Add(Guid.NewGuid());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
 
         #region ICollection Members
 
@@ -4136,13 +4096,11 @@ namespace DesktopTestData
             this.internalList.Add(new PrivateDC());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
 
         #region ICollection Members
 
@@ -4193,13 +4151,11 @@ namespace DesktopTestData
             this.internalList.Add(Guid.NewGuid());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
 
         #region ICollection Members
 
@@ -4234,7 +4190,6 @@ namespace DesktopTestData
 
         #endregion
     }
-
 
     #endregion
 
@@ -4359,8 +4314,6 @@ namespace DesktopTestData
             return this.internalList.Count;
         }
 
-
-
         #region IEnumerable Members
 
         public IEnumerator GetEnumerator()
@@ -4390,7 +4343,6 @@ namespace DesktopTestData
         {
             this.internalList.Add(value);
         }
-
 
         #region IEnumerable Members
 
@@ -4424,9 +4376,6 @@ namespace DesktopTestData
             return this.internalList.Count;
         }
 
-
-
-
         #region IEnumerable Members
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -4452,15 +4401,11 @@ namespace DesktopTestData
             this.internalList.Add(Guid.NewGuid());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
-
-
 
         #region IEnumerable Members
 
@@ -4489,15 +4434,11 @@ namespace DesktopTestData
             this.internalList.Add(new PrivateDC());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
-
-
 
         #region IEnumerable Members
 
@@ -4508,7 +4449,6 @@ namespace DesktopTestData
 
         #endregion
     }
-
 
     [CollectionDataContract(IsReference = true, Name = "SamplePrivateIEnumerableExplicitWithCDC", Namespace = "Test", ItemName = "Item")]
     class SamplePrivateIEnumerableExplicitWithCDC : IEnumerable
@@ -4525,15 +4465,11 @@ namespace DesktopTestData
             this.internalList.Add(Guid.NewGuid());
         }
 
-
         public int Add(object value)
         {
             this.internalList.Add(value);
             return this.internalList.Count;
         }
-
-
-
 
         #region IEnumerable Members
 
@@ -5164,7 +5100,6 @@ namespace DesktopTestData
 
         #region IDictionary<PublicDC,PublicDC> Members
 
-
         bool IDictionary<PublicDC, PublicDC>.ContainsKey(PublicDC key)
         {
             return data.ContainsKey(key);
@@ -5347,7 +5282,6 @@ namespace DesktopTestData
 
         #region IDictionary<PublicDC,PublicDC> Members
 
-
         public bool ContainsKey(Object key)
         {
             return data.ContainsKey(key);
@@ -5420,7 +5354,6 @@ namespace DesktopTestData
 
         #endregion
     }
-
 
     [CollectionDataContract(IsReference = true, ItemName = "DictItem", KeyName = "DictKey", Name = "MyIDictionaryContainsPublicDC", Namespace = "MyDictNS", ValueName = "DictValue")]
     [KnownType(typeof(PublicDC))]
@@ -5835,7 +5768,6 @@ namespace DesktopTestData
 
         #region IDictionary<PublicDC,PublicDC> Members
 
-
         public bool ContainsKey(Object key)
         {
             return data.ContainsKey(key);
@@ -6115,13 +6047,11 @@ namespace DesktopTestData
     [DataContract(IsReference = true)]
     class PublicDCDerivedPrivate : PublicDC
     {
-
     }
 
     [DataContract(IsReference = true)]
     public class PublicDCDerivedPublic : PublicDC
     {
-
     }
 
     #endregion
@@ -6171,10 +6101,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         public virtual void WriteXml(System.Xml.XmlWriter writer)
@@ -6195,7 +6123,6 @@ namespace DesktopTestData
                 if (other.bits[i] != bits[i])
                 {
                     return false;
-
                 }
             }
             return true;
@@ -6232,10 +6159,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         public virtual void WriteXml(System.Xml.XmlWriter writer)
@@ -6246,8 +6171,6 @@ namespace DesktopTestData
             //writer.WriteBase64(bits, 0, bits.Length);
             //writer.WriteEndElement(); // WriteBinHex
         }
-
-
     }
 
     public class PrivateDefaultCtorIXmlSerializables : IXmlSerializable
@@ -6278,10 +6201,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         public virtual void WriteXml(System.Xml.XmlWriter writer)
@@ -6326,10 +6247,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         public virtual void WriteXml(System.Xml.XmlWriter writer)
@@ -6340,8 +6259,6 @@ namespace DesktopTestData
             //writer.WriteBase64(bits, 0, bits.Length);
             //writer.WriteEndElement(); // WriteBinHex
         }
-
-
     }
 
 
@@ -6377,10 +6294,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         void IXmlSerializable.WriteXml(System.Xml.XmlWriter writer)
@@ -6391,8 +6306,6 @@ namespace DesktopTestData
             //writer.WriteBase64(bits, 0, bits.Length);
             //writer.WriteEndElement(); // WriteBinHex
         }
-
-
     }
 
     [XmlSchemaProvider("MySchema")]
@@ -6427,10 +6340,8 @@ namespace DesktopTestData
                 if (readBits[i] != bits[i])
                 {
                     throw new Exception("Test Code Exception: read xml content is not correct in IReadWriteXmlWriteBinHex.ReadXml. Read: " + readBits[i] + " Original: " + bits[i]);
-
                 }
             }
-
         }
 
         public virtual void WriteXml(System.Xml.XmlWriter writer)
@@ -6441,8 +6352,6 @@ namespace DesktopTestData
             //writer.WriteBase64(bits, 0, bits.Length);
             //writer.WriteEndElement(); // WriteBinHex
         }
-
-
     }
 
     #endregion
@@ -6567,13 +6476,6 @@ namespace DesktopTestData
     class PrivateDCClassPublicDM_DerivedDCClassPrivate : PrivateDCClassPublicDM
     {
     }
-
-    /** following not allowed  - cant compiler
-    [DataContract(IsReference=true)]
-    public class PrivateDCClassPublicDM_DerivedDCClassPublic : PrivateDCClassPublicDM
-    {
-    }
-    */
 
     [DataContract(IsReference = true)]
     public class PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM : PublicDCClassPublicDM
@@ -6790,7 +6692,6 @@ namespace DesktopTestData
             set { _data3 = value; }
         }
 
-
         public Prop_PublicDCClassMixedDM() { }
         public Prop_PublicDCClassMixedDM(bool init) { Data1 = "No change"; }
     }
@@ -6820,13 +6721,6 @@ namespace DesktopTestData
     {
     }
 
-    /** following not allowed  - cant compile
-    [DataContract(IsReference=true)]
-    public class Prop_PrivateDCClassPublicDM_DerivedDCClassPublic : Prop_PrivateDCClassPublicDM
-    {
-    }
-    */
-
     [DataContract(IsReference = true)]
     public class Prop_PublicDCClassPublicDM_DerivedDCClassPublicContainsPrivateDM : Prop_PublicDCClassPublicDM
     {
@@ -6836,7 +6730,6 @@ namespace DesktopTestData
         [DataMember]
         public string DerivedData2;
     }
-
 
     [DataContract(IsReference = true)]
     public class Prop_SetPrivate_PublicDCClassPublicDM
@@ -6923,7 +6816,6 @@ namespace DesktopTestData
         public Derived_Override_Prop_GetPrivate_Private() { }
         public Derived_Override_Prop_GetPrivate_Private(bool init) { Data = "No change"; }
     }
-
 
     #endregion
 
@@ -7043,7 +6935,6 @@ namespace DesktopTestData
 
         [OnSerializing]
         public void OnSerializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7054,9 +6945,7 @@ namespace DesktopTestData
 
         [OnSerialized]
         public void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
-
 
     [DataContract(IsReference = true)]
     public class CallBackSample_OnDeserializing_Public
@@ -7066,7 +6955,6 @@ namespace DesktopTestData
 
         [OnDeserializing]
         public void OnDeserializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7077,7 +6965,6 @@ namespace DesktopTestData
 
         [OnDeserialized]
         public void OnDeserialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
 
@@ -7089,7 +6976,6 @@ namespace DesktopTestData
 
         [OnSerializing]
         void OnSerializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7100,7 +6986,6 @@ namespace DesktopTestData
 
         [OnSerialized]
         internal void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
 
@@ -7112,7 +6997,6 @@ namespace DesktopTestData
 
         [OnDeserializing]
         private void OnDeserializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7133,12 +7017,10 @@ namespace DesktopTestData
         [DataMember]
         public string Data;
 
-
         #region IDeserializationCallback Members
 
         public void OnDeserialization(object sender)
         {
-
         }
 
         #endregion
@@ -7154,7 +7036,6 @@ namespace DesktopTestData
 
         void IDeserializationCallback.OnDeserialization(object sender)
         {
-
         }
 
         #endregion
@@ -7171,7 +7052,6 @@ namespace DesktopTestData
 
         [OnSerializing]
         public void OnSerializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7182,7 +7062,6 @@ namespace DesktopTestData
 
         [OnSerialized]
         public void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
 
@@ -7194,7 +7073,6 @@ namespace DesktopTestData
 
         [OnDeserializing]
         public void OnDeserializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7205,7 +7083,6 @@ namespace DesktopTestData
 
         [OnDeserialized]
         public void OnDeserialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
 
@@ -7217,7 +7094,6 @@ namespace DesktopTestData
 
         [OnSerializing]
         void OnSerializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7228,7 +7104,6 @@ namespace DesktopTestData
 
         [OnSerialized]
         internal void OnSerialized(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
 
@@ -7240,7 +7115,6 @@ namespace DesktopTestData
 
         [OnDeserializing]
         private void OnDeserializing(System.Runtime.Serialization.StreamingContext context) { }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7259,12 +7133,10 @@ namespace DesktopTestData
         [DataMember]
         public string Data = "Data";
 
-
         #region IDeserializationCallback Members
 
         public void OnDeserialization(object sender)
         {
-
         }
 
         #endregion
@@ -7280,7 +7152,6 @@ namespace DesktopTestData
 
         void IDeserializationCallback.OnDeserialization(object sender)
         {
-
         }
 
         #endregion
@@ -7297,7 +7168,6 @@ namespace DesktopTestData
         {
             Console.WriteLine("Base");
         }
-
     }
 
     [DataContract(IsReference = true)]
@@ -7312,7 +7182,6 @@ namespace DesktopTestData
         {
             Console.WriteLine("Derived");
         }
-
     }
 
     #endregion
@@ -7515,7 +7384,6 @@ namespace DesktopTestData
         }
 
         #endregion
-
 
         public static CDC_PrivateAdd CreateInstance()
         {
@@ -7879,66 +7747,7 @@ namespace DesktopTestData
             this.Age = nonDCPerson.Age;
         }
     }
-    /*
-    public class DCSurrogate : IDataContractSurrogate
-    {
-        #region IDataContractSurrogate Members
 
-        public object GetCustomDataToExport(Type clrType, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetCustomDataToExport(System.Reflection.MemberInfo memberInfo, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Type GetDataContractType(Type type)
-        {
-            if (typeof(NonDCPerson).IsAssignableFrom(type))
-            {
-                return typeof(PersonSurrogated);
-            }
-            return type;
-        }
-
-        public object GetDeserializedObject(object obj, Type memberType)
-        {
-            if (obj is PersonSurrogated)
-            {
-                return new NonDCPerson((PersonSurrogated)obj);
-            }
-            return obj;
-        }
-
-        public void GetKnownCustomDataTypes(Collection<Type> customDataTypes)
-        {
-
-        }
-
-        public object GetObjectToSerialize(object obj, Type membertype)
-        {
-            if (obj is NonDCPerson)
-            {
-                return new PersonSurrogated((NonDCPerson)obj);
-            }
-            return obj;
-        }
-
-        public Type GetReferencedTypeOnImport(string typeName, string typeNamespace, object customData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public System.CodeDom.CodeTypeDeclaration ProcessImportedType(System.CodeDom.CodeTypeDeclaration typeDeclaration, System.CodeDom.CodeCompileUnit compileUnit)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-    }
-    */
     public class SerSurrogate : ISerializationSurrogate
     {
         #region ISerializationSurrogate Members
@@ -7965,73 +7774,13 @@ namespace DesktopTestData
             {
                 return obj;
             }
-
         }
 
         #endregion
     }
 
     #region explicit implementations
-    /*
-    public class DCSurrogateExplicit : IDataContractSurrogate
-    {
-        #region IDataContractSurrogate Members
 
-        object IDataContractSurrogate.GetCustomDataToExport(Type clrType, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        object IDataContractSurrogate.GetCustomDataToExport(System.Reflection.MemberInfo memberInfo, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        Type IDataContractSurrogate.GetDataContractType(Type type)
-        {
-            if (typeof(NonDCPerson).IsAssignableFrom(type))
-            {
-                return typeof(PersonSurrogated);
-            }
-            return type;
-        }
-
-        object IDataContractSurrogate.GetDeserializedObject(object obj, Type memberType)
-        {
-            if (obj is PersonSurrogated)
-            {
-                return new NonDCPerson((PersonSurrogated)obj);
-            }
-            return obj;
-        }
-
-        void IDataContractSurrogate.GetKnownCustomDataTypes(Collection<Type> customDataTypes)
-        {
-
-        }
-
-        object IDataContractSurrogate.GetObjectToSerialize(object obj, Type membertype)
-        {
-            if (obj is NonDCPerson)
-            {
-                return new PersonSurrogated((NonDCPerson)obj);
-            }
-            return obj;
-        }
-
-        Type IDataContractSurrogate.GetReferencedTypeOnImport(string typeName, string typeNamespace, object customData)
-        {
-            throw new NotImplementedException();
-        }
-
-        System.CodeDom.CodeTypeDeclaration IDataContractSurrogate.ProcessImportedType(System.CodeDom.CodeTypeDeclaration typeDeclaration, System.CodeDom.CodeCompileUnit compileUnit)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-    }
-    */
     public class SerSurrogateExplicit : ISerializationSurrogate
     {
         #region ISerializationSurrogate Members
@@ -8058,7 +7807,6 @@ namespace DesktopTestData
             {
                 return obj;
             }
-
         }
 
         #endregion
@@ -8067,66 +7815,7 @@ namespace DesktopTestData
     #endregion
 
     #region private surrogate type explicit implementations
-    /*
-    class PrivateDCSurrogate : IDataContractSurrogate
-    {
-        #region IDataContractSurrogate Members
 
-        public object GetCustomDataToExport(Type clrType, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetCustomDataToExport(System.Reflection.MemberInfo memberInfo, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Type GetDataContractType(Type type)
-        {
-            if (typeof(NonDCPerson).IsAssignableFrom(type))
-            {
-                return typeof(PersonSurrogated);
-            }
-            return type;
-        }
-
-        public object GetDeserializedObject(object obj, Type memberType)
-        {
-            if (obj is PersonSurrogated)
-            {
-                return new NonDCPerson((PersonSurrogated)obj);
-            }
-            return obj;
-        }
-
-        public void GetKnownCustomDataTypes(Collection<Type> customDataTypes)
-        {
-
-        }
-
-        public object GetObjectToSerialize(object obj, Type membertype)
-        {
-            if (obj is NonDCPerson)
-            {
-                return new PersonSurrogated((NonDCPerson)obj);
-            }
-            return obj;
-        }
-
-        public Type GetReferencedTypeOnImport(string typeName, string typeNamespace, object customData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public System.CodeDom.CodeTypeDeclaration ProcessImportedType(System.CodeDom.CodeTypeDeclaration typeDeclaration, System.CodeDom.CodeCompileUnit compileUnit)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-    }
-    */
     class PrivateSerSurrogate : ISerializationSurrogate
     {
         #region ISerializationSurrogate Members
@@ -8159,66 +7848,6 @@ namespace DesktopTestData
         #endregion
     }
 
-    /*
-    class PrivateDCSurrogateExplicit : IDataContractSurrogate
-    {
-        #region IDataContractSurrogate Members
-
-        object IDataContractSurrogate.GetCustomDataToExport(Type clrType, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        object IDataContractSurrogate.GetCustomDataToExport(System.Reflection.MemberInfo memberInfo, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        Type IDataContractSurrogate.GetDataContractType(Type type)
-        {
-            if (typeof(NonDCPerson).IsAssignableFrom(type))
-            {
-                return typeof(PersonSurrogated);
-            }
-            return type;
-        }
-
-        object IDataContractSurrogate.GetDeserializedObject(object obj, Type memberType)
-        {
-            if (obj is PersonSurrogated)
-            {
-                return new NonDCPerson((PersonSurrogated)obj);
-            }
-            return obj;
-        }
-
-        void IDataContractSurrogate.GetKnownCustomDataTypes(Collection<Type> customDataTypes)
-        {
-
-        }
-
-        object IDataContractSurrogate.GetObjectToSerialize(object obj, Type membertype)
-        {
-            if (obj is NonDCPerson)
-            {
-                return new PersonSurrogated((NonDCPerson)obj);
-            }
-            return obj;
-        }
-
-        Type IDataContractSurrogate.GetReferencedTypeOnImport(string typeName, string typeNamespace, object customData)
-        {
-            throw new NotImplementedException();
-        }
-
-        System.CodeDom.CodeTypeDeclaration IDataContractSurrogate.ProcessImportedType(System.CodeDom.CodeTypeDeclaration typeDeclaration, System.CodeDom.CodeCompileUnit compileUnit)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-    }
-    */
     class PrivateSerSurrogateExplicit : ISerializationSurrogate
     {
         #region ISerializationSurrogate Members
@@ -8254,66 +7883,7 @@ namespace DesktopTestData
     #endregion
 
     #region private dc
-    /*
-    public class DCSurrogateReturnPrivate : IDataContractSurrogate
-    {
-        #region IDataContractSurrogate Members
 
-        public object GetCustomDataToExport(Type clrType, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetCustomDataToExport(System.Reflection.MemberInfo memberInfo, Type dataContractType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Type GetDataContractType(Type type)
-        {
-            if (typeof(NonDCPerson).IsAssignableFrom(type))
-            {
-                return typeof(PrivateDC);
-            }
-            return type;
-        }
-
-        public object GetDeserializedObject(object obj, Type memberType)
-        {
-            if (obj is PrivateDC)
-            {
-                return new NonDCPerson();
-            }
-            return obj;
-        }
-
-        public void GetKnownCustomDataTypes(Collection<Type> customDataTypes)
-        {
-
-        }
-
-        public object GetObjectToSerialize(object obj, Type membertype)
-        {
-            if (obj is NonDCPerson)
-            {
-                return new PrivateDC();
-            }
-            return obj;
-        }
-
-        public Type GetReferencedTypeOnImport(string typeName, string typeNamespace, object customData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public System.CodeDom.CodeTypeDeclaration ProcessImportedType(System.CodeDom.CodeTypeDeclaration typeDeclaration, System.CodeDom.CodeCompileUnit compileUnit)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-    }
-    */
     public class SerSurrogateReturnPrivate : ISerializationSurrogate
     {
         #region ISerializationSurrogate Members
@@ -8336,7 +7906,6 @@ namespace DesktopTestData
             {
                 return obj;
             }
-
         }
 
         #endregion
@@ -8451,7 +8020,7 @@ namespace DesktopTestData
     }
 
 
-    [DataContract]//(IsReference=true)]
+    [DataContract]
     struct PrivateDCStruct
     {
         [DataMember]
@@ -8461,7 +8030,6 @@ namespace DesktopTestData
         {
             Data = int.MaxValue;
         }
-
     }
 
     #endregion
@@ -8641,12 +8209,10 @@ namespace DesktopTestData
         [DataMember]
         public DataTable dataTable;
 
-        public SerPublicDatasetPrivate()
-        { }
+        public SerPublicDatasetPrivate() { }
         public SerPublicDatasetPrivate(bool init)
         {
             dataSet = new DataSet("MyData");
-
 
             DataTable dt = new DataTable("MyTable");
             DataColumn dc1 = new DataColumn("Data", typeof(string));
@@ -8693,8 +8259,7 @@ namespace DesktopTestData
         [DataMember]
         public DataTable dataTable;
 
-        public DCPrivateDatasetPublic()
-        { }
+        public DCPrivateDatasetPublic() { }
         public DCPrivateDatasetPublic(bool init)
         {
             dataSet = new DataSet("MyData");
@@ -8723,7 +8288,6 @@ namespace DesktopTestData
 
         public DCPrivateDatasetPrivate(bool init)
         {
-
             dataSet = new DataSet("MyData");
             dataTable = new DataTable("MyTable");
             DataColumn dc1 = new DataColumn("Data", typeof(string));
@@ -8759,8 +8323,7 @@ namespace DesktopTestData
             dataSet.Tables.Add(dataTable);
         }
     }
-
-
+    
     [Serializable]
     class SerPrivateDatasetPrivate
     {
@@ -8835,45 +8398,4 @@ namespace DesktopTestData
             arrayDTO = new DateTimeOffset[] { DateTimeOffset.Now, DateTimeOffset.UtcNow };
         }
     }
-
 }
-/*******************
-namespace Test.WCF.DCS.Delegates
-{
-    using MiscSamples;
-    using System.Runtime.Serialization;
-
-    public delegate void PublicVoidDelegate();
-    public delegate void PublicVoidDelegateContainsPublicDC(PublicDC publicDC);
-    delegate void PublicVoidDelegateContainsPrivateDC(PrivateDC privateDC);
-    public delegate void PublicVoidDelegateContainsPublicDCClassPrivateDM(PublicDCClassPrivateDM privateDC);
-    delegate void PublicVoidDelegateContainsPrivateDerived(PublicDCDerivedPrivate privateDC);
-    delegate void PublicVoidDelegateContainsMixed(PrivateDC privateDC, PublicDC publicDC, PublicDCClassPrivateDM privateDM, PublicDCDerivedPrivate derivedPrivate);
-
-    delegate void PrivateVoidDelegate();
-
-    delegate PrivateDC PrivateDCDelegate();
-    public delegate PublicDCClassPrivateDM PublicPublicDCClassPrivateDMDelegate();
-
-    delegate PrivateDC PrivateDCDelegateContainsMixed(PrivateDC privateDC, PublicDC publicDC, PublicDCClassPrivateDM privateDM, PublicDCDerivedPrivate derivedPrivate);
-
-    [DataContract(IsReference = true)]
-    public class DelegateContainer_PublicVoidDelegate
-    {
-        [DataMember]
-        public PublicVoidDelegate publicDelegate;
-
-        public DelegateContainer_PublicVoidDelegate() { }
-
-        public DelegateContainer_PublicVoidDelegate(bool init)
-        {
-            publicDelegate = new PublicVoidDelegate(PrivateMethod);
-        }
-
-        public void PublicMethod() { }
-
-        void PrivateMethod() { }
-
-    }
-}
-*/

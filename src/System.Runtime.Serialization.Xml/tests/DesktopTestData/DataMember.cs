@@ -142,7 +142,6 @@ namespace DesktopTestData
                         && MemberTypeContract.StableName.Equals(dataMember.MemberTypeContract.StableName));
             }
             return false;
-
         }
 
         public override int GetHashCode()

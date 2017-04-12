@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace DesktopTestData
@@ -1008,7 +1005,6 @@ namespace DesktopTestData
     }
 
     [DataContract]
-
     public class Array2
     {
         [DataMember]
@@ -1210,7 +1206,5 @@ namespace DesktopTestData
         public object generictwo = new CustomGeneric2<BoxedPrim, EmptyDC>();
         public object nullableStruct = new Nullable<MyStruct>();
         public object obj = new Drawing<Seasons1, Seasons2, CustomGeneric2<Person>>(Seasons1.Autumn, Seasons2.Summer, new CustomGeneric2<Person>());
-
     }
-
 }

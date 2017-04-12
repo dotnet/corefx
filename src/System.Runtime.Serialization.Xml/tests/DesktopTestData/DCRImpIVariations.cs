@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Xml;
-using System.Threading.Tasks;
 
 namespace DesktopTestData
 {
@@ -56,7 +52,6 @@ namespace DesktopTestData
         {
             return base.TryResolveType(dcType, declaredType, KTResolver, out typeName, out typeNamespace);
         }
-
 
         public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
         {
@@ -213,7 +208,6 @@ namespace DesktopTestData
             return false;
         }
 
-
         public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
         {
             System.Diagnostics.Debug.WriteLine("Resolving Name {0}", typeName);
@@ -252,8 +246,7 @@ namespace DesktopTestData
             System.Diagnostics.Debug.WriteLine("Resolving type {0}", dcType.Name);
             throw new ArgumentException("DCR threw ArgumentExp");
         }
-
-
+        
         public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
         {
             System.Diagnostics.Debug.WriteLine("Resolving Name {0}", typeName);
@@ -268,7 +261,6 @@ namespace DesktopTestData
             throw new InvalidOperationException("DCR threw InvalidOPExp");
 
         }
-
 
         public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
         {

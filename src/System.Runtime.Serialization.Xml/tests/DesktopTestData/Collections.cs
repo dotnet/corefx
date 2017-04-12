@@ -11,7 +11,6 @@ namespace DesktopTestData
     public class ContainsLinkedList
     {
         public LinkedList<SimpleDCWithRef> Data;
-
         public ContainsLinkedList() { }
         public ContainsLinkedList(bool init)
         {

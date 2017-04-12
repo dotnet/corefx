@@ -39,11 +39,9 @@ namespace DesktopTestData
             useObjectContainer = wrapInObjectContainer;
             expectedExp = expectedException;
             expectedErrorMsg = expectedErrorMessage;
-
         }
 
         public TestParameters(SerializerEnum serEnum, Type t, string ResolverName, bool wrapInObjectContainer) : this(serEnum, t, ResolverName, wrapInObjectContainer, null, null) { }
-
 
         public SerializerEnum serializerEnum;
         public Type typeToRoundtrip;
@@ -430,11 +428,9 @@ namespace DesktopTestData
                 ExceptionHelpers.CheckForException(testParams.expectedExp, testParams.expectedErrorMsg,
                     delegate
                     {
-
                         roundtrippedInstance = DCRUtils.SingleRoundTripTest(serializer, originalInstance);
 
                     });
-
             }
             else
             {
@@ -733,7 +729,6 @@ namespace DesktopTestData
                         , PreserveObjectReferences = false
                     };
                     return new DataContractSerializer(testType, dataContractSerializerSettings);
-                        //return new DataContractSerializer(testType, knownTypesCollection, int.MaxValue, false, false, surrogate, dcr);
                 default:
                     {
                         throw new NotSupportedException("Test Issue: serializer.ToString() not supported for DCR tests");
