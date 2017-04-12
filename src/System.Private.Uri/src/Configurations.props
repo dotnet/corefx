@@ -6,6 +6,7 @@
       netcoreapp-Unix;
       netcoreapp-Windows_NT;
       uap-Windows_NT;
+      mono;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
