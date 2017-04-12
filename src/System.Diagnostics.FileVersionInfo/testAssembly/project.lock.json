@@ -1,0 +1,59 @@
+{
+  "locked": true,
+  "version": -9997,
+  "targets": {
+    "DNXCore,Version=v5.0": {
+      "System.Private.Uri/4.0.0-beta-22921": {
+        "runtime": [
+          "lib/DNXCore50/System.Private.Uri.dll"
+        ]
+      },
+      "System.Runtime/4.0.20-beta-22921": {
+        "dependencies": {
+          "System.Private.Uri": "4.0.0-beta-22921"
+        },
+        "compile": [
+          "ref/any/System.Runtime.dll"
+        ],
+        "runtime": [
+          "lib/DNXCore50/System.Runtime.dll"
+        ]
+      }
+    }
+  },
+  "libraries": {
+    "System.Private.Uri/4.0.0-beta-22921": {
+      "sha512": "zGoqYe8M2JnByle6NZjb+IPsPjUcprf1XnA7VLiawPOoOS3MO5AmqK8CZHJhWRZ4ZUQzau8PPDu1Y1YCNm3RnQ==",
+      "files": [
+        "System.Private.Uri.4.0.0-beta-22921.nupkg",
+        "System.Private.Uri.4.0.0-beta-22921.nupkg.sha512",
+        "System.Private.Uri.nuspec",
+        "lib/DNXCore50/System.Private.Uri.dll",
+        "lib/netcore50/System.Private.Uri.dll",
+        "ref/dnxcore50/_._",
+        "ref/netcore50/_._",
+        "runtimes/win8-aot/lib/netcore50/System.Private.Uri.dll"
+      ]
+    },
+    "System.Runtime/4.0.20-beta-22921": {
+      "sha512": "Jl0FZQeEWd2wPawap3K3HsceEXPfCfDSm6UYiileQlJ8hlYpOT2HcqkifsLWhvyAiUvje2h3zL93EDB5ClQnpw==",
+      "files": [
+        "System.Runtime.4.0.20-beta-22921.nupkg",
+        "System.Runtime.4.0.20-beta-22921.nupkg.sha512",
+        "System.Runtime.nuspec",
+        "lib/DNXCore50/System.Runtime.dll",
+        "lib/net46/System.Runtime.dll",
+        "lib/netcore50/System.Runtime.dll",
+        "ref/any/System.Runtime.dll",
+        "ref/net46/System.Runtime.dll",
+        "runtimes/win8-aot/lib/netcore50/System.Runtime.dll"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "System.Runtime >= 4.0.20-beta-*"
+    ],
+    "DNXCore,Version=v5.0": []
+  }
+}
