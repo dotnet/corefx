@@ -80,6 +80,7 @@ namespace System.Diagnostics
 
                     // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
                     IDictionaryEnumerator e = envVars.GetEnumerator();
+                    Debug.Assert(!(e is IDisposable), "Environment.GetEnvironmentVariables should not be IDisposable.");
                     while (e.MoveNext())
                     {
                         DictionaryEntry entry = e.Entry;
@@ -105,7 +106,7 @@ namespace System.Diagnostics
         /// </devdoc>
         public string FileName
         {
-            get =>_fileName ?? string.Empty;
+            get => _fileName ?? string.Empty;
             set => _fileName = value;
         }
 

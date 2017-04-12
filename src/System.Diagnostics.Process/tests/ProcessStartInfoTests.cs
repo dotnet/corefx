@@ -566,7 +566,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework throws an InvalidCastException for non-string keys.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework throws an InvalidCastException for non-string keys. See https://github.com/dotnet/corefx/issues/18187.")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void Verbs_GetWithNonStringValue_ReturnsEmpty()
         {
