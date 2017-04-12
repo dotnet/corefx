@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace System.Tests
@@ -68,20 +69,7 @@ namespace System.Tests
             d();
             Assert.Equal(2, t.x);
 
-            // Serialize the delegate
-            var binaryFormatter = new BinaryFormatter();
-            byte[] serializedBytes;
-            using (var memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, d);
-                serializedBytes = memoryStream.ToArray();
-            }
-
-            // Deserialize the delegate
-            using (var memoryStream = new MemoryStream(serializedBytes))
-            {
-                d = (Action)binaryFormatter.Deserialize(memoryStream);
-            }
+            d = BinaryFormatterHelpers.Clone(d);
             t = (TestSerializableClass)d.Target;
             Assert.Equal(2, t.x);
             d();
