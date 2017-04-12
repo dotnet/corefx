@@ -158,17 +158,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 store.Open(OpenFlags.ReadWrite);
 
-                using (var coll = new ImportedCollection(store.Certificates))
-                {
-                    // Add only throws when it has to do work.  If, for some reason, this certificate
-                    // is already present in the CurrentUser\My store, we can't really test this
-                    // functionality.
-                    if (!coll.Collection.Contains(cert))
-                    {
-                        cert.Dispose();
-                        Assert.ThrowsAny<ArgumentNullException>(() => store.Add(cert));
-                    }
-                }
+                cert.Dispose();
+                Assert.ThrowsAny<ArgumentNullException>(() => store.Add(cert));
             }
         }
 
