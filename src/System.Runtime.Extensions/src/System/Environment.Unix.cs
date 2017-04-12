@@ -14,13 +14,17 @@ using System.Threading;
 
 namespace System
 {
+#if !MONO
     public static partial class Environment
+#else
+    internal static class EnvironmentUnix
+#endif
     {
         internal static readonly bool IsMac = Interop.Sys.GetUnixName() == "OSX";
         private static Func<string, IEnumerable<string>> s_fileReadLines;
         private static Action<string> s_directoryCreateDirectory;
 
-        private static string CurrentDirectoryCore
+        internal static string CurrentDirectoryCore
         {
             get { return Interop.Sys.GetCwd(); }
             set { Interop.CheckIo(Interop.Sys.ChDir(value), value, isDirectory: true); }
@@ -28,7 +32,7 @@ namespace System
 
         public static int ExitCode { get { return EnvironmentAugments.ExitCode; } set { EnvironmentAugments.ExitCode = value; } }
 
-        private static string ExpandEnvironmentVariablesCore(string name)
+        internal static string ExpandEnvironmentVariablesCore(string name)
         {
             StringBuilder result = StringBuilderCache.Acquire();
 
@@ -38,7 +42,7 @@ namespace System
                 if (name[lastPos] == '%')
                 {
                     string key = name.Substring(lastPos + 1, pos - lastPos - 1);
-                    string value = GetEnvironmentVariable(key);
+                    string value = Environment.GetEnvironmentVariable(key);
                     if (value != null)
                     {
                         result.Append(value);
@@ -54,16 +58,16 @@ namespace System
             return StringBuilderCache.GetStringAndRelease(result);
         }
 
-        private static string GetFolderPathCore(SpecialFolder folder, SpecialFolderOption option)
+        internal static string GetFolderPathCore(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
         {
-            // Get the path for the SpecialFolder
+            // Get the path for the Environment.SpecialFolder
             string path = GetFolderPathCoreWithoutValidation(folder);
             Debug.Assert(path != null);
 
             // If we didn't get one, or if we got one but we're not supposed to verify it,
             // or if we're supposed to verify it and it passes verification, return the path.
             if (path.Length == 0 ||
-                option == SpecialFolderOption.DoNotVerify ||
+                option == Environment.SpecialFolderOption.DoNotVerify ||
                 Interop.Sys.Access(path, Interop.Sys.AccessMode.R_OK) == 0)
             {
                 return path;
@@ -71,13 +75,13 @@ namespace System
 
             // Failed verification.  If None, then we're supposed to return an empty string.
             // If Create, we're supposed to create it and then return the path.
-            if (option == SpecialFolderOption.None)
+            if (option == Environment.SpecialFolderOption.None)
             {
                 return string.Empty;
             }
             else
             {
-                Debug.Assert(option == SpecialFolderOption.Create);
+                Debug.Assert(option == Environment.SpecialFolderOption.Create);
 
                 // TODO #11151: Replace with Directory.CreateDirectory once we have access to System.IO.FileSystem here.
                 Action<string> createDirectory = LazyInitializer.EnsureInitialized(ref s_directoryCreateDirectory, () =>
@@ -92,21 +96,21 @@ namespace System
             }
         }
 
-        private static string GetFolderPathCoreWithoutValidation(SpecialFolder folder)
+        private static string GetFolderPathCoreWithoutValidation(Environment.SpecialFolder folder)
         {
             // First handle any paths that involve only static paths, avoiding the overheads of getting user-local paths.
             // https://www.freedesktop.org/software/systemd/man/file-hierarchy.html
             switch (folder)
             {
-                case SpecialFolder.CommonApplicationData: return "/usr/share";
-                case SpecialFolder.CommonTemplates: return "/usr/share/templates";
+                case Environment.SpecialFolder.CommonApplicationData: return "/usr/share";
+                case Environment.SpecialFolder.CommonTemplates: return "/usr/share/templates";
             }
             if (IsMac)
             {
                 switch (folder)
                 {
-                    case SpecialFolder.ProgramFiles: return "/Applications";
-                    case SpecialFolder.System: return "/System";
+                    case Environment.SpecialFolder.ProgramFiles: return "/Applications";
+                    case Environment.SpecialFolder.System: return "/System";
                 }
             }
 
@@ -131,45 +135,45 @@ namespace System
 
             switch (folder)
             {
-                case SpecialFolder.UserProfile:
-                case SpecialFolder.MyDocuments: // same value as Personal
+                case Environment.SpecialFolder.UserProfile:
+                case Environment.SpecialFolder.MyDocuments: // same value as Personal
                     return home;
-                case SpecialFolder.ApplicationData:
+                case Environment.SpecialFolder.ApplicationData:
                     return GetXdgConfig(home);
-                case SpecialFolder.LocalApplicationData:
+                case Environment.SpecialFolder.LocalApplicationData:
                     // "$XDG_DATA_HOME defines the base directory relative to which user specific data files should be stored."
                     // "If $XDG_DATA_HOME is either not set or empty, a default equal to $HOME/.local/share should be used."
-                    string data = GetEnvironmentVariable("XDG_DATA_HOME");
+                    string data = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
                     if (string.IsNullOrEmpty(data) || data[0] != '/')
                     {
                         data = Path.Combine(home, ".local", "share");
                     }
                     return data;
 
-                case SpecialFolder.Desktop:
-                case SpecialFolder.DesktopDirectory:
+                case Environment.SpecialFolder.Desktop:
+                case Environment.SpecialFolder.DesktopDirectory:
                     return ReadXdgDirectory(home, "XDG_DESKTOP_DIR", "Desktop");
-                case SpecialFolder.Templates:
+                case Environment.SpecialFolder.Templates:
                     return ReadXdgDirectory(home, "XDG_TEMPLATES_DIR", "Templates");
-                case SpecialFolder.MyVideos:
+                case Environment.SpecialFolder.MyVideos:
                     return ReadXdgDirectory(home, "XDG_VIDEOS_DIR", "Videos");
 
-                case SpecialFolder.MyMusic:
+                case Environment.SpecialFolder.MyMusic:
                     return IsMac ? Path.Combine(home, "Music") : ReadXdgDirectory(home, "XDG_MUSIC_DIR", "Music");
-                case SpecialFolder.MyPictures:
+                case Environment.SpecialFolder.MyPictures:
                     return IsMac ? Path.Combine(home, "Pictures") : ReadXdgDirectory(home, "XDG_PICTURES_DIR", "Pictures");
-                case SpecialFolder.Fonts:
+                case Environment.SpecialFolder.Fonts:
                     return IsMac ? Path.Combine(home, "Library", "Fonts") : Path.Combine(home, ".fonts");
 
-                case SpecialFolder.Favorites:
+                case Environment.SpecialFolder.Favorites:
                     if (IsMac) return Path.Combine(home, "Library", "Favorites");
                     break;
-                case SpecialFolder.InternetCache:
+                case Environment.SpecialFolder.InternetCache:
                     if (IsMac) return Path.Combine(home, "Library", "Caches");
                     break;
             }
 
-            // No known path for the SpecialFolder
+            // No known path for the Environment.SpecialFolder
             return string.Empty;
         }
 
@@ -177,7 +181,7 @@ namespace System
         {
             // "$XDG_CONFIG_HOME defines the base directory relative to which user specific configuration files should be stored."
             // "If $XDG_CONFIG_HOME is either not set or empty, a default equal to $HOME/.config should be used."
-            string config = GetEnvironmentVariable("XDG_CONFIG_HOME");
+            string config = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
             if (string.IsNullOrEmpty(config) || config[0] != '/')
             {
                 config = Path.Combine(home, ".config");
@@ -191,7 +195,7 @@ namespace System
             Debug.Assert(!string.IsNullOrEmpty(key), $"Expected non-empty key");
             Debug.Assert(!string.IsNullOrEmpty(fallback), $"Expected non-empty fallback");
 
-            string envPath = GetEnvironmentVariable(key);
+            string envPath = Environment.GetEnvironmentVariable(key);
             if (!string.IsNullOrEmpty(envPath) && envPath[0] == '/')
             {
                 return envPath;
@@ -296,7 +300,7 @@ namespace System
 
         public static string[] GetLogicalDrives() => Interop.Sys.GetAllMountPoints();
 
-        private static bool Is64BitOperatingSystemWhen32BitProcess => false;
+        internal static bool Is64BitOperatingSystemWhen32BitProcess => false;
 
         public static string MachineName
         {
@@ -310,7 +314,7 @@ namespace System
 
         public static string NewLine => "\n";
 
-        private static Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() =>
+        internal static Lazy<OperatingSystem> s_osVersion = new Lazy<OperatingSystem>(() =>
         {
             int major = 0, minor = 0, build = 0, revision = 0;
 
@@ -358,7 +362,7 @@ namespace System
 
         public static int ProcessorCount => (int)Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_NPROCESSORS_ONLN);
 
-        public static string SystemDirectory => GetFolderPathCore(SpecialFolder.System, SpecialFolderOption.None);
+        public static string SystemDirectory => GetFolderPathCore(Environment.SpecialFolder.System, Environment.SpecialFolderOption.None);
 
         public static int SystemPageSize => (int)Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_PAGESIZE);
 

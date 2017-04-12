@@ -9,6 +9,10 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)'=='mono'">
+    <DefineConstants>$(DefineConstants);MONO</DefineConstants>
+    <NoWarn>$(NoWarn);BCL0015</NoWarn>
+  </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -18,6 +22,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'mono-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'mono-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\AppDomain.cs" />
     <Compile Include="System\Context.cs" />
@@ -87,7 +93,7 @@
     </Compile>
   </ItemGroup>
   <!-- WINDOWS: Shared CoreCLR and .NET Native -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' or '$(TargetGroup)' == 'mono'">
     <Compile Include="System\Environment.Windows.cs" />
     <Compile Include="System\Environment.Win32.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
@@ -178,7 +184,7 @@
     </Compile>
   </ItemGroup>
   <!-- UNIX -->
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' or '$(TargetGroup)' == 'mono'">
     <Compile Include="System\Environment.Unix.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Unix.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Unix.cs" />
@@ -255,6 +261,21 @@
   <!-- WINDOWS: UAP -->
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <Compile Include="System\IO\BinaryWriter.cs" />
+  </ItemGroup>
+  <!-- MONO -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'mono'">
+    <Compile Include="System\Environment.Mono.cs" />
+    <Compile Include="System\Diagnostics\Stopwatch.Mono.cs" />
+    <Compile Include="System\Runtime\Versioning\VersioningHelper.Mono.cs" />
+    <Compile Include="$(CommonPath)\System\PlatformHelper.Mono.cs">
+      <Link>Common\System\PlatformHelper.Mono.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Mono.cs">
+      <Link>Common\System\IO\DriveInfoInternal.Mono.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.Mono.cs">
+      <Link>Common\System\IO\PathInternal.Mono.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\StringNormalizationExtensions.cs" />

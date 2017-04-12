@@ -6,6 +6,7 @@
       netcoreapp-Windows_NT;
       uapaot-Windows_NT;
       uap-Windows_NT;
+      mono;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

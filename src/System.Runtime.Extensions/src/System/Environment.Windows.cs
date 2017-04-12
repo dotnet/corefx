@@ -8,9 +8,13 @@ using System.Text;
 
 namespace System
 {
+#if !MONO
     public static partial class Environment
+#else
+    public static class EnvironmentWindows
+#endif
     {
-        private static string CurrentDirectoryCore
+        internal static string CurrentDirectoryCore
         {
             get
             {
@@ -66,7 +70,7 @@ namespace System
 
         public static string NewLine => "\r\n";
 
-        private static int ProcessorCountFromSystemInfo
+        internal static int ProcessorCountFromSystemInfo
         {
             get
             {
