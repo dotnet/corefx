@@ -18,7 +18,9 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="Common\System\Data\Common\AdapterUtil.cs" />
     <Compile Include="Common\System\Data\Common\DbConnectionOptions.cs" />
-    <Compile Include="Common\System\Data\Common\DbConnectionPoolKey.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionPoolKey.cs">
+      <Link>System\Data\Common\DbConnectionPoolKey.cs</Link>
+    </Compile>
     <Compile Include="Common\System\Data\Common\DBConnectionString.cs" />
     <Compile Include="Common\System\Data\Common\DbConnectionStringCommon.cs" />
     <Compile Include="$(CommonPath)\System\Data\Common\NameValuePair.cs">
