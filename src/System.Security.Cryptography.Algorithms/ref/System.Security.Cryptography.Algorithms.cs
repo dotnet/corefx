@@ -536,13 +536,13 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA1 Create(string hashName) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    public sealed partial class SHA1Managed : System.Security.Cryptography.SHA1
+    public partial class SHA1Managed : System.Security.Cryptography.SHA1
     {
         public SHA1Managed() { }
         protected sealed override void Dispose(bool disposing) { }
-        protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
-        protected sealed override byte[] HashFinal() { throw null; }
-        public sealed override void Initialize() { }
+        protected override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected override byte[] HashFinal() { throw null; }
+        public override void Initialize() { }
     }
     public abstract partial class SHA256 : System.Security.Cryptography.HashAlgorithm
     {
@@ -551,13 +551,13 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA256 Create(string hashName) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    public sealed partial class SHA256Managed : System.Security.Cryptography.SHA256
+    public partial class SHA256Managed : System.Security.Cryptography.SHA256
     {
         public SHA256Managed() { }
         protected sealed override void Dispose(bool disposing) { }
-        protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
-        protected sealed override byte[] HashFinal() { throw null; }
-        public sealed override void Initialize() { }
+        protected override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected override byte[] HashFinal() { throw null; }
+        public override void Initialize() { }
     }
     public abstract partial class SHA384 : System.Security.Cryptography.HashAlgorithm
     {
@@ -566,13 +566,13 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA384 Create(string hashName) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    public sealed partial class SHA384Managed : System.Security.Cryptography.SHA384
+    public partial class SHA384Managed : System.Security.Cryptography.SHA384
     {
         public SHA384Managed() { }
         protected sealed override void Dispose(bool disposing) { }
-        protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
-        protected sealed override byte[] HashFinal() { throw null; }
-        public sealed override void Initialize() { }
+        protected override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected override byte[] HashFinal() { throw null; }
+        public override void Initialize() { }
     }
     public abstract partial class SHA512 : System.Security.Cryptography.HashAlgorithm
     {
@@ -581,13 +581,13 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA512 Create(string hashName) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    public sealed partial class SHA512Managed : System.Security.Cryptography.SHA512
+    public partial class SHA512Managed : System.Security.Cryptography.SHA512
     {
         public SHA512Managed() { }
         protected sealed override void Dispose(bool disposing) { }
-        protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
-        protected sealed override byte[] HashFinal() { throw null; }
-        public sealed override void Initialize() { }
+        protected override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected override byte[] HashFinal() { throw null; }
+        public override void Initialize() { }
     }
     public partial class SignatureDescription {
         public SignatureDescription() { }
