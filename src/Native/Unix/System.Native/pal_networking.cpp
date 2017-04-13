@@ -576,8 +576,7 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         {
             free(buffer);
             *entry = nullptr;
-            assert(getHostErrno != 0);
-            return getHostErrno;
+            return getHostErrno ? getHostErrno : HOST_NOT_FOUND;
         }
     }
 }
@@ -656,8 +655,7 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         {
             free(buffer);
             *entry = nullptr;
-            assert(getHostErrno != 0);
-            return getHostErrno;
+            return getHostErrno ? getHostErrno : HOST_NOT_FOUND;
         }
     }
 }
