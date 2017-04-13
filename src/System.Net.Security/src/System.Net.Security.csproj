@@ -6,7 +6,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.Security</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <AssemblyVersion>4.0.0.1</AssemblyVersion>
     <ProjectGuid>{89F37791-6254-4D60-AB96-ACD3CCA0E771}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
@@ -32,7 +32,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  
+
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="System\PinnableBufferCache.cs" />
     <Compile Include="System\Net\SecurityBuffer.cs" />
@@ -50,7 +50,7 @@
     <Compile Include="System\Net\SecureProtocols\FixedSizeReader.cs" />
     <Compile Include="System\Net\SecureProtocols\ProtectionLevel.cs" />
 
-    <!-- NegotiateStream -->    
+    <!-- NegotiateStream -->
     <Compile Include="System\Net\ContextFlagsPal.cs" />
     <Compile Include="System\Net\NTAuthentication.cs" />
     <Compile Include="System\Net\SSPIHandleCache.cs" />
@@ -60,12 +60,12 @@
     <Compile Include="System\Net\SecureProtocols\NegoState.cs" />
     <Compile Include="System\Net\SecureProtocols\InternalNegotiateStream.cs" />
     <Compile Include="System\Net\NegotiationInfoClass.cs" />
-    
+
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicy.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\PolicyEnforcement.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ProtectionScenario.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ServiceNameCollection.cs" />
-	
+
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
       <Link>Common\System\Net\Shims\TraceSource.cs</Link>
@@ -88,7 +88,7 @@
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
-	
+
     <!-- Debug only -->
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
@@ -99,7 +99,7 @@
     <Compile Include="$(CommonPath)\System\Net\DebugCriticalHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\System\Net\DebugCriticalHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-	
+
     <!-- System.Net common -->
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.cs">
       <Link>Common\System\Net\ContextAwareResult.cs</Link>
@@ -110,14 +110,14 @@
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
-	
+
     <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
       <Link>Common\System\Net\LazyAsyncResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
     </Compile>
-	
+
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>Common\System\Net\UriScheme.cs</Link>
     </Compile>
@@ -148,17 +148,17 @@
       <Link>Common\System\IO\Error.cs</Link>
     </Compile>
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="System\Net\SslStreamPal.Windows.cs" />
     <Compile Include="System\Net\SecurityContextTokenHandle.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
     <Compile Include="System\Net\SecurityStatusAdapterPal.Windows.cs" />
-	
+
     <!-- NegotiateStream -->
     <Compile Include="System\Net\NegotiateStreamPal.Windows.cs" />
     <Compile Include="System\Net\ContextFlagsAdapterPal.Windows.cs" />
-   
+
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -239,7 +239,7 @@
       <Link>Common\System\Net\ContextAwareResult.Windows.cs</Link>
     </Compile>
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\SslStreamPal.Unix.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
@@ -247,10 +247,10 @@
       <Link>Common\System\Net\Security\CertificateValidation.Unix.cs</Link>
     </Compile>
 
-    <!-- NegotiateStream -->    
+    <!-- NegotiateStream -->
     <Compile Include="System\Net\NegotiateStreamPal.Unix.cs" />
     <Compile Include="System\Net\ContextFlagsAdapterPal.Unix.cs" />
-    
+
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
