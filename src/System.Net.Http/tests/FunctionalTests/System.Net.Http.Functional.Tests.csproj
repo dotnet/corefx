@@ -48,8 +48,17 @@
     <Compile Include="$(CommonTestPath)\System\Net\EventSourceTestLogging.cs">
       <Link>Common\System\Net\EventSourceTestLogging.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\SchSendAuxRecordTestServer.cs">
-      <Link>Common\System\Net\SchSendAuxRecordTestServer.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Net\HttpsTestServer.cs">
+      <Link>Common\System\Net\HttpsTestServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\HttpsTestClient.cs">
+      <Link>Common\System\Net\HttpsTestClient.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\SslStreamCertificatePolicy.cs">
+      <Link>Common\System\Net\SslStreamCertificatePolicy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
+      <Link>Common\System\Net\Capability.Security.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
@@ -88,6 +97,7 @@
     <Compile Include="HttpClientHandlerTest.SslProtocols.cs" />
     <Compile Include="DiagnosticsTests.cs" />
     <Compile Include="HttpClientTest.cs" />
+    <Compile Include="HttpClientEKUTest.cs" />
     <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpMessageInvokerTest.cs" />
@@ -118,6 +128,16 @@
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
+      <OSGroup>$(InputOSGroup)</OSGroup>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\System.Net.Security\src\System.Net.Security.csproj">
+      <Project>{89F37791-6254-4D60-AB96-ACD3CCA0E771}</Project>
+      <Name>System.Net.Security</Name>
+      <OSGroup>$(InputOSGroup)</OSGroup>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\System.Security.Cryptography.X509Certificates\src\System.Security.Cryptography.X509Certificates.csproj">
+      <Project>{6F8576C2-6CD0-4DF3-8394-00B002D82E40}</Project>
+      <Name>System.Security.Cryptography.X509Certificates</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
   </ItemGroup>
