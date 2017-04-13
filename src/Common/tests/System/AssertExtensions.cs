@@ -25,7 +25,7 @@ namespace System
                 RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
                 netFxParamName : netCoreParamName;
 
-            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+            if (!PlatformDetection.IsNetNative)
                 Assert.Equal(expectedParamName, exception.ParamName);
         }
 
@@ -34,7 +34,7 @@ namespace System
         {
             T exception = Assert.Throws<T>(action);
 
-            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+            if (!PlatformDetection.IsNetNative)
                 Assert.Equal(paramName, exception.ParamName);
         }
     }
