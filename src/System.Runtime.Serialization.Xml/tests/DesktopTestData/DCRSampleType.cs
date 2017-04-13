@@ -75,10 +75,10 @@ namespace DesktopTestData
         public object d = Char.MaxValue;
 
         [DataMember]
-        public object f5 = DateTime.Now;
+        public object f5 = DateTime.MaxValue;
 
         [DataMember]
-        public object guidData = Guid.NewGuid();
+        public object guidData = Guid.Parse("4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56");
 
         [DataMember]
         public object strData;

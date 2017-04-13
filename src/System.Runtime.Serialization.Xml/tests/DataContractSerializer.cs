@@ -2779,34 +2779,12 @@ public static partial class DataContractSerializerTests
             , PreserveObjectReferences = false
         };
 
-        string baseline = ""; 
+        string baseline = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/DesktopTestData"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><data i:type=""a:PrimitiveContainer"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DTO""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0</z97><z98 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">4294967295</z98><z99 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></data><data2 i:type=""a:PrimitiveContainer"" xmlns:a=""http://www.default.com""><a i:type=""a:Boolean_foo"">false</a><array1><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/><anyType xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""/></array1><b i:type=""a:Byte_foo"">255</b><c i:type=""a:Byte_foo"">0</c><d i:type=""a:Char_foo"">65535</d><e i:type=""a:Decimal_foo"">79228162514264337593543950335</e><f i:type=""a:Decimal_foo"">-1</f><f5 i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">9999-12-31T23:59:59.9999999</f5><g i:type=""a:Decimal_foo"">-79228162514264337593543950335</g><guidData i:type=""a:Guid_foo"">4bc848b1-a541-40bf-8aa9-dd6ccb6d0e56</guidData><h i:type=""a:Decimal_foo"">1</h><i i:type=""a:Decimal_foo"">0</i><j i:type=""a:Decimal_foo"">0</j><k i:type=""a:Double_foo"">0</k><l i:type=""a:Double_foo"">4.94065645841247E-324</l><lDTO xmlns:b=""http://schemas.datacontract.org/2004/07/System""/><m i:type=""a:Double_foo"">1.7976931348623157E+308</m><n i:type=""a:Double_foo"">-1.7976931348623157E+308</n><nDTO i:type=""a:DTO""><DateTime xmlns=""http://schemas.datacontract.org/2004/07/System"">9999-12-31T23:59:59.9999999Z</DateTime><OffsetMinutes xmlns=""http://schemas.datacontract.org/2004/07/System"">0</OffsetMinutes></nDTO><o i:type=""a:Double_foo"">NaN</o><obj/><p i:type=""a:Double_foo"">-INF</p><q i:type=""a:Double_foo"">INF</q><r i:type=""a:Single_foo"">0</r><s i:type=""a:Single_foo"">1.401298E-45</s><strData i:nil=""true""/><t i:type=""a:Single_foo"">-3.40282347E+38</t><timeSpan i:type=""a:TimeSpan_foo"">P10675199DT2H48M5.4775807S</timeSpan><u i:type=""a:Single_foo"">3.40282347E+38</u><uri>http://www.microsoft.com/</uri><v i:type=""a:Single_foo"">NaN</v><w i:type=""a:Single_foo"">-INF</w><x i:type=""a:Single_foo"">INF</x><xmlQualifiedName i:type=""a:XmlQualifiedName_foo"" xmlns:b=""http://www.microsoft.com"">b:WCF</xmlQualifiedName><y i:type=""a:Int32_foo"">0</y><z i:type=""a:Int32_foo"">2147483647</z><z1 i:type=""a:Int32_foo"">-2147483648</z1><z2 i:type=""a:Int64_foo"">0</z2><z3 i:type=""a:Int64_foo"">9223372036854775807</z3><z4 i:type=""a:Int64_foo"">-9223372036854775808</z4><z5/><z6 i:type=""a:SByte_foo"">0</z6><z7 i:type=""a:SByte_foo"">127</z7><z8 i:type=""a:SByte_foo"">-128</z8><z9 i:type=""a:Int16_foo"">0</z9><z91 i:type=""a:Int16_foo"">32767</z91><z92 i:type=""a:Int16_foo"">-32768</z92><z93 i:type=""a:String_foo"">abc</z93><z94 i:type=""a:UInt16_foo"">0</z94><z95 i:type=""a:UInt16_foo"">65535</z95><z96 i:type=""a:UInt16_foo"">0</z96><z97 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0</z97><z98 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">4294967295</z98><z99 i:type=""b:unsignedInt"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0</z99><z990 i:type=""a:UInt64_foo"">0</z990><z991 i:type=""a:UInt64_foo"">18446744073709551615</z991><z992 i:type=""a:UInt64_foo"">0</z992><z993>AQIDBA==</z993></data2></ObjectContainer>";
         var value = new DesktopTestData.ObjectContainer(new DesktopTestData.PrimitiveContainer());
 
-        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings, null, true);
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
         // Throw Exception when verification failed
         DesktopTestData.ComparisonHelper.CompareRecursively(value, actual);
-
-        var instance = new DesktopTestData.ObjectContainer(new DesktopTestData.PrimitiveContainer());
-
-        object result = DesktopTestData.DCRUtils.SingleRoundTripTest(
-            DesktopTestData.SerializerFactory.GetSerializer(
-                typeof(DesktopTestData.ObjectContainer)
-                , DesktopTestData.SerializerEnum.DataContractSerializer
-                , new DesktopTestData.PrimitiveTypeResolver()
-                )
-            , instance
-            );
-
-        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
-
-        result = DesktopTestData.DCRUtils.SingleRoundtripPerEpisode(
-            DesktopTestData.SerializerEnum.DataContractSerializer
-            , typeof(DesktopTestData.ObjectContainer)
-            , instance
-            , new DesktopTestData.PrimitiveTypeResolver()
-            );
-
-        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
     }
 
     /// <summary>
@@ -2831,28 +2809,6 @@ public static partial class DataContractSerializerTests
 
         var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
         DesktopTestData.ComparisonHelper.CompareRecursively(value, actual);
-
-        var instance = new DesktopTestData.ObjectContainer(new DesktopTestData.EnumStructContainer());
-
-        object result = DesktopTestData.DCRUtils.SingleRoundTripTest(
-            DesktopTestData.SerializerFactory.GetSerializer(
-                typeof(ObjectContainer)
-                , DesktopTestData.SerializerEnum.DataContractSerializer
-                , new DesktopTestData.PrimitiveTypeResolver()
-                )
-            , instance
-            );
-
-        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
-
-        result = DesktopTestData.DCRUtils.SingleRoundtripPerEpisode(
-            DesktopTestData.SerializerEnum.DataContractSerializer
-            , typeof(ObjectContainer)
-            , instance
-            , new DesktopTestData.PrimitiveTypeResolver()
-            );
-
-        DesktopTestData.ComparisonHelper.CompareRecursively(instance, result);
     }
 
     #endregion
