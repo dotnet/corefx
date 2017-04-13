@@ -90,5 +90,9 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Linq\In.cs" />
+    <Compile Include="System\Linq\NotIn.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
