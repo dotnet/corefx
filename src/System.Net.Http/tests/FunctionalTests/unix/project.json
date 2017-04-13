@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "Microsoft.NETCore.Platforms": "1.0.1",
+    "System.Console": "4.0.0",
     "System.Diagnostics.DiagnosticSource": "4.0.0",
     "System.Diagnostics.Process": "4.1.0",
     "System.Diagnostics.Tracing": "4.1.0",
