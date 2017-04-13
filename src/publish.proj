@@ -11,12 +11,7 @@
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <!-- only try to publish if there are .nupkgs produced -->
-    <PublishBuildDependsOn Condition="'@(_PackagesToPublish)' != ''">CreateContainerName;UploadToAzure</PublishBuildDependsOn>
-  </PropertyGroup>
-
+  
   <Target Name="CreateContainerName"
           DependsOnTargets="CreateVersionFileDuringBuild"
           Condition="'$(ContainerName)' == ''">
@@ -25,5 +20,8 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="Build" DependsOnTargets="$(PublishBuildDependsOn)" />
+  <Target Name="Build" DependsOnTargets="CreateContainerName">
+    <!-- skip uploadToAzure when there are no nupkgs -->
+    <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
+  </Target>  
 </Project>
