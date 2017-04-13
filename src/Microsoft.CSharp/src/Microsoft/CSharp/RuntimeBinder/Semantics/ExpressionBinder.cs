@@ -356,7 +356,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory GetExprFactory() { return ExprFactory; }
 
-        private ExprFactory ExprFactory { get { return Context.GetExprFactory(); } }
+        private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
 
         private AggregateType GetReqPDT(PredefinedType pt)
         {
@@ -406,54 +406,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Bind the simple assignment operator =.
 
-        public Expr bindAssignment(Expr op1, Expr op2, bool allowExplicit)
+        public Expr BindAssignment(Expr op1, Expr op2, bool allowExplicit)
         {
-            bool fOp2NotAddrOp = false;
-            bool fOp2WasCast = false;
+            Debug.Assert(op1 is ExprCast
+                || op1 is ExprArrayIndex
+                || op1 is ExprCall
+                || op1 is ExprProperty 
+                || op1 is ExprClass
+                || op1 is ExprField
+                || op1 is ExprEvent);
 
-            if (!(op1 is ExprLocal local && local.IsOK))
+            if (!checkLvalue(op1, CheckLvalueKind.Assignment))
             {
-                if (!checkLvalue(op1, CheckLvalueKind.Assignment))
-                {
-                    var rval = GetExprFactory().CreateAssignment(op1, op2);
-                    rval.SetError();
-                    return rval;
-                }
-            }
-            else
-            {
-                if (op2.Type.IsArrayType())
-                {
-                    return BindPtrToArray(local, op2);
-                }
-                if (op2.Type == GetReqPDT(PredefinedType.PT_STRING))
-                {
-                    op2 = bindPtrToString(op2);
-                }
-                else if (op2.Kind == ExpressionKind.Addr)
-                {
-                    op2.Flags |= EXPRFLAG.EXF_ADDRNOCONV;
-                }
-                else if (op2.IsOK)
-                {
-                    fOp2NotAddrOp = true;
-                    fOp2WasCast = op2 is ExprCast;
-                }
+                ExprAssignment rval = GetExprFactory().CreateAssignment(op1, op2);
+                rval.SetError();
+                return rval;
             }
 
             op2 = GenerateAssignmentConversion(op1, op2, allowExplicit);
-            if (op2.IsOK && fOp2NotAddrOp)
-            {
-                // Only report these errors if the convert succeeded
-                if (fOp2WasCast)
-                {
-                    ErrorContext.Error(ErrorCode.ERR_BadCastInFixed);
-                }
-                else
-                {
-                    ErrorContext.Error(ErrorCode.ERR_FixedNotNeeded);
-                }
-            }
             return GenerateOptimizedAssignment(op1, op2);
         }
 
@@ -526,77 +496,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return pExpr;
         }
-
-        private ExprUnaryOp bindPtrToString(Expr @string)
-        {
-            CType typeRet = GetTypes().GetPointer(GetReqPDT(PredefinedType.PT_CHAR));
-
-            return GetExprFactory().CreateUnaryOp(ExpressionKind.Addr, typeRet, @string);
-        }
-
-        private ExprQuestionMark BindPtrToArray(ExprLocal exprLoc, Expr array)
-        {
-            CType typeElem = array.Type.AsArrayType().GetElementType();
-            CType typePtrElem = GetTypes().GetPointer(typeElem);
-
-            // element must be unmanaged...
-            if (GetSymbolLoader().isManagedType(typeElem))
-            {
-                ErrorContext.Error(ErrorCode.ERR_ManagedAddr, typeElem);
-            }
-
-            SetExternalRef(typeElem);
-
-            Expr test = null;
-            // we need to wrap the array so we can effectively generate something like this:
-            // (((temp = array) != null && temp.Length > 0) ? loc = temp[0] : loc = null)
-            // NOTE: The assignment needs to be inside the ExpressionKind.EK_QUESTIONMARK.
-            // We can't do loc = (... ? ... : ...) since the CLR type of temp[0] is a managed
-            // pointer and null is a UIntPtr - which confuses the JIT. We can't just convert
-            // temp[0] to UIntPtr with a conv.u instruction because then if a GC occurs between
-            // the time of the cast and the assignment to the local, we're toast.
-            ExprWrap wrapArray = WrapShortLivedExpression(array);
-            Expr save = GetExprFactory().CreateSave(wrapArray);
-            Expr nullTest = GetExprFactory().CreateBinop(ExpressionKind.NotEq, GetReqPDT(PredefinedType.PT_BOOL), save, GetExprFactory().CreateConstant(wrapArray.Type, ConstVal.Get(0)));
-            Expr lenTest;
-
-            if (array.Type.AsArrayType().rank == 1)
-            {
-                Expr len = GetExprFactory().CreateArrayLength(wrapArray);
-                lenTest = GetExprFactory().CreateBinop(ExpressionKind.NotEq, GetReqPDT(PredefinedType.PT_BOOL), len, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstVal.Get(0)));
-            }
-            else
-            {
-                ExprCall call = BindPredefMethToArgs(PREDEFMETH.PM_ARRAY_GETLENGTH, wrapArray, null, null, null);
-                lenTest = GetExprFactory().CreateBinop(ExpressionKind.NotEq, GetReqPDT(PredefinedType.PT_BOOL), call, GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstVal.Get(0)));
-            }
-
-            test = GetExprFactory().CreateBinop(ExpressionKind.LogicalAnd, GetReqPDT(PredefinedType.PT_BOOL), nullTest, lenTest);
-
-            Expr list = null;
-            Expr pList = list;
-            Expr pLastList = null;
-            for (int cc = 0; cc < array.Type.AsArrayType().rank; cc++)
-            {
-                GetExprFactory().AppendItemToList(GetExprFactory().CreateConstant(GetReqPDT(PredefinedType.PT_INT), ConstVal.Get(0)), ref pList, ref pLastList);
-            }
-            Debug.Assert(list != null);
-
-            Expr exprAddr = GetExprFactory().CreateUnaryOp(ExpressionKind.Addr, typePtrElem, GetExprFactory().CreateArrayIndex(wrapArray, list));
-            exprAddr.Flags |= EXPRFLAG.EXF_ADDRNOCONV;
-            exprAddr = mustConvert(exprAddr, exprLoc.Type, CONVERTTYPE.NOUDC);
-            exprAddr = GetExprFactory().CreateAssignment(exprLoc, exprAddr);
-            exprAddr.Flags |= EXPRFLAG.EXF_ASSGOP;
-            exprAddr = GetExprFactory().CreateBinop(ExpressionKind.SequenceReverse, exprLoc.Type, exprAddr, WrapShortLivedExpression(wrapArray)); // free the temp
-
-            Expr exprnull = GetExprFactory().CreateZeroInit(exprLoc.Type);
-            exprnull = GetExprFactory().CreateAssignment(exprLoc, exprnull);
-            exprnull.Flags |= EXPRFLAG.EXF_ASSGOP;
-
-            ExprBinOp exprRes = GetExprFactory().CreateBinop(ExpressionKind.BinaryOp, exprAddr.Type, exprAddr, exprnull);
-            return GetExprFactory().CreateQuestionMark(test, exprRes);
-        }
-
 
         private Expr bindIndexer(Expr pObject, Expr args, BindingFlag bindFlags)
         {
@@ -813,14 +712,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Exception: a readonly field is not an lvalue unless we're in the constructor/static constructor appropriate
             // for the field.
-            if (RespectReadonly() && fwt.Field().isReadOnly)
+            if (fwt.Field().isReadOnly)
             {
-                if (ContainingAgg() == null || !InMethod() || !InConstructor()
-                    || fwt.Field().getClass() != ContainingAgg() || InStaticMethod() != fwt.Field().isStatic
-                    || (pOptionalObject != null && !isThisPointer(pOptionalObject)) || InAnonymousMethod())
-                {
-                    isLValue = false;
-                }
+                isLValue = false;
             }
 
             CType fieldType = null;
@@ -1326,35 +1220,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // This finds a method  and binds it to the args provided.
-
-        private ExprCall BindPredefMethToArgs(PREDEFMETH predefMethod, Expr obj, Expr args, TypeArray clsTypeArgs, TypeArray methTypeArgs)
-        {
-            MethodSymbol methSym = GetSymbolLoader().getPredefinedMembers().GetMethod(predefMethod);
-            if (methSym == null)
-            {
-                MethWithInst mwi = new MethWithInst(null, null);
-                ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(obj, mwi);
-                ExprCall rval = GetExprFactory().CreateCall(0, null, args, pMemGroup, null);
-                rval.SetError();
-                return rval;
-            }
-
-            AggregateSymbol agg = methSym.getClass();
-            if (clsTypeArgs == null)
-            {
-                clsTypeArgs = BSYMMGR.EmptyTypeArray();
-            }
-            AggregateType aggType = GetTypes().GetAggregate(agg, clsTypeArgs);
-
-            MethPropWithInst mpwiBest = new MethPropWithInst(methSym, aggType, methTypeArgs);
-            ExprMemberGroup memgroup = GetExprFactory().CreateMemGroup(obj, mpwiBest);
-
-            ExprCall exprRes = BindToMethod(new MethWithInst(mpwiBest), args, memgroup, (MemLookFlags)MemLookFlags.None);
-
-            return exprRes;
-        }
-        ////////////////////////////////////////////////////////////////////////////////
         // Report a bad operator types error to the user.
         private ExprOperator BadOperatorTypesError(ExpressionKind ek, Expr pOperand1, Expr pOperand2)
         {
@@ -1700,24 +1565,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pObject == null)
             {
-                if (InFieldInitializer() && !InStaticMethod() && ContainingAgg() == swt.Sym.parent)
-                {
-                    ErrorContext.ErrorRef(ErrorCode.ERR_FieldInitRefNonstatic, swt); // give better error message for common mistake <BUGNUM>See VS7:119218</BUGNUM>
-                }
-                else if (InAnonymousMethod() && !InStaticMethod() && ContainingAgg() == swt.Sym.parent && ContainingAgg().IsStruct())
-                {
-                    ErrorContext.Error(ErrorCode.ERR_ThisStructNotInAnonMeth);
-                }
-                else
-                {
-                    return null;
-                }
-
-                // For fields or structs, make a this pointer for us to use.
-
-                ExprThisPointer thisExpr = GetExprFactory().CreateThis(Context.GetThisPointer(), true);
-                thisExpr.SetMismatchedStaticBit();
-                return thisExpr;
+                return null;
             }
 
             CType typeObj = pObject.Type;
@@ -1810,14 +1658,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else if (pObject == null)
             {
                 // We're not static, and we don't have an object. This is ok in certain scenarios:
-                bool bNonStaticField = InFieldInitializer() && !InStaticMethod() && ContainingAgg() == swt.Sym.parent;
-                bool bAnonymousMethod = InAnonymousMethod() && !InStaticMethod() && ContainingAgg() == swt.Sym.parent && ContainingAgg().IsStruct();
-
-                if (!bNonStaticField && !bAnonymousMethod)
-                {
-                    return false;
-                }
+                return false;
             }
+
             return true;
         }
 
@@ -1829,9 +1672,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return (
                        pObject == null ||  // statics are always lvalues
-
-                       isThisPointer(pObject) ||  // the this pointer's fields or props are lvalues
-
                        (((pObject.Flags & EXPRFLAG.EXF_LVALUE) != 0) && (pObject.Kind != ExpressionKind.Property)) ||
                        // things marked as lvalues have props/fields which are lvalues, with one exception:  props of structs
                        // do not have fields/structs as lvalues
@@ -2057,7 +1897,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // we need to create an array and put it as the last arg...
             CType substitutedArrayType = GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
-            if (!substitutedArrayType.IsArrayType() || substitutedArrayType.AsArrayType().rank != 1)
+            if (!substitutedArrayType.IsArrayType() || !substitutedArrayType.AsArrayType().IsSZArray)
             {
                 // Invalid type for params array parameter. Happens in LAF scenarios, e.g.
                 //
@@ -2497,7 +2337,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert((errCode != ErrorCode.ERR_SizeofUnsafe) || pArg != null);
             if (type == null || type.isUnsafe())
             {
-                if (!isUnsafeContext() && ReportUnsafeErrors())
+                if (ReportUnsafeErrors())
                 {
                     if (pArg != null)
                         ErrorContext.Error(errCode, pArg);
@@ -2508,60 +2348,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private bool InMethod()
-        {
-            return Context.InMethod();
-        }
-
-        private bool InStaticMethod()
-        {
-            return Context.InStaticMethod();
-        }
-
-        private bool InConstructor()
-        {
-            return Context.InConstructor();
-        }
-
-        private bool InAnonymousMethod()
-        {
-            return Context.InAnonymousMethod();
-        }
-
-        private bool InFieldInitializer()
-        {
-            return Context.InFieldInitializer();
-        }
-
         ////////////////////////////////////////////////////////////////////////////////
         private Declaration ContextForMemberLookup()
         {
-            return Context.ContextForMemberLookup();
-        }
-
-        private AggregateSymbol ContainingAgg()
-        {
-            return Context.ContainingAgg();
-        }
-
-        private bool isThisPointer(Expr expr)
-        {
-            return Context.IsThisPointer(expr);
-        }
-
-        private bool RespectReadonly()
-        {
-            return Context.RespectReadonly();
-        }
-
-        private bool isUnsafeContext()
-        {
-            return Context.IsUnsafeContext();
+            return Context.ContextForMemberLookup;
         }
 
         private bool ReportUnsafeErrors()
         {
-            return Context.ReportUnsafeErrors();
+            return Context.ReportUnsafeErrors;
         }
 
         private void RecordUnsafeUsage()
@@ -2581,11 +2376,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static void RecordUnsafeUsage(BindingContext context)
         {
-            if (!(context.GetUnsafeState() == UNSAFESTATES.UNSAFESTATES_Unsafe) &&
-                    !context.GetOutputContext().m_bUnsafeErrorGiven)
-            {
-                context.GetOutputContext().m_bUnsafeErrorGiven = true;
-            }
+            context.ReportUnsafeErrors = false;
         }
 
         internal static int CountArguments(Expr args, out bool typeErrors)

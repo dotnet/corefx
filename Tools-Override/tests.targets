@@ -99,7 +99,6 @@
     </ItemGroup>
     <ItemGroup Condition="'$(BuildingNETFxVertical)' == 'true'">
       <SupplementalTestData Include="$(RuntimePath)xunit.console.exe" />
-      <SupplementalTestData Include="$(RuntimePath)xunit.console.exe.config" />
       <SupplementalTestData Include="$(RuntimePath)xunit.execution.desktop.dll" />
     </ItemGroup>
   </Target>
@@ -124,12 +123,25 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyRemoteExecutionConfigFile" 
-          BeforeTargets="GenerateTestExecutionScripts" 
-          Condition="'$(BuildingNETFxVertical)' == 'true' And Exists('$(TestPath)\RemoteExecutorConsoleApp.exe')">
+  <!-- We need to generate a simple config file for desktop test executors to tell them to use DEVPATH environment variable to use their dependencies from there.
+  DEVPATH is being set for desktop runs in RunTests.cmd to the TestHostPath. We need this approach to have desktop Helix runs. -->
+  <Target Name="CopyDesktopExecutorsConfigFiles"
+          BeforeTargets="GenerateTestExecutionScripts"
+          Condition="'$(BuildingNETFxVertical)' == 'true'">
+    <PropertyGroup>
+      <NETFxTestRunnerAppConfig Condition="'$(NETFxTestRunnerAppConfig)' == ''">$(ToolsDir)\DesktopRunnerConfigFile.config</NETFxTestRunnerAppConfig>
+      <XunitRunnerNETFxConfigFile>$(TestPath)\$(XunitExecutable).config</XunitRunnerNETFxConfigFile>
+      <RemoteExecutorConfigFile>$(TestPath)\RemoteExecutorConsoleApp.exe.config</RemoteExecutorConfigFile>
+    </PropertyGroup>
 
-    <Copy SourceFiles="$(RuntimePath)\xunit.console.exe.config"
-          DestinationFiles="$(TestPath)\RemoteExecutorConsoleApp.exe.config" 
+    <Copy SourceFiles="$(NETFxTestRunnerAppConfig)"
+          DestinationFiles="$(XunitRunnerNETFxConfigFile)" 
+          SkipUnchangedFiles="true"
+          />
+
+    <Copy Condition="Exists('$(TestPath)\RemoteExecutorConsoleApp.exe')"
+          SourceFiles="$(NETFxTestRunnerAppConfig)"
+          DestinationFiles="$(RemoteExecutorConfigFile)" 
           SkipUnchangedFiles="true"
           />
   </Target>
@@ -198,6 +210,13 @@
       Overwrite="true"
       Encoding="Ascii" />
 
+      <!--======================================================
+                      Section for netfx test runs
+            ====================================================== -->
+    <ItemGroup Condition="'$(BuildingNETFxVertical)' == 'true'" >
+      <TestCommandLines Include="set DEVPATH=%RUNTIME_PATH%" />
+    </ItemGroup>
+
         <!--======================================================
                       Section for uapaot ilc test runs
             ====================================================== -->
@@ -262,6 +281,7 @@
       <TestCommandLines  Condition="'$(TargetOS)'=='Windows_NT'" Include="call $(TestCommandLine)"/>
 
       <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT' and '$(TestGCStressLevel)' != ''" Include="export COMPlus_GCStress=$(TestGCStressLevel)"/>
+      <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="chmod +x $(TestProgram)"/>
       <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="$(TestCommandLine)"/>
     </ItemGroup>
 
@@ -280,6 +300,7 @@
       RunnerScriptTemplate="$(MSBuildThisFileDirectory)/$(RunnerTemplateName)"
       ScriptOutputPath ="$(OutputPathForScriptGenerator)"
     />
+    <Exec Condition="'$(TargetOS)'!='Windows_NT'" Command="chmod +x $(OutputPathForScriptGenerator)" />
   </Target>
 
   <Target Name="RunTestsForProject"

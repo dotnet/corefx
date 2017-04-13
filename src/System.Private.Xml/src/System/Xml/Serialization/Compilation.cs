@@ -31,7 +31,7 @@ namespace System.Xml.Serialization
     internal class TempAssembly
     {
         internal const string GeneratedAssemblyNamespace = "Microsoft.Xml.Serialization.GeneratedAssembly";
-        private Assembly _assembly;
+        private Assembly _assembly = null;
         private XmlSerializerImplementation _contract = null;
         private IDictionary _writerMethods;
         private IDictionary _readerMethods;
@@ -50,6 +50,13 @@ namespace System.Xml.Serialization
 
         private TempAssembly()
         {
+        }
+
+        internal TempAssembly(XmlMapping[] xmlMappings, Assembly assembly, XmlSerializerImplementation contract)
+        {
+            _assembly = assembly;
+            InitAssemblyMethods(xmlMappings);
+            _contract = contract;
         }
 
         internal TempAssembly(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, string location)
@@ -102,24 +109,12 @@ namespace System.Xml.Serialization
             InitAssemblyMethods(xmlMappings);
         }
 
-        internal TempAssembly(XmlMapping[] xmlMappings, Assembly assembly, XmlSerializerImplementation contract)
-        {
-            _assembly = assembly;
-            InitAssemblyMethods(xmlMappings);
-            _contract = contract;
-        }
-
         internal static bool UseLegacySerializerGeneration
         {
             get
             {
                 return false;
             }
-        }
-
-        internal TempAssembly(XmlSerializerImplementation contract)
-        {
-            _contract = contract;
         }
 
         internal XmlSerializerImplementation Contract
@@ -179,7 +174,7 @@ namespace System.Xml.Serialization
                 name.CultureInfo = CultureInfo.InvariantCulture;
                 try
                 {
-                    serializer = Assembly.Load(name);
+                    serializer = Assembly.LoadFile(Path.GetFullPath(serializerName) + ".dll");
                 }
                 catch (Exception e)
                 {
@@ -193,9 +188,6 @@ namespace System.Xml.Serialization
                         // the parent assembly was signed, so do not try to LoadWithPartialName
                         return null;
                     }
-#pragma warning disable 618
-                    serializer = Assembly.LoadWithPartialName(serializerName);
-#pragma warning restore 618
                 }
                 if (serializer == null)
                 {
@@ -420,7 +412,7 @@ namespace System.Xml.Serialization
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    throw new UnauthorizedAccessException(SR.Format(SR.DicrectoryAccessDenied, location));
+                    throw new UnauthorizedAccessException(SR.Format(SR.DirectoryAccessDenied, location));
                 }
             }
             finally
@@ -677,7 +669,7 @@ namespace System.Xml.Serialization
             {
                 TempAssembly tempAssembly;
                 _cache.TryGetValue(new TempAssemblyCacheKey(ns, o), out tempAssembly);
-                return  tempAssembly;
+                return tempAssembly;
             }
         }
 

@@ -161,11 +161,14 @@ namespace System.Net.Http
             get { return true; }
             set
             {
+                /*
+                TODO:#18104
                 if (value != PreAuthenticate)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(PreAuthenticate)));
                 }
+                */
                 CheckDisposedOrStarted();
             }
         }
@@ -285,7 +288,7 @@ namespace System.Net.Http
             set
             {
                 /*
-                 * https://github.com/dotnet/corefx/issues/17812
+                 * TODO:#17812
                 if (value != MaxAutomaticRedirections)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
@@ -331,8 +334,11 @@ namespace System.Net.Http
 
             set
             {
+                /*
+                 * TODO:#18036
                 throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                     SR.net_http_value_not_supported, value, nameof(MaxResponseHeadersLength)));
+                */
             }
         }
 
@@ -367,8 +373,10 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != null)
                 {
+                    /* 
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(ServerCertificateCustomValidationCallback)));
+                   */
                 }
             }
         }
@@ -382,11 +390,13 @@ namespace System.Net.Http
             set
             {
                 CheckDisposedOrStarted();
+                /*TODO#18116
                 if (!value)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(CheckCertificateRevocationList)));
                 }
+                */
             }
         }
 
@@ -398,8 +408,11 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != SslProtocols.None)
                 {
+                    /*
+                    TODO:#18116
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(SslProtocols)));
+                   */
                 }
             }
         }
