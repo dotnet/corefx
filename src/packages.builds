@@ -53,6 +53,18 @@
     </Project>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >
+    <!-- add specific native builds / pkgproj's here to include in servicing builds -->
+    <Project Include="Native\pkg\runtime.native.System.Security.Cryptography\runtime.native.System.Security.Cryptography.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
+    <Project Include="Native\pkg\runtime.native.System.Security.Cryptography.OpenSsl\runtime.native.System.Security.Cryptography.OpenSsl.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
+  </ItemGroup>
+
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
   <Target Name="GenerateNETStandardDocs">
     <Error Condition="'$(WcfPackageReportDir)' == ''"
