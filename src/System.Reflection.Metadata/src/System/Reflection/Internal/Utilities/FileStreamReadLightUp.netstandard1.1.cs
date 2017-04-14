@@ -105,7 +105,7 @@ namespace System.Reflection.Internal
 
             try
             {
-                result = NativeMethods.ReadFileCompat(handle, buffer, size, out bytesRead, IntPtr.Zero);
+                result = ReadFile(handle, buffer, size, out bytesRead, IntPtr.Zero);
             }
             catch
             {
