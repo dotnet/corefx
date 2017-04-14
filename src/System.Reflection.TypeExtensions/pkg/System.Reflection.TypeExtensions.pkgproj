@@ -3,10 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Reflection.TypeExtensions.csproj">
-      <SupportedFramework>net462;netcoreapp1.0;uap10.1;$(AllXamarinFrameworks)</SupportedFramework>
-      <Preserve>true</Preserve>
+      <SupportedFramework>net461;netcoreapp2.0;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Reflection.TypeExtensions.builds" />
+    <ProjectReference Include="..\src\System.Reflection.TypeExtensions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />
@@ -15,6 +14,14 @@
     <InboxOnTargetFramework Include="xamarinmac20" />
     <InboxOnTargetFramework Include="xamarintvos10" />
     <InboxOnTargetFramework Include="xamarinwatchos10" />
+    <!-- this package previously defined API at netstandard1.5, which was supported by net462
+         now that net461 supports netstandard2.0 and therefor nestandard1.5 we must support
+         the ns1.5 API in net461, exclude the net462 assembly since it is redundant. -->
+    <HarvestExcludePaths Include="ref/net462;lib/net462" />
+
+    <!-- this package is part of the implementation closure of NETStandard.Library
+         therefore it cannot reference NETStandard.Library -->
+    <SuppressMetaPackage Include="NETStandard.Library" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -10,22 +10,23 @@
     <FileAlignment>512</FileAlignment>
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants Condition="'$(TargetGroup)'=='uap101aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
     <!-- We do not want to block reflection for this assembly -->
-    <BlockReflectionAttribute Condition="'$(TargetGroup)'=='uap101aot'">false</BlockReflectionAttribute>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <BlockReflectionAttribute Condition="'$(TargetGroup)'=='uapaot'">false</BlockReflectionAttribute>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup>
     <RuntimeSerializationSources>System\Runtime\Serialization</RuntimeSerializationSources>
     <JsonSources>System\Runtime\Serialization\Json</JsonSources>
     <XmlSources>System\Xml</XmlSources>
     <TextSources>System\Text</TextSources>
-    <NetNative>$(DefineConstants.Contains('NET_NATIVE'))</NetNative>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\HResults.cs">
@@ -52,7 +53,7 @@
     <Compile Include="$(RuntimeSerializationSources)\Globals.cs" />
     <Compile Include="$(RuntimeSerializationSources)\GenericParameterDataContract.cs" />
     <Compile Include="$(RuntimeSerializationSources)\HybridObjectCache.cs" />
-    <Compile Include="$(RuntimeSerializationSources)\InvalidDataContract.cs" Condition="$(NetNative)" />
+    <Compile Include="$(RuntimeSerializationSources)\InvalidDataContract.cs"  Condition="'$(TargetGroup)' == 'uapaot'" />
     <Compile Include="$(RuntimeSerializationSources)\ObjectToIdCache.cs" />
     <Compile Include="$(RuntimeSerializationSources)\ObjectReferenceStack.cs" />
     <Compile Include="$(RuntimeSerializationSources)\PrimitiveDataContract.cs" />
@@ -76,7 +77,7 @@
     <Compile Include="$(RuntimeSerializationSources)\KnownTypeDataContractResolver.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlObjectSerializerReadContextComplex.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlObjectSerializerWriteContextComplex.cs" />
-    <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="!$(NetNative)" />
+    <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSurrogateCaller.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSerializerExtensions.cs" />
     <Compile Include="$(RuntimeSerializationSources)\XmlSerializableServices.cs" />
@@ -141,8 +142,11 @@
     <Compile Include="$(JsonSources)\IXmlJsonWriterInitializer.cs" />
     <Compile Include="$(JsonSources)\ByteArrayHelperWithString.cs" />
     <Compile Include="$(JsonSources)\JsonEncodingStreamWrapper.cs" />
-    <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="!$(NetNative)" />
+    <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="'$(TargetGroup)' != 'uapaot'" />
     <Compile Include="System\Runtime\Serialization\AccessorBuilder.cs" />
+    <Compile Include="$(CommonPath)\System\CodeDom\CodeTypeReference.cs" />
+    <Compile Include="$(CommonPath)\System\CodeDom\CodeTypeReferenceCollection.cs" />
+    <Compile Include="$(CommonPath)\System\CodeDom\CodeObject.cs" />
     <Compile Include="System\Runtime\Serialization\DataContractSet.cs" />
     <Compile Include="System\Runtime\Serialization\ExportOptions.cs" />
     <Compile Include="System\Runtime\Serialization\IExtensibleDataObject.cs" />
@@ -158,12 +162,32 @@
     <Compile Include="System\Runtime\Serialization\XsdDataContractExporter.cs" />
     <Compile Include="System\Xml\IFragmentCapableXmlDictionaryWriter.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uap101aot'">
-    <TargetingPackReference Include="System.Private.CoreLib.Augments" />
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
     <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.Reflection.Emit.ILGeneration" />
+    <Reference Include="System.Reflection.Emit.Lightweight" />
+    <Reference Include="System.Reflection.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.Serialization.Formatters" />
+    <Reference Include="System.Runtime.Serialization.Primitives" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Xml.ReaderWriter" />
+    <Reference Include="System.Xml.XDocument" />
+    <Reference Include="System.Xml.XmlSerializer" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

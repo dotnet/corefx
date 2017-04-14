@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 
 using Xunit;
@@ -14,6 +10,7 @@ namespace System.Net.Sockets.Tests
 {
     public class IPPacketInformationTest
     {
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in IPPacketInformation.Equals that dereferences null address")]
         [Fact]
         public void Equals_DefaultValues_Success()
         {
@@ -22,6 +19,7 @@ namespace System.Net.Sockets.Tests
             Assert.False(default(IPPacketInformation) != default(IPPacketInformation));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in IPPacketInformation.GetHashCode that dereferences null address")]
         [Fact]
         public void GetHashCode_DefaultValues_Success()
         {
@@ -41,6 +39,8 @@ namespace System.Net.Sockets.Tests
             Assert.NotEqual(packetInfo, default(IPPacketInformation));
             Assert.False(packetInfo == default(IPPacketInformation));
             Assert.True(packetInfo != default(IPPacketInformation));
+
+            int ignored = packetInfo.Interface; // just make sure it doesn't throw, nothing else to verify
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/987

@@ -290,23 +290,9 @@ namespace System.Xml.Xsl
             get { return _debugger; }
         }
 
-#if false
-        internal XslTransform(IXsltDebugger debugger) {
-            this.debugger = debugger;
-        }
-#endif
-
-        internal XslTransform(object debugger)
-        {
-            if (debugger != null)
-            {
-                _debugger = new DebuggerAddapter(debugger);
-            }
-        }
-
         private static XmlResolver CreateDefaultResolver()
         {
-            if (LocalAppContextSwitches.DontProhibitDefaultResolver)
+            if (LocalAppContextSwitches.AllowDefaultResolver)
             {
                 return new XmlUrlResolver();
             }

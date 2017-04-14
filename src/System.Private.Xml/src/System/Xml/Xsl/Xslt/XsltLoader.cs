@@ -1322,80 +1322,14 @@ namespace System.Xml.Xsl.Xslt
             new XsltAttribute("name", V1Opt | V2Opt),
             new XsltAttribute("href", V1Opt | V2Opt)
         };
-        // SxS: This method reads resource names from source document and does not expose any resources to the caller.
-        // It's OK to suppress the SxS warning.
-        private void LoadMsAssembly(ScriptClass scriptClass)
-        {
-            _input.GetAttributes(_assemblyAttributes);
-
-            string name = ParseStringAttribute(0, "name");
-            string href = ParseStringAttribute(1, "href");
-
-            if ((name != null) == (href != null))
-            {
-                ReportError(/*[XT_046]*/SR.Xslt_AssemblyNameHref);
-            }
-            else
-            {
-                string asmLocation = null;
-                if (name != null)
-                {
-                    try
-                    {
-                        AssemblyName asmName = new AssemblyName(name);
-                        Assembly.Load(asmName);
-                        asmLocation = asmName.Name + ".dll";
-                    }
-                    catch
-                    {
-                        AssemblyName asmName = new AssemblyName(name);
-
-                        // If the assembly is simply named, let CodeDomProvider and Fusion resolve it
-                        byte[] publicKeyToken = asmName.GetPublicKeyToken();
-                        if ((publicKeyToken == null || publicKeyToken.Length == 0) && asmName.Version == null)
-                        {
-                            asmLocation = asmName.Name + ".dll";
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    Debug.Assert(href != null);
-                    asmLocation = Assembly.LoadFrom(ResolveUri(href, _input.BaseUri).ToString()).Location;
-                    scriptClass.refAssembliesByHref = true;
-                }
-
-                if (asmLocation != null)
-                {
-                    scriptClass.refAssemblies.Add(asmLocation);
-                }
-            }
-
-            CheckNoContent();
-        }
 
         private XsltAttribute[] _usingAttributes = {
             new XsltAttribute("namespace", V1Req | V2Req)
         };
-        private void LoadMsUsing(ScriptClass scriptClass)
-        {
-            _input.GetAttributes(_usingAttributes);
-
-            if (_input.MoveToXsltAttribute(0, "namespace"))
-            {
-                scriptClass.nsImports.Add(_input.Value);
-            }
-            CheckNoContent();
-        }
 
         // ----------------- Template level methods --------------------------
         // Each instruction in AST tree has nsdecl list attuched to it.
         // Load*() methods do this treek. Xsl*() methods rely on LoadOneInstruction() to do this.
-        // ToDo: check how LoadUnknown*() follows this gideline!
 
         private enum InstructionFlags
         {
@@ -2675,7 +2609,6 @@ namespace System.Xml.Xsl.Xslt
             _input.MoveToElement();
             ISourceLineInfo extElmLineInfo = _input.BuildNameLineInfo();
             List<XslNode> fallbacksArray = new List<XslNode>();
-            // TODO: Unknown element can have NS declarations that will be in affect in fallback clouse.
             /* Process children */
             if (_input.MoveToFirstChild())
             {
@@ -3142,8 +3075,6 @@ namespace System.Xml.Xsl.Xslt
             }
         }
 
-
-        // ToDo: We don't need separation on SkipEmptyContent() and CheckNoContent(). Merge them back when we are done with parsing.
         private void CheckNoContent()
         {
             _input.MoveToElement();
@@ -3161,12 +3092,12 @@ namespace System.Xml.Xsl.Xslt
         {
             ISourceLineInfo result = null;
 
-            // Really EMPTY means no content at all, but for the sake of compatibility with MSXML we allow whitespaces
+            // Really EMPTY means no content at all, but for the sake of compatibility with MSXML we allow whitespace
             if (_input.MoveToFirstChild())
             {
                 do
                 {
-                    // NOTE: XmlNodeType.SignificantWhitespace are not allowed here
+                    // NOTE: XmlNodeType.SignificantWhitespace is not allowed here
                     if (_input.NodeType != XmlNodeType.Whitespace)
                     {
                         if (result == null)
@@ -3212,7 +3143,7 @@ namespace System.Xml.Xsl.Xslt
         // Namespaces of stylesheet can be overriden in template and to make this works correclety we
         // should attache them after NsDec of top level elements.
         // Toplevel element almost never contais NsDecl and in practice node duplication will not happened, but if they have
-        // we should copy NsDecls of stylesheet localy in toplevel elements.
+        // we should copy NsDecls of stylesheet locally in toplevel elements.
         private static NsDecl MergeNamespaces(NsDecl thisList, NsDecl parentList)
         {
             if (parentList == null)

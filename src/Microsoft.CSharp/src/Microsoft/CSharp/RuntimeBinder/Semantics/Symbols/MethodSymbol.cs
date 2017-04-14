@@ -44,19 +44,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             Debug.Assert(!_inferenceMustFail);
             _checkedInfMustFail = true;
-            for (int ivar = 0; ivar < typeVars.Size; ivar++)
+            for (int ivar = 0; ivar < typeVars.Count; ivar++)
             {
                 TypeParameterType var = typeVars.ItemAsTypeParameterType(ivar);
                 // See if type var is used in a parameter.
                 for (int ipar = 0; ; ipar++)
                 {
-                    if (ipar >= Params.Size)
+                    if (ipar >= Params.Count)
                     {
                         // This type variable is not in any parameter.
                         _inferenceMustFail = true;
                         return true;
                     }
-                    if (TypeManager.TypeContainsType(Params.Item(ipar), var))
+                    if (TypeManager.TypeContainsType(Params[ipar], var))
                     {
                         break;
                     }
@@ -84,8 +84,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsNullableConstructor()
         {
             return getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL) &&
-                Params.Size == 1 &&
-                Params.Item(0).IsGenericParameter &&
+                Params.Count == 1 &&
+                Params[0].IsGenericParameter &&
                 IsConstructor();
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _methKind == MethodKindEnum.EventAccessor;
         }
 
-        public bool isExplicit()          // is user defined explicit conversion operator
+        private bool isExplicit()          // is user defined explicit conversion operator
         {
             return _methKind == MethodKindEnum.ExplicitConv;
         }
@@ -171,7 +171,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return !isOperator && !isAnyAccessor();
         }
 
-        public bool isAnyAccessor()
+        private bool isAnyAccessor()
         {
             return isPropertyAccessor() || isEventAccessor();
         }
@@ -206,11 +206,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // used for CMOD_OPT interop
     // ----------------------------------------------------------------------------
 
-    internal class InterfaceImplementationMethodSymbol : MethodSymbol
+    internal sealed class InterfaceImplementationMethodSymbol : MethodSymbol
     {
     }
 
-    internal class IteratorFinallyMethodSymbol : MethodSymbol
+    internal sealed class IteratorFinallyMethodSymbol : MethodSymbol
     {
     }
 }

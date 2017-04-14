@@ -217,14 +217,7 @@ namespace System
             int hr = Interop.Shell32.SHGetKnownFolderPath(folderId, (uint)option, IntPtr.Zero, out path);
             if (hr != 0) // Not S_OK
             {
-                if (hr == Interop.Shell32.COR_E_PLATFORMNOTSUPPORTED)
-                {
-                    throw new PlatformNotSupportedException();
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return string.Empty;
             }
 
             return path;
@@ -340,7 +333,7 @@ namespace System
                 // Use GetUserNameExW, as GetUserNameW isn't available on all platforms, e.g. Win7
                 var domainName = new StringBuilder(1024);
                 uint domainNameLen = (uint)domainName.Capacity;
-                if (Interop.SspiCli.GetUserNameExW(Interop.SspiCli.NameSamCompatible, domainName, ref domainNameLen) == 1)
+                if (Interop.Secur32.GetUserNameExW(Interop.Secur32.NameSamCompatible, domainName, ref domainNameLen) == 1)
                 {
                     string samName = domainName.ToString();
                     int index = samName.IndexOf('\\');
@@ -360,7 +353,7 @@ namespace System
             {
                 var domainName = new StringBuilder(1024);
                 uint domainNameLen = (uint)domainName.Capacity;
-                if (Interop.SspiCli.GetUserNameExW(Interop.SspiCli.NameSamCompatible, domainName, ref domainNameLen) == 1)
+                if (Interop.Secur32.GetUserNameExW(Interop.Secur32.NameSamCompatible, domainName, ref domainNameLen) == 1)
                 {
                     string samName = domainName.ToString();
                     int index = samName.IndexOf('\\');

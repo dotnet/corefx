@@ -10,7 +10,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class CType : ITypeOrNamespace
+    internal abstract class CType
     {
         private TypeKind _typeKind;
         private Name _pName;
@@ -44,19 +44,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsWindowsRuntimeType()
         {
-            return (AssociatedSystemType.GetTypeInfo().Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
+            return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
         }
 
         public bool IsCollectionType()
         {
-            if ((AssociatedSystemType.GetTypeInfo().IsGenericType &&
-                 (AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IList<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                  AssociatedSystemType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
+            if ((AssociatedSystemType.IsGenericType &&
+                 (AssociatedSystemType.GetGenericTypeDefinition() == typeof(IList<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(ICollection<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
                 AssociatedSystemType == typeof(System.Collections.IList) ||
                 AssociatedSystemType == typeof(System.Collections.ICollection) ||
                 AssociatedSystemType == typeof(System.Collections.IEnumerable) ||
@@ -97,14 +97,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ArrayType:
                     ArrayType a = src.AsArrayType();
                     Type elementType = a.GetElementType().AssociatedSystemType;
-                    if (a.rank == 1)
-                    {
-                        result = elementType.MakeArrayType();
-                    }
-                    else
-                    {
-                        result = elementType.MakeArrayType(a.rank);
-                    }
+                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.rank);
                     break;
 
                 case TypeKind.TK_NullableType:
@@ -139,7 +132,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     else
                     {
                         Type parentType = t.GetOwningSymbol().AsAggregateSymbol().AssociatedSystemType;
-                        result = parentType.GetTypeInfo().GenericTypeParameters[t.GetIndexInOwnParameters()];
+                        result = parentType.GetGenericArguments()[t.GetIndexInOwnParameters()];
                     }
                     break;
 
@@ -169,20 +162,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             List<Type> list = new List<Type>();
 
             // Get each type arg.
-            for (int i = 0; i < typeArgs.size; i++)
+            for (int i = 0; i < typeArgs.Count; i++)
             {
                 // Unnamed type parameter types are just placeholders.
-                if (typeArgs.Item(i).IsTypeParameterType() && typeArgs.Item(i).AsTypeParameterType().GetTypeParameterSymbol().name == null)
+                if (typeArgs[i].IsTypeParameterType() && typeArgs[i].AsTypeParameterType().GetTypeParameterSymbol().name == null)
                 {
                     return null;
                 }
-                list.Add(typeArgs.Item(i).AssociatedSystemType);
+                list.Add(typeArgs[i].AssociatedSystemType);
             }
 
             Type[] systemTypeArgs = list.ToArray();
             Type uninstantiatedType = agg.AssociatedSystemType;
 
-            if (uninstantiatedType.GetTypeInfo().IsGenericType)
+            if (uninstantiatedType.IsGenericType)
             {
                 try
                 {
@@ -196,12 +189,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return uninstantiatedType;
         }
-
-        // ITypeOrNamespace
-        public bool IsType() { return true; }
-        public bool IsNamespace() { return false; }
-        public AssemblyQualifiedNamespaceSymbol AsNamespace() { throw Error.InternalCompilerError(); }
-        public CType AsType() { return this; }
 
         public TypeKind GetTypeKind() { return _typeKind; }
         public void SetTypeKind(TypeKind kind) { _typeKind = kind; }
@@ -244,9 +231,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_AggregateType:
                     fBogus = AsAggregateType().getAggregate().computeCurrentBogusState();
-                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().size; i++)
+                    for (int i = 0; !fBogus && i < AsAggregateType().GetTypeArgsAll().Count; i++)
                     {
-                        fBogus |= AsAggregateType().GetTypeArgsAll().Item(i).computeCurrentBogusState();
+                        fBogus |= AsAggregateType().GetTypeArgsAll()[i].computeCurrentBogusState();
                     }
                     break;
 
@@ -314,14 +301,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             _fHasErrors = typePar.HasErrors();
             _fUnres = typePar.IsUnresolved();
-#if CSEE
-
-            this.typeRes = this;
-            if (!this.fUnres)
-                this.tsRes = ktsImportMax;
-            this.fDirty = typePar.fDirty;
-            this.tsDirty = typePar.tsDirty;
-#endif // CSEE
         }
 
         public bool HasErrors()
@@ -469,7 +448,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return GetNakedAgg(false);
         }
-        public AggregateSymbol GetNakedAgg(bool fStripNub)
+
+        private AggregateSymbol GetNakedAgg(bool fStripNub)
         {
             CType type = GetNakedType(fStripNub);
             if (type != null && type.IsAggregateType())
@@ -521,7 +501,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return isSimpleType() || isPredefType(PredefinedType.PT_STRING) || isEnumType();
         }
 
-        public bool isPointerLike()
+        private bool isPointerLike()
         {
             return IsPointerType() || isPredefType(PredefinedType.PT_INTPTR) || isPredefType(PredefinedType.PT_UINTPTR);
         }
@@ -654,7 +634,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
 
                         // Generics are always managed.
-                        if (aggT.GetTypeVarsAll().size > 0)
+                        if (aggT.GetTypeVarsAll().Count > 0)
                         {
                             aggT.SetManagedStruct(true);
                             return true;
@@ -697,7 +677,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (isPredefType(PredefinedType.PT_G_EXPRESSION))
             {
-                return AsAggregateType().GetTypeArgsThis().Item(0);
+                return AsAggregateType().GetTypeArgsThis()[0];
             }
 
             return this;

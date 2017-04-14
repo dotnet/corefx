@@ -73,7 +73,7 @@ namespace System.Linq.Expressions
         /// </summary>
         public ReadOnlyCollection<Expression> Arguments
         {
-            get { return ReturnReadOnly(ref _arguments); }
+            get { return ExpressionUtils.ReturnReadOnly(ref _arguments); }
         }
 
         /// <summary>
@@ -86,11 +86,15 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public IndexExpression Update(Expression @object, IEnumerable<Expression> arguments)
         {
-            if (@object == Object && arguments == Arguments)
+            if (@object == Object & arguments != null)
             {
-                return this;
+                if (ExpressionUtils.SameElements(ref arguments, Arguments))
+                {
+                    return this;
+                }
             }
-            return Expression.MakeIndex(@object, Indexer, arguments);
+
+            return MakeIndex(@object, Indexer, arguments);
         }
 
         /// <summary>
@@ -168,7 +172,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression ArrayAccess(Expression array, IEnumerable<Expression> indexes)
         {
-            RequiresCanRead(array, nameof(array));
+            ExpressionUtils.RequiresCanRead(array, nameof(array));
 
             Type arrayType = array.Type;
             if (!arrayType.IsArray)
@@ -184,7 +188,7 @@ namespace System.Linq.Expressions
 
             foreach (Expression e in indexList)
             {
-                RequiresCanRead(e, nameof(indexes));
+                ExpressionUtils.RequiresCanRead(e, nameof(indexes));
                 if (e.Type != typeof(int))
                 {
                     throw Error.ArgumentMustBeArrayIndexType(nameof(indexes));
@@ -207,7 +211,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression Property(Expression instance, string propertyName, params Expression[] arguments)
         {
-            RequiresCanRead(instance, nameof(instance));
+            ExpressionUtils.RequiresCanRead(instance, nameof(instance));
             ContractUtils.RequiresNotNull(propertyName, nameof(propertyName));
             PropertyInfo pi = FindInstanceProperty(instance.Type, propertyName, arguments);
             return MakeIndexProperty(instance, pi, nameof(propertyName), arguments.ToReadOnly());
@@ -467,7 +471,7 @@ namespace System.Linq.Expressions
                     throw Error.OnlyStaticPropertiesHaveNullInstance(nameof(instance));
                 }
 
-                RequiresCanRead(instance, nameof(instance));
+                ExpressionUtils.RequiresCanRead(instance, nameof(instance));
                 ValidateCallInstanceType(instance.Type, method);
             }
 
@@ -487,7 +491,7 @@ namespace System.Linq.Expressions
                 {
                     Expression arg = arguments[i];
                     ParameterInfo pi = indexes[i];
-                    RequiresCanRead(arg, nameof(arguments), i);
+                    ExpressionUtils.RequiresCanRead(arg, nameof(arguments), i);
 
                     Type pType = pi.ParameterType;
                     if (pType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs(nameof(indexes), i);

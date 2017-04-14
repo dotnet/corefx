@@ -13,7 +13,6 @@ namespace System.DirectoryServices.ActiveDirectory
     using System.Runtime.InteropServices;
     using System.Security.Permissions;
 
-    [DirectoryServicesPermission(SecurityAction.LinkDemand, Unrestricted = true)]
     public class ConfigurationSet
     {
         // Private Variables
@@ -87,7 +86,7 @@ namespace System.DirectoryServices.ActiveDirectory
             if ((context.ContextType != DirectoryContextType.ConfigurationSet) &&
                 (context.ContextType != DirectoryContextType.DirectoryServer))
             {
-                throw new ArgumentException(Res.GetString(Res.TargetShouldBeServerORConfigSet), "context");
+                throw new ArgumentException(SR.TargetShouldBeServerORConfigSet, "context");
             }
 
             // target should be an adam config set or server
@@ -96,11 +95,11 @@ namespace System.DirectoryServices.ActiveDirectory
                 // the target should be a server or an ADAM Config Set
                 if (context.ContextType == DirectoryContextType.ConfigurationSet)
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ConfigSetNotFound), typeof(ConfigurationSet), context.Name);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.ConfigSetNotFound, typeof(ConfigurationSet), context.Name);
                 }
                 else
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.AINotFound, context.Name), typeof(ConfigurationSet), null);
+                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.AINotFound , context.Name), typeof(ConfigurationSet), null);
                 }
             }
 
@@ -119,7 +118,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 rootDSE = directoryEntryMgr.GetCachedDirectoryEntry(WellKnownDN.RootDSE);
                 if ((context.isServer()) && (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectoryApplicationMode)))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.AINotFound, context.Name), typeof(ConfigurationSet), null);
+                    throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.AINotFound , context.Name), typeof(ConfigurationSet), null);
                 }
 
                 configSetName = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.ConfigurationNamingContext);
@@ -132,11 +131,11 @@ namespace System.DirectoryServices.ActiveDirectory
                 {
                     if (context.ContextType == DirectoryContextType.ConfigurationSet)
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ConfigSetNotFound), typeof(ConfigurationSet), context.Name);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.ConfigSetNotFound, typeof(ConfigurationSet), context.Name);
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.AINotFound, context.Name), typeof(ConfigurationSet), null);
+                        throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.AINotFound , context.Name), typeof(ConfigurationSet), null);
                     }
                 }
                 else
@@ -149,7 +148,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 if (context.ContextType == DirectoryContextType.ConfigurationSet)
                 {
                     // this is the case when we could not find an ADAM instance in that config set
-                    throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ConfigSetNotFound), typeof(ConfigurationSet), context.Name);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.ConfigSetNotFound, typeof(ConfigurationSet), context.Name);
                 }
                 else
                     throw;
@@ -374,7 +373,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region private methods
 
-        [DirectoryServicesPermission(SecurityAction.Assert, Unrestricted = true)]
         private static DirectoryEntry GetSearchRootEntry(Forest forest)
         {
             DirectoryEntry rootEntry;
@@ -398,10 +396,8 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (isServer)
             {
-                if (DirectoryContext.ServerBindSupported)
-                {
-                    authType |= AuthenticationTypes.ServerBind;
-                }
+                authType |= AuthenticationTypes.ServerBind;
+                
                 if (isGC)
                 {
                     rootEntry = new DirectoryEntry("GC://" + forestContext.GetServerName(), forestContext.UserName, forestContext.Password, authType);
@@ -432,7 +428,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 if (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectoryApplicationMode))
                 {
                     directoryEntryMgr.RemoveIfExists(directoryEntryMgr.ExpandWellKnownDN(WellKnownDN.RootDSE));
-                    throw new ArgumentException(Res.GetString(Res.TargetShouldBeServerORConfigSet), "context");
+                    throw new ArgumentException(SR.TargetShouldBeServerORConfigSet, "context");
                 }
 
                 string dnsHostName = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.DnsHostName);
@@ -525,19 +521,19 @@ namespace System.DirectoryServices.ActiveDirectory
             // can expect valid context (non-null)
             if (partitionName != null && partitionName.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "partitionName");
+                throw new ArgumentException(SR.EmptyStringParameter, "partitionName");
             }
 
             if (siteName != null && siteName.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "siteName");
+                throw new ArgumentException(SR.EmptyStringParameter, "siteName");
             }
 
             ArrayList ntdsaNames = Utils.GetReplicaList(context, partitionName, siteName, false /* isDefaultNC */, true /* isADAM */, false /* mustBeGC */);
 
             if (ntdsaNames.Count < 1)
             {
-                throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ADAMInstanceNotFound), typeof(AdamInstance), null);
+                throw new ActiveDirectoryObjectNotFoundException(SR.ADAMInstanceNotFound, typeof(AdamInstance), null);
             }
 
             return FindAliveAdamInstance(configSetName, context, ntdsaNames);
@@ -548,12 +544,12 @@ namespace System.DirectoryServices.ActiveDirectory
             // can expect valid context (non-null)
             if (partitionName != null && partitionName.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "partitionName");
+                throw new ArgumentException(SR.EmptyStringParameter, "partitionName");
             }
 
             if (siteName != null && siteName.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "siteName");
+                throw new ArgumentException(SR.EmptyStringParameter, "siteName");
             }
 
             ArrayList adamInstanceList = new ArrayList();
@@ -604,7 +600,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     {
                         // if we are passed the timeout period, we should throw, else do nothing
                         if (DateTime.UtcNow.Subtract(startTime) > s_locationTimeout)
-                            throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ADAMInstanceNotFoundInConfigSet, (configSetName != null) ? configSetName : context.Name), typeof(AdamInstance), null);
+                            throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ADAMInstanceNotFoundInConfigSet , (configSetName != null) ? configSetName : context.Name), typeof(AdamInstance), null);
                     }
                     else
                         throw ExceptionHelper.GetExceptionFromCOMException(context, e);
@@ -617,10 +613,10 @@ namespace System.DirectoryServices.ActiveDirectory
             }
 
             // if we reach here, we haven't found an adam instance
-            throw new ActiveDirectoryObjectNotFoundException(Res.GetString(Res.ADAMInstanceNotFoundInConfigSet, (configSetName != null) ? configSetName : context.Name), typeof(AdamInstance), null);
+            throw new ActiveDirectoryObjectNotFoundException(String.Format(CultureInfo.CurrentCulture, SR.ADAMInstanceNotFoundInConfigSet , (configSetName != null) ? configSetName : context.Name), typeof(AdamInstance), null);
         }
 
-        /// <returns>Returns a DomainController object for the DC that holds the the specified FSMO role</returns>
+        /// <returns>Returns a DomainController object for the DC that holds the specified FSMO role</returns>
         private AdamInstance GetRoleOwner(AdamRole role)
         {
             DirectoryEntry entry = null;

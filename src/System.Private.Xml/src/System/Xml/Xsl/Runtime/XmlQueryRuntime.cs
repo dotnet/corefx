@@ -22,7 +22,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     /// <summary>
     /// XmlQueryRuntime is passed as the first parameter to all generated query methods.
     ///
@@ -468,19 +467,6 @@ namespace System.Xml.Xsl.Runtime
 
             // Use string comparison
             return (GetAtomizedName(indexLocalName) == navigator.LocalName) && (GetAtomizedName(indexNamespaceUri) == navigator.NamespaceURI);
-        }
-
-
-        //-----------------------------------------------
-        // Xml types
-        //-----------------------------------------------
-
-        /// <summary>
-        /// Get the array of xml types that are used within this query.
-        /// </summary>
-        internal XmlQueryType[] XmlTypes
-        {
-            get { return _types; }
         }
 
         /// <summary>
@@ -1109,7 +1095,7 @@ namespace System.Xml.Xsl.Runtime
             return 0;
         }
 
-        // 'true' if current Namespace "inherited" from it's parent. Not defined localy.
+        // 'true' if current Namespace "inherited" from it's parent. Not defined locally.
         private static bool IsInheritedNamespace(XPathNavigator node)
         {
             Debug.Assert(node.NodeType == XPathNodeType.Namespace);

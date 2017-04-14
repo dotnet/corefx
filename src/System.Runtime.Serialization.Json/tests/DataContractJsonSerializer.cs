@@ -25,9 +25,12 @@ public static partial class DataContractJsonSerializerTests
 
     static DataContractJsonSerializerTests()
     {
-        var method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName);
-        Assert.True(method != null, $"No method named {SerializationOptionSetterName}");
-        method.Invoke(null, new object[] { 1 });
+        if (!PlatformDetection.IsFullFramework)
+        {
+            MethodInfo method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.True(method != null, $"No method named {SerializationOptionSetterName}");
+            method.Invoke(null, new object[] { 1 }); 
+        }
     }
 #endif
     [Fact]
@@ -946,9 +949,6 @@ public static partial class DataContractJsonSerializerTests
         var dict0 = new Dictionary<string, object> { { "Key0", dict1 } };
 
         var y = SerializeAndDeserialize<Dictionary<string, object>>(dict0, @"[{""Key"":""Key0"",""Value"":[{""__type"":""KeyValuePairOfstringanyType:#System.Collections.Generic"",""key"":""Key1-0"",""value"":""Value1-0""},{""__type"":""KeyValuePairOfstringanyType:#System.Collections.Generic"",""key"":""Key1-1"",""value"":[{""__type"":""KeyValuePairOfstringanyType:#System.Collections.Generic"",""key"":""Key2-0"",""value"":""Value2-0""}]}]}]"
-#if NET_NATIVE
-            , null, () => { return new DataContractJsonSerializer(typeof(Dictionary<string, object>), new Type[] { typeof(KeyValuePair<string, object>) }); }
-#endif
         );
         Assert.NotNull(y);
         Assert.StrictEqual(y.Count, 1);
@@ -2240,9 +2240,6 @@ public static partial class DataContractJsonSerializerTests
         }
     }
 
-#if ReflectionOnly
-    [ActiveIssue(13071)]
-#endif
     [Fact]
     public static void DCJS_MyISerializableType()
     {
@@ -2307,7 +2304,7 @@ public static partial class DataContractJsonSerializerTests
         }
         catch (Exception e)
         {
-            Assert.True(false, $"Error occured when comparing results: {Environment.NewLine}{e.Message}{Environment.NewLine}Expected: {baseline1}{Environment.NewLine}Actual: {actualOutput1}");
+            Assert.True(false, $"Error occurred when comparing results: {Environment.NewLine}{e.Message}{Environment.NewLine}Expected: {baseline1}{Environment.NewLine}Actual: {actualOutput1}");
         }
 
 
@@ -2336,7 +2333,7 @@ public static partial class DataContractJsonSerializerTests
         }
         catch(Exception e)
         {
-            Assert.True(false, $"Error occured when comparing results: {Environment.NewLine}{e.Message}{Environment.NewLine}Expected: {baseline2}{Environment.NewLine}Actual: {actualOutput2}");
+            Assert.True(false, $"Error occurred when comparing results: {Environment.NewLine}{e.Message}{Environment.NewLine}Expected: {baseline2}{Environment.NewLine}Actual: {actualOutput2}");
         }
     }
 
@@ -2399,6 +2396,86 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(value.Area, actual.Area);
     }
 
+    [Fact]
+    public static void DCJS_DifferentDateTimeStylesForDeserialization()
+    {
+        string dateTimeFormat = "O";
+        var original = new DateTime(2011, 9, 8, 7, 6, 54, 32);
+        var styleToFormatDictionary = new Dictionary<DateTimeStyles, Func<string, string>>()
+        {
+            { DateTimeStyles.AllowLeadingWhite, (str) => str.Replace("2011", "           2011") },
+            { DateTimeStyles.AllowTrailingWhite, (str) => str.Replace("0320000", "0320000   ") },
+            { DateTimeStyles.AllowInnerWhite, (str) => str.Replace(":", " : ") },
+            { DateTimeStyles.AllowWhiteSpaces, (str) => str.Replace(":", " : ") },
+            { DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowInnerWhite , (str) => str.Replace("2011", "           2011") },
+        };
+        foreach (var style in styleToFormatDictionary.Keys)
+        {
+            var dcjsSettings = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var actual = SerializeAndDeserialize(original, null, dcjsSettings, null, true);
+            Assert.NotNull(actual);
+            Assert.Equal(original, actual);
+        }
+    }
+
+    [Fact]
+    public static void DCJS_NegativeDateTimeStylesTest_IncorrectDateTimeStyles()
+    {
+        string dateTimeFormat = "f";
+        DateTimeStyles[] dateTimeStyles = { DateTimeStyles.AssumeUniversal | DateTimeStyles.RoundtripKind, (DateTimeStyles)Int32.MaxValue };
+        foreach (var style in dateTimeStyles)
+        {
+            var dcjsSettings = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var original = DateTime.Now;
+            try
+            {
+                SerializeAndDeserialize(original, null, dcjsSettings, null, true);
+                Assert.True(false, $"An exception should be thrown in deserailization of {original.ToString(dateTimeFormat)} with DateTimeStyles={style} but no exception was thrown");
+            }
+            catch (ArgumentException e)
+            {
+                Assert.NotNull(e);
+            }
+        }
+    }
+
+    [Fact]
+    public static void DCJS_RoundtrippingDateTime()
+    {
+        string dateTimeFormat = "o";
+        DateTimeStyles[] dateTimeStyles =
+        {
+            DateTimeStyles.None, DateTimeStyles.RoundtripKind,
+            DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.RoundtripKind
+        };
+        foreach (var style in dateTimeStyles)
+        {
+            var dcjsSettings = new DataContractJsonSerializerSettings()
+            {
+                DateTimeFormat = new DateTimeFormat(dateTimeFormat, CultureInfo.InvariantCulture)
+                {
+                    DateTimeStyles = style
+                },
+            };
+            var original = DateTime.Now;
+            var actual = SerializeAndDeserialize(original, null, dcjsSettings, null, true);
+            Assert.NotNull(actual);
+            Assert.Equal(original, actual);
+        }
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
@@ -2432,7 +2509,7 @@ public static partial class DataContractJsonSerializerTests
             return deserialized;
         }
     }
-
+    
     private static T DeserializeString<T>(string stringToDeserialize, bool shouldReportDeserializationExceptions = true, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null)
     {
         DataContractJsonSerializer dcs;

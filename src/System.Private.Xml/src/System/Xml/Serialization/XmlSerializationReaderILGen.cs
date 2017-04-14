@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 
-#if !NET_NATIVE
+#if !uapaot
 namespace System.Xml.Serialization
 {
     using System;
@@ -52,7 +52,6 @@ namespace System.Xml.Serialization
             private bool _isArray;
             private bool _isList;
             private bool _isNullable;
-            private bool _multiRef;
             private int _fixupIndex = -1;
             private string _paramsReadSource;
             private string _checkSpecifiedSource;
@@ -152,12 +151,6 @@ namespace System.Xml.Serialization
             {
                 get { return _isNullable; }
                 set { _isNullable = value; }
-            }
-
-            internal bool MultiRef
-            {
-                get { return _multiRef; }
-                set { _multiRef = value; }
             }
 
             internal int FixupIndex
@@ -2741,7 +2734,7 @@ namespace System.Xml.Serialization
                 ilg.Ldc(1);
                 ilg.Add();
                 ilg.Stloc(localI);
-                if (CodeGenerator.IsNullableGenericType(arrayElementType) || arrayElementType.GetTypeInfo().IsValueType)
+                if (CodeGenerator.IsNullableGenericType(arrayElementType) || arrayElementType.IsValueType)
                 {
                     ilg.Ldelema(arrayElementType);
                 }
@@ -2809,7 +2802,7 @@ namespace System.Xml.Serialization
                 object oVar = ilg.GetVariable(match.Groups["locA1"].Value);
                 Type arrayElementType = ilg.GetVariableType(oVar).GetElementType();
                 ilg.ConvertValue(elementType, arrayElementType);
-                if (CodeGenerator.IsNullableGenericType(arrayElementType) || arrayElementType.GetTypeInfo().IsValueType)
+                if (CodeGenerator.IsNullableGenericType(arrayElementType) || arrayElementType.IsValueType)
                 {
                     ilg.Stobj(arrayElementType);
                 }
@@ -2824,7 +2817,7 @@ namespace System.Xml.Serialization
             {
                 int index = source.LastIndexOf(".Add(", StringComparison.Ordinal);
                 LocalBuilder localA = ilg.GetLocal(source.Substring(0, index));
-                Debug.Assert(!localA.LocalType.GetTypeInfo().IsGenericType || (localA.LocalType.GetGenericArguments().Length == 1 && localA.LocalType.GetGenericArguments()[0].IsAssignableFrom(elementType)));
+                Debug.Assert(!localA.LocalType.IsGenericType || (localA.LocalType.GetGenericArguments().Length == 1 && localA.LocalType.GetGenericArguments()[0].IsAssignableFrom(elementType)));
                 MethodInfo Add = localA.LocalType.GetMethod(
                      "Add",
                      CodeGenerator.InstanceBindingFlags,
@@ -3459,57 +3452,6 @@ namespace System.Xml.Serialization
             ilg.Pop();
         }
 
-        private void WriteCatchCastException(TypeDesc typeDesc, string source, string id)
-        {
-            WriteCatchException(typeof(InvalidCastException));
-            MethodInfo XmlSerializationReader_CreateInvalidCastException = typeof(XmlSerializationReader).GetMethod(
-                "CreateInvalidCastException",
-                CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(Type), typeof(Object), typeof(String) }
-                );
-            ilg.Ldarg(0);
-            ilg.Ldc(typeDesc.Type);
-
-            // GetTarget(ids[0])
-            if (source.StartsWith("GetTarget(ids[", StringComparison.Ordinal))
-            {
-                MethodInfo XmlSerializationReader_GetTarget = typeof(XmlSerializationReader).GetMethod(
-                    "GetTarget",
-                    CodeGenerator.InstanceBindingFlags,
-                    new Type[] { typeof(String) }
-                    );
-                object idsLoc = ilg.GetVariable("ids");
-                ilg.Ldarg(0);
-                // Parse index
-                ilg.LoadArrayElement(idsLoc, Int32.Parse(source.Substring(14, source.Length - 16), CultureInfo.InvariantCulture));
-                ilg.Call(XmlSerializationReader_GetTarget);
-            }
-            else
-            {
-                ilg.Load(ilg.GetVariable(source));
-            }
-
-            if (id == null)
-                ilg.Load(null);
-            else
-            {
-                // ids[0]
-                if (id.StartsWith("ids[", StringComparison.Ordinal))
-                {
-                    object idsLoc = ilg.GetVariable("ids");
-                    // Parse index
-                    ilg.LoadArrayElement(idsLoc, Int32.Parse(id.Substring(4, id.Length - 5), CultureInfo.InvariantCulture));
-                }
-                else
-                {
-                    object idVar = ilg.GetVariable(id);
-                    ilg.Load(idVar);
-                    ilg.ConvertValue(ilg.GetVariableType(idVar), typeof(string));
-                }
-            }
-            ilg.Call(XmlSerializationReader_CreateInvalidCastException);
-            ilg.Throw();
-        }
         private void WriteArrayLocalDecl(string typeName, string variableName, string initValue, TypeDesc arrayTypeDesc)
         {
             RaCodeGen.WriteArrayLocalDecl(typeName, variableName, new SourceInfo(initValue, initValue, null, arrayTypeDesc.Type, ilg), arrayTypeDesc);

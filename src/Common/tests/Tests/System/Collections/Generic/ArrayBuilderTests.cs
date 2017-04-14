@@ -23,8 +23,11 @@ namespace System.Collections.Generic.Tests
             uint seed = (uint)count;
             for (int i = 0; i < count; i++)
             {
-                seed ^= 0x9e3779b9 + (seed << 6) + (seed >> 2);
-                yield return generator.Generate((int)seed);
+                unchecked
+                {
+                    seed ^= 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                    yield return generator.Generate((int)seed);
+                }
             }
         }
     }
@@ -186,10 +189,12 @@ namespace System.Collections.Generic.Tests
             {
                 count++;
                 builder.Add(item);
-                
+
                 Assert.Equal(count, builder.Count);
                 Assert.Equal(CalculateExpectedCapacity(count), builder.Capacity);
                 VerifyBuilderContents(sequence.Take(count), builder);
+                Assert.Equal(sequence.First(), builder.First());
+                Assert.Equal(item, builder.Last());
             }
 
             return builder;

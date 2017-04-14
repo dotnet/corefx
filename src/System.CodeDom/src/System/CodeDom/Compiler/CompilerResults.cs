@@ -4,38 +4,34 @@
 
 using System.Collections.Specialized;
 using System.Reflection;
-using System.Security.Policy;
 
 namespace System.CodeDom.Compiler
 {
     [Serializable]
-    public class CompilerResults
+    public partial class CompilerResults
     {
         private readonly CompilerErrorCollection _errors = new CompilerErrorCollection();
         private readonly StringCollection _output = new StringCollection();
         private Assembly _compiledAssembly;
-        private Evidence _evidence;
+
+        [NonSerialized]
+        private TempFileCollection _tempFiles;
 
         public CompilerResults(TempFileCollection tempFiles)
         {
-            TempFiles = tempFiles;
+            _tempFiles = tempFiles;
         }
 
-        public TempFileCollection TempFiles { get; set; }
-
-        [Obsolete("CAS policy is obsolete and will be removed in a future release of the .NET Framework. Please see http://go2.microsoft.com/fwlink/?LinkId=131738 for more information.")]
-        public Evidence Evidence
+        public TempFileCollection TempFiles
         {
             get
             {
-                Evidence e = null;
-                if (_evidence != null)
-                {
-                    e = _evidence.Clone();
-                }
-                return e;
+                return _tempFiles;
             }
-            set { _evidence = value?.Clone(); }
+            set
+            {
+                _tempFiles = value;
+            }
         }
 
         public Assembly CompiledAssembly

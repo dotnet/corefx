@@ -1065,8 +1065,7 @@ namespace System.Xml
         {
             XmlResolver tempResolver = _coreReaderImpl.GetResolver();
 
-            if (tempResolver == null && !_coreReaderImpl.IsResolverSet &&
-                !System.Xml.XmlReaderSettings.EnableLegacyXmlSettings())
+            if (tempResolver == null && !_coreReaderImpl.IsResolverSet)
             {
                 // it is safe to return valid resolver as it'll be used in the schema validation 
                 if (s_tempResolver == null)
@@ -1105,12 +1104,6 @@ namespace System.Xml
                     _validator.Validate();
                     break;
             }
-        }
-
-        internal void Close(bool closeStream)
-        {
-            _coreReaderImpl.Close(closeStream);
-            _parsingFunction = ParsingFunction.ReaderClosed;
         }
 
         internal BaseValidator Validator
@@ -1158,14 +1151,6 @@ namespace System.Xml
             set
             {
                 _coreReaderImpl.InternalTypedValue = value;
-            }
-        }
-
-        internal bool Normalization
-        {
-            get
-            {
-                return _coreReaderImpl.Normalization;
             }
         }
 

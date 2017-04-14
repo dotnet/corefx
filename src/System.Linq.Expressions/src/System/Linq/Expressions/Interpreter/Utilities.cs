@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -27,7 +25,7 @@ namespace System.Linq.Expressions.Interpreter
             // the arity is small enough to fit in Func<...> or Action<...>
             if (types.Length > MaximumArity || types.Any(t => t.IsByRef))
             {
-                throw Assert.Unreachable;
+                throw ContractUtils.Unreachable;
             }
 
             Type returnType = types[types.Length - 1];
@@ -79,7 +77,7 @@ namespace System.Linq.Expressions.Interpreter
                     case 17: return typeof(Func<,,,,,,,,,,,,,,,,>).MakeGenericType(types);
                 }
             }
-            throw Assert.Unreachable;
+            throw ContractUtils.Unreachable;
         }
     }
 #endif
@@ -154,7 +152,7 @@ namespace System.Linq.Expressions.Interpreter
                     return null;
             }
 
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 result = Enum.ToObject(type, result);
             }
@@ -171,7 +169,7 @@ namespace System.Linq.Expressions.Interpreter
         /// </summary>
         public static void UnwrapAndRethrow(TargetInvocationException exception)
         {
-            ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+            ExceptionDispatchInfo.Throw(exception.InnerException);
         }
     }
 

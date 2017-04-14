@@ -7,12 +7,10 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class SymFactory : SymFactoryBase
+    internal sealed class SymFactory : SymFactoryBase
     {
-        public SymFactory(
-            SYMTBL symtable,
-            NameManager namemgr) :
-            base(symtable, namemgr)
+        public SymFactory(SYMTBL symtable) :
+            base(symtable, true)
         {
         }
 
@@ -74,17 +72,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // DECLSYMs are not parented like named symbols.
             AggregateDeclaration sym = newBasicSym(SYMKIND.SK_AggregateDeclaration, agg.name, null).AsAggregateDeclaration();
 
-            if (declOuter != null)
-            {
-                declOuter.AddToChildList(sym);
-            }
+            declOuter?.AddToChildList(sym);
             agg.AddDecl(sym);
 
             Debug.Assert(sym != null);
             return (sym);
         }
 
-        public AggregateSymbol CreateUnresolvedAggregate(Name name, ParentSymbol parent, TypeManager typeManager)
+        private AggregateSymbol CreateUnresolvedAggregate(Name name, ParentSymbol parent, TypeManager typeManager)
         {
             Debug.Assert(name != null);
 

@@ -74,6 +74,22 @@ namespace System.SpanTests
             public char C3;
             public char C4;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct TestValueTypeWithReference
+        {
+            public int I;
+            public string S;
+        }
+
+        private enum TestEnum
+        {
+            e0,
+            e1,
+            e2,
+            e3,
+            e4,
+        }
     }
 }
 

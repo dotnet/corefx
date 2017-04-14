@@ -47,13 +47,6 @@ namespace System.Xml.Schema
             }
         }
 
-        public void Clear(int index)
-        {
-            int nBitSlot = Subscript(index);
-            EnsureLength(nBitSlot + 1);
-            _bits[nBitSlot] &= ~((uint)1 << (index & bitSlotMask));
-        }
-
         public void Set(int index)
         {
             int nBitSlot = Subscript(index);
@@ -148,7 +141,7 @@ namespace System.Xml.Schema
             int h = 1234;
             for (int i = _bits.Length; --i >= 0;)
             {
-                h ^= (int)_bits[i] * (i + 1);
+                h ^= unchecked((int)_bits[i] * (i + 1));
             }
             return (int)((h >> 32) ^ h);
         }
@@ -254,14 +247,6 @@ namespace System.Xml.Schema
                 _bits = newBits;
             }
         }
-
-#if DEBUG
-        public void Dump(StringBuilder bb) {
-            for (int i = 0; i < _count; i ++) {
-                bb.Append( Get(i) ? "1" : "0");
-            }
-        }
-#endif
     };
 }
 

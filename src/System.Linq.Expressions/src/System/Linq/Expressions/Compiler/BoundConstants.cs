@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Dynamic.Utils;
@@ -84,9 +83,8 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal void AddReference(object value, Type type)
         {
-            if (!_indexes.ContainsKey(value))
+            if (_indexes.TryAdd(value, _values.Count))
             {
-                _indexes.Add(value, _values.Count);
                 _values.Add(value);
             }
             Helpers.IncrementCount(new TypedConstant(value, type), _references);
@@ -191,9 +189,9 @@ namespace System.Linq.Expressions.Compiler
                 _values.Add(value);
             }
 
-            lc.IL.EmitInt(index);
+            lc.IL.EmitPrimitive(index);
             lc.IL.Emit(OpCodes.Ldelem_Ref);
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 lc.IL.Emit(OpCodes.Unbox_Any, type);
             }

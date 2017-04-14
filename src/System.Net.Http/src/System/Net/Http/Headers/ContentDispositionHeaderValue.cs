@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 
 namespace System.Net.Http.Headers
@@ -125,7 +126,7 @@ namespace System.Net.Http.Headers
                 else
                 {
                     string sizeString = value.Value.ToString(CultureInfo.InvariantCulture);
-                    _parameters.Add(new NameValueHeaderValue(size, sizeString));
+                    Parameters.Add(new NameValueHeaderValue(size, sizeString));
                 }
             }
         }
@@ -166,7 +167,10 @@ namespace System.Net.Http.Headers
 
         public override string ToString()
         {
-            return _dispositionType + NameValueHeaderValue.ToString(_parameters, ';', true);
+            StringBuilder sb = StringBuilderCache.Acquire();
+            sb.Append(_dispositionType);
+            NameValueHeaderValue.ToString(_parameters, ';', true, sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         public override bool Equals(object obj)

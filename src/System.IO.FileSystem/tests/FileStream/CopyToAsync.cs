@@ -27,11 +27,6 @@ namespace System.IO.Tests
                 fs.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
             }
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
-            {
-                fs.SafeFileHandle.Dispose();
-                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
-            }
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.Write))
             {
                 Assert.Throws<NotSupportedException>(() => { fs.CopyToAsync(new MemoryStream()); });
@@ -41,6 +36,53 @@ namespace System.IO.Tests
             {
                 dst.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { src.CopyToAsync(dst); });
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The Stream CopyToAsync fails on netcoreapp because it calls Length which checks the validity of the underlying handle. On NetFX the operation no-ops for no input or delays failure to execution for input. See /dotnet/coreclr/pull/4540.")]
+        public void DisposeHandleThenUseFileStream_CopyToAsync(bool useAsync)
+        {
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
+            }
+
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.Write(TestBuffer, 0, TestBuffer.Length);
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()).Wait(); });
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The Stream CopyToAsync fails on netcoreapp because it calls Length which checks the validity of the underlying handle. On NetFX the operation no-ops for no input or delays failure to execution for input. See /dotnet/coreclr/pull/4540.")]
+        public void DisposeHandleThenUseFileStream_CopyToAsync_netfx(bool useAsync)
+        {
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.SafeFileHandle.Dispose();
+                fs.CopyToAsync(new MemoryStream());
+            }
+
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.Write(TestBuffer, 0, TestBuffer.Length);
+                fs.SafeFileHandle.Dispose();
+                try
+                {
+                    fs.CopyToAsync(new MemoryStream()).Wait();
+                }
+                catch (AggregateException e)
+                {
+                    Assert.Equal(typeof(ObjectDisposedException), e.InnerException.GetType());
+                }
             }
         }
 
@@ -148,7 +190,7 @@ namespace System.IO.Tests
                                 default: createDestinationStream = s => File.Create(s); break;
                             }
 
-                            // Various exposeHandle (whether the SafeFileHandle was publically accessed), 
+                            // Various exposeHandle (whether the SafeFileHandle was publicly accessed), 
                             // preWrite, bufferSize, writeSize, and numWrites combinations
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1000, 0x100, 100 };
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1, 0x1, 1000 };

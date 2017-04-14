@@ -65,7 +65,7 @@ namespace System.Net.Http
     // time still allowing the native code to continue using its GCHandle and lookup the associated state as long as it's alive.
     // Yet then when an async read is made on the response message, we want to postpone such finalization and ensure that the async
     // read can be appropriately completed with control and reference ownership given back to the reader. As such, we do two things:
-    // we make the response stream finalizable, and we make the GCHandle be to a wrapper object for the EasyRequest rather than to 
+    // we make the response stream finalizable, and we make the GCHandle be to a wrapper object for the EasyRequest rather than to
     // the EasyRequest itself.  That wrapper object maintains a weak reference to the EasyRequest as well as sometimes maintaining
     // a strong reference.  When the request starts out, the GCHandle is created to the wrapper, which has a strong reference to
     // the EasyRequest (which also back references to the wrapper so that the wrapper can be accessed via it).  The GCHandle is
@@ -97,7 +97,7 @@ namespace System.Net.Http
         private const string UriSchemeHttps = "https";
         private const string EncodingNameGzip = "gzip";
         private const string EncodingNameDeflate = "deflate";
-        
+
         private const int MaxRequestBufferSize = 16384; // Default used by libcurl
         private const string NoTransferEncoding = HttpKnownHeaderNames.TransferEncoding + ":";
         private const string NoContentType = HttpKnownHeaderNames.ContentType + ":";
@@ -127,8 +127,6 @@ namespace System.Net.Http
         private static string s_curlVersionDescription;
         private static string s_curlSslVersionDescription;
 
-        private static readonly DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
-
         private readonly MultiAgent _agent;
         private volatile bool _anyOperationStarted;
         private volatile bool _disposed;
@@ -146,7 +144,7 @@ namespace System.Net.Http
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
         private int _maxConnectionsPerServer = HttpHandlerDefaults.DefaultMaxConnectionsPerServer;
-        private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeaderLength;
+        private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength;
         private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
         private X509Certificate2Collection _clientCertificates;
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
@@ -156,7 +154,7 @@ namespace System.Net.Http
 
         private object LockObject { get { return _agent; } }
 
-        #endregion        
+        #endregion
 
         static CurlHandler()
         {
@@ -249,7 +247,23 @@ namespace System.Net.Http
             }
         }
 
-        internal X509Certificate2Collection ClientCertificates => _clientCertificates ?? (_clientCertificates = new X509Certificate2Collection());
+        internal X509Certificate2Collection ClientCertificates
+        {
+            get
+            {
+                if (_clientCertificateOption != ClientCertificateOption.Manual)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.net_http_invalid_enable_first, "ClientCertificateOptions", "Manual"));
+                }
+
+                if (_clientCertificates == null)
+                {
+                    _clientCertificates = new X509Certificate2Collection();
+                }
+
+                return _clientCertificates;
+            }
+        }
 
         internal Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateValidationCallback
         {
@@ -312,7 +326,7 @@ namespace System.Net.Http
         {
             get { return _useCookie; }
             set
-            {               
+            {
                 CheckDisposedOrStarted();
                 _useCookie = value;
             }
@@ -460,22 +474,18 @@ namespace System.Net.Http
                 return Task.FromCanceled<HttpResponseMessage>(cancellationToken);
             }
 
-            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
-
             // Create the easy request.  This associates the easy request with this handler and configures
             // it based on the settings configured for the handler.
-            var easy = new EasyRequest(this, request, cancellationToken);
+            var easy = new EasyRequest(this, _agent, request, cancellationToken);
             try
             {
-                EventSourceTrace("{0}", request, easy: easy, agent: _agent);
+                EventSourceTrace("{0}", request, easy: easy);
                 _agent.Queue(new MultiAgent.IncomingRequest { Easy = easy, Type = MultiAgent.IncomingRequestType.New });
             }
             catch (Exception exc)
             {
                 easy.CleanupAndFailRequest(exc);
             }
-
-            s_diagnosticListener.LogHttpResponse(easy.Task, loggingRequestId);
 
             return easy.Task;
         }
@@ -566,7 +576,7 @@ namespace System.Net.Http
             catch (CookieException e)
             {
                 EventSourceTrace(
-                    "Malformed cookie parsing failed: {0}, server: {1}, cookie: {2}", 
+                    "Malformed cookie parsing failed: {0}, server: {1}, cookie: {2}",
                     e.Message, state._requestMessage.RequestUri, cookieHeader,
                     easy: state);
             }
@@ -704,7 +714,7 @@ namespace System.Net.Http
         }
 
         private static void EventSourceTrace(
-            string message, 
+            string message,
             MultiAgent agent = null, EasyRequest easy = null, [CallerMemberName] string memberName = null)
         {
             if (NetEventSource.IsEnabled)
@@ -721,9 +731,9 @@ namespace System.Net.Http
                 agent = easy._associatedMultiAgent;
             }
 
-            if (NetEventSource.IsEnabled) NetEventSource.Log.HandlerMessage(
+            NetEventSource.Log.HandlerMessage(
                 (agent?.RunningWorkerId).GetValueOrDefault(),
-                easy != null ? easy.Task.Id : 0,
+                easy?.Task.Id ?? 0,
                 memberName,
                 message);
         }
@@ -763,7 +773,7 @@ namespace System.Net.Http
             }
             else if (!chunkedMode)
             {
-                // Make sure Transfer-Encoding: chunked header is set, 
+                // Make sure Transfer-Encoding: chunked header is set,
                 // as we have content to send but no known length for it.
                 request.Headers.TransferEncodingChunked = true;
             }

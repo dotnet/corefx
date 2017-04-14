@@ -46,7 +46,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Gets the arguments to the constructor.
         /// </summary>
-        public ReadOnlyCollection<Expression> Arguments => ReturnReadOnly(ref _arguments);
+        public ReadOnlyCollection<Expression> Arguments => ExpressionUtils.ReturnReadOnly(ref _arguments);
 
         /// <summary>
         /// Gets the argument expression with the specified <paramref name="index"/>.
@@ -82,15 +82,12 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public NewExpression Update(IEnumerable<Expression> arguments)
         {
-            if (arguments == Arguments)
+            if (ExpressionUtils.SameElements(ref arguments, Arguments))
             {
                 return this;
             }
-            if (Members != null)
-            {
-                return Expression.New(Constructor, arguments, Members);
-            }
-            return Expression.New(Constructor, arguments);
+
+            return Members != null ? New(Constructor, arguments, Members) : New(Constructor, arguments);
         }
     }
 
@@ -191,7 +188,7 @@ namespace System.Linq.Expressions
             }
             TypeUtils.ValidateType(type, nameof(type));
 
-            if (!type.GetTypeInfo().IsValueType)
+            if (!type.IsValueType)
             {
                 ConstructorInfo ci = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SingleOrDefault(c => c.GetParametersCached().Length == 0);
                 if (ci == null)
@@ -222,7 +219,7 @@ namespace System.Linq.Expressions
                 for (int i = 0, n = arguments.Count; i < n; i++)
                 {
                     Expression arg = arguments[i];
-                    RequiresCanRead(arg, nameof(arguments), i);
+                    ExpressionUtils.RequiresCanRead(arg, nameof(arguments), i);
                     MemberInfo member = members[i];
                     ContractUtils.RequiresNotNull(member, nameof(members), i);
                     if (!TypeUtils.AreEquivalent(member.DeclaringType, constructor.DeclaringType))

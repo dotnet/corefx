@@ -20,10 +20,12 @@ namespace System.Security.Cryptography.EcDsa.Tests
             return ec;
         }
 
+#if netcoreapp
         public ECDsa Create(ECCurve curve)
         {
             return ECDsa.Create(curve);
         }
+#endif
 
         public bool IsCurveValid(Oid oid)
         {
@@ -31,6 +33,10 @@ namespace System.Security.Cryptography.EcDsa.Tests
             {
                 // Friendly name required for windows
                 return NativeOidFriendlyNameExists(oid.FriendlyName);
+            }
+            if (PlatformDetection.IsOSX)
+            {
+                return false;
             }
             if (!string.IsNullOrEmpty(oid.Value))
             {
@@ -48,6 +54,12 @@ namespace System.Security.Cryptography.EcDsa.Tests
                 {
                     return PlatformDetection.WindowsVersion >= 10;
                 }
+
+                if (PlatformDetection.IsOSX)
+                {
+                    return false;
+                }
+
                 return true;
             }
         }

@@ -8,7 +8,28 @@ namespace System.Security.Cryptography.EcDsa.Tests
 {
     public class ECDsaImportExportTests : ECDsaTestsBase
     {
-        [Theory, MemberData(nameof(TestCurvesFull))]
+#if netcoreapp
+        [Fact]
+        public static void DiminishedCoordsRoundtrip()
+        {
+            ECParameters toImport = ECDsaTestData.GetNistP521DiminishedCoordsParameters();
+            ECParameters privateParams;
+            ECParameters publicParams;
+
+            using (ECDsa ecdsa = ECDsa.Create(toImport))
+            {
+                privateParams = ecdsa.ExportParameters(true);
+                publicParams = ecdsa.ExportParameters(false);
+            }
+            
+            ComparePublicKey(toImport.Q, privateParams.Q);
+            ComparePrivateKey(toImport, privateParams);
+            ComparePublicKey(toImport.Q, publicParams.Q);
+            Assert.Null(publicParams.D);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestCurvesFull))]
         public static void TestNamedCurves(CurveDef curveDef)
         {
             using (ECDsa ec1 = ECDsaFactory.Create(curveDef.Curve))
@@ -286,5 +307,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
             ECParameters paramSecondExport = ec.ExportExplicitParameters(curveDef.IncludePrivate);
             AssertEqual(parameters, paramSecondExport);
         }
+#endif
     }
 }

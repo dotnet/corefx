@@ -71,7 +71,7 @@ set(__LinkArgs "${__LinkArgs} /guard:cf")
 # linking in VCRUNTIME140.DLL for a simplified xcopy experience by reducing the dependency on VC REDIST.
 #
 # For Release builds, we shall dynamically link into uCRT [ucrtbase.dll] (which is pushed down as a Windows Update on downlevel OS) but
-# wont do the same for debug/checked builds since ucrtbased.dll is not redistributable and Debug/Checked builds are not
+# won't do the same for debug/checked builds since ucrtbased.dll is not redistributable and Debug/Checked builds are not
 # production-time scenarios.
 if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     add_compile_options(/MT)
@@ -121,8 +121,11 @@ if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # Release build specific flags
     set(__LinkArgs "${__LinkArgs} /LTCG /OPT:REF /OPT:ICF /INCREMENTAL:NO")
     
-    # Force uCRT to be dynamically linked for Release build
-    set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
+    # Force uCRT to be dynamically linked for Release build (unless env variable CLR_CMAKE_WIN32_FORCE_STATIC_LINK is set to true)
+    set(CLR_CMAKE_WIN32_FORCE_STATIC_LINK $ENV{CLR_CMAKE_WIN32_FORCE_STATIC_LINK})
+    if(NOT CLR_CMAKE_WIN32_FORCE_STATIC_LINK)	
+      set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
+    endif()
     
     if ($ENV{__BuildArch} STREQUAL x86)
         set(__LinkArgs "${__LinkArgs} /SAFESEH")

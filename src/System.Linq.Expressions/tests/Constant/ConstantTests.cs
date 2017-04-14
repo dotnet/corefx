@@ -4,13 +4,19 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
 {
     public static class ConstantTests
     {
-        #region Test methods
+
+        private class PrivateGenericClass<T>
+        {
+        }
+
+#region Test methods
 
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckBoolConstantTest(bool useInterpreter)
@@ -60,7 +66,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckDecimalConstantTest(bool useInterpreter)
         {
-            foreach (decimal value in new decimal[] { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue, int.MinValue, int.MaxValue, int.MinValue - 1L, int.MaxValue + 1L, long.MinValue, long.MaxValue })
+            foreach (decimal value in new decimal[] { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue, int.MinValue, int.MaxValue, int.MinValue - 1L, int.MaxValue + 1L, long.MinValue, long.MaxValue, long.MaxValue + 1m, ulong.MaxValue, ulong.MaxValue + 1m })
             {
                 VerifyDecimalConstant(value, useInterpreter);
             }
@@ -273,13 +279,45 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
+#if FEATURE_COMPILE
+        private static TypeBuilder GetTypeBuilder()
+        {
+            AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
+            ModuleBuilder module = assembly.DefineDynamicModule("Name");
+            return module.DefineType("Type");
+        }
+#endif
+
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckTypeConstantTest(bool useInterpreter)
         {
-            foreach (Type value in new Type[] { null, typeof(int), typeof(Func<string>) })
+            foreach (Type value in new[]
+            {
+                null,
+                typeof(int),
+                typeof(Func<string>),
+                typeof(List<>).GetGenericArguments()[0],
+#if FEATURE_COMPILE
+                GetTypeBuilder(),
+#endif
+                typeof(PrivateGenericClass<>).GetGenericArguments()[0],
+                typeof(PrivateGenericClass<>),
+                typeof(PrivateGenericClass<int>)
+            })
             {
                 VerifyTypeConstant(value, useInterpreter);
             }
+        }
+
+#if FEATURE_COMPILE
+
+        private static MethodInfo GlobalMethod(params Type[] parameterTypes)
+        {
+            ModuleBuilder module = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run).DefineDynamicModule("Module");
+            MethodBuilder globalMethod = module.DefineGlobalMethod("GlobalMethod", MethodAttributes.Public | MethodAttributes.Static, typeof(void), parameterTypes);
+            globalMethod.GetILGenerator().Emit(OpCodes.Ret);
+            module.CreateGlobalFunctions();
+            return module.GetMethod(globalMethod.Name);
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
@@ -293,9 +331,27 @@ namespace System.Linq.Expressions.Tests
                 typeof(SomePublicMethodsForLdToken).GetMethod(nameof(SomePublicMethodsForLdToken.Qux), BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(typeof(int)),
                 typeof(List<>).GetMethod(nameof(List<int>.Add)),
                 typeof(List<int>).GetMethod(nameof(List<int>.Add)),
+                GlobalMethod(Type.EmptyTypes),
+                GlobalMethod(typeof(PrivateGenericClass<int>)),
+                GlobalMethod(typeof(PrivateGenericClass<>))
             })
             {
                 VerifyMethodInfoConstant(value, useInterpreter);
+            }
+        }
+#endif
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckConstructorInfoConstantTest(bool useInterpreter)
+        {
+            foreach (
+                ConstructorInfo value in
+                typeof(SomePublicMethodsForLdToken).GetConstructors()
+                    .Concat(typeof(string).GetConstructors())
+                    .Concat(typeof(List<>).GetConstructors())
+                    .Append(null))
+            {
+                VerifyConstructorInfoConstant(value, useInterpreter);
             }
         }
 
@@ -460,9 +516,9 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region Generic helpers
+#region Generic helpers
 
         public static void CheckGenericWithStructRestrictionConstantHelper<Ts>(bool useInterpreter) where Ts : struct
         {
@@ -512,9 +568,9 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        #endregion
+#endregion
 
-        #region Test verifiers
+#region Test verifiers
 
         private static void VerifyBoolConstant(bool value, bool useInterpreter)
         {
@@ -826,6 +882,14 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(value, f());
         }
 
+        private static void VerifyConstructorInfoConstant(ConstructorInfo value, bool useInterpreter)
+        {
+            Expression<Func<ConstructorInfo>> e =
+                Expression.Lambda<Func<ConstructorInfo>>(Expression.Constant(value, typeof(ConstructorInfo)));
+            Func<ConstructorInfo> f = e.Compile(useInterpreter);
+            Assert.Equal(value, f());
+        }
+
         private static void VerifyGenericWithStructRestriction<Ts>(Ts value, bool useInterpreter) where Ts : struct
         {
             Expression<Func<Ts>> e =
@@ -886,7 +950,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(value, f());
         }
 
-        #endregion
+#endregion
 
         [Fact]
         public static void InvalidTypeValueType()
@@ -952,6 +1016,16 @@ namespace System.Linq.Expressions.Tests
             ConstantExpression e5 = Expression.Constant(f);
             Assert.Equal(f.ToString(), e5.ToString());
         }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void DecimalConstantRetainsScaleAnd(bool useInterpreter)
+        {
+            var lambda = Expression.Lambda<Func<decimal>>(Expression.Constant(-0.000m));
+            var func = lambda.Compile(useInterpreter);
+            var bits = decimal.GetBits(func());
+            Assert.Equal(unchecked((int)0x80030000), bits[3]);
+        }
+
 
         class Bar
         {

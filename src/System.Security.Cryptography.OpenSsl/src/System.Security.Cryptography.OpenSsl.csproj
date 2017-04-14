@@ -1,32 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Unix_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{78452F3E-BA91-47E7-BB0F-02E8A5C116C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.OpenSsl</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <GeneratePlatformNotSupportedAssembly>true</GeneratePlatformNotSupportedAssembly>
     <!-- Clear PackageTargetRuntime on Windows to package the PlatformNotSupported assembly 
          without a RID so that it applies in desktop packages.config projects as well -->
     <PackageTargetRuntime>
     </PackageTargetRuntime>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <!-- ApiCompat requires an object reference to determine the core assembly. -->
+    <AssemblyInfoSource Include="internal class ObjectMarker { }" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="System\Security\Cryptography\DSAOpenSsl.cs" />
     <Compile Include="System\Security\Cryptography\ECDsaOpenSsl.cs" />
     <Compile Include="System\Security\Cryptography\RSAOpenSsl.cs" />
     <Compile Include="System\Security\Cryptography\SafeEvpPKeyHandle.Unix.cs" />
-    <Compile Include="$(CommonPath)\Internal\Cryptography\OpenSslAsymmetricAlgorithmCore.cs">
-      <Link>Common\Internal\Cryptography\OpenSslAsymmetricAlgorithmCore.cs</Link>
+    <Compile Include="$(CommonPath)\Internal\Cryptography\AsymmetricAlgorithmHelpers.Der.cs">
+      <Link>Common\Internal\Cryptography\AsymmetricAlgorithmHelpers.Der.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs">
+      <Link>Common\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -110,8 +115,20 @@
       <Link>Common\System\Security\Cryptography\RSAOpenSsl.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Runtime.Numerics" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

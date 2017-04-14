@@ -118,7 +118,7 @@ namespace System.Runtime.CompilerServices
     /// Dynamic site type.
     /// </summary>
     /// <typeparam name="T">The delegate type.</typeparam>
-    public partial class CallSite<T> : CallSite where T : class
+    public class CallSite<T> : CallSite where T : class
     {
         /// <summary>
         /// The update delegate. Called when the dynamic site experiences cache miss.
@@ -186,6 +186,7 @@ namespace System.Runtime.CompilerServices
         public static CallSite<T> Create(CallSiteBinder binder)
         {
             if (!typeof(T).IsSubclassOf(typeof(MulticastDelegate))) throw System.Linq.Expressions.Error.TypeMustBeDerivedFromSystemDelegate();
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             return new CallSite<T>(binder);
         }
 
@@ -281,7 +282,7 @@ namespace System.Runtime.CompilerServices
             Type[] args;
             MethodInfo invoke = target.GetMethod("Invoke");
 
-            if (target.GetTypeInfo().IsGenericType && IsSimpleSignature(invoke, out args))
+            if (target.IsGenericType && IsSimpleSignature(invoke, out args))
             {
                 MethodInfo method = null;
                 MethodInfo noMatchMethod = null;

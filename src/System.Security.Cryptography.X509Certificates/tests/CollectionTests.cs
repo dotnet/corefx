@@ -511,7 +511,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // StoreSavedAsSerializedCerData not supported on Unix
         public static void ImportStoreSavedAsSerializedCerData_Windows()
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
@@ -535,7 +535,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // StoreSavedAsSerializedCerData not supported on Unix
         public static void ImportStoreSavedAsSerializedCerData_Unix()
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
@@ -545,7 +545,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(StorageFlags))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // StoreSavedAsSerializedStoreData not supported on Unix
         public static void ImportStoreSavedAsSerializedStoreData_Windows(X509KeyStorageFlags keyStorageFlags)
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -570,7 +570,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // StoreSavedAsSerializedStoreData not supported on Unix
         public static void ImportStoreSavedAsSerializedStoreData_Unix()
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
@@ -654,7 +654,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             TestExportSingleCert(X509ContentType.Cert);
         }
 
-#if netcoreapp11
+#if netcoreapp
         [Fact]
         public static void ExportCert_SecureString()
         {
@@ -663,14 +663,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 #endif
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // SerializedCert not supported on Unix
         public static void ExportSerializedCert_Windows()
         {
             TestExportSingleCert(X509ContentType.SerializedCert);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // SerializedCert not supported on Unix
         public static void ExportSerializedCert_Unix()
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -682,14 +682,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // SerializedStore not supported on Unix
         public static void ExportSerializedStore_Windows()
         {
             TestExportStore(X509ContentType.SerializedStore);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // SerializedStore not supported on Unix
         public static void ExportSerializedStore_Unix()
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -735,6 +735,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(16705, TestPlatforms.OSX)]
         public static void ExportUnrelatedPfx()
         {
             // Export multiple certificates which are not part of any kind of certificate chain.
@@ -800,7 +801,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2743, TestPlatforms.AnyUnix)]
+        [ActiveIssue(2743, TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
         public static void ExportMultiplePrivateKeys()
         {
             var collection = new X509Certificate2Collection();
@@ -817,6 +818,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Export, re-import.
                 byte[] exported;
 
+                bool expectSuccess =
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
                 try
                 {
                     exported = collection.Export(X509ContentType.Pkcs12);
@@ -829,7 +834,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     //
                     // If Windows gets here, or any exception other than PlatformNotSupportedException is raised,
                     // let that fail the test.
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (expectSuccess)
                     {
                         throw;
                     }
@@ -839,7 +844,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // As the other half of issue 2743, if we make it this far we better be Windows (or remove the catch
                 // above)
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "RuntimeInformation.IsOSPlatform(OSPlatform.Windows)");
+                Assert.True(expectSuccess, "Test is expected to fail on this platform");
 
                 using (ImportedCollection ic = Cert.Import(exported))
                 {
@@ -1401,7 +1406,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-#if netcoreapp11
+#if netcoreapp
         private static void TestExportSingleCert_SecureStringPassword(X509ContentType ct)
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.CreatePfxDataPasswordSecureString(), Cert.EphemeralIfPossible))
@@ -1480,17 +1485,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        public static IEnumerable<object[]> StorageFlags
-        {
-            get
-            {
-                yield return new object[] { X509KeyStorageFlags.DefaultKeySet };
-
-#if netcoreapp11
-                yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
-#endif
-            }
-        }
+        public static IEnumerable<object[]> StorageFlags => CollectionImportTests.StorageFlags;
 
         private static X509Certificate2[] ToArray(this X509Certificate2Collection col)
         {

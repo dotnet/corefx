@@ -408,7 +408,7 @@ namespace System.Threading.Tasks.Dataflow
                         if (exceptions != null)
                         {
                             // It is important to migrate these exceptions to the source part of the owning batch,
-                            // because that is the completion task that is publically exposed.
+                            // because that is the completion task that is publicly exposed.
                             thisBroadcastBlock._source.AddExceptions(exceptions);
                         }
 
@@ -1176,7 +1176,7 @@ namespace System.Threading.Tasks.Dataflow
                 }
             }
 
-            /// <summary>Adds an individual exceptionto this source.</summary>
+            /// <summary>Adds an individual exception to this source.</summary>
             /// <param name="exception">The exception to add</param>
             internal void AddException(Exception exception)
             {
@@ -1239,8 +1239,6 @@ namespace System.Threading.Tasks.Dataflow
                 public bool HasValue { get { return _source._currentMessageIsValid; } }
                 /// <summary>Gets the value of the source's current message.</summary>
                 public TOutput Value { get { return _source._currentMessage; } }
-                /// <summary>Gets the number of messages waiting to be made current.</summary>
-                public int InputCount { get { return _source._messages.Count; } }
                 /// <summary>Gets the messages available for receiving.</summary>
                 public IEnumerable<TOutput> InputQueue { get { return _source._messages.ToList(); } }
                 /// <summary>Gets the task being used for output processing.</summary>
@@ -1248,8 +1246,6 @@ namespace System.Threading.Tasks.Dataflow
 
                 /// <summary>Gets the DataflowBlockOptions used to configure this block.</summary>
                 public DataflowBlockOptions DataflowBlockOptions { get { return _source._dataflowBlockOptions; } }
-                /// <summary>Gets whether the block is declining further messages.</summary>
-                public bool IsDecliningPermanently { get { return _source._decliningPermanently; } }
                 /// <summary>Gets whether the block is completed.</summary>
                 public bool IsCompleted { get { return _source.Completion.IsCompleted; } }
 

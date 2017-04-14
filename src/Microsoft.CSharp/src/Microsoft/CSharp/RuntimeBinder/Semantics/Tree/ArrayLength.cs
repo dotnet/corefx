@@ -4,10 +4,13 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRARRAYLENGTH : EXPR
+    internal sealed class ExprArrayLength : ExprWithType
     {
-        private EXPR _Array;
-        public EXPR GetArray() { return _Array; }
-        public void SetArray(EXPR value) { _Array = value; }
+        public ExprArrayLength(CType type)
+            : base(ExpressionKind.ArrayLength, type)
+        {
+        }
+
+        public Expr Array { get; set; }
     }
 }

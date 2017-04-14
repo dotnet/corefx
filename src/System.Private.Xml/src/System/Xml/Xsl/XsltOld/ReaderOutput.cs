@@ -227,11 +227,6 @@ namespace System.Xml.Xsl.XsltOld
             get { return GetAttribute(i); }
         }
 
-        public override string this[string name]
-        {
-            get { return GetAttribute(name); }
-        }
-
         public override string this[string name, string namespaceURI]
         {
             get { return GetAttribute(name, namespaceURI); }
@@ -343,7 +338,7 @@ namespace System.Xml.Xsl.XsltOld
                 if (_haveRecord)
                 {
                     CheckCurrentInfo();
-                    // check text nodes on whitespaces;
+                    // check text nodes on whitespace;
                     switch (this.NodeType)
                     {
                         case XmlNodeType.Text:

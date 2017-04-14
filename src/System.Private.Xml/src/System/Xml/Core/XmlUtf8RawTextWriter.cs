@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// TODO: this code went through some modifications and generation comment might not be fully valid
+// Note: This code went through some modifications and generation comment might not be fully valid
 // WARNING: This file is generated and should not be modified directly.  Instead,
 // modify XmlTextWriterGenerator.cxx and run gen.bat in the same directory.
 // This batch file will execute the following commands:
@@ -730,7 +730,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -836,7 +836,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + this.bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -949,7 +949,7 @@ namespace System.Xml
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + this.bufLen)
@@ -995,7 +995,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1097,7 +1097,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1230,7 +1230,7 @@ namespace System.Xml
                 byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (; ;)
+                for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1416,19 +1416,23 @@ namespace System.Xml
         {
             Debug.Assert(ch >= 0x80 && !XmlCharType.IsSurrogate(ch));
 
-            /* UTF8-2: If ch is in 0x80-0x7ff range, then use 2 bytes to encode it */
-            if (ch < 0x800)
+            unchecked
             {
-                *pDst = (byte)(unchecked((sbyte)0xC0) | (ch >> 6));
-            }
-            /* UTF8-3: If ch is anything else, then default to using 3 bytes to encode it. */
-            else
-            {
-                *pDst = (byte)(unchecked((sbyte)0xE0) | (ch >> 12));
-                pDst++;
+                /* UTF8-2: If ch is in 0x80-0x7ff range, then use 2 bytes to encode it */
+                if (ch < 0x800)
+                {
+                    *pDst = (byte)((sbyte)0xC0 | (ch >> 6));
+                }
+                /* UTF8-3: If ch is anything else, then default to using 3 bytes to encode it. */
+                else
+                {
+                    *pDst = (byte)((sbyte)0xE0 | (ch >> 12));
+                    pDst++;
 
-                *pDst = (byte)(unchecked((sbyte)0x80) | (ch >> 6) & 0x3F);
+                    *pDst = (byte)((sbyte)0x80 | (ch >> 6) & 0x3F);
+                }
             }
+
             pDst++;
             *pDst = (byte)(0x80 | ch & 0x3F);
             return pDst + 1;

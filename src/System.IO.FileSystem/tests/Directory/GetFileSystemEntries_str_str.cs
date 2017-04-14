@@ -4,6 +4,7 @@
 
 using System.Runtime.InteropServices;
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -209,7 +210,7 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Long path segment in search pattern throws PathTooLongException
         public void WindowsSearchPatternLongSegment()
         {
             // Create a path segment longer than the normal max of 255
@@ -219,7 +220,8 @@ namespace System.IO.Tests
             Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void SearchPatternLongPath()
         {
             // Create a destination path longer than the traditional Windows limit of 256 characters
@@ -242,7 +244,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
         public void WindowsSearchPatternWithDoubleDots()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
@@ -250,22 +252,23 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
         }
 
-        [ActiveIssue(11584)]
+        private static char[] OldWildcards = new char[] { '*', '?' };
+        private static char[] NewWildcards = new char[] { '<', '>', '\"' };
+
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
         public void WindowsSearchPatternInvalid()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ">"));
+            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "|"));
 
-            Char[] invalidFileNames = Path.GetInvalidFileNameChars();
-            for (int i = 0; i < invalidFileNames.Length; i++)
+            Assert.All(Path.GetInvalidFileNameChars().Except(OldWildcards).Except(NewWildcards), invalidChar =>
             {
-                switch (invalidFileNames[i])
+                switch (invalidChar)
                 {
                     case '\\':
                     case '/':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         break;
                     //We don't throw in V1 too
                     case ':':
@@ -276,26 +279,52 @@ namespace System.IO.Tests
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
                             FileSystemDebugInfo.IsCurrentDriveNTFS()) // testing NTFS
                         {
-                            Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                            Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         }
                         else
                         {
-                            GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
+                            GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
                         }
                         break;
-                    case '*':
-                    case '?':
-                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
-                        break;
                     default:
-                        Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         break;
                 }
-            }
+            });
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In netcoreapp we made three new characters be treated as valid wildcards instead of invalid characters. NetFX still treats them as InvalidChars.")]
+        public void WindowsSearchPatternInvalid_Wildcards_netcoreapp()
+        {
+            Assert.All(OldWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+            Assert.All(NewWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "In netcoreapp we made three new characters be treated as valid wildcards instead of invalid characters. NetFX still treats them as InvalidChars.")]
+        public void WindowsSearchPatternInvalid_Wildcards_netfx()
+        {
+            Assert.All(OldWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+            Assert.All(NewWildcards, invalidChar =>
+            {
+                Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid sarch patterns throw ArgumentException
         public void UnixSearchPatternInvalid()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
@@ -303,7 +332,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // ? in search pattern returns results
         public virtual void WindowsSearchPatternQuestionMarks()
         {
             string testDir1Str = GetTestFileName();
@@ -322,7 +351,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace in search pattern returns nothing
         public void WindowsSearchPatternWhitespace()
         {
             Assert.Empty(GetEntries(TestDirectory, "           "));
@@ -376,7 +405,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-valid chars in file search patterns
         public void UnixSearchPatternFileValidChar()
         {
             if (TestFiles)
@@ -391,7 +420,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-valid chars in directory search patterns
         public void UnixSearchPatternDirectoryValidChar()
         {
             if (TestDirectories)
@@ -406,7 +435,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Search pattern with DoubleDots on Unix
         public void UnixSearchPatternWithDoubleDots()
         {
             // search pattern is valid but directory doesn't exist

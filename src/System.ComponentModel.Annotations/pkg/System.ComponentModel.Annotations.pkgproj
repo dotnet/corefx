@@ -3,9 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.ComponentModel.Annotations.csproj">
-      <SupportedFramework>net463;netcoreapp1.1;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp2.0;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.ComponentModel.Annotations.builds" />
+    <ProjectReference Include="..\src\System.ComponentModel.Annotations.csproj" />
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
     <InboxOnTargetFramework Include="net45">

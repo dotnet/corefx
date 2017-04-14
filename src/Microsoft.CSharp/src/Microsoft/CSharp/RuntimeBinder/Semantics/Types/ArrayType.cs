@@ -8,10 +8,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // ArrayType - a symbol representing an array.
     // ----------------------------------------------------------------------------
 
-    internal class ArrayType : CType
+    internal sealed class ArrayType : CType
     {
         // rank of the array. zero means unknown rank int [?].
         public int rank;
+
+        public bool IsSZArray { get; set; }
 
         public CType GetElementType() { return _pElementType; }
         public void SetElementType(CType pType) { _pElementType = pType; }

@@ -4,15 +4,13 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_GlobalAttributes", Desc = "")]
-    public class TC_SchemaSet_GlobalAttributes
+    public class TC_SchemaSet_GlobalAttributes : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -164,6 +162,3 @@ namespace System.Xml.Tests
         }
     }
 }
-
-//todo: copy include/import tests from element
-//todo: copy count checks from element

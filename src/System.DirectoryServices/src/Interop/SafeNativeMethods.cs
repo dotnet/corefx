@@ -9,9 +9,8 @@ namespace System.DirectoryServices.Interop
     using System.Security;
     using System.Security.Permissions;
     using System.Runtime.InteropServices;
-
+#pragma warning disable BCL0015 // CoreFxPort
     [
-    ComVisible(false),
     SuppressUnmanagedCodeSecurityAttribute()
     ]
     internal class SafeNativeMethods
@@ -44,7 +43,6 @@ namespace System.DirectoryServices.Interop
         public static extern int FormatMessageW(int dwFlags, int lpSource, int dwMessageId,
                                                 int dwLanguageId, StringBuilder lpBuffer, int nSize, int arguments);
 
-        [System.Runtime.InteropServices.ComVisible(false)]
         public class EnumVariant
         {
             private static readonly object s_noMoreValues = new object();
@@ -76,7 +74,7 @@ namespace System.DirectoryServices.Interop
             public Object GetValue()
             {
                 if (_currentValue == s_noMoreValues)
-                    throw new InvalidOperationException(Res.GetString(Res.DSEnumerator));
+                    throw new InvalidOperationException(SR.DSEnumerator);
                 return _currentValue;
             }
 
@@ -109,7 +107,9 @@ namespace System.DirectoryServices.Interop
                     {
                         if (numRead[0] > 0)
                         {
+#pragma warning disable 612, 618
                             _currentValue = Marshal.GetObjectForNativeVariant(addr);
+#pragma warning restore 612, 618
                         }
                     }
                     finally

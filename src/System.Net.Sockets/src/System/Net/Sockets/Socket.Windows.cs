@@ -5,13 +5,17 @@
 using Microsoft.Win32.SafeHandles;
 using System.Collections;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Net.Sockets
 {
     public partial class Socket
     {
         private DynamicWinsockMethods _dynamicWinsockMethods;
+
+        internal void ReplaceHandleIfNecessaryAfterFailedConnect() { /* nop on Windows */ }
 
         private void EnsureDynamicWinsockMethods()
         {
@@ -21,14 +25,14 @@ namespace System.Net.Sockets
             }
         }
 
-        internal bool AcceptEx(SafeCloseSocket listenSocketHandle,
+        internal unsafe bool AcceptEx(SafeCloseSocket listenSocketHandle,
             SafeCloseSocket acceptSocketHandle,
             IntPtr buffer,
             int len,
             int localAddressLength,
             int remoteAddressLength,
             out int bytesReceived,
-            SafeHandle overlapped)
+            NativeOverlapped* overlapped)
         {
             EnsureDynamicWinsockMethods();
             AcceptExDelegate acceptEx = _dynamicWinsockMethods.GetDelegate<AcceptExDelegate>(listenSocketHandle);
@@ -65,7 +69,7 @@ namespace System.Net.Sockets
                 out remoteSocketAddressLength);
         }
 
-        internal bool DisconnectEx(SafeCloseSocket socketHandle, SafeHandle overlapped, int flags, int reserved)
+        internal unsafe bool DisconnectEx(SafeCloseSocket socketHandle, NativeOverlapped* overlapped, int flags, int reserved)
         {
             EnsureDynamicWinsockMethods();
             DisconnectExDelegate disconnectEx = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegate>(socketHandle);
@@ -81,13 +85,13 @@ namespace System.Net.Sockets
             return disconnectEx_Blocking(socketHandle, overlapped, flags, reserved);
         }
 
-        internal bool ConnectEx(SafeCloseSocket socketHandle,
+        internal unsafe bool ConnectEx(SafeCloseSocket socketHandle,
             IntPtr socketAddress,
             int socketAddressSize,
             IntPtr buffer,
             int dataLength,
             out int bytesSent,
-            SafeHandle overlapped)
+            NativeOverlapped* overlapped)
         {
             EnsureDynamicWinsockMethods();
             ConnectExDelegate connectEx = _dynamicWinsockMethods.GetDelegate<ConnectExDelegate>(socketHandle);
@@ -95,7 +99,7 @@ namespace System.Net.Sockets
             return connectEx(socketHandle, socketAddress, socketAddressSize, buffer, dataLength, out bytesSent, overlapped);
         }
 
-        internal SocketError WSARecvMsg(SafeCloseSocket socketHandle, IntPtr msg, out int bytesTransferred, SafeHandle overlapped, IntPtr completionRoutine)
+        internal unsafe SocketError WSARecvMsg(SafeCloseSocket socketHandle, IntPtr msg, out int bytesTransferred, NativeOverlapped* overlapped, IntPtr completionRoutine)
         {
             EnsureDynamicWinsockMethods();
             WSARecvMsgDelegate recvMsg = _dynamicWinsockMethods.GetDelegate<WSARecvMsgDelegate>(socketHandle);
@@ -111,7 +115,7 @@ namespace System.Net.Sockets
             return recvMsg_Blocking(socketHandle, msg, out bytesTransferred, overlapped, completionRoutine);
         }
 
-        internal bool TransmitPackets(SafeCloseSocket socketHandle, IntPtr packetArray, int elementCount, int sendSize, SafeNativeOverlapped overlapped, TransmitFileOptions flags)
+        internal unsafe bool TransmitPackets(SafeCloseSocket socketHandle, IntPtr packetArray, int elementCount, int sendSize, NativeOverlapped* overlapped, TransmitFileOptions flags)
         {
             EnsureDynamicWinsockMethods();
             TransmitPacketsDelegate transmitPackets = _dynamicWinsockMethods.GetDelegate<TransmitPacketsDelegate>(socketHandle);
@@ -193,12 +197,9 @@ namespace System.Net.Sockets
             {
                 acceptSocket = new Socket(_addressFamily, _socketType, _protocolType);
             }
-            else
+            else if (acceptSocket._rightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
             {
-                if (acceptSocket._rightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
-                {
-                    throw new InvalidOperationException(SR.Format(SR.net_sockets_namedmustnotbebound, propertyName));
-                }
+                throw new InvalidOperationException(SR.Format(SR.net_sockets_namedmustnotbebound, propertyName));
             }
 
             handle = acceptSocket._handle;
@@ -221,10 +222,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             // If the user passed the Disconnect and/or ReuseSocket flags, then TransmitFile disconnected the socket.
@@ -246,12 +244,9 @@ namespace System.Net.Sockets
             SocketError errorCode = SocketPal.SendFileAsync(_handle, fileStream, preBuffer, postBuffer, flags, asyncResult);
 
             // Check for synchronous exception
-            if (errorCode != SocketError.Success)
+            if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                throw new SocketException((int)errorCode);
             }
 
             asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
@@ -285,12 +280,18 @@ namespace System.Net.Sockets
 
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
+        }
+
+        internal ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandle()
+        {
+            // There is a known bug that exists through Windows 7 with UDP and
+            // SetFileCompletionNotificationModes.
+            // So, don't try to enable skipping the completion port on success in this case.
+            bool trySkipCompletionPortOnSuccess = !(CompletionPortHelper.PlatformHasUdpIssue && _protocolType == ProtocolType.Udp);
+            return _handle.GetOrAllocateThreadPoolBoundHandle(trySkipCompletionPortOnSuccess);
         }
     }
 }

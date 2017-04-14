@@ -1,27 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5F9C3C9F-652E-461E-B2D6-85D264F5A733}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>System.Net.Http.Unit.Tests</RootNamespace>
-    <AssemblyName>System.Net.Http.Unit.Tests</AssemblyName>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <NoWarn Condition="'$(TargetGroup)' == 'netfx'">$(NoWarn);0436</NoWarn>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netfx'">$(DefineConstants);NET46</DefineConstants>
   </PropertyGroup>
-  
-  <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />  
-  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
+  <ItemGroup>
+    <TargetingPackExclusions Include="System.Net.Http" />
+    <TargetingPackExclusions Include="System.Net.Mail" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
@@ -31,6 +26,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>ProductionCode\Common\System\StringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
+      <Link>ProductionCode\Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>ProductionCode\Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
@@ -76,6 +74,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Mail\WhitespaceReader.cs">
       <Link>ProductionCode\Common\src\System\Net\Mail\WhitespaceReader.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Internal\UriHelper.cs">
       <Link>ProductionCode\Internal\UriHelper.cs</Link>
@@ -340,16 +341,13 @@
     <Compile Include="MockContent.cs" />
     <Compile Include="StreamToStreamCopyTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != ''">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="..\..\src\Internal\ICloneable.cs">
       <Link>ProductionCode\Internal\ICloneable.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\SerializableAttribute.cs">
       <Link>Common\System\SerializableAttribute.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

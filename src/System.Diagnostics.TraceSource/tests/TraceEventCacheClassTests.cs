@@ -49,10 +49,16 @@ namespace System.Diagnostics.TraceSourceTests
         }
 
         [Fact]
-        public void CallstackTest()
+        public void CallstackTest_NotEmpty()
         {
             var cache = new TraceEventCache();
-            Assert.Contains("at System.Environment.GetStackTrace(Exception e, Boolean needFileInfo)", cache.Callstack);
+            Assert.NotEmpty(cache.Callstack);
+        }
+
+        [Fact]
+        public void CallstackTest_ContainsExpectedFrames()
+        {
+            var cache = new TraceEventCache();
             Assert.Contains("at System.Environment.get_StackTrace()", cache.Callstack);
         }
 

@@ -3,15 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Dynamic.Utils;
 using System.Globalization;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Text;
-using System.Threading;
-
 using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Linq.Expressions.Interpreter
@@ -308,7 +303,7 @@ namespace System.Linq.Expressions.Interpreter
             NewArrayExpression data = Expression.NewArrayInit(typeof(object), parametersAsObject);
             var dlg = new Func<object[], object>(Run);
 
-            ConstantExpression dlgExpr = AstUtils.Constant(dlg);
+            ConstantExpression dlgExpr = Expression.Constant(dlg);
 
             ParameterExpression argsParam = Expression.Parameter(typeof(object[]), "$args");
 
@@ -388,7 +383,6 @@ namespace System.Linq.Expressions.Interpreter
         }
 
 #if NO_FEATURE_STATIC_DELEGATE
-        [EnableInvokeTesting]
         internal void RunVoidRef2<T0, T1>(ref T0 arg0, ref T1 arg1)
         {
             // copy in and copy out for today...

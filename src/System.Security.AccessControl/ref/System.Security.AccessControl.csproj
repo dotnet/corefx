@@ -2,15 +2,15 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <NuGetTargetMoniker>.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <ProjectGuid>{F80C478C-48EE-46A5-89C4-EE0CFB23A14F}</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Security.AccessControl.cs" />
-    <Compile Include="System.Security.AccessControl.Manual.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <ProjectReference Include="..\..\System.Security.Principal.Windows\ref\System.Security.Principal.Windows.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

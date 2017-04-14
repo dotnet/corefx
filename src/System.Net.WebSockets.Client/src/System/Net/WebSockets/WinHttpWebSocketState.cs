@@ -232,7 +232,7 @@ namespace System.Net.WebSockets
         {
             lock (_lock)
             {
-                ClientWebSocket.ThrowIfInvalidState(_state, _disposed, validStates);
+                WebSocketValidate.ThrowIfInvalidState(_state, _disposed, validStates);
             }
         }
 
@@ -250,7 +250,7 @@ namespace System.Net.WebSockets
         // Must be called with Lock taken.
         public void CheckValidState(WebSocketState[] validStates)
         {
-            ClientWebSocket.ThrowIfInvalidState(_state, _disposed, validStates);
+            WebSocketValidate.ThrowIfInvalidState(_state, _disposed, validStates);
         }
 
         public void UpdateState(WebSocketState value)
@@ -264,17 +264,9 @@ namespace System.Net.WebSockets
         #region IDisposable Support
         private void Dispose(bool disposing)
         {
-            if (_webSocketHandle != null)
-            {
-                _webSocketHandle.Dispose();
-                // Will be set to null in the callback.
-            }
-
-            if (_requestHandle != null)
-            {
-                _requestHandle.Dispose();
-                // Will be set to null in the callback.
-            }
+            // These will be set to null in the callback.
+            _webSocketHandle?.Dispose();
+            _requestHandle?.Dispose();
 
             Interop.WinHttp.SafeWinHttpHandle.DisposeAndClearHandle(ref _connectionHandle);
             Interop.WinHttp.SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);

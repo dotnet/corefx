@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -29,7 +28,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((sbyte)((sbyte)value << (int)shift));
+                    frame.Push(unchecked((sbyte)((sbyte)value << (int)shift)));
                 }
                 return 1;
             }
@@ -47,7 +46,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((short)((short)value << (int)shift));
+                    frame.Push(unchecked((short)((short)value << (int)shift)));
                 }
                 return 1;
             }
@@ -101,7 +100,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((byte)((byte)value << (int)shift));
+                    frame.Push(unchecked((byte)((byte)value << (int)shift)));
                 }
                 return 1;
             }
@@ -119,7 +118,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push((ushort)((ushort)value << (int)shift));
+                    frame.Push(unchecked((ushort)((ushort)value << (int)shift)));
                 }
                 return 1;
             }
@@ -164,10 +163,7 @@ namespace System.Linq.Expressions.Interpreter
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static Instruction Create(Type type)
         {
-            // Boxed enums can be unboxed as their underlying types:
-            Type underlyingType = type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : type.GetNonNullableType();
-
-            switch (underlyingType.GetTypeCode())
+            switch (type.GetNonNullableType().GetTypeCode())
             {
                 case TypeCode.SByte: return s_SByte ?? (s_SByte = new LeftShiftSByte());
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new LeftShiftInt16());
@@ -178,7 +174,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new LeftShiftUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new LeftShiftUInt64());
                 default:
-                    throw Error.ExpressionNotSupportedForType("LeftShift", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

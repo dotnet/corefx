@@ -5,17 +5,18 @@
     <ProjectGuid>{07390899-C8F6-4E83-A3A9-6867B8CB46A0}</ProjectGuid>
     <RootNamespace>System.Security.Permissions</RootNamespace>
     <AssemblyName>System.Security.Permissions</AssemblyName>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <PackageAsRefAndLib Condition="'$(TargetGroup)' == 'net461'">true</PackageAsRefAndLib>
+    <PackageAsRefAndLib Condition="'$(TargetGroup)' == 'netfx'">true</PackageAsRefAndLib>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net461'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+    <Compile Include="System\ApplicationIdentity.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationAccess.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermission.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermissionAttribute.cs" />
@@ -114,16 +115,44 @@
     <Compile Include="System\Security\HostSecurityManagerOptions.cs" />
     <Compile Include="System\Security\HostSecurityManager.cs" />
     <Compile Include="System\Security\HostProtectionException.cs" />
-    <!-- Remove these P2P references once packages are updated -->
-    <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj" />
-    <ProjectReference Include="..\..\System.Collections.NonGeneric\pkg\System.Collections.NonGeneric.pkgproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net461'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Security.AccessControl" />
+    <Reference Include="System.Security.Cryptography.Csp" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap' Or '$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Security\Permissions\FileIOPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\IsolatedStorageContainment.cs" />
+    <Compile Include="System\Security\Permissions\IsolatedStorageFilePermission.cs" />
+    <Compile Include="System\Security\Permissions\IsolatedStorageFilePermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\IsolatedStoragePermission.cs" />
+    <Compile Include="System\Security\Permissions\IsolatedStoragePermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermission.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntry.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryCollection.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryEnumerator.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
+    <Compile Include="System\Security\Permissions\ResourcePermissionBase.cs" />
+    <Compile Include="System\Security\Permissions\ResourcePermissionBaseEntry.cs" />
+    <Compile Include="System\Security\Permissions\StorePermission.cs" />
+    <Compile Include="System\Security\Permissions\StorePermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
+    <Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

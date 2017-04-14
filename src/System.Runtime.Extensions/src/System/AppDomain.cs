@@ -4,19 +4,16 @@
 
 #pragma warning disable CS0067 // events are declared but not used
 
-extern alias System_Security_Principal;
-
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Loader;
 using System.IO;
+using System.Security.Principal;
 
 namespace System
 {
-    using PrincipalPolicy = System_Security_Principal::System.Security.Principal.PrincipalPolicy;
-    using IPrincipal = System_Security_Principal::System.Security.Principal.IPrincipal;
-
     public partial class AppDomain : MarshalByRefObject
     {
         private static readonly AppDomain s_domain = new AppDomain();
@@ -88,7 +85,7 @@ namespace System
         public static AppDomain CreateDomain(string friendlyName)
         {
             if (friendlyName == null) throw new ArgumentNullException(nameof(friendlyName));
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_AppDomains);
         }
 
         public int ExecuteAssembly(string assemblyFile) => ExecuteAssembly(assemblyFile, null);
@@ -106,8 +103,7 @@ namespace System
 
         public int ExecuteAssembly(string assemblyFile, string[] args, byte[] hashValue, Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm)
         {
-            // This api is only meaningful for very specific partial trust/CAS hence not supporting
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); // This api is only meaningful for very specific partial trust/CAS scenarios
         }
 
         private int ExecuteAssembly(Assembly assembly, string[] args)
@@ -134,7 +130,7 @@ namespace System
                 
                 // We are catching the TIE here and throws the inner exception only,
                 // this is needed to have a consistent exception story with desktop clr
-                ExceptionDispatchInfo.Capture(targetInvocationException.InnerException).Throw();
+                ExceptionDispatchInfo.Throw(targetInvocationException.InnerException);
             }
 
             return result != null ? (int)result : 0;
@@ -194,7 +190,7 @@ namespace System
                 {
                     throw new ArgumentException(SR.Arg_MustBeTrue);
                 }
-                throw new PlatformNotSupportedException();
+                throw new PlatformNotSupportedException(SR.PlatformNotSupported_AppDomain_ResMon);
             }
         }
 
@@ -206,7 +202,7 @@ namespace System
 
         public TimeSpan MonitoringTotalProcessorTime { get { throw CreateResMonNotAvailException(); } }
 
-        private static Exception CreateResMonNotAvailException() => new InvalidOperationException(SR.AppDomain_ResMonNotAvail);
+        private static Exception CreateResMonNotAvailException() => new InvalidOperationException(SR.PlatformNotSupported_AppDomain_ResMon);
 
         [ObsoleteAttribute("AppDomain.GetCurrentThreadId has been deprecated because it does not provide a stable Id when managed threads are running on fibers (aka lightweight threads). To get a stable identifier for a managed thread, use the ManagedThreadId property on Thread.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
         public static int GetCurrentThreadId() => Environment.CurrentManagedThreadId;
@@ -239,6 +235,14 @@ namespace System
             remove { AssemblyLoadContext.AssemblyLoad -= value; }
         }
 
+        public event ResolveEventHandler AssemblyResolve
+        {
+            add { AssemblyLoadContext.AssemblyResolve += value; }
+            remove { AssemblyLoadContext.AssemblyResolve -= value; }
+        }
+
+        public event ResolveEventHandler ReflectionOnlyAssemblyResolve;
+
         public event ResolveEventHandler TypeResolve
         {
             add { AssemblyLoadContext.TypeResolve += value; }
@@ -270,13 +274,5 @@ namespace System
                 _defaultPrincipal = principal;
             }
         }
-
-        public event ResolveEventHandler AssemblyResolve
-        {
-            add { AssemblyLoadContext.AssemblyResolve += value; }
-            remove { AssemblyLoadContext.AssemblyResolve -= value; }
-        }
-
-        public event ResolveEventHandler ReflectionOnlyAssemblyResolve;
     }
 }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace System.Dynamic
 {
@@ -79,7 +78,7 @@ namespace System.Dynamic
                 {
                     Type ct = Expression.Type;
                     // valuetype at compile time, type cannot change.
-                    if (ct.GetTypeInfo().IsValueType)
+                    if (ct.IsValueType)
                     {
                         return ct;
                     }

@@ -4,22 +4,19 @@
   <PropertyGroup>
     <AssemblyName>System.Globalization</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7;uap10.1</PackageTargetFramework>
+    <ProjectGuid>{2395E8CA-73CB-40DF-BE40-A60BC189B737}</ProjectGuid>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net463'" />
-    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net463'" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

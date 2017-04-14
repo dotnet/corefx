@@ -12,7 +12,6 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     /// <summary>
     /// Table of bound extension functions.  Once an extension function is bound and entered into the table, future bindings
     /// will be very fast.  This table is not thread-safe.
@@ -322,7 +321,7 @@ namespace System.Xml.Xsl.Runtime
         /// </summary>
         private Type GetClrType(Type clrType)
         {
-            if (clrType.GetTypeInfo().IsEnum)
+            if (clrType.IsEnum)
                 return Enum.GetUnderlyingType(clrType);
 
             if (clrType.IsByRef)

@@ -37,6 +37,7 @@ namespace System.Net.Http
 
         private readonly RTHttpBaseProtocolFilter rtFilter;
         private readonly HttpHandlerToFilter handlerToFilter;
+        private readonly HttpMessageHandler diagnosticsPipeline;
 
         private volatile bool operationStarted;
         private volatile bool disposed;
@@ -160,11 +161,14 @@ namespace System.Net.Http
             get { return true; }
             set
             {
+                /*
+                TODO:#18104
                 if (value != PreAuthenticate)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(PreAuthenticate)));
                 }
+                */
                 CheckDisposedOrStarted();
             }
         }
@@ -283,11 +287,14 @@ namespace System.Net.Http
             get { return 10; }
             set
             {
+                /*
+                 * TODO:#17812
                 if (value != MaxAutomaticRedirections)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(MaxAutomaticRedirections)));
                 }
+                */
                 CheckDisposedOrStarted();
             }
         }
@@ -327,8 +334,11 @@ namespace System.Net.Http
 
             set
             {
+                /*
+                 * TODO:#18036
                 throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                     SR.net_http_value_not_supported, value, nameof(MaxResponseHeadersLength)));
+                */
             }
         }
 
@@ -363,8 +373,10 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != null)
                 {
+                    /* 
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(ServerCertificateCustomValidationCallback)));
+                   */
                 }
             }
         }
@@ -378,11 +390,13 @@ namespace System.Net.Http
             set
             {
                 CheckDisposedOrStarted();
+                /*TODO#18116
                 if (!value)
                 {
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(CheckCertificateRevocationList)));
                 }
+                */
             }
         }
 
@@ -394,8 +408,11 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != SslProtocols.None)
                 {
+                    /*
+                    TODO:#18116
                     throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(SslProtocols)));
+                   */
                 }
             }
         }
@@ -421,6 +438,7 @@ namespace System.Net.Http
         {
             this.rtFilter = new RTHttpBaseProtocolFilter();
             this.handlerToFilter = new HttpHandlerToFilter(this.rtFilter);
+            this.diagnosticsPipeline = new DiagnosticsHandler(handlerToFilter);
 
             this.clientCertificateOptions = ClientCertificateOption.Manual;
 
@@ -553,8 +571,12 @@ namespace System.Net.Http
             try
             {
                 await ConfigureRequest(request).ConfigureAwait(false);
-            
-                response = await this.handlerToFilter.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                Task<HttpResponseMessage> responseTask = DiagnosticsHandler.IsEnabled() ? 
+                    this.diagnosticsPipeline.SendAsync(request, cancellationToken) :
+                    this.handlerToFilter.SendAsync(request, cancellationToken);
+
+                response = await responseTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {

@@ -6,15 +6,13 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     using System;
     using System.Net;
-    using System.Globalization;
     using System.Security.Principal;
     using System.Diagnostics;
     using System.Runtime.InteropServices;
     using System.ComponentModel;
-    using System.Text;
     using System.Security.Permissions;
     using System.IO;
-
+    
     public enum DirectoryContextType
     {
         Domain = 0,
@@ -35,11 +33,6 @@ namespace System.DirectoryServices.ActiveDirectory
         private bool _validated = false;
         private bool _contextIsValid = false;
 
-        private static bool s_platformSupported;
-        private static bool s_serverBindSupported;
-        private static bool s_dnsgetdcSupported;
-        private static bool s_w2k;
-
         internal static LoadLibrarySafeHandle ADHandle;
         internal static LoadLibrarySafeHandle ADAMHandle;
 
@@ -48,94 +41,13 @@ namespace System.DirectoryServices.ActiveDirectory
         [EnvironmentPermission(SecurityAction.Assert, Unrestricted = true)]
         static DirectoryContext()
         {
-            //
-            // Everything supported until proven otherwise
-            //
-            s_platformSupported = true;
-            s_serverBindSupported = true;
-            s_dnsgetdcSupported = true;
-            s_w2k = false;
-
-            //
-            // S.DS.AD only supported on W2K above
-            //    
-            OperatingSystem os = Environment.OSVersion;
-
-            if (os.Platform == PlatformID.Win32NT &&
-                os.Version.Major >= 5)
-            {
-                if (os.Version.Major == 5 && os.Version.Minor == 0)
-                {
-                    //
-                    // This is W2K: DsGetDcOpen/Next/Close not supported
-                    //
-                    s_w2k = true;
-                    s_dnsgetdcSupported = false;
-
-                    //
-                    // Now get the service pack information as well to check if ADS_SERVER_BIND
-                    // is supported (Could not have used OSVersionInfoEx earlier itself as it is not
-                    // supported on all platforms)
-                    //
-                    OSVersionInfoEx osviex = new OSVersionInfoEx();
-                    bool result = NativeMethods.GetVersionEx(osviex);
-                    if (!result)
-                    {
-                        int errorCode = NativeMethods.GetLastError();
-                        Debug.Fail(string.Format(CultureInfo.InvariantCulture, "NativeMethods.GetVersionEx (with OSVERSIONINFOEX) failed with error code {0}.", errorCode));
-                        throw new SystemException(Res.GetString(Res.VersionFailure, errorCode)); ;
-                    }
-
-                    if (osviex.servicePackMajor < 3)
-                    {
-                        //
-                        // ADS_SERVER_BIND is not supported on platforms prior to W2K SP3 
-                        //
-                        s_serverBindSupported = false;
-                    }
-                }
-
-                // load ntdsapi.dll for AD and ADAM
-                GetLibraryHandle();
-            }
-            else
-            {
-                //
-                // S.DS.AD does not support this platform (< 5.0)
-                //
-                s_platformSupported = false;
-                s_serverBindSupported = false;
-                s_dnsgetdcSupported = false;
-            }
-        }
-
-        internal static bool ServerBindSupported
-        {
-            get
-            {
-                return s_serverBindSupported;
-            }
-        }
-
-        internal static bool DnsgetdcSupported
-        {
-            get
-            {
-                return s_dnsgetdcSupported;
-            }
+            // load ntdsapi.dll for AD and ADAM
+            GetLibraryHandle();
         }
 
         // Internal Constructors
         internal void InitializeDirectoryContext(DirectoryContextType contextType, string name, string username, string password)
         {
-            //
-            // Check if the platform is currently supported or not
-            //
-            if (!s_platformSupported)
-            {
-                throw new PlatformNotSupportedException(Res.GetString(Res.SupportedPlatforms));
-            }
-
             _name = name;
             _contextType = contextType;
             _credential = new NetworkCredential(username, password);
@@ -189,9 +101,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #region public constructors
 
-        [
-            DirectoryServicesPermission(SecurityAction.Demand, Unrestricted = true)
-        ]
         public DirectoryContext(DirectoryContextType contextType)
         {
             //
@@ -200,15 +109,12 @@ namespace System.DirectoryServices.ActiveDirectory
             //
             if (contextType != DirectoryContextType.Domain && contextType != DirectoryContextType.Forest)
             {
-                throw new ArgumentException(Res.GetString(Res.OnlyDomainOrForest), "contextType");
+                throw new ArgumentException(SR.OnlyDomainOrForest, "contextType");
             }
 
             InitializeDirectoryContext(contextType, null, null, null);
         }
 
-        [
-           DirectoryServicesPermission(SecurityAction.Demand, Unrestricted = true)
-        ]
         public DirectoryContext(DirectoryContextType contextType, string name)
         {
             if (contextType < DirectoryContextType.Domain || contextType > DirectoryContextType.ApplicationPartition)
@@ -223,15 +129,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (name.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "name");
+                throw new ArgumentException(SR.EmptyStringParameter, "name");
             }
 
             InitializeDirectoryContext(contextType, name, null, null);
         }
 
-        [
-            DirectoryServicesPermission(SecurityAction.Demand, Unrestricted = true)
-        ]
         public DirectoryContext(DirectoryContextType contextType, string username, string password)
         {
             //
@@ -240,15 +143,12 @@ namespace System.DirectoryServices.ActiveDirectory
             //
             if (contextType != DirectoryContextType.Domain && contextType != DirectoryContextType.Forest)
             {
-                throw new ArgumentException(Res.GetString(Res.OnlyDomainOrForest), "contextType");
+                throw new ArgumentException(SR.OnlyDomainOrForest, "contextType");
             }
 
             InitializeDirectoryContext(contextType, null, username, password);
         }
 
-        [
-            DirectoryServicesPermission(SecurityAction.Demand, Unrestricted = true)
-        ]
         public DirectoryContext(DirectoryContextType contextType, string name, string username, string password)
         {
             if (contextType < DirectoryContextType.Domain || contextType > DirectoryContextType.ApplicationPartition)
@@ -263,7 +163,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (name.Length == 0)
             {
-                throw new ArgumentException(Res.GetString(Res.EmptyStringParameter), "name");
+                throw new ArgumentException(SR.EmptyStringParameter, "name");
             }
 
             InitializeDirectoryContext(contextType, name, username, password);
@@ -331,7 +231,6 @@ namespace System.DirectoryServices.ActiveDirectory
         #endregion public properties
 
         #region private methods
-        [DirectoryServicesPermission(SecurityAction.Assert, Unrestricted = true)]
         internal static bool IsContextValid(DirectoryContext context, DirectoryContextType contextType)
         {
             bool contextIsValid = false;
@@ -573,19 +472,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (!_validated)
             {
-                if (s_w2k)
-                {
-                    //
-                    // On W2K client we need to validate that it is not a domain or application partition
-                    //
-                    _contextIsValid = (IsContextValid(this, DirectoryContextType.DirectoryServer) &&
-                        (!(IsContextValid(this, DirectoryContextType.Domain))) &&
-                        (!(IsContextValid(this, DirectoryContextType.ApplicationPartition))));
-                }
-                else
-                {
-                    _contextIsValid = IsContextValid(this, DirectoryContextType.DirectoryServer);
-                }
+                _contextIsValid = IsContextValid(this, DirectoryContextType.DirectoryServer);
                 _validated = true;
             }
             return _contextIsValid;
@@ -800,7 +687,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 // we should never get to this point here since we should have already verified that the context is valid 
                 // by the time we get to this point
                 //
-                throw new ActiveDirectoryOperationException(Res.GetString(Res.ContextNotAssociatedWithDomain));
+                throw new ActiveDirectoryOperationException(SR.ContextNotAssociatedWithDomain);
             }
 
             return domainName;
@@ -839,7 +726,6 @@ namespace System.DirectoryServices.ActiveDirectory
             return domainControllerInfo.DomainName;
         }
 
-        [FileIOPermission(SecurityAction.Assert, AllFiles = FileIOPermissionAccess.PathDiscovery)]
         [EnvironmentPermission(SecurityAction.Assert, Unrestricted = true)]
         private static void GetLibraryHandle()
         {

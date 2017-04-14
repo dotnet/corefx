@@ -139,8 +139,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.Select((e, i) => i == 5 ? e.name : null));
         }
 
-        [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void Overflow()
         {
             var selected = new FastInfiniteEnumerator<int>().Select((e, i) => e);
@@ -240,7 +239,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsAnArray_ExecutionIsDefered()
+        public void SelectSelect_SourceIsAnArray_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             Func<int>[] source = new Func<int>[] { () => { funcCalled = true; return 1; } };
@@ -250,7 +249,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsAList_ExecutionIsDefered()
+        public void SelectSelect_SourceIsAList_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             List<Func<int>> source = new List<Func<int>>() { () => { funcCalled = true; return 1; } };
@@ -280,7 +279,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsIEnumerable_ExecutionIsDefered()
+        public void SelectSelect_SourceIsIEnumerable_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             IEnumerable<Func<int>> source = Enumerable.Repeat((Func<int>)(() => { funcCalled = true; return 1; }), 1);
@@ -731,15 +730,24 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_ResetCalledOnEnumerator_ExceptionThrown()
+        public void Select_ResetCalledOnEnumerator_ThrowsException()
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
             Func<int, int> selector = i => i + 1;
 
-            var result = source.Select(selector);
-            var enumerator = result.GetEnumerator();
+            IEnumerable<int> result = source.Select(selector);
+            IEnumerator<int> enumerator = result.GetEnumerator();
 
-            Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+            // The.NET full framework throws a NotImplementedException.
+            // See https://github.com/dotnet/corefx/pull/2959.
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<NotImplementedException>(() => enumerator.Reset());
+            }
+            else
+            {
+                Assert.Throws<NotSupportedException>(() => enumerator.Reset());
+            }
         }
 
         [Fact]
@@ -1167,6 +1175,66 @@ namespace System.Linq.Tests
             yield return new object[] { Array.Empty<int>() };
             yield return new object[] { new int[1] };
             yield return new object[] { Enumerable.Range(1, 30) };
+        }
+
+        [Theory]
+        [MemberData(nameof(RunSelectorDuringCountData))]
+        public void RunSelectorDuringCount(IEnumerable<int> source)
+        {
+            int timesRun = 0;
+            var selected = source.Select(i => timesRun++);
+            selected.Count();
+
+            Assert.Equal(source.Count(), timesRun);
+        }
+
+        // [Theory]
+        [MemberData(nameof(RunSelectorDuringCountData))]
+        public void RunSelectorDuringPartitionCount(IEnumerable<int> source)
+        {
+            int timesRun = 0;
+
+            var selected = source.Select(i => timesRun++);
+
+            if (source.Any())
+            {
+                selected.Skip(1).Count();
+                Assert.Equal(source.Count() - 1, timesRun);
+
+                selected.Take(source.Count() - 1).Count();
+                Assert.Equal(source.Count() * 2 - 2, timesRun);
+            }
+        }
+
+        public static IEnumerable<object[]> RunSelectorDuringCountData()
+        {
+            var transforms = new Func<IEnumerable<int>, IEnumerable<int>>[]
+            {
+                e => e,
+                e => ForceNotCollection(e),
+                e => ForceNotCollection(e).Skip(1),
+                e => ForceNotCollection(e).Where(i => true), 
+                e => e.ToArray().Where(i => true),
+                e => e.ToList().Where(i => true),
+                e => new LinkedList<int>(e).Where(i => true),
+                e => e.Select(i => i),
+                e => e.Take(e.Count()),
+                e => e.ToArray(),
+                e => e.ToList(),
+                e => new LinkedList<int>(e) // Implements IList<T>.
+            };
+
+            var r = new Random(unchecked((int)0x984bf1a3));
+
+            for (int i = 0; i <= 5; i++)
+            {
+                var enumerable = Enumerable.Range(1, i).Select(_ => r.Next());
+
+                foreach (var transform in transforms)
+                {
+                    yield return new object[] { transform(enumerable) };
+                }
+            }
         }
     }
 }

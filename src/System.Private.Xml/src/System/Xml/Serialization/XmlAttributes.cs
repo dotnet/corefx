@@ -2,14 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System;
     using System.Reflection;
     using System.Collections;
     using System.ComponentModel;
     using System.Linq;
-    using Collections.Generic;
+    using System.Collections.Generic;
 
     internal enum XmlAttributeFlags
     {
@@ -83,7 +87,7 @@ namespace System.Xml.Serialization
             {
                 if (s_ignoreAttributeType == null)
                 {
-                    s_ignoreAttributeType = typeof(object).GetTypeInfo().Assembly.GetType("System.XmlIgnoreMemberAttribute");
+                    s_ignoreAttributeType = typeof(object).Assembly.GetType("System.XmlIgnoreMemberAttribute");
                     if (s_ignoreAttributeType == null)
                     {
                         s_ignoreAttributeType = typeof(XmlIgnoreAttribute);
@@ -100,7 +104,7 @@ namespace System.Xml.Serialization
         {
             object[] attrs = provider.GetCustomAttributes(false);
 
-            // most generic <any/> matches everithig 
+            // most generic <any/> matches everything 
             XmlAnyElementAttribute wildcard = null;
             for (int i = 0; i < attrs.Length; i++)
             {

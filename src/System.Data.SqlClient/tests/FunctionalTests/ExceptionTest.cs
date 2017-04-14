@@ -8,7 +8,6 @@ using Xunit;
 
 namespace System.Data.SqlClient.Tests
 {
-    [OuterLoop("Takes minutes on some networks")]
     public class ExceptionTest
     {
         // test connection string
@@ -74,6 +73,28 @@ namespace System.Data.SqlClient.Tests
                 {
                     VerifyConnectionFailure<InvalidOperationException>(() => command.ExecuteReader(), execReaderFailedMessage);
                 }
+            }
+        }
+
+        [ActiveIssue(17373)]
+        [Theory]
+        [InlineData(@"np:\\.\pipe\sqlbad\query")]
+        [InlineData(@"np:\\.\pipe\MSSQL$NonExistentInstance\sql\query")]
+        [InlineData(@"\\.\pipe\sqlbad\query")]
+        [InlineData(@"\\.\pipe\MSSQL$NonExistentInstance\sql\query")]
+        [InlineData(@"np:\\localhost\pipe\sqlbad\query")]
+        [InlineData(@"np:\\localhost\pipe\MSSQL$NonExistentInstance\sqlbad\query")]
+        [InlineData(@"\\localhost\pipe\sqlbad\query")]
+        [InlineData(@"\\localhost\pipe\MSSQL$NonExistentInstance\sqlbad\query")]
+        [PlatformSpecific(TestPlatforms.Windows)] // Named pipes with the given input strings are not supported on Unix
+        public void NamedPipeTest(string dataSource)
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = dataSource;
+            builder.ConnectTimeout = 1;
+            using(SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                VerifyConnectionFailure<SqlException>(() => connection.Open(), "(provider: Named Pipes Provider, error: 11 - Timeout error)");
             }
         }
 

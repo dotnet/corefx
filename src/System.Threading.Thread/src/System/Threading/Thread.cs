@@ -2,38 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if !NETNATIVE
-extern alias System_Runtime_Extensions;
-extern alias System_Security_Principal;
-#endif
-
-using System.Diagnostics;
+using Internal.Runtime.Augments;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.ConstrainedExecution;
-using Internal.Runtime.Augments;
+using System.Security.Principal;
 
 namespace System.Threading
 {
-#if !NETNATIVE
-    using AppDomain = System_Runtime_Extensions::System.AppDomain;
-    using IPrincipal = System_Security_Principal::System.Security.Principal.IPrincipal;
-#endif
-
-#if !NETNATIVE
     public sealed partial class Thread : CriticalFinalizerObject
-#else
-    public sealed partial class Thread
-#endif
     {
         [ThreadStatic]
         private static Thread t_currentThread;
 
         private readonly RuntimeThread _runtimeThread;
         private Delegate _start;
-#if !NETNATIVE
         private IPrincipal _principal;
-#endif
 
         private Thread(RuntimeThread runtimeThread)
         {
@@ -166,7 +151,6 @@ namespace System.Threading
             }
         }
 
-#if !NETNATIVE
         public static IPrincipal CurrentPrincipal
         {
             get
@@ -178,7 +162,6 @@ namespace System.Threading
                 CurrentThread._principal = value;
             }
         }
-#endif
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
         public bool IsAlive => _runtimeThread.IsAlive;
@@ -191,29 +174,29 @@ namespace System.Threading
 
         public void Abort()
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_ThreadAbort);
         }
 
         public void Abort(object stateInfo)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_ThreadAbort);
         }
 
         public static void ResetAbort()
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_ThreadAbort);
         }
 
         [ObsoleteAttribute("Thread.Suspend has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
         public void Suspend()
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_ThreadSuspend);
         }
 
         [ObsoleteAttribute("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
         public void Resume()
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_ThreadSuspend);
         }
 
         // Currently, no special handling is done for critical regions, and no special handling is necessary to ensure thread
@@ -223,14 +206,12 @@ namespace System.Threading
         public static void BeginThreadAffinity() { }
         public static void EndThreadAffinity() { }
 
-#if !NETNATIVE
         public static LocalDataStoreSlot AllocateDataSlot() => LocalDataStore.AllocateSlot();
         public static LocalDataStoreSlot AllocateNamedDataSlot(string name) => LocalDataStore.AllocateNamedSlot(name);
         public static LocalDataStoreSlot GetNamedDataSlot(string name) => LocalDataStore.GetNamedSlot(name);
         public static void FreeNamedDataSlot(string name) => LocalDataStore.FreeNamedSlot(name);
         public static object GetData(LocalDataStoreSlot slot) => LocalDataStore.GetData(slot);
         public static void SetData(LocalDataStoreSlot slot, object data) => LocalDataStore.SetData(slot, data);
-#endif
 
         [Obsolete("The ApartmentState property has been deprecated.  Use GetApartmentState, SetApartmentState or TrySetApartmentState instead.", false)]
         public ApartmentState ApartmentState
@@ -291,10 +272,8 @@ namespace System.Threading
             throw new InvalidOperationException(SR.Thread_GetSetCompressedStack_NotSupported);
         }
 
-#if !NETNATIVE
         public static AppDomain GetDomain() => AppDomain.CurrentDomain;
         public static int GetDomainID() => GetDomain().Id;
-#endif
         public override int GetHashCode() => ManagedThreadId;
         public void Interrupt() => _runtimeThread.Interrupt();
         public void Join() => _runtimeThread.Join();
@@ -345,7 +324,6 @@ namespace System.Threading
         [CLSCompliant(false)]
         public static void VolatileWrite(ref UIntPtr address, UIntPtr value) => Volatile.Write(ref address, value);
 
-#if !NETNATIVE
         /// <summary>
         /// Manages functionality required to support members of <see cref="Thread"/> dealing with thread-local data
         /// </summary>
@@ -426,6 +404,5 @@ namespace System.Threading
                 GetThreadLocal(slot).Value = value;
             }
         }
-#endif
     }
 }

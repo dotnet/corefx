@@ -22,7 +22,7 @@ namespace System.Net.Http
                 Debug.Assert(easy != null, "Expected non-null EasyRequest");
                 RequestMessage = easy._requestMessage;
                 ResponseStream = new CurlResponseStream(easy);
-                Content = new StreamContent(ResponseStream);
+                Content = new NoWriteNoSeekStreamContent(ResponseStream, CancellationToken.None);
 
                 // On Windows, we pass the equivalent of the easy._cancellationToken
                 // in to StreamContent's ctor.  This in turn passes that token through
@@ -237,10 +237,14 @@ namespace System.Net.Http
                 }
             }
 
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                return ReadAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
-            }
+            public override int Read(byte[] buffer, int offset, int count) =>
+                ReadAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
+
+            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+                TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), callback, state);
+
+            public override int EndRead(IAsyncResult asyncResult) =>
+                TaskToApm.End<int>(asyncResult);
 
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
@@ -389,12 +393,13 @@ namespace System.Net.Http
 
                     // If there's a pending read request, complete it, either with 0 bytes for success
                     // or with the exception/CancellationToken for failure.
-                    if (_pendingReadRequest != null)
+                    ReadState pendingRead = _pendingReadRequest;
+                    if (pendingRead != null)
                     {
                         if (_completed == s_completionSentinel)
                         {
                             EventSourceTrace("Completing pending read with 0 bytes");
-                            _pendingReadRequest.TrySetResult(0);
+                            pendingRead.TrySetResult(0);
                         }
                         else
                         {
@@ -402,11 +407,11 @@ namespace System.Net.Http
                             OperationCanceledException oce = _completed as OperationCanceledException;
                             if (oce != null)
                             {
-                                _pendingReadRequest.TrySetCanceled(oce.CancellationToken);
+                                pendingRead.TrySetCanceled(oce.CancellationToken);
                             }
                             else
                             {
-                                _pendingReadRequest.TrySetException(MapToReadWriteIOException(_completed, isRead: true));
+                                pendingRead.TrySetException(MapToReadWriteIOException(_completed, isRead: true));
                             }
                         }
 

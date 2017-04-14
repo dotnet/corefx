@@ -246,6 +246,9 @@ namespace System.IO
 
         private void ParseEventBufferAndNotifyForEach(byte[] buffer)
         {
+            Debug.Assert(buffer != null);
+            Debug.Assert(buffer.Length > 0);
+
             // Parse each event from the buffer and notify appropriate delegates
 
             /******
@@ -273,7 +276,7 @@ namespace System.IO
             {
                 unsafe
                 {
-                    fixed (byte* buffPtr = buffer)
+                    fixed (byte* buffPtr = &buffer[0])
                     {
                         // Get next offset:
                         nextOffset = *((int*)(buffPtr + offset));
@@ -316,28 +319,19 @@ namespace System.IO
                 // If the action is RENAMED_FROM, save the name of the file
                 if (action == Interop.Kernel32.FileOperations.FILE_ACTION_RENAMED_OLD_NAME)
                 {
-                    Debug.Assert(oldName == null, "Two FILE_ACTION_RENAMED_OLD_NAME in a row!  [" + oldName + "], [ " + name + "]");
                     oldName = name;
                 }
                 else if (action == Interop.Kernel32.FileOperations.FILE_ACTION_RENAMED_NEW_NAME)
                 {
-                    if (oldName != null)
-                    {
-                        NotifyRenameEventArgs(WatcherChangeTypes.Renamed, name, oldName);
-                        oldName = null;
-                    }
-                    else
-                    {
-                        Debug.Fail("FILE_ACTION_RENAMED_NEW_NAME with no old name! [ " + name + "]");
-                        NotifyRenameEventArgs(WatcherChangeTypes.Renamed, name, oldName);
-                        oldName = null;
-                    }
+                    // oldName may be null here if we received a FILE_ACTION_RENAMED_NEW_NAME with no old name
+                    NotifyRenameEventArgs(WatcherChangeTypes.Renamed, name, oldName);
+                    oldName = null;
                 }
                 else
                 {
                     if (oldName != null)
                     {
-                        Debug.Fail("Previous FILE_ACTION_RENAMED_OLD_NAME with no new name!  [" + oldName + "]");
+                        // Previous FILE_ACTION_RENAMED_OLD_NAME with no new name
                         NotifyRenameEventArgs(WatcherChangeTypes.Renamed, null, oldName);
                         oldName = null;
                     }
@@ -364,7 +358,7 @@ namespace System.IO
 
             if (oldName != null)
             {
-                Debug.Fail("FILE_ACTION_RENAMED_OLD_NAME with no new name!  [" + oldName + "]");
+                // Previous FILE_ACTION_RENAMED_OLD_NAME with no new name
                 NotifyRenameEventArgs(WatcherChangeTypes.Renamed, null, oldName);
                 oldName = null;
             }
@@ -379,6 +373,7 @@ namespace System.IO
             internal AsyncReadState(int session, byte[] buffer, SafeFileHandle handle, ThreadPoolBoundHandle binding)
             {
                 Debug.Assert(buffer != null);
+                Debug.Assert(buffer.Length > 0);
                 Debug.Assert(handle != null);
                 Debug.Assert(binding != null);
 

@@ -5,13 +5,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Internal;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+
+using StreamMemoryBlockProvider = System.Reflection.Internal.StreamMemoryBlockProvider;
 
 namespace System.Reflection.Metadata.Tests
 {
@@ -2635,7 +2636,6 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
-        [ActiveIssue(1050)]
         public void CanReadFromSameMemoryMappedPEReaderInParallel()
         {
             // See http://roslyn.codeplex.com/workitem/299

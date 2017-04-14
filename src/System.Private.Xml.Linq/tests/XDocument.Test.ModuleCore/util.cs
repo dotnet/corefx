@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-
 namespace Microsoft.Test.ModuleCore
 {
     ////////////////////////////////////////////////////////////////
@@ -57,7 +55,7 @@ namespace Microsoft.Test.ModuleCore
                 return;
             }
 
-            //Otheriwse add the value
+            //Otherwise add the value
             Add(key, value);
         }
 

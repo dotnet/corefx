@@ -10,8 +10,8 @@ if [%BUILDTOOLS_SOURCE%]==[] set BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/do
 set /P BUILDTOOLS_VERSION=< "%~dp0BuildToolsVersion.txt"
 set BUILD_TOOLS_PATH=%PACKAGES_DIR%Microsoft.DotNet.BuildTools\%BUILDTOOLS_VERSION%\lib\
 set PROJECT_JSON_PATH=%TOOLRUNTIME_DIR%\%BUILDTOOLS_VERSION%
-set PROJECT_JSON_FILE=%PROJECT_JSON_PATH%\project.json
-set PROJECT_JSON_CONTENTS={ "dependencies": { "Microsoft.DotNet.BuildTools": "%BUILDTOOLS_VERSION%" }, "frameworks": { "netcoreapp1.0": { } } }
+set PROJECT_JSON_FILE=%PROJECT_JSON_PATH%\project.csproj
+set PROJECT_JSON_CONTENTS=^^^<Project Sdk=^^^"Microsoft.NET.Sdk^^^"^^^>^^^<PropertyGroup^^^>^^^<TargetFramework^^^>netcoreapp1.0^^^</TargetFramework^^^>^^^<DisableImplicitFrameworkReferences^^^>true^^^</DisableImplicitFrameworkReferences^^^>^^^</PropertyGroup^^^>^^^<ItemGroup^^^>^^^<PackageReference Include=^^^"Microsoft.DotNet.BuildTools^^^" Version=^^^"%BUILDTOOLS_VERSION%^^^" /^^^>^^^</ItemGroup^^^>^^^</Project^^^>
 set BUILD_TOOLS_SEMAPHORE=%PROJECT_JSON_PATH%\init-tools.completed
 
 :: if force option is specified then clean the tool runtime and build tools package directory to force it to get recreated
@@ -67,14 +67,6 @@ set INIT_TOOLS_ERRORLEVEL=%ERRORLEVEL%
 if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
   echo ERROR: An error occured when trying to initialize the tools. Please check '%INIT_TOOLS_LOG%' for more details. 1>&2
   exit /b %INIT_TOOLS_ERRORLEVEL%
-)
-
-echo Updating CLI NuGet Frameworks map...
-robocopy "%TOOLRUNTIME_DIR%" "%TOOLRUNTIME_DIR%\dotnetcli\sdk\%DOTNET_VERSION%" NuGet.Frameworks.dll /XO >> "%INIT_TOOLS_LOG%"
-set UPDATE_CLI_ERRORLEVEL=%ERRORLEVEL%
-if %UPDATE_CLI_ERRORLEVEL% GTR 1 (
-  echo ERROR: Failed to update Nuget for CLI {Error level %UPDATE_CLI_ERRORLEVEL%}. Please check '%INIT_TOOLS_LOG%' for more details. 1>&2
-  exit /b %UPDATE_CLI_ERRORLEVEL%
 )
 
 :: Create sempahore file

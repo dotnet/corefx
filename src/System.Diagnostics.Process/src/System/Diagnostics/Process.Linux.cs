@@ -49,7 +49,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets the time the associated process was started.</summary>
-        public DateTime StartTime
+        internal DateTime StartTimeCore
         {
             get
             {
@@ -164,7 +164,7 @@ namespace System.Diagnostics
         private void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
         {
             // RLIMIT_RSS with setrlimit not supported on Linux > 2.4.30.
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.MinimumWorkingSetNotSupported);
         }
 
         // -----------------------------

@@ -2,30 +2,25 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
+    <ProjectGuid>{EC0F9F33-3D4E-470A-90E6-AE9D005F023A}</ProjectGuid>
     <AssemblyName>System.Xml.XmlDocument</AssemblyName>
     <RootNamespace>System.Xml.XmlDocument</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory>None</ResourcesSourceOutputDirectory>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj">
-      <OSGroup>$(InputOSGroup)</OSGroup>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System.Xml" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="System.Runtime" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

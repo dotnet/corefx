@@ -103,9 +103,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 {
                     ecms.Encrypt(cmsRecipient);
                 }
-                catch (CryptographicException e)
+                catch (CryptographicException) when (PlatformDetection.IsFullFramework) // Expected on full FX
                 {
-                    throw new Exception("ecms.Encrypt() threw " + e.Message + ".\nIf you're running on the desktop CLR, this is actually an expected result.");
                 }
             }
             byte[] encodedMessage = ecms.Encode();
@@ -175,10 +174,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 ecms.Decrypt(extraStore);
                 ContentInfo contentInfo = ecms.ContentInfo;
                 byte[] content = contentInfo.Content;
-                if (content.Length == 6)
-                    throw new Exception("ContentInfo expected to be 0 but was actually 6. If you're running on the desktop CLR, this is actually a known bug.");
 
-                Assert.Equal(0, content.Length);
+                int expected = PlatformDetection.IsFullFramework ? 6 : 0; // Desktop bug gives 6
+                Assert.Equal(expected, content.Length);
             }
         }
 
@@ -279,9 +277,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        // On the desktop, this throws up a UI for the user to select a recipient. We don't support that.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void EnvelopedCmsEncryptWithZeroRecipients()
         {
-            // On the desktop, this throws up a UI for the user to select a recipient. We don't support that.
             EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(new byte[3]));
             Assert.Throws<PlatformNotSupportedException>(() => ecms.Encrypt(new CmsRecipientCollection()));
         }

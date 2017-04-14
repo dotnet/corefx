@@ -40,10 +40,14 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public MemberMemberBinding Update(IEnumerable<MemberBinding> bindings)
         {
-            if (bindings == Bindings)
+            if (bindings != null)
             {
-                return this;
+                if (ExpressionUtils.SameElements(ref bindings, Bindings))
+                {
+                    return this;
+                }
             }
+
             return Expression.MemberBind(Member, bindings);
         }
     }
@@ -111,23 +115,31 @@ namespace System.Linq.Expressions
 
         private static void ValidateGettableFieldOrPropertyMember(MemberInfo member, out Type memberType)
         {
-            FieldInfo fi = member as FieldInfo;
-            if (fi == null)
+            Type decType = member.DeclaringType;
+            if (decType == null)
             {
-                PropertyInfo pi = member as PropertyInfo;
-                if (pi == null)
-                {
-                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
-                }
-                if (!pi.CanRead)
-                {
-                    throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
-                }
-                memberType = pi.PropertyType;
+                throw Error.NotAMemberOfAnyType(member, nameof(member));
             }
-            else
+
+            // Null paramName as there are several paths here with different parameter names at the API
+            TypeUtils.ValidateType(decType, null);
+            switch (member)
             {
-                memberType = fi.FieldType;
+                case PropertyInfo pi:
+                    if (!pi.CanRead)
+                    {
+                        throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
+                    }
+
+                    memberType = pi.PropertyType;
+                    break;
+
+                case FieldInfo fi:
+                    memberType = fi.FieldType;
+                    break;
+
+                default:
+                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
             }
         }
 

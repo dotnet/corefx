@@ -62,7 +62,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)] // OSX throws PNSE from StartTime
         public void TestStartTimeProperty_OSX()
         {
             using (Process p = Process.GetCurrentProcess())
@@ -187,6 +187,19 @@ namespace System.Diagnostics.Tests
             {
                 Assert.Throws<InvalidOperationException>(() => thread.WaitReason);
             }
+        }
+
+        [Fact]
+        public void Threads_GetMultipleTimes_ReturnsSameInstance()
+        {
+            Assert.Same(_process.Threads, _process.Threads);
+        }
+
+        [Fact]
+        public void Threads_GetNotStarted_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.Threads);
         }
     }
 }

@@ -82,7 +82,7 @@ public static class XmlDictionaryWriterTest
         catch(Exception e)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"An error occured: {e.Message}");
+            sb.AppendLine($"An error occurred: {e.Message}");
             sb.AppendLine(e.StackTrace);
             sb.AppendLine();
             sb.AppendLine($"The last completed operation before the exception was: {lastCompletedOperation}");
@@ -166,6 +166,7 @@ public static class XmlDictionaryWriterTest
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "is implemented on full framework")]
     public static void CreateMtomReaderWriter_Throw_PNSE()
     {
         using (var stream = new MemoryStream())
@@ -288,6 +289,7 @@ public static class XmlDictionaryWriterTest
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "is implemented on full framework")]
     public static void FragmentTest()
     {
         string rwTypeStr = "Text";

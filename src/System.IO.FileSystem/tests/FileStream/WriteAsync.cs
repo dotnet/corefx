@@ -207,6 +207,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In netcoreapp we modified ReadAsync/WriteAsync to complete synchronously here, but that change was not backported to netfx.")]
         public void WriteAsyncBufferedCompletesSynchronously()
         {
             using (FileStream fs = new FileStream(
@@ -257,7 +258,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public async void WriteAsyncInternalBufferOverflow()
+        public async Task WriteAsyncInternalBufferOverflow()
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.Write, FileShare.None, 3, useAsync: true))
             {

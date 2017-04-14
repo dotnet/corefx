@@ -4,25 +4,28 @@
   <PropertyGroup>
     <AssemblyName>System.Reflection.TypeExtensions</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <ProjectGuid>{1E689C1B-690C-4799-BDE9-6E7990585894}</ProjectGuid>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.5</NuGetTargetMoniker>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.5;uap10.1</PackageTargetFramework>
+    <ProjectGuid>{A9EF5E88-1AD9-4545-8AFE-CA0F5F00E2CB}</ProjectGuid>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Reflection\Requires.cs" />
     <Compile Include="System\Reflection\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net462'" />
-    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net462'" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="mscorlib" Condition="'$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'net461'" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'netfx' AND '$(TargetGroup)' != 'net461'" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

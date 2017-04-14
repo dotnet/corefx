@@ -62,11 +62,37 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public MethodCallExpression Update(Expression @object, IEnumerable<Expression> arguments)
         {
-            if (@object == Object && arguments == Arguments)
+            if (@object == Object)
             {
-                return this;
+                // Ensure arguments is safe to enumerate twice.
+                // (If this means a second call to ToReadOnly it will return quickly).
+                ICollection<Expression> args;
+                if (arguments == null)
+                {
+                    args = null;
+                }
+                else
+                {
+                    args = arguments as ICollection<Expression>;
+                    if (args == null)
+                    {
+                        arguments = args = arguments.ToReadOnly();
+                    }
+                }
+
+                if (SameArguments(args))
+                {
+                    return this;
+                }
             }
-            return Expression.Call(@object, Method, arguments);
+
+            return Call(@object, Method, arguments);
+        }
+
+        [ExcludeFromCodeCoverage] // Unreachable
+        internal virtual bool SameArguments(ICollection<Expression> arguments)
+        {
+            throw ContractUtils.Unreachable;
         }
 
         [ExcludeFromCodeCoverage] // Unreachable
@@ -155,8 +181,11 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(ref _arguments);
+            return ExpressionUtils.ReturnReadOnly(ref _arguments);
         }
+
+        internal override bool SameArguments(ICollection<Expression> arguments) =>
+            ExpressionUtils.SameElements(arguments, _arguments);
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
@@ -181,9 +210,12 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => _arguments.Count;
 
+        internal override bool SameArguments(ICollection<Expression> arguments) =>
+            ExpressionUtils.SameElements(arguments, _arguments);
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(ref _arguments);
+            return ExpressionUtils.ReturnReadOnly(ref _arguments);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -214,6 +246,9 @@ namespace System.Linq.Expressions
             return EmptyReadOnlyCollection<Expression>.Instance;
         }
 
+        internal override bool SameArguments(ICollection<Expression> arguments) =>
+            arguments == null || arguments.Count == 0;
+
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
@@ -237,7 +272,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
@@ -246,7 +281,21 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
+        }
+
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 1)
+            {
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    return en.Current == ExpressionUtils.ReturnObject<Expression>(_arg0);
+                }
+            }
+
+            return false;
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -259,7 +308,7 @@ namespace System.Linq.Expressions
                 return Expression.Call(Method, args[0]);
             }
 
-            return Expression.Call(Method, ReturnObject<Expression>(_arg0));
+            return Expression.Call(Method, ExpressionUtils.ReturnObject<Expression>(_arg0));
         }
     }
 
@@ -279,7 +328,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
@@ -287,9 +336,33 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 2;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 2)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        return en.Current == _arg1;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -301,7 +374,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(Method, args[0], args[1]);
             }
-            return Expression.Call(Method, ReturnObject<Expression>(_arg0), _arg1);
+            return Expression.Call(Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1);
         }
     }
 
@@ -322,7 +395,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
@@ -331,9 +404,37 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 3;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 3)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if( en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            return en.Current == _arg2;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -345,7 +446,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(Method, args[0], args[1], args[2]);
             }
-            return Expression.Call(Method, ReturnObject<Expression>(_arg0), _arg1, _arg2);
+            return Expression.Call(Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1, _arg2);
         }
     }
 
@@ -367,7 +468,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
@@ -377,9 +478,41 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 4;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 4)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            if (en.Current == _arg2)
+                            {
+                                en.MoveNext();
+                                return en.Current == _arg3;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -391,7 +524,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(Method, args[0], args[1], args[2], args[3]);
             }
-            return Expression.Call(Method, ReturnObject<Expression>(_arg0), _arg1, _arg2, _arg3);
+            return Expression.Call(Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1, _arg2, _arg3);
         }
     }
 
@@ -414,7 +547,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
@@ -425,9 +558,45 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 5;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 5)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            if (en.Current == _arg2)
+                            {
+                                en.MoveNext();
+                                if (en.Current == _arg3)
+                                {
+                                    en.MoveNext();
+                                    return en.Current == _arg4;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -440,7 +609,7 @@ namespace System.Linq.Expressions
                 return Expression.Call(Method, args[0], args[1], args[2], args[3], args[4]);
             }
 
-            return Expression.Call(Method, ReturnObject<Expression>(_arg0), _arg1, _arg2, _arg3, _arg4);
+            return Expression.Call(Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1, _arg2, _arg3, _arg4);
         }
     }
 
@@ -462,6 +631,9 @@ namespace System.Linq.Expressions
         {
             return EmptyReadOnlyCollection<Expression>.Instance;
         }
+
+        internal override bool SameArguments(ICollection<Expression> arguments) =>
+            arguments == null || arguments.Count == 0;
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
@@ -486,16 +658,30 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
         public override int ArgumentCount => 1;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 1)
+            {
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    return en.Current == ExpressionUtils.ReturnObject<Expression>(_arg0);
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -507,7 +693,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(instance, Method, args[0]);
             }
-            return Expression.Call(instance, Method, ReturnObject<Expression>(_arg0));
+            return Expression.Call(instance, Method, ExpressionUtils.ReturnObject<Expression>(_arg0));
         }
     }
 
@@ -527,7 +713,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
@@ -535,9 +721,33 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 2;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 2)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        return en.Current == _arg1;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -549,7 +759,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(instance, Method, args[0], args[1]);
             }
-            return Expression.Call(instance, Method, ReturnObject<Expression>(_arg0), _arg1);
+            return Expression.Call(instance, Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1);
         }
     }
 
@@ -570,7 +780,7 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
@@ -579,9 +789,37 @@ namespace System.Linq.Expressions
 
         public override int ArgumentCount => 3;
 
+        internal override bool SameArguments(ICollection<Expression> arguments)
+        {
+            if (arguments != null && arguments.Count == 3)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(arguments, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = arguments.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            return en.Current == _arg2;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override ReadOnlyCollection<Expression> GetOrMakeArguments()
         {
-            return ReturnReadOnly(this, ref _arg0);
+            return ExpressionUtils.ReturnReadOnly(this, ref _arg0);
         }
 
         internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
@@ -593,7 +831,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Call(instance, Method, args[0], args[1], args[2]);
             }
-            return Expression.Call(instance, Method, ReturnObject<Expression>(_arg0), _arg1, _arg2);
+            return Expression.Call(instance, Method, ExpressionUtils.ReturnObject<Expression>(_arg0), _arg1, _arg2);
         }
     }
 
@@ -954,39 +1192,39 @@ namespace System.Linq.Expressions
         /// <paramref name="instance"/>.Type is not assignable to the declaring type of the method represented by <paramref name="method"/>.-or-The number of elements in <paramref name="arguments"/> does not equal the number of parameters for the method represented by <paramref name="method"/>.-or-One or more of the elements of <paramref name="arguments"/> is not assignable to the corresponding parameter for the method represented by <paramref name="method"/>.</exception>
         public static MethodCallExpression Call(Expression instance, MethodInfo method, IEnumerable<Expression> arguments)
         {
-            IReadOnlyList<Expression> argumentList = arguments as IReadOnlyList<Expression>;
+            IReadOnlyList<Expression> argumentList = arguments as IReadOnlyList<Expression> ?? arguments.ToReadOnly();
 
-            if (argumentList != null)
+            int argCount = argumentList.Count;
+
+            switch (argCount)
             {
-                int argCount = argumentList.Count;
+                case 0:
+                    return Call(instance, method);
+                case 1:
+                    return Call(instance, method, argumentList[0]);
+                case 2:
+                    return Call(instance, method, argumentList[0], argumentList[1]);
+                case 3:
+                    return Call(instance, method, argumentList[0], argumentList[1], argumentList[2]);
+            }
 
+            if (instance == null)
+            {
                 switch (argCount)
                 {
-                    case 0:
-                        return Call(instance, method);
-                    case 1:
-                        return Call(instance, method, argumentList[0]);
-                    case 2:
-                        return Call(instance, method, argumentList[0], argumentList[1]);
-                    case 3:
-                        return Call(instance, method, argumentList[0], argumentList[1], argumentList[2]);
-                }
-
-                if (instance == null)
-                {
-                    switch (argCount)
-                    {
-                        case 4:
-                            return Call(method, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
-                        case 5:
-                            return Call(method, argumentList[0], argumentList[1], argumentList[2], argumentList[3], argumentList[4]);
-                    }
+                    case 4:
+                        return Call(method, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
+                    case 5:
+                        return Call(method, argumentList[0], argumentList[1], argumentList[2], argumentList[3], argumentList[4]);
                 }
             }
 
             ContractUtils.RequiresNotNull(method, nameof(method));
 
-            ReadOnlyCollection<Expression> argList = arguments.ToReadOnly();
+            // If this has resulted in a duplicate call to ToReadOnly (any case except arguments being
+            // a large IReadOnlyList that is not TrueReadOnlyCollection) it will return argumentList
+            // back again quickly.
+            ReadOnlyCollection<Expression> argList = argumentList.ToReadOnly();
 
             ValidateMethodInfo(method, nameof(method));
             ValidateStaticOrInstanceMethod(instance, method);
@@ -1014,12 +1252,12 @@ namespace System.Linq.Expressions
         {
             if (method.IsStatic)
             {
-                if (instance != null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, nameof(instance));
+                if (instance != null) throw Error.OnlyStaticMethodsHaveNullInstance();
             }
             else
             {
-                if (instance == null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, nameof(method));
-                RequiresCanRead(instance, nameof(instance));
+                if (instance == null) throw Error.OnlyStaticMethodsHaveNullInstance();
+                ExpressionUtils.RequiresCanRead(instance, nameof(instance));
                 ValidateCallInstanceType(instance.Type, method);
             }
         }
@@ -1165,7 +1403,7 @@ namespace System.Linq.Expressions
         /// <paramref name="array"/>.Type does not represent an array type.-or-The rank of <paramref name="array"/>.Type does not match the number of elements in <paramref name="indexes"/>.-or-The <see cref="Expression.Type"/> property of one or more elements of <paramref name="indexes"/> does not represent the <see cref="Int32"/> type.</exception>
         public static MethodCallExpression ArrayIndex(Expression array, IEnumerable<Expression> indexes)
         {
-            RequiresCanRead(array, nameof(array));
+            ExpressionUtils.RequiresCanRead(array, nameof(array), -1);
             ContractUtils.RequiresNotNull(indexes, nameof(indexes));
 
             Type arrayType = array.Type;
@@ -1184,7 +1422,7 @@ namespace System.Linq.Expressions
             {
                 Expression e = indexList[i];
 
-                RequiresCanRead(e, nameof(indexes), i);
+                ExpressionUtils.RequiresCanRead(e, nameof(indexes), i);
                 if (e.Type != typeof(int))
                 {
                     throw Error.ArgumentMustBeArrayIndexType(nameof(indexes), i);

@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System;
     using System.IO;
@@ -106,10 +110,6 @@ namespace System.Xml.Serialization
             _dataType = dataType;
             _formatterName = formatterName;
         }
-
-        internal TypeDesc(string name, string fullName, XmlSchemaType dataType, TypeKind kind, TypeDesc baseTypeDesc, TypeFlags flags)
-            : this(name, fullName, dataType, kind, baseTypeDesc, flags, null)
-        { }
 
         internal TypeDesc(string name, string fullName, TypeKind kind, TypeDesc baseTypeDesc, TypeFlags flags)
             : this(name, fullName, (XmlSchemaType)null, kind, baseTypeDesc, flags, null)
@@ -398,11 +398,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal string ArrayLengthName
-        {
-            get { return _kind == TypeKind.Array ? "Length" : "Count"; }
-        }
-
         internal TypeDesc ArrayElementTypeDesc
         {
             get { return _arrayElementTypeDesc; }
@@ -561,7 +556,7 @@ namespace System.Xml.Serialization
         {
             if (type == typeof(object))
                 return true;
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
                 return false;
 
             switch (type.GetTypeCode())
@@ -588,12 +583,12 @@ namespace System.Xml.Serialization
                         return true;
                     else if (type == typeof(Guid))
                         return true;
-                    else if (type == typeof (TimeSpan))
+                    else if (type == typeof(TimeSpan))
                         return true;
                     else if (type == typeof(XmlNode[]))
                         return true;
                     break;
-             }
+            }
             return false;
         }
 
@@ -699,11 +694,6 @@ namespace System.Xml.Serialization
             return GetTypeDesc(type, null, true, true);
         }
 
-        internal TypeDesc GetTypeDesc(Type type, MemberInfo source)
-        {
-            return GetTypeDesc(type, source, true, true);
-        }
-
         internal TypeDesc GetTypeDesc(Type type, MemberInfo source, bool directReference)
         {
             return GetTypeDesc(type, source, directReference, true);
@@ -711,7 +701,7 @@ namespace System.Xml.Serialization
 
         internal TypeDesc GetTypeDesc(Type type, MemberInfo source, bool directReference, bool throwOnError)
         {
-            if (type.GetTypeInfo().ContainsGenericParameters)
+            if (type.ContainsGenericParameters)
             {
                 throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedOpenGenericType, type.ToString()));
             }
@@ -745,6 +735,7 @@ namespace System.Xml.Serialization
             return typeDesc;
         }
 
+#if XMLSERIALIZERGENERATOR
         internal TypeMapping GetTypeMappingFromTypeDesc(TypeDesc typeDesc)
         {
             foreach (TypeMapping typeMapping in TypeMappings)
@@ -766,6 +757,7 @@ namespace System.Xml.Serialization
             }
             return null;
         }
+#endif
 
         private TypeDesc ImportTypeDesc(Type type, MemberInfo memberInfo, bool directReference)
         {
@@ -776,12 +768,12 @@ namespace System.Xml.Serialization
             TypeFlags flags = 0;
             Exception exception = null;
 
-            if (!type.GetTypeInfo().IsVisible)
+            if (!type.IsVisible)
             {
                 flags |= TypeFlags.Unsupported;
                 exception = new InvalidOperationException(SR.Format(SR.XmlTypeInaccessible, type.FullName));
             }
-            else if (directReference && (type.GetTypeInfo().IsAbstract && type.GetTypeInfo().IsSealed))
+            else if (directReference && (type.IsAbstract && type.IsSealed))
             {
                 flags |= TypeFlags.Unsupported;
                 exception = new InvalidOperationException(SR.Format(SR.XmlTypeStatic, type.FullName));
@@ -790,7 +782,7 @@ namespace System.Xml.Serialization
             {
                 flags |= TypeFlags.UseReflection;
             }
-            if (!type.GetTypeInfo().IsValueType)
+            if (!type.IsValueType)
                 flags |= TypeFlags.Reference;
 
             if (type == typeof(object))
@@ -841,7 +833,7 @@ namespace System.Xml.Serialization
             {
                 kind = TypeKind.Primitive;
             }
-            else if (type.GetTypeInfo().IsPrimitive)
+            else if (type.IsPrimitive)
             {
                 kind = TypeKind.Primitive;
                 flags |= TypeFlags.Unsupported;
@@ -850,11 +842,11 @@ namespace System.Xml.Serialization
                     exception = new NotSupportedException(SR.Format(SR.XmlSerializerUnsupportedType, type.FullName));
                 }
             }
-            else if (type.GetTypeInfo().IsEnum)
+            else if (type.IsEnum)
             {
                 kind = TypeKind.Enum;
             }
-            else if (type.GetTypeInfo().IsValueType)
+            else if (type.IsValueType)
             {
                 kind = TypeKind.Struct;
                 if (IsOptionalValue(type))
@@ -864,11 +856,11 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    baseType = type.GetTypeInfo().BaseType;
+                    baseType = type.BaseType;
                 }
-                if (type.GetTypeInfo().IsAbstract) flags |= TypeFlags.Abstract;
+                if (type.IsAbstract) flags |= TypeFlags.Abstract;
             }
-            else if (type.GetTypeInfo().IsClass)
+            else if (type.IsClass)
             {
                 if (type == typeof(XmlAttribute))
                 {
@@ -878,7 +870,7 @@ namespace System.Xml.Serialization
                 else if (typeof(XmlNode).IsAssignableFrom(type))
                 {
                     kind = TypeKind.Node;
-                    baseType = type.GetTypeInfo().BaseType;
+                    baseType = type.BaseType;
                     flags |= TypeFlags.Special | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue;
                     if (typeof(XmlText).IsAssignableFrom(type))
                         flags &= ~TypeFlags.CanBeElementValue;
@@ -890,12 +882,12 @@ namespace System.Xml.Serialization
                 else
                 {
                     kind = TypeKind.Class;
-                    baseType = type.GetTypeInfo().BaseType;
-                    if (type.GetTypeInfo().IsAbstract)
+                    baseType = type.BaseType;
+                    if (type.IsAbstract)
                         flags |= TypeFlags.Abstract;
                 }
             }
-            else if (type.GetTypeInfo().IsInterface)
+            else if (type.IsInterface)
             {
                 kind = TypeKind.Void;
                 flags |= TypeFlags.Unsupported;
@@ -922,7 +914,7 @@ namespace System.Xml.Serialization
             }
 
             // check to see if the type has public default constructor for classes
-            if (kind == TypeKind.Class && !type.GetTypeInfo().IsAbstract)
+            if (kind == TypeKind.Class && !type.IsAbstract)
             {
                 flags |= GetConstructorFlags(type, ref exception);
             }
@@ -966,9 +958,9 @@ namespace System.Xml.Serialization
             {
                 typeDesc.BaseTypeDesc = GetTypeDesc(baseType, memberInfo, false, false);
             }
-            if (type.GetTypeInfo().IsNestedPublic)
+            if (type.IsNestedPublic)
             {
-                for (Type t = type.DeclaringType; t != null && !t.GetTypeInfo().ContainsGenericParameters && !(t.GetTypeInfo().IsAbstract && t.GetTypeInfo().IsSealed); t = t.DeclaringType)
+                for (Type t = type.DeclaringType; t != null && !t.ContainsGenericParameters && !(t.IsAbstract && t.IsSealed); t = t.DeclaringType)
                     GetTypeDesc(t, null, false);
             }
             return typeDesc;
@@ -976,12 +968,12 @@ namespace System.Xml.Serialization
 
         private static bool IsArraySegment(Type t)
         {
-            return t.GetTypeInfo().IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
+            return t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
         }
 
         internal static bool IsOptionalValue(Type type)
         {
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 if (type.GetGenericTypeDefinition() == typeof(Nullable<>).GetGenericTypeDefinition())
                     return true;
@@ -1003,7 +995,7 @@ namespace System.Xml.Serialization
             {
                 return "ArrayOf" + TypeName(t.GetElementType());
             }
-            else if (t.GetTypeInfo().IsGenericType)
+            else if (t.IsGenericType)
             {
                 StringBuilder typeName = new StringBuilder();
                 StringBuilder ns = new StringBuilder();
@@ -1140,7 +1132,7 @@ namespace System.Xml.Serialization
             }
 
             // The scenario here is that user has one base class A and one derived class B and wants to serialize/deserialize an object of B.
-            // There's one virtual property defined in A and overrided by B. Without the replacing logic below, the code generated will always
+            // There's one virtual property defined in A and overridden by B. Without the replacing logic below, the code generated will always
             // try to access the property defined in A, rather than B.
             // The logic here is to:
             // 1) Check current members inside memberInfos dictionary and figure out whether there's any override or new properties defined in the derived class.
@@ -1219,7 +1211,7 @@ namespace System.Xml.Serialization
                     }
 
                     // we go one level down and try again
-                    currentType = currentType.GetTypeInfo().BaseType;
+                    currentType = currentType.BaseType;
                 }
             }
 
@@ -1329,7 +1321,7 @@ namespace System.Xml.Serialization
             PropertyInfo indexer = null;
             if (defaultMembers != null && defaultMembers.Length > 0)
             {
-                for (Type t = type; t != null; t = t.GetTypeInfo().BaseType)
+                for (Type t = type; t != null; t = t.BaseType)
                 {
                     for (int i = 0; i < defaultMembers.Length; i++)
                     {
@@ -1390,6 +1382,7 @@ namespace System.Xml.Serialization
             name = type.Substring(nsLen + 1, nameLen - nsLen - 1);
             dims = type.Substring(nameLen);
 
+#if !XMLSERIALIZERGENERATOR
             // parent is not null only in the case when we used XmlSchema.Read(), 
             // in which case we need to fixup the wsdl:arayType attribute value
             while (parent != null)
@@ -1405,6 +1398,8 @@ namespace System.Xml.Serialization
                 }
                 parent = parent.Parent;
             }
+
+#endif
             return new XmlQualifiedName(name, ns);
         }
 

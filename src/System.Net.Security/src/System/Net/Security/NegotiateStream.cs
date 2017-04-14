@@ -5,6 +5,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.ExceptionServices;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Principal;
 
@@ -575,7 +576,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStream.BeginRead(buffer, offset, count, asyncCallback, asyncState);
+                    return TaskToApm.Begin(InnerStream.ReadAsync(buffer, offset, count), asyncCallback, asyncState);
                 }
 
                 BufferAsyncResult bufferResult = new BufferAsyncResult(this, buffer, offset, count, asyncState, asyncCallback);
@@ -597,7 +598,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStream.EndRead(asyncResult);
+                    return TaskToApm.End<int>(asyncResult);
                 }
 
 
@@ -620,14 +621,14 @@ namespace System.Net.Security
                 // No "artificial" timeouts implemented so far, InnerStream controls timeout.
                 bufferResult.InternalWaitForCompletion();
 
-                if (bufferResult.Result is Exception)
+                if (bufferResult.Result is Exception e)
                 {
-                    if (bufferResult.Result is IOException)
+                    if (e is IOException)
                     {
-                        throw (Exception)bufferResult.Result;
+                        ExceptionDispatchInfo.Throw(e);
                     }
 
-                    throw new IOException(SR.net_io_read, (Exception)bufferResult.Result);
+                    throw new IOException(SR.net_io_read, e);
                 }
 
                 return bufferResult.Int32Result;
@@ -647,7 +648,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+                    return TaskToApm.Begin(InnerStream.WriteAsync(buffer, offset, count), asyncCallback, asyncState);
                 }
 
                 BufferAsyncResult bufferResult = new BufferAsyncResult(this, buffer, offset, count, asyncState, asyncCallback);
@@ -670,7 +671,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    InnerStream.EndWrite(asyncResult);
+                    TaskToApm.End(asyncResult);
                     return;
                 }
 
@@ -693,80 +694,18 @@ namespace System.Net.Security
                 // No "artificial" timeouts implemented so far, InnerStream controls timeout.
                 bufferResult.InternalWaitForCompletion();
 
-                if (bufferResult.Result is Exception)
+                if (bufferResult.Result is Exception e)
                 {
-                    if (bufferResult.Result is IOException)
+                    if (e is IOException)
                     {
-                        throw (Exception)bufferResult.Result;
+                        ExceptionDispatchInfo.Throw(e);
                     }
 
-                    throw new IOException(SR.net_io_write, (Exception)bufferResult.Result);
+                    throw new IOException(SR.net_io_write, e);
                 }
 #if DEBUG
             }
 #endif
-        }
-
-        // ReadAsync - provide async read functionality.
-        // 
-        // This method provides async read functionality. All we do is
-        // call through to the Begin/EndRead methods.
-        // 
-        // Input:
-        // 
-        //     buffer            - Buffer to read into.
-        //     offset            - Offset into the buffer where we're to read.
-        //     size              - Number of bytes to read.
-        //     cancellationToken - Token used to request cancellation of the operation
-        // 
-        // Returns:
-        // 
-        //     A Task<int> representing the read.
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled<int>(cancellationToken);
-            }
-
-            return Task.Factory.FromAsync(
-                (bufferArg, offsetArg, sizeArg, callback, state) => ((NegotiateStream)state).BeginRead(bufferArg, offsetArg, sizeArg, callback, state),
-                iar => ((NegotiateStream)iar.AsyncState).EndRead(iar),
-                buffer,
-                offset,
-                size,
-                this);
-        }
-
-        // WriteAsync - provide async write functionality.
-        // 
-        // This method provides async write functionality. All we do is
-        // call through to the Begin/EndWrite methods.
-        // 
-        // Input:
-        // 
-        //     buffer  - Buffer to write into.
-        //     offset  - Offset into the buffer where we're to write.
-        //     size    - Number of bytes to write.
-        //     cancellationToken - Token used to request cancellation of the operation
-        // 
-        // Returns:
-        // 
-        //     A Task representing the write.
-        public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled<int>(cancellationToken);
-            }
-
-            return Task.Factory.FromAsync(
-                (bufferArg, offsetArg, sizeArg, callback, state) => ((NegotiateStream)state).BeginWrite(bufferArg, offsetArg, sizeArg, callback, state),
-                iar => ((NegotiateStream)iar.AsyncState).EndWrite(iar),
-                buffer,
-                offset,
-                size,
-                this);
         }
     }
 }

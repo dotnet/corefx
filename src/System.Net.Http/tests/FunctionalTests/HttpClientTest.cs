@@ -88,6 +88,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_Roundtrip_Equal()
         {
@@ -101,6 +102,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public void MaxResponseContentBufferSize_OutOfRange_Throws()
         {
@@ -112,6 +114,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [Fact]
         public async Task MaxResponseContentBufferSize_TooSmallForContent_Throws()
         {
@@ -381,18 +384,19 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        [OuterLoop]
-        [ActiveIssue(12778)]
-        public void Timeout_SetTo60AndGetResponseFromServerWhichTakes40_Success()
+        [OuterLoop("One second delay in getting server's response")]
+        public async Task Timeout_SetTo30AndGetResponseFromLoopbackQuickly_Success()
         {
-            // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
-            const string SlowServer = "http://httpbin.org/drip?numbytes=1&duration=1&delay=40&code=200";
-            
-            using (var client = new HttpClient())
+            using (var client = new HttpClient() { Timeout = TimeSpan.FromSeconds(30) })
             {
-                client.Timeout = TimeSpan.FromSeconds(60);
-                var response = client.GetAsync(SlowServer).GetAwaiter().GetResult();
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    Task getTask = client.GetStringAsync(url);
+                    await Task.Delay(TimeSpan.FromSeconds(.5));
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getTask,
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server));
+                });
             }
         }
 

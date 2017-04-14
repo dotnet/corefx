@@ -4,7 +4,11 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRCLASS : EXPRTYPEORNAMESPACE
+    internal sealed class ExprClass : ExprWithType
     {
+        public ExprClass(CType type)
+            : base(ExpressionKind.Class, type)
+        {
+        }
     }
 }

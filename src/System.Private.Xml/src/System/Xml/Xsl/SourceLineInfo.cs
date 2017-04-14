@@ -12,16 +12,11 @@ namespace System.Xml.Xsl
         private ulong _value;
 
         public int Line { get { return (int)(_value >> 32); } }
-        public int Pos { get { return (int)(_value); } }
+        public int Pos { get { return unchecked((int)(_value)); } }
 
         public Location(int line, int pos)
         {
             _value = (((ulong)line) << 32) | (uint)pos;
-        }
-
-        public Location(Location that)
-        {
-            _value = that._value;
         }
 
         public bool LessOrEqual(Location that)
@@ -51,9 +46,6 @@ namespace System.Xml.Xsl
 
         public string Uri { get { return this.uriString; } }
         public int StartLine { get { return this.start.Line; } }
-        public int StartPos { get { return this.start.Pos; } }
-        public int EndLine { get { return this.end.Line; } }
-        public int EndPos { get { return this.end.Pos; } }
         public Location End { get { return this.end; } }
         public Location Start { get { return this.start; } }
 

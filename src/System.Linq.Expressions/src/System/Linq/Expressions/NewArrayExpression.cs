@@ -63,15 +63,17 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public NewArrayExpression Update(IEnumerable<Expression> expressions)
         {
-            if (expressions == Expressions)
+            // Explicit null check here as otherwise wrong parameter name will be used.
+            ContractUtils.RequiresNotNull(expressions, nameof(expressions));
+
+            if (ExpressionUtils.SameElements(ref expressions, Expressions))
             {
                 return this;
             }
-            if (NodeType == ExpressionType.NewArrayInit)
-            {
-                return Expression.NewArrayInit(Type.GetElementType(), expressions);
-            }
-            return Expression.NewArrayBounds(Type.GetElementType(), expressions);
+
+            return NodeType == ExpressionType.NewArrayInit
+                ? NewArrayInit(Type.GetElementType(), expressions)
+                : NewArrayBounds(Type.GetElementType(), expressions);
         }
     }
 
@@ -151,7 +153,7 @@ namespace System.Linq.Expressions
             for (int i = 0, n = initializerList.Count; i < n; i++)
             {
                 Expression expr = initializerList[i];
-                RequiresCanRead(expr, nameof(initializers), i);
+                ExpressionUtils.RequiresCanRead(expr, nameof(initializers), i);
 
                 if (!TypeUtils.AreReferenceAssignable(type, expr.Type))
                 {
@@ -231,7 +233,7 @@ namespace System.Linq.Expressions
             for (int i = 0; i < dimensions; i++)
             {
                 Expression expr = boundsList[i];
-                RequiresCanRead(expr, nameof(bounds), i);
+                ExpressionUtils.RequiresCanRead(expr, nameof(bounds), i);
                 if (!expr.Type.IsInteger())
                 {
                     throw Error.ArgumentMustBeInteger(nameof(bounds), i);

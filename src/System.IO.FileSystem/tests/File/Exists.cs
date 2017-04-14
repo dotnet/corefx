@@ -52,14 +52,11 @@ namespace System.IO.Tests
             });
         }
 
-        [Fact]
-        public void PathWithInvalidCharactersAsPath_ReturnsFalse()
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
-            Assert.All((IOInputs.GetPathsWithInvalidCharacters()), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            Assert.False(Exists(invalidPath));
 
             Assert.False(Exists(".."));
             Assert.False(Exists("."));
@@ -206,7 +203,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // UNC paths
         public void UncPathWithoutShareNameAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetUncPathsWithoutShareName()), (component) =>
@@ -226,7 +222,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes
         public void FalseForNonRegularFile()
         {
             string fileName = GetTestFilePath();

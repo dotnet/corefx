@@ -83,11 +83,15 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public TryExpression Update(Expression body, IEnumerable<CatchBlock> handlers, Expression @finally, Expression fault)
         {
-            if (body == Body && handlers == Handlers && @finally == Finally && fault == Fault)
+            if (body == Body & @finally == Finally & fault == Fault)
             {
-                return this;
+                if (ExpressionUtils.SameElements(ref handlers, Handlers))
+                {
+                    return this;
+                }
             }
-            return Expression.MakeTry(Type, body, @finally, fault, handlers);
+
+            return MakeTry(Type, body, @finally, fault, handlers);
         }
     }
 
@@ -149,7 +153,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="TryExpression"/>.</returns>
         public static TryExpression MakeTry(Type type, Expression body, Expression @finally, Expression fault, IEnumerable<CatchBlock> handlers)
         {
-            RequiresCanRead(body, nameof(body));
+            ExpressionUtils.RequiresCanRead(body, nameof(body));
 
             ReadOnlyCollection<CatchBlock> @catch = handlers.ToReadOnly();
             ContractUtils.RequiresNotNullItems(@catch, nameof(handlers));
@@ -161,11 +165,11 @@ namespace System.Linq.Expressions
                 {
                     throw Error.FaultCannotHaveCatchOrFinally(nameof(fault));
                 }
-                RequiresCanRead(fault, nameof(fault));
+                ExpressionUtils.RequiresCanRead(fault, nameof(fault));
             }
             else if (@finally != null)
             {
-                RequiresCanRead(@finally, nameof(@finally));
+                ExpressionUtils.RequiresCanRead(@finally, nameof(@finally));
             }
             else if (@catch.Count == 0)
             {

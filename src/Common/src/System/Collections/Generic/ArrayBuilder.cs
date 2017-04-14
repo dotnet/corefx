@@ -9,6 +9,7 @@ namespace System.Collections.Generic
     /// <summary>
     /// Helper type for avoiding allocations while building arrays.
     /// </summary>
+    /// <typeparam name="T">The element type.</typeparam>
     internal struct ArrayBuilder<T>
     {
         private const int DefaultCapacity = 4;
@@ -74,7 +75,25 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Returns an array with equivalent contents as this builder.
+        /// Gets the first item in this builder.
+        /// </summary>
+        public T First()
+        {
+            Debug.Assert(_count > 0);
+            return _array[0];
+        }
+
+        /// <summary>
+        /// Gets the last item in this builder.
+        /// </summary>
+        public T Last()
+        {
+            Debug.Assert(_count > 0);
+            return _array[_count - 1];
+        }
+
+        /// <summary>
+        /// Creates an array from the contents of this builder.
         /// </summary>
         /// <remarks>
         /// Do not call this method twice on the same builder.

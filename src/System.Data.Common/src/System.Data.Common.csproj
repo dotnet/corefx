@@ -6,18 +6,22 @@
     <AssemblyName>System.Data.Common</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <!-- CSC adds typeforwards for several internal nested types to the reference assembly, however
+         GenFacades doesn't consider this as a viable target for a typeforward since it's internal -->
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Data\Common\DbColumn.cs" />
     <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Compile Include="System.Data.Common.TypeForwards.cs" />
     <Compile Include="System\HResults.cs" />
     <Compile Include="System\Xml\TreeIterator.cs" />
@@ -265,16 +269,43 @@
     <Compile Include="System\Data\ProviderBase\DataReaderContainer.cs" />
     <Compile Include="System\Data\ProviderBase\SchemaMapping.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
-    <TargetingPackReference Include="System.Data" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
     <Compile Include="System\Data\Common\DbDataReaderExtensions.Facade.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+    <Reference Include="System.Transactions.Local" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
+  <ItemGroup>
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.Linq.Expressions" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.Numerics" />
+    <Reference Include="System.Runtime.Serialization.Formatters" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Xml.ReaderWriter" />
+    <Reference Include="System.Xml.XmlSerializer" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

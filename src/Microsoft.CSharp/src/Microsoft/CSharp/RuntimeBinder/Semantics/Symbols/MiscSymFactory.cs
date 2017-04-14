@@ -4,21 +4,20 @@
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
-using mdAssemblyRef = Microsoft.CSharp.RuntimeBinder.Semantics.mdToken;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class MiscSymFactory : SymFactoryBase
+    internal sealed class MiscSymFactory : SymFactoryBase
     {
         // Constructor.
 
         public MiscSymFactory(SYMTBL symtable)
-            : base(symtable, null)
+            : base(symtable, false)
         {
         }
 
         // Files
-        public InputFile CreateMDInfile(Name name, mdAssemblyRef idLocalAssembly)
+        public InputFile CreateMDInfile(Name name)
         {
             InputFile sym = new InputFile();
             sym.isSource = false;

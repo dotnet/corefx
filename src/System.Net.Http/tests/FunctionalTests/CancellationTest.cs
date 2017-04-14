@@ -22,7 +22,7 @@ namespace System.Net.Http.Functional.Tests
             _output = output;
         }
 
-        [ActiveIssue(10504)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // includes seconds of delay
         [Theory]
         [InlineData(false, false)]
@@ -72,11 +72,12 @@ namespace System.Net.Http.Functional.Tests
                     _output.WriteLine("GetAsync() completed at: {0}", stopwatch.Elapsed.ToString());
 
                     triggerResponseWrite.SetResult(true);
-                    Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), "Elapsed time should be short");
+                    Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), $"Elapsed time {stopwatch.Elapsed} should be short");
                 });
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Hangs on NETFX
         [ActiveIssue(9075, TestPlatforms.AnyUnix)] // recombine this test into the subsequent one when issue is fixed
         [OuterLoop] // includes seconds of delay
         [Fact]
@@ -85,6 +86,7 @@ namespace System.Net.Http.Functional.Tests
             return ReadAsStreamAsync_ReadAsync_Cancel_TaskCanceledQuickly(false);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Hangs on NETFX
         [OuterLoop] // includes seconds of delay
         [Theory]
         [InlineData(true)]
@@ -134,7 +136,7 @@ namespace System.Net.Http.Functional.Tests
 
                         triggerResponseWrite.SetResult(true);
                         _output.WriteLine("ReadAsync() completed at: {0}", stopwatch.Elapsed.ToString());
-                        Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), "Elapsed time should be short");
+                        Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 10), $"Elapsed time {stopwatch.Elapsed} should be short");
                     }
                 });
             }

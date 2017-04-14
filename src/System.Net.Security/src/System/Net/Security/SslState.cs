@@ -29,8 +29,6 @@ namespace System.Net.Security
 
         private SslStreamInternal _secureStream;
 
-        private FixedSizeReader _reader;
-
         private int _nestedAuth;
         private SecureChannel _context;
 
@@ -81,7 +79,6 @@ namespace System.Net.Security
         internal SslState(Stream innerStream, RemoteCertValidationCallback certValidationCallback, LocalCertSelectionCallback certSelectionCallback, EncryptionPolicy encryptionPolicy)
         {
             _innerStream = innerStream;
-            _reader = new FixedSizeReader(innerStream);
             _certValidationDelegate = certValidationCallback;
             _certSelectionDelegate = certSelectionCallback;
             _encryptionPolicy = encryptionPolicy;
@@ -790,16 +787,23 @@ namespace System.Net.Security
                 else
                 {
                     asyncRequest.AsyncState = message;
-                    IAsyncResult ar = InnerStream.BeginWrite(message.Payload, 0, message.Size, s_writeCallback, asyncRequest);
-                    if (!ar.CompletedSynchronously)
+                    Task t = InnerStream.WriteAsync(message.Payload, 0, message.Size);
+                    if (t.IsCompleted)
                     {
-#if DEBUG
-                        asyncRequest._DebugAsyncChain = ar;
-#endif
-                        return;
+                        t.GetAwaiter().GetResult();
                     }
-
-                    InnerStream.EndWrite(ar);
+                    else
+                    {
+                        IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
+                        if (!ar.CompletedSynchronously)
+                        {
+#if DEBUG
+                            asyncRequest._DebugAsyncChain = ar;
+#endif
+                            return;
+                        }
+                        TaskToApm.End(ar);
+                    }
                 }
             }
 
@@ -861,12 +865,12 @@ namespace System.Net.Security
             int readBytes = 0;
             if (asyncRequest == null)
             {
-                readBytes = _reader.ReadPacket(buffer, 0, SecureChannel.ReadHeaderSize);
+                readBytes = FixedSizeReader.ReadPacket(_innerStream, buffer, 0, SecureChannel.ReadHeaderSize);
             }
             else
             {
                 asyncRequest.SetNextRequest(buffer, 0, SecureChannel.ReadHeaderSize, s_partialFrameCallback);
-                _reader.AsyncReadPacket(asyncRequest);
+                FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return;
@@ -909,12 +913,12 @@ namespace System.Net.Security
 
             if (asyncRequest == null)
             {
-                restBytes = _reader.ReadPacket(buffer, readBytes, restBytes);
+                restBytes = FixedSizeReader.ReadPacket(_innerStream, buffer, readBytes, restBytes);
             }
             else
             {
                 asyncRequest.SetNextRequest(buffer, readBytes, restBytes, s_readFrameCallback);
-                _reader.AsyncReadPacket(asyncRequest);
+                FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return;
@@ -996,12 +1000,20 @@ namespace System.Net.Security
             else
             {
                 asyncRequest.AsyncState = exception;
-                IAsyncResult ar = InnerStream.BeginWrite(message.Payload, 0, message.Size, s_writeCallback, asyncRequest);
-                if (!ar.CompletedSynchronously)
+                Task t = InnerStream.WriteAsync(message.Payload, 0, message.Size);
+                if (t.IsCompleted)
                 {
-                    return;
+                    t.GetAwaiter().GetResult();
                 }
-                InnerStream.EndWrite(ar);
+                else
+                {
+                    IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
+                    if (!ar.CompletedSynchronously)
+                    {
+                        return;
+                    }
+                    TaskToApm.End(ar);
+                }
             }
 
             exception.Throw();
@@ -1065,7 +1077,7 @@ namespace System.Net.Security
             // Async completion.
             try
             {
-                sslState.InnerStream.EndWrite(transportResult);
+                TaskToApm.End(transportResult);
 
                 // Special case for an error notification.
                 object asyncState = asyncRequest.AsyncState;
@@ -1833,14 +1845,14 @@ namespace System.Net.Security
             CheckThrow(authSuccessCheck:true, shutdownCheck:true);
 
             ProtocolToken message = Context.CreateShutdownToken();
-            return InnerStream.BeginWrite(message.Payload, 0, message.Payload.Length, asyncCallback, asyncState);
+            return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
         }
 
         internal void EndShutdown(IAsyncResult result)
         {
             CheckThrow(authSuccessCheck: true, shutdownCheck:true);
 
-            InnerStream.EndWrite(result);
+            TaskToApm.End(result);
             _shutdown = true;
         }
     }

@@ -22,8 +22,8 @@ namespace System.Net.Security.Tests
 
         protected abstract bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream);
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [ActiveIssue(16516, TestPlatforms.Windows)]
         public void SslStream_StreamToStream_Authentication_Success()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -38,7 +38,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Authentication_IncorrectServerName_Fail()
         {
@@ -63,7 +62,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
@@ -101,7 +99,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_WithZeroBytes_Success()
         {
@@ -142,7 +139,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -166,7 +162,7 @@ namespace System.Net.Security.Tests
                 {
                     for (int i = 0; i < largeMsg.Length; i++)
                     {
-                        largeMsg[i] = (byte)i; // very compressible
+                        largeMsg[i] = unchecked((byte)i); // very compressible
                     }
                 }
                 byte[] receivedLargeMsg = new byte[largeMsg.Length];
@@ -191,7 +187,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SslStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
@@ -233,8 +228,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        [ActiveIssue(16516, TestPlatforms.Windows)]
         public void SslStream_StreamToStream_Write_ReadByte_Success()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -258,7 +253,73 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task SslStream_StreamToStream_WriteAsync_ReadByte_Success()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(serverStream))
+            {
+                bool result = DoHandshake(clientSslStream, serverSslStream);
+                Assert.True(result, "Handshake completed.");
+
+                for (int i = 0; i < 3; i++)
+                {
+                    await clientSslStream.WriteAsync(_sampleMsg, 0, _sampleMsg.Length).ConfigureAwait(false);
+                    foreach (byte b in _sampleMsg)
+                    {
+                        Assert.Equal(b, serverSslStream.ReadByte());
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public async Task SslStream_StreamToStream_WriteAsync_ReadAsync_Pending_Success()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new NotifyReadVirtualNetworkStream(network, isServer: true))
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(serverStream))
+            {
+                bool result = DoHandshake(clientSslStream, serverSslStream);
+                Assert.True(result, "Handshake completed.");
+
+                var serverBuffer = new byte[1];
+                var tcs = new TaskCompletionSource<object>();
+                serverStream.OnRead += (buffer, offset, count) =>
+                {
+                    tcs.TrySetResult(null);
+                };
+                Task readTask = serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length);
+
+                // Since the sequence of calls that ends in serverStream.Read() is sync, by now
+                // the read task will have acquired the semaphore shared by Stream.BeginReadInternal()
+                // and Stream.BeginWriteInternal().
+                // But to be sure, we wait until we know we're inside Read().
+                await tcs.Task.TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
+
+                // Should not hang
+                await serverSslStream.WriteAsync(new byte[] { 1 }, 0, 1)
+                    .TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
+
+                // Read in client
+                var clientBuffer = new byte[1];
+                await clientSslStream.ReadAsync(clientBuffer, 0, clientBuffer.Length);
+                Assert.Equal(1, clientBuffer[0]);
+
+                // Complete server read task
+                await clientSslStream.WriteAsync(new byte[] { 2 }, 0, 1);
+                await readTask;
+                Assert.Equal(2, serverBuffer[0]);
+            }
+        }
+
         [Fact]
         public void SslStream_StreamToStream_Flush_Propagated()
         {
@@ -273,7 +334,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_FlushAsync_Propagated()
         {

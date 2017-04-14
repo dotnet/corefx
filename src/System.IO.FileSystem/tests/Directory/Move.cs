@@ -42,10 +42,27 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveOntoExistingDirectory()
+        public void MoveOntoSameDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<IOException>(() => Move(testDir.FullName, testDir.FullName));
+        }
+
+        [Fact]
+        public void MoveOntoExistingDirectory()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo secondDir = Directory.CreateDirectory(GetTestFilePath());
+            Assert.Throws<IOException>(() => Move(testDir.FullName, secondDir.FullName));
+        }
+
+        [Fact]
+        public void MoveOntoFile()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            string testFile = GetTestFilePath();
+            File.WriteAllText(testFile, "");
+            Assert.Throws<IOException>(() => Move(testDir.FullName, testFile));
         }
 
         [Fact]
@@ -143,8 +160,9 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Long path succeeds
         public void Path_With_Longer_Than_MaxDirectory_Succeeds()
         {
             string testDir = GetTestFilePath();
@@ -169,7 +187,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Wild characters in path, wild chars are normal chars on Unix
         public void WindowsWildCharacterPath()
         {
             Assert.Throws<ArgumentException>(() => Move("*", GetTestFilePath()));
@@ -179,7 +197,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Wild characters in path are allowed
         public void UnixWildCharacterPath()
         {
             // Wildcards are allowed in paths for Unix move commands as literals as well as functional wildcards,
@@ -205,7 +223,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace path causes ArgumentException
         public void WindowsWhitespacePath()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -219,7 +237,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace path allowed
         public void UnixWhitespacePath()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -234,7 +252,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Moving to existing directory causes IOException
         public void WindowsExistingDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -249,7 +267,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // drive labels
         public void BetweenDriveLabels()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -258,31 +276,6 @@ namespace System.IO.Tests
                 Assert.Throws<IOException>(() => Move(path, "C:\\DoesntExist"));
             else
                 Assert.Throws<IOException>(() => Move(path, "D:\\DoesntExist"));
-        }
-
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/1008
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixExistingDirectory()
-        {
-            // Moving to an-empty directory is supported on Unix, but moving to a non-empty directory is not
-            string testDirSource = GetTestFilePath();
-            string testDirDestEmpty = GetTestFilePath();
-            string testDirDestNonEmpty = GetTestFilePath();
-
-            Directory.CreateDirectory(testDirSource);
-            Directory.CreateDirectory(testDirDestEmpty);
-            Directory.CreateDirectory(testDirDestNonEmpty);
-
-            using (File.Create(Path.Combine(testDirDestNonEmpty, GetTestFileName())))
-            {
-                Assert.Throws<IOException>(() => Move(testDirSource, testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirDestNonEmpty));
-                Assert.True(Directory.Exists(testDirSource));
-            }
-
-            Move(testDirSource, testDirDestEmpty);
-            Assert.True(Directory.Exists(testDirDestEmpty));
-            Assert.False(Directory.Exists(testDirSource));
         }
 
         #endregion

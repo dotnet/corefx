@@ -29,16 +29,27 @@ namespace System.Net.Tests
             Assert.False(request.HaveResponse);
             Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
             Assert.Null(request.CookieContainer);
-            Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength); // NetFX behavior difference (64 on NetFX).
-            Assert.Equal(65536, HttpWebRequest.DefaultMaximumResponseHeadersLength); // NetFX behavior difference (64 on NetFX).
+            Assert.Equal(64, HttpWebRequest.DefaultMaximumResponseHeadersLength);
             Assert.Null(request.CookieContainer);
             Assert.True(request.AllowWriteStreamBuffering);
             Assert.NotNull(request.ClientCertificates);
-            Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName); //NetFX behavior difference.
+
+            // TODO: Issue #17842
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength);
+                Assert.Throws<NotImplementedException>(() => request.ConnectionGroupName);
+            }
+            else
+            {
+                Assert.Equal(64, HttpWebRequest.DefaultMaximumErrorResponseLength);
+                Assert.Null(request.ConnectionGroupName);
+            }
         }
 
         [OuterLoop]
-        [Theory, MemberData(nameof(EchoServers))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
+        [MemberData(nameof(EchoServers))]
         public WebResponse GetResponse_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
@@ -72,12 +83,13 @@ namespace System.Net.Tests
             Assert.Equal(request.CookieContainer.GetCookies(remoteServer).Count, 2);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17842")] // Difference in behavior
         [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public void HttpWebRequest_ServicePoint_Throws(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint); // NetFX Behavior difference.
+            Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint);
         }
 
         [OuterLoop]
@@ -90,7 +102,7 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        public void HttpWebRequest_EndGetRequestStreamContext_Null(Uri remoteServer)
+        public void HttpWebRequest_EndGetRequestStreamContext_ExpectedValue(Uri remoteServer)
         {
             System.Net.TransportContext context;
             HttpWebRequest httpWebRequest = HttpWebRequest.CreateHttp(remoteServer);
@@ -98,7 +110,14 @@ namespace System.Net.Tests
 
             using (httpWebRequest.EndGetRequestStream(httpWebRequest.BeginGetRequestStream(null, null), out context))
             {
-                Assert.Equal(null, context); // NetFX behavior difference.
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.NotNull(context);
+                }
+                else
+                {
+                    Assert.Null(context);
+                }
             }
         }
 
@@ -115,6 +134,7 @@ namespace System.Net.Tests
             Assert.Equal(Cache.RequestCacheLevel.BypassCache, HttpWebRequest.DefaultCachePolicy.Level);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17842")] //Test hangs in desktop.
         [OuterLoop]
         [Theory, MemberData(nameof(EchoServers))]
         public void HttpWebRequest_ProxySetAfterGetResponse_Fails(Uri remoteServer)
@@ -176,7 +196,7 @@ namespace System.Net.Tests
 
                 sw.Stop();
 
-                Assert.InRange(sw.ElapsedMilliseconds, 1, 10 * 1000); // Allow a very wide range.
+                Assert.InRange(sw.ElapsedMilliseconds, 1, 60 * 1000); // Allow a very wide range as this has taken over 10 seconds occasionally
                 Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
                 Assert.Equal(null, exception.InnerException);
                 Assert.Equal(null, exception.Response);
@@ -192,6 +212,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16928")] //Test hangs in desktop.
         public void HttpWebRequest_PreAuthenticateGetSet_Ok()
         {
             HttpWebRequest request = WebRequest.CreateHttp(Configuration.Http.RemoteEchoServer);

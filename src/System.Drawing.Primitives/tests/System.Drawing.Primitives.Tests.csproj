@@ -1,29 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <OutputType>Library</OutputType>
-    <RootNamespace>System.Drawing.Primitives.Tests</RootNamespace>
-    <AssemblyName>System.Drawing.Primitives.Tests</AssemblyName>
     <ProjectGuid>{297A9116-1005-499D-A895-2063D03E4C94}</ProjectGuid>
-    <NugetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU' ">
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Drawing.Primitives.pkgproj">
-      <Project>{F9DF2357-81B4-4317-908E-512DA9395583}</Project>
-      <Name>System.Drawing.Primitives</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="PointFTests.cs" />
     <Compile Include="PointTests.cs" />
@@ -31,8 +18,6 @@
     <Compile Include="RectangleTests.cs" />
     <Compile Include="SizeFTests.cs" />
     <Compile Include="SizeTests.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="ColorTests.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">

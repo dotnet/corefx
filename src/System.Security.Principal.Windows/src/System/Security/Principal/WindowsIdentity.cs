@@ -183,11 +183,12 @@ namespace System.Security.Principal
 
         private static int LookupAuthenticationPackage(SafeLsaHandle lsaHandle, string packageName)
         {
+            Debug.Assert(!string.IsNullOrEmpty(packageName));
             unsafe
             {
                 int packageId;
                 byte[] asciiPackageName = Encoding.ASCII.GetBytes(packageName);
-                fixed (byte* pAsciiPackageName = asciiPackageName)
+                fixed (byte* pAsciiPackageName = &asciiPackageName[0])
                 {
                     LSA_STRING lsaPackageName = new LSA_STRING((IntPtr)pAsciiPackageName, checked((ushort)(asciiPackageName.Length)));
                     int ntStatus = Interop.SspiCli.LsaLookupAuthenticationPackage(lsaHandle, ref lsaPackageName, out packageId);
@@ -220,7 +221,7 @@ namespace System.Security.Principal
             Contract.EndContractBlock();
 
             // Find out if the specified token is a valid.
-            uint dwLength = (uint)Marshal.SizeOf<uint>();
+            uint dwLength = (uint)sizeof(uint);
             bool result = Interop.Advapi32.GetTokenInformation(userToken, (uint)TokenInformationClass.TokenType,
                                                           SafeLocalAllocHandle.InvalidHandle, 0, out dwLength);
             if (Marshal.GetLastWin32Error() == Interop.Errors.ERROR_INVALID_HANDLE)
@@ -773,44 +774,6 @@ namespace System.Security.Principal
             }
         }
 
-        //
-        // QueryImpersonation used to test if the current thread is impersonated.
-        // This method doesn't return the thread token (WindowsIdentity).
-        // Note GetCurrentInternal can be used to perform the same test, but 
-        // QueryImpersonation is optimized for performance
-        // 
-
-        internal static ImpersonationQueryResult QueryImpersonation()
-        {
-            SafeAccessTokenHandle safeTokenHandle = null;
-            bool success = Interop.Advapi32.OpenThreadToken(TokenAccessLevels.Query, WinSecurityContext.Thread, out safeTokenHandle);
-
-            if (safeTokenHandle != null)
-            {
-                Debug.Assert(success, "[WindowsIdentity..QueryImpersonation] - success");
-                safeTokenHandle.Dispose();
-                return ImpersonationQueryResult.Impersonated;
-            }
-
-            int lastError = Marshal.GetLastWin32Error();
-
-            if (lastError == Interop.Errors.ERROR_ACCESS_DENIED)
-            {
-                // thread is impersonated because the thread was there (and we failed to open it).
-                return ImpersonationQueryResult.Impersonated;
-            }
-
-            if (lastError == Interop.Errors.ERROR_NO_TOKEN)
-            {
-                // definitely not impersonating
-                return ImpersonationQueryResult.NotImpersonated;
-            }
-
-            // Unexpected failure.
-            return ImpersonationQueryResult.Failed;
-        }
-
-
         private static Interop.LUID GetLogonAuthId(SafeAccessTokenHandle safeTokenHandle)
         {
             using (SafeLocalAllocHandle pStatistics = GetTokenInformation(safeTokenHandle, TokenInformationClass.TokenStatistics))
@@ -824,7 +787,7 @@ namespace System.Security.Principal
         private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass)
         {
             SafeLocalAllocHandle safeLocalAllocHandle = SafeLocalAllocHandle.InvalidHandle;
-            uint dwLength = (uint)Marshal.SizeOf<uint>();
+            uint dwLength = (uint)sizeof(uint);
             bool result = Interop.Advapi32.GetTokenInformation(tokenHandle,
                                                           (uint)tokenInformationClass,
                                                           safeLocalAllocHandle,
@@ -892,29 +855,6 @@ namespace System.Security.Principal
                 throw new ArgumentNullException(nameof(identity));
             }
             return identity._authType;
-        }
-
-        internal IntPtr GetTokenInternal()
-        {
-            return _safeTokenHandle.DangerousGetHandle();
-        }
-
-
-        internal WindowsIdentity(ClaimsIdentity claimsIdentity, IntPtr userToken)
-            : base(claimsIdentity)
-        {
-            if (userToken != IntPtr.Zero && userToken.ToInt64() > 0)
-            {
-                CreateFromToken(userToken);
-            }
-        }
-
-        /// <summary>
-        /// Returns a new instance of the base, used when serializing the WindowsIdentity.
-        /// </summary>
-        internal ClaimsIdentity CloneAsBase()
-        {
-            return base.Clone();
         }
 
         /// <summary>
@@ -1125,13 +1065,6 @@ namespace System.Security.Principal
         Thread = 1, // OpenAsSelf = false
         Process = 2, // OpenAsSelf = true
         Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
-    }
-
-    internal enum ImpersonationQueryResult
-    {
-        Impersonated = 0,    // current thread is impersonated
-        NotImpersonated = 1,    // current thread is not impersonated
-        Failed = 2     // failed to query 
     }
 
     [Serializable]

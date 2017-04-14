@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Linq.Expressions.Tests;
 using Microsoft.CSharp.RuntimeBinder;
 using Xunit;
 
@@ -133,7 +134,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x + y, dX + dY);
+            Assert.Equal(unchecked(x + y), unchecked(dX + dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -250,7 +251,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x * y, dX * dY);
+            Assert.Equal(unchecked(x * y), unchecked(dX * dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -301,7 +302,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x - y, dX - dY);
+            Assert.Equal(unchecked(x - y), unchecked(dX - dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -328,8 +329,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX += dY;
-            Assert.Equal(x + y, dX);
+
+            unchecked
+            {
+                dX += dY;
+                Assert.Equal(x + y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -419,8 +424,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX *= dY;
-            Assert.Equal(x * y, dX);
+
+            unchecked
+            {
+                dX *= dY;
+                Assert.Equal(x * y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -467,8 +476,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX -= dY;
-            Assert.Equal(x - y, dX);
+
+            unchecked
+            {
+                dX -= dY;
+                Assert.Equal(x - y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -697,6 +710,58 @@ namespace System.Dynamic.Tests
             dX = 23;
             dY = 49;
             Assert.Throws<RuntimeBinderException>(() => dX && dY);
+        }
+
+        [Fact]
+        public void LiteralDoubleNaN()
+        {
+            dynamic d = double.NaN;
+            Assert.False(d == double.NaN);
+            Assert.True(d != double.NaN);
+            d = 3.0;
+            Assert.True(double.IsNaN(d + double.NaN));
+        }
+
+        [Fact]
+        public void LiteralSingleNaN()
+        {
+            dynamic d = float.NaN;
+            Assert.False(d == float.NaN);
+            Assert.True(d != float.NaN);
+            d = 3.0F;
+            Assert.True(float.IsNaN(d + float.NaN));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void BinaryCallSiteBinder_DynamicExpression(bool useInterpreter)
+        {
+            DynamicExpression expression = DynamicExpression.Dynamic(
+                new BinaryCallSiteBinder(),
+                typeof(object),
+                Expression.Constant(40, typeof(object)),
+                Expression.Constant(2, typeof(object)));
+            Func<object> func = Expression.Lambda<Func<object>>(expression).Compile(useInterpreter);
+            Assert.Equal("42", func().ToString());
+        }
+
+        private class BinaryCallSiteBinder : BinaryOperationBinder
+        {
+            public BinaryCallSiteBinder() : base(ExpressionType.Add) {}
+
+            public override DynamicMetaObject FallbackBinaryOperation(DynamicMetaObject target, DynamicMetaObject arg, DynamicMetaObject errorSuggestion)
+            {
+                return new DynamicMetaObject(
+                    Expression.Convert(
+                    Expression.Add(
+                        Expression.Convert(target.Expression, typeof(int)),
+                        Expression.Convert(arg.Expression, typeof(int))
+                    ), typeof(object)),
+
+                    BindingRestrictions.GetTypeRestriction(target.Expression, typeof(int)).Merge(
+                        BindingRestrictions.GetTypeRestriction(arg.Expression, typeof(int))
+                    ));
+            }
         }
     }
 }

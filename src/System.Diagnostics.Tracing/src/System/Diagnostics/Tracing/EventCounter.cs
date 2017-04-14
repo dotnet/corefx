@@ -245,7 +245,9 @@ namespace System.Diagnostics.Tracing
 
         private void RegisterCommandCallback()
         {
+#if SUPPORTS_EVENTCOMMANDEXECUTED
             _eventSource.EventCommandExecuted += OnEventSourceCommand;
+#endif
         }
 
         private void OnEventSourceCommand(object sender, EventCommandEventArgs e)

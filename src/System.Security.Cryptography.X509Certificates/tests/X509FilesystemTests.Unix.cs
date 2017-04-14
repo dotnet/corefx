@@ -15,8 +15,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     [Collection("X509Filesystem")]
     public static class X509FilesystemTests
     {
-        // #9293: Our Fedora23 and Ubuntu1610 CI machines use NTFS for "tmphome", which causes our filesystem permissions checks to fail.
-        private static bool IsReliableInCI { get; } = !PlatformDetection.IsFedora23 && !PlatformDetection.IsUbuntu1610;
+        // #9293: Our Fedora and Ubuntu1610 CI machines use NTFS for "tmphome", which causes our filesystem permissions checks to fail.
+        private static bool IsReliableInCI { get; } = ChainTests.IsReliableInCI;
 
         [ActiveIssue(12833, TestPlatforms.AnyUnix)]
         [Fact]

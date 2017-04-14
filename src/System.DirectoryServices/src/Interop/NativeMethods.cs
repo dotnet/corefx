@@ -4,6 +4,7 @@
 
 namespace System.DirectoryServices.Interop
 {
+#pragma warning disable BCL0015 // CoreFXPort
     using System.Runtime.InteropServices;
     using System;
     using System.Security.Permissions;
@@ -11,9 +12,6 @@ namespace System.DirectoryServices.Interop
     using System.IO;
     using System.Text;
 
-    [
-    System.Runtime.InteropServices.ComVisible(false)
-    ]
     internal class NativeMethods
     {
         public enum AuthenticationModes

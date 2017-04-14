@@ -1,43 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{63634289-90D7-4947-8BF3-DBBE98D76C85}</ProjectGuid>
+    <ProjectGuid>{F55047F8-E47B-46E3-B221-C23595AFE168}</ProjectGuid>
     <RootNamespace>System.Diagnostics.Process</RootNamespace>
     <AssemblyName>System.Diagnostics.Process</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net463'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
     <NoWarn>0649</NoWarn>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Linux-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Linux-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="FxCopBaseline.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)'!='true'">
+  <ItemGroup>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.cs" />
     <Compile Include="System\Diagnostics\AsyncStreamReader.cs" />
     <Compile Include="System\Diagnostics\DataReceivedEventArgs.cs" />
     <Compile Include="System\Diagnostics\Process.cs" />
     <Compile Include="System\Diagnostics\ProcessInfo.cs" />
+    <Compile Include="System\Diagnostics\ProcessManager.cs" />
     <Compile Include="System\Diagnostics\ProcessModule.cs" />
     <Compile Include="System\Diagnostics\ProcessModuleCollection.cs" />
     <Compile Include="System\Diagnostics\ProcessPriorityClass.cs" />
@@ -203,6 +196,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs">
       <Link>Common\Interop\Windows\Interop.GetCurrentProcessId.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Encoding.Constants.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.Encoding.Constants.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetConsoleCP.cs">
       <Link>Common\Interop\Windows\Interop.GetConsoleCP.cs</Link>
     </Compile>
@@ -239,11 +235,29 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\Interop.ProcessOptions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs">
+      <Link>Common\Interop\Windows\Interop.MultiByteToWideChar.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WideCharToMultiByte.cs">
+      <Link>Common\Interop\Windows\Interop.WideCharToMultiByte.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Text\ConsoleEncoding.cs">
       <Link>Common\System\Text\ConsoleEncoding.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.cs">
-      <Link>Common\System\Text\EncodingHelper.cs</Link>
+    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.Windows.cs">
+      <Link>Common\System\Text\EncodingHelper.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\OSEncoding.Windows.cs">
+      <Link>Common\System\Text\OSEncoding.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\OSEncoder.cs">
+      <Link>Common\System\Text\OSEncoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\DBCSDecoder.cs">
+      <Link>Common\System\Text\DBCSDecoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs</Link>
     </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeThreadHandle.cs" />
@@ -352,18 +366,37 @@
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetTimestamp.cs">
+      <Link>Common\Unix\System.Native\Interop.GetTimestamp.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" ('$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true') AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="System\Diagnostics\Process.UnknownUnix.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.UnknownUnix.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.UnknownUnix.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)'=='true'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System" />
-  </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="Microsoft.Win32.Registry" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.FileVersionInfo" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Threading.ThreadPool" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

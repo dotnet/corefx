@@ -3,11 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System
 {
     internal partial class LocalAppContext
     {
+        private static bool s_isDisableCachingInitialized;
+        private static bool s_disableCaching;
+        private static object s_syncObject;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool GetCachedSwitchValue(string switchName, ref int switchValue)
         {
@@ -31,13 +36,12 @@ namespace System
             return isSwitchEnabled;
         }
 
-        internal static bool DisableCaching
-        {
-            get
+        private static bool DisableCaching =>
+            LazyInitializer.EnsureInitialized(ref s_disableCaching, ref s_isDisableCachingInitialized, ref s_syncObject, () =>
             {
-                //TODO: Replace with the value returned from AppContext (Issue #14064)
-                return true;
-            }
-        }
+                bool isEnabled;
+                AppContext.TryGetSwitch(@"TestSwitch.LocalAppContext.DisableCaching", out isEnabled);
+                return isEnabled;
+            });
     }
 }

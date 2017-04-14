@@ -15,6 +15,8 @@ namespace System
     /// Span represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
+    [DebuggerTypeProxy(typeof(SpanDebugView<>))]
+    [DebuggerDisplay("Length = {Length}")]
     public struct Span<T>
     {
         /// <summary>
@@ -111,7 +113,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
-            if (!SpanHelpers.IsReferenceFree<T>())
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
@@ -123,26 +125,16 @@ namespace System
 
         /// <summary>
         /// Create a new span over a portion of a regular managed object. This can be useful
-        /// if part of a managed object represents a "fixed array." This is dangerous because
-        /// "length" is not checked, nor is the fact that "rawPointer" actually lies within the object.
+        /// if part of a managed object represents a "fixed array." This is dangerous because neither the
+        /// <paramref name="length"/> is checked, nor <paramref name="obj"/> being null, nor the fact that
+        /// "rawPointer" actually lies within <paramref name="obj"/>.
         /// </summary>
         /// <param name="obj">The managed object that contains the data to span over.</param>
         /// <param name="objectData">A reference to data within that object.</param>
         /// <param name="length">The number of <typeparamref name="T"/> elements the memory contains.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when the specified object is null.
-        /// </exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="length"/> is negative.
-        /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
         {
-            if (obj == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
-            if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
-
             Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
             IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
             return new Span<T>(pinnable, byteOffset, length);
@@ -177,11 +169,7 @@ namespace System
         /// <exception cref="System.IndexOutOfRangeException">
         /// Thrown when index less than 0 or index greater than or equal to Length
         /// </exception>
-
-        // TODO: https://github.com/dotnet/corefx/issues/13681
-        //   Until we get over the hurdle of C# 7 tooling, this indexer will return "T" and have a setter rather than a "ref T". (The doc comments
-        //   continue to reflect the original intent of returning "ref T")
-        public T this[int index]
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -190,46 +178,113 @@ namespace System
                     ThrowHelper.ThrowIndexOutOfRangeException();
 
                 if (_pinnable == null)
-                    unsafe { return Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index); }
+                    unsafe { return ref Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index); }
                 else
-                    return Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                if ((uint) index >= ((uint) _length))
-                    ThrowHelper.ThrowIndexOutOfRangeException();
-
-                if (_pinnable == null)
-                    unsafe { Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index) = value; }
-                else
-                    Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index) = value;
+                    return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
             }
         }
 
         /// <summary>
-        /// Returns a reference to specified element of the Span.
+        /// Clears the contents of this span.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        /// <exception cref="System.IndexOutOfRangeException">
-        /// Thrown when index less than 0 or index greater than or equal to Length
-        /// </exception>
-
-        // TODO: https://github.com/dotnet/corefx/issues/13681
-        //   Until we get over the hurdle of C# 7 tooling, this temporary method will simulate the intended "ref T" indexer for those
-        //   who need bypass the workaround for performance.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetItem(int index)
+        public unsafe void Clear()
         {
-            if ((uint)index >= ((uint)_length))
-                ThrowHelper.ThrowIndexOutOfRangeException();
+            int length = _length;
 
-            if (_pinnable == null)
-                unsafe { return ref Unsafe.Add<T>(ref Unsafe.AsRef<T>(_byteOffset.ToPointer()), index); }
+            if (length == 0)
+                return;
+
+            var byteLength = (UIntPtr)((uint)length * Unsafe.SizeOf<T>());
+
+            if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0)
+            {
+                if (_pinnable == null)
+                {
+                    var ptr = (byte*)_byteOffset.ToPointer();
+
+                    SpanHelpers.ClearLessThanPointerSized(ptr, byteLength);
+                }
+                else
+                {
+                    ref byte b = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+
+                    SpanHelpers.ClearLessThanPointerSized(ref b, byteLength);
+                }
+            }
             else
-                return ref Unsafe.Add<T>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset), index);
+            {
+                if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+                {
+                    UIntPtr pointerSizedLength = (UIntPtr)((length * Unsafe.SizeOf<T>()) / sizeof(IntPtr));
+
+                    ref IntPtr ip = ref Unsafe.As<T, IntPtr>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithReferences(ref ip, pointerSizedLength);
+                }
+                else
+                {
+                    ref byte b = ref Unsafe.As<T, byte>(ref DangerousGetPinnableReference());
+
+                    SpanHelpers.ClearPointerSizedWithoutReferences(ref b, byteLength);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fills the contents of this span with the given value.
+        /// </summary>
+        public unsafe void Fill(T value)
+        {
+            int length = _length;
+
+            if (length == 0)
+                return;
+
+            if (Unsafe.SizeOf<T>() == 1)
+            {
+                byte fill = Unsafe.As<T, byte>(ref value);
+                if (_pinnable == null)
+                {
+                    Unsafe.InitBlockUnaligned(_byteOffset.ToPointer(), fill, (uint)length);
+                }
+                else
+                {
+                    ref byte r = ref Unsafe.As<T, byte>(ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset));
+                    Unsafe.InitBlockUnaligned(ref r, fill, (uint)length);
+                }
+            }
+            else
+            {
+                ref T r = ref DangerousGetPinnableReference();
+
+                // TODO: Create block fill for value types of power of two sizes e.g. 2,4,8,16
+
+                // Simple loop unrolling
+                int i = 0;
+                for (; i < (length & ~7); i += 8)
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    Unsafe.Add<T>(ref r, i + 4) = value;
+                    Unsafe.Add<T>(ref r, i + 5) = value;
+                    Unsafe.Add<T>(ref r, i + 6) = value;
+                    Unsafe.Add<T>(ref r, i + 7) = value;
+                }
+                if (i < (length & ~3))
+                {
+                    Unsafe.Add<T>(ref r, i + 0) = value;
+                    Unsafe.Add<T>(ref r, i + 1) = value;
+                    Unsafe.Add<T>(ref r, i + 2) = value;
+                    Unsafe.Add<T>(ref r, i + 3) = value;
+                    i += 4;
+                }
+                for (; i < length; i++)
+                {
+                    Unsafe.Add<T>(ref r, i) = value;
+                }
+            }
         }
 
         /// <summary>
@@ -248,7 +303,6 @@ namespace System
                 ThrowHelper.ThrowArgumentException_DestinationTooShort();
         }
 
-
         /// <summary>
         /// Copies the contents of this span into destination span. If the source
         /// and destinations overlap, this method behaves as if the original values in
@@ -260,37 +314,19 @@ namespace System
         /// <param name="destination">The span to copy items into.</param>
         public bool TryCopyTo(Span<T> destination)
         {
-            if ((uint)_length > (uint)destination._length)
+            int length = _length;
+            int destLength = destination._length;
+
+            if ((uint)length == 0)
+                return true;
+
+            if ((uint)length > (uint)destLength)
                 return false;
 
-            // TODO: This is a tide-over implementation as we plan to add a overlap-safe cpblk-based api to Unsafe. (https://github.com/dotnet/corefx/issues/13427)
-            unsafe
-            {
-                ref T src = ref DangerousGetPinnableReference();
-                ref T dst = ref destination.DangerousGetPinnableReference();
-                IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-                int length = _length;
-
-                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-                if (srcGreaterThanDst)
-                {
-                    // Source address greater than or equal to destination address. Can do normal copy.
-                    for (int i = 0; i < length; i++)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
-                }
-                else
-                {
-                    // Source address less than destination address. Must do backward copy.
-                    int i = length;
-                    while (i-- != 0)
-                    {
-                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
-                    }
-                }
-                return true;
-            }
+            ref T src = ref DangerousGetPinnableReference();
+            ref T dst = ref destination.DangerousGetPinnableReference();
+            SpanHelpers.CopyTo<T>(ref dst, destLength, ref src, length);
+            return true;
         }
 
         /// <summary>

@@ -87,14 +87,13 @@ namespace System.Net.Http
         private TimeSpan _sendTimeout = TimeSpan.FromSeconds(30);
         private TimeSpan _receiveHeadersTimeout = TimeSpan.FromSeconds(30);
         private TimeSpan _receiveDataTimeout = TimeSpan.FromSeconds(30);
-        private int _maxResponseHeadersLength = 64 * 1024;
+        private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength;
         private int _maxResponseDrainSize = 64 * 1024;
         private IDictionary<String, Object> _properties; // Only create dictionary when required.
         private volatile bool _operationStarted;
         private volatile bool _disposed;
         private SafeWinHttpHandle _sessionHandle;
         private WinHttpAuthHelper _authHelper = new WinHttpAuthHelper();
-        private static readonly DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
 
         public WinHttpHandler()
         {
@@ -260,6 +259,11 @@ namespace System.Net.Http
         {
             get
             {
+                if (_clientCertificateOption != ClientCertificateOption.Manual)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.net_http_invalid_enable_first, "ClientCertificateOptions", "Manual"));
+                }
+
                 if (_clientCertificates == null)
                 {
                     _clientCertificates = new X509Certificate2Collection();
@@ -533,8 +537,6 @@ namespace System.Net.Http
 
             CheckDisposed();
 
-            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
-
             SetOperationStarted();
 
             TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
@@ -562,8 +564,6 @@ namespace System.Net.Http
                 CancellationToken.None,
                 TaskCreationOptions.DenyChildAttach,
                 TaskScheduler.Default);
-
-            s_diagnosticListener.LogHttpResponse(tcs.Task, loggingRequestId);
 
             return tcs.Task;
         }
@@ -721,7 +721,7 @@ namespace System.Net.Http
                             Interop.WinHttp.WINHTTP_NO_PROXY_NAME,
                             Interop.WinHttp.WINHTTP_NO_PROXY_BYPASS,
                             (int)Interop.WinHttp.WINHTTP_FLAG_ASYNC);
-                            
+
                         if (sessionHandle.IsInvalid)
                         {
                             int lastError = Marshal.GetLastWin32Error();
@@ -750,7 +750,7 @@ namespace System.Net.Http
                             sessionHandle,
                             Interop.WinHttp.WINHTTP_OPTION_ASSURED_NON_BLOCKING_CALLBACKS,
                             ref optionAssuredNonBlockingTrue,
-                            (uint)Marshal.SizeOf<uint>()))
+                            (uint)sizeof(uint)))
                         {
                             // This option is not available on downlevel Windows versions. While it improves
                             // performance, we can ignore the error that the option is not available.
@@ -847,7 +847,7 @@ namespace System.Net.Http
                 // will have the side-effect of WinHTTP cancelling any pending I/O and accelerating its callbacks
                 // on the handle and thus releasing the awaiting tasks in the loop below. This helps to provide
                 // a more timely, cooperative, cancellation pattern.
-                using (state.CancellationToken.Register(s => ((WinHttpRequestState)s).RequestHandle.Dispose(), state))                
+                using (state.CancellationToken.Register(s => ((WinHttpRequestState)s).RequestHandle.Dispose(), state))
                 {
                     do
                     {
@@ -883,7 +883,7 @@ namespace System.Net.Http
                 // Since the headers have been read, set the "receive" timeout to be based on each read
                 // call of the response body data. WINHTTP_OPTION_RECEIVE_TIMEOUT sets a timeout on each
                 // lower layer winsock read.
-                uint optionData = (uint)_receiveDataTimeout.TotalMilliseconds;
+                uint optionData = unchecked((uint)_receiveDataTimeout.TotalMilliseconds);
                 SetWinHttpOption(state.RequestHandle, Interop.WinHttp.WINHTTP_OPTION_RECEIVE_TIMEOUT, ref optionData);
 
                 HttpResponseMessage responseMessage = WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck);
@@ -917,7 +917,7 @@ namespace System.Net.Http
         private void SetSessionHandleTlsOptions(SafeWinHttpHandle sessionHandle)
         {
             uint optionData = 0;
-            SslProtocols sslProtocols = 
+            SslProtocols sslProtocols =
                 (_sslProtocols == SslProtocols.None) ? SecurityProtocol.DefaultSecurityProtocols : _sslProtocols;
 
             if ((sslProtocols & SslProtocols.Tls) != 0)
@@ -1076,7 +1076,7 @@ namespace System.Net.Http
                     ref optionData);
             }
 
-            optionData = _automaticRedirection ? 
+            optionData = _automaticRedirection ?
                 Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY_DISALLOW_HTTPS_TO_HTTP :
                 Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY, ref optionData);
@@ -1094,7 +1094,7 @@ namespace System.Net.Http
 
         private void SetRequestHandleTlsOptions(SafeWinHttpHandle requestHandle)
         {
-            // If we have a custom server certificate validation callback method then 
+            // If we have a custom server certificate validation callback method then
             // we need to have WinHTTP ignore some errors so that the callback method
             // will have a chance to be called.
             uint optionData;
@@ -1173,7 +1173,7 @@ namespace System.Net.Http
 
         private void SetRequestHandleBufferingOptions(SafeWinHttpHandle requestHandle)
         {
-            uint optionData = (uint)_maxResponseHeadersLength;
+            uint optionData = (uint)(_maxResponseHeadersLength * 1024);
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE, ref optionData);
             optionData = (uint)_maxResponseDrainSize;
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, ref optionData);
@@ -1251,7 +1251,7 @@ namespace System.Net.Http
             }
             else if (ex is WinHttpException || ex is IOException)
             {
-                // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during 
+                // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during
                 // execution. All other exception types, including ArgumentExceptions and ProtocolViolationExceptions
                 // are 'unexpected' or caused by user error and should not be wrapped.
                 state.Tcs.TrySetException(new HttpRequestException(SR.net_http_client_execution_error, ex));
@@ -1312,7 +1312,7 @@ namespace System.Net.Http
                 }
             }
         }
-        
+
         private void ThrowOnInvalidHandle(SafeWinHttpHandle handle)
         {
             if (handle.IsInvalid)
@@ -1322,7 +1322,7 @@ namespace System.Net.Http
                 throw WinHttpException.CreateExceptionUsingError(lastError);
             }
         }
-        
+
         private RendezvousAwaitable<int> InternalSendRequestAsync(WinHttpRequestState state)
         {
             lock (state.Lock)
@@ -1347,7 +1347,7 @@ namespace System.Net.Http
 
             return state.LifecycleAwaitable;
         }
-        
+
         private async Task InternalSendRequestBodyAsync(WinHttpRequestState state, bool chunkedModeForSend)
         {
             using (var requestStream = new WinHttpRequestStream(state, chunkedModeForSend))
@@ -1358,7 +1358,7 @@ namespace System.Net.Http
                 await requestStream.EndUploadAsync(state.CancellationToken).ConfigureAwait(false);
             }
         }
-        
+
         private RendezvousAwaitable<int> InternalReceiveResponseHeadersAsync(WinHttpRequestState state)
         {
             lock (state.Lock)

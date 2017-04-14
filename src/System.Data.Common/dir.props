@@ -3,6 +3,9 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>4.2.0.0</AssemblyVersion>
+    <AssemblyKey>MSFT</AssemblyKey>
+    <IsNETCoreApp>true</IsNETCoreApp>
+    <IsUAP>true</IsUAP>
+    <IsNetFxNETStandard>true</IsNetFxNETStandard>
   </PropertyGroup>
 </Project>
-

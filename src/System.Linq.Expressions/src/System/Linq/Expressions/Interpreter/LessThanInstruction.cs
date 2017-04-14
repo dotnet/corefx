@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -277,7 +276,7 @@ namespace System.Linq.Expressions.Interpreter
         }
         public static Instruction Create(Type type, bool liftedToNull = false)
         {
-            Debug.Assert(!type.GetTypeInfo().IsEnum);
+            Debug.Assert(!type.IsEnum);
             if (liftedToNull)
             {
                 switch (type.GetNonNullableType().GetTypeCode())
@@ -294,7 +293,7 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_liftedToNullSingle ?? (s_liftedToNullSingle = new LessThanSingle(null));
                     case TypeCode.Double: return s_liftedToNullDouble ?? (s_liftedToNullDouble = new LessThanDouble(null));
                     default:
-                        throw Error.ExpressionNotSupportedForType("LessThan", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
             else
@@ -313,7 +312,7 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_Single ?? (s_Single = new LessThanSingle(Utils.BoxedFalse));
                     case TypeCode.Double: return s_Double ?? (s_Double = new LessThanDouble(Utils.BoxedFalse));
                     default:
-                        throw Error.ExpressionNotSupportedForType("LessThan", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
         }

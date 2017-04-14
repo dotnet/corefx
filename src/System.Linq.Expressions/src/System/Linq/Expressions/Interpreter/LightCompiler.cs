@@ -31,34 +31,26 @@ namespace System.Linq.Expressions.Interpreter
 
     internal sealed class ExceptionHandler
     {
-        public readonly Type ExceptionType;
+        private readonly Type _exceptionType;
         public readonly int LabelIndex;
         public readonly int HandlerStartIndex;
         public readonly int HandlerEndIndex;
         public readonly ExceptionFilter Filter;
 
-        internal TryCatchFinallyHandler Parent = null;
-
         internal ExceptionHandler(int labelIndex, int handlerStartIndex, int handlerEndIndex, Type exceptionType, ExceptionFilter filter)
         {
             Debug.Assert(exceptionType != null);
             LabelIndex = labelIndex;
-            ExceptionType = exceptionType;
+            _exceptionType = exceptionType;
             HandlerStartIndex = handlerStartIndex;
             HandlerEndIndex = handlerEndIndex;
             Filter = filter;
         }
 
-        internal void SetParent(TryCatchFinallyHandler tryHandler)
-        {
-            Debug.Assert(Parent == null);
-            Parent = tryHandler;
-        }
-
-        public bool Matches(Type exceptionType) => ExceptionType.IsAssignableFrom(exceptionType);
+        public bool Matches(Type exceptionType) => _exceptionType.IsAssignableFrom(exceptionType);
 
         public override string ToString() =>
-            string.Format(CultureInfo.InvariantCulture, "catch({0}) [{1}->{2}]", ExceptionType.Name, HandlerStartIndex, HandlerEndIndex);
+            string.Format(CultureInfo.InvariantCulture, "catch({0}) [{1}->{2}]", _exceptionType.Name, HandlerStartIndex, HandlerEndIndex);
     }
 
     internal sealed class TryCatchFinallyHandler
@@ -103,16 +95,7 @@ namespace System.Linq.Expressions.Interpreter
             FinallyStartIndex = finallyStart;
             FinallyEndIndex = finallyEnd;
             GotoEndTargetIndex = gotoEndLabelIndex;
-
             _handlers = handlers;
-
-            if (_handlers != null)
-            {
-                foreach (ExceptionHandler handler in _handlers)
-                {
-                    handler.SetParent(this);
-                }
-            }
         }
 
         internal bool HasHandler(InterpretedFrame frame, Exception exception, out ExceptionHandler handler, out object unwrappedException)
@@ -135,9 +118,8 @@ namespace System.Linq.Expressions.Interpreter
                 RuntimeWrappedException rwe = exception as RuntimeWrappedException;
                 unwrappedException = rwe != null ? rwe.WrappedException : exception;
                 Type exceptionType = unwrappedException.GetType();
-                for (int i = 0; i != _handlers.Length; ++i)
+                foreach (ExceptionHandler candidate in _handlers)
                 {
-                    ExceptionHandler candidate = _handlers[i];
                     if (candidate.Matches(exceptionType) && (candidate.Filter == null || FilterPasses(frame, ref unwrappedException, candidate.Filter)))
                     {
                         handler = candidate;
@@ -154,35 +136,42 @@ namespace System.Linq.Expressions.Interpreter
             return false;
         }
 
-        internal bool FilterPasses(InterpretedFrame frame, ref object exception, ExceptionFilter filter)
+        private static bool FilterPasses(InterpretedFrame frame, ref object exception, ExceptionFilter filter)
         {
             Interpreter interpreter = frame.Interpreter;
             Instruction[] instructions = interpreter.Instructions.Instructions;
             int stackIndex = frame.StackIndex;
+            int frameIndex = frame.InstructionIndex;
             try
             {
                 int index = interpreter._labels[filter.LabelIndex].Index;
+                frame.InstructionIndex = index;
                 frame.Push(exception);
                 while (index >= filter.StartIndex && index < filter.EndIndex)
                 {
                     index += instructions[index].Run(frame);
+                    frame.InstructionIndex = index;
                 }
 
+                // Exception is stored in a local at start of the filter, and loaded from it at the end, so it is now
+                // on the top of the stack. It may have been assigned to in the course of the filter running.
+                // If this is the handler that will be executed, then if the filter has assigned to the exception variable
+                // that change should be visible to the handler. Otherwise, it should not, so we write it back only on true.
+                object exceptionLocal = frame.Pop();
                 if ((bool)frame.Pop())
                 {
-                    // If this is the handler that will be executed, then if the filter has assigned to the exception variable
-                    // that change should be visible to the handler. Otherwise, it should not.
-                    exception = (Exception)frame.Peek();
+                    exception = exceptionLocal;
+                    // Stack and instruction indices will be overwritten in the catch block anyway, so no need to restore.
                     return true;
                 }
             }
             catch
             {
                 // Silently eating exceptions and returning false matches the CLR behavior.
-                // Restore stack depth first.
-                frame.StackIndex = stackIndex;
             }
 
+            frame.StackIndex = stackIndex;
+            frame.InstructionIndex = frameIndex;
             return false;
         }
     }
@@ -362,7 +351,11 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (type != typeof(void))
             {
-                if (type.GetTypeInfo().IsValueType)
+                if (type.IsNullableOrReferenceType())
+                {
+                    _instructions.EmitLoad(value: null);
+                }
+                else
                 {
                     object value = ScriptingRuntimeHelpers.GetPrimitiveDefaultValue(type);
                     if (value != null)
@@ -373,10 +366,6 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         _instructions.EmitDefaultValue(type);
                     }
-                }
-                else
-                {
-                    _instructions.EmitLoad(value: null);
                 }
             }
         }
@@ -453,7 +442,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private bool MaybeMutableValueType(Type type)
         {
-            return type.GetTypeInfo().IsValueType && !type.GetTypeInfo().IsEnum && !type.GetTypeInfo().IsPrimitive;
+            return type.IsValueType && !type.IsEnum && !type.IsPrimitive;
         }
 
         private void CompileGetBoxedVariable(ParameterExpression variable)
@@ -830,16 +819,11 @@ namespace System.Linq.Expressions.Interpreter
                             _instructions.EmitEqual(typeof(object));
                             _instructions.EmitBranchFalse(callMethod);
 
-                            if (node.NodeType == ExpressionType.Equal)
-                            {
-                                // right null, left not, false
-                                _instructions.EmitLoad(AstUtils.BoxedFalse, typeof(bool));
-                            }
-                            else
-                            {
-                                // right null, left not, true
-                                _instructions.EmitLoad(AstUtils.BoxedTrue, typeof(bool));
-                            }
+                            // right null, left not, false
+                            // right null, left not, true
+                            _instructions.EmitLoad(
+                                node.NodeType == ExpressionType.Equal ? AstUtils.BoxedFalse : AstUtils.BoxedTrue,
+                                typeof(bool));
                             _instructions.EmitBranch(end, hasResult: false, hasValue: true);
 
                             // both are not null
@@ -990,7 +974,7 @@ namespace System.Linq.Expressions.Interpreter
         private void CompileEqual(Expression left, Expression right, bool liftedToNull)
         {
 #if DEBUG
-            Debug.Assert(IsNullComparison(left, right) || left.Type == right.Type || !left.Type.GetTypeInfo().IsValueType && !right.Type.GetTypeInfo().IsValueType);
+            Debug.Assert(IsNullComparison(left, right) || left.Type == right.Type || !left.Type.IsValueType && !right.Type.IsValueType);
 #endif
             Compile(left);
             Compile(right);
@@ -1000,7 +984,7 @@ namespace System.Linq.Expressions.Interpreter
         private void CompileNotEqual(Expression left, Expression right, bool liftedToNull)
         {
 #if DEBUG
-            Debug.Assert(IsNullComparison(left, right) || left.Type == right.Type || !left.Type.GetTypeInfo().IsValueType && !right.Type.GetTypeInfo().IsValueType);
+            Debug.Assert(IsNullComparison(left, right) || left.Type == right.Type || !left.Type.IsValueType && !right.Type.IsValueType);
 #endif
             Compile(left);
             Compile(right);
@@ -1057,7 +1041,7 @@ namespace System.Linq.Expressions.Interpreter
                 Compile(node.Operand);
                 _instructions.EmitStoreLocal(opTemp.Index);
 
-                if (!node.Operand.Type.GetTypeInfo().IsValueType ||
+                if (!node.Operand.Type.IsValueType ||
                     (node.Operand.Type.IsNullableType() && node.IsLiftedToNull))
                 {
                     _instructions.EmitLoadLocal(opTemp.Index);
@@ -1104,7 +1088,7 @@ namespace System.Linq.Expressions.Interpreter
                 return;
             }
 
-            if (typeFrom.GetTypeInfo().IsValueType &&
+            if (typeFrom.IsValueType &&
                 typeTo.IsNullableType() &&
                 typeTo.GetNonNullableType().Equals(typeFrom))
             {
@@ -1112,7 +1096,7 @@ namespace System.Linq.Expressions.Interpreter
                 return;
             }
 
-            if (typeTo.GetTypeInfo().IsValueType &&
+            if (typeTo.IsValueType &&
                 typeFrom.IsNullableType() &&
                 typeFrom.GetNonNullableType().Equals(typeTo))
             {
@@ -1125,16 +1109,16 @@ namespace System.Linq.Expressions.Interpreter
             Type nonNullableTo = typeTo.GetNonNullableType();
 
             // use numeric conversions for both numeric types and enums
-            if ((nonNullableFrom.IsNumericOrBool() || nonNullableFrom.GetTypeInfo().IsEnum)
-                 && (nonNullableTo.IsNumeric() || nonNullableTo.GetTypeInfo().IsEnum || nonNullableTo == typeof(decimal)))
+            if ((nonNullableFrom.IsNumericOrBool() || nonNullableFrom.IsEnum)
+                 && (nonNullableTo.IsNumericOrBool() || nonNullableTo.IsEnum || nonNullableTo == typeof(decimal)))
             {
                 Type enumTypeTo = null;
 
-                if (nonNullableFrom.GetTypeInfo().IsEnum)
+                if (nonNullableFrom.IsEnum)
                 {
                     nonNullableFrom = Enum.GetUnderlyingType(nonNullableFrom);
                 }
-                if (nonNullableTo.GetTypeInfo().IsEnum)
+                if (nonNullableTo.IsEnum)
                 {
                     enumTypeTo = nonNullableTo;
                     nonNullableTo = Enum.GetUnderlyingType(nonNullableTo);
@@ -1143,13 +1127,36 @@ namespace System.Linq.Expressions.Interpreter
                 TypeCode from = nonNullableFrom.GetTypeCode();
                 TypeCode to = nonNullableTo.GetTypeCode();
 
-                if (isChecked)
+                if (from == to)
                 {
-                    _instructions.EmitNumericConvertChecked(from, to, isLiftedToNull);
+                    if ((object)enumTypeTo != null)
+                    {
+                        // If casting between enums of the same underlying type or to enum from the underlying
+                        // type, there's no need for the numeric conversion, so just include a null-check if
+                        // appropriate.
+                        if (typeFrom.IsNullableType() && !typeTo.IsNullableType())
+                        {
+                            _instructions.Emit(NullableMethodCallInstruction.CreateGetValue());
+                        }
+                    }
+                    else
+                    {
+                        // Casting to the underlying check still needs a numeric conversion to force the type
+                        // change that EmitCastToEnum provides for enums, but needs only one cast. Checked can
+                        // also never throw, so always be unchecked.
+                        _instructions.EmitConvertToUnderlying(to, isLiftedToNull);
+                    }
                 }
                 else
                 {
-                    _instructions.EmitNumericConvertUnchecked(from, to, isLiftedToNull);
+                    if (isChecked)
+                    {
+                        _instructions.EmitNumericConvertChecked(from, to, isLiftedToNull);
+                    }
+                    else
+                    {
+                        _instructions.EmitNumericConvertUnchecked(from, to, isLiftedToNull);
+                    }
                 }
 
                 if ((object)enumTypeTo != null)
@@ -1158,25 +1165,10 @@ namespace System.Linq.Expressions.Interpreter
                     _instructions.EmitCastToEnum(enumTypeTo);
                 }
 
-                if (typeTo.IsNullableType())
-                {
-                    BranchLabel whenNull = _instructions.MakeLabel();
-                    _instructions.EmitDup();
-                    _instructions.EmitLoad(null, typeof(object));
-                    _instructions.EmitEqual(typeof(object));
-                    _instructions.EmitBranchTrue(whenNull);
-
-                    // get constructor for nullable type
-                    ConstructorInfo constructor = typeTo.GetConstructor(new[] { typeTo.GetNonNullableType() });
-                    _instructions.EmitNew(constructor);
-
-                    _instructions.MarkLabel(whenNull);
-                }
-
                 return;
             }
 
-            if (typeTo.GetTypeInfo().IsEnum)
+            if (typeTo.IsEnum)
             {
                 _instructions.Emit(NullCheckInstruction.Instance);
                 _instructions.EmitCastReferenceToEnum(typeTo);
@@ -1212,6 +1204,7 @@ namespace System.Linq.Expressions.Interpreter
                 switch (node.NodeType)
                 {
                     case ExpressionType.Not:
+                    case ExpressionType.OnesComplement:
                         CompileNotExpression(node);
                         break;
                     case ExpressionType.TypeAs:
@@ -1243,10 +1236,6 @@ namespace System.Linq.Expressions.Interpreter
                     case ExpressionType.IsTrue:
                     case ExpressionType.IsFalse:
                         EmitUnaryBoolCheck(node);
-                        break;
-                    case ExpressionType.OnesComplement:
-                        Compile(node.Operand);
-                        _instructions.EmitOnesComplement(node.Type);
                         break;
                     default:
                         throw new PlatformNotSupportedException(SR.Format(SR.UnsupportedExpressionType, node.NodeType));
@@ -1633,10 +1622,7 @@ namespace System.Linq.Expressions.Interpreter
                 foreach (ConstantExpression testValue in switchCase.TestValues)
                 {
                     var key = (T)testValue.Value;
-                    if (!caseDict.ContainsKey(key))
-                    {
-                        caseDict.Add(key, caseOffset);
-                    }
+                    caseDict.TryAdd(key, caseOffset);
                 }
 
                 Compile(switchCase.Body, !hasValue);
@@ -1687,9 +1673,9 @@ namespace System.Linq.Expressions.Interpreter
                             nullCase.Value = caseOffset;
                         }
                     }
-                    else if (!caseDict.ContainsKey(key))
+                    else
                     {
-                        caseDict.Add(key, caseOffset);
+                        caseDict.TryAdd(key, caseOffset);
                     }
                 }
 
@@ -2014,6 +2000,7 @@ namespace System.Linq.Expressions.Interpreter
 
                             CompileSetVariable(parameter, isVoid: true);
                             Compile(handler.Filter);
+                            CompileGetVariable(parameter);
 
                             filter = new ExceptionFilter(filterLabel, filterStart, _instructions.Count);
 
@@ -2214,7 +2201,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private static bool ShouldWritebackNode(Expression node)
         {
-            if (node.Type.GetTypeInfo().IsValueType)
+            if (node.Type.IsValueType)
             {
                 switch (node.NodeType)
                 {
@@ -2261,7 +2248,7 @@ namespace System.Linq.Expressions.Interpreter
                                 objTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Object.Type), _instructions.Count);
                                 EmitThisForMethodCall(indexNode.Object);
                                 _instructions.EmitDup();
-                                _instructions.EmitStoreLocal(objTmp.Value.Index);
+                                _instructions.EmitStoreLocal(objTmp.GetValueOrDefault().Index);
                             }
 
                             int count = indexNode.ArgumentCount;
@@ -2299,7 +2286,7 @@ namespace System.Linq.Expressions.Interpreter
                             memberTemp = _locals.DefineLocal(Expression.Parameter(member.Expression.Type, "member"), _instructions.Count);
                             EmitThisForMethodCall(member.Expression);
                             _instructions.EmitDup();
-                            _instructions.EmitStoreLocal(memberTemp.Value.Index);
+                            _instructions.EmitStoreLocal(memberTemp.GetValueOrDefault().Index);
                         }
 
                         var field = member.Member as FieldInfo;
@@ -2377,7 +2364,7 @@ namespace System.Linq.Expressions.Interpreter
 
             if (node.Constructor != null)
             {
-                if (node.Constructor.DeclaringType.GetTypeInfo().IsAbstract)
+                if (node.Constructor.DeclaringType.IsAbstract)
                     throw Error.NonAbstractConstructorRequired();
 
                 ParameterInfo[] parameters = node.Constructor.GetParametersCached();
@@ -2416,8 +2403,16 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                Debug.Assert(node.Type.GetTypeInfo().IsValueType);
-                _instructions.EmitDefaultValue(node.Type);
+                Type type = node.Type;
+                Debug.Assert(type.IsValueType);
+                if (type.IsNullableType())
+                {
+                    _instructions.EmitLoad(value: null);
+                }
+                else
+                {
+                    _instructions.EmitDefaultValue(type);
+                }
             }
         }
 
@@ -2715,7 +2710,7 @@ namespace System.Linq.Expressions.Interpreter
                         var memberMember = (MemberMemberBinding)binding;
                         _instructions.EmitDup();
                         Type type = GetMemberType(memberMember.Member);
-                        if (memberMember.Member is PropertyInfo && type.GetTypeInfo().IsValueType)
+                        if (memberMember.Member is PropertyInfo && type.IsValueType)
                         {
                             throw Error.CannotAutoInitializeValueTypeMemberThroughProperty(memberMember.Bindings);
                         }
@@ -2861,7 +2856,7 @@ namespace System.Linq.Expressions.Interpreter
 
             Compile(node.Operand);
 
-            if (node.Type.GetTypeInfo().IsValueType && !node.Type.IsNullableType())
+            if (node.Type.IsValueType && !node.Type.IsNullableType())
             {
                 _instructions.Emit(NullCheckInstruction.Instance);
             }
@@ -2875,16 +2870,11 @@ namespace System.Linq.Expressions.Interpreter
             Compile(node.Expression);
             if (node.Expression.Type == typeof(void))
             {
-                _instructions.EmitLoad(node.TypeOperand == node.Expression.Type, typeof(bool));
-            }
-            else if (node.TypeOperand.GetTypeInfo().IsGenericType && node.TypeOperand.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                _instructions.EmitLoad(node.TypeOperand.GenericTypeArguments[0]);
-                _instructions.EmitNullableTypeEquals();
+                _instructions.EmitLoad(node.TypeOperand == typeof(void), typeof(bool));
             }
             else
             {
-                _instructions.EmitLoad(node.TypeOperand);
+                _instructions.EmitLoad(node.TypeOperand.GetNonNullableType());
                 _instructions.EmitTypeEquals();
             }
         }
@@ -2904,28 +2894,38 @@ namespace System.Linq.Expressions.Interpreter
 
             Compile(node.Expression);
 
-            if (result == AnalyzeTypeIsResult.KnownTrue ||
-                result == AnalyzeTypeIsResult.KnownFalse)
+            switch (result)
             {
-                // Result is known statically, so just emit the expression for
-                // its side effects and return the result
-                if (node.Expression.Type != typeof(void))
-                {
-                    _instructions.EmitPop();
-                }
+                case AnalyzeTypeIsResult.KnownTrue:
+                case AnalyzeTypeIsResult.KnownFalse:
 
-                _instructions.EmitLoad(result == AnalyzeTypeIsResult.KnownTrue);
-                return;
-            }
+                    // Result is known statically, so just emit the expression for
+                    // its side effects and return the result
+                    if (node.Expression.Type != typeof(void))
+                    {
+                        _instructions.EmitPop();
+                    }
 
-            if (node.TypeOperand.GetTypeInfo().IsGenericType && node.TypeOperand.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                _instructions.EmitLoad(node.TypeOperand.GenericTypeArguments[0]);
-                _instructions.EmitNullableTypeEquals();
-            }
-            else
-            {
-                _instructions.EmitTypeIs(node.TypeOperand);
+                    _instructions.EmitLoad(result == AnalyzeTypeIsResult.KnownTrue);
+                    break;
+                case AnalyzeTypeIsResult.KnownAssignable:
+
+                    // Either the value is of the type or it is null
+                    // so emit test for not-null.
+                    _instructions.EmitLoad(null);
+                    _instructions.EmitNotEqual(typeof(object));
+                    break;
+                default:
+                    if (node.TypeOperand.IsValueType)
+                    {
+                        _instructions.EmitLoad(node.TypeOperand.GetNonNullableType());
+                        _instructions.EmitTypeEquals();
+                    }
+                    else
+                    {
+                        _instructions.EmitTypeIs(node.TypeOperand);
+                    }
+                    break;
             }
         }
 
@@ -3162,7 +3162,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override void Update(InterpretedFrame frame, object value)
         {
-            object obj = _object == null ? null : frame.Data[_object.Value.Index];
+            object obj = _object == null ? null : frame.Data[_object.GetValueOrDefault().Index];
             _field.SetValue(obj, value);
         }
 
@@ -3170,7 +3170,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_object != null)
             {
-                locals.UndefineLocal(_object.Value, instructions.Count);
+                locals.UndefineLocal(_object.GetValueOrDefault(), instructions.Count);
             }
         }
     }
@@ -3189,7 +3189,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override void Update(InterpretedFrame frame, object value)
         {
-            object obj = _object == null ? null : frame.Data[_object.Value.Index];
+            object obj = _object == null ? null : frame.Data[_object.GetValueOrDefault().Index];
 
             try
             {
@@ -3206,7 +3206,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_object != null)
             {
-                locals.UndefineLocal(_object.Value, instructions.Count);
+                locals.UndefineLocal(_object.GetValueOrDefault(), instructions.Count);
             }
         }
     }
@@ -3234,7 +3234,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             args[args.Length - 1] = value;
 
-            object instance = _obj == null ? null : frame.Data[_obj.Value.Index];
+            object instance = _obj == null ? null : frame.Data[_obj.GetValueOrDefault().Index];
 
             try
             {
@@ -3251,7 +3251,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (_obj != null)
             {
-                locals.UndefineLocal(_obj.Value, instructions.Count);
+                locals.UndefineLocal(_obj.GetValueOrDefault(), instructions.Count);
             }
 
             for (int i = 0; i < _args.Length; i++)

@@ -3,33 +3,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
-    <PackageVersion>$(LineupPackageVersion)</PackageVersion>
-    <IsLineupPackage>true</IsLineupPackage>
-    <RuntimeFileSource>runtime.json</RuntimeFileSource>
+    <PackageVersion>2.0.0</PackageVersion>
     <SkipValidatePackage>true</SkipValidatePackage>
   </PropertyGroup>
-  
-  <Import Project="..\NETStandard.Library\NETStandard.Library.packages.targets" />
-  
+
   <ItemGroup>
     <!-- make this package installable and noop in a packages.config-based project -->
     <File Include="$(PlaceHolderFile)">
       <TargetPath>lib/netstandard1.0</TargetPath>
     </File>
 
-    <Package Include="System.Private.Uri" />
-    <NativePackage Include="runtime.native.System.IO.Compression" />
-    <NativePackage Include="runtime.native.System" />
-    <NativePackage Include="runtime.native.System.Net.Http" />
-    <NativePackage Include="runtime.native.System.Security.Cryptography" />
-    <NativePackage Include="runtime.native.System.Security.Cryptography.Apple" />
-    <NativePackage Include="runtime.native.System.Security.Cryptography.OpenSsl" />
-    <NativePackage Include="runtime.native.System.Net.Security" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <LineupProjectReference Include="@(Package->'$(SourceDir)%(Identity)/pkg/%(Identity).pkgproj')" />
-    <LineupProjectReference Include="@(NativePackage->'$(SourceDir)Native/pkg/%(Identity)/%(Identity).pkgproj')" />
+    <File Include="runtime.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

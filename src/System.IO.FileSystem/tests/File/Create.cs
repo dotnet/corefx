@@ -56,8 +56,9 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(UsingNewNormalization))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void ValidCreation_ExtendedSyntax()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + GetTestFilePath());
@@ -71,8 +72,9 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Valid Windows path extended prefix, long path
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void ValidCreation_LongPathExtendedSyntax()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(IOServices.GetPath(IOInputs.ExtendedPrefix + TestDirectory, characterCount: 500).FullPath);
@@ -195,7 +197,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)] // Invalid file name with wildcard characters on Windows
         public void WindowsWildCharacterPath()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -206,7 +208,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Invalid file name with whitespace on Windows
         public void WindowsWhitespacePath()
         {
             Assert.Throws<ArgumentException>(() => Create("         "));
@@ -219,7 +221,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Valid file name with Whitespace on Unix
         public void UnixWhitespacePath()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());

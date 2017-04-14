@@ -408,6 +408,50 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
+        /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        public void Clear()
+        {
+            // If there are no queues in the bag, there's nothing to clear.
+            if (_workStealingQueues == null)
+            {
+                return;
+            }
+
+            // Clear the local queue.
+            WorkStealingQueue local = GetCurrentThreadWorkStealingQueue(forceCreate: false);
+            if (local != null)
+            {
+                local.LocalClear();
+                if (local._nextQueue == null && local == _workStealingQueues)
+                {
+                    // If it's the only queue, nothing more to do.
+                    return;
+                }
+            }
+
+            // Clear the other queues by stealing all remaining items. We freeze the bag to
+            // avoid having to contend with too many new items being added while we're trying
+            // to drain the bag. But we can't just freeze the bag and attempt to remove all
+            // items from every other queue, as even with freezing the bag it's dangerous to
+            // manipulate other queues' tail pointers and add/take counts.
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+                for (WorkStealingQueue queue = _workStealingQueues; queue != null; queue = queue._nextQueue)
+                {
+                    T ignored;
+                    while (queue.TrySteal(out ignored, take: true));
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
         /// Returns an enumerator that iterates through the <see
         /// cref="ConcurrentBag{T}"/>.
         /// </summary>
@@ -780,6 +824,22 @@ namespace System.Collections.Concurrent
                 }
             }
 
+            /// <summary>Clears the contents of the local queue.</summary>
+            internal void LocalClear()
+            {
+                Debug.Assert(Environment.CurrentManagedThreadId == _ownerThreadId);
+                lock (this) // synchronize with steals
+                {
+                    // If the queue isn't empty, reset the state to clear out all items.
+                    if (_headIndex < _tailIndex)
+                    {
+                        _headIndex = _tailIndex = StartIndex;
+                        _addTakeCount = _stealCount = 0;
+                        Array.Clear(_array, 0, _array.Length);
+                    }
+                }
+            }
+
             /// <summary>Remove an item from the tail of the queue.</summary>
             /// <param name="result">The removed item</param>
             internal bool TryLocalPop(out T result)
@@ -898,7 +958,7 @@ namespace System.Collections.Concurrent
                             // Increment head to tentatively take an element: a full fence is used to ensure the read
                             // of _tailIndex doesn't move earlier, as otherwise we could potentially end up stealing
                             // the same element that's being popped locally.
-                            Interlocked.Exchange(ref _headIndex, head + 1);
+                            Interlocked.Exchange(ref _headIndex, unchecked(head + 1));
 
                             // If there's an element to steal, do it.
                             if (head < _tailIndex)

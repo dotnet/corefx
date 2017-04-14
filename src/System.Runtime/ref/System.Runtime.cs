@@ -83,10 +83,8 @@ namespace System
         public static string BaseDirectory { get { throw null; } }
         public static void SetSwitch(string switchName, bool isEnabled) { }
         public static bool TryGetSwitch(string switchName, out bool isEnabled) { throw null; }
-#if netcoreapp11
         public static string TargetFrameworkName { get { throw null; } }
         public static object GetData(string name) { throw null; }
-#endif
     }
     
     public partial class EntryPointNotFoundException : System.TypeLoadException
@@ -167,6 +165,22 @@ namespace System
         public void Handle(System.Func<System.Exception, bool> predicate) { }
         public override string ToString() { throw null; }
     }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct ArgIterator
+    {
+        public ArgIterator(System.RuntimeArgumentHandle arglist) { }
+        [System.CLSCompliantAttribute(false)]
+        public unsafe ArgIterator(System.RuntimeArgumentHandle arglist, void *ptr) { }
+        public void End() { }
+        public override bool Equals(Object o) { throw null; }
+        public override int GetHashCode() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public System.TypedReference GetNextArg() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
+        public unsafe System.RuntimeTypeHandle GetNextArgType() { throw null; }
+        public int GetRemainingCount() { throw null; }
+    }
     public partial class ArgumentException : System.SystemException, System.Runtime.Serialization.ISerializable
     {
         public ArgumentException() { }
@@ -245,6 +259,8 @@ namespace System
         public static System.Array CreateInstance(System.Type elementType, params long[] lengths) { throw null; }
         public static T[] Empty<T>() { throw null; }
         public static bool Exists<T>(T[] array, System.Predicate<T> match) { throw null; }
+        public static void Fill<T>(T[] array, T value) { throw null; }
+        public static void Fill<T>(T[] array, T value, int startIndex, int count) { throw null; }
         public static T Find<T>(T[] array, System.Predicate<T> match) { throw null; }
         public static T[] FindAll<T>(T[] array, System.Predicate<T> match) { throw null; }
         public static int FindIndex<T>(T[] array, int startIndex, int count, System.Predicate<T> match) { throw null; }
@@ -284,10 +300,8 @@ namespace System
         public static void Resize<T>(ref T[] array, int newSize) { }
         public static void Reverse(System.Array array) { }
         public static void Reverse(System.Array array, int index, int length) { }
-#if netcoreapp11
         public static void Reverse<T>(T[] array) { }
         public static void Reverse<T>(T[] array, int index, int length) { }
-#endif
         public void SetValue(object value, int index) { }
         public void SetValue(object value, int index1, int index2) { }
         public void SetValue(object value, int index1, int index2, int index3) { }
@@ -1100,10 +1114,8 @@ namespace System
         public static bool IsDefined(System.Type enumType, object value) { throw null; }
         public static object Parse(System.Type enumType, string value) { throw null; }
         public static object Parse(System.Type enumType, string value, bool ignoreCase) { throw null; }
-#if netcoreapp11
-        public static TEnum Parse<TEnum>(String value) where TEnum : struct { return default(TEnum); }
-        public static TEnum Parse<TEnum>(String value, bool ignoreCase) where TEnum : struct { return default(TEnum); }
-#endif
+        public static TEnum Parse<TEnum>(String value) where TEnum : struct { throw null; }
+        public static TEnum Parse<TEnum>(String value, bool ignoreCase) where TEnum : struct { throw null; }
         System.TypeCode System.IConvertible.GetTypeCode() { throw null; }
         bool System.IConvertible.ToBoolean(System.IFormatProvider provider) { throw null; }
         byte System.IConvertible.ToByte(System.IFormatProvider provider) { throw null; }
@@ -1139,10 +1151,8 @@ namespace System
         public string ToString(System.IFormatProvider provider) { throw null; }        
         [System.ObsoleteAttribute("The provider argument is not used. Please use ToString(String).")]
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
-#if netcoreapp11
-        public static bool TryParse(System.Type enumType, string value, out object result) { result = default(object); return default(bool); }
-        public static bool TryParse(System.Type enumType, string value, bool ignoreCase, out object result) { result = default(object); return default(bool); }
-#endif
+        public static bool TryParse(System.Type enumType, string value, out object result) { throw null; }
+        public static bool TryParse(System.Type enumType, string value, bool ignoreCase, out object result) { throw null; }
         public static bool TryParse<TEnum>(string value, out TEnum result) where TEnum : struct { throw null; }
         public static bool TryParse<TEnum>(string value, bool ignoreCase, out TEnum result) where TEnum : struct { throw null; }
     }
@@ -1252,9 +1262,7 @@ namespace System
         public static System.GCNotificationStatus WaitForFullGCComplete() { throw null; }
         public static System.GCNotificationStatus WaitForFullGCComplete(int millisecondsTimeout) { throw null; }
         public static void WaitForPendingFinalizers() { }
-#if netcoreapp11
-        public static long GetAllocatedBytesForCurrentThread() { return default(long); }
-#endif
+        public static long GetAllocatedBytesForCurrentThread() { throw null; }
     }
     public enum GCCollectionMode
     {
@@ -1487,10 +1495,7 @@ namespace System
         public static bool TryParse(string s, out long result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct IntPtr : System.Runtime.Serialization.ISerializable
-#if netcoreapp11
-, IEquatable<IntPtr>
-#endif
+    public partial struct IntPtr : System.Runtime.Serialization.ISerializable, IEquatable<IntPtr>
     {
         public static readonly System.IntPtr Zero;
         public IntPtr(int value) { throw null; }
@@ -1501,9 +1506,7 @@ namespace System
         public static int Size { get { throw null; } }
         public static System.IntPtr Add(System.IntPtr pointer, int offset) { throw null; }
         public override bool Equals(object obj) { throw null; }
-#if netcoreapp11
-        bool IEquatable<IntPtr>.Equals(IntPtr other) { return default(bool); }
-#endif
+        bool IEquatable<IntPtr>.Equals(IntPtr other) { throw null; }
         public override int GetHashCode() { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static System.IntPtr operator +(System.IntPtr pointer, int offset) { throw null; }
@@ -1572,9 +1575,7 @@ namespace System
     public partial class Lazy<T>
     {
         public Lazy() { }
-#if netcoreapp11
         public Lazy(T value) { }
-#endif
         public Lazy(bool isThreadSafe) { }
         public Lazy(System.Func<T> valueFactory) { }
         public Lazy(System.Func<T> valueFactory, bool isThreadSafe) { }
@@ -1817,6 +1818,10 @@ namespace System
         public System.Reflection.Assembly RequestingAssembly { get { throw null; } }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct RuntimeArgumentHandle
+    {
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct RuntimeFieldHandle : System.Runtime.Serialization.ISerializable
     {
         public override bool Equals(object obj) { throw null; }
@@ -1997,11 +2002,14 @@ namespace System
         public static string Concat(string str0, string str1) { throw null; }
         public static string Concat(string str0, string str1, string str2) { throw null; }
         public static string Concat(string str0, string str1, string str2, string str3) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static string Concat(object arg0, object arg1, object arg2, object arg3, __arglist) { throw null; } 
         public static string Concat(params string[] values) { throw null; }
         public static string Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public bool Contains(string value) { throw null; }
         public static System.String Copy(System.String str) { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
+        public bool EndsWith(char value) { throw null; }
         public bool EndsWith(string value) { throw null; }
         public bool EndsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public bool EndsWith(string value, System.StringComparison comparisonType) { throw null; }
@@ -2044,6 +2052,10 @@ namespace System
         public static string Join(string separator, params string[] value) { throw null; }
         public static string Join(string separator, string[] value, int startIndex, int count) { throw null; }
         public static string Join<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
+        public static string Join(char separator, params object[] values) { throw null; }
+        public static string Join(char separator, params string[] value) { throw null; }
+        public static string Join(char separator, string[] value, int startIndex, int count) { throw null; }
+        public static string Join<T>(char separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public int LastIndexOf(char value) { throw null; }
         public int LastIndexOf(char value, int startIndex) { throw null; }
         public int LastIndexOf(char value, int startIndex, int count) { throw null; }
@@ -2068,18 +2080,17 @@ namespace System
         public string Remove(int startIndex, int count) { throw null; }
         public string Replace(char oldChar, char newChar) { throw null; }
         public string Replace(string oldValue, string newValue) { throw null; }
-#if netcoreapp11
-        public string[] Split(char separator, System.StringSplitOptions options = System.StringSplitOptions.None) { return default(string[]); }
-        public string[] Split(char separator, int count, System.StringSplitOptions options = System.StringSplitOptions.None) { return default(string[]); }
-        public string[] Split(string separator, System.StringSplitOptions options = System.StringSplitOptions.None) { return default(string[]); }
-        public string[] Split(string separator, int count, System.StringSplitOptions options = System.StringSplitOptions.None) { return default(string[]); }
-#endif
+        public string[] Split(char separator, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
+        public string[] Split(char separator, int count, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
+        public string[] Split(string separator, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
+        public string[] Split(string separator, int count, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
         public string[] Split(params char[] separator) { throw null; }
         public string[] Split(char[] separator, int count) { throw null; }
         public string[] Split(char[] separator, int count, System.StringSplitOptions options) { throw null; }
         public string[] Split(char[] separator, System.StringSplitOptions options) { throw null; }
         public string[] Split(string[] separator, int count, System.StringSplitOptions options) { throw null; }
         public string[] Split(string[] separator, System.StringSplitOptions options) { throw null; }
+        public bool StartsWith(char value) { throw null; }
         public bool StartsWith(string value) { throw null; }
         public bool StartsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public bool StartsWith(string value, System.StringComparison comparisonType) { throw null; }
@@ -2115,8 +2126,13 @@ namespace System
         public System.String ToUpper(System.Globalization.CultureInfo culture) { throw null; }
         public string ToUpperInvariant() { throw null; }
         public string Trim() { throw null; }
+        public string Trim(char trimChar) { throw null; }
         public string Trim(params char[] trimChars) { throw null; }
+        public string TrimEnd() { throw null; }
+        public string TrimEnd(char trimChar) { throw null; }
         public string TrimEnd(params char[] trimChars) { throw null; }
+        public string TrimStart() { throw null; }
+        public string TrimStart(char trimChar) { throw null; }
         public string TrimStart(params char[] trimChars) { throw null; }
     }
     public enum StringComparison
@@ -2176,6 +2192,8 @@ namespace System
         public static int Compare(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public int CompareTo(object value) { throw null; }
         public int CompareTo(System.TimeSpan value) { throw null; }
+        public System.TimeSpan Divide(double divisor) { throw null; }
+        public double Divide(System.TimeSpan ts) { throw null; }
         public System.TimeSpan Duration() { throw null; }
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.TimeSpan obj) { throw null; }
@@ -2187,8 +2205,11 @@ namespace System
         public static System.TimeSpan FromSeconds(double value) { throw null; }
         public static System.TimeSpan FromTicks(long value) { throw null; }
         public override int GetHashCode() { throw null; }
+        public System.TimeSpan Multiply(double factor) { throw null; }
         public System.TimeSpan Negate() { throw null; }
         public static System.TimeSpan operator +(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static double operator /(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static System.TimeSpan operator /(System.TimeSpan timeSpan, double divisor) { throw null; }
         public static bool operator ==(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator >(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator >=(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
@@ -2196,6 +2217,8 @@ namespace System
         public static bool operator <(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static bool operator <=(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
         public static System.TimeSpan operator -(System.TimeSpan t1, System.TimeSpan t2) { throw null; }
+        public static System.TimeSpan operator *(System.TimeSpan timeSpan, double factor) { throw null; }
+        public static System.TimeSpan operator *(double factor, System.TimeSpan timeSpan) { throw null; }
         public static System.TimeSpan operator -(System.TimeSpan t) { throw null; }
         public static System.TimeSpan operator +(System.TimeSpan t) { throw null; }
         public static System.TimeSpan Parse(string s) { throw null; }
@@ -2330,9 +2353,12 @@ namespace System
         public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) { throw null; }
     }
     public partial class Tuple<T1> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1) { }
         public T1 Item1 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2342,10 +2368,13 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2) { }
         public T1 Item1 { get { throw null; } }
         public T2 Item2 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2355,11 +2384,14 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3) { }
         public T1 Item1 { get { throw null; } }
         public T2 Item2 { get { throw null; } }
         public T3 Item3 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2369,12 +2401,15 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3, T4> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4) { }
         public T1 Item1 { get { throw null; } }
         public T2 Item2 { get { throw null; } }
         public T3 Item3 { get { throw null; } }
         public T4 Item4 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2384,6 +2419,7 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3, T4, T5> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { }
         public T1 Item1 { get { throw null; } }
@@ -2391,6 +2427,8 @@ namespace System
         public T3 Item3 { get { throw null; } }
         public T4 Item4 { get { throw null; } }
         public T5 Item5 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2400,6 +2438,7 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3, T4, T5, T6> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { }
         public T1 Item1 { get { throw null; } }
@@ -2408,6 +2447,8 @@ namespace System
         public T4 Item4 { get { throw null; } }
         public T5 Item5 { get { throw null; } }
         public T6 Item6 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2417,6 +2458,7 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3, T4, T5, T6, T7> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { }
         public T1 Item1 { get { throw null; } }
@@ -2426,6 +2468,8 @@ namespace System
         public T5 Item5 { get { throw null; } }
         public T6 Item6 { get { throw null; } }
         public T7 Item7 { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2435,6 +2479,7 @@ namespace System
         public override string ToString() { throw null; }
     }
     public partial class Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable
+        , System.Runtime.CompilerServices.ITuple
     {
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) { }
         public T1 Item1 { get { throw null; } }
@@ -2445,6 +2490,8 @@ namespace System
         public T6 Item6 { get { throw null; } }
         public T7 Item7 { get { throw null; } }
         public TRest Rest { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
@@ -2452,6 +2499,72 @@ namespace System
         int System.Collections.IStructuralEquatable.GetHashCode(System.Collections.IEqualityComparer comparer) { throw null; }
         int System.IComparable.CompareTo(object obj) { throw null; }
         public override string ToString() { throw null; }
+    }
+    public static class TupleExtensions
+    {
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20, T21>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19, out T20 item20, out T21 item21) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19, out T20 item20) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7>(this Tuple<T1, T2, T3, T4, T5, T6, T7> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5, T6>(this Tuple<T1, T2, T3, T4, T5, T6> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4, T5>(this Tuple<T1, T2, T3, T4, T5> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5) { throw null; }
+        public static void Deconstruct<T1, T2, T3, T4>(this Tuple<T1, T2, T3, T4> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4) { throw null; }
+        public static void Deconstruct<T1, T2, T3>(this Tuple<T1, T2, T3> value, out T1 item1, out T2 item2, out T3 item3) { throw null; }
+        public static void Deconstruct<T1, T2>(this Tuple<T1, T2> value, out T1 item1, out T2 item2) { throw null; }
+        public static void Deconstruct<T1>(this Tuple<T1> value, out T1 item1) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20, T21>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19, T20, T21>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19, T20>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15>>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8>> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7> ToTuple<T1, T2, T3, T4, T5, T6, T7>(this ValueTuple<T1, T2, T3, T4, T5, T6, T7> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5, T6> ToTuple<T1, T2, T3, T4, T5, T6>(this ValueTuple<T1, T2, T3, T4, T5, T6> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4, T5> ToTuple<T1, T2, T3, T4, T5>(this ValueTuple<T1, T2, T3, T4, T5> value) { throw null; }
+        public static Tuple<T1, T2, T3, T4> ToTuple<T1, T2, T3, T4>(this ValueTuple<T1, T2, T3, T4> value) { throw null; }
+        public static Tuple<T1, T2, T3> ToTuple<T1, T2, T3>(this ValueTuple<T1, T2, T3> value) { throw null; }
+        public static Tuple<T1, T2> ToTuple<T1, T2>(this ValueTuple<T1, T2> value) { throw null; }
+        public static Tuple<T1> ToTuple<T1>(this ValueTuple<T1> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19, T20, T21>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20, T21>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19, T20>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19, T20>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18, T19>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18, T19>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17, T18>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17, T18>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16, T17>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16, T17>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15, T16>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15, T16>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14, ValueTuple<T15>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14, Tuple<T15>>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13, T14>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13, T14>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12, T13>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12, T13>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11, T12>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11, T12>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10, T11>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10, T11>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9, T10>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9, T10>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8, T9>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8, T9>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7> ToValueTuple<T1, T2, T3, T4, T5, T6, T7>(this Tuple<T1, T2, T3, T4, T5, T6, T7> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6> ToValueTuple<T1, T2, T3, T4, T5, T6>(this Tuple<T1, T2, T3, T4, T5, T6> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5> ToValueTuple<T1, T2, T3, T4, T5>(this Tuple<T1, T2, T3, T4, T5> value) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4> ToValueTuple<T1, T2, T3, T4>(this Tuple<T1, T2, T3, T4> value) { throw null; }
+        public static ValueTuple<T1, T2, T3> ToValueTuple<T1, T2, T3>(this Tuple<T1, T2, T3> value) { throw null; }
+        public static ValueTuple<T1, T2> ToValueTuple<T1, T2>(this Tuple<T1, T2> value) { throw null; }
+        public static ValueTuple<T1> ToValueTuple<T1>(this Tuple<T1> value) { throw null; }
     }
     public abstract partial class Type : System.Reflection.MemberInfo, System.Reflection.IReflect
     {
@@ -2516,6 +2629,7 @@ namespace System
         public virtual bool IsSecurityTransparent { get { throw null; } }
         public virtual bool IsSerializable { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
+        public virtual bool IsSZArray { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public bool IsVisible { get { throw null; } }
@@ -2661,6 +2775,20 @@ namespace System
         UInt16 = 8,
         UInt32 = 10,
         UInt64 = 12,
+    }
+    [System.CLSCompliantAttribute(false)]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct TypedReference
+    {
+        public override bool Equals(Object o) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static System.Type GetTargetType(TypedReference value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static System.TypedReference MakeTypedReference(object target, System.Reflection.FieldInfo[] flds) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public unsafe static void SetTypedReference(System.TypedReference target, object value) { }
+        public static System.RuntimeTypeHandle TargetTypeToken(System.TypedReference value) { throw null; }
+        public unsafe static object ToObject(System.TypedReference value) { throw null; }
     }
     public sealed partial class TypeInitializationException : System.SystemException
     {
@@ -2819,10 +2947,7 @@ namespace System
     }
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct UIntPtr : System.Runtime.Serialization.ISerializable
-#if netcoreapp11
-, IEquatable<UIntPtr>    
-#endif
+    public partial struct UIntPtr : System.Runtime.Serialization.ISerializable, IEquatable<UIntPtr>    
     {
         public static readonly System.UIntPtr Zero;
         public UIntPtr(uint value) { throw null; }
@@ -2833,9 +2958,7 @@ namespace System
         public static int Size { get { throw null; } }
         public static System.UIntPtr Add(System.UIntPtr pointer, int offset) { throw null; }
         public override bool Equals(object obj) { throw null; }
-#if netcoreapp11
-        bool IEquatable<UIntPtr>.Equals(UIntPtr other) { return default(bool); }
-#endif
+        bool IEquatable<UIntPtr>.Equals(UIntPtr other) { throw null; }
         public override int GetHashCode() { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static System.UIntPtr operator +(System.UIntPtr pointer, int offset) { throw null; }
@@ -3088,6 +3211,202 @@ namespace System
     {
         public NewsStyleUriParser() { }
     }
+    public struct ValueTuple
+        : IEquatable<ValueTuple>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple>, Runtime.CompilerServices.ITuple
+    {
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+        public static ValueTuple Create() { throw null; }
+        public static ValueTuple<T1> Create<T1>(T1 item1) { throw null; }
+        public static ValueTuple<T1, T2> Create<T1, T2>(T1 item1, T2 item2) { throw null; }
+        public static ValueTuple<T1, T2, T3> Create<T1, T2, T3>(T1 item1, T2 item2, T3 item3) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4> Create<T1, T2, T3, T4>(T1 item1, T2 item2, T3 item3, T4 item4) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { throw null; }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { throw null;  }
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8>> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) { throw null; }
+    }
+    public struct ValueTuple<T1>
+        : IEquatable<ValueTuple<T1>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public ValueTuple(T1 item1) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2>
+        : IEquatable<ValueTuple<T1, T2>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public ValueTuple(T1 item1, T2 item2) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3>
+        : IEquatable<ValueTuple<T1, T2, T3>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public ValueTuple(T1 item1, T2 item2, T3 item3) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3, T4>
+        : IEquatable<ValueTuple<T1, T2, T3, T4>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3, T4> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3, T4> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3, T4, T5>
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3, T4, T5> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3, T4, T5> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6>
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3, T4, T5, T6> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7>
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3, T4, T5, T6, T7> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6, T7> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
+    [Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Auto)]
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, Collections.IStructuralEquatable, Collections.IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, Runtime.CompilerServices.ITuple
+        where TRest : struct
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        public TRest Rest;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other) { throw null; }
+        bool Collections.IStructuralEquatable.Equals(object other, Collections.IEqualityComparer comparer) { throw null; }
+        int IComparable.CompareTo(object other) { throw null; }
+        public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other) { throw null; }
+        int Collections.IStructuralComparable.CompareTo(object other, Collections.IComparer comparer) { throw null; }
+        public override int GetHashCode() { throw null; }
+        int Collections.IStructuralEquatable.GetHashCode(Collections.IEqualityComparer comparer) { throw null; }
+        public override string ToString() { throw null; }
+        int Runtime.CompilerServices.ITuple.Length { get { throw null; } }
+        object Runtime.CompilerServices.ITuple.this[int index] { get { throw null; } }
+    }
     public abstract partial class ValueType
     {
         protected ValueType() { }
@@ -3278,6 +3597,11 @@ namespace System.Runtime.CompilerServices
     {
         void OnCompleted(System.Action continuation);
     }
+    public interface ITuple
+    {
+        int Length { get; }
+        object this[int index] { get; }
+    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct TaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
     {
@@ -3295,6 +3619,13 @@ namespace System.Runtime.CompilerServices
         public void OnCompleted(System.Action continuation) { }
         [System.Security.SecurityCriticalAttribute]
         public void UnsafeOnCompleted(System.Action continuation) { }
+    }
+    [System.CLSCompliant(false)]
+    [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Event)]
+    public sealed class TupleElementNamesAttribute : Attribute
+    {
+        public TupleElementNamesAttribute(string[] transformNames) { throw null; }
+        public System.Collections.Generic.IList<string> TransformNames { get { throw null; } }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential, Size = 1)]
     public partial struct YieldAwaitable
@@ -3317,6 +3648,8 @@ namespace System.Collections
     public partial struct DictionaryEntry
     {
         public DictionaryEntry(object key, object value) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public void Deconstruct(out object key, out object value) { throw null; }
         public object Key { get { throw null; } set { } }
         public object Value { get { throw null; } set { } }
     }
@@ -3471,10 +3804,16 @@ namespace System.Collections.Generic
         public KeyNotFoundException(string message, System.Exception innerException) { }
         protected KeyNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
+    public static class KeyValuePair
+    {
+        public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value) { throw null; }        
+    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct KeyValuePair<TKey, TValue>
     {
         public KeyValuePair(TKey key, TValue value) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public void Deconstruct(out TKey key, out TValue value) { throw null; }
         public TKey Key { get { throw null; } }
         public TValue Value { get { throw null; } }
         public override string ToString() { throw null; }
@@ -3564,7 +3903,6 @@ namespace System.ComponentModel
         public DefaultValueAttribute(object value) { }
         public DefaultValueAttribute(float value) { }
         public DefaultValueAttribute(string value) { }
-#if netcoreapp11
         [System.CLSCompliantAttribute(false)]
         public DefaultValueAttribute(sbyte value) { }
         [System.CLSCompliantAttribute(false)]
@@ -3573,7 +3911,6 @@ namespace System.ComponentModel
         public DefaultValueAttribute(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public DefaultValueAttribute(ulong value) { }
-#endif
         public DefaultValueAttribute(System.Type type, string value) { }
         public virtual object Value { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
@@ -4615,11 +4952,7 @@ namespace System.IO
         public virtual System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         public virtual System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         public void CopyTo(System.IO.Stream destination) { }
-#if netcoreapp11
         public virtual void CopyTo(System.IO.Stream destination, int bufferSize) { }
-#else
-        public void CopyTo(System.IO.Stream destination, int bufferSize) { }
-#endif
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination) { throw null; }
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { throw null; }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
@@ -5222,9 +5555,13 @@ namespace System.Reflection
         public virtual object GetRawConstantValue() { throw null; }
         public virtual Type[] GetRequiredCustomModifiers() { throw null; }
         public abstract object GetValue(object obj);
+        [System.CLSCompliantAttribute(false)]
+        public virtual object GetValueDirect(System.TypedReference obj) { throw null; }
         public override MemberTypes MemberType { get { throw null; } }
         public void SetValue(object obj, object value) { }
         public abstract void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Globalization.CultureInfo culture);
+        [System.CLSCompliantAttribute(false)]
+        public virtual void SetValueDirect(System.TypedReference obj, object value) { }
     }
     [System.FlagsAttribute]
     public enum GenericParameterAttributes
@@ -5794,6 +6131,7 @@ namespace System.Reflection
         protected override bool IsValueTypeImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsConstructedGenericType { get { throw null; } }
+        public override bool IsSZArray { get { throw null; } }
         public override System.Type GetElementType() { throw null; }
         protected override bool HasElementTypeImpl() { throw null; }
         public override System.Type UnderlyingSystemType { get { throw null; } }
@@ -5935,11 +6273,15 @@ namespace System.Runtime.CompilerServices
     {
         public CompilerGeneratedAttribute() { }
     }
-    public sealed partial class ConditionalWeakTable<TKey, TValue> where TKey : class where TValue : class
+    public sealed partial class ConditionalWeakTable<TKey, TValue> : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey,TValue>> where TKey : class where TValue : class
     {
         public ConditionalWeakTable() { }
         public void Add(TKey key, TValue value) { }
+        public void AddOrUpdate(TKey key, TValue value) { }
+        public void Clear() { }
         ~ConditionalWeakTable() { }
+        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>.GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public TValue GetOrCreateValue(TKey key) { throw null; }
         public TValue GetValue(TKey key, System.Runtime.CompilerServices.ConditionalWeakTable<TKey, TValue>.CreateValueCallback createValueCallback) { throw null; }
         public bool Remove(TKey key) { throw null; }
@@ -6077,11 +6419,10 @@ namespace System.Runtime.CompilerServices
         public static void PrepareMethod(System.RuntimeMethodHandle method, System.RuntimeTypeHandle[] instantiation) { }
         [System.Security.SecurityCriticalAttribute]
         public static void ProbeForSufficientStack() { }
-#if netcoreapp11
-        public static bool TryEnsureSufficientExecutionStack() { return default(bool); }
-        public static object GetUninitializedObject(Type type) { return default(object); }
-#endif
-   }
+        public static bool TryEnsureSufficientExecutionStack() { throw null; }
+        public static object GetUninitializedObject(Type type) { throw null; }
+        public static bool IsReferenceOrContainsReferences<T>() { throw null; }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false, AllowMultiple = false)]
     public partial class StateMachineAttribute : System.Attribute
     {
@@ -6172,6 +6513,7 @@ namespace System.Runtime.ExceptionServices
         public System.Exception SourceException { get { throw null; } }
         public static System.Runtime.ExceptionServices.ExceptionDispatchInfo Capture(System.Exception source) { throw null; }
         public void Throw() { }
+        public static void Throw(Exception source) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), AllowMultiple=false, Inherited=false)]
     public sealed partial class HandleProcessCorruptedStateExceptionsAttribute : System.Attribute
@@ -6811,6 +7153,7 @@ namespace System.Text
         public virtual int GetByteCount(char[] chars) { throw null; }
         public abstract int GetByteCount(char[] chars, int index, int count);
         public virtual int GetByteCount(string s) { throw null; }
+        public int GetByteCount(string s, int index, int count) { throw null; }
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]
         public unsafe virtual int GetBytes(char* chars, int charCount, byte* bytes, int byteCount) { throw null; }
@@ -6818,6 +7161,7 @@ namespace System.Text
         public virtual byte[] GetBytes(char[] chars, int index, int count) { throw null; }
         public abstract int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex);
         public virtual byte[] GetBytes(string s) { throw null; }
+        public byte[] GetBytes(string s, int index, int count) { throw null; }
         public virtual int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex) { throw null; }
         [System.CLSCompliantAttribute(false)]
         [System.Security.SecurityCriticalAttribute]

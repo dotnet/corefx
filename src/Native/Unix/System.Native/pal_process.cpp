@@ -285,7 +285,7 @@ static int32_t ConvertRLimitResourcesPalToPlatform(RLimitResources value)
             return RLIMIT_NOFILE;
     }
 
-    assert(false && "Unknown RLIMIT value");
+    assert_msg(false, "Unknown RLIMIT value", static_cast<int>(value));
     return -1;
 }
 
@@ -438,7 +438,7 @@ extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)
 
     if (confValue == -1)
     {
-        assert(false && "Unknown PathConfName");
+        assert_msg(false, "Unknown PathConfName", static_cast<int>(name));
         errno = EINVAL;
         return -1;
     }
@@ -459,7 +459,7 @@ extern "C" int64_t SystemNative_GetMaximumPath()
 
 extern "C" int32_t SystemNative_GetPriority(PriorityWhich which, int32_t who)
 {
-    // GetPriority uses errno 0 to show succes to make sure we don't have a stale value
+    // GetPriority uses errno 0 to show success to make sure we don't have a stale value
     errno = 0;
 #if PRIORITY_REQUIRES_INT_WHO
     return getpriority(which, who);

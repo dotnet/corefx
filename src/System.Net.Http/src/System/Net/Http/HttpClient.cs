@@ -131,9 +131,9 @@ namespace System.Net.Http
             GetStringAsync(CreateUri(requestUri));
 
         public Task<string> GetStringAsync(Uri requestUri) =>
-            GeStringAsyncCore(GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead));
+            GetStringAsyncCore(GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead));
 
-        private async Task<string> GeStringAsyncCore(Task<HttpResponseMessage> getTask)
+        private async Task<string> GetStringAsyncCore(Task<HttpResponseMessage> getTask)
         {
             // Wait for the response message.
             using (HttpResponseMessage responseMessage = await getTask.ConfigureAwait(false))
@@ -145,6 +145,9 @@ namespace System.Net.Http
                 HttpContent c = responseMessage.Content;
                 if (c != null)
                 {
+#if NET46
+                    return await c.ReadAsStringAsync().ConfigureAwait(false);
+#else
                     HttpContentHeaders headers = c.Headers;
 
                     // Since the underlying byte[] will never be exposed, we use an ArrayPool-backed
@@ -159,6 +162,7 @@ namespace System.Net.Http
                             return HttpContent.ReadBufferAsString(buffer.GetBuffer(), headers);
                         }
                     }
+#endif
                 }
 
                 // No content to return.
@@ -184,6 +188,9 @@ namespace System.Net.Http
                 HttpContent c = responseMessage.Content;
                 if (c != null)
                 {
+#if NET46
+                    return await c.ReadAsByteArrayAsync().ConfigureAwait(false);
+#else
                     HttpContentHeaders headers = c.Headers;
                     using (Stream responseStream = await c.ReadAsStreamAsync().ConfigureAwait(false))
                     {
@@ -220,6 +227,7 @@ namespace System.Net.Http
                             finally { buffer.Dispose(); }
                         }
                     }
+#endif
                 }
 
                 // No content to return.

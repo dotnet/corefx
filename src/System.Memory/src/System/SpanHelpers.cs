@@ -9,8 +9,78 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-    internal static class SpanHelpers
+    internal static partial class SpanHelpers
     {
+        /// <summary>
+        /// Implements the copy functionality used by Span and ReadOnlySpan.
+        ///
+        /// NOTE: Fast span implements TryCopyTo in corelib and therefore this implementation
+        ///       is only used by portable span. The code must live in code that only compiles
+        ///       for portable span which means either each individual span implementation
+        ///       of this shared code file. Other shared SpanHelper.X.cs files are compiled
+        ///       for both portable and fast span implementations.
+        /// </summary>
+        public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
+        {
+            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
+            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
+            IntPtr tailDiff;
+
+            if (srcGreaterThanDst)
+            {
+                // If the start of source is greater than the start of destination, then we need to calculate
+                // the different between the end of destination relative to the start of source.
+                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, dstLength), ref src);
+            }
+            else
+            {
+                // If the start of source is less than the start of destination, then we need to calculate
+                // the different between the end of source relative to the start of destunation.
+                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, srcLength), ref dst);
+            }
+
+            // If the source is entirely before or entirely after the destination and the type inside the span is not
+            // itself a reference type or containing reference types, then we can do a simple block copy of the data.
+            bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+            if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
+                ref byte srcBytes = ref Unsafe.As<T, byte>(ref src);
+                ulong byteCount = (ulong)srcLength * (ulong)Unsafe.SizeOf<T>();
+                ulong index = 0;
+
+                while (index < byteCount)
+                {
+                    uint blockSize = (byteCount - index) > uint.MaxValue ? uint.MaxValue : (uint)(byteCount - index);
+                    Unsafe.CopyBlock(
+                        ref Unsafe.Add(ref dstBytes, (IntPtr)index),
+                        ref Unsafe.Add(ref srcBytes, (IntPtr)index),
+                        blockSize);
+                    index += blockSize;
+                }
+            }
+            else
+            {
+                if (srcGreaterThanDst)
+                {
+                    // Source address greater than or equal to destination address. Can do normal copy.
+                    for (int i = 0; i < srcLength; i++)
+                    {
+                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                    }
+                }
+                else
+                {
+                    // Source address less than destination address. Must do backward copy.
+                    int i = srcLength;
+                    while (i-- != 0)
+                    {
+                        Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Computes "start + index * sizeof(T)", using the unsigned IntPtr-sized multiplication for 32 and 64 bits.
         ///
@@ -45,48 +115,18 @@ namespace System
         }
 
         /// <summary>
-        /// Determine if a type is eligible for storage in unmanaged memory. TODO: To be replaced by a ContainsReference() api.
+        /// Determine if a type is eligible for storage in unmanaged memory.
+        /// Portable equivalent of RuntimeHelpers.IsReferenceOrContainsReferences&lt;T&gt;()
         /// </summary>
-        public static bool IsReferenceFree<T>() => PerTypeValues<T>.IsReferenceFree;
+        public static bool IsReferenceOrContainsReferences<T>() => PerTypeValues<T>.IsReferenceOrContainsReferences;
 
-        private static bool IsReferenceFreeCore<T>()
-        {
-            // Under the JIT, these become constant-folded.
-            if (typeof(T) == typeof(byte))
-                return true;
-            if (typeof(T) == typeof(sbyte))
-                return true;
-            if (typeof(T) == typeof(bool))
-                return true;
-            if (typeof(T) == typeof(char))
-                return true;
-            if (typeof(T) == typeof(short))
-                return true;
-            if (typeof(T) == typeof(ushort))
-                return true;
-            if (typeof(T) == typeof(int))
-                return true;
-            if (typeof(T) == typeof(uint))
-                return true;
-            if (typeof(T) == typeof(long))
-                return true;
-            if (typeof(T) == typeof(ulong))
-                return true;
-            if (typeof(T) == typeof(IntPtr))
-                return true;
-            if (typeof(T) == typeof(UIntPtr))
-                return true;
-
-            return IsReferenceFreeCoreSlow(typeof(T));
-        }
-
-        private static bool IsReferenceFreeCoreSlow(Type type)
+        private static bool IsReferenceOrContainsReferencesCore(Type type)
         {
             if (type.GetTypeInfo().IsPrimitive) // This is hopefully the common case. All types that return true for this are value types w/out embedded references.
-                return true;
+                return false;
 
             if (!type.GetTypeInfo().IsValueType)
-                return false;
+                return true;
 
             // If type is a Nullable<> of something, unwrap it first.
             Type underlyingNullable = Nullable.GetUnderlyingType(type);
@@ -94,28 +134,25 @@ namespace System
                 type = underlyingNullable;
 
             if (type.GetTypeInfo().IsEnum)
-                return true;
+                return false;
 
             foreach (FieldInfo field in type.GetTypeInfo().DeclaredFields)
             {
                 if (field.IsStatic)
                     continue;
-                if (!IsReferenceFreeCoreSlow(field.FieldType))
-                    return false;
+                if (IsReferenceOrContainsReferencesCore(field.FieldType))
+                    return true;
             }
-            return true;
+            return false;
         }
 
         public static class PerTypeValues<T>
         {
             //
             // Latch to ensure that excruciatingly expensive validation check for constructing a Span around a raw pointer is done
-            // only once per type (unless of course, the validation fails.)
+            // only once per type.
             //
-            // false == not yet computed or found to be not reference free.
-            // true == confirmed reference free
-            //
-            public static readonly bool IsReferenceFree = IsReferenceFreeCore<T>();
+            public static readonly bool IsReferenceOrContainsReferences = IsReferenceOrContainsReferencesCore(typeof(T));
 
             public static readonly T[] EmptyArray = new T[0];
 

@@ -14,7 +14,6 @@ using System.Reflection;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     /// <summary>
     /// Contains conversion routines used by Xslt.  These conversions fall into several categories:
     ///   1. Internal type to internal type: These are conversions from one of the five Xslt types to another
@@ -402,7 +401,7 @@ namespace System.Xml.Xsl.Runtime
             if (clrType == XPathNavigatorArrayType) return XmlQueryTypeFactory.NodeSDod;
             if (clrType == XPathNavigatorType) return XmlQueryTypeFactory.NodeNotRtf;
             if (clrType == XPathNodeIteratorType) return XmlQueryTypeFactory.NodeSDod;
-            if (clrType.GetTypeInfo().IsEnum) return XmlQueryTypeFactory.DoubleX;
+            if (clrType.IsEnum) return XmlQueryTypeFactory.DoubleX;
             if (clrType == VoidType) return XmlQueryTypeFactory.Empty;
 
             return XmlQueryTypeFactory.ItemS;
