@@ -28,6 +28,9 @@
     </Project>
 
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
@@ -44,6 +47,14 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
 
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >
+    <!-- add specific native builds / pkgproj's here to include in servicing builds -->
+    <Project Include="Native\pkg\runtime.native.System.Security.Cryptography\runtime.native.System.Security.Cryptography.builds">
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
+      <BuildAllOSGroups>$(BuildAllOSGroups)</BuildAllOSGroups>
+    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
