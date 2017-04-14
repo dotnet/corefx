@@ -10,19 +10,13 @@ namespace System.Security.Cryptography.Xml
     // the class that provides node subset state and canonicalization function to XmlProcessingInstruction
     internal class CanonicalXmlProcessingInstruction : XmlProcessingInstruction, ICanonicalizableNode
     {
-        private bool _isInNodeSet;
-
         public CanonicalXmlProcessingInstruction(string target, string data, XmlDocument doc, bool defaultNodeSetInclusionState)
             : base(target, data, doc)
         {
-            _isInNodeSet = defaultNodeSetInclusionState;
+            IsInNodeSet = defaultNodeSetInclusionState;
         }
 
-        public bool IsInNodeSet
-        {
-            get { return _isInNodeSet; }
-            set { _isInNodeSet = value; }
-        }
+        public bool IsInNodeSet { get; set; }
 
         public void Write(StringBuilder strBuilder, DocPosition docPos, AncestralNamespaceContextManager anc)
         {

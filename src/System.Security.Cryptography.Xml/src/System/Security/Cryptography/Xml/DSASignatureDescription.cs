@@ -11,9 +11,9 @@ namespace System.Security.Cryptography.Xml
 
         public DSASignatureDescription()
         {
-            KeyAlgorithm = typeof(System.Security.Cryptography.DSA).AssemblyQualifiedName;
-            FormatterAlgorithm = typeof(System.Security.Cryptography.DSASignatureFormatter).AssemblyQualifiedName;
-            DeformatterAlgorithm = typeof(System.Security.Cryptography.DSASignatureDeformatter).AssemblyQualifiedName;
+            KeyAlgorithm = typeof(DSA).AssemblyQualifiedName;
+            FormatterAlgorithm = typeof(DSASignatureFormatter).AssemblyQualifiedName;
+            DeformatterAlgorithm = typeof(DSASignatureDeformatter).AssemblyQualifiedName;
             DigestAlgorithm = "SHA1";
         }
 
@@ -33,7 +33,7 @@ namespace System.Security.Cryptography.Xml
             return item;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 needed for compat.")]
+        [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 needed for compat.")]
         public sealed override HashAlgorithm CreateDigest()
         {
             return SHA1.Create();

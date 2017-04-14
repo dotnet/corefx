@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Xml
             return (NamespaceFrame)_ancestorStack[i];
         }
 
-        internal NamespaceFrame GetCurrentScope()
+        private NamespaceFrame GetCurrentScope()
         {
             return GetScopeAt(_ancestorStack.Count - 1);
         }
@@ -71,7 +71,7 @@ namespace System.Security.Cryptography.Xml
             nsLocallyDeclared.Values.CopyTo(attrs, 0);
             foreach (object attr in attrs)
             {
-                AddUnrendered((XmlAttribute)attr);
+                GetCurrentScope().AddUnrendered((XmlAttribute)attr);
             }
         }
 
@@ -79,18 +79,8 @@ namespace System.Security.Cryptography.Xml
         {
             foreach (object attr in nsRenderedList.GetKeyList())
             {
-                AddRendered((XmlAttribute)attr);
+                GetCurrentScope().AddRendered((XmlAttribute)attr);
             }
-        }
-
-        internal void AddRendered(XmlAttribute attr)
-        {
-            GetCurrentScope().AddRendered(attr);
-        }
-
-        internal void AddUnrendered(XmlAttribute attr)
-        {
-            GetCurrentScope().AddUnrendered(attr);
         }
     }
 }

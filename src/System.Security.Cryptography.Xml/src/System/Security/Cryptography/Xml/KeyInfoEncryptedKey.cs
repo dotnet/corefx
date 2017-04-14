@@ -8,39 +8,33 @@ namespace System.Security.Cryptography.Xml
 {
     public class KeyInfoEncryptedKey : KeyInfoClause
     {
-        private EncryptedKey _encryptedKey;
-
         public KeyInfoEncryptedKey() { }
 
         public KeyInfoEncryptedKey(EncryptedKey encryptedKey)
         {
-            _encryptedKey = encryptedKey;
+            EncryptedKey = encryptedKey;
         }
 
-        public EncryptedKey EncryptedKey
-        {
-            get { return _encryptedKey; }
-            set { _encryptedKey = value; }
-        }
+        public EncryptedKey EncryptedKey { get; set; }
 
         public override XmlElement GetXml()
         {
-            if (_encryptedKey == null)
+            if (EncryptedKey == null)
                 throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "KeyInfoEncryptedKey");
-            return _encryptedKey.GetXml();
+            return EncryptedKey.GetXml();
         }
 
         internal override XmlElement GetXml(XmlDocument xmlDocument)
         {
-            if (_encryptedKey == null)
+            if (EncryptedKey == null)
                 throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "KeyInfoEncryptedKey");
-            return _encryptedKey.GetXml(xmlDocument);
+            return EncryptedKey.GetXml(xmlDocument);
         }
 
         public override void LoadXml(XmlElement value)
         {
-            _encryptedKey = new EncryptedKey();
-            _encryptedKey.LoadXml(value);
+            EncryptedKey = new EncryptedKey();
+            EncryptedKey.LoadXml(value);
         }
     }
 }

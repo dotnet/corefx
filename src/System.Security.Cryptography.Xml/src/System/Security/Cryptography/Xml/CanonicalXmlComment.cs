@@ -10,26 +10,16 @@ namespace System.Security.Cryptography.Xml
     // the class that provides node subset state and canonicalization function to XmlComment
     internal class CanonicalXmlComment : XmlComment, ICanonicalizableNode
     {
-        private bool _isInNodeSet;
-        private bool _includeComments;
-
         public CanonicalXmlComment(string comment, XmlDocument doc, bool defaultNodeSetInclusionState, bool includeComments)
             : base(comment, doc)
         {
-            _isInNodeSet = defaultNodeSetInclusionState;
-            _includeComments = includeComments;
+            IsInNodeSet = defaultNodeSetInclusionState;
+            IncludeComments = includeComments;
         }
 
-        public bool IsInNodeSet
-        {
-            get { return _isInNodeSet; }
-            set { _isInNodeSet = value; }
-        }
+        public bool IsInNodeSet { get; set; }
 
-        public bool IncludeComments
-        {
-            get { return _includeComments; }
-        }
+        public bool IncludeComments { get; private set; }
 
         public void Write(StringBuilder strBuilder, DocPosition docPos, AncestralNamespaceContextManager anc)
         {

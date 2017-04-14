@@ -8,8 +8,6 @@ namespace System.Security.Cryptography.Xml
 {
     public sealed class EncryptionProperty
     {
-        private string _target;
-        private string _id;
         private XmlElement _elemProp;
         private XmlElement _cachedXml = null;
 
@@ -27,15 +25,9 @@ namespace System.Security.Cryptography.Xml
             _cachedXml = null;
         }
 
-        public string Id
-        {
-            get { return _id; }
-        }
+        public string Id { get; private set; }
 
-        public string Target
-        {
-            get { return _target; }
-        }
+        public string Target { get; private set; }
 
         public XmlElement PropertyElement
         {
@@ -83,8 +75,8 @@ namespace System.Security.Cryptography.Xml
 
             // cache the Xml
             _cachedXml = value;
-            _id = Utils.GetAttribute(value, "Id", EncryptedXml.XmlEncNamespaceUrl);
-            _target = Utils.GetAttribute(value, "Target", EncryptedXml.XmlEncNamespaceUrl);
+            Id = Utils.GetAttribute(value, "Id", EncryptedXml.XmlEncNamespaceUrl);
+            Target = Utils.GetAttribute(value, "Target", EncryptedXml.XmlEncNamespaceUrl);
             _elemProp = value;
         }
     }

@@ -13,20 +13,15 @@ namespace System.Security.Cryptography.Xml
     {
         private bool _defaultNodeSetInclusionState;
         private bool _includeComments;
-        private bool _isInNodeSet;
 
         public CanonicalXmlDocument(bool defaultNodeSetInclusionState, bool includeComments) : base()
         {
             PreserveWhitespace = true;
             _includeComments = includeComments;
-            _isInNodeSet = _defaultNodeSetInclusionState = defaultNodeSetInclusionState;
+            IsInNodeSet = _defaultNodeSetInclusionState = defaultNodeSetInclusionState;
         }
 
-        public bool IsInNodeSet
-        {
-            get { return _isInNodeSet; }
-            set { _isInNodeSet = value; }
-        }
+        public bool IsInNodeSet { get; set; }
 
         public void Write(StringBuilder strBuilder, DocPosition docPos, AncestralNamespaceContextManager anc)
         {
