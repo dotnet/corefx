@@ -65,7 +65,7 @@ if (APPLE)
     add_custom_command(TARGET System.Security.Cryptography.Native POST_BUILD
         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native>
+        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path -add_rpath /usr/local/lib -add_rpath /usr/local/share/dotnet/redist $<TARGET_FILE:System.Security.Cryptography.Native>
         )
 endif()
 
