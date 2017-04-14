@@ -2774,6 +2774,68 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.IntProperty, actual.IntProperty);
     }
 
+    [Fact]
+    public static void DCS_ResolveNameReturnsEmptyNamespace()
+    {
+        EmptyNsContainer instance = new EmptyNsContainer(new EmptyNSAddress());
+        var settings = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        EmptyNsContainer result = SerializeAndDeserialize(instance, null, settings, null, true);
+        bool flag = result.address != null;
+        if (flag)
+        {
+            throw new Exception("Address not null as per CSDMain:73231");
+        }
+        Assert.True(!flag);
+
+        result = (EmptyNsContainer)SingleRoundtripPerEpisode(typeof(EmptyNsContainer), instance, new EmptyNamespaceResolver());
+        if (flag)
+        {
+            throw new Exception("Address not null as per CSDMain:73231");
+        }
+        Assert.True(!flag);
+
+        instance = new EmptyNsContainer(new UknownEmptyNSAddress());
+        settings = new DataContractSerializerSettings() { DataContractResolver = new EmptyNamespaceResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        result = SerializeAndDeserialize(instance, null, settings, null, true);
+        if (flag)
+        {
+            throw new Exception("Address not null as per CSDMain:79892");
+        }
+        Assert.True(!flag);
+
+        result = (EmptyNsContainer)SingleRoundtripPerEpisode(typeof(EmptyNsContainer), instance, new EmptyNamespaceResolver());
+        if (flag)
+        {
+            throw new Exception("Address not null as per CSDMain:73231");
+        }
+        Assert.True(!flag);
+    }
+
+    [Fact]
+    public static void DCS_ResolveDatacontractBaseType()
+    {
+        Customer customerInstance = new PreferredCustomerProxy();
+        Type customerBaseType = customerInstance.GetType().BaseType;
+        var settings = new DataContractSerializerSettings() { DataContractResolver = new ProxyDataContractResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        object result = SerializeAndDeserialize(customerInstance, null, settings, null, true);
+        Assert.Equal(customerBaseType, result.GetType());
+        result = SingleRoundtripPerEpisode(typeof(Customer), customerInstance, new ProxyDataContractResolver());
+        Assert.Equal(customerBaseType, result.GetType());
+    }
+
+    public static object SingleRoundtripPerEpisode(Type t, Object instance, DataContractResolver dcr)
+    {
+        var settings = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        var dcs = new DataContractSerializer(t, settings);
+        MemoryStream ms = new MemoryStream();
+        XmlDictionaryWriter xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, instance, dcr);
+        xmlWriter.Flush();
+        ms.Position = 0;
+        XmlDictionaryReader xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        return dcs.ReadObject(xmlReader, false, dcr);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;
