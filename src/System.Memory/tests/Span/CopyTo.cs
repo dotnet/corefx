@@ -196,14 +196,18 @@ namespace System.SpanTests
         public static void CopyToLargeSizeTest(long bufferSize)
         {
             int GuidCount = (int)(bufferSize / Unsafe.SizeOf<Guid>());
+            bool allocatedFirst = false;
+            bool allocatedSecond = false;
+            IntPtr memBlockFirst = IntPtr.Zero;
+            IntPtr memBlockSecond = IntPtr.Zero;
 
             unsafe
             {
-                bool allocatedFirst = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out IntPtr memBlockFirst);
-                bool allocatedSecond = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out IntPtr memBlockSecond);
-
                 try
                 {
+                    allocatedFirst = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockFirst);
+                    allocatedSecond = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockSecond);
+
                     if (allocatedFirst && allocatedSecond)
                     {
                         ref Guid memoryFirst = ref Unsafe.AsRef<Guid>(memBlockFirst.ToPointer());
