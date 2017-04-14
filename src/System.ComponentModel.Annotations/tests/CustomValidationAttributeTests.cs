@@ -78,8 +78,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
         {
             CustomValidationAttribute attribute = GetAttribute(method);
 
-            // The full .NET framework has a bug where CustomValidationAttribute doesn't
-            // validate the context. See https://github.com/dotnet/corefx/pull/5203.
+            // The full .NET Framework has a bug where CustomValidationAttribute doesn't
+            // validate the context. See https://github.com/dotnet/corefx/issues/18360.
             if (PlatformDetection.IsFullFramework)
             {
                 Assert.False(attribute.RequiresValidationContext);
@@ -106,7 +106,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET core fixes a bug where CustomValidationAttribute doesn't validate the context. See https://github.com/dotnet/corefx/pull/5203")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core fixes a bug where CustomValidationAttribute doesn't validate the context. See https://github.com/dotnet/corefx/issues/18360")]
         [MemberData(nameof(BadlyFormed_TestData))]
         public static void RequiresValidationContext_BadlyFormed_NetCore_ThrowsInvalidOperationException(Type validatorType, string method)
         {
@@ -115,7 +115,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug where CustomValidationAttribute doesn't validate the context. See https://github.com/dotnet/corefx/pull/5203")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The full .NET Framework has a bug where CustomValidationAttribute doesn't validate the context. See https://github.com/dotnet/corefx/issues/18360")]
         [MemberData(nameof(BadlyFormed_TestData))]
         public static void RequiresValidationContext_BadlyFormed_NetFx_DoesNotThrow(Type validatorType, string method)
         {
