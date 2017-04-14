@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.IO;
-using System.Net;
-using System.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
@@ -176,7 +172,6 @@ namespace System.Security.Cryptography.Xml
             if (cipherData == null)
                 throw new ArgumentNullException(nameof(cipherData));
 
-            WebResponse response = null;
             Stream inputStream = null;
 
             if (cipherData.CipherValue != null)
@@ -216,8 +211,6 @@ namespace System.Security.Cryptography.Xml
                     Utils.Pump(decInputStream, ms);
                     cipherValue = ms.ToArray();
                     // Close the stream and return
-                    if (response != null)
-                        response.Close();
                     if (inputStream != null)
                         inputStream.Close();
                     decInputStream.Close();

@@ -44,7 +44,6 @@
     <Compile Include="System\Security\Cryptography\Xml\EncryptedXml.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptionMethod.cs" />
     <Compile Include="System\Security\Cryptography\Xml\EncryptionProperty.cs" />
-    <Compile Include="System\Security\Cryptography\Xml\EncryptionPropertyCollection.cs" />
     <Compile Include="System\Security\Cryptography\Xml\ExcAncestralNamespaceContextManager.cs" />
     <Compile Include="System\Security\Cryptography\Xml\ExcCanonicalXml.cs" />
     <Compile Include="System\Security\Cryptography\Xml\ICanonicalizableNode.cs" />
@@ -61,7 +60,6 @@
     <Compile Include="System\Security\Cryptography\Xml\NamespaceFrame.cs" />
     <Compile Include="System\Security\Cryptography\Xml\NamespaceSortOrder.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Reference.cs" />
-    <Compile Include="System\Security\Cryptography\Xml\ReferenceList.cs" />
     <Compile Include="System\Security\Cryptography\Xml\ReferenceTargetType.cs" />
     <Compile Include="System\Security\Cryptography\Xml\RSAKeyValue.cs" />
     <Compile Include="System\Security\Cryptography\Xml\Signature.cs" />
@@ -97,7 +95,6 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
-    <Reference Include="System.Net.Requests" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

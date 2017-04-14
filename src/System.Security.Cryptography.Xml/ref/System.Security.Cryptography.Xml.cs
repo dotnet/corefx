@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace System.Security.Cryptography.Xml
 {
     public sealed partial class CipherData
@@ -61,7 +63,7 @@ namespace System.Security.Cryptography.Xml
         public EncryptedKey() { }
         public string CarriedKeyName { get { throw null; } set { } }
         public string Recipient { get { throw null; } set { } }
-        public System.Security.Cryptography.Xml.ReferenceList ReferenceList { get { throw null; } }
+        public List<EncryptedReference> ReferenceList { get { throw null; } }
         public void AddReference(System.Security.Cryptography.Xml.DataReference dataReference) { }
         public void AddReference(System.Security.Cryptography.Xml.KeyReference keyReference) { }
         public override System.Xml.XmlElement GetXml() { throw null; }
@@ -86,7 +88,7 @@ namespace System.Security.Cryptography.Xml
         public virtual System.Security.Cryptography.Xml.CipherData CipherData { get { throw null; } set { } }
         public virtual string Encoding { get { throw null; } set { } }
         public virtual System.Security.Cryptography.Xml.EncryptionMethod EncryptionMethod { get { throw null; } set { } }
-        public virtual System.Security.Cryptography.Xml.EncryptionPropertyCollection EncryptionProperties { get { throw null; } }
+        public virtual List<EncryptionProperty> EncryptionProperties { get { throw null; } }
         public virtual string Id { get { throw null; } set { } }
         public System.Security.Cryptography.Xml.KeyInfo KeyInfo { get { throw null; } set { } }
         public virtual string MimeType { get { throw null; } set { } }
@@ -159,34 +161,6 @@ namespace System.Security.Cryptography.Xml
         public string Target { get { throw null; } }
         public System.Xml.XmlElement GetXml() { throw null; }
         public void LoadXml(System.Xml.XmlElement value) { }
-    }
-    public sealed partial class EncryptionPropertyCollection : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
-    {
-        public EncryptionPropertyCollection() { }
-        public int Count { get { throw null; } }
-        public bool IsFixedSize { get { throw null; } }
-        public bool IsReadOnly { get { throw null; } }
-        public bool IsSynchronized { get { throw null; } }
-        [System.Runtime.CompilerServices.IndexerName("ItemOf")]
-        public System.Security.Cryptography.Xml.EncryptionProperty this[int index] { get { throw null; } set { } }
-        public object SyncRoot { get { throw null; } }
-        object System.Collections.IList.this[int index] { get { throw null; } set { } }
-        public int Add(System.Security.Cryptography.Xml.EncryptionProperty value) { throw null; }
-        public void Clear() { }
-        public bool Contains(System.Security.Cryptography.Xml.EncryptionProperty value) { throw null; }
-        public void CopyTo(System.Array array, int index) { }
-        public void CopyTo(System.Security.Cryptography.Xml.EncryptionProperty[] array, int index) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
-        public int IndexOf(System.Security.Cryptography.Xml.EncryptionProperty value) { throw null; }
-        public void Insert(int index, System.Security.Cryptography.Xml.EncryptionProperty value) { }
-        public System.Security.Cryptography.Xml.EncryptionProperty Item(int index) { throw null; }
-        public void Remove(System.Security.Cryptography.Xml.EncryptionProperty value) { }
-        public void RemoveAt(int index) { }
-        int System.Collections.IList.Add(object value) { throw null; }
-        bool System.Collections.IList.Contains(object value) { throw null; }
-        int System.Collections.IList.IndexOf(object value) { throw null; }
-        void System.Collections.IList.Insert(int index, object value) { }
-        void System.Collections.IList.Remove(object value) { }
     }
     public partial interface IRelDecryptor
     {
@@ -282,28 +256,6 @@ namespace System.Security.Cryptography.Xml
         public void AddTransform(System.Security.Cryptography.Xml.Transform transform) { }
         public System.Xml.XmlElement GetXml() { throw null; }
         public void LoadXml(System.Xml.XmlElement value) { }
-    }
-    public sealed partial class ReferenceList : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
-    {
-        public ReferenceList() { }
-        public int Count { get { throw null; } }
-        public bool IsSynchronized { get { throw null; } }
-        [System.Runtime.CompilerServices.IndexerName("ItemOf")]
-        public System.Security.Cryptography.Xml.EncryptedReference this[int index] { get { throw null; } set { } }
-        public object SyncRoot { get { throw null; } }
-        bool System.Collections.IList.IsFixedSize { get { throw null; } }
-        bool System.Collections.IList.IsReadOnly { get { throw null; } }
-        object System.Collections.IList.this[int index] { get { throw null; } set { } }
-        public int Add(object value) { throw null; }
-        public void Clear() { }
-        public bool Contains(object value) { throw null; }
-        public void CopyTo(System.Array array, int index) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
-        public int IndexOf(object value) { throw null; }
-        public void Insert(int index, object value) { }
-        public System.Security.Cryptography.Xml.EncryptedReference Item(int index) { throw null; }
-        public void Remove(object value) { }
-        public void RemoveAt(int index) { }
     }
     public partial class RSAKeyValue : System.Security.Cryptography.Xml.KeyInfoClause
     {

@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -12,7 +11,7 @@ namespace System.Security.Cryptography.Xml
     {
         private string _recipient;
         private string _carriedKeyName;
-        private ReferenceList _referenceList;
+        private List<EncryptedReference> _referenceList;
 
         public EncryptedKey() { }
 
@@ -42,12 +41,12 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        public ReferenceList ReferenceList
+        public List<EncryptedReference> ReferenceList
         {
             get
             {
                 if (_referenceList == null)
-                    _referenceList = new ReferenceList();
+                    _referenceList = new List<EncryptedReference>();
                 return _referenceList;
             }
         }
@@ -199,7 +198,7 @@ namespace System.Security.Cryptography.Xml
                 XmlElement encryptionPropertiesElement = document.CreateElement("EncryptionProperties", EncryptedXml.XmlEncNamespaceUrl);
                 for (int index = 0; index < EncryptionProperties.Count; index++)
                 {
-                    EncryptionProperty ep = EncryptionProperties.Item(index);
+                    EncryptionProperty ep = EncryptionProperties[index];
                     encryptionPropertiesElement.AppendChild(ep.GetXml(document));
                 }
                 encryptedKeyElement.AppendChild(encryptionPropertiesElement);

@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Xml;
 using System.Globalization;
 using System.Runtime.Versioning;
@@ -309,7 +305,6 @@ namespace System.Security.Cryptography.Xml
             // Let's go get the target.
             string baseUri = (document == null ? System.Environment.CurrentDirectory + "\\" : document.BaseURI);
             Stream hashInputStream = null;
-            WebResponse response = null;
             Stream inputStream = null;
             XmlResolver resolver = null;
             byte[] hashval = null;
@@ -431,8 +426,6 @@ namespace System.Security.Cryptography.Xml
             {
                 if (hashInputStream != null)
                     hashInputStream.Close();
-                if (response != null)
-                    response.Close();
                 if (inputStream != null)
                     inputStream.Close();
             }

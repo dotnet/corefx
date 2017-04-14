@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Resources;
-using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -16,7 +15,6 @@ namespace System
 
         // This method is used to decide if we need to append the exception message parameters to the message when calling SR.Format.
         // by default it returns false.
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool UsingResourceKeys()
         {
             return false;
