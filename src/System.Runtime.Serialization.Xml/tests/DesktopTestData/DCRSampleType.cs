@@ -235,7 +235,5 @@ namespace DesktopTestData
 
         [DataMember]
         public List<DateTimeOffset> lDTO = new List<DateTimeOffset>();
-
     }
-
 }
