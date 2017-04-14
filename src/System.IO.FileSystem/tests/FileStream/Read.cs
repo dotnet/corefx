@@ -32,7 +32,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, 1));
 
                 // array is checked first
                 Assert.Throws<ArgumentNullException>("array", () => fs.Read(null, -1, 1));
@@ -44,10 +44,10 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
 
                 // offset is checked before count
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
 
                 // array is checked first
                 Assert.Throws<ArgumentNullException>("array", () => fs.Read(null, -1, -1));
@@ -91,10 +91,10 @@ namespace System.IO.Tests
                 Assert.Throws<ArgumentException>(null, () => fs.Read(new byte[2], 1, 2));
 
                 // count is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
 
                 // offset is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
 
                 // array is checked first
                 Assert.Throws<ArgumentNullException>("array", () => fs.Read(null, -1, -1));
@@ -116,10 +116,10 @@ namespace System.IO.Tests
                 Assert.Throws<ArgumentException>(null, () => fs.Read(new byte[2], 1, 2));
 
                 // count is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => fs.Read(new byte[1], 0, -1));
 
                 // offset is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => fs.Read(new byte[1], -1, -1));
 
                 // array is checked first
                 Assert.Throws<ArgumentNullException>("array", () => fs.Read(null, -1, -1));

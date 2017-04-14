@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -736,8 +736,8 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new Regex("pattern").Match("input", 6, 0));
 
             // Length is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, 6));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new Regex("pattern").Match("input", 0, 6));
         }
 
         [Theory]

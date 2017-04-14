@@ -20,8 +20,8 @@ namespace System.Text.Tests
         public void GetEncoding_Int_Invalid()
         {
             // Codepage is out of range
-            Assert.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(65536));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(65536));
 
             // Codepage doesn't exist
             Assert.Throws<ArgumentException>("codepage", () => Encoding.GetEncoding(42));

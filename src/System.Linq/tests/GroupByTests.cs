@@ -147,8 +147,8 @@ namespace System.Linq.Tests
 
             Assert.True(e.MoveNext());
             IList<int> odds = (IList<int>)e.Current;
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => odds[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => odds[23]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => odds[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => odds[23]);
         }
 
         [Fact]

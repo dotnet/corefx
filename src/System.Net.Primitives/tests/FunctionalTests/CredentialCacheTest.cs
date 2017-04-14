@@ -169,7 +169,7 @@ namespace System.Net.Primitives.Functional.Tests
             ArgumentException ae = exception as ArgumentException;
             Assert.True(ae.ParamName == "host" || ae.ParamName == null);
 
-            Assert.Throws<ArgumentOutOfRangeException>("port", () => cc.Add("host", -1, "authenticationType", new NetworkCredential())); //Port < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => cc.Add("host", -1, "authenticationType", new NetworkCredential())); //Port < 0
         }
 
         [Fact]
@@ -257,7 +257,7 @@ namespace System.Net.Primitives.Functional.Tests
             ArgumentException ae = exception as ArgumentException;
             Assert.True(ae.ParamName == "host" || ae.ParamName == null);
 
-            Assert.Throws<ArgumentOutOfRangeException>("port", () => cc.GetCredential("host", -1, "authenticationType")); //Port < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => cc.GetCredential("host", -1, "authenticationType")); //Port < 0
         }
 
         public static IEnumerable<object[]> GetEnumeratorWithCountTestData

@@ -109,8 +109,8 @@ namespace System.Text.Tests
         {
             EncoderFallbackBuffer buffer = new EncoderReplacementFallback().CreateFallbackBuffer();
 
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
         }
 
         [Fact]
@@ -119,8 +119,8 @@ namespace System.Text.Tests
         {
             EncoderFallbackBuffer buffer = new EncoderReplacementFallback().CreateFallbackBuffer();
 
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
-            Assert.Throws<ArgumentOutOfRangeException>("CharUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CharUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
         }
     }
 }

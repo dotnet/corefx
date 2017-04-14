@@ -70,8 +70,8 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new BitArray(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new BitArray(-1, false));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new BitArray(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new BitArray(-1, false));
         }
 
         public static IEnumerable<object[]> Ctor_BoolArray_TestData()

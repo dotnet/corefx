@@ -166,7 +166,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.Throws<InvalidCastException>(() => keysCollection.CopyTo(new Foo[count], 0));
             }
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => keysCollection.CopyTo(new string[count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => keysCollection.CopyTo(new string[count], -1));
             Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], 1));
             Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], count + 1));
         }

@@ -268,8 +268,8 @@ namespace System.Linq.Expressions.Tests
         public void InvalidExpressionIndex(object value, int blockSize)
         {
             BlockExpression block = Expression.Block(PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
         }
 
         [Fact]
@@ -380,8 +380,8 @@ namespace System.Linq.Expressions.Tests
             Assert.All(copyToTest, Assert.Null);
             children.CopyTo(copyToTest, 1);
             Assert.Equal(copyToTest, exps.Prepend(null));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => children[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => children[parCount]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => children[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => children[parCount]);
             Assert.Equal(-1, children.IndexOf(Expression.Parameter(typeof(int))));
             Assert.False(children.Contains(Expression.Parameter(typeof(int))));
         }

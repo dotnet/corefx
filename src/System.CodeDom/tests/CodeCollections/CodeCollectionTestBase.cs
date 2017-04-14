@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -134,7 +135,7 @@ namespace System.CodeDom.Tests
         public void Insert_InvalidIndex_ThrowsArgumentOutOfRangeException(int index)
         {
             var collection = Ctor();
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Insert(collection, index, new TItem()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Insert(collection, index, new TItem()));
         }
 
         [Fact]
@@ -180,8 +181,8 @@ namespace System.CodeDom.Tests
         public void Item_InvalidIndex_ThrowsArgumentOutOfRangeException(int index)
         {
             var collection = Ctor();
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => GetItem(collection, index));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => SetItem(collection, index, new TItem()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => GetItem(collection, index));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => SetItem(collection, index, new TItem()));
         }
 
         [Fact]

@@ -126,10 +126,10 @@ namespace System.Text.RegularExpressions.Tests
         {
             ICollection<Group> collection = CreateCollection();
             Assert.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], -1));
             Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 0));
             Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => collection.CopyTo(new Group[1], 2));
         }
 
         [Fact]

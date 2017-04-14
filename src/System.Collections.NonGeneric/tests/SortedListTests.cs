@@ -44,7 +44,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new SortedList(-1)); // InitialCapacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new SortedList(-1)); // InitialCapacity < 0
         }
 
         [Theory]
@@ -66,7 +66,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IComparer_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => new SortedList(new CustomComparer(), -1)); // InitialCapacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => new SortedList(new CustomComparer(), -1)); // InitialCapacity < 0
         }
 
         [Fact]
@@ -480,7 +480,7 @@ namespace System.Collections.Tests
                 Assert.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
-                Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
                 Assert.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
             });
         }
@@ -509,8 +509,8 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(sortList2.Count)); // Index >= list.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(sortList2.Count)); // Index >= list.Count
             });
         }
 
@@ -969,8 +969,8 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(sortList2.Count)); // Index >= count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(sortList2.Count)); // Index >= count
             });
         }
 
@@ -1284,7 +1284,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = sortList2.Count - 1); // Capacity < count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = sortList2.Count - 1); // Capacity < count
             });
         }
 
@@ -1294,7 +1294,7 @@ namespace System.Collections.Tests
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = -1); // Capacity < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = -1); // Capacity < 0
                 Assert.Throws<OutOfMemoryException>(() => sortList2.Capacity = int.MaxValue); // Capacity is too large
             });
         }
@@ -1431,8 +1431,8 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(sortList2.Count)); // Index >= count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(sortList2.Count)); // Index >= count
             });
         }
 
@@ -1485,8 +1485,8 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(-1, 101)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(sortList2.Count, 101)); // Index >= list.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(-1, 101)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(sortList2.Count, 101)); // Index >= list.Count
             });
         }
         

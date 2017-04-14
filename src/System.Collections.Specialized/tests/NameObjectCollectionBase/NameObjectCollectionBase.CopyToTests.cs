@@ -59,7 +59,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.Throws<InvalidCastException>(() => collection.CopyTo(new Foo[count], 0));
             }
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collection.CopyTo(new string[count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.CopyTo(new string[count], -1));
             Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], 1));
             Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new string[count], count + 1));
         }

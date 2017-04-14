@@ -630,8 +630,8 @@ namespace System.Linq.Expressions.Tests
         {
             var args = call.Arguments;
             Assert.Equal(args.Count, call.ArgumentCount);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => call.GetArgument(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => call.GetArgument(args.Count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => call.GetArgument(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => call.GetArgument(args.Count));
             for (int i = 0; i != args.Count; ++i)
             {
                 Assert.Same(args[i], call.GetArgument(i));

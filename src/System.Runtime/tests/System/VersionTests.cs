@@ -36,8 +36,8 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0)); // Major < 0
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1)); // Minor < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0)); // Major < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1)); // Minor < 0
         }
 
         [Theory]
@@ -52,9 +52,9 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0, 0)); // Major < 0
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1, 0)); // Minor < 0
-            Assert.Throws<ArgumentOutOfRangeException>("build", () => new Version(0, 0, -1)); // Build < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0, 0)); // Major < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1, 0)); // Minor < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("build", () => new Version(0, 0, -1)); // Build < 0
         }
 
         [Theory]
@@ -76,10 +76,10 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Int_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0, 0, 0)); // Major < 0
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1, 0, 0)); // Minor < 0
-            Assert.Throws<ArgumentOutOfRangeException>("build", () => new Version(0, 0, -1, 0)); // Build < 0
-            Assert.Throws<ArgumentOutOfRangeException>("revision", () => new Version(0, 0, 0, -1)); // Revision < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("major", () => new Version(-1, 0, 0, 0)); // Major < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("minor", () => new Version(0, -1, 0, 0)); // Minor < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("build", () => new Version(0, 0, -1, 0)); // Build < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("revision", () => new Version(0, 0, 0, -1)); // Revision < 0
         }
 
         public static IEnumerable<object[]> CompareTo_TestData()

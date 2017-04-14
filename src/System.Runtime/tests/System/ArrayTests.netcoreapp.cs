@@ -119,13 +119,13 @@ namespace System.Tests
         [Fact]
         public static void Reverse_Generic_NegativeIndex_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
         }
 
         [Fact]
         public static void Reverse_Generic_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
         }
 
         [Theory]

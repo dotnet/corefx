@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -72,8 +73,8 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray(new JsonPrimitive(true));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array[1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array[1]);
         }
 
         [Fact]
@@ -90,8 +91,8 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray(new JsonPrimitive(true));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array[-1] = false);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array[1] = false);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array[-1] = false);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array[1] = false);
         }
 
         [Fact]
@@ -178,8 +179,8 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray(new JsonPrimitive(true));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(-1, new JsonPrimitive(false)));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(2, new JsonPrimitive(false)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(-1, new JsonPrimitive(false)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(2, new JsonPrimitive(false)));
         }
 
         [Fact]
@@ -249,8 +250,8 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray(new JsonPrimitive(true));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(1));
         }
 
         [Fact]

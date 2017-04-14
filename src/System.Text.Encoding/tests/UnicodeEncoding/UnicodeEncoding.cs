@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -60,9 +60,9 @@ namespace System.Text.Encodings.Tests
                 Assert.Throws<ArgumentNullException>("chars", () => enc.GetByteCount(null, 1));
                 Assert.Throws<ArgumentNullException>("bytes", () => enc.GetBytes(pChars, 1, null, 1));
 
-                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetBytes(pChars, -1, pBytes, 1));
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => enc.GetByteCount(pChars, -1));
-                Assert.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetBytes(pChars, 1, pBytes, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetBytes(pChars, -1, pBytes, 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => enc.GetByteCount(pChars, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetBytes(pChars, 1, pBytes, -1));
 
                 Assert.Throws<ArgumentException>("bytes", () => enc.GetBytes(pChars, 4, pBytes, 1));
                 
@@ -92,9 +92,9 @@ namespace System.Text.Encodings.Tests
                 Assert.Throws<ArgumentNullException>("bytes", () => enc.GetCharCount(null, bytes.Length));
                 Assert.Throws<ArgumentNullException>("chars", () => enc.GetChars(pBytes, bytes.Length, null, 20));
 
-                Assert.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetChars(pBytes, -1, pChars, 20));
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => enc.GetCharCount(pBytes, -1));
-                Assert.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetChars(pBytes, bytes.Length, pChars, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetChars(pBytes, -1, pChars, 20));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => enc.GetCharCount(pBytes, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetChars(pBytes, bytes.Length, pChars, -1));
 
                 Assert.Throws<ArgumentException>("chars", () => enc.GetChars(pBytes, bytes.Length, pChars, 1));
 

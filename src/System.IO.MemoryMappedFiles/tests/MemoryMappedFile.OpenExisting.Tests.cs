@@ -56,7 +56,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_Inheritability(HandleInheritability inheritability)
         {
             // Out of range values
-            Assert.Throws<ArgumentOutOfRangeException>("inheritability", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), MemoryMappedFileRights.Read, inheritability));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritability", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), MemoryMappedFileRights.Read, inheritability));
         }
 
         /// <summary>
@@ -66,8 +66,8 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_Rights()
         {
             // Out of range values
-            Assert.Throws<ArgumentOutOfRangeException>("desiredAccessRights", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), (MemoryMappedFileRights)0x800000));
-            Assert.Throws<ArgumentOutOfRangeException>("desiredAccessRights", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), (MemoryMappedFileRights)0x800000, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("desiredAccessRights", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), (MemoryMappedFileRights)0x800000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("desiredAccessRights", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), (MemoryMappedFileRights)0x800000, HandleInheritability.None));
         }
 
         /// <summary>

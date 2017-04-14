@@ -285,8 +285,8 @@ namespace System.Linq.Tests
             Assert.Equal(3, remaining.ElementAt(0));
             Assert.Equal(4, remaining.ElementAt(1));
             Assert.Equal(6, remaining.ElementAt(3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
         }
 
         [Fact]
@@ -297,8 +297,8 @@ namespace System.Linq.Tests
             Assert.Equal(3, remaining.ElementAt(0));
             Assert.Equal(4, remaining.ElementAt(1));
             Assert.Equal(6, remaining.ElementAt(3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => remaining.ElementAt(4));
         }
 
         [Fact]

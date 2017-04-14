@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -91,17 +91,17 @@ namespace System.Tests
         {
             var valueArray = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' };
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () =>
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () =>
             {
                 fixed (char* value = valueArray) { new string(value, -1, 8); } // Start index < 0
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () =>
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () =>
             {
                 fixed (char* value = valueArray) { new string(value, 0, -1); } // Length < 0
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>("ptr", () => new string((char*)null, 0, 1)); // null ptr with non-zero length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("ptr", () => new string((char*)null, 0, 1)); // null ptr with non-zero length
         }
 
         [Theory]
@@ -125,7 +125,7 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Char_Int_Negative_Count_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => new string('a', -1)); // Count < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => new string('a', -1)); // Count < 0
         }
 
         [Theory]
@@ -159,10 +159,10 @@ namespace System.Tests
 
             Assert.Throws<ArgumentNullException>("value", () => new string((char[])null, 0, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 0, 9)); // Length > array length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new string(value, 5, -1)); // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, -1, 1)); // Start Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 6, 5)); // Walks off array
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 0, 9)); // Length > array length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new string(value, 5, -1)); // Length < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, -1, 1)); // Start Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 6, 5)); // Walks off array
         }
 
         [Theory]
@@ -436,17 +436,17 @@ namespace System.Tests
 
             Assert.Throws<ArgumentNullException>("destination", () => s.CopyTo(0, null, 0, 0)); // Dst is null
 
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(-1, dst, 0, 0)); // Source index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, -1, 0)); // Destination index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(-1, dst, 0, 0)); // Source index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, -1, 0)); // Destination index < 0
 
-            Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, dst.Length, 1)); // Destination index > dst.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, dst.Length, 1)); // Destination index > dst.Length
 
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.CopyTo(0, dst, 0, -1)); // Count < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.CopyTo(0, dst, 0, -1)); // Count < 0
 
             // Source index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length, dst, 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length - 1, dst, 0, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(0, dst, 0, 6));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length, dst, 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(s.Length - 1, dst, 0, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(0, dst, 0, 6));
         }
 
         [Theory]
@@ -668,24 +668,24 @@ namespace System.Tests
             Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.OrdinalIgnoreCase + 1));
 
             // IndexA < 0
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a", -1, "bb", 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", -1, "bb", 0, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a", -1, "bb", 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", -1, "bb", 0, 1, StringComparison.CurrentCulture));
 
             // IndexA > stringA.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 2, "bb", 0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", 2, "bb", 0, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 2, "bb", 0, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("a", 2, "bb", 0, 1, StringComparison.CurrentCulture));
 
             // IndexB < 0
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare("a", 0, "bb", -1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", -1, 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare("a", 0, "bb", -1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", -1, 1, StringComparison.CurrentCulture));
 
             // IndexB > stringB.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare("a", 0, "bb", 3, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", 3, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare("a", 0, "bb", 3, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("a", 0, "bb", 3, 0, StringComparison.CurrentCulture));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 0, "bb", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 0, "bb", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
 
             // There is a subtle behavior difference between the string.Compare that accepts a StringComparison parameter,
             // and the one that does not. The former includes short-circuiting logic for nulls BEFORE the length/
@@ -700,36 +700,36 @@ namespace System.Tests
             // Compare accepting StringComparison
             Assert.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
             // Tests to ensure null is short-circuited before validating the arguments are in the Compare() theory
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("foo", 0, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("foo", 0, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexB
             // Then the optimization where we short-circuit if strA == strB && indexA == indexB, or length == 0, is tested in the Compare() theory.
 
             // Compare not accepting StringComparison
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare(null, -1, null, -1, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare(null, 0, "bar", 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare(null, -1, null, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare(null, 0, null, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("string1", () => string.Compare(null, 1, null, 1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("string2", () => string.Compare("bar", 1, null, 1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare(null, -1, null, -1, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare(null, 0, "bar", 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare(null, -1, null, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare(null, 0, null, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("string1", () => string.Compare(null, 1, null, 1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("string2", () => string.Compare("bar", 1, null, 1, 1));
         }
 
         [Fact]
         public static void CompareOrdinal_Invalid()
         {
             // IndexA < 0 or IndexA > strA.Length
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", -1, "bb", 0, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", 6, "bb", 0, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", -1, "bb", 0, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("a", 6, "bb", 0, 0));
 
             // IndexB < 0 or IndexB > strB.Length
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", -1, 0)); // IndexB < 0
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", 3, 0)); // IndexB > strB.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", -1, 0)); // IndexB < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", 3, 0)); // IndexB > strB.Length
 
             // We must validate arguments before any short-circuiting is done (besides for nulls)
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", -1, "foo", -1, 0)); // then indexA
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
-            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
-            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", -1, "foo", -1, 0)); // then indexA
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
         }
 
         [Fact]
@@ -1450,30 +1450,30 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1, 0, StringComparison.CurrentCulture));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf('o', 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", 4, 0, StringComparison.CurrentCulture));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, -1, StringComparison.CurrentCulture));
 
             // Count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf('o', 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4, StringComparison.CurrentCulture));
 
             // Invalid comparison type
             Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.CurrentCulture - 1));
@@ -1529,7 +1529,7 @@ namespace System.Tests
         [InlineData(2, 2)]
         public static void IndexOfAny_InvalidCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOfAny(new char[] { 'o' }, startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOfAny(new char[] { 'o' }, startIndex, count));
         }
 
         [Theory]
@@ -1551,8 +1551,8 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentNullException>("value", () => "Hello".Insert(0, null)); // Value is null
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(-1, "!")); // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(6, "!")); // Start index > string.length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(-1, "!")); // Start index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(6, "!")); // Start index > string.length
         }
 
         [Theory]
@@ -1637,7 +1637,7 @@ namespace System.Tests
         [Fact]
         public static void Join_String_NegativeCount_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1));
         }
 
         [Theory]
@@ -1649,7 +1649,7 @@ namespace System.Tests
         [InlineData(-1, 0)]
         public static void Join_String_InvalidStartIndexCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, startIndex, count));
         }
 
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
@@ -1791,30 +1791,30 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", -1, 0, StringComparison.CurrentCulture));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf("a", s.Length + 1, 0, StringComparison.CurrentCulture));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, -1, StringComparison.CurrentCulture));
 
             // Start index - count + 1 < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, s.Length + 2));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf('a', 0, s.Length + 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2, StringComparison.CurrentCulture));
 
             // Invalid comparison type
             Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.CurrentCulture - 1));
@@ -1907,19 +1907,19 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>(() => "foo".LastIndexOfAny(null, 0, 0));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, -1, 0));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 4, 0));
 
             // Count < 0 or count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".LastIndexOfAny(new char[] { 'o' }, 0, 4));
 
             // Start index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 3, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".LastIndexOfAny(new char[] { 'o' }, 3, 1));
         }
 
         [Theory]
@@ -1939,7 +1939,7 @@ namespace System.Tests
         [Fact]
         public static void PadLeft_NegativeTotalWidth_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadLeft(-1, '.'));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadLeft(-1, '.'));
         }
 
         [Theory]
@@ -1959,7 +1959,7 @@ namespace System.Tests
         [Fact]
         public static void PadRight_NegativeTotalWidth_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadRight(-1, '.'));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("totalWidth", () => "".PadRight(-1, '.'));
         }
 
         [Theory]
@@ -1984,19 +1984,19 @@ namespace System.Tests
             string s = "Hello";
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(-1, 0));
 
             // Start index >= string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(s.Length));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.Remove(s.Length));
 
             // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, -1));
 
             // Start index + count > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, s.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length + 1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(0, s.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.Remove(s.Length, 1));
         }
 
         [Theory]
@@ -2176,20 +2176,20 @@ namespace System.Tests
         public static void Substring_Invalid()
         {
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(-1, 0));
 
             // Start index > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".Substring(4, 0));
 
             // Length < 0 or length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(0, 4));
 
             // Start index + length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(3, 2));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(2, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(3, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".Substring(2, 2));
         }
 
         [Theory]
@@ -2210,16 +2210,16 @@ namespace System.Tests
         public static void ToCharArray_Invalid()
         {
             // StartIndex < 0 or startIndex > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(-1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(4, 0)); // Start index > string.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(4, 0)); // Start index > string.Length
 
             // Length < 0 or length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => "foo".ToCharArray(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(0, 4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => "foo".ToCharArray(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(0, 4));
 
             // StartIndex + length > string.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(3, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(2, 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(3, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".ToCharArray(2, 2));
         }
 
         [Theory]
@@ -2540,10 +2540,10 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", null, CompareOptions.None));
 
             Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", 0, "b", 0, 1, false, null));
-            Assert.Throws<ArgumentOutOfRangeException>("length1", () => String.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("length2", () => String.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => String.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
-            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => String.Compare("a", 1, "b",-1 ,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => String.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => String.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => String.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => String.Compare("a", 1, "b",-1 ,1, false, CultureInfo.InvariantCulture));
         }
 
         [Theory]

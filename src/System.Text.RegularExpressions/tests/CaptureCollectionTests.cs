@@ -63,8 +63,8 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             CaptureCollection captures = regex.Match("aaabbccccccccccaaaabc").Captures;
 
-            Assert.Throws<ArgumentOutOfRangeException>("i", () => captures[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("i", () => captures[captures.Count]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("i", () => captures[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("i", () => captures[captures.Count]);
         }
 
         [Fact]

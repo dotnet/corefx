@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -177,10 +178,10 @@ namespace System.Linq.Expressions.Tests
             Expression key = Expression.Constant("Key");
             Expression value = Expression.Constant(42);
             ElementInit init = Expression.ElementInit(typeof(Dictionary<string, int>).GetMethod("Add"), key, value);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(2));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(3));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(int.MaxValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => init.GetArgument(int.MaxValue));
         }
 
         [Fact]

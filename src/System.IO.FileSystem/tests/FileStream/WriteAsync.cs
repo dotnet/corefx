@@ -27,7 +27,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, 1)));
 
                 // buffer is checked first
@@ -41,11 +41,11 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], 0, -1)));
 
                 // offset is checked before count
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
@@ -100,11 +100,11 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[2], 1, 2)));
 
                 // count is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("count", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], 0, -1)));
 
                 // offset is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
@@ -135,11 +135,11 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[2], 1, 2)));
 
                 // count is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("count", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], 0, -1)));
 
                 // offset is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
@@ -175,11 +175,11 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[2], 1, 2, cancelledToken)));
 
                 // count is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("count", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], 0, -1, cancelledToken)));
 
                 // offset is checked prior
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () =>
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1, cancelledToken)));
 
                 // buffer is checked first

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using Xunit;
@@ -44,7 +45,7 @@ namespace System.Security.Cryptography.Xml.Tests
         public void KeySize_SetNegativeValue_ThrowsArgumentOutOfRangeException(int value)
         {
             EncryptionMethod method = new EncryptionMethod();
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
         }
 
         [Theory]

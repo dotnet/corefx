@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -270,7 +270,7 @@ namespace System.Data.SqlClient.Tests
 
             Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, 0));
             Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => d.CopyTo(new DictionaryEntry[20], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => d.CopyTo(new DictionaryEntry[20], -1));
             Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 18));
             Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 1000));
             Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[4, 3], 0));
@@ -435,7 +435,7 @@ namespace System.Data.SqlClient.Tests
 
             Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new string[20], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new string[20], -1));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 18));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 1000));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[4, 3], 0));
@@ -545,7 +545,7 @@ namespace System.Data.SqlClient.Tests
 
             Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new long[20], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new long[20], -1));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 18));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 1000));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[4, 3], 0));

@@ -166,7 +166,7 @@ namespace System.Collections.Specialized.Tests
             }
             
             Assert.Throws<ArgumentNullException>("array", () => keys.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => keys.CopyTo(new object[keys.Count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => keys.CopyTo(new object[keys.Count], -1));
         }
 
         // bool System.Collections.ICollection.IsSynchronized { get; }
@@ -296,7 +296,7 @@ namespace System.Collections.Specialized.Tests
             }
             
             Assert.Throws<ArgumentNullException>("array", () => values.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => values.CopyTo(new object[values.Count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => values.CopyTo(new object[values.Count], -1));
         }
 
         // public void Add(object key, object value);

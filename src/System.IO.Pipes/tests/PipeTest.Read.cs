@@ -49,8 +49,8 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // Offset must be nonnegative
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => pipe.Read(new byte[6], -1, 1));
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => { pipe.ReadAsync(new byte[4], -1, 1); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => pipe.Read(new byte[6], -1, 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { pipe.ReadAsync(new byte[4], -1, 1); });
             }
         }
 
@@ -64,7 +64,7 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // Count must be nonnegative
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => pipe.Read(new byte[3], 0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => pipe.Read(new byte[3], 0, -1));
                 Assert.Throws<System.ArgumentOutOfRangeException>("count", () => { pipe.ReadAsync(new byte[7], 0, -1); });
             }
         }
@@ -198,7 +198,7 @@ namespace System.IO.Pipes.Tests
             using (ServerClientPair pair = CreateServerClientPair())
             {
                 Assert.Throws<ArgumentNullException>("destination", () => { pair.readablePipe.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { pair.readablePipe.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { pair.readablePipe.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { pair.readablePipe.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 if (!pair.writeablePipe.CanRead)
                 {

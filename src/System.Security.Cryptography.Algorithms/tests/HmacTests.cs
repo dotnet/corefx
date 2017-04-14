@@ -123,7 +123,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HMAC hash = Create())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => hash.ComputeHash(Array.Empty<byte>(), -1, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => hash.ComputeHash(Array.Empty<byte>(), -1, 0));
             }
         }
 

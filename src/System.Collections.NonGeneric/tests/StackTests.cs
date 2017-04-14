@@ -36,7 +36,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new Stack(-1)); // InitialCapacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new Stack(-1)); // InitialCapacity < 0
         }
 
         [Theory]
@@ -237,7 +237,7 @@ namespace System.Collections.Tests
                 Assert.Throws<ArgumentNullException>("array", () => stack2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => stack2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => stack2.CopyTo(new object[100], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => stack2.CopyTo(new object[100], -1)); // Index < 0
                 Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[0], 0)); // Index >= array.Count
                 Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[100], 1)); // Index + array.Count > stack.Count
                 Assert.Throws<ArgumentException>(null, () => stack2.CopyTo(new object[150], 51)); // Index + array.Count > stack.Count

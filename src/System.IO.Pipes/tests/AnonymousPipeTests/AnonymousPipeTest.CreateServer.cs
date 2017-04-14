@@ -35,8 +35,8 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeDirection.Out, 999)]
         public static void ServerBadInheritabilityThrows(PipeDirection direction, HandleInheritability inheritability)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("inheritability", () => new AnonymousPipeServerStream(direction, inheritability));
-            Assert.Throws<ArgumentOutOfRangeException>("inheritability", () => new AnonymousPipeServerStream(direction, inheritability, 500));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritability", () => new AnonymousPipeServerStream(direction, inheritability));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritability", () => new AnonymousPipeServerStream(direction, inheritability, 500));
         }
 
         [Theory]
@@ -45,15 +45,15 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeDirection.InOut, -500)] //bufferSize will cause an exception before InOut will
         public static void InvalidBufferSize_Throws_ArgumentOutOfRangeException(PipeDirection direction, int bufferSize)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => new AnonymousPipeServerStream(direction, HandleInheritability.None, bufferSize));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => new AnonymousPipeServerStream(direction, HandleInheritability.None, bufferSize));
         }
 
         [Fact]
         public static void InvalidPipeDirection_Throws_ArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, HandleInheritability.None, 500));
-            Assert.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, (HandleInheritability)999, -500));
-            Assert.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, HandleInheritability.None, - 500));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, HandleInheritability.None, 500));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, (HandleInheritability)999, -500));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("direction", () => new AnonymousPipeServerStream((PipeDirection)123, HandleInheritability.None, - 500));
         }
 
         [Fact]

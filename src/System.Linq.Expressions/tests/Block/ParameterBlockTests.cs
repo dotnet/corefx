@@ -142,8 +142,8 @@ namespace System.Linq.Expressions.Tests
         public void InvalidExpressionIndex(object value, int blockSize)
         {
             BlockExpression block = Expression.Block(SingleParameter, PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
         }
 
         [Fact]

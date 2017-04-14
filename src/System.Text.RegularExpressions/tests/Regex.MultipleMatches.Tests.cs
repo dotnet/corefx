@@ -215,18 +215,18 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Throws<ArgumentNullException>("pattern", () => Regex.Matches("input", null, RegexOptions.None, TimeSpan.FromSeconds(1)));
 
             // Options are invalid
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)(-1), TimeSpan.FromSeconds(1)));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)0x400));
-            Assert.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)0x400, TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)(-1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)(-1), TimeSpan.FromSeconds(1)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)0x400));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => Regex.Matches("input", "pattern", (RegexOptions)0x400, TimeSpan.FromSeconds(1)));
 
             // MatchTimeout is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => Regex.Matches("input", "pattern", RegexOptions.None, TimeSpan.Zero));
-            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => Regex.Matches("input", "pattern", RegexOptions.None, TimeSpan.Zero));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => Regex.Matches("input", "pattern", RegexOptions.None, TimeSpan.Zero));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => Regex.Matches("input", "pattern", RegexOptions.None, TimeSpan.Zero));
 
             // Start is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("startat", () => new Regex("pattern").Matches("input", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startat", () => new Regex("pattern").Matches("input", 6));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startat", () => new Regex("pattern").Matches("input", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startat", () => new Regex("pattern").Matches("input", 6));
         }
 
         [Fact]

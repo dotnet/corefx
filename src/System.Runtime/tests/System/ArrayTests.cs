@@ -447,19 +447,19 @@ namespace System.Tests
         [Fact]
         public static void BinarySearch_IndexLessThanZero_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new int[3], -1, 0, ""));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new string[3], -1, 0, ""));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new int[3], -1, 0, "", null));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new string[3], -1, 0, "", null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new int[3], -1, 0, ""));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new string[3], -1, 0, ""));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new int[3], -1, 0, "", null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.BinarySearch(new string[3], -1, 0, "", null));
         }
 
         [Fact]
         public static void BinarySearch_LengthLessThanZero_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new int[3], 0, -1, ""));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new string[3], 0, -1, ""));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new int[3], 0, -1, "", null));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new string[3], 0, -1, "", null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new int[3], 0, -1, ""));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new string[3], 0, -1, ""));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new int[3], 0, -1, "", null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.BinarySearch(new string[3], 0, -1, "", null));
         }
 
         [Theory]
@@ -1239,9 +1239,9 @@ namespace System.Tests
         [Fact]
         public static void Copy_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], new string[10], -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], 0, new string[10], 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.ConstrainedCopy(new string[10], 0, new string[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], new string[10], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], 0, new string[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.ConstrainedCopy(new string[10], 0, new string[10], 0, -1));
         }
 
         [Theory]
@@ -1407,9 +1407,9 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.CreateInstance(typeof(int), -1));
-            Assert.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }));
-            Assert.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }, new int[1]));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.CreateInstance(typeof(int), -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }, new int[1]));
         }
 
         [Fact]
@@ -1528,20 +1528,20 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, 0, 0, i => i == 43));
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], -1, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], -1, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], -1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], -1, 0, i => i == 43));
 
             // Start index > array.Length 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], 4, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], 4, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], 4, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], 4, 0, i => i == 43));
 
             // Count < 0 or count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 0, -1, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 0, 4, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 0, -1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 0, 4, i => i == 43));
 
             // Start index + count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 3, 1, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 2, 2, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 3, 1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindIndex(new int[3], 2, 2, i => i == 43));
         }
 
         [Fact]
@@ -1571,22 +1571,22 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, null));
             Assert.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, 0, null));
 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[0], 0, i => i == 43)); // Start index != -1 for an empty array
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[0], 0, i => i == 43)); // Start index != -1 for an empty array
 
             // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], -1, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], -1, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], -1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], -1, 0, i => i == 43));
 
             // Start index > array.Length 
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 4, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 4, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 4, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 4, 0, i => i == 43));
 
             // Count < 0 or count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindLastIndex(new int[3], 0, -1, i => i == 43));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.FindLastIndex(new int[3], 0, 4, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindLastIndex(new int[3], 0, -1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.FindLastIndex(new int[3], 0, 4, i => i == 43));
 
             // Start index + count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 3, 1, i => i == 43));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[3], 3, 1, i => i == 43));
         }
 
         public static IEnumerable<object[]> GetEnumerator_TestData()
@@ -1997,10 +1997,10 @@ namespace System.Tests
         [InlineData(1)]
         public static void IndexOf_InvalidStartIndex_ThrowsArgumentOutOfRangeException(int startIndex)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex, 0));
         }
 
         [Theory]
@@ -2010,8 +2010,8 @@ namespace System.Tests
         [InlineData(2, 2, 1)]
         public static void IndexOf_InvalidCount_ThrowsArgumentOutOfRangeException(int length, int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new int[length], "", startIndex, count));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new string[length], "", startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new int[length], "", startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new string[length], "", startIndex, count));
         }
 
         public static IEnumerable<object[]> LastIndexOf_SZArray_TestData()
@@ -2351,24 +2351,24 @@ namespace System.Tests
         [Fact]
         public static void LastIndexOf_EmptyArrayInvalidStartIndexCount_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[0], 0, 1, 0)); // Start index != 0 or -1
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[0], 0, 0, 1)); // Count != 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[0], 0, 1, 0)); // Start index != 0 or -1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[0], 0, 0, 1)); // Count != 0
         }
 
         [Fact]
         public static void LastIndexOf_NegativeStartIndex_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[1], "", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[1], "", -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new string[1], "", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new string[1], "", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[1], "", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new int[1], "", -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new string[1], "", -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.LastIndexOf(new string[1], "", -1, 0));
         }
 
         [Fact]
         public static void LastIndexOf_NegativeCount_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[1], "", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new string[1], "", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[1], "", 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new string[1], "", 0, -1));
         }
 
         [Theory]
@@ -2377,8 +2377,8 @@ namespace System.Tests
         [InlineData(3, 1, 3)]
         public static void LastIndexOf_InvalidStartIndexCount_ThrowsArgumentOutOfRangeExeption(int length, int startIndex, int count)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => Array.LastIndexOf(new int[length], "", startIndex, count));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[length], 0, startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("endIndex", () => Array.LastIndexOf(new int[length], "", startIndex, count));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[length], 0, startIndex, count));
         }
 
         public static IEnumerable<object[]> IStructuralComparable_TestData()
@@ -2493,7 +2493,7 @@ namespace System.Tests
         public static void Resize_NegativeNewSize_ThrowsArgumentOutOfRangeException()
         {
             var array = new int[0];
-            Assert.Throws<ArgumentOutOfRangeException>("newSize", () => Array.Resize(ref array, -1)); // New size < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("newSize", () => Array.Resize(ref array, -1)); // New size < 0
             Assert.Equal(new int[0], array);
         }
 
@@ -2649,7 +2649,7 @@ namespace System.Tests
         [InlineData(-1)]
         public static void Reverse_IndexLessThanLowerBound_ThrowsArgumentOutOfRangeException(int lowerBound)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(NonZeroLowerBoundArray(new int[0], lowerBound), lowerBound - 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(NonZeroLowerBoundArray(new int[0], lowerBound), lowerBound - 1, 0));
         }
 
         [Fact]
@@ -2661,7 +2661,7 @@ namespace System.Tests
         [Fact]
         public static void Reverse_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse((Array)new int[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse((Array)new int[10], 0, -1));
         }
 
         [Theory]
@@ -2814,12 +2814,12 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => Array.Sort(new object[] { "1", 2, new object() }, 0, 3));
 
             // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], -1, 0));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], 0, -1));
 
             // Index + length > list.Count
             Assert.Throws<ArgumentException>(() => Array.Sort((Array)new int[10], 11, 0));
@@ -2844,12 +2844,12 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => Array.Sort(new object[] { "1", 2, new object() }, 0, 3, null));
 
             // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], -1, 0, null));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], -1, 0, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], -1, 0, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], -1, 0, null));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], 0, -1, null));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], 0, -1, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], 0, -1, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], 0, -1, null));
 
             // Index + length > list.Count
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], 11, 0, null));
@@ -3085,12 +3085,12 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => Array.Sort(new object[] { "1", 2, new object() }, new object[3], 0, 3));
 
             // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], new int[10], -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], new int[10], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], new int[10], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], new int[10], -1, 0));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], new int[10], 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], new int[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], new int[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], new int[10], 0, -1));
 
             // Index + length > list.Count
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[10], 11, 0));
@@ -3124,12 +3124,12 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => Array.Sort(new object[] { "1", 2, new object() }, new object[3], 0, 3, null));
 
             // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], new int[10], -1, 0, null));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], new int[10], -1, 0, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort((Array)new int[10], new int[10], -1, 0, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Sort(new int[10], new int[10], -1, 0, null));
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], new int[10], 0, -1, null));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], new int[10], 0, -1, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort((Array)new int[10], new int[10], 0, -1, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Sort(new int[10], new int[10], 0, -1, null));
 
             // Index + length > list.Count
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[10], 11, 0, null));

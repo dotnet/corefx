@@ -27,7 +27,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentOutOfRangeException>("access", () => CreateFileStream(fs.SafeFileHandle, ~FileAccess.Read));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => CreateFileStream(fs.SafeFileHandle, ~FileAccess.Read));
             }
         }
 

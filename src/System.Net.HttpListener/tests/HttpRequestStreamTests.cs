@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -351,7 +351,7 @@ namespace System.Net.Tests
             HttpListenerRequest request = await _helper.GetRequest();
             using (Stream inputStream = request.InputStream)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => inputStream.Read(new byte[2], offset, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => inputStream.Read(new byte[2], offset, 0));
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>("offset", () => inputStream.ReadAsync(new byte[2], offset, 0));
             }
         }
@@ -366,7 +366,7 @@ namespace System.Net.Tests
             HttpListenerRequest request = await _helper.GetRequest();
             using (Stream inputStream = request.InputStream)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("size", () => inputStream.Read(new byte[2], offset, size));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => inputStream.Read(new byte[2], offset, size));
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>("size", () => inputStream.ReadAsync(new byte[2], offset, size));
             }
         }

@@ -186,7 +186,7 @@ namespace System.Collections.Tests
 
             Assert.Throws<ArgumentException>(() => dictBase.CopyTo(new object[100, 100], 0)); // Array is multidimensional
 
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => dictBase.CopyTo(new DictionaryEntry[100], -1)); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => dictBase.CopyTo(new DictionaryEntry[100], -1)); // Index < 0
 
             Assert.Throws<ArgumentException>(null, () => dictBase.CopyTo(new DictionaryEntry[100], 100)); // Index >= count
             Assert.Throws<ArgumentException>(null, () => dictBase.CopyTo(new DictionaryEntry[100], 50)); // Index + array.Count >= count

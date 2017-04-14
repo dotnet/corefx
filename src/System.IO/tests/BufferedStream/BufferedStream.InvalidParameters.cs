@@ -122,8 +122,8 @@ namespace System.IO.Tests
                 Assert.Throws<ArgumentNullException>("destination", () => { s.CopyToAsync(null); });
 
                 // Buffer size out-of-range
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), 0); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), -1, CancellationToken.None); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), -1, CancellationToken.None); });
 
                 // Copying to non-writable stream
                 Assert.Throws<NotSupportedException>(() => { s.CopyToAsync(new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: true)); });

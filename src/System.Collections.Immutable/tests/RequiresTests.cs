@@ -20,8 +20,8 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void FailRange()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.FailRange("parameterName"));
-            Assert.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.FailRange("parameterName", "message"));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.FailRange("parameterName"));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.FailRange("parameterName", "message"));
         }
 
         [Fact]
@@ -29,8 +29,8 @@ namespace System.Collections.Immutable.Tests
         {
             Requires.Range(true, "parameterName");
             Requires.Range(true, "parameterName", "message");
-            Assert.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.Range(false, "parameterName"));
-            Assert.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.Range(false, "parameterName", "message"));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.Range(false, "parameterName"));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("parameterName", () => Requires.Range(false, "parameterName", "message"));
         }
 
         [Fact]

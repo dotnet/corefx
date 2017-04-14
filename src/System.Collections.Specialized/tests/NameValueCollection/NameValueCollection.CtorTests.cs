@@ -70,9 +70,9 @@ namespace System.Collections.Specialized.Tests
         [Fact]
         public void Ctor_NegativeCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1, new NameValueCollection()));
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1, (IEqualityComparer)null
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1, new NameValueCollection()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new NameValueCollection(-1, (IEqualityComparer)null
                 ));
 
             Assert.Throws<OutOfMemoryException>(() => new NameValueCollection(int.MaxValue));

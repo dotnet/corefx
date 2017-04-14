@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -259,8 +260,8 @@ namespace System.Security.Cryptography.RNG.Tests
         private static void GetBytes_InvalidArgs(RandomNumberGenerator rng)
         {
             Assert.Throws<ArgumentNullException>("data", () => rng.GetBytes(null, 0, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => rng.GetBytes(Array.Empty<byte>(), -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => rng.GetBytes(Array.Empty<byte>(), 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => rng.GetBytes(Array.Empty<byte>(), -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => rng.GetBytes(Array.Empty<byte>(), 0, -1));
             Assert.Throws<ArgumentException>(() => rng.GetBytes(Array.Empty<byte>(), 0, 1));
             // GetBytes(null) covered in test NullInput()
         }

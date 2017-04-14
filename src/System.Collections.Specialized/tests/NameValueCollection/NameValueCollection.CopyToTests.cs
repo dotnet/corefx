@@ -61,7 +61,7 @@ namespace System.Collections.Specialized.Tests
             Assert.Throws<ArgumentNullException>("dest", () => nameValueCollection.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentException>("dest", null, () => nameValueCollection.CopyTo(new string[count, count], 0)); // in netfx when passing multidimensional arrays Exception.ParamName is null.
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => nameValueCollection.CopyTo(new string[count], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => nameValueCollection.CopyTo(new string[count], -1));
 
             Assert.Throws<ArgumentException>(null, () => nameValueCollection.CopyTo(new string[count], 1));
             Assert.Throws<ArgumentException>(null, () => nameValueCollection.CopyTo(new string[count], count + 1));

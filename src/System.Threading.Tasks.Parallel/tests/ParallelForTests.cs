@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,8 +19,8 @@ namespace System.Threading.Tasks.Tests
         {
             // ParallelOptions tests
             ParallelOptions options = new ParallelOptions();
-            Assert.Throws<ArgumentOutOfRangeException>("MaxDegreeOfParallelism", () => options.MaxDegreeOfParallelism = 0);
-            Assert.Throws<ArgumentOutOfRangeException>("MaxDegreeOfParallelism", () => options.MaxDegreeOfParallelism = -2);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("MaxDegreeOfParallelism", () => options.MaxDegreeOfParallelism = 0);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("MaxDegreeOfParallelism", () => options.MaxDegreeOfParallelism = -2);
             
             // Parallel.Invoke tests
             Action[] smallActionArray = new Action[] { () => { } };

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace System.Buffers.ArrayPool.Tests
         [InlineData(-1)]
         public static void CreatingAPoolWithInvalidArrayCountThrows(int length)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("maxArraysPerBucket", () => ArrayPool<byte>.Create(maxArraysPerBucket: length, maxArrayLength: 16));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("maxArraysPerBucket", () => ArrayPool<byte>.Create(maxArraysPerBucket: length, maxArrayLength: 16));
         }
 
         [Theory]
@@ -55,7 +56,7 @@ namespace System.Buffers.ArrayPool.Tests
         [InlineData(-1)]
         public static void CreatingAPoolWithInvalidMaximumArraySizeThrows(int length)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("maxArrayLength", () => ArrayPool<byte>.Create(maxArrayLength: length, maxArraysPerBucket: 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("maxArrayLength", () => ArrayPool<byte>.Create(maxArrayLength: length, maxArraysPerBucket: 1));
         }
 
         [Theory]
@@ -74,7 +75,7 @@ namespace System.Buffers.ArrayPool.Tests
         [MemberData(nameof(BytePoolInstances))]
         public static void RentingWithInvalidLengthThrows(ArrayPool<byte> pool)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("minimumLength", () => pool.Rent(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("minimumLength", () => pool.Rent(-1));
         }
 
         [Fact]

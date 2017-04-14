@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -248,28 +249,28 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(AllImplementations))]
         public void SignDataByteArraySpan_NegativeOffset_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("offset",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset",
                 () => ecdsa.SignData(new byte[0], -1, -1, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void SignDataByteArraySpan_OffsetGreaterThanCount_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("offset",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset",
                 () => ecdsa.SignData(new byte[0], 2, 1, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void SignDataByteArraySpan_NegativeCount_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count",
                 () => ecdsa.SignData(new byte[0], 0, -1, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void SignDataByteArraySpan_CountGreaterThanLengthMinusOffset_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count",
                 () => ecdsa.SignData(new byte[0], 0, 1, default(HashAlgorithmName)));
         }
 
@@ -332,28 +333,28 @@ namespace System.Security.Cryptography.EcDsa.Tests
         [Theory, MemberData(nameof(AllImplementations))]
         public void VerifyDataByteArraySpan_NegativeOffset_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("offset",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset",
                 () => ecdsa.VerifyData(new byte[0], -1, -1, null, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void VerifyDataByteArraySpan_OffsetGreaterThanCount_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("offset",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset",
                 () => ecdsa.VerifyData(new byte[0], 2, 1, null, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void VerifyDataByteArraySpan_NegativeCount_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count",
                 () => ecdsa.VerifyData(new byte[0], 0, -1, null, default(HashAlgorithmName)));
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
         public void VerifyDataByteArraySpan_CountGreaterThanLengthMinusOffset_ThrowsArgumentOutOfRangeException(ECDsa ecdsa)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count",
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count",
                 () => ecdsa.VerifyData(new byte[0], 0, 1, null, default(HashAlgorithmName)));
         }
 

@@ -53,13 +53,13 @@ namespace System.Text.Tests
             Assert.Throws<ArgumentNullException>("dstEncoding", () => Encoding.Convert(Encoding.ASCII, null, new byte[0], 0, 0));
 
             // Invalid index
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 11, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 11, 0));
 
             // Invalid count
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 0, 11));
-            Assert.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 1, 10));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 0, 11));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], 1, 10));
         }
     }
 }

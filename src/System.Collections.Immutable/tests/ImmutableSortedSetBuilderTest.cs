@@ -325,8 +325,8 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(2, builder[1]);
             Assert.Equal(3, builder[2]);
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => builder[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => builder[3]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder[3]);
         }
 
         [Fact]

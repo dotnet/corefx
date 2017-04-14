@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -270,7 +271,7 @@ namespace System.CodeDom.Compiler.Tests
         [Fact]
         public void CompileAssemblyFromSource_CallsCompilerMethod()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("3", () => new CustomProvider().CompileAssemblyFromSource(new CompilerParameters()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("3", () => new CustomProvider().CompileAssemblyFromSource(new CompilerParameters()));
         }
 
         [Fact]
@@ -306,7 +307,7 @@ namespace System.CodeDom.Compiler.Tests
         [Fact]
         public void GenerateCodeFromCompileUnit_CallsGeneratorMethod()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("3", () => new CustomProvider().GenerateCodeFromCompileUnit(new CodeCompileUnit(), new StringWriter(), new CodeGeneratorOptions()));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("3", () => new CustomProvider().GenerateCodeFromCompileUnit(new CodeCompileUnit(), new StringWriter(), new CodeGeneratorOptions()));
         }
 
         [Fact]

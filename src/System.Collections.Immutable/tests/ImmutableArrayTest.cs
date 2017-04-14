@@ -191,13 +191,13 @@ namespace System.Collections.Immutable.Tests
 
             Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int>)null));
 
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (Func<int, int>)null));
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, i => i));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (Func<int, int>)null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, i => i));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, array.Length + 1, i => i));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, array.Length, 1, i => i));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, Math.Max(0, array.Length - 1), 2, i => i));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, -1, i => i));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, array.Length + 1, i => i));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, array.Length, 1, i => i));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, Math.Max(0, array.Length - 1), 2, i => i));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, -1, i => i));
 
             Assert.Throws<NullReferenceException>(() => ImmutableArray.CreateRange(s_emptyDefault, 0, 0, i => i));
         }
@@ -235,13 +235,13 @@ namespace System.Collections.Immutable.Tests
 
             Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int, int>)null, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(s_empty, -1, 1, (Func<int, int, int>)null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (i, j) => i + j, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(s_empty, -1, 1, (Func<int, int, int>)null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (i, j) => i + j, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, array.Length + 1, (i, j) => i + j, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, array.Length, 1, (i, j) => i + j, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, Math.Max(0, array.Length - 1), 2, (i, j) => i + j, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, -1, (i, j) => i + j, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, array.Length + 1, (i, j) => i + j, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, array.Length, 1, (i, j) => i + j, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, Math.Max(0, array.Length - 1), 2, (i, j) => i + j, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.CreateRange(array, 0, -1, (i, j) => i + j, 0));
 
             Assert.Throws<NullReferenceException>(() => ImmutableArray.CreateRange(s_emptyDefault, 0, 0, (x, y) => 0, 0));
         }
@@ -270,16 +270,16 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, array.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, array.Length + 1, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, array.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, Math.Max(0, array.Length - 1), 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, array.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, Math.Max(0, array.Length - 1), 2));
 
             if (array.Length > 0)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 1, array.Length));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 1, array.Length));
             }
         }
 
@@ -307,16 +307,16 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, array.Length + 1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, -1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.Create(array, array.Length + 1, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, array.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, Math.Max(0, array.Length - 1), 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 0, array.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, Math.Max(0, array.Length - 1), 2));
 
             if (array.Length > 0)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 1, array.Length));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => ImmutableArray.Create(array, 1, array.Length));
             }
         }
 
@@ -1003,8 +1003,8 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(-1, 0x61));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(array.Length + 1, 0x61));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(-1, 0x61));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Insert(array.Length + 1, 0x61));
         }
 
         [Theory]
@@ -1022,11 +1022,11 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(array.Length + 1, s_oneElement));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(-1, s_oneElement));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(array.Length + 1, s_oneElement));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(-1, s_oneElement));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(array.Length + 1, (IEnumerable<int>)s_oneElement));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(-1, (IEnumerable<int>)s_oneElement));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(array.Length + 1, (IEnumerable<int>)s_oneElement));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.InsertRange(-1, (IEnumerable<int>)s_oneElement));
         }
 
         [Theory]
@@ -1121,9 +1121,9 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveAt(array.Length));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(array.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveAt(array.Length));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveAt(array.Length + 1));
         }
 
         [Theory]
@@ -1210,10 +1210,10 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveRange(-1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveRange(array.Length + 1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveRange(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveRange(0, array.Length + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveRange(-1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.RemoveRange(array.Length + 1, 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveRange(0, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => array.RemoveRange(0, array.Length + 1));
         }
 
         [Theory]
@@ -1478,9 +1478,9 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: -1, item: 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: array.Length, item: 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: array.Length + 1, item: 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: -1, item: 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: array.Length, item: 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.SetItem(index: array.Length + 1, item: 0));
         }
 
         [Theory]
@@ -1560,7 +1560,7 @@ namespace System.Collections.Immutable.Tests
             AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => array.CopyTo(0, null, 0, 0));
             AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => array.CopyTo(-1, null, -1, -1)); // The destination should be validated first.
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => array.CopyTo(-1, new int[0], -1, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => array.CopyTo(-1, new int[0], -1, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", "srcIndex", () => array.CopyTo(-1, new int[0], -1, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => array.CopyTo(0, new int[0], -1, 0));
 
@@ -1734,12 +1734,12 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Sort(-1, -1, Comparer<int>.Default));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => array.Sort(-1, 0, Comparer<int>.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Sort(-1, -1, Comparer<int>.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => array.Sort(-1, 0, Comparer<int>.Default));
 
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(0, -1, Comparer<int>.Default));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(array.Length + 1, 0, Comparer<int>.Default));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(0, array.Length + 1, Comparer<int>.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(0, -1, Comparer<int>.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(array.Length + 1, 0, Comparer<int>.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => array.Sort(0, array.Length + 1, Comparer<int>.Default));
         }
 
         [Theory]

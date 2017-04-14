@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -656,7 +656,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => absoluteUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped - 1)); // Format is invalid
             Assert.Throws<ArgumentOutOfRangeException>(() => absoluteUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.SafeUnescaped + 1)); // Format is invalid
 
-            Assert.Throws<ArgumentOutOfRangeException>("components", () => absoluteUri.GetComponents(UriComponents.HostAndPort | ~UriComponents.KeepDelimiter, UriFormat.UriEscaped)); // Components is invalid
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("components", () => absoluteUri.GetComponents(UriComponents.HostAndPort | ~UriComponents.KeepDelimiter, UriFormat.UriEscaped)); // Components is invalid
 
             Assert.Throws<InvalidOperationException>(() => relativeUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.Unescaped)); // Uri is relative
             Assert.Throws<ArgumentOutOfRangeException>(() => relativeUri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped - 1)); // Uri is relative, format is invalid

@@ -47,7 +47,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_NegativeCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1)); // Capacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1)); // Capacity < 0
         }
 
         [Theory]
@@ -68,9 +68,9 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1, 1)); // Capacity < 0
-            Assert.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)0.99)); // Grow factor < 1
-            Assert.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)10.01)); // Grow factor > 10
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Queue(-1, 1)); // Capacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)0.99)); // Grow factor < 1
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("growFactor", () => new Queue(1, (float)10.01)); // Grow factor > 10
         }
 
         [Fact]
@@ -379,7 +379,7 @@ namespace System.Collections.Tests
                 Assert.Throws<ArgumentNullException>("array", () => queue2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => queue2.CopyTo(new object[150, 150], 0)); // Array is multidimensional
 
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => queue2.CopyTo(new object[150], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => queue2.CopyTo(new object[150], -1)); // Index < 0
 
                 Assert.Throws<ArgumentException>(null, () => queue2.CopyTo(new object[150], 51)); // Index + queue.Count > array.Length
             });

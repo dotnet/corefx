@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -79,7 +79,7 @@ namespace System.Security.AccessControl.Tests
         {
             CompoundAce ace = (CompoundAce)CompoundAce_CreateTestData(0, 1, 1, "S-1-5-11", 0)[0];
             Assert.Throws<ArgumentNullException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(null, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => CompoundAce.CreateFromBinaryForm(new byte[1], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => CompoundAce.CreateFromBinaryForm(new byte[1], -1));
             Assert.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength + 1], 2));
             Assert.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength], 1));
         }
@@ -89,9 +89,9 @@ namespace System.Security.AccessControl.Tests
         {
             CompoundAce ace = (CompoundAce)CompoundAce_CreateTestData(0, 1, 1, "S-1-5-11", 0)[0];
             Assert.Throws<ArgumentNullException>("binaryForm", () => ace.GetBinaryForm(null, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => ace.GetBinaryForm(new byte[1], -1));
-            Assert.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength + 1], 2));
-            Assert.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength], 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => ace.GetBinaryForm(new byte[1], -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength + 1], 2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength], 1));
         }
 
         [Theory]
