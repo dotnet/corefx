@@ -7,42 +7,19 @@ namespace System.Security.Cryptography.Xml
 {
     public struct X509IssuerSerial
     {
-        private string _issuerName;
-        private string _serialNumber;
-
         internal X509IssuerSerial(string issuerName, string serialNumber)
         {
             if (issuerName == null || issuerName.Length == 0)
                 throw new ArgumentException(SR.Arg_EmptyOrNullString, nameof(issuerName));
             if (serialNumber == null || serialNumber.Length == 0)
                 throw new ArgumentException(SR.Arg_EmptyOrNullString, nameof(serialNumber));
-            _issuerName = issuerName;
-            _serialNumber = serialNumber;
+            IssuerName = issuerName;
+            SerialNumber = serialNumber;
         }
 
 
-        public string IssuerName
-        {
-            get
-            {
-                return _issuerName;
-            }
-            set
-            {
-                _issuerName = value;
-            }
-        }
+        public string IssuerName { get; set; }
 
-        public string SerialNumber
-        {
-            get
-            {
-                return _serialNumber;
-            }
-            set
-            {
-                _serialNumber = value;
-            }
-        }
+        public string SerialNumber { get; set; }
     }
 }

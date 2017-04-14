@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.Xml
 
         public KeyInfoNode(XmlElement node)
         {
-            _node = node;
+            Value = node;
         }
 
         //

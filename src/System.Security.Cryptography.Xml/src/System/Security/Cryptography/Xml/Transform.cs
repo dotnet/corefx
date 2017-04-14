@@ -22,32 +22,15 @@ namespace System.Security.Cryptography.Xml
 {
     public abstract class Transform
     {
-        private string _algorithm;
-        private string _baseUri = null;
         internal XmlResolver _xmlResolver = null;
-        private bool _bResolverSet = false;
-        private SignedXml _signedXml = null;
-        private Reference _reference = null;
         private Hashtable _propagatedNamespaces = null;
         private XmlElement _context = null;
 
-        internal string BaseURI
-        {
-            get { return _baseUri; }
-            set { _baseUri = value; }
-        }
+        internal string BaseURI { get; set; }
 
-        internal SignedXml SignedXml
-        {
-            get { return _signedXml; }
-            set { _signedXml = value; }
-        }
+        internal SignedXml SignedXml { get; set; }
 
-        internal Reference Reference
-        {
-            get { return _reference; }
-            set { _reference = value; }
-        }
+        internal Reference Reference { get; set; }
 
         //
         // protected constructors
@@ -59,11 +42,7 @@ namespace System.Security.Cryptography.Xml
         // public properties
         //
 
-        public string Algorithm
-        {
-            get { return _algorithm; }
-            set { _algorithm = value; }
-        }
+        public string Algorithm { get; set; }
 
         public XmlResolver Resolver
         {
@@ -72,7 +51,7 @@ namespace System.Security.Cryptography.Xml
             set
             {
                 _xmlResolver = value;
-                _bResolverSet = true;
+                ResolverSet = true;
             }
 
             internal get
@@ -81,20 +60,11 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        internal bool ResolverSet
-        {
-            get { return _bResolverSet; }
-        }
+        internal bool ResolverSet { get; private set; }
 
-        public abstract Type[] InputTypes
-        {
-            get;
-        }
+        public abstract Type[] InputTypes { get; }
 
-        public abstract Type[] OutputTypes
-        {
-            get;
-        }
+        public abstract Type[] OutputTypes { get; }
 
         internal bool AcceptsType(Type inputType)
         {
