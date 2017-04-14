@@ -10,12 +10,6 @@ namespace System
 {
     public static class AssertExtensions
     {
-        public static void Throws<T>(Action action, string message)
-            where T : Exception
-        {
-            Assert.Equal(Assert.Throws<T>(action).Message, message);
-        }
-
         public static void Throws<T>(string netCoreParamName, string netFxParamName, Action action)
             where T : ArgumentException
         {
