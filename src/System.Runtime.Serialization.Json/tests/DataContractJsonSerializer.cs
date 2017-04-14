@@ -2439,15 +2439,7 @@ public static partial class DataContractJsonSerializerTests
                 },
             };
             var original = DateTime.Now;
-            try
-            {
-                SerializeAndDeserialize(original, null, dcjsSettings, null, true);
-                Assert.True(false, $"An exception should be thrown in deserailization of {original.ToString(dateTimeFormat)} with DateTimeStyles={style} but no exception was thrown");
-            }
-            catch (ArgumentException e)
-            {
-                Assert.NotNull(e);
-            }
+            Assert.Throws<ArgumentException>(() => SerializeAndDeserialize(original, null, dcjsSettings, null, true));
         }
     }
 
@@ -2479,28 +2471,9 @@ public static partial class DataContractJsonSerializerTests
     [Fact]
     public static void DCJS_DateTimeFormatIsNull()
     {
-        var stream = new MemoryStream();
         var settings = new DataContractJsonSerializerSettings();
-        try
-        {
-            settings.DateTimeFormat = new DateTimeFormat(null);
-            Assert.True(false, "formatString is null and it should throw ArgumentNullException but no exception was thrown");
-        }
-        catch (ArgumentNullException e)
-        {
-            Assert.NotNull(e);
-        }
-
-        settings = new DataContractJsonSerializerSettings();
-        try
-        {
-            settings.DateTimeFormat = new DateTimeFormat("ddmmyyyyy", null);
-            Assert.True(false, "formatProvider is null and it should throw ArgumentNullException but no exception was thrown");
-        }
-        catch (ArgumentNullException e)
-        {
-            Assert.NotNull(e);
-        }
+        Assert.Throws<ArgumentNullException>(() => settings.DateTimeFormat = new DateTimeFormat(null));
+        Assert.Throws<ArgumentNullException>(() => settings.DateTimeFormat = new DateTimeFormat("ddmmyyyyy", null));
     }
 
     [Fact]
@@ -2520,15 +2493,7 @@ public static partial class DataContractJsonSerializerTests
         serializer.WriteObject(ms, original);
         var serializedJsonValue = Encoding.UTF8.GetString(ms.ToArray());
         serializedJsonValue = serializedJsonValue.Replace("2011", "         2011");
-        try
-        {
-            var roundtripped = DeserializeString<DateTime>(serializedJsonValue);
-            Assert.True(false, $"An exception should be thrown in deserailization of {original.ToString(dateTimeFormat)} with DateTimeStyles={DateTimeStyles.None} but no exception was thrown");
-        }
-        catch (SerializationException e)
-        {
-            Assert.NotNull(e);
-        }
+        Assert.Throws<SerializationException>(() => DeserializeString<DateTime>(serializedJsonValue));
     }
 
     [Fact]
@@ -2710,6 +2675,9 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(4, actual2["a4"]);
     }
 
+#if ReflectionOnly
+    [ActiveIssue(18373)]
+#endif
     [Fact]
     public static void DCJS_VerifyDictionaryFormat()
     {
