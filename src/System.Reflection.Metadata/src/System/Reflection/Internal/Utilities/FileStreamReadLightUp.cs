@@ -59,7 +59,7 @@ namespace System.Reflection.Internal
 
             try
             {
-                result = ReadFileCompat(handle, buffer, size, out bytesRead, IntPtr.Zero);
+                result = ReadFile(handle, buffer, size, out bytesRead, IntPtr.Zero);
             }
             catch
             {
@@ -83,7 +83,7 @@ namespace System.Reflection.Internal
 #pragma warning disable BCL0015 // Disable Pinvoke analyzer errors.
         [DllImport(@"kernel32.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static unsafe extern bool ReadFileCompat(
+        internal static unsafe extern bool ReadFile(
              SafeHandle fileHandle,
              byte* buffer,
              int byteCount,

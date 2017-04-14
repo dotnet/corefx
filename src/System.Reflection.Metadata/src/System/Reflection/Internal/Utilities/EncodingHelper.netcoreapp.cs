@@ -60,13 +60,6 @@ namespace System.Reflection.Internal
             return result;
         }
 
-        public static string GetString(this Encoding encoding, byte* bytes, int byteCount)
-        {
-            Debug.Assert(encoding != null);
-
-            return encoding.GetString(bytes, byteCount);
-        }
-
         // Test hook to force portable implementation and ensure light is functioning.
         internal static bool TestOnly_LightUpEnabled
         {
