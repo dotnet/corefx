@@ -24,8 +24,7 @@ namespace System.Reflection.Internal
         });
 
         // internal for testing
-        internal static bool readFileCompatNotAvailable;
-        internal static bool readFileModernNotAvailable;
+        internal static bool readFileNotAvailable;
         internal static bool safeFileHandleNotAvailable;
 
         internal static bool IsFileStream(Stream stream)
@@ -90,7 +89,7 @@ namespace System.Reflection.Internal
 
         internal static unsafe bool TryReadFile(Stream stream, byte* buffer, long start, int size)
         {
-            if (readFileModernNotAvailable && readFileCompatNotAvailable)
+            if (readFileNotAvailable)
             {
                 return false;
             }
@@ -104,29 +103,14 @@ namespace System.Reflection.Internal
             bool result = false;
             int bytesRead = 0;
 
-            if (!readFileModernNotAvailable)
+            try
             {
-                try
-                {
-                    result = NativeMethods.ReadFileModern(handle, buffer, size, out bytesRead, IntPtr.Zero);
-                }
-                catch
-                {
-                    readFileModernNotAvailable = true;
-                }
+                result = NativeMethods.ReadFileCompat(handle, buffer, size, out bytesRead, IntPtr.Zero);
             }
-
-            if (readFileModernNotAvailable)
+            catch
             {
-                try
-                {
-                    result = NativeMethods.ReadFileCompat(handle, buffer, size, out bytesRead, IntPtr.Zero);
-                }
-                catch
-                {
-                    readFileCompatNotAvailable = true;
-                    return false;
-                }
+                readFileNotAvailable = true;
+                return false;
             }
 
             if (!result || bytesRead != size)
@@ -142,33 +126,16 @@ namespace System.Reflection.Internal
             return true;
         }
 
-
-// The library guards against unavailable entrypoints by using EntryPointNotFoundException.
-#pragma warning disable BCL0015 // Diasable Pinvoke analyzer errors.
-        private static unsafe class NativeMethods
-        {
-            // API sets available on modern platforms:
-            [DllImport(@"api-ms-win-core-file-l1-1-0.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool ReadFileModern(
-                 SafeHandle fileHandle,
-                 byte* buffer,
-                 int byteCount,
-                 out int bytesRead,
-                 IntPtr overlapped
-            );
-
-            // older Windows systems:
-            [DllImport(@"kernel32.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool ReadFileCompat(
-                 SafeHandle fileHandle,
-                 byte* buffer,
-                 int byteCount,
-                 out int bytesRead,
-                 IntPtr overlapped
-            );
-        }
+#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors.
+        [DllImport(@"kernel32.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static unsafe extern bool ReadFile(
+             SafeHandle fileHandle,
+             byte* buffer,
+             int byteCount,
+             out int bytesRead,
+             IntPtr overlapped
+        );
 #pragma warning restore BCL0015
     }
 }

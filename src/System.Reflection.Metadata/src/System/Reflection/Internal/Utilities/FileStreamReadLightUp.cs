@@ -11,8 +11,7 @@ namespace System.Reflection.Internal
     internal static class FileStreamReadLightUp
     {
         // internal for testing
-        internal static bool readFileCompatNotAvailable = Path.DirectorySeparatorChar != '\\'; // Available on Windows only
-        internal static bool readFileModernNotAvailable = true;
+        internal static bool readFileNotAvailable = Path.DirectorySeparatorChar != '\\'; // Available on Windows only
         internal static bool safeFileHandleNotAvailable = false;
 
         internal static bool IsFileStream(Stream stream) => stream is FileStream;
@@ -43,7 +42,7 @@ namespace System.Reflection.Internal
 
         internal static unsafe bool TryReadFile(Stream stream, byte* buffer, long start, int size)
         {
-            if (readFileCompatNotAvailable)
+            if (readFileNotAvailable)
             {
                 return false;
             }
@@ -63,7 +62,7 @@ namespace System.Reflection.Internal
             }
             catch
             {
-                readFileCompatNotAvailable = true;
+                readFileNotAvailable = true;
                 return false;
             }
 
