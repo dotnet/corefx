@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -110,20 +110,20 @@ public class MyObject
         return "Inside Public Function";
     }
 
-    private String PrivateFunction()
-    {
-        return "Inside Private Function";
-    }
+//    private String PrivateFunction()
+//    {
+//        return "Inside Private Function";
+//    }
 
-    protected String ProtectedFunction()
-    {
-        return "Inside Protected Function";
-    }
+//    protected String ProtectedFunction()
+//    {
+//        return "Inside Protected Function";
+//    }
 
-    private String DefaultFunction()
-    {
-        return "Default Function";
-    }
+//    private String DefaultFunction()
+//    {
+//        return "Default Function";
+//    }
 
     // Return types tests
     public int MyValue()

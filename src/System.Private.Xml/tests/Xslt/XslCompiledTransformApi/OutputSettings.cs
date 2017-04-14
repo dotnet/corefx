@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,13 +40,13 @@ namespace System.Xml.Tests
             return sw;
         }
 
-        private void VerifyResult(object actual, object expected, string message)
-        {
-            _output.WriteLine("Expected : {0}", expected);
-            _output.WriteLine("Actual : {0}", actual);
-
-            Assert.Equal(actual, expected);
-        }
+//        private void VerifyResult(object actual, object expected, string message)
+//        {
+//            _output.WriteLine("Expected : {0}", expected);
+//            _output.WriteLine("Actual : {0}", actual);
+//
+//            Assert.Equal(actual, expected);
+//        }
 
         //[Variation(id = 1, Desc = "Verify the default value of the OutputSettings, expected null", Pri = 0)]
         [InlineData()]

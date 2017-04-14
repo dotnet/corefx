@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -127,13 +127,13 @@ namespace System.Xml.Serialization
 
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
 
-        private static bool ReflectionMethodEnabled
-        {
-            get
-            {
-                return Mode == SerializationMode.ReflectionOnly || Mode == SerializationMode.ReflectionAsBackup;
-            }
-        }
+//        private static bool ReflectionMethodEnabled
+//        {
+//            get
+//            {
+//                return Mode == SerializationMode.ReflectionOnly || Mode == SerializationMode.ReflectionAsBackup;
+//            }
+//        }
 
         private TempAssembly _tempAssembly;
 #pragma warning disable 0414

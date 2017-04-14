@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -2066,41 +2066,41 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal((XmlQualifiedName)value.Value, (XmlQualifiedName)actual.Value);
     }
 
-    [Fact]
-    static void Xml_TypeWithTypesHavingCustomFormatter()
-    {
-        var str = "The quick brown fox jumps over the lazy dog.";
-        var value = new TypeWithTypesHavingCustomFormatter()
-        {
-            DateTimeContent = new DateTime(2016, 7, 18, 0, 0, 0, DateTimeKind.Utc),
-            QNameContent = new XmlQualifiedName("QNameContent"),
-            DateContent = new DateTime(2016, 7, 18, 0, 0, 0, DateTimeKind.Utc),
-            NameContent = "NameContent",
-            NCNameContent = "NCNameContent",
-            NMTOKENContent = "NMTOKENContent",
-            NMTOKENSContent = "NMTOKENSContent",
-            Base64BinaryContent = Encoding.Unicode.GetBytes(str),
-            HexBinaryContent = Encoding.Unicode.GetBytes(str),
-        };
-
-        var actual = SerializeAndDeserialize(value,
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<TypeWithTypesHavingCustomFormatter xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <DateTimeContent>2016-07-18T00:00:00Z</DateTimeContent>\r\n  <QNameContent xmlns=\"\">QNameContent</QNameContent>\r\n  <DateContent>2016-07-18</DateContent>\r\n  <NameContent>NameContent</NameContent>\r\n  <NCNameContent>NCNameContent</NCNameContent>\r\n  <NMTOKENContent>NMTOKENContent</NMTOKENContent>\r\n  <NMTOKENSContent>NMTOKENSContent</NMTOKENSContent>\r\n  <Base64BinaryContent>VABoAGUAIABxAHUAaQBjAGsAIABiAHIAbwB3AG4AIABmAG8AeAAgAGoAdQBtAHAAcwAgAG8AdgBlAHIAIAB0AGgAZQAgAGwAYQB6AHkAIABkAG8AZwAuAA==</Base64BinaryContent>\r\n  <HexBinaryContent>540068006500200071007500690063006B002000620072006F0077006E00200066006F00780020006A0075006D007000730020006F00760065007200200074006800650020006C0061007A007900200064006F0067002E00</HexBinaryContent>\r\n</TypeWithTypesHavingCustomFormatter>");
-
-        Assert.NotNull(actual);
-        Assert.True(value.DateTimeContent == actual.DateTimeContent, $"Actual DateTimeContent was not as expected. \r\n Expected: {value.DateTimeContent} \r\n Actual: {actual.DateTimeContent}");
-        Assert.True(value.QNameContent == actual.QNameContent, $"Actual QNameContent was not as expected. \r\n Expected: {value.QNameContent} \r\n Actual: {actual.QNameContent}");
-        Assert.True(value.DateContent == actual.DateContent, $"Actual DateContent was not as expected. \r\n Expected: {value.DateContent} \r\n Actual: {actual.DateContent}");
-        Assert.True(value.NameContent == actual.NameContent, $"Actual NameContent was not as expected. \r\n Expected: {value.NameContent} \r\n Actual: {actual.NameContent}");
-        Assert.True(value.NCNameContent == actual.NCNameContent, $"Actual NCNameContent was not as expected. \r\n Expected: {value.NCNameContent} \r\n Actual: {actual.NCNameContent}");
-        Assert.True(value.NMTOKENContent == actual.NMTOKENContent, $"Actual NMTOKENContent was not as expected. \r\n Expected: {value.NMTOKENContent} \r\n Actual: {actual.NMTOKENContent}");
-        Assert.True(value.NMTOKENSContent == actual.NMTOKENSContent, $"Actual NMTOKENSContent was not as expected. \r\n Expected: {value.NMTOKENSContent} \r\n Actual: {actual.NMTOKENSContent}");
-
-        Assert.NotNull(actual.Base64BinaryContent);
-        Assert.True(Enumerable.SequenceEqual(value.Base64BinaryContent, actual.Base64BinaryContent), "Actual Base64BinaryContent was not as expected.");
-
-        Assert.NotNull(actual.HexBinaryContent);
-        Assert.True(Enumerable.SequenceEqual(value.HexBinaryContent, actual.HexBinaryContent), "Actual HexBinaryContent was not as expected.");
-    }
+//    [Fact]
+//    static void Xml_TypeWithTypesHavingCustomFormatter()
+//    {
+//        var str = "The quick brown fox jumps over the lazy dog.";
+//        var value = new TypeWithTypesHavingCustomFormatter()
+//        {
+//            DateTimeContent = new DateTime(2016, 7, 18, 0, 0, 0, DateTimeKind.Utc),
+//            QNameContent = new XmlQualifiedName("QNameContent"),
+//            DateContent = new DateTime(2016, 7, 18, 0, 0, 0, DateTimeKind.Utc),
+//            NameContent = "NameContent",
+//            NCNameContent = "NCNameContent",
+//            NMTOKENContent = "NMTOKENContent",
+//            NMTOKENSContent = "NMTOKENSContent",
+//            Base64BinaryContent = Encoding.Unicode.GetBytes(str),
+//            HexBinaryContent = Encoding.Unicode.GetBytes(str),
+//        };
+//
+//        var actual = SerializeAndDeserialize(value,
+//            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<TypeWithTypesHavingCustomFormatter xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <DateTimeContent>2016-07-18T00:00:00Z</DateTimeContent>\r\n  <QNameContent xmlns=\"\">QNameContent</QNameContent>\r\n  <DateContent>2016-07-18</DateContent>\r\n  <NameContent>NameContent</NameContent>\r\n  <NCNameContent>NCNameContent</NCNameContent>\r\n  <NMTOKENContent>NMTOKENContent</NMTOKENContent>\r\n  <NMTOKENSContent>NMTOKENSContent</NMTOKENSContent>\r\n  <Base64BinaryContent>VABoAGUAIABxAHUAaQBjAGsAIABiAHIAbwB3AG4AIABmAG8AeAAgAGoAdQBtAHAAcwAgAG8AdgBlAHIAIAB0AGgAZQAgAGwAYQB6AHkAIABkAG8AZwAuAA==</Base64BinaryContent>\r\n  <HexBinaryContent>540068006500200071007500690063006B002000620072006F0077006E00200066006F00780020006A0075006D007000730020006F00760065007200200074006800650020006C0061007A007900200064006F0067002E00</HexBinaryContent>\r\n</TypeWithTypesHavingCustomFormatter>");
+//
+//        Assert.NotNull(actual);
+//        Assert.True(value.DateTimeContent == actual.DateTimeContent, $"Actual DateTimeContent was not as expected. \r\n Expected: {value.DateTimeContent} \r\n Actual: {actual.DateTimeContent}");
+//        Assert.True(value.QNameContent == actual.QNameContent, $"Actual QNameContent was not as expected. \r\n Expected: {value.QNameContent} \r\n Actual: {actual.QNameContent}");
+//        Assert.True(value.DateContent == actual.DateContent, $"Actual DateContent was not as expected. \r\n Expected: {value.DateContent} \r\n Actual: {actual.DateContent}");
+//        Assert.True(value.NameContent == actual.NameContent, $"Actual NameContent was not as expected. \r\n Expected: {value.NameContent} \r\n Actual: {actual.NameContent}");
+//        Assert.True(value.NCNameContent == actual.NCNameContent, $"Actual NCNameContent was not as expected. \r\n Expected: {value.NCNameContent} \r\n Actual: {actual.NCNameContent}");
+//        Assert.True(value.NMTOKENContent == actual.NMTOKENContent, $"Actual NMTOKENContent was not as expected. \r\n Expected: {value.NMTOKENContent} \r\n Actual: {actual.NMTOKENContent}");
+//        Assert.True(value.NMTOKENSContent == actual.NMTOKENSContent, $"Actual NMTOKENSContent was not as expected. \r\n Expected: {value.NMTOKENSContent} \r\n Actual: {actual.NMTOKENSContent}");
+//
+//        Assert.NotNull(actual.Base64BinaryContent);
+//        Assert.True(Enumerable.SequenceEqual(value.Base64BinaryContent, actual.Base64BinaryContent), "Actual Base64BinaryContent was not as expected.");
+//
+//        Assert.NotNull(actual.HexBinaryContent);
+//        Assert.True(Enumerable.SequenceEqual(value.HexBinaryContent, actual.HexBinaryContent), "Actual HexBinaryContent was not as expected.");
+//    }
 
     [Fact]
     public static void Xml_TypeWithXmlElementsAndUnnamedXmlAny()

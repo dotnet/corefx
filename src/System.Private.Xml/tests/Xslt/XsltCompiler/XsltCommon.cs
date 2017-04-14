@@ -161,10 +161,10 @@ namespace XmlCoreTest.Common
             else throw new NotSupportedException("Not a supported driver version");
         }
 
-        private static string CalcChecksum(string fileName, DelayedWriteLogger logger)
-        {
-            return CalcChecksum(fileName, 1, logger);
-        }
+//        private static string CalcChecksum(string fileName, DelayedWriteLogger logger)
+//        {
+//            return CalcChecksum(fileName, 1, logger);
+//        }
 
         /// <summary>
         ///
