@@ -167,8 +167,6 @@ namespace System.Collections.Concurrent
         /// </summary>
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
-        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(IEqualityComparer<TKey> comparer) : this(DefaultConcurrencyLevel, DefaultCapacity, true, comparer) { }
 
         /// <summary>
@@ -185,9 +183,7 @@ namespace System.Collections.Concurrent
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
-        /// (Nothing in Visual Basic). -or-
-        /// <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
-        /// </exception>
+        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
             : this(comparer)
         {
@@ -210,8 +206,6 @@ namespace System.Collections.Concurrent
         /// when comparing keys.</param>
         /// <exception cref="T:System.ArgumentNullException">
         /// <paramref name="collection"/> is a null reference (Nothing in Visual Basic).
-        /// -or-
-        /// <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">
         /// <paramref name="concurrencyLevel"/> is less than 1.
@@ -261,8 +255,6 @@ namespace System.Collections.Concurrent
         /// <paramref name="concurrencyLevel"/> is less than 1. -or-
         /// <paramref name="capacity"/> is less than 0.
         /// </exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
-        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer)
             : this(concurrencyLevel, capacity, false, comparer)
         {
@@ -278,7 +270,6 @@ namespace System.Collections.Concurrent
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), SR.ConcurrentDictionary_CapacityMustNotBeNegative);
             }
-            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
 
             // The capacity should be at least as large as the concurrency level. Otherwise, we would have locks that don't guard
             // any buckets.
@@ -297,7 +288,7 @@ namespace System.Collections.Concurrent
             Node[] buckets = new Node[capacity];
             _tables = new Tables(buckets, locks, countPerLock);
 
-            _comparer = comparer;
+            _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _growLockArray = growLockArray;
             _budget = buckets.Length / locks.Length;
         }
