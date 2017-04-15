@@ -1150,7 +1150,7 @@ namespace SerializationTypes
 
         new public string Name3 { get; set; }
 
-//        new internal string Name4 { get; set; }
+        new internal string Name4 { get; set; }
 
         new public string Name5 { get; set; }
     }

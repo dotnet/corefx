@@ -127,13 +127,13 @@ namespace System.Xml.Serialization
 
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
 
-//        private static bool ReflectionMethodEnabled
-//        {
-//            get
-//            {
-//                return Mode == SerializationMode.ReflectionOnly || Mode == SerializationMode.ReflectionAsBackup;
-//            }
-//        }
+        private static bool ReflectionMethodEnabled
+        {
+            get
+            {
+                return Mode == SerializationMode.ReflectionOnly || Mode == SerializationMode.ReflectionAsBackup;
+            }
+        }
 
         private TempAssembly _tempAssembly;
 #pragma warning disable 0414
