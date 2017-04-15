@@ -50,5 +50,16 @@ namespace System.IO.MemoryMappedFiles.Tests
         {
             throw new PlatformNotSupportedException();
         }
+
+        /// <summary>Asserts that the handle's inheritability matches the specified value.</summary>
+        protected static void AssertInheritability(SafeHandle handle, HandleInheritability inheritability)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                uint flags;
+                Assert.True(GetHandleInformation(handle.DangerousGetHandle(), out flags));
+                Assert.Equal(inheritability == HandleInheritability.Inheritable, (flags & HANDLE_FLAG_INHERIT) != 0);
+            }
+        }
     }
 }
