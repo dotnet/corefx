@@ -234,7 +234,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // UseShellExecute currently not supported on Windows
+        [PlatformSpecific(TestPlatforms.Windows)] // UseShellExecute currently not supported on Windows on .NET Core
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
         public void UseShellExecute_GetSetWindows_Success_Netcore()
@@ -250,7 +250,7 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.UseShellExecute, "UseShellExecute=true is not supported on onecore.");
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // UseShellExecute currently not supported on Windows
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop UseShellExecute is set to true by default but UseShellExecute=true is not supported on Core")]
         public void UseShellExecute_GetSetWindows_Success_Netfx()
