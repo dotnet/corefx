@@ -107,14 +107,18 @@ namespace System.Collections.Tests
         public void Remove_NullIDictionary_ThrowsArgumentNullException()
         {
             IDictionary<string, string> dictionary = null;
-            Assert.Throws<ArgumentNullException>("dictionary", () => dictionary.Remove("key", out var value));
+            string value = null;
+            Assert.Throws<ArgumentNullException>("dictionary", () => dictionary.Remove("key", out value));
+            Assert.Null(value);
         }
 
         [Fact]
         public void Remove_NullKeyIDictionary_ThrowsArgumentNullException()
         {
             IDictionary<string, string> dictionary = new SortedDictionary<string, string>();
-            Assert.Throws<ArgumentNullException>("key", () => dictionary.Remove(null, out var value));
+            string value = null;
+            Assert.Throws<ArgumentNullException>("key", () => dictionary.Remove(null, out value));
+            Assert.Null(value);
         }
 
         [Fact]
