@@ -261,7 +261,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Windows returns Task.CompletedTask in FlushAsync
         public async Task CanWrite_Get_ReturnsTrue()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())

@@ -31,6 +31,8 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -78,6 +80,11 @@ namespace System.Net
 
         public override void Flush()
         {
+        }
+        
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
 

@@ -32,6 +32,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
@@ -149,6 +150,11 @@ namespace System.Net
 
         public override void Flush()
         {
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         private static byte[] s_crlf = new byte[] { 13, 10 };

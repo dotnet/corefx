@@ -313,7 +313,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // NotSupportedException thrown instead of InvalidOperationException
         public async Task CanWrite_Get_ReturnsFalse()
         {
             HttpListenerRequest request = await _helper.GetRequest();
