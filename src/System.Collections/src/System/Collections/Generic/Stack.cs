@@ -127,9 +127,9 @@ namespace System.Collections.Generic
             int srcIndex = 0;
             int dstIndex = arrayIndex + _size;
             while(srcIndex < _size)
-			{
+            {
                 array[--dstIndex] = _array[srcIndex++];
-			}
+            }
         }
 
         void ICollection.CopyTo(Array array, int arrayIndex)
