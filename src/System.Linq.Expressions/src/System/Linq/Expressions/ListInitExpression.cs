@@ -120,14 +120,51 @@ namespace System.Linq.Expressions
             ContractUtils.RequiresNotNull(newExpression, nameof(newExpression));
             ContractUtils.RequiresNotNull(initializers, nameof(initializers));
 
-            ReadOnlyCollection<Expression> initializerlist = initializers.ToReadOnly();
+            IList<Expression> initializerlist = initializers as IList<Expression> ?? initializers.ToArray();
             if (initializerlist.Count == 0)
             {
                 return new ListInitExpression(newExpression, EmptyReadOnlyCollection<ElementInit>.Instance);
             }
 
-            MethodInfo addMethod = FindMethod(newExpression.Type, "Add", null, new Expression[] { initializerlist[0] }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return ListInit(newExpression, addMethod, initializerlist);
+            ElementInit[] elementInits = new ElementInit[initializerlist.Count];
+            Type type = null;
+            try
+            {
+                Type listType = newExpression.Type;
+                Type lastType = null;
+                MethodInfo lastMethod = null;
+                for (int i = 0; i < elementInits.Length; i++)
+                {
+                    Expression init = initializerlist[i];
+                    MethodInfo addMethod;
+                    type = init.Type;
+                    if (type == lastType)
+                    {
+                        addMethod = lastMethod;
+                    }
+                    else
+                    {
+                        lastType = type;
+                        Type[] typeArr = {type};
+                        lastMethod = addMethod =
+                            listType.GetMethod("Add", BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.IgnoreCase, null, typeArr, null)
+                            ?? listType.GetMethod("Add", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy | BindingFlags.IgnoreCase, null, typeArr, null);
+
+                        if (addMethod == null)
+                        {
+                            throw Error.MethodWithArgsDoesNotExistOnType("Add", type);
+                        }
+                    }
+
+                    elementInits[i] = ElementInit(addMethod, init);
+                }
+            }
+            catch (AmbiguousMatchException)
+            {
+                throw Error.MethodWithMoreThanOneMatch("Add", type);
+            }
+
+            return ListInit(newExpression, elementInits);
         }
 
         /// <summary>
