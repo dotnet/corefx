@@ -125,7 +125,7 @@ namespace System.Collections.Concurrent
         /// class that is empty, has the default concurrency level, has the default initial capacity, and
         /// uses the default comparer for the key type.
         /// </summary>
-        public ConcurrentDictionary() : this(DefaultConcurrencyLevel, DefaultCapacity, true, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary() : this(DefaultConcurrencyLevel, DefaultCapacity, true, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see
@@ -142,7 +142,7 @@ namespace System.Collections.Concurrent
         /// less than 1.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
         /// 0.</exception>
-        public ConcurrentDictionary(int concurrencyLevel, int capacity) : this(concurrencyLevel, capacity, false, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary(int concurrencyLevel, int capacity) : this(concurrencyLevel, capacity, false, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
@@ -158,7 +158,7 @@ namespace System.Collections.Concurrent
         /// (Nothing in Visual Basic).</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more
         /// duplicate keys.</exception>
-        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
