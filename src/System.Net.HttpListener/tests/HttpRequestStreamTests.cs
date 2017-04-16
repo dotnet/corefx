@@ -344,7 +344,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData(-1)]
         [InlineData(3)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Managed implementation throws different exception
         public async Task Read_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset)
         {
             HttpListenerRequest request = await _helper.GetRequest();
@@ -359,7 +358,6 @@ namespace System.Net.Tests
         [InlineData(0, 3)]
         [InlineData(1, 2)]
         [InlineData(2, 1)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Managed implementation throws different exception
         public async Task Read_InvalidOffsetSize_ThrowsArgumentOutOfRangeException(int offset, int size)
         {
             HttpListenerRequest request = await _helper.GetRequest();
@@ -375,7 +373,6 @@ namespace System.Net.Tests
         public async Task EndRead_NullAsyncResult_ThrowsArgumentNullException()
         {
             HttpListenerRequest request = await _helper.GetRequest();
-
             using (Stream inputStream = request.InputStream)
             {
                 Assert.Throws<ArgumentNullException>("asyncResult", () => inputStream.EndRead(null));

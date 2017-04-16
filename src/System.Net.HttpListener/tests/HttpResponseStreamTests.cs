@@ -275,7 +275,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_NullBuffer_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -289,7 +288,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData(-1)]
         [InlineData(3)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset)
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -304,7 +302,6 @@ namespace System.Net.Tests
         [InlineData(0, 3)]
         [InlineData(1, 2)]
         [InlineData(2, 1)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_InvalidOffsetSize_ThrowsArgumentOutOfRangeException(int offset, int size)
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
