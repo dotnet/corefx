@@ -284,16 +284,20 @@ namespace System.Net
             return _stream.BeginWrite(buffer, offset, size, cback, state);
         }
 
-        public override void EndWrite(IAsyncResult ares)
+        public override void EndWrite(IAsyncResult asyncResult)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().ToString());
+            if (asyncResult == null)
+            {
+                throw new ArgumentNullException(nameof(asyncResult));
+            }
 
             if (_ignore_errors)
             {
                 try
                 {
-                    _stream.EndWrite(ares);
+                    _stream.EndWrite(asyncResult);
                     if (_response.SendChunked)
                         _stream.Write(s_crlf, 0, 2);
                 }
@@ -301,7 +305,7 @@ namespace System.Net
             }
             else
             {
-                _stream.EndWrite(ares);
+                _stream.EndWrite(asyncResult);
                 if (_response.SendChunked)
                     _stream.Write(s_crlf, 0, 2);
             }

@@ -369,7 +369,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No validation performed
         public async Task EndRead_NullAsyncResult_ThrowsArgumentNullException()
         {
             HttpListenerRequest request = await _helper.GetRequest();

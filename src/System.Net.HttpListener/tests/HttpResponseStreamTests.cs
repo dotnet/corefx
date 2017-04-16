@@ -543,9 +543,12 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
-        public async Task EndWrite_NullAsyncResult_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task EndWrite_NullAsyncResult_ThrowsArgumentNullException(bool ignoreWriteExceptions)
         {
+            _listener.IgnoreWriteExceptions = ignoreWriteExceptions;
             using (HttpListenerResponse response = await _helper.GetResponse())
             using (Stream outputStream = response.OutputStream)
             {
