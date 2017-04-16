@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,5 +54,18 @@ namespace System.Net.Tests
         public WaitHandle AsyncWaitHandle => throw new NotImplementedException();
         public bool CompletedSynchronously => throw new NotImplementedException();
         public bool IsCompleted => throw new NotImplementedException();
+    }
+
+    public class Helpers
+    {
+        public static void WaitForSocketShutdown(Socket socket)
+        {
+            while (SocketConnected(socket));
+        }
+
+        public static bool SocketConnected(Socket socket)
+        {
+            return !(socket.Poll(100, SelectMode.SelectRead) && socket.Available == 0);
+        }
     }
 }

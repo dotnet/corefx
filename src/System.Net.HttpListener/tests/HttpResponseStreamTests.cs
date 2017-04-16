@@ -398,7 +398,6 @@ namespace System.Net.Tests
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
-        [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.        
         public async Task Write_HeadersToClosedConnectionAsynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -414,9 +413,8 @@ namespace System.Net.Tests
                 HttpListenerContext context = await listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
 
                 // Writing to a disconnected client should fail.
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length));
@@ -430,7 +428,6 @@ namespace System.Net.Tests
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
-        [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
         public async Task Write_HeadersToClosedConnectionSynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -446,10 +443,9 @@ namespace System.Net.Tests
                 HttpListenerContext context = await listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
+
                 // Writing to, a closed connection should fail.
                 Assert.Throws<HttpListenerException>(() => context.Response.OutputStream.Write(buffer, 0, buffer.Length));
                 

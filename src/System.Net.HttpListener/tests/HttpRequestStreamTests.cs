@@ -427,7 +427,8 @@ namespace System.Net.Tests
                 HttpListenerContext context = await _listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Disconnect(false);
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
 
                 // Reading from a closed connection should fail.
                 byte[] buffer = new byte[expected.Length];
@@ -457,7 +458,8 @@ namespace System.Net.Tests
                 HttpListenerContext context = await _listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Disconnect(false);
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
 
                 // Reading from a closed connection should fail.
                 byte[] buffer = new byte[expected.Length];
