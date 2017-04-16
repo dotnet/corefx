@@ -313,18 +313,18 @@ namespace System.Net
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException(SR.net_writeonlystream);
+            throw new InvalidOperationException(SR.net_writeonlystream);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count,
                             AsyncCallback cback, object state)
         {
-            throw new NotSupportedException(SR.net_writeonlystream);
+            throw new InvalidOperationException(SR.net_writeonlystream);
         }
 
         public override int EndRead(IAsyncResult ares)
         {
-            throw new NotSupportedException(SR.net_writeonlystream);
+            throw new InvalidOperationException(SR.net_writeonlystream);
         }
 
         public override long Seek(long offset, SeekOrigin origin)

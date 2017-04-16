@@ -242,18 +242,18 @@ namespace System.Net
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException(SR.net_readonlystream);
+            throw new InvalidOperationException(SR.net_readonlystream);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count,
                             AsyncCallback cback, object state)
         {
-            throw new NotSupportedException(SR.net_readonlystream);
+            throw new InvalidOperationException(SR.net_readonlystream);
         }
 
         public override void EndWrite(IAsyncResult async_result)
         {
-            throw new NotSupportedException(SR.net_readonlystream);
+            throw new InvalidOperationException(SR.net_readonlystream);
         }
     }
 }
