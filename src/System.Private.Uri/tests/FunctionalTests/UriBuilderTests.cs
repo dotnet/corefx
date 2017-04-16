@@ -292,8 +292,8 @@ namespace System.PrivateUri.Tests
         [Theory]
         [InlineData("#fragment", "#fragment")]
         [InlineData("#", "#")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "See: dotnet/corefx #15145")]
-        public void Fragment_Get_Set_Netcore(string value, string expected)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In NET Core if the value starts with # then no other # is prepended, in Desktop we always prepend #")]
+        public void Fragment_Get_Set_StartsWithPound(string value, string expected)
         {
             var uriBuilder = new UriBuilder();
             uriBuilder.Fragment = value;
