@@ -2511,9 +2511,8 @@ public static partial class DataContractJsonSerializerTests
         var value = new DateTime(2010, 12, 1);
         var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
         var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
-
         var baseline = $"\"\\/Date(1291161600000{timeZoneString})\\/\"";
-        if (Environment.OSVersion.VersionString.ToLower().Contains("osx") || Environment.OSVersion.VersionString.ToLower().Contains("windows"))
+        if (PlatformDetection.IsOSX || PlatformDetection.IsWindows)
         {
             baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
         }
@@ -2544,10 +2543,10 @@ public static partial class DataContractJsonSerializerTests
         var dt35832 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 3, 58, 32);
         var dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         var expected_DT_list = "[\"03:58:32.00 a.m.\",\"12:00:00.00 a.m.\",\"12:00:00.00 a.m.\",\"03:58:32.00 a.m.\"]";
-        if (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu"))
+        if (PlatformDetection.IsUbuntu)
         {
             expected_DT_list = "[\"03:58:32.00 a. m.\",\"12:00:00.00 a. m.\",\"12:00:00.00 a. m.\",\"03:58:32.00 a. m.\"]";
-        }
+        }            
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_hmsFt };
         var actual4 = SerializeAndDeserialize(jsonTypes.DT_List, expected_DT_list, dcjsSettings);
         Assert.NotNull(actual4);
@@ -2555,9 +2554,9 @@ public static partial class DataContractJsonSerializerTests
         Assert.True(actual4[1] == dt);
         Assert.True(actual4[2] == dt);
         Assert.True(actual4[3] == dt35832);
-        
+
         var expected_DT_dictionary = "[{\"Key\":\"03:58:32.00 a.m.\",\"Value\":\"03:58:32.00 a.m.\"},{\"Key\":\"12:00:00.00 a.m.\",\"Value\":\"12:00:00.00 a.m.\"}]";
-        if (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu"))
+        if (PlatformDetection.IsUbuntu)
         {
             expected_DT_dictionary = "[{\"Key\":\"03:58:32.00 a. m.\",\"Value\":\"03:58:32.00 a. m.\"},{\"Key\":\"12:00:00.00 a. m.\",\"Value\":\"12:00:00.00 a. m.\"}]";
         }
