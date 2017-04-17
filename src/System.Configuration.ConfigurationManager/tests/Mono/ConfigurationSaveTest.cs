@@ -504,6 +504,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(18431)]
         public void NotModifiedAfterSave()
         {
             Run<DefaultMachineConfig>("NotModifiedAfterSave", (config, label) =>
