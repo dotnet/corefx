@@ -35,7 +35,7 @@ namespace System
 
 namespace System.Data.Common
 {
-    internal static class ADP
+    internal static partial class ADP
     {
         // The class ADP defines the exceptions that are specific to the Adapters.f
         // The class contains functions that take the proper informational variables and then construct
@@ -59,88 +59,14 @@ namespace System.Data.Common
         }
 
         // this method accepts BID format as an argument, this attribute allows FXCopBid rule to validate calls to it
-        private static void TraceException(string trace, Exception e)
+        static partial void TraceException(string trace, Exception e)
         {
             Debug.Assert(null != e, "TraceException: null Exception");
-        }
-
-        internal static void TraceExceptionAsReturnValue(Exception e)
-        {
-            TraceException("<comm.ADP.TraceException|ERR|THROW> '%ls'\n", e);
-        }
-        internal static void TraceExceptionWithoutRethrow(Exception e)
-        {
-            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
         }
 
         //
         // COM+ exceptions
         //
-        internal static ArgumentException Argument(string error)
-        {
-            ArgumentException e = new ArgumentException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentException Argument(string error, Exception inner)
-        {
-            ArgumentException e = new ArgumentException(error, inner);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentException Argument(string error, string parameter)
-        {
-            ArgumentException e = new ArgumentException(error, parameter);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentNullException ArgumentNull(string parameter)
-        {
-            ArgumentNullException e = new ArgumentNullException(parameter);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentNullException ArgumentNull(string parameter, string error)
-        {
-            ArgumentNullException e = new ArgumentNullException(parameter, error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentOutOfRangeException ArgumentOutOfRange(string parameterName)
-        {
-            ArgumentOutOfRangeException e = new ArgumentOutOfRangeException(parameterName);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static ArgumentOutOfRangeException ArgumentOutOfRange(string message, string parameterName)
-        {
-            ArgumentOutOfRangeException e = new ArgumentOutOfRangeException(parameterName, message);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static IndexOutOfRangeException IndexOutOfRange(string error)
-        {
-            IndexOutOfRangeException e = new IndexOutOfRangeException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static InvalidCastException InvalidCast(string error)
-        {
-            return InvalidCast(error, null);
-        }
-        internal static InvalidCastException InvalidCast(string error, Exception inner)
-        {
-            InvalidCastException e = new InvalidCastException(error, inner);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        internal static InvalidOperationException InvalidOperation(string error)
-        {
-            InvalidOperationException e = new InvalidOperationException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         internal static TimeoutException TimeoutException(string error)
         {
             TimeoutException e = new TimeoutException(error);
@@ -153,50 +79,15 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        internal static NotSupportedException NotSupported()
-        {
-            NotSupportedException e = new NotSupportedException();
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         internal static InvalidCastException InvalidCast()
         {
             InvalidCastException e = new InvalidCastException();
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        internal static InvalidOperationException DataAdapter(string error)
-        {
-            return InvalidOperation(error);
-        }
         internal static InvalidOperationException DataAdapter(string error, Exception inner)
         {
             return InvalidOperation(error, inner);
-        }
-        private static InvalidOperationException Provider(string error)
-        {
-            return InvalidOperation(error);
-        }
-
-        internal static ArgumentException InvalidMultipartName(string property, string value)
-        {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidMultipartName, SR.GetString(property), value));
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        internal static ArgumentException InvalidMultipartNameIncorrectUsageOfQuotes(string property, string value)
-        {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidMultipartNameQuoteUsage, SR.GetString(property), value));
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        internal static ArgumentException InvalidMultipartNameToManyParts(string property, string value, int limit)
-        {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidMultipartNameToManyParts, SR.GetString(property), value, limit));
-            TraceExceptionAsReturnValue(e);
-            return e;
         }
 
         //
@@ -210,62 +101,8 @@ namespace System.Data.Common
                 throw Argument(SR.GetString(SR.ADP_EmptyString, parameterName)); // MDAC 94859
             }
         }
-        internal static void CheckArgumentNull(object value, string parameterName)
-        {
-            if (null == value)
-            {
-                throw ArgumentNull(parameterName);
-            }
-        }
-
-
-        // only StackOverflowException & ThreadAbortException are sealed classes
-        private static readonly Type s_stackOverflowType = typeof(StackOverflowException);
-        private static readonly Type s_outOfMemoryType = typeof(OutOfMemoryException);
-        private static readonly Type s_threadAbortType = typeof(ThreadAbortException);
-        private static readonly Type s_nullReferenceType = typeof(NullReferenceException);
-        private static readonly Type s_accessViolationType = typeof(AccessViolationException);
-        private static readonly Type s_securityType = typeof(SecurityException);
-
-        internal static bool IsCatchableExceptionType(Exception e)
-        {
-            // a 'catchable' exception is defined by what it is not.
-            Debug.Assert(e != null, "Unexpected null exception!");
-            Type type = e.GetType();
-
-            return ((type != s_stackOverflowType) &&
-                     (type != s_outOfMemoryType) &&
-                     (type != s_threadAbortType) &&
-                     (type != s_nullReferenceType) &&
-                     (type != s_accessViolationType) &&
-                     !s_securityType.IsAssignableFrom(type));
-        }
-
-        internal static bool IsCatchableOrSecurityExceptionType(Exception e)
-        {
-            // a 'catchable' exception is defined by what it is not.
-            // since IsCatchableExceptionType defined SecurityException as not 'catchable'
-            // this method will return true for SecurityException has being catchable.
-
-            // the other way to write this method is, but then SecurityException is checked twice
-            // return ((e is SecurityException) || IsCatchableExceptionType(e));
-
-            Debug.Assert(e != null, "Unexpected null exception!");
-            Type type = e.GetType();
-
-            return ((type != s_stackOverflowType) &&
-                     (type != s_outOfMemoryType) &&
-                     (type != s_threadAbortType) &&
-                     (type != s_nullReferenceType) &&
-                     (type != s_accessViolationType));
-        }
 
         // Invalid Enumeration
-
-        internal static ArgumentOutOfRangeException InvalidEnumerationValue(Type type, int value)
-        {
-            return ADP.ArgumentOutOfRange(SR.GetString(SR.ADP_InvalidEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
-        }
 
         // IDbCommand.CommandType
         internal static ArgumentOutOfRangeException InvalidCommandType(CommandType value)
@@ -386,14 +223,6 @@ namespace System.Data.Common
         //
         // DbConnectionOptions, DataAccess
         //
-        internal static ArgumentException ConnectionStringSyntax(int index)
-        {
-            return Argument(SR.GetString(SR.ADP_ConnectionStringSyntax, index));
-        }
-        internal static ArgumentException KeywordNotSupported(string keyword)
-        {
-            return Argument(SR.GetString(SR.ADP_KeywordNotSupported, keyword));
-        }
         /*
         static internal ArgumentException EmptyKeyValue(string keyword) { // MDAC 80715
             return Argument(Res.GetString(Res.ADP_EmptyKeyValue, keyword));
@@ -411,10 +240,6 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.ADP_InvalidValue), parameterName);
         }
-        internal static ArgumentException ConvertFailed(Type fromType, Type toType, Exception innerException)
-        {
-            return ADP.Argument(SR.GetString(SR.SqlConvert_ConvertFailed, fromType.FullName, toType.FullName), innerException);
-        }
 
         //
         // DbConnection
@@ -429,37 +254,9 @@ namespace System.Data.Common
             return System.NotImplemented.ByDesignWithMessage(methodName);
         }
 
-        private static string ConnectionStateMsg(ConnectionState state)
-        { // MDAC 82165, if the ConnectionState enum to msg the localization looks weird
-            switch (state)
-            {
-                case (ConnectionState.Closed):
-                case (ConnectionState.Connecting | ConnectionState.Broken): // treated the same as closed
-                    return SR.GetString(SR.ADP_ConnectionStateMsg_Closed);
-                case (ConnectionState.Connecting):
-                    return SR.GetString(SR.ADP_ConnectionStateMsg_Connecting);
-                case (ConnectionState.Open):
-                    return SR.GetString(SR.ADP_ConnectionStateMsg_Open);
-                case (ConnectionState.Open | ConnectionState.Executing):
-                    return SR.GetString(SR.ADP_ConnectionStateMsg_OpenExecuting);
-                case (ConnectionState.Open | ConnectionState.Fetching):
-                    return SR.GetString(SR.ADP_ConnectionStateMsg_OpenFetching);
-                default:
-                    return SR.GetString(SR.ADP_ConnectionStateMsg, state.ToString());
-            }
-        }
-
         //
         // : DbConnectionOptions, DataAccess, SqlClient
         //
-        internal static Exception InvalidConnectionOptionValue(string key)
-        {
-            return InvalidConnectionOptionValue(key, null);
-        }
-        internal static Exception InvalidConnectionOptionValue(string key, Exception inner)
-        {
-            return Argument(SR.GetString(SR.ADP_InvalidConnectionOptionValue, key), inner);
-        }
 
         internal static Exception OdbcNoTypesFromProvider()
         {
@@ -482,37 +279,9 @@ namespace System.Data.Common
         //
         // Generic Data Provider Collection
         //
-        internal static ArgumentException CollectionRemoveInvalidObject(Type itemType, ICollection collection)
-        {
-            return Argument(SR.GetString(SR.ADP_CollectionRemoveInvalidObject, itemType.Name, collection.GetType().Name)); // MDAC 68201
-        }
-        internal static ArgumentNullException CollectionNullValue(string parameter, Type collection, Type itemType)
-        {
-            return ArgumentNull(parameter, SR.GetString(SR.ADP_CollectionNullValue, collection.Name, itemType.Name));
-        }
-        internal static IndexOutOfRangeException CollectionIndexInt32(int index, Type collection, int count)
-        {
-            return IndexOutOfRange(SR.GetString(SR.ADP_CollectionIndexInt32, index.ToString(CultureInfo.InvariantCulture), collection.Name, count.ToString(CultureInfo.InvariantCulture)));
-        }
-        internal static IndexOutOfRangeException CollectionIndexString(Type itemType, string propertyName, string propertyValue, Type collection)
-        {
-            return IndexOutOfRange(SR.GetString(SR.ADP_CollectionIndexString, itemType.Name, propertyName, propertyValue, collection.Name));
-        }
-        internal static InvalidCastException CollectionInvalidType(Type collection, Type itemType, object invalidValue)
-        {
-            return InvalidCast(SR.GetString(SR.ADP_CollectionInvalidType, collection.Name, itemType.Name, invalidValue.GetType().Name));
-        }
         internal static Exception CollectionUniqueValue(Type itemType, string propertyName, string propertyValue)
         {
             return Argument(SR.GetString(SR.ADP_CollectionUniqueValue, itemType.Name, propertyName, propertyValue));
-        }
-        internal static ArgumentException ParametersIsNotParent(Type parameterType, ICollection collection)
-        {
-            return Argument(SR.GetString(SR.ADP_CollectionIsNotParent, parameterType.Name, collection.GetType().Name));
-        }
-        internal static ArgumentException ParametersIsParent(Type parameterType, ICollection collection)
-        {
-            return Argument(SR.GetString(SR.ADP_CollectionIsParent, parameterType.Name, collection.GetType().Name));
         }
 
         //
@@ -624,61 +393,12 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_InternalConnectionError, (int)internalError));
         }
 
-        internal enum InternalErrorCode
-        {
-            UnpooledObjectHasOwner = 0,
-            UnpooledObjectHasWrongOwner = 1,
-            PushingObjectSecondTime = 2,
-            PooledObjectHasOwner = 3,
-            PooledObjectInPoolMoreThanOnce = 4,
-            CreateObjectReturnedNull = 5,
-            NewObjectCannotBePooled = 6,
-            NonPooledObjectUsedMoreThanOnce = 7,
-            AttemptingToPoolOnRestrictedToken = 8,
-            //          ConnectionOptionsInUse                                  =  9,
-            ConvertSidToStringSidWReturnedNull = 10,
-            //          UnexpectedTransactedObject                              = 11,
-            AttemptingToConstructReferenceCollectionOnStaticObject = 12,
-            AttemptingToEnlistTwice = 13,
-            CreateReferenceCollectionReturnedNull = 14,
-            PooledObjectWithoutPool = 15,
-            UnexpectedWaitAnyResult = 16,
-            SynchronousConnectReturnedPending = 17,
-            CompletedConnectReturnedPending = 18,
-
-            NameValuePairNext = 20,
-            InvalidParserState1 = 21,
-            InvalidParserState2 = 22,
-            InvalidParserState3 = 23,
-
-            InvalidBuffer = 30,
-
-            UnimplementedSMIMethod = 40,
-            InvalidSmiCall = 41,
-
-            SqlDependencyObtainProcessDispatcherFailureObjectHandle = 50,
-            SqlDependencyProcessDispatcherFailureCreateInstance = 51,
-            SqlDependencyProcessDispatcherFailureAppDomain = 52,
-            SqlDependencyCommandHashIsNotAssociatedWithNotification = 53,
-
-            UnknownTransactionFailure = 60,
-        }
-
-        internal static Exception InternalError(InternalErrorCode internalError)
-        {
-            return InvalidOperation(SR.GetString(SR.ADP_InternalProviderError, (int)internalError));
-        }
-
         //
         // : DbDataReader
         //
         internal static Exception DataReaderNoData()
         {
             return InvalidOperation(SR.GetString(SR.ADP_DataReaderNoData));
-        }
-        internal static Exception DataReaderClosed(string method)
-        {
-            return InvalidOperation(SR.GetString(SR.ADP_DataReaderClosed, method));
         }
 
         //
@@ -943,11 +663,9 @@ namespace System.Data.Common
         internal const string UpdateCommand = "UpdateCommand";
         internal const string UpdateRows = "UpdateRows";
 
-        internal const CompareOptions compareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
         internal const int DecimalMaxPrecision = 29;
         internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
         internal const int DefaultCommandTimeout = 30;
-        internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
 
         // security issue, don't rely upon static public readonly values - AS/URT 109635
         internal static readonly String StrEmpty = ""; // String.Empty
@@ -1062,26 +780,6 @@ namespace System.Data.Common
             }
             Debug.Assert(8 == ADP.PtrSize, "8 != IntPtr.Size"); // MDAC 73747
             return (IntPtr)checked(pbase.ToInt64() + offset);
-        }
-
-        internal static int DstCompare(string strA, string strB)
-        { // this is null safe
-            return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, ADP.compareOptions);
-        }
-
-        internal static bool IsEmptyArray(string[] array)
-        {
-            return ((null == array) || (0 == array.Length));
-        }
-
-        internal static bool IsNull(object value)
-        {
-            if ((null == value) || (DBNull.Value == value))
-            {
-                return true;
-            }
-            INullable nullable = (value as INullable);
-            return ((null != nullable) && nullable.IsNull);
         }
     }
 }
