@@ -2507,8 +2507,11 @@ public static partial class DataContractJsonSerializerTests
             EmitTypeInformation = EmitTypeInformation.AsNeeded,
             KnownTypes = new List<Type>()
         };
+
         var value = new DateTime(2010, 12, 1);
-        var actual = SerializeAndDeserialize(value, "\"\\/Date(1291190400000-0800)\\/\"", dcjsSettings);
+        var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
+        var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
+        var actual = SerializeAndDeserialize(value, $"\"\\/Date(1291190400000{timeZoneString})\\/\"", dcjsSettings);
         Assert.Equal(value, actual);
 
         var DTF_class = new JsonTypes.DTF_class()
@@ -2583,7 +2586,9 @@ public static partial class DataContractJsonSerializerTests
             EmitTypeInformation = EmitTypeInformation.AsNeeded,
             KnownTypes = new List<Type>()
         };
-        var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), "\"03:58:32.00 a.m.\"", dcjsSettings);
+
+        var value = (Environment.OSVersion.Platform == PlatformID.Unix) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";      
+        var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), value, dcjsSettings);
         Assert.NotNull(actual2);
         Assert.True(actual2 == new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 3, 58, 32));
 
@@ -2647,7 +2652,7 @@ public static partial class DataContractJsonSerializerTests
             KnownTypes = new List<Type>()
         };
         var value = new JsonTypes.DictionaryClass();
-        var actual = SerializeAndDeserialize(value, "{\"dict\":{\"Title\":\"Sherlocl Kholmes\",\"Name\":\"study scarlet\"}}", dcjsSettings);
+        var actual = SerializeAndDeserialize(value, "{\"_dict\":{\"Title\":\"Sherlocl Kholmes\",\"Name\":\"study scarlet\"}}", dcjsSettings);
         Assert.NotNull(actual);
 
         var value2 = new ImplementDictionary()
@@ -2914,5 +2919,5 @@ public static partial class DataContractJsonSerializerTests
     private static string getCheckFailureMsg(string propertyName)
     {
         return string.Format(s_errorMsg, propertyName);
-    }   
+    }
 }

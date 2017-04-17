@@ -1724,36 +1724,36 @@ namespace SerializationTypes
             public static bool WriteXmlInvoked = false;
             public static bool ReadXmlInvoked = false;
 
-        public string StringValue { get; set; }
-        private T GenericValue { get; set; }
+            public string StringValue { get; set; }
+            private T GenericValue { get; set; }
 
-        public NestedGenericClassImplementingIXmlSerialiable()
-        {
-            GenericValue = default(T);
-        }
+            public NestedGenericClassImplementingIXmlSerialiable()
+            {
+                GenericValue = default(T);
+            }
 
-        public T GetPrivateMember()
-        {
-            return GenericValue;
-        }
+            public T GetPrivateMember()
+            {
+                return GenericValue;
+            }
 
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
-            return null;
-        }
+            public System.Xml.Schema.XmlSchema GetSchema()
+            {
+                return null;
+            }
 
-        public void ReadXml(System.Xml.XmlReader reader)
-        {
-            ReadXmlInvoked = true;
-            reader.MoveToContent();
-            StringValue = reader.GetAttribute("StringValue");
-        }
+            public void ReadXml(System.Xml.XmlReader reader)
+            {
+                ReadXmlInvoked = true;
+                reader.MoveToContent();
+                StringValue = reader.GetAttribute("StringValue");
+            }
 
-        public void WriteXml(System.Xml.XmlWriter writer)
-        {
-            WriteXmlInvoked = true;
-            writer.WriteAttributeString("StringValue", StringValue);
-        }
+            public void WriteXml(System.Xml.XmlWriter writer)
+            {
+                WriteXmlInvoked = true;
+                writer.WriteAttributeString("StringValue", StringValue);
+            }
         }
     }
 
@@ -4442,7 +4442,7 @@ public class JsonTypes
     public class DictionaryClass
     {
         [DataMember]
-        Dictionary<string, string> dict = new Dictionary<string, string>()
+        private Dictionary<string, string> _dict = new Dictionary<string, string>()
         {
             {
               "Title", "Sherlocl Kholmes"
@@ -4607,19 +4607,19 @@ public class TestClass
 {
     public List<int> intList { get; set; }
     public float floatNum { get; set; }
-    static char ListSeparator = ',';
-    static char MemberSeparator = '#';
+    private static char s_listSeparator = ',';
+    private static char s_memberSeparator = '#';
 
     public override string ToString()
     {
         string ints = String.Join(",", intList);
-        return String.Format("{0}{1}{2}", ints, MemberSeparator, floatNum);
+        return String.Format("{0}{1}{2}", ints, s_memberSeparator, floatNum);
     }
 
     public static TestClass Parse(string value)
     {
-        string[] members = value.Split(MemberSeparator);
-        string[] numbers = members[0].Split(ListSeparator);
+        string[] members = value.Split(s_memberSeparator);
+        string[] numbers = members[0].Split(s_listSeparator);
 
         List<int> ints = new List<int>();
         foreach (string number in numbers)
@@ -4651,17 +4651,17 @@ public class TestClassWithKT
 
 public class ImplementDictionary : IDictionary
 {
-    private DictionaryEntry[] items;
-    private Int32 ItemsInUse = 0;
+    private DictionaryEntry[] _items;
+    private Int32 _itemsInUse = 0;
 
     public ImplementDictionary()
     {
-        items = new DictionaryEntry[10];
+        _items = new DictionaryEntry[10];
     }
 
     public ImplementDictionary(Int32 numItems)
     {
-        items = new DictionaryEntry[numItems];
+        _items = new DictionaryEntry[numItems];
     }
 
     #region IDictionary Members
@@ -4678,27 +4678,27 @@ public class ImplementDictionary : IDictionary
         Int32 index;
         if (TryGetIndexOfKey(key, out index))
         {
-            Array.Copy(items, index + 1, items, index, ItemsInUse - index - 1);
-            ItemsInUse--;
+            Array.Copy(_items, index + 1, _items, index, _itemsInUse - index - 1);
+            _itemsInUse--;
         }
         else
         {
         }
     }
-    public void Clear() { ItemsInUse = 0; }
+    public void Clear() { _itemsInUse = 0; }
     public void Add(object key, object value)
     {
-        if (ItemsInUse == items.Length)
+        if (_itemsInUse == _items.Length)
             throw new InvalidOperationException("The dictionary cannot hold any more items.");
-        items[ItemsInUse++] = new DictionaryEntry(key, value);
+        _items[_itemsInUse++] = new DictionaryEntry(key, value);
     }
     public ICollection Keys
     {
         get
         {
-            Object[] keys = new Object[ItemsInUse];
-            for (Int32 n = 0; n < ItemsInUse; n++)
-                keys[n] = items[n].Key;
+            Object[] keys = new Object[_itemsInUse];
+            for (Int32 n = 0; n < _itemsInUse; n++)
+                keys[n] = _items[n].Key;
             return keys;
         }
     }
@@ -4706,9 +4706,9 @@ public class ImplementDictionary : IDictionary
     {
         get
         {
-            Object[] values = new Object[ItemsInUse];
-            for (Int32 n = 0; n < ItemsInUse; n++)
-                values[n] = items[n].Value;
+            Object[] values = new Object[_itemsInUse];
+            for (Int32 n = 0; n < _itemsInUse; n++)
+                values[n] = _items[n].Value;
             return values;
         }
     }
@@ -4719,7 +4719,7 @@ public class ImplementDictionary : IDictionary
             Int32 index;
             if (TryGetIndexOfKey(key, out index))
             {
-                return items[index].Value;
+                return _items[index].Value;
             }
             else
             {
@@ -4731,7 +4731,7 @@ public class ImplementDictionary : IDictionary
             Int32 index;
             if (TryGetIndexOfKey(key, out index))
             {
-                items[index].Value = value;
+                _items[index].Value = value;
             }
             else
             {
@@ -4741,49 +4741,49 @@ public class ImplementDictionary : IDictionary
     }
     private Boolean TryGetIndexOfKey(Object key, out Int32 index)
     {
-        for (index = 0; index < ItemsInUse; index++)
+        for (index = 0; index < _itemsInUse; index++)
         {
-            if (items[index].Key.Equals(key)) return true;
+            if (_items[index].Key.Equals(key)) return true;
         }
         return false;
     }
     private class ImplementDictionaryEnumerator : IDictionaryEnumerator
     {
-        DictionaryEntry[] items;
-        Int32 index = -1;
+        private DictionaryEntry[] _items;
+        private Int32 _index = -1;
 
         public ImplementDictionaryEnumerator(ImplementDictionary sd)
         {
-            items = new DictionaryEntry[sd.Count];
-            Array.Copy(sd.items, 0, items, 0, sd.Count);
+            _items = new DictionaryEntry[sd.Count];
+            Array.Copy(sd._items, 0, _items, 0, sd.Count);
         }
 
-        public Object Current { get { ValidateIndex(); return items[index]; } }
+        public Object Current { get { ValidateIndex(); return _items[_index]; } }
 
         public DictionaryEntry Entry
         {
             get { return (DictionaryEntry)Current; }
         }
 
-        public Object Key { get { ValidateIndex(); return items[index].Key; } }
+        public Object Key { get { ValidateIndex(); return _items[_index].Key; } }
 
-        public Object Value { get { ValidateIndex(); return items[index].Value; } }
+        public Object Value { get { ValidateIndex(); return _items[_index].Value; } }
 
         public Boolean MoveNext()
         {
-            if (index < items.Length - 1) { index++; return true; }
+            if (_index < _items.Length - 1) { _index++; return true; }
             return false;
         }
 
         private void ValidateIndex()
         {
-            if (index < 0 || index >= items.Length)
+            if (_index < 0 || _index >= _items.Length)
                 throw new InvalidOperationException("Enumerator is before or after the collection.");
         }
 
         public void Reset()
         {
-            index = -1;
+            _index = -1;
         }
     }
     public IDictionaryEnumerator GetEnumerator()
@@ -4795,7 +4795,7 @@ public class ImplementDictionary : IDictionary
     #region ICollection Members
     public bool IsSynchronized { get { return false; } }
     public object SyncRoot { get { throw new NotImplementedException(); } }
-    public int Count { get { return ItemsInUse; } }
+    public int Count { get { return _itemsInUse; } }
     public void CopyTo(Array array, int index) { throw new NotImplementedException(); }
     #endregion
 
