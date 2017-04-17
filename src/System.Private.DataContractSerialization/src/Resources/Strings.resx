@@ -1084,4 +1084,13 @@
   <data name="ParseJsonNumberReturnInvalidNumber" xml:space="preserve">
     <value>JsonObjectDataContract.ParseJsonNumber shouldn't return a TypeCode that we're not expecting.</value>
   </data>
+  <data name="CouldNotReadSerializationSchema" xml:space="preserve">
+    <value>An internal error has occurred. Could not load serialization schema. Consider providing schema with namespace '{0}'.</value>
+  </data>
+  <data name="MissingSchemaType" xml:space="preserve">
+    <value>Schema type '{0}' returned by CLR type '{1}' is not found in the XmlSchemaSet.</value>
+  </data>
+  <data name="InvalidReturnSchemaOnGetSchemaMethod" xml:space="preserve">
+    <value>Method '{0}.GetSchema()' must return a schema with a valid Id.</value>
+  </data>
 </root>
