@@ -378,17 +378,10 @@ namespace System.Reflection.Tests
         [Fact]
         public void LoadFrom_SamePath_ReturnsEqualAssemblies()
         {
-<<<<<<< HEAD
-            var assem = Assembly.LoadFrom(destTestAssemblyPath);
-            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
-            var assem1 = Assembly.LoadFrom(destTestAssemblyPath);
-            Assert.Equal(assem, assem1);
-=======
             Assembly assembly1 = Assembly.LoadFrom(destTestAssemblyPath);
             Assembly assembly2 = Assembly.LoadFrom(destTestAssemblyPath);
             Assert.Equal(assembly1, assembly2);
         }
->>>>>>> 3ac4651f96aa89cd2f82835f2e6bdeecf8ade1a7
 
         [Fact]
         public void LoadFrom_SameIdentityAsAssemblyWithDifferentPath_ReturnsEqualAssemblies()
@@ -411,11 +404,6 @@ namespace System.Reflection.Tests
         [Fact]
         public void LoadFrom_NullAssemblyFile_ThrowsArgumentNullException()
         {
-<<<<<<< HEAD
-            var assem = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
-            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
-        }        
-=======
             Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
             Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
         }
@@ -448,7 +436,6 @@ namespace System.Reflection.Tests
         {
             Assert.Throws<NotSupportedException>(() => Assembly.LoadFrom(destTestAssemblyPath, new byte[0], Configuration.Assemblies.AssemblyHashAlgorithm.None));
         }
->>>>>>> 3ac4651f96aa89cd2f82835f2e6bdeecf8ade1a7
 
         [Fact]
         public void GetFile()
