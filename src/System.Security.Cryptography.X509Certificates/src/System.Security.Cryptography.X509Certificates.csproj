@@ -94,7 +94,6 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.cs" />
-    <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.CspParametersStub.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.Import.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.PrivateKey.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\ChainPal.BuildChain.cs" />
