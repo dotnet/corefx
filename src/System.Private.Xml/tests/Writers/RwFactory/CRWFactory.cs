@@ -159,11 +159,6 @@ namespace System.Xml.Tests
             return GetPath(fileName, false);
         }
 
-//        protected string GetUrl(string url)
-//        {
-//            return GetPath(url, true);
-//        }
-
         /// <summary>
         /// Init does the following :
         /// Store Parameter Info.
@@ -304,31 +299,6 @@ namespace System.Xml.Tests
             }
             return s;
         }
-
-        /// <summary>
-        /// Reads the value of the tag in the Spec file under the Data Section
-        /// </summary>
-        /// <param name="tag">Name of the tag to read.</param>
-        /// <param name="throwOnNull">IF true, will check for null and throw, 
-        /// set to true if you want to throw an exception if value is not found. 
-        /// If set to false, the return value can be null</param>
-        /// <returns>Value of the tag under Data Section</returns>
-//        protected string ReadData(string tag, bool throwOnNull)
-//        {
-//            CError.WriteIgnore("Loading .. " + tag + " : ");
-//            string s = null;
-//            if (throwOnNull)
-//            {
-//                s = varInfo.SelectExistingValue(tag, "Data");
-//                Log(s);
-//            }
-//            else
-//            {
-//                s = varInfo.SelectValue(tag, "Data");
-//                Log(s);
-//            }
-//            return s;
-//        }
     }
 
     #region CustomReader

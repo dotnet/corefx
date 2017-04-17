@@ -41,24 +41,6 @@ namespace System.Xml.Tests
 
         protected String scriptTestPath = null;
 
-//        protected String ScriptTestPath
-//        {
-//            get
-//            {
-//                if (scriptTestPath == null) //not thread safe
-//                {
-//                    scriptTestPath = _standardTests;
-//
-//                    if (!scriptTestPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-//                        scriptTestPath += Path.DirectorySeparatorChar;
-//
-//                    scriptTestPath += "Scripting" + Path.DirectorySeparatorChar;
-//                }
-//
-//                return scriptTestPath;
-//            }
-//        }
-
         protected MethodInfo AMethodInfo
         {
             get

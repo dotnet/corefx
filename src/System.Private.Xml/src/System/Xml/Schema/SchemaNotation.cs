@@ -9,9 +9,6 @@ namespace System.Xml.Schema
 
     internal sealed class SchemaNotation
     {
-//        internal const int SYSTEM = 0;
-//        internal const int PUBLIC = 1;
-
         private XmlQualifiedName _name;
         private String _systemLiteral;   // System literal
         private String _pubid;    // pubid literal

@@ -84,7 +84,5 @@ namespace MS.Internal.Xml.XPath
         {
             return list.GetEnumerator();
         }
-
-//        private object debuggerDisplayProxy { get { return index < 1 ? null : (object)new XPathNavigator.DebuggerDisplayProxy(Current); } }
     }
 }

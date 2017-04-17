@@ -27,9 +27,6 @@ namespace System.Xml.Serialization
 
     internal class Compiler
     {
-#if !XMLSERIALIZERGENERATOR
-//        private bool _debugEnabled = DiagnosticsSwitches.KeepTempFiles.Enabled;
-#endif
         private StringWriter _writer = new StringWriter(CultureInfo.InvariantCulture);
 
 #if XMLSERIALIZERGENERATOR

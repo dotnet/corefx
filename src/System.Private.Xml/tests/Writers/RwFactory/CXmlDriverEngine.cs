@@ -756,10 +756,5 @@ namespace System.Xml.Tests
         {
             get { return _confirmanceErrors; }
         }
-
-//        internal bool IsRequiredCultureInfoNeedToBeSet
-//        {
-//            get { return _isRequiredCultureInfoNeedToBeSet; }
-//        }
     }
 }

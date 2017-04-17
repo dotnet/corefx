@@ -110,21 +110,6 @@ public class MyObject
         return "Inside Public Function";
     }
 
-//    private String PrivateFunction()
-//    {
-//        return "Inside Private Function";
-//    }
-
-//    protected String ProtectedFunction()
-//    {
-//        return "Inside Protected Function";
-//    }
-
-//    private String DefaultFunction()
-//    {
-//        return "Default Function";
-//    }
-
     // Return types tests
     public int MyValue()
     {

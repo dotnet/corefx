@@ -989,7 +989,6 @@ namespace System.Xml.Schema
 
     internal class Numeric10FacetsChecker : FacetsChecker
     {
-//        private static readonly char[] s_signs = new char[] { '+', '-' };
         private decimal _maxValue;
         private decimal _minValue;
 

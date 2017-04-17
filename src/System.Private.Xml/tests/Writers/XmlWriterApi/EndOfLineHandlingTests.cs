@@ -23,7 +23,6 @@ namespace System.Xml.Tests
             return TEST_SKIPPED;
         }
 
-//        private static NewLineHandling[] s_nlHandlingMembers = { NewLineHandling.Entitize, NewLineHandling.Replace, NewLineHandling.None };
         private StringWriter _strWriter = null;
 
         private XmlWriter CreateMemWriter(XmlWriterSettings settings)

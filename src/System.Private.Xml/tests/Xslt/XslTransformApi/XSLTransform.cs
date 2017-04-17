@@ -75,8 +75,6 @@ namespace System.Xml.Tests
         protected XsltArgumentList m_xsltArg;                   // For XsltArgumentList tests
         public object retObj;
 
-//        protected bool _isInProc;          // Is the current test run in proc or /Host None?
-
         private ITestOutputHelper _output;
         public XsltApiTestCaseBase(ITestOutputHelper output)
         {

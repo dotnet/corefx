@@ -1123,14 +1123,5 @@ namespace System.Xml.Tests
         }
 
         #endregion
-
-        #region Methods
-
-//        private TimeSpan GetOffsetFromUtc(DateTime dt)
-//        {
-//            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(dt);
-//            return offset;
-//        }
-        #endregion
     }
 }

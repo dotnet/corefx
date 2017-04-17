@@ -13,7 +13,6 @@ namespace System.Xml.Xsl.XsltOld
     internal class CopyAction : ContainerAction
     {
         // Local execution states
-//        private const int CopyText = 4;
         private const int NamespaceCopy = 5;
 
         private const int ContentsCopy = 6;

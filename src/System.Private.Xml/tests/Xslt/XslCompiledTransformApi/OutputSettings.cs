@@ -40,14 +40,6 @@ namespace System.Xml.Tests
             return sw;
         }
 
-//        private void VerifyResult(object actual, object expected, string message)
-//        {
-//            _output.WriteLine("Expected : {0}", expected);
-//            _output.WriteLine("Actual : {0}", actual);
-//
-//            Assert.Equal(actual, expected);
-//        }
-
         //[Variation(id = 1, Desc = "Verify the default value of the OutputSettings, expected null", Pri = 0)]
         [InlineData()]
         [Theory]

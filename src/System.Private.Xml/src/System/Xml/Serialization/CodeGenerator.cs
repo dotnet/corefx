@@ -32,7 +32,6 @@ namespace System.Xml.Serialization
 
     internal class CodeGenerator
     {
-//        internal static BindingFlags InstancePublicBindingFlags = BindingFlags.Instance | BindingFlags.Public;
         internal static BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         internal static BindingFlags StaticBindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         internal static MethodAttributes PublicMethodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig;

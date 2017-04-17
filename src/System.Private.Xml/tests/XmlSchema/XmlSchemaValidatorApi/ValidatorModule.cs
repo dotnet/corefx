@@ -76,11 +76,6 @@ namespace System.Xml.Tests
             return CreateValidator(schemas, flags);
         }
 
-//        protected XmlSchemaValidator CreateValidator(string xsdFilename, string targetNamespace)
-//        {
-//            return CreateValidator(xsdFilename, targetNamespace, AllFlags);
-//        }
-
         protected XmlSchemaValidator CreateValidator(string xsdFilename)
         {
             return CreateValidator(xsdFilename, "", AllFlags);

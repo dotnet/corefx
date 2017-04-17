@@ -66,28 +66,6 @@ namespace System.Xml.Tests
             return bPassed;
         }
 
-//        protected void TestInvalidNodeType(XmlNodeType nt)
-//        {
-//            ReloadSource();
-//
-//            PositionOnNodeType(nt);
-//            string name = DataReader.Name;
-//            string value = DataReader.Value;
-//
-//            byte[] buffer = new byte[1];
-//            if (CheckCanReadBinaryContent()) return;
-//
-//            try
-//            {
-//                int nBytes = DataReader.ReadContentAsBinHex(buffer, 0, 1);
-//            }
-//            catch (InvalidOperationException)
-//            {
-//                return;
-//            }
-//            CError.Compare(false, "Invalid OP exception not thrown on wrong nodetype");
-//        }
-
         [Variation("ReadBinHex Element with all valid value")]
         public int TestReadBinHex_1()
         {

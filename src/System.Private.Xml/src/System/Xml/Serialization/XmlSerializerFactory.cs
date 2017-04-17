@@ -26,8 +26,6 @@ namespace System.Xml.Serialization
     /// </devdoc>
     public class XmlSerializerFactory
     {
-//        private static TempAssemblyCache s_cache = new TempAssemblyCache();
-
         /// <include file='doc\XmlSerializerFactory.uex' path='docs/doc[@for="XmlSerializerFactory.CreateSerializer"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>

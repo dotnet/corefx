@@ -36,7 +36,6 @@ namespace System.Xml.Serialization
         private IDictionary _writerMethods;
         private IDictionary _readerMethods;
         private TempMethodDictionary _methods;
-//        private Hashtable _assemblies = new Hashtable();
 
         internal class TempMethod
         {

@@ -23,11 +23,6 @@ namespace System.Xml.Tests
         }
 
         //Accessors
-//        private IList<CThread> Internal
-//        {
-//            get { return _rgThreads; }
-//        }
-
         public CThread this[int index]
         {
             get { return _rgThreads[index]; }

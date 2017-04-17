@@ -189,25 +189,6 @@ namespace System.Xml.Tests
                 pstate = TestState.Error;
         }
 
-//        protected void CompareSettings()
-//        {
-//            XmlWriterSettings actual = _factoryWriter.Settings;
-//
-//            CError.Compare(actual.CheckCharacters, _settings.CheckCharacters, "CheckCharacters");
-//
-//            //This actually checks Conformance Level DCR to some extent.
-//            if (_settings.ConformanceLevel != ConformanceLevel.Auto)
-//                CError.Compare(actual.ConformanceLevel, _settings.ConformanceLevel, "ConformanceLevel");
-//
-//            CError.Compare(actual.Encoding, _settings.Encoding, "Encoding");
-//            CError.Compare(actual.Indent, _settings.Indent, "Indent");
-//            CError.Compare(actual.IndentChars, _settings.IndentChars, "IndentChars");
-//            CError.Compare(actual.NewLineChars, _settings.NewLineChars, "NewLineChars");
-//            CError.Compare(actual.NewLineOnAttributes, _settings.NewLineOnAttributes, "NewLineOnAttributes");
-//            CError.Compare(actual.NewLineHandling, _settings.NewLineHandling, "NormalizeNewLines");
-//            CError.Compare(actual.OmitXmlDeclaration, _settings.OmitXmlDeclaration, "OmitXmlDeclaration");
-//        }
-
         protected void CreateWriter(WriteThru writeThru)
         {
             // Assumption is that the Create method doesn't throw NullReferenceException and

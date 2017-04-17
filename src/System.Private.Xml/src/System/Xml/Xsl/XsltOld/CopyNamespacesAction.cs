@@ -12,7 +12,6 @@ namespace System.Xml.Xsl.XsltOld
     internal sealed class CopyNamespacesAction : Action
     {
         private const int BeginEvent = 2;
-//        private const int TextEvent = 3;
         private const int EndEvent = 4;
         private const int Advance = 5;
 

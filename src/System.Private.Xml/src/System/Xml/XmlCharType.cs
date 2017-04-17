@@ -16,7 +16,6 @@ namespace System.Xml
         internal const int SurHighEnd = 0xdbff;
         internal const int SurLowStart = 0xdc00;    // 1101 11xx
         internal const int SurLowEnd = 0xdfff;
-//        internal const int SurMask = 0xfc00;    // 1111 11xx
 
         // Characters defined in the XML 1.0 Fourth Edition
         // Whitespace chars -- Section 2.3 [3]

@@ -22,7 +22,6 @@ namespace System.Xml.Tests
             return TEST_SKIPPED;
         }
 
-//        private static NamespaceHandling[] s_nlHandlingMembers = { NamespaceHandling.Default, NamespaceHandling.OmitDuplicates };
         private StringWriter _strWriter = null;
 
         private XmlWriter CreateMemWriter(XmlWriterSettings settings)

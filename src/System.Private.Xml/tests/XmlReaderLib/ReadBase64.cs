@@ -60,44 +60,6 @@ namespace System.Xml.Tests
             return bPassed;
         }
 
-//        protected void TestOnInvalidNodeType(XmlNodeType nt)
-//        {
-//            ReloadSource();
-//            PositionOnNodeType(nt);
-//            if (CheckCanReadBinaryContent()) return;
-//            try
-//            {
-//                byte[] buffer = new byte[1];
-//                int nBytes = DataReader.ReadContentAsBase64(buffer, 0, 1);
-//            }
-//            catch (InvalidOperationException ioe)
-//            {
-//                if (ioe.ToString().IndexOf(nt.ToString()) < 0)
-//                    CError.Compare(false, "Call threw wrong invalid operation exception on " + nt);
-//                else
-//                    return;
-//            }
-//            CError.Compare(false, "Call succeeded on " + nt);
-//        }
-
-//        protected void TestOnNopNodeType(XmlNodeType nt)
-//        {
-//            ReloadSource();
-//
-//            PositionOnNodeType(nt);
-//            string name = DataReader.Name;
-//            string value = DataReader.Value;
-//            CError.WriteLine("Name=" + name);
-//            CError.WriteLine("Value=" + value);
-//            if (CheckCanReadBinaryContent()) return;
-//
-//            byte[] buffer = new byte[1];
-//            int nBytes = DataReader.ReadContentAsBase64(buffer, 0, 1);
-//            CError.Compare(nBytes, 0, "nBytes");
-//            CError.Compare(DataReader.VerifyNode(nt, name, value), "vn");
-//            CError.WriteLine("Succeeded:{0}", nt);
-//        }
-
         ////////////////////////////////////////////////////////////////
         // Variations
         ////////////////////////////////////////////////////////////////
@@ -606,26 +568,6 @@ namespace System.Xml.Tests
 
             return bPassed;
         }
-
-//        protected void TestOnInvalidNodeType(XmlNodeType nt)
-//        {
-//            ReloadSource();
-//            PositionOnNodeType(nt);
-//            if (CheckCanReadBinaryContent()) return;
-//            try
-//            {
-//                byte[] buffer = new byte[1];
-//                int nBytes = DataReader.ReadElementContentAsBase64(buffer, 0, 1);
-//            }
-//            catch (InvalidOperationException ioe)
-//            {
-//                if (ioe.ToString().IndexOf(nt.ToString()) < 0)
-//                    CError.Compare(false, "Call threw wrong invalid operation exception on " + nt);
-//                else
-//                    return;
-//            }
-//            CError.Compare(false, "Call succeeded on " + nt);
-//        }
 
         ////////////////////////////////////////////////////////////////
         // Variations

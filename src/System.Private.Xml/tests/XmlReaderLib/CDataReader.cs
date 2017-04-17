@@ -911,18 +911,6 @@ namespace System.Xml.Tests
             CError.WriteLine();
         }
 
-//        private void DumpChars(String strActValue)
-//        {
-//            Byte c;
-//            int i;
-//
-//            for (i = 0; i < strActValue.Length; i++)
-//            {
-//                c = Convert.ToByte(strActValue[i]);
-//                CError.WriteLine("Char[" + i.ToString() + "] : " + c.ToString());
-//            }
-//        }
-
         public int FindNodeType(XmlNodeType _nodetype)
         {
             if (NodeType == _nodetype)
