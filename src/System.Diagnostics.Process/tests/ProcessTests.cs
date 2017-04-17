@@ -809,8 +809,8 @@ namespace System.Diagnostics.Tests
 
         public static IEnumerable<object[]> MachineName_Remote_TestData()
         {
-            yield return new object[] { "machine" };
-            yield return new object[] { "\\machine" };
+            yield return new object[] { Guid.NewGuid().ToString("N") };
+            yield return new object[] { "\\" + Guid.NewGuid().ToString("N") };
         }
 
         [Theory]
@@ -824,8 +824,7 @@ namespace System.Diagnostics.Tests
             Assert.All(processes, process => Assert.Equal(machineName, process.MachineName));
         }
 
-        [ActiveIssue(18324)]
-        [Theory]
+        [ConditionalTheory(nameof(ProcessPeformanceCounterEnabled))]
         [MemberData(nameof(MachineName_Remote_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)] // Accessing processes on remote machines is only supported on Windows.
         public void GetProcessesByName_RemoteMachineNameWindows_ReturnsExpected(string machineName)
@@ -884,13 +883,23 @@ namespace System.Diagnostics.Tests
             }
             catch (Exception)
             {
-                // Ignore exceptions, and just assume the counter is enabled.
+                // Ignore exceptions. This may occur if the user doesn't have admin privileges.
+                // The computer may be running with a guest user with process performance counters
+                // disabled. If so, try connecting to a remote machine. If the error contains any
+                // indication that process performance counters are disabled, then we will know.
+                try
+                {
+                    Process.GetProcesses(Guid.NewGuid().ToString("N"));
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return !ex.Message.Contains("Process performance counter is disabled");
+                }
             }
 
             return true;
         }
 
-        [ActiveIssue(18324)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
         [ConditionalTheory(nameof(ProcessPeformanceCounterEnabled))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
