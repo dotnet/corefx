@@ -549,13 +549,45 @@ namespace System.Collections.Concurrent.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18432 yet.")]
         public static void TestNullComparer()
         {
-            new ConcurrentDictionary<int, int>((IEqualityComparer<int>)null).TryAdd(1, 1);
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>((IEqualityComparer<EqualityApiSpy>)null));
 
-            new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1) }, null).TryAdd(1, 1);
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(new[] { new KeyValuePair<EqualityApiSpy, int>(new EqualityApiSpy(), 1) }, null));
 
-            new ConcurrentDictionary<int, int>(1, new[] { new KeyValuePair<int, int>(1, 1) }, null).TryAdd(1, 1);
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(1, new[] { new KeyValuePair<EqualityApiSpy, int>(new EqualityApiSpy(), 1) }, null));
 
-            new ConcurrentDictionary<int, int>(1, 1, null).TryAdd(1, 1);
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(1, 1, null));
+
+            void AssertDefaultComparerBehavior(ConcurrentDictionary<EqualityApiSpy, int> dictionary)
+            {
+                var spyKey = new EqualityApiSpy();
+
+                Assert.True(dictionary.TryAdd(spyKey, 1));
+                Assert.False(dictionary.TryAdd(spyKey, 1));
+
+                Assert.False(spyKey.ObjectApiUsed);
+                Assert.True(spyKey.IEquatableApiUsed);
+            }
+        }
+
+        private sealed class EqualityApiSpy : IEquatable<EqualityApiSpy>
+        {
+            public bool ObjectApiUsed { get; private set; }
+            public bool IEquatableApiUsed { get; private set; }
+
+
+            public override bool Equals(object obj)
+            {
+                ObjectApiUsed = true;
+                return ReferenceEquals(this, obj);
+            }
+
+            public override int GetHashCode() => base.GetHashCode();
+
+            public bool Equals(EqualityApiSpy other)
+            {
+                IEquatableApiUsed = true;
+                return ReferenceEquals(this, other);
+            }
         }
 
         [Fact]
