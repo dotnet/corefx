@@ -2511,7 +2511,13 @@ public static partial class DataContractJsonSerializerTests
         var value = new DateTime(2010, 12, 1);
         var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
         var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
-        var actual = SerializeAndDeserialize(value, $"\"\\/Date(1291190400000{timeZoneString})\\/\"", dcjsSettings);
+
+        var baseline = $"\"\\/Date(1291161600000{timeZoneString})\\/\"";
+        if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.VersionString.Contains("Windows"))
+        {
+            baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
+        }
+        var actual = SerializeAndDeserialize(value, baseline, dcjsSettings);
         Assert.Equal(value, actual);
 
         var DTF_class = new JsonTypes.DTF_class()
@@ -2583,12 +2589,11 @@ public static partial class DataContractJsonSerializerTests
         {
             DateTimeFormat = jsonTypes.DTF_hmsFt,
             UseSimpleDictionaryFormat = true,
-            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded, 
             KnownTypes = new List<Type>()
         };
-
-        var value = (Environment.OSVersion.Platform == PlatformID.Unix) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";      
-        var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), value, dcjsSettings);
+        var baseline = (Environment.OSVersion.VersionString.Contains("Ubuntu")) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";
+        var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), baseline, dcjsSettings);
         Assert.NotNull(actual2);
         Assert.True(actual2 == new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 3, 58, 32));
 
