@@ -2599,7 +2599,7 @@ public static partial class DataContractJsonSerializerTests
             EmitTypeInformation = EmitTypeInformation.AsNeeded, 
             KnownTypes = new List<Type>()
         };
-        var baseline = (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu")) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";
+        var baseline = PlatformDetection.IsUbuntu ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";
         var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), baseline, dcjsSettings);
         Assert.NotNull(actual2);
         Assert.True(actual2 == new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 3, 58, 32));
