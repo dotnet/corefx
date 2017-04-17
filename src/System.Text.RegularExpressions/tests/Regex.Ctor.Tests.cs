@@ -53,9 +53,9 @@ namespace System.Text.RegularExpressions.Tests
         public static void Ctor_Invalid()
         {
             // Pattern is null
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null));
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None));
-            Assert.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None, new TimeSpan()));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("pattern", () => new Regex(null, RegexOptions.None, new TimeSpan()));
 
             // Options are invalid
             AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => new Regex("foo", (RegexOptions)(-1)));

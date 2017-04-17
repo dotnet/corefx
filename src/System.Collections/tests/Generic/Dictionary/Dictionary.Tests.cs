@@ -155,9 +155,9 @@ namespace System.Collections.Tests
         [Fact]
         public void CopyConstructorExceptions()
         {
-            Assert.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null));
-            Assert.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null, null));
-            Assert.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null, null));
+            AssertExtensions.Throws<ArgumentNullException>("dictionary", () => new Dictionary<int, int>((IDictionary<int, int>)null, EqualityComparer<int>.Default));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Dictionary<int, int>(new NegativeCountDictionary<int, int>()));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Dictionary<int, int>(new NegativeCountDictionary<int, int>(), null));

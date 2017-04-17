@@ -23,7 +23,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void Ctor_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => new ReadOnlyCollection<int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("list", () => new ReadOnlyCollection<int>(null));
         }
 
         [Fact]

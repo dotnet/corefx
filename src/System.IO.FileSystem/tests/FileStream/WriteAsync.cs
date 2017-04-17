@@ -17,7 +17,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create))
             {
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, 0, 1)));
             }
         }
@@ -31,7 +31,7 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, 1)));
 
                 // buffer is checked first
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, -1, 1)));
             }
         }
@@ -49,7 +49,7 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, -1, -1)));
             }
         }
@@ -108,7 +108,7 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, -1, -1)));
             }
         }
@@ -143,7 +143,7 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1)));
 
                 // buffer is checked first
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, -1, -1)));
             }
         }
@@ -183,7 +183,7 @@ namespace System.IO.Tests
                     FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[1], -1, -1, cancelledToken)));
 
                 // buffer is checked first
-                Assert.Throws<ArgumentNullException>("buffer", () =>
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () =>
                     FSAssert.CompletesSynchronously(fs.WriteAsync(null, -1, -1, cancelledToken)));
             }
         }

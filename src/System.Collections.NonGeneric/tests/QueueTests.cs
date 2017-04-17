@@ -89,7 +89,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_ICollection_NullCollection_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("col", () => new Queue(null)); // Collection is null
+            AssertExtensions.Throws<ArgumentNullException>("col", () => new Queue(null)); // Collection is null
         }
 
         [Fact]
@@ -376,7 +376,7 @@ namespace System.Collections.Tests
             Queue queue1 = Helpers.CreateIntQueue(100);
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
-                Assert.Throws<ArgumentNullException>("array", () => queue2.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentNullException>("array", () => queue2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => queue2.CopyTo(new object[150, 150], 0)); // Array is multidimensional
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => queue2.CopyTo(new object[150], -1)); // Index < 0
@@ -953,7 +953,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_NullQueue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("queue", () => Queue.Synchronized(null)); // Queue is null
+            AssertExtensions.Throws<ArgumentNullException>("queue", () => Queue.Synchronized(null)); // Queue is null
         }
 
         public void StartEnqueueThread()

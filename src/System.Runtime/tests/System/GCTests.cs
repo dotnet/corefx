@@ -268,7 +268,7 @@ namespace System.Tests
         [Fact]
         public static void SuppressFinalizer_NullObject_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
+            AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
         }
 
         [Fact]
@@ -280,7 +280,7 @@ namespace System.Tests
         [Fact]
         public static void ReRegisterFoFinalize_NullObject_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("obj", () => GC.ReRegisterForFinalize(null)); // Obj is null
+            AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.ReRegisterForFinalize(null)); // Obj is null
         }
 
         private class ReRegisterForFinalizeTest

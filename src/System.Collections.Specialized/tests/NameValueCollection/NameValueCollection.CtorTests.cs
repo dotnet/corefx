@@ -109,8 +109,8 @@ namespace System.Collections.Specialized.Tests
         [Fact]
         public void Ctor_NullNameValueCollection_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("c", () => new NameValueCollection((NameValueCollection)null));
-            Assert.Throws<ArgumentNullException>("col", () => new NameValueCollection(0, (NameValueCollection)null));
+            AssertExtensions.Throws<ArgumentNullException>("c", () => new NameValueCollection((NameValueCollection)null));
+            AssertExtensions.Throws<ArgumentNullException>("col", () => new NameValueCollection(0, (NameValueCollection)null));
         }
         
         public static IEnumerable<object[]> Ctor_Int_NameValueCollection_TestData()

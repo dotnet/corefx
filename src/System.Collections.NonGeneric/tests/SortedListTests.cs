@@ -142,7 +142,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new SortedList((IDictionary)null)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new SortedList((IDictionary)null)); // Dictionary is null
         }
 
         [Theory]
@@ -208,7 +208,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_IComparer_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new SortedList(null, new CustomComparer())); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new SortedList(null, new CustomComparer())); // Dictionary is null
         }
 
         [Fact]
@@ -300,7 +300,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
 
                 Assert.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
             });
@@ -414,8 +414,8 @@ namespace System.Collections.Tests
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Contains(null)); // Key is null
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.ContainsKey(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Contains(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.ContainsKey(null)); // Key is null
             });
         }
 
@@ -477,7 +477,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
                 Assert.Throws<ArgumentException>(() => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
@@ -816,7 +816,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 IList keys = sortList2.GetKeyList();
-                Assert.Throws<ArgumentNullException>("key", () => keys.IndexOf(null)); // Value is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => keys.IndexOf(null)); // Value is null
                 Assert.Throws<InvalidOperationException>(() => keys.IndexOf("hello")); // Value is a different object type
             });
         }
@@ -1217,7 +1217,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.IndexOfKey(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.IndexOfKey(null)); // Key is null
             });
         }
 
@@ -1404,7 +1404,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2[null] = 101); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2[null] = 101); // Key is null
             });
         }
 
@@ -1461,7 +1461,7 @@ namespace System.Collections.Tests
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Remove(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Remove(null)); // Key is null
             });
         }
 
@@ -1500,7 +1500,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => SortedList.Synchronized(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => SortedList.Synchronized(null)); // List is null
         }
 
         [Fact]

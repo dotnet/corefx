@@ -391,14 +391,14 @@ namespace System.Tests
         [Fact]
         public static void BinarySearch_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, "", null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, "", null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, 0, 0, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, 0, 0, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, 0, 0, "", null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, 0, 0, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, 0, 0, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, 0, 0, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch((int[])null, 0, 0, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.BinarySearch(null, 0, 0, "", null));
         }
 
         [Fact]
@@ -531,7 +531,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => new int[10].GetValue(10)); // Index >= array.Length
             Assert.Throws<ArgumentException>(null, () => new int[10, 10].GetValue(0)); // Array is multidimensional
 
-            Assert.Throws<ArgumentNullException>("indices", () => new int[10].GetValue((int[])null)); // Indices is null
+            AssertExtensions.Throws<ArgumentNullException>("indices", () => new int[10].GetValue((int[])null)); // Indices is null
             Assert.Throws<ArgumentException>(null, () => new int[10, 10].GetValue(new int[] { 1, 2, 3 })); // Indices.Length > array.Rank
 
             Assert.Throws<IndexOutOfRangeException>(() => new int[8, 10].GetValue(new int[] { -1, 2 })); // Indices[0] < 0
@@ -616,7 +616,7 @@ namespace System.Tests
         [Fact]
         public static void Clear_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Clear(null, 0, 0)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Clear(null, 0, 0)); // Array is null
 
             Assert.Throws<IndexOutOfRangeException>(() => Array.Clear(new int[10], -1, 0)); // Index < 0
             Assert.Throws<IndexOutOfRangeException>(() => Array.Clear(new int[10], 0, -1)); // Length < 0 
@@ -962,7 +962,7 @@ namespace System.Tests
         [Fact]
         public static void Copy_NullSourceArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("sourceArray", () => Array.Copy(null, new string[10], 0));
+            AssertExtensions.Throws<ArgumentNullException>("sourceArray", () => Array.Copy(null, new string[10], 0));
 
             AssertExtensions.Throws<ArgumentNullException>("sourceArray", "source", () => Array.Copy(null, 0, new string[10], 0, 0));
             AssertExtensions.Throws<ArgumentNullException>("sourceArray", "source", () => Array.ConstrainedCopy(null, 0, new string[10], 0, 0));
@@ -971,7 +971,7 @@ namespace System.Tests
         [Fact]
         public static void Copy_NullDestinationArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("destinationArray", () => Array.Copy(new string[10], null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("destinationArray", () => Array.Copy(new string[10], null, 0));
 
             AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => Array.Copy(new string[10], 0, null, 0, 0));
             AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => Array.ConstrainedCopy(new string[10], 0, null, 0, 0));
@@ -1381,9 +1381,9 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_NullElementType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0));
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1]));
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1], new int[1]));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1]));
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1], new int[1]));
         }
 
         public static IEnumerable<object[]> CreateInstance_NotSupportedType_TestData()
@@ -1415,7 +1415,7 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_LengthsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("lengths", () => Array.CreateInstance(typeof(int), null, new int[1]));
+            AssertExtensions.Throws<ArgumentNullException>("lengths", () => Array.CreateInstance(typeof(int), null, new int[1]));
         }
 
         [Fact]
@@ -1428,7 +1428,7 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_LowerBoundNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("lowerBounds", () => Array.CreateInstance(typeof(int), new int[] { 1 }, null));
+            AssertExtensions.Throws<ArgumentNullException>("lowerBounds", () => Array.CreateInstance(typeof(int), new int[] { 1 }, null));
         }
 
         [Theory]
@@ -1508,24 +1508,24 @@ namespace System.Tests
         [Fact]
         public static void Exists_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Exists((int[])null, i => i == 43)); // Array is null
-            Assert.Throws<ArgumentNullException>("match", () => Array.Exists(new int[0], null)); // Match is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Exists((int[])null, i => i == 43)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.Exists(new int[0], null)); // Match is null
         }
 
         [Fact]
         public static void Find_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Find((int[])null, i => i == 43)); // Array is null
-            Assert.Throws<ArgumentNullException>("match", () => Array.Find(new int[0], null)); // Match is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Find((int[])null, i => i == 43)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.Find(new int[0], null)); // Match is null
         }
 
         [Fact]
         public static void FindIndex_Invalid()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, i => i == 43));
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, 0, i => i == 43));
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, 0, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindIndex((int[])null, 0, 0, i => i == 43));
 
             // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindIndex(new int[3], -1, i => i == 43));
@@ -1547,29 +1547,29 @@ namespace System.Tests
         [Fact]
         public static void FindAll_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindAll((int[])null, i => i == 43)); // Array is null
-            Assert.Throws<ArgumentNullException>("match", () => Array.FindAll(new int[0], null)); // Match is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindAll((int[])null, i => i == 43)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.FindAll(new int[0], null)); // Match is null
         }
 
         [Fact]
         public static void FindLast_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindLast((int[])null, i => i == 43)); // Array is null
-            Assert.Throws<ArgumentNullException>("match", () => Array.FindLast(new int[0], null)); // Match is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindLast((int[])null, i => i == 43)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.FindLast(new int[0], null)); // Match is null
         }
 
         [Fact]
         public static void FindLastIndex_Invalid()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, i => i == 43));
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, 0, i => i == 43));
-            Assert.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, 0, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, 0, i => i == 43));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.FindLastIndex((int[])null, 0, 0, i => i == 43));
 
             // Match is null
-            Assert.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], null));
-            Assert.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, null));
-            Assert.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.FindLastIndex(new int[0], 0, 0, null));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.FindLastIndex(new int[0], 0, i => i == 43)); // Start index != -1 for an empty array
 
@@ -1976,12 +1976,12 @@ namespace System.Tests
         [Fact]
         public static void IndexOf_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0, 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0, 0));
         }
 
         [Fact]
@@ -2329,12 +2329,12 @@ namespace System.Tests
         [Fact]
         public static void LastIndexOf_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, "", 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, "", 0, 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, ""));
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, "", 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, "", 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, "", 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf((int[])null, "", 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, ""));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, "", 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.LastIndexOf(null, "", 0, 0));
         }
 
         [Fact]
@@ -2413,10 +2413,10 @@ namespace System.Tests
         public static void IStructuralComparable_Invalid()
         {
             IStructuralComparable comparable = new int[] { 1, 2, 3 };
-            Assert.Throws<ArgumentException>("other", () => comparable.CompareTo(new int[] { 1, 2 }, new IntegerComparer())); // Arrays have different lengths
-            Assert.Throws<ArgumentException>("other", () => comparable.CompareTo(new int[] { 1, 2, 3, 4 }, new IntegerComparer())); // Arrays have different lengths
+            AssertExtensions.Throws<ArgumentException>("other", () => comparable.CompareTo(new int[] { 1, 2 }, new IntegerComparer())); // Arrays have different lengths
+            AssertExtensions.Throws<ArgumentException>("other", () => comparable.CompareTo(new int[] { 1, 2, 3, 4 }, new IntegerComparer())); // Arrays have different lengths
 
-            Assert.Throws<ArgumentException>("other", () => comparable.CompareTo(123, new IntegerComparer())); // Other is not an array
+            AssertExtensions.Throws<ArgumentException>("other", () => comparable.CompareTo(123, new IntegerComparer())); // Other is not an array
         }
 
         [Fact]
@@ -2474,7 +2474,7 @@ namespace System.Tests
         public static void IStructuralEquatable_GetHashCode_NullComparer_ThrowsArgumentNullException()
         {
             IStructuralEquatable equatable = new int[] { 1, 2, 3 };
-            Assert.Throws<ArgumentNullException>("comparer", () => equatable.GetHashCode(null));
+            AssertExtensions.Throws<ArgumentNullException>("comparer", () => equatable.GetHashCode(null));
         }
 
         [Theory]
@@ -2633,8 +2633,8 @@ namespace System.Tests
         [Fact]
         public static void Reverse_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse(null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse(null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse(null, 0, 0));
         }
 
         [Fact]
@@ -2770,8 +2770,8 @@ namespace System.Tests
         [Fact]
         public static void Sort_Array_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null)); // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort(null)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null)); // Array is null
 
             Assert.Throws<RankException>(() => Array.Sort(new int[10, 10])); // Array is multidimensional
 
@@ -2783,8 +2783,8 @@ namespace System.Tests
         public static void Sort_Array_IComparer_Invalid()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer)null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer)null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer<int>)null));
 
             Assert.Throws<RankException>(() => Array.Sort(new int[10, 10], (IComparer)null)); // Array is multidimensional
 
@@ -2796,16 +2796,16 @@ namespace System.Tests
         [Fact]
         public static void Sort_Array_Comparison_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null, (Comparison<int>)null)); // Array is null
-            Assert.Throws<ArgumentNullException>("comparison", () => Array.Sort(new int[10], (Comparison<int>)null)); // Comparison is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort(null, (Comparison<int>)null)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("comparison", () => Array.Sort(new int[10], (Comparison<int>)null)); // Comparison is null
         }
 
         [Fact]
         public static void Sort_Array_Int_Int_Invalid()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, 0, 0));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null, 0, 0));
 
             Assert.Throws<RankException>(() => Array.Sort(new int[10, 10], 0, 0, null)); // Array is multidimensional
 
@@ -2834,8 +2834,8 @@ namespace System.Tests
         public static void Sort_Array_Int_Int_IComparer_Invalid()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, 0, 0, null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null, 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null, 0, 0, null));
 
             Assert.Throws<RankException>(() => Array.Sort(new int[10, 10], 0, 0, null)); // Array is multidimensional
 
@@ -3020,8 +3020,8 @@ namespace System.Tests
         public static void Sort_Array_Array_Invalid()
         {
             // Keys is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10]));
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10]));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10]));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10]));
 
             // Keys.Length > items.Length
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[9]));
@@ -3043,8 +3043,8 @@ namespace System.Tests
         public static void Sort_Array_Array_IComparer_Invalid()
         {
             // Keys is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], null));
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], null));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], null));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], null));
 
             // Keys.Length > items.Length
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[9], null));
@@ -3066,8 +3066,8 @@ namespace System.Tests
         public static void Sort_Array_Array_Int_Int_Invalid()
         {
             // Keys is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], 0, 0));
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], 0, 0));
 
             // Keys.Length > items.Length
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[9], 0, 10));
@@ -3105,8 +3105,8 @@ namespace System.Tests
         public static void Sort_Array_Array_Int_Int_IComparer_Invalid()
         {
             // Keys is null
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], 0, 0, null));
-            Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], 0, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], 0, 0, null));
 
             // Keys.Length > items.Length
             Assert.Throws<ArgumentException>(null, () => Array.Sort((Array)new int[10], new int[9], 0, 10, null));
@@ -3200,7 +3200,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => new int[10].SetValue(1, 10)); // Index >= array.Length
             Assert.Throws<ArgumentException>(null, () => new int[10, 10].SetValue(1, 0)); // Array is multidimensional
 
-            Assert.Throws<ArgumentNullException>("indices", () => new int[10].SetValue(1, (int[])null)); // Indices is null
+            AssertExtensions.Throws<ArgumentNullException>("indices", () => new int[10].SetValue(1, (int[])null)); // Indices is null
             Assert.Throws<ArgumentException>(null, () => new int[10, 10].SetValue(1, new int[] { 1, 2, 3 })); // Indices.Length > array.Length
 
             Assert.Throws<IndexOutOfRangeException>(() => new int[8, 10].SetValue(1, new int[] { -1, 2 })); // Indices[0] < 0
@@ -3228,8 +3228,8 @@ namespace System.Tests
         public static void TrueForAll_Null_ThrowsArgumentNullException()
         {
             // Array is null
-            Assert.Throws<ArgumentNullException>("array", () => Array.TrueForAll((int[])null, i => i > 0));
-            Assert.Throws<ArgumentNullException>("match", () => Array.TrueForAll(new int[0], null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.TrueForAll((int[])null, i => i > 0));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => Array.TrueForAll(new int[0], null));
         }
 
         [Fact]

@@ -212,7 +212,7 @@ namespace System.Threading.Tests
         [Fact]
         public void OpenExisting_InvalidNames_Windows()
         {
-            Assert.Throws<ArgumentNullException>("name", () => Semaphore.OpenExisting(null));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => Semaphore.OpenExisting(null));
             Assert.Throws<ArgumentException>(() => Semaphore.OpenExisting(string.Empty));
             Assert.Throws<ArgumentException>(() => Semaphore.OpenExisting(new string('a', 10000)));
         }

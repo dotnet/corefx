@@ -59,7 +59,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_WriteAccess()
         {
             // Write-only access isn't allowed, as it'd be useless
-            Assert.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateNew(null, 4096, MemoryMappedFileAccess.Write));
+            AssertExtensions.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateNew(null, 4096, MemoryMappedFileAccess.Write));
         }
 
         /// <summary>

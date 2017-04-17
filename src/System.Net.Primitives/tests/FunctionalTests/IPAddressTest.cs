@@ -76,8 +76,8 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Ctor_Bytes_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => new IPAddress(null));
-            Assert.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => new IPAddress(null));
+            AssertExtensions.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }));
         }
 
         [Theory]
@@ -105,9 +105,9 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Ctor_BytesScopeId_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => new IPAddress(null, 500));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => new IPAddress(null, 500));
 
-            Assert.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }, 500));
+            AssertExtensions.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }, 500));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(ipV6AddressBytes1, MinScopeId - 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(ipV6AddressBytes1, MaxScopeId + 1));
@@ -146,7 +146,7 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Parse_String_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("ipString", () => { IPAddress.Parse(null); });
+            AssertExtensions.Throws<ArgumentNullException>("ipString", () => { IPAddress.Parse(null); });
             IPAddress ip;
             Assert.False(IPAddress.TryParse(null, out ip));
         }
@@ -215,7 +215,7 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void IsLooback_Get_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => IPAddress.IsLoopback(null));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => IPAddress.IsLoopback(null));
         }
 
         [Fact]

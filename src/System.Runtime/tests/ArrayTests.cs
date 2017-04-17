@@ -52,8 +52,8 @@ namespace System.Tests
         [Fact]
         public static void ForEach_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => { Array.ForEach<short>(null, new Action<short>(i => i++)); });  // Array is null
-            Assert.Throws<ArgumentNullException>("action", () => { Array.ForEach<string>(new string[] { }, null); }); // Action is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => { Array.ForEach<short>(null, new Action<short>(i => i++)); });  // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("action", () => { Array.ForEach<string>(new string[] { }, null); }); // Action is null
             Assert.Throws<InvalidOperationException>(() => {
                 Array.ForEach<string>(new string[] { "a" }, i => { throw new InvalidOperationException(); }); // Action throws
             });
@@ -134,7 +134,7 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_Type_Int_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0)); // Element type is null
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0)); // Element type is null
 
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(void), 0)); // Element type is not supported (void)
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(List<>), 0)); // Element type is not supported (generic)
@@ -146,7 +146,7 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_Type_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 1)); // Element type is null
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 1)); // Element type is null
 
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(void), 0, 1)); // Element type is not supported (void)
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(List<>), 0, 1)); // Element type is not supported (generic)
@@ -167,7 +167,7 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_Type_Int_Int_Int_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 1, 2)); // Element type is null
+            AssertExtensions.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, 0, 1, 2)); // Element type is null
 
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(void), 0, 1, 2)); // Element type is not supported (void)
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(typeof(List<>), 0, 1, 2)); // Element type is not supported (generic)
@@ -237,8 +237,8 @@ namespace System.Tests
         [Fact]
         public static void ConvertAll_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => { Array.ConvertAll<short, short>(null, i => i); });  // Array is null
-            Assert.Throws<ArgumentNullException>("converter", () => { Array.ConvertAll<string, string>(new string[] { }, null); }); // Converter is null
+            AssertExtensions.Throws<ArgumentNullException>("array", () => { Array.ConvertAll<short, short>(null, i => i); });  // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("converter", () => { Array.ConvertAll<string, string>(new string[] { }, null); }); // Converter is null
             Assert.Throws<InvalidOperationException>(() => {
                 Array.ConvertAll<string, string>(new string[] { "x" }, i => { throw new InvalidOperationException(); }); // Converter throws
             });

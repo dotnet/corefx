@@ -12,8 +12,8 @@ namespace System.Text.Tests
         [Fact]
         public void GetEncoding_String_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("name", () => Encoding.GetEncoding(null));
-            Assert.Throws<ArgumentException>("name", () => Encoding.GetEncoding("no-such-encoding-name"));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => Encoding.GetEncoding(null));
+            AssertExtensions.Throws<ArgumentException>("name", () => Encoding.GetEncoding("no-such-encoding-name"));
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(65536));
 
             // Codepage doesn't exist
-            Assert.Throws<ArgumentException>("codepage", () => Encoding.GetEncoding(42));
+            AssertExtensions.Throws<ArgumentException>("codepage", () => Encoding.GetEncoding(42));
             Assert.Throws<NotSupportedException>(() => Encoding.GetEncoding(54321));
         }
 

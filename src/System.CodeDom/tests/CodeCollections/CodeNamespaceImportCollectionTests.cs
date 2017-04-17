@@ -80,8 +80,8 @@ namespace System.CodeDom.Tests
         public void AddRange_Null_ThrowsArgumentNullException()
         {
             var collection = new CodeNamespaceImportCollection();
-            Assert.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
-            Assert.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
         }
 
         [Fact]

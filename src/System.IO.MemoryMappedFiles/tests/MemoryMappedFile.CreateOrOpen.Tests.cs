@@ -16,9 +16,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_MapName()
         {
             // null is an invalid map name with CreateOrOpen (it's valid with CreateNew and CreateFromFile)
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096));
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite));
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.CreateOrOpen(null, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
 
             // Empty string is always an invalid map name
             Assert.Throws<ArgumentException>(() => MemoryMappedFile.CreateOrOpen(string.Empty, 4096));
@@ -256,8 +256,8 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void OpenWrite()
         {
             // Write-only access fails when the map doesn't exist
-            Assert.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write));
-            Assert.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write, MemoryMappedFileOptions.None, HandleInheritability.None));
+            AssertExtensions.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write));
+            AssertExtensions.Throws<ArgumentException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Write, MemoryMappedFileOptions.None, HandleInheritability.None));
 
             // Write-only access works when the map does exist
             const int Capacity = 4096;

@@ -146,10 +146,10 @@ namespace System.Tests
 
             Version nullVersion = null;
             Version testVersion = new Version(1, 2);
-            Assert.Throws<ArgumentNullException>("v1", () => testVersion >= nullVersion); // V2 is null
-            Assert.Throws<ArgumentNullException>("v1", () => testVersion > nullVersion); // V2 is null
-            Assert.Throws<ArgumentNullException>("v1", () => nullVersion < testVersion); // V1 is null
-            Assert.Throws<ArgumentNullException>("v1", () => nullVersion <= testVersion); // V1 is null
+            AssertExtensions.Throws<ArgumentNullException>("v1", () => testVersion >= nullVersion); // V2 is null
+            AssertExtensions.Throws<ArgumentNullException>("v1", () => testVersion > nullVersion); // V2 is null
+            AssertExtensions.Throws<ArgumentNullException>("v1", () => nullVersion < testVersion); // V1 is null
+            AssertExtensions.Throws<ArgumentNullException>("v1", () => nullVersion <= testVersion); // V1 is null
         }
 
         private static IEnumerable<object[]> Equals_TestData()
@@ -274,8 +274,8 @@ namespace System.Tests
             int maxFieldCount = expected.Length - 1;
             Assert.Equal(expected[maxFieldCount], version.ToString());
 
-            Assert.Throws<ArgumentException>("fieldCount", () => version.ToString(-1)); // Index < 0
-            Assert.Throws<ArgumentException>("fieldCount", () => version.ToString(maxFieldCount + 1)); // Index > version.fieldCount
+            AssertExtensions.Throws<ArgumentException>("fieldCount", () => version.ToString(-1)); // Index < 0
+            AssertExtensions.Throws<ArgumentException>("fieldCount", () => version.ToString(maxFieldCount + 1)); // Index > version.fieldCount
         }
 
         private static void VerifyVersion(Version version, int major, int minor, int build, int revision)

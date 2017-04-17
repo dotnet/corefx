@@ -37,7 +37,7 @@ namespace System.Net.WebSockets.Client.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 0, new ArraySegment<byte>(new byte[1])));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("receiveBufferSize", () => cws.Options.SetBuffer(0, 1, new ArraySegment<byte>(new byte[1])));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sendBufferSize", () => cws.Options.SetBuffer(1, 0, new ArraySegment<byte>(new byte[1])));
-            Assert.Throws<ArgumentNullException>("buffer.Array", () => cws.Options.SetBuffer(1, 1, default(ArraySegment<byte>)));
+            AssertExtensions.Throws<ArgumentNullException>("buffer.Array", () => cws.Options.SetBuffer(1, 1, default(ArraySegment<byte>)));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("buffer", () => cws.Options.SetBuffer(1, 1, new ArraySegment<byte>(new byte[0])));
         }
 

@@ -433,7 +433,7 @@ namespace System.Data.Tests.Common
         [Fact]
         public void GetDataColumn_DataColumnMappingCollection_String_Type_DataTable_MissingMappingAction_MissingSchemaAction_InvalidArguments()
         {
-            Assert.Throws<ArgumentException>("sourceColumn", () => DataColumnMappingCollection.GetDataColumn((DataColumnMappingCollection)null, null, typeof(string), new DataTable(), new MissingMappingAction(), new MissingSchemaAction()));
+            AssertExtensions.Throws<ArgumentException>("sourceColumn", () => DataColumnMappingCollection.GetDataColumn((DataColumnMappingCollection)null, null, typeof(string), new DataTable(), new MissingMappingAction(), new MissingSchemaAction()));
         }
 
         [Fact]

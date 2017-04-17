@@ -41,16 +41,16 @@ namespace System.Text.Tests
         public void Convert_Invalid()
         {
             // Bytes is null
-            Assert.Throws<ArgumentNullException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, null));
-            Assert.Throws<ArgumentNullException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, null));
+            AssertExtensions.Throws<ArgumentNullException>("bytes", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, null, 0, 0));
 
             // SrcEncoding is null
-            Assert.Throws<ArgumentNullException>("srcEncoding", () => Encoding.Convert(null, Encoding.ASCII, new byte[0]));
-            Assert.Throws<ArgumentNullException>("srcEncoding", () => Encoding.Convert(null, Encoding.ASCII, new byte[0], 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("srcEncoding", () => Encoding.Convert(null, Encoding.ASCII, new byte[0]));
+            AssertExtensions.Throws<ArgumentNullException>("srcEncoding", () => Encoding.Convert(null, Encoding.ASCII, new byte[0], 0, 0));
 
             // DstEncoding is null
-            Assert.Throws<ArgumentNullException>("dstEncoding", () => Encoding.Convert(Encoding.ASCII, null, new byte[0]));
-            Assert.Throws<ArgumentNullException>("dstEncoding", () => Encoding.Convert(Encoding.ASCII, null, new byte[0], 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("dstEncoding", () => Encoding.Convert(Encoding.ASCII, null, new byte[0]));
+            AssertExtensions.Throws<ArgumentNullException>("dstEncoding", () => Encoding.Convert(Encoding.ASCII, null, new byte[0], 0, 0));
 
             // Invalid index
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Encoding.Convert(Encoding.ASCII, Encoding.ASCII, new byte[10], -1, 0));

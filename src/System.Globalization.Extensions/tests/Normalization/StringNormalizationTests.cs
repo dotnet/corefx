@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Text;
 using Xunit;
 
@@ -28,10 +29,10 @@ namespace System.Globalization.Tests
         {
             Assert.Throws<ArgumentException>(() => "\uFB01".IsNormalized((NormalizationForm)10));
 
-            Assert.Throws<ArgumentException>("strInput", () => "\uFFFE".IsNormalized()); // Invalid codepoint
-            Assert.Throws<ArgumentException>("strInput", () => "\uD800\uD800".IsNormalized()); // Invalid surrogate pair
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFFFE".IsNormalized()); // Invalid codepoint
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uD800\uD800".IsNormalized()); // Invalid surrogate pair
 
-            Assert.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.IsNormalized(null));
+            AssertExtensions.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.IsNormalized(null));
         }
 
         [Theory]
@@ -60,10 +61,10 @@ namespace System.Globalization.Tests
         {
             Assert.Throws<ArgumentException>(() => "\uFB01".Normalize((NormalizationForm)7));
 
-            Assert.Throws<ArgumentException>("strInput", () => "\uFFFE".Normalize()); // Invalid codepoint
-            Assert.Throws<ArgumentException>("strInput", () => "\uD800\uD800".Normalize()); // Invalid surrogate pair
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFFFE".Normalize()); // Invalid codepoint
+            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uD800\uD800".Normalize()); // Invalid surrogate pair
 
-            Assert.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.Normalize(null));
+            AssertExtensions.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.Normalize(null));
         }
     }
 }

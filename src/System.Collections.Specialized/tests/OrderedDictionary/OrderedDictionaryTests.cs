@@ -165,7 +165,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.True(d.Contains(array[i]));
             }
             
-            Assert.Throws<ArgumentNullException>("array", () => keys.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => keys.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => keys.CopyTo(new object[keys.Count], -1));
         }
 
@@ -295,7 +295,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.Equal(array[i], "bar_" + (i - 50));
             }
             
-            Assert.Throws<ArgumentNullException>("array", () => values.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => values.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => values.CopyTo(new object[values.Count], -1));
         }
 

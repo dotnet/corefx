@@ -71,24 +71,24 @@ namespace System.Security.AccessControl.Tests
         [Fact]
         public void CompoundAce_Constructor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("securityIdentifier", () => new CompoundAce((AceFlags)0, 1, (CompoundAceType)1, null));
+            AssertExtensions.Throws<ArgumentNullException>("securityIdentifier", () => new CompoundAce((AceFlags)0, 1, (CompoundAceType)1, null));
         }
 
         [Fact]
         public void CompoundAce_CreateBinaryForm_Invalid()
         {
             CompoundAce ace = (CompoundAce)CompoundAce_CreateTestData(0, 1, 1, "S-1-5-11", 0)[0];
-            Assert.Throws<ArgumentNullException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(null, 1));
+            AssertExtensions.Throws<ArgumentNullException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(null, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => CompoundAce.CreateFromBinaryForm(new byte[1], -1));
-            Assert.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength + 1], 2));
-            Assert.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength], 1));
+            AssertExtensions.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength + 1], 2));
+            AssertExtensions.Throws<ArgumentException>("binaryForm", () => CompoundAce.CreateFromBinaryForm(new byte[ace.BinaryLength], 1));
         }
 
         [Fact]
         public void CompoundAce_GetBinaryForm_Invalid()
         {
             CompoundAce ace = (CompoundAce)CompoundAce_CreateTestData(0, 1, 1, "S-1-5-11", 0)[0];
-            Assert.Throws<ArgumentNullException>("binaryForm", () => ace.GetBinaryForm(null, 1));
+            AssertExtensions.Throws<ArgumentNullException>("binaryForm", () => ace.GetBinaryForm(null, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => ace.GetBinaryForm(new byte[1], -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength + 1], 2));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("binaryForm", () => ace.GetBinaryForm(new byte[ace.BinaryLength], 1));

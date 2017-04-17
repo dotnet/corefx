@@ -101,7 +101,7 @@ namespace System.Tests
         {
             var baseUri = new Uri("http://www.domain.com/");
             var relativeUri = new Uri("/path/", UriKind.Relative);
-            Assert.Throws<ArgumentNullException>("uri", () => baseUri.MakeRelativeUri(null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => baseUri.MakeRelativeUri(null)); // Uri is null
 
             Assert.Throws<InvalidOperationException>(() => relativeUri.MakeRelativeUri(baseUri)); // Base uri is relative
             Assert.Throws<InvalidOperationException>(() => baseUri.MakeRelativeUri(relativeUri)); // Uri is relative
@@ -207,7 +207,7 @@ namespace System.Tests
         [Fact]
         public void IsBaseOf_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("uri", () => new Uri("http://domain.com").IsBaseOf(null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => new Uri("http://domain.com").IsBaseOf(null)); // Uri is null
         }
 
         public static IEnumerable<object[]> IsWellFormedOriginalString_TestData()
@@ -306,8 +306,8 @@ namespace System.Tests
         public void Compare_Invalid()
         {
             var uri = new Uri("http://domain.com");
-            Assert.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => Uri.Compare(uri, uri, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -423,7 +423,7 @@ namespace System.Tests
         [Fact]
         public void EscapeDataString_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null)); // StringToEscape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null)); // StringToEscape is null
             Assert.Throws<UriFormatException>(() => Uri.EscapeDataString(UriCreateStringTests.s_longString)); // StringToEscape is too long
 
             Assert.Throws<UriFormatException>(() => Uri.EscapeDataString("\uD800")); // Incomplete surrogate pair provided
@@ -443,7 +443,7 @@ namespace System.Tests
         [Fact]
         public void UnescapedDataString_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("stringToUnescape", () => Uri.UnescapeDataString(null)); // StringToUnescape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToUnescape", () => Uri.UnescapeDataString(null)); // StringToUnescape is null
         }
 
         [Theory]
@@ -465,7 +465,7 @@ namespace System.Tests
         [Fact]
         public void EscapeUriString_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeUriString(null)); // StringToEscape is null
+            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeUriString(null)); // StringToEscape is null
             Assert.Throws<UriFormatException>(() => Uri.EscapeUriString(UriCreateStringTests.s_longString)); // StringToEscape is too long
 
             Assert.Throws<UriFormatException>(() => Uri.EscapeUriString("\uD800")); // Incomplete surrogate pair provided

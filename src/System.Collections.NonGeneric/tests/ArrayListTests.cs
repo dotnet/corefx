@@ -76,7 +76,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_ICollection_NullCollection_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("c", () => new ArrayList(null)); // Collection is null
+            AssertExtensions.Throws<ArgumentNullException>("c", () => new ArrayList(null)); // Collection is null
         }
 
         [Fact]
@@ -254,7 +254,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Adapter_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.Adapter(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.Adapter(null)); // List is null
         }
 
         [Fact]
@@ -386,7 +386,7 @@ namespace System.Collections.Tests
                     return;
                 }
 
-                Assert.Throws<ArgumentNullException>("c", () => arrList2.AddRange(null)); // Collection is null
+                AssertExtensions.Throws<ArgumentNullException>("c", () => arrList2.AddRange(null)); // Collection is null
             });
         }
         
@@ -957,7 +957,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void FixedSize_ArrayList_NullCollection_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.FixedSize(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.FixedSize(null)); // List is null
         }
 
         [Fact]
@@ -1000,7 +1000,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void FixedSize_IList_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.FixedSize((IList)null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.FixedSize((IList)null)); // List is null
         }
         
         [Fact]
@@ -1357,7 +1357,7 @@ namespace System.Collections.Tests
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => arrList2.SetRange(-1, new object[1])); // Index < 0
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => arrList2.SetRange(arrList2.Count, new object[1])); // Index > list.Count
 
-                Assert.Throws<ArgumentNullException>("c", () => arrList2.SetRange(0, null)); // Collection is null
+                AssertExtensions.Throws<ArgumentNullException>("c", () => arrList2.SetRange(0, null)); // Collection is null
             });
         }
 
@@ -1664,7 +1664,7 @@ namespace System.Collections.Tests
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => arrList2.InsertRange(-1, new object[1])); // Index < 0
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => arrList2.InsertRange(1000, new object[1])); // Index > count
 
-                Assert.Throws<ArgumentNullException>("c", () => arrList2.InsertRange(3, null)); // Collection is null
+                AssertExtensions.Throws<ArgumentNullException>("c", () => arrList2.InsertRange(3, null)); // Collection is null
             });
         }
 
@@ -1908,7 +1908,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void ReadOnly_ArrayList_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.ReadOnly(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.ReadOnly(null)); // List is null
         }
 
         [Fact]
@@ -1951,7 +1951,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void ReadOnly_IList_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.ReadOnly((IList)null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.ReadOnly((IList)null)); // List is null
         }
 
         [Fact]
@@ -2379,7 +2379,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_ArrayList_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.Synchronized(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.Synchronized(null)); // List is null
         }
 
         [Fact]
@@ -2403,7 +2403,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_IList_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => ArrayList.Synchronized((IList)null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.Synchronized((IList)null)); // List is null
         }
 
         [Fact]
@@ -2447,7 +2447,7 @@ namespace System.Collections.Tests
             {
                 // This should be covered in Array.Copy, but lets do it for completion's sake
                 Assert.Throws<InvalidCastException>(() => arrList2.ToArray(typeof(string))); // Objects stored are not strings
-                Assert.Throws<ArgumentNullException>("type", () => arrList2.ToArray(null)); // Type is null
+                AssertExtensions.Throws<ArgumentNullException>("type", () => arrList2.ToArray(null)); // Type is null
             });
         }
 

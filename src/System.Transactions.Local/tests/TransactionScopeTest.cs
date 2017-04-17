@@ -14,7 +14,7 @@ namespace System.Transactions.Tests
         [Fact]
         public void TransactionScopeWithInvalidTimeSpanThrows()
         {
-            Assert.Throws<ArgumentNullException>("transactionToUse", () => new TransactionScope(null, TimeSpan.FromSeconds(-1)));
+            AssertExtensions.Throws<ArgumentNullException>("transactionToUse", () => new TransactionScope(null, TimeSpan.FromSeconds(-1)));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeTimeout", () => new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(-1)));
         }
 

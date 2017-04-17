@@ -203,11 +203,11 @@ namespace System.IO.Tests
             MemoryStream memoryStream;
             using (memoryStream = new MemoryStream())
             {
-                Assert.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null));
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null));
                 
                 // Validate the destination parameter first.
-                Assert.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: 0));
-                Assert.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: -1));
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: 0));
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: -1));
 
                 // Then bufferSize.
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => memoryStream.CopyTo(Stream.Null, bufferSize: 0)); // 0-length buffer doesn't make sense.

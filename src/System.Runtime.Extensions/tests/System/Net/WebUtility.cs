@@ -299,7 +299,7 @@ namespace System.Net.Tests
         [Fact]
         public static void UrlDecodeToBytes_NullBytes_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("bytes", () => WebUtility.UrlDecodeToBytes(null, 0, 1));
+            AssertExtensions.Throws<ArgumentNullException>("bytes", () => WebUtility.UrlDecodeToBytes(null, 0, 1));
         }
 
         [Theory]
@@ -362,7 +362,7 @@ namespace System.Net.Tests
         [Fact]
         public static void UrlEncodeToBytes_NullBytes_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("bytes", () => WebUtility.UrlEncodeToBytes(null, 0, 1));
+            AssertExtensions.Throws<ArgumentNullException>("bytes", () => WebUtility.UrlEncodeToBytes(null, 0, 1));
         }
 
         [Theory]

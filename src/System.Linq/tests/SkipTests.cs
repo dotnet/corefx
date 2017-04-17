@@ -75,14 +75,14 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipThrowsOnNull()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<DateTime>)null).Skip(3));
         }
 
         [Fact]
         public void SkipThrowsOnNullIList()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((List<DateTime>)null).Skip(3));
-            Assert.Throws<ArgumentNullException>("source", () => ((IList<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((List<DateTime>)null).Skip(3));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IList<DateTime>)null).Skip(3));
         }
 
         [Fact]

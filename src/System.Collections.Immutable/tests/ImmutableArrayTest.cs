@@ -95,7 +95,7 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void CreateRangeInvalid()
         {
-            Assert.Throws<ArgumentNullException>("items", () => ImmutableArray.CreateRange((IEnumerable<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => ImmutableArray.CreateRange((IEnumerable<int>)null));
         }
 
         [Fact]
@@ -126,9 +126,9 @@ namespace System.Collections.Immutable.Tests
         [MemberData(nameof(Int32EnumerableData))]
         public void CreateRangeWithSelectorInvalid(IEnumerable<int> source)
         {
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(source.ToImmutableArray(), (Func<int, int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(source.ToImmutableArray(), (Func<int, int>)null));
             // If both parameters are invalid, the selector should be validated first.
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(s_emptyDefault, (Func<int, int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(s_emptyDefault, (Func<int, int>)null));
             Assert.Throws<NullReferenceException>(() => ImmutableArray.CreateRange(s_emptyDefault, i => i));
         }
 
@@ -154,9 +154,9 @@ namespace System.Collections.Immutable.Tests
         [MemberData(nameof(Int32EnumerableData))]
         public void CreateRangeWithSelectorAndArgumentInvalid(IEnumerable<int> source)
         {
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(source.ToImmutableArray(), (Func<int, int, int>)null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(source.ToImmutableArray(), (Func<int, int, int>)null, 0));
             // If both parameters are invalid, the selector should be validated first.
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(s_emptyDefault, (Func<int, int, int>)null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(s_emptyDefault, (Func<int, int, int>)null, 0));
             Assert.Throws<NullReferenceException>(() => ImmutableArray.CreateRange(s_emptyDefault, (x, y) => 0, 0));
         }
 
@@ -189,7 +189,7 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int>)null));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (Func<int, int>)null));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, i => i));
@@ -233,7 +233,7 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int, int>)null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => ImmutableArray.CreateRange(array, 0, 0, (Func<int, int, int>)null, 0));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(s_empty, -1, 1, (Func<int, int, int>)null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => ImmutableArray.CreateRange(array, -1, 1, (i, j) => i + j, 0));
@@ -1292,8 +1292,8 @@ namespace System.Collections.Immutable.Tests
                 Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveRange(array, comparer));
 
                 // Struct overloads, rhs is default
-                Assert.Throws<ArgumentNullException>("items", () => array.RemoveRange(s_emptyDefault));
-                Assert.Throws<ArgumentNullException>("items", () => array.RemoveRange(s_emptyDefault, comparer));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => array.RemoveRange(s_emptyDefault));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => array.RemoveRange(s_emptyDefault, comparer));
 
                 // Enumerable overloads, rhs is default
                 Assert.Throws<InvalidOperationException>(() => array.RemoveRange((IEnumerable<int>)s_emptyDefault));
@@ -1302,8 +1302,8 @@ namespace System.Collections.Immutable.Tests
                 Assert.Throws<InvalidOperationException>(() => ((IImmutableList<int>)array).RemoveRange(s_emptyDefault, comparer));
 
                 // Struct overloads, both sides are default
-                Assert.Throws<ArgumentNullException>("items", () => s_emptyDefault.RemoveRange(s_emptyDefault));
-                Assert.Throws<ArgumentNullException>("items", () => s_emptyDefault.RemoveRange(s_emptyDefault, comparer));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => s_emptyDefault.RemoveRange(s_emptyDefault));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => s_emptyDefault.RemoveRange(s_emptyDefault, comparer));
 
                 // Enumerable overloads, both sides are default
                 Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveRange((IEnumerable<int>)s_emptyDefault));
@@ -1312,10 +1312,10 @@ namespace System.Collections.Immutable.Tests
                 Assert.Throws<InvalidOperationException>(() => ((IImmutableList<int>)s_emptyDefault).RemoveRange(s_emptyDefault, comparer));
 
                 // Enumerable overloads, rhs is null
-                Assert.Throws<ArgumentNullException>("items", () => array.RemoveRange(items: null));
-                Assert.Throws<ArgumentNullException>("items", () => array.RemoveRange(items: null, equalityComparer: comparer));
-                Assert.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)array).RemoveRange(items: null));
-                Assert.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)array).RemoveRange(items: null, equalityComparer: comparer));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => array.RemoveRange(items: null));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => array.RemoveRange(items: null, equalityComparer: comparer));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)array).RemoveRange(items: null));
+                AssertExtensions.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)array).RemoveRange(items: null, equalityComparer: comparer));
 
                 // Enumerable overloads, lhs is default and rhs is null
                 Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveRange(items: null));
@@ -1366,7 +1366,7 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentNullException>("match", () => array.RemoveAll(match: null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => array.RemoveAll(match: null));
         }
 
         [Fact]
@@ -1427,16 +1427,16 @@ namespace System.Collections.Immutable.Tests
 
             Assert.All(SharedEqualityComparers<int>(), comparer =>
             {
-                Assert.Throws<ArgumentException>("oldValue", () => array.Replace(notContained, 123));
-                Assert.Throws<ArgumentException>("oldValue", () => ((IImmutableList<int>)array).Replace(notContained, 123));
+                AssertExtensions.Throws<ArgumentException>("oldValue", () => array.Replace(notContained, 123));
+                AssertExtensions.Throws<ArgumentException>("oldValue", () => ((IImmutableList<int>)array).Replace(notContained, 123));
 
                 // If the comparer is a faulty implementation that says everything is equal,
                 // an exception won't be thrown here. Check that the comparer says the source does
                 // not contain this value first.
                 if (!source.Contains(notContained, comparer))
                 {
-                    Assert.Throws<ArgumentException>("oldValue", () => array.Replace(notContained, 123, comparer));
-                    Assert.Throws<ArgumentException>("oldValue", () => ((IImmutableList<int>)array).Replace(notContained, 123, comparer));
+                    AssertExtensions.Throws<ArgumentException>("oldValue", () => array.Replace(notContained, 123, comparer));
+                    AssertExtensions.Throws<ArgumentException>("oldValue", () => ((IImmutableList<int>)array).Replace(notContained, 123, comparer));
                 }
             });
         }
@@ -1725,7 +1725,7 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentNullException>("comparison", () => array.Sort(comparison: null));
+            AssertExtensions.Throws<ArgumentNullException>("comparison", () => array.Sort(comparison: null));
         }
 
         [Theory]
@@ -1952,7 +1952,7 @@ namespace System.Collections.Immutable.Tests
         public void IStructuralEquatableGetHashCodeNullComparerNonNullUnderlyingArrayInvalid(IEnumerable<int> source)
         {
             var array = source.ToImmutableArray();
-            Assert.Throws<ArgumentNullException>("comparer", () => ((IStructuralEquatable)array).GetHashCode(comparer: null));
+            AssertExtensions.Throws<ArgumentNullException>("comparer", () => ((IStructuralEquatable)array).GetHashCode(comparer: null));
         }
 
         [Fact]
@@ -1977,8 +1977,8 @@ namespace System.Collections.Immutable.Tests
             {
                 // CompareTo should throw if the arrays are of different lengths. The default ImmutableArray is considered to have
                 // a different length from every other array, including empty ones.
-                Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)s_emptyDefault).CompareTo(other, comparer));
-                Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(s_emptyDefault, comparer));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)s_emptyDefault).CompareTo(other, comparer));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(s_emptyDefault, comparer));
             });
         }
 
@@ -1991,11 +1991,11 @@ namespace System.Collections.Immutable.Tests
             // just pass in a default array from the MemberData.
 
             var array = source?.ToImmutableArray() ?? s_emptyDefault;
-            Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)array).CompareTo(other, comparer: null));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)array).CompareTo(other, comparer: null));
 
             if (other is Array || IsImmutableArray(other))
             {
-                Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(array, comparer: null));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(array, comparer: null));
             }
         }
 
@@ -2065,13 +2065,13 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
 
-            Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)array).CompareTo(other, comparer));
-            Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)source.ToArray()).CompareTo(other, comparer));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)array).CompareTo(other, comparer));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)source.ToArray()).CompareTo(other, comparer));
 
             if (other is Array || IsImmutableArray(other))
             {
-                Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(array, comparer));
-                Assert.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(source.ToArray(), comparer));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(array, comparer));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)other).CompareTo(source.ToArray(), comparer));
             }
         }
 
@@ -2133,7 +2133,7 @@ namespace System.Collections.Immutable.Tests
         [MemberData(nameof(BinarySearchData))]
         public void BinarySearchDefaultInvalid(IEnumerable<int> source, int value)
         {
-            Assert.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, value));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, value));
         }
 
         [Fact]

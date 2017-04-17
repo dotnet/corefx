@@ -81,8 +81,8 @@ namespace System.Tests
         [Fact]
         public static void Ctor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("array", () => new ArraySegment<T>(null));
-            Assert.Throws<ArgumentNullException>("array", () => new ArraySegment<T>(null, -1, 1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => new ArraySegment<T>(null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => new ArraySegment<T>(null, -1, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => new ArraySegment<T>(new T[10], -1, 0)); // Offset < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => new ArraySegment<T>(new T[10], 0, -1)); // Count < 0
             Assert.Throws<ArgumentException>(null, () => new ArraySegment<T>(new T[10], 10, 1)); // Offset + count > array.Length

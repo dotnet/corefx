@@ -59,8 +59,8 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("ftp://onlyhttpsupported"));
-                Assert.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("/onlyabsolutesupported", UriKind.Relative));
+                AssertExtensions.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("ftp://onlyhttpsupported"));
+                AssertExtensions.Throws<ArgumentException>("value", () => client.BaseAddress = new Uri("/onlyabsolutesupported", UriKind.Relative));
             }
         }
 
@@ -309,7 +309,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient(new CustomResponseHandler((r,c) => Task.FromResult<HttpResponseMessage>(null))))
             {
-                Assert.Throws<ArgumentNullException>("request", () => { client.SendAsync(null); });
+                AssertExtensions.Throws<ArgumentNullException>("request", () => { client.SendAsync(null); });
             }
         }
 

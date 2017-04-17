@@ -134,20 +134,20 @@ namespace System.Collections.Immutable.Tests
             builder1.AddRange(array);
             Assert.Equal(new[] { 1, 2, 3 }, builder1);
 
-            Assert.Throws<ArgumentNullException>("items", () => builder1.AddRange((int[])null));
-            Assert.Throws<ArgumentNullException>("items", () => builder1.AddRange(null, 42));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => builder1.AddRange((int[])null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => builder1.AddRange(null, 42));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder1.AddRange(new int[0], -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder1.AddRange(new int[0], 42));
 
-            Assert.Throws<ArgumentNullException>("items", () => builder1.AddRange((ImmutableArray<int>.Builder)null));
-            Assert.Throws<ArgumentNullException>("items", () => builder1.AddRange((IEnumerable<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => builder1.AddRange((ImmutableArray<int>.Builder)null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => builder1.AddRange((IEnumerable<int>)null));
 
             Assert.Throws<NullReferenceException>(() => builder1.AddRange(default(ImmutableArray<int>)));
             builder1.AddRange(default(ImmutableArray<int>), 42);
 
             var builder2 = new ImmutableArray<object>.Builder();
             builder2.AddRange(default(ImmutableArray<string>));
-            Assert.Throws<ArgumentNullException>("items", () => builder2.AddRange((ImmutableArray<string>.Builder)null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => builder2.AddRange((ImmutableArray<string>.Builder)null));
         }
 
         [Fact]
@@ -308,7 +308,7 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void Sort_NullComparison_Throws()
         {
-            Assert.Throws<ArgumentNullException>("comparison", () => ImmutableArray.CreateBuilder<int>().Sort((Comparison<int>)null));
+            AssertExtensions.Throws<ArgumentNullException>("comparison", () => ImmutableArray.CreateBuilder<int>().Sort((Comparison<int>)null));
         }
 
         [Fact]
@@ -462,7 +462,7 @@ namespace System.Collections.Immutable.Tests
             builder.CopyTo(target, 1);
             Assert.Equal(new[] { 0, 1, 2, 3 }, target);
 
-            Assert.Throws<ArgumentNullException>("array", () => builder.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => builder.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.CopyTo(target, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.CopyTo(target, 2));
         }

@@ -14,13 +14,13 @@ namespace System.IO.Tests
         [Fact]
         public static void NullArgs_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("path", () => new StreamReader((string)null));
-            Assert.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null));
-            Assert.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null, true));
-            Assert.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null, true, -1));
-            Assert.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null));
-            Assert.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null, true));
-            Assert.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null, true, -1));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new StreamReader((string)null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null, true));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new StreamReader((string)null, null, true, -1));
+            AssertExtensions.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null));
+            AssertExtensions.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null, true));
+            AssertExtensions.Throws<ArgumentNullException>("encoding", () => new StreamReader("", null, true, -1));
         }
 
         [Fact]

@@ -147,7 +147,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void LoadXml_NullValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => new EncryptionMethod().LoadXml(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => new EncryptionMethod().LoadXml(null));
         }
 
         [Theory]

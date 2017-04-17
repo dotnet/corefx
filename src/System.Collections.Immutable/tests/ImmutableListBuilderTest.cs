@@ -155,7 +155,7 @@ namespace System.Collections.Immutable.Tests
             mutable.AddRange(new int[0]);
             Assert.Equal(new[] { 1, 4, 5, 2, 3 }, mutable);
 
-            Assert.Throws<ArgumentNullException>("items", () => mutable.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => mutable.AddRange(null));
         }
 
         [Fact]

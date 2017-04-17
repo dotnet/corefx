@@ -16,7 +16,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void InvalidArguments_Name()
         {
             // null isn't valid when trying to OpenExistinga map
-            Assert.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.OpenExisting(null));
+            AssertExtensions.Throws<ArgumentNullException>("mapName", () => MemoryMappedFile.OpenExisting(null));
 
             // Empty is never a valid map name
             Assert.Throws<ArgumentException>(() => MemoryMappedFile.OpenExisting(string.Empty));

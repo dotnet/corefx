@@ -209,7 +209,7 @@ namespace System.Collections.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[-1] = new Foo()); // Index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[collBase.Count] = new Foo()); // Index >= InnerList.Count
 
-            Assert.Throws<ArgumentNullException>("value", () => collBase[0] = null); // Object is null
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collBase[0] = null); // Object is null
         }
 
         [Fact]

@@ -49,8 +49,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetNextTextElement_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("str", () => StringInfo.GetNextTextElement(null)); // Str is null
-            Assert.Throws<ArgumentNullException>("str", () => StringInfo.GetNextTextElement(null, 0)); // Str is null
+            AssertExtensions.Throws<ArgumentNullException>("str", () => StringInfo.GetNextTextElement(null)); // Str is null
+            AssertExtensions.Throws<ArgumentNullException>("str", () => StringInfo.GetNextTextElement(null, 0)); // Str is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => StringInfo.GetNextTextElement("abc", -1)); // Index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => StringInfo.GetNextTextElement("abc", 4)); // Index > str.Length

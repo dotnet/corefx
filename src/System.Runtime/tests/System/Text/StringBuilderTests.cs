@@ -596,7 +596,7 @@ namespace System.Text.Tests
         public static void Append_String_NullValueNonZeroStartIndexCount_ThrowsArgumentNullException()
         {
             var builder = new StringBuilder();
-            Assert.Throws<ArgumentNullException>("value", () => builder.Append((string)null, 1, 1));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => builder.Append((string)null, 1, 1));
         }
 
         [Theory]
@@ -659,7 +659,7 @@ namespace System.Text.Tests
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
 
-            Assert.Throws<ArgumentNullException>("value", () => builder.Append((char[])null, 1, 1)); // Value is null, startIndex > 0 and count > 0
+            AssertExtensions.Throws<ArgumentNullException>("value", () => builder.Append((char[])null, 1, 1)); // Value is null, startIndex > 0 and count > 0
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Append(new char[0], -1, 0)); // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Append(new char[0], 0, -1)); // Count < 0
@@ -678,7 +678,7 @@ namespace System.Text.Tests
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
 
-            Assert.Throws<ArgumentNullException>("value", () => builder.Append((char[])null, 1, 1)); // Value is null, startIndex > 0 and count > 0
+            AssertExtensions.Throws<ArgumentNullException>("value", () => builder.Append((char[])null, 1, 1)); // Value is null, startIndex > 0 and count > 0
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Append(new char[0], -1, 0)); // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[0], 0, -1)); // Count < 0
@@ -815,18 +815,18 @@ namespace System.Text.Tests
             var obj3 = new object();
             var obj4 = new object();
 
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3, obj4)); // Format is null
-            Assert.Throws<ArgumentNullException>("args", () => builder.AppendFormat("", null)); // Args is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, (object[])null)); // Both format and args are null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2, obj3)); // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2, obj3, obj4)); // Format is null
-            Assert.Throws<ArgumentNullException>("args", () => builder.AppendFormat(formatter, "", null)); // Args is null
-            Assert.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, null)); // Both format and args are null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, obj1, obj2, obj3, obj4)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("args", () => builder.AppendFormat("", null)); // Args is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(null, (object[])null)); // Both format and args are null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2, obj3)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, obj1, obj2, obj3, obj4)); // Format is null
+            AssertExtensions.Throws<ArgumentNullException>("args", () => builder.AppendFormat(formatter, "", null)); // Args is null
+            AssertExtensions.Throws<ArgumentNullException>("format", () => builder.AppendFormat(formatter, null, null)); // Both format and args are null
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("{-1}", obj1)); // Format has value < 0
             Assert.Throws<FormatException>(() => builder.AppendFormat("{-1}", obj1, obj2)); // Format has value < 0
@@ -962,7 +962,7 @@ namespace System.Text.Tests
         public static void CopyTo_Invalid()
         {
             var builder = new StringBuilder("Hello");
-            Assert.Throws<ArgumentNullException>("destination", () => builder.CopyTo(0, null, 0, 0)); // Destination is null
+            AssertExtensions.Throws<ArgumentNullException>("destination", () => builder.CopyTo(0, null, 0, 0)); // Destination is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => builder.CopyTo(-1, new char[10], 0, 0)); // Source index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => builder.CopyTo(6, new char[10], 0, 0)); // Source index > builder.Length
@@ -1658,11 +1658,11 @@ namespace System.Text.Tests
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
 
-            Assert.Throws<ArgumentNullException>("oldValue", () => builder.Replace(null, "")); // Old value is null
-            Assert.Throws<ArgumentNullException>("oldValue", () => builder.Replace(null, "a", 0, 0)); // Old value is null
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => builder.Replace(null, "")); // Old value is null
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => builder.Replace(null, "a", 0, 0)); // Old value is null
 
-            Assert.Throws<ArgumentException>("oldValue", () => builder.Replace("", "a")); // Old value is empty
-            Assert.Throws<ArgumentException>("oldValue", () => builder.Replace("", "a", 0, 0)); // Old value is empty
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => builder.Replace("", "a")); // Old value is empty
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => builder.Replace("", "a", 0, 0)); // Old value is empty
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Replace("o", "oo")); // New length > builder.MaxCapacity
             AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Replace("o", "oo", 0, 5)); // New length > builder.MaxCapacity

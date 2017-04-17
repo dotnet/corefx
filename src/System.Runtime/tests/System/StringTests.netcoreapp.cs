@@ -94,10 +94,10 @@ namespace System.Tests
         [Fact]
         public static void Join_Char_NullValues_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null));
-            Assert.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null, 0, 0));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (object[])null));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<object>)null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join('|', (string[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join('|', (object[])null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join('|', (IEnumerable<object>)null));
         }
 
         [Fact]

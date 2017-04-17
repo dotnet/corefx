@@ -61,14 +61,14 @@ namespace System.IO.Pipes.Tests
         {
             using (AnonymousPipeServerStream dummyserver = new AnonymousPipeServerStream(PipeDirection.Out))
             {
-                Assert.Throws<ArgumentNullException>("serverSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, null, dummyserver.ClientSafePipeHandle));
+                AssertExtensions.Throws<ArgumentNullException>("serverSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, null, dummyserver.ClientSafePipeHandle));
 
-                Assert.Throws<ArgumentNullException>("clientSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, dummyserver.SafePipeHandle, null));
+                AssertExtensions.Throws<ArgumentNullException>("clientSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, dummyserver.SafePipeHandle, null));
 
                 SafePipeHandle pipeHandle = new SafePipeHandle(new IntPtr(-1), true);
-                Assert.Throws<ArgumentException>("serverSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, pipeHandle, dummyserver.ClientSafePipeHandle));
+                AssertExtensions.Throws<ArgumentException>("serverSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, pipeHandle, dummyserver.ClientSafePipeHandle));
 
-                Assert.Throws<ArgumentException>("clientSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, dummyserver.SafePipeHandle, pipeHandle));
+                AssertExtensions.Throws<ArgumentException>("clientSafePipeHandle", () => new AnonymousPipeServerStream(PipeDirection.Out, dummyserver.SafePipeHandle, pipeHandle));
             }
         }
 

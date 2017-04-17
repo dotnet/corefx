@@ -48,7 +48,7 @@ namespace System.Collections.Specialized.Tests
             MyNameObjectCollection nameObjectCollection = Helpers.CreateNameObjectCollection(count);
             ICollection collection = nameObjectCollection;
 
-            Assert.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
             Assert.Throws<ArgumentException>(() => collection.CopyTo(new string[count, count], 0));
 
             if (count > 0)

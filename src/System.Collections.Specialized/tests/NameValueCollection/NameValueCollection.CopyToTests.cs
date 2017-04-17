@@ -58,7 +58,7 @@ namespace System.Collections.Specialized.Tests
         public void CopyTo_Invalid(int count)
         {
             NameValueCollection nameValueCollection = Helpers.CreateNameValueCollection(count);
-            Assert.Throws<ArgumentNullException>("dest", () => nameValueCollection.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("dest", () => nameValueCollection.CopyTo(null, 0));
             AssertExtensions.Throws<ArgumentException>("dest", null, () => nameValueCollection.CopyTo(new string[count, count], 0)); // in netfx when passing multidimensional arrays Exception.ParamName is null.
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => nameValueCollection.CopyTo(new string[count], -1));

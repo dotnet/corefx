@@ -283,7 +283,7 @@ namespace System.Net.Tests
             using (HttpListenerResponse response = await _helper.GetResponse())
             using (Stream outputStream = response.OutputStream)
             {
-                Assert.Throws<ArgumentNullException>("buffer", () => outputStream.Write(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => outputStream.Write(null, 0, 0));
                 await Assert.ThrowsAsync<ArgumentNullException>("buffer", () => outputStream.WriteAsync(null, 0, 0));
             }
         }
@@ -554,7 +554,7 @@ namespace System.Net.Tests
             using (HttpListenerResponse response = await _helper.GetResponse())
             using (Stream outputStream = response.OutputStream)
             {
-                Assert.Throws<ArgumentNullException>("asyncResult", () => outputStream.EndWrite(null));
+                AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => outputStream.EndWrite(null));
             }
         }
 
@@ -569,8 +569,8 @@ namespace System.Net.Tests
             {
                 IAsyncResult beginWriteResult = outputStream1.BeginWrite(new byte[0], 0, 0, null, null);
 
-                Assert.Throws<ArgumentException>("asyncResult", () => outputStream2.EndWrite(new CustomAsyncResult()));
-                Assert.Throws<ArgumentException>("asyncResult", () => outputStream2.EndWrite(beginWriteResult));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => outputStream2.EndWrite(new CustomAsyncResult()));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => outputStream2.EndWrite(beginWriteResult));
             }
         }
 

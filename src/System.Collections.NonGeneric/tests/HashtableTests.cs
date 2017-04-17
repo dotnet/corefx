@@ -62,7 +62,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Hashtable((IDictionary)null)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Hashtable((IDictionary)null)); // Dictionary is null
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_HashCodeProvider_Comparer_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Hashtable(null, CaseInsensitiveHashCodeProvider.Default, StringComparer.OrdinalIgnoreCase)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Hashtable(null, CaseInsensitiveHashCodeProvider.Default, StringComparer.OrdinalIgnoreCase)); // Dictionary is null
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_Int_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Hashtable(null, 1f)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Hashtable(null, 1f)); // Dictionary is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("loadFactor", () => new Hashtable(new Hashtable(), 0.09f)); // Load factor < 0.1f
             AssertExtensions.Throws<ArgumentOutOfRangeException>("loadFactor", () => new Hashtable(new Hashtable(), 1.01f)); // Load factor > 1f
@@ -204,7 +204,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_IEqualityComparer_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Hashtable((IDictionary)null, null)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Hashtable((IDictionary)null, null)); // Dictionary is null
         }
 
         [Theory]
@@ -319,7 +319,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Ctor_IDictionary_LoadFactor_IEqualityComparer_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new Hashtable(null, 1f, null)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new Hashtable(null, 1f, null)); // Dictionary is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("loadFactor", () => new Hashtable(new Hashtable(), 0.09f, null)); // Load factor < 0.1f
             AssertExtensions.Throws<ArgumentOutOfRangeException>("loadFactor", () => new Hashtable(new Hashtable(), 1.01f, null)); // Load factor > 1f
@@ -646,8 +646,8 @@ namespace System.Collections.Tests
             var hash1 = new Hashtable();
             Helpers.PerformActionOnAllHashtableWrappers(hash1, hash2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => hash2.ContainsKey(null)); // Key is null
-                Assert.Throws<ArgumentNullException>("key", () => hash2.Contains(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => hash2.ContainsKey(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => hash2.Contains(null)); // Key is null
             });
         }
 
@@ -774,7 +774,7 @@ namespace System.Collections.Tests
         [Fact]
         public static void Synchronized_NullTable_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("table", () => Hashtable.Synchronized(null)); // Table is null
+            AssertExtensions.Throws<ArgumentNullException>("table", () => Hashtable.Synchronized(null)); // Table is null
         }
 
         [Fact]

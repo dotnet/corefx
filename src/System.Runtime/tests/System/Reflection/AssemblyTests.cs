@@ -62,7 +62,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssembly_Nullery()
         {
-            Assert.Throws<ArgumentNullException>("type", () => Assembly.GetAssembly(null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Assembly.GetAssembly(null));
         }
 
         public static IEnumerable<object[]> GetAssembly_TestData()
@@ -281,7 +281,7 @@ namespace System.Reflection.Tests
             var assem = typeof(AssemblyTests).Assembly;
             string path = "System.Runtime.Tests.dll";
             string fullpath = Path.GetFullPath(path);
-            Assert.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
+            AssertExtensions.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
             Assert.Throws<ArgumentException>(() => Assembly.LoadFile(path));
             var loadfile1 = Assembly.LoadFile(fullpath);
             Assert.NotEqual(assem, loadfile1);
@@ -319,7 +319,7 @@ namespace System.Reflection.Tests
         public void Test_LoadFrom()
         {
             var assem = Assembly.LoadFrom(destTestAssemblyPath);
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
             var assem1 = Assembly.LoadFrom(destTestAssemblyPath);
             Assert.Equal(assem, assem1);
 
@@ -335,7 +335,7 @@ namespace System.Reflection.Tests
         public void Test_UnsafeLoadFrom()
         {
             var assem = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
         }        
 
         [Fact]

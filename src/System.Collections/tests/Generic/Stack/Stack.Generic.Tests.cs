@@ -82,7 +82,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Stack_Generic_Constructor_IEnumerable_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("collection", () => new Stack<T>(null));
+            AssertExtensions.Throws<ArgumentNullException>("collection", () => new Stack<T>(null));
         }
 
         #endregion

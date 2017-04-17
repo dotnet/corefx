@@ -26,7 +26,7 @@ namespace System.Security.AccessControl.Tests
         [Fact]
         public virtual void AuditRule_Constructor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("identity", () => Constructor(null, 1, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
+            AssertExtensions.Throws<ArgumentNullException>("identity", () => Constructor(null, 1, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("accessMask", () => Constructor(new SecurityIdentifier("S-1-5-32-544"), 0, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("accessMask", () => Constructor(new SecurityIdentifier("S-1-5-32-544"), -1, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
@@ -62,7 +62,7 @@ namespace System.Security.AccessControl.Tests
         [Fact]
         public override void AuditRule_Constructor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("identity", () => Constructor(null, 1, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
+            AssertExtensions.Throws<ArgumentNullException>("identity", () => Constructor(null, 1, true, (InheritanceFlags)1, (PropagationFlags)1, (AuditFlags)0));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritanceFlags", () => Constructor(new SecurityIdentifier("S-1-5-32-544"), 1, true, (InheritanceFlags)4, (PropagationFlags)1, (AuditFlags)0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("propagationFlags", () => Constructor(new SecurityIdentifier("S-1-5-32-544"), 1, true, (InheritanceFlags)1, (PropagationFlags)4, (AuditFlags)0));

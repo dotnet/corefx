@@ -15,7 +15,7 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.Write))
             {
-                Assert.Throws<ArgumentNullException>("array", () => fs.BeginRead(null, 0, 0, null, null));
+                AssertExtensions.Throws<ArgumentNullException>("array", () => fs.BeginRead(null, 0, 0, null, null));
             }
         }
 

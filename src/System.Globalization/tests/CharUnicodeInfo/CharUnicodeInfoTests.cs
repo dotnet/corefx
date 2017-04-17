@@ -59,7 +59,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetUnicodeCategory_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetUnicodeCategory(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetUnicodeCategory(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("abc", 3));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetUnicodeCategory("", 0));
@@ -107,7 +107,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void GetNumericValue_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetNumericValue(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => CharUnicodeInfo.GetNumericValue(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("abc", 3));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => CharUnicodeInfo.GetNumericValue("", 0));

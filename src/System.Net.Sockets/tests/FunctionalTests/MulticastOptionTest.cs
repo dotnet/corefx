@@ -12,10 +12,10 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void MulticastOption_Ctor_InvalidArguments_Throws()
         {
-            Assert.Throws<ArgumentNullException>("group", () => new MulticastOption(null));
-            Assert.Throws<ArgumentNullException>("group", () => new MulticastOption(null, 0));
-            Assert.Throws<ArgumentNullException>("group", () => new MulticastOption(null, null));
-            Assert.Throws<ArgumentNullException>("mcint", () => new MulticastOption(IPAddress.Loopback, null));
+            AssertExtensions.Throws<ArgumentNullException>("group", () => new MulticastOption(null));
+            AssertExtensions.Throws<ArgumentNullException>("group", () => new MulticastOption(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("group", () => new MulticastOption(null, null));
+            AssertExtensions.Throws<ArgumentNullException>("mcint", () => new MulticastOption(IPAddress.Loopback, null));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("interfaceIndex", () => new MulticastOption(IPAddress.Loopback, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("interfaceIndex", () => new MulticastOption(IPAddress.Loopback, int.MaxValue));
         }
@@ -70,8 +70,8 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void IPv6MulticastOption_Ctor_InvalidArguments_Throws()
         {
-            Assert.Throws<ArgumentNullException>("group", () => new IPv6MulticastOption(null));
-            Assert.Throws<ArgumentNullException>("group", () => new IPv6MulticastOption(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("group", () => new IPv6MulticastOption(null));
+            AssertExtensions.Throws<ArgumentNullException>("group", () => new IPv6MulticastOption(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("ifindex", () => new IPv6MulticastOption(IPAddress.Loopback, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("ifindex", () => new IPv6MulticastOption(IPAddress.Loopback, long.MaxValue));
         }
@@ -82,7 +82,7 @@ namespace System.Net.Sockets.Tests
             var option = new IPv6MulticastOption(IPAddress.Any);
             Assert.Same(IPAddress.Any, option.Group);
 
-            Assert.Throws<ArgumentNullException>("value", () => option.Group = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => option.Group = null);
 
             option.Group = IPAddress.Broadcast;
             Assert.Same(IPAddress.Broadcast, option.Group);

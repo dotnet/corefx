@@ -157,7 +157,7 @@ namespace System.Tests
         {
             var value = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
 
-            Assert.Throws<ArgumentNullException>("value", () => new string((char[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => new string((char[])null, 0, 0));
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => new string(value, 0, 9)); // Length > array length
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => new string(value, 5, -1)); // Length < 0
@@ -405,13 +405,13 @@ namespace System.Tests
         [Fact]
         public static void Concat_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
 
-            Assert.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>(null)); // Values is null
-            Assert.Throws<ArgumentNullException>("values", () => string.Concat<object>(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<string>(null)); // Values is null
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Concat<object>(null)); // Values is null
         }
 
         [Theory]
@@ -434,7 +434,7 @@ namespace System.Tests
             string s = "Hello";
             char[] dst = new char[10];
 
-            Assert.Throws<ArgumentNullException>("destination", () => s.CopyTo(0, null, 0, 0)); // Dst is null
+            AssertExtensions.Throws<ArgumentNullException>("destination", () => s.CopyTo(0, null, 0, 0)); // Dst is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sourceIndex", () => s.CopyTo(-1, dst, 0, 0)); // Source index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", () => s.CopyTo(0, dst, -1, 0)); // Destination index < 0
@@ -662,10 +662,10 @@ namespace System.Tests
         public static void Compare_Invalid()
         {
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", "bb", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare("a", 0, "bb", 0, 1, StringComparison.OrdinalIgnoreCase + 1));
 
             // IndexA < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a", -1, "bb", 0, 1));
@@ -698,7 +698,7 @@ namespace System.Tests
             // These tests ensure that the argument validation stays in order.
 
             // Compare accepting StringComparison
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
             // Tests to ensure null is short-circuited before validating the arguments are in the Compare() theory
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
             AssertExtensions.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
@@ -760,7 +760,7 @@ namespace System.Tests
         [Fact]
         public static void Contains_NullValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "foo".Contains(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".Contains(null));
         }
 
         [Theory]
@@ -851,12 +851,12 @@ namespace System.Tests
         public static void EndsWith_Invalid()
         {
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".EndsWith(null, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".EndsWith("", StringComparison.OrdinalIgnoreCase + 1));
         }
 
 
@@ -1078,8 +1078,8 @@ namespace System.Tests
         public static void Equals_InvalidComparisonType_ThrowsArgumentOutOfRangeException(StringComparison comparisonType)
         {
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => string.Equals("a", "b", comparisonType));
-            Assert.Throws<ArgumentException>("comparisonType", () => "a".Equals("a", comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.Equals("a", "b", comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "a".Equals("a", comparisonType));
         }
 
         [Fact]
@@ -1103,22 +1103,22 @@ namespace System.Tests
             var obj4 = new object();
 
             // Format is null
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3, obj4));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, obj1, obj2, obj3, obj4));
 
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2, obj3));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, obj1, obj2, obj3));
 
             // Args is null
-            Assert.Throws<ArgumentNullException>("args", () => string.Format("", null));
-            Assert.Throws<ArgumentNullException>("args", () => string.Format(formatter, "", null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Format("", null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => string.Format(formatter, "", null));
 
             // Args and format are null
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(null, (object[])null));
-            Assert.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, null));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(null, (object[])null));
+            AssertExtensions.Throws<ArgumentNullException>("format", () => string.Format(formatter, null, null));
 
             // Format has value < 0
             Assert.Throws<FormatException>(() => string.Format("{-1}", obj1));
@@ -1443,11 +1443,11 @@ namespace System.Tests
         public static void IndexOf_Invalid()
         {
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "foo".IndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "foo".IndexOf("o", -1));
@@ -1476,12 +1476,12 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOf("o", 0, 4, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf("o", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Theory]
@@ -1549,7 +1549,7 @@ namespace System.Tests
         [Fact]
         public static void Insert_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "Hello".Insert(0, null)); // Value is null
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "Hello".Insert(0, null)); // Value is null
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(-1, "!")); // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => "Hello".Insert(6, "!")); // Start index > string.length
@@ -1628,10 +1628,10 @@ namespace System.Tests
         [Fact]
         public static void Join_String_NullValues_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
-            Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
         }
 
         [Fact]
@@ -1692,8 +1692,8 @@ namespace System.Tests
         [Fact]
         public static void Join_ObjectArray_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
-            Assert.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("$$", (object[])null));
+            AssertExtensions.Throws<ArgumentNullException>("values", () => string.Join("--", (IEnumerable<object>)null));
         }
 
         [Theory]
@@ -1784,11 +1784,11 @@ namespace System.Tests
             string s = "foo";
 
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, StringComparison.CurrentCulture));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0));
-            Assert.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, StringComparison.CurrentCulture));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.LastIndexOf(null, 0, 0, StringComparison.CurrentCulture));
 
             // Start index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => s.LastIndexOf('a', -1));
@@ -1817,12 +1817,12 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => s.LastIndexOf("a", 0, s.Length + 2, StringComparison.CurrentCulture));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.LastIndexOf("a", 0, 0, StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Fact]
@@ -2046,8 +2046,8 @@ namespace System.Tests
         [Fact]
         public static void Replace_String_StringInvalid()
         {
-            Assert.Throws<ArgumentNullException>("oldValue", () => "Hello".Replace(null, "")); // Old value is null
-            Assert.Throws<ArgumentException>("oldValue", () => "Hello".Replace("", "l")); // Old value is empty
+            AssertExtensions.Throws<ArgumentNullException>("oldValue", () => "Hello".Replace(null, "")); // Old value is null
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => "Hello".Replace("", "l")); // Old value is empty
         }
 
         [Theory]
@@ -2146,15 +2146,15 @@ namespace System.Tests
             string s = "Hello";
 
             // Value is null
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null));
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.CurrentCultureIgnoreCase));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.CurrentCultureIgnoreCase));
 
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.Ordinal));
-            Assert.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.OrdinalIgnoreCase));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.Ordinal));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => s.StartsWith(null, StringComparison.OrdinalIgnoreCase));
 
             // Invalid comparison type
-            Assert.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.OrdinalIgnoreCase + 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.CurrentCulture - 1));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.OrdinalIgnoreCase + 1));
         }
 
         [Theory]
@@ -2534,12 +2534,12 @@ namespace System.Tests
         [Fact]
         public static void CompareNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", false, null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", false, null));
 
-            Assert.Throws<ArgumentException>("options", () => String.Compare("a", "b", CultureInfo.InvariantCulture, (CompareOptions) 7891));
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", null, CompareOptions.None));
+            AssertExtensions.Throws<ArgumentException>("options", () => String.Compare("a", "b", CultureInfo.InvariantCulture, (CompareOptions) 7891));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", "b", null, CompareOptions.None));
 
-            Assert.Throws<ArgumentNullException>("culture", () => String.Compare("a", 0, "b", 0, 1, false, null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => String.Compare("a", 0, "b", 0, 1, false, null));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => String.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => String.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => String.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
@@ -2558,8 +2558,8 @@ namespace System.Tests
         [Fact]
         public static void CasingNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("culture", () => "".ToLower(null));
-            Assert.Throws<ArgumentNullException>("culture", () => "".ToUpper(null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToLower(null));
+            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToUpper(null));
         }
 
         [Theory]
@@ -2574,8 +2574,8 @@ namespace System.Tests
         [Fact]
         public static void StartEndNegativeTest()
         {
-            Assert.Throws<ArgumentNullException>("value", () => "".StartsWith(null, true, null));
-            Assert.Throws<ArgumentNullException>("value", () => "".EndsWith(null, true, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "".StartsWith(null, true, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => "".EndsWith(null, true, null));
         }
 
         [Fact]

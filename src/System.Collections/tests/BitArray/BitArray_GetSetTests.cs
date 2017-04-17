@@ -313,7 +313,7 @@ namespace System.Collections.Tests
         public static void CopyTo_Type_Invalid()
         {
             ICollection bitArray = new BitArray(10);
-            Assert.Throws<ArgumentNullException>("array", () => bitArray.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => bitArray.CopyTo(null, 0));
             Assert.Throws<ArgumentException>(() => bitArray.CopyTo(new long[10], 0));
             Assert.Throws<ArgumentException>(() => bitArray.CopyTo(new int[10, 10], 0));
         }

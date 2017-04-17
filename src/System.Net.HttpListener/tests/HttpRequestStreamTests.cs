@@ -337,7 +337,7 @@ namespace System.Net.Tests
             HttpListenerRequest request = await _helper.GetRequest();
             using (Stream inputStream = request.InputStream)
             {
-                Assert.Throws<ArgumentNullException>("buffer", () => inputStream.Read(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => inputStream.Read(null, 0, 0));
                 await Assert.ThrowsAsync<ArgumentNullException>("buffer", () => inputStream.ReadAsync(null, 0, 0));
             }
         }
@@ -379,7 +379,7 @@ namespace System.Net.Tests
 
             using (Stream inputStream = request.InputStream)
             {
-                Assert.Throws<ArgumentNullException>("asyncResult", () => inputStream.EndRead(null));
+                AssertExtensions.Throws<ArgumentNullException>("asyncResult", () => inputStream.EndRead(null));
             }
         }
 
@@ -395,8 +395,8 @@ namespace System.Net.Tests
             {
                 IAsyncResult beginReadResult = inputStream1.BeginRead(new byte[0], 0, 0, null, null);
 
-                Assert.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(new CustomAsyncResult()));
-                Assert.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(beginReadResult));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(new CustomAsyncResult()));
+                AssertExtensions.Throws<ArgumentException>("asyncResult", () => inputStream2.EndRead(beginReadResult));
             }
         }
 

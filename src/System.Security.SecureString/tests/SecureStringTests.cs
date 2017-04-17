@@ -30,7 +30,7 @@ namespace System.Security.Tests
         [Fact]
         public static unsafe void Ctor_CharInt_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("value", () => new SecureString(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => new SecureString(null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => { fixed (char* chars = "test") new SecureString(chars, -1); });
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => CreateSecureString(CreateString(ushort.MaxValue + 2 /*65537: Max allowed length is 65536*/)));
         }
@@ -302,10 +302,10 @@ namespace System.Security.Tests
         [Fact]
         public static void SecureStringMarshal_NullArgsAllowed_IntPtrZero()
         {
-            Assert.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToCoTaskMemAnsi(null));
-            Assert.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToCoTaskMemUnicode(null));
-            Assert.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToGlobalAllocAnsi(null));
-            Assert.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToGlobalAllocUnicode(null));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToCoTaskMemAnsi(null));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToCoTaskMemUnicode(null));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToGlobalAllocAnsi(null));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => SecureStringMarshal.SecureStringToGlobalAllocUnicode(null));
         }
 
         [Fact]

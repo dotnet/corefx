@@ -56,15 +56,15 @@ namespace System.Text.Encodings.Tests
                 char *pChars = pCharsPtr;
                 char *pInvalidSurrogate = pInvalidSurrogatePtr;
 
-                Assert.Throws<ArgumentNullException>("chars", () => enc.GetBytes(null, 1, pBytes, 1));
-                Assert.Throws<ArgumentNullException>("chars", () => enc.GetByteCount(null, 1));
-                Assert.Throws<ArgumentNullException>("bytes", () => enc.GetBytes(pChars, 1, null, 1));
+                AssertExtensions.Throws<ArgumentNullException>("chars", () => enc.GetBytes(null, 1, pBytes, 1));
+                AssertExtensions.Throws<ArgumentNullException>("chars", () => enc.GetByteCount(null, 1));
+                AssertExtensions.Throws<ArgumentNullException>("bytes", () => enc.GetBytes(pChars, 1, null, 1));
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetBytes(pChars, -1, pBytes, 1));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => enc.GetByteCount(pChars, -1));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetBytes(pChars, 1, pBytes, -1));
 
-                Assert.Throws<ArgumentException>("bytes", () => enc.GetBytes(pChars, 4, pBytes, 1));
+                AssertExtensions.Throws<ArgumentException>("bytes", () => enc.GetBytes(pChars, 4, pBytes, 1));
                 
                 Assert.Throws<EncoderFallbackException>(() => enc.GetBytes(pInvalidSurrogate, 2, pBytes, 10));
                 Assert.Throws<EncoderFallbackException>(() => enc.GetByteCount(pInvalidSurrogate, 2));
@@ -88,15 +88,15 @@ namespace System.Text.Encodings.Tests
                 byte *pInvalid = pInvalidPtr;
                 char *pChars = pCharsPtr;
 
-                Assert.Throws<ArgumentNullException>("bytes", () => enc.GetChars(null, bytes.Length, pChars, 20));
-                Assert.Throws<ArgumentNullException>("bytes", () => enc.GetCharCount(null, bytes.Length));
-                Assert.Throws<ArgumentNullException>("chars", () => enc.GetChars(pBytes, bytes.Length, null, 20));
+                AssertExtensions.Throws<ArgumentNullException>("bytes", () => enc.GetChars(null, bytes.Length, pChars, 20));
+                AssertExtensions.Throws<ArgumentNullException>("bytes", () => enc.GetCharCount(null, bytes.Length));
+                AssertExtensions.Throws<ArgumentNullException>("chars", () => enc.GetChars(pBytes, bytes.Length, null, 20));
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("byteCount", () => enc.GetChars(pBytes, -1, pChars, 20));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => enc.GetCharCount(pBytes, -1));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => enc.GetChars(pBytes, bytes.Length, pChars, -1));
 
-                Assert.Throws<ArgumentException>("chars", () => enc.GetChars(pBytes, bytes.Length, pChars, 1));
+                AssertExtensions.Throws<ArgumentException>("chars", () => enc.GetChars(pBytes, bytes.Length, pChars, 1));
 
                 Assert.Throws<DecoderFallbackException>(() => enc.GetChars(pInvalid, invalid.Length, pChars, 20));
                 Assert.Throws<DecoderFallbackException>(() => enc.GetCharCount(pInvalid, invalid.Length));

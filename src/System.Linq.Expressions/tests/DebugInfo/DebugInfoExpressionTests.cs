@@ -25,7 +25,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void DebugInfo_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("document", () => Expression.DebugInfo(null, 1, 1, 1, 1));
+            AssertExtensions.Throws<ArgumentNullException>("document", () => Expression.DebugInfo(null, 1, 1, 1, 1));
 
             SymbolDocumentInfo document = Expression.SymbolDocument("AFile");
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startLine", () => Expression.DebugInfo(document, 0, 1, 1, 1));

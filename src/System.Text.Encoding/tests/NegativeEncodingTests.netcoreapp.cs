@@ -15,7 +15,7 @@ namespace System.Text.Tests
         public static unsafe void GetByteCount_Invalid_NetCoreApp(Encoding encoding)
         {
             // Chars is null
-            Assert.Throws<ArgumentNullException>("s", () => encoding.GetByteCount((string)null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => encoding.GetByteCount((string)null, 0, 0));
 
             // Index < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => encoding.GetByteCount("abc", -1, 0));
@@ -36,7 +36,7 @@ namespace System.Text.Tests
         public static unsafe void GetBytes_Invalid_NetCoreApp(Encoding encoding)
         {
             // Source is null
-            Assert.Throws<ArgumentNullException>("s", () => encoding.GetBytes((string)null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => encoding.GetBytes((string)null, 0, 0));
 
             // CharIndex < 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => encoding.GetBytes("a", -1, 0));

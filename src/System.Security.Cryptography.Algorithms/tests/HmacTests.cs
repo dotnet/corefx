@@ -112,8 +112,8 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HMAC hash = Create())
             {
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
                 Assert.Throws<NullReferenceException>(() => hash.ComputeHash((Stream)null));
             }
         }

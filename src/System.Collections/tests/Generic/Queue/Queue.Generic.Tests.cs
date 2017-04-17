@@ -69,7 +69,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Queue_Generic_Constructor_IEnumerable_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("collection", () => new Queue<T>(null));
+            AssertExtensions.Throws<ArgumentNullException>("collection", () => new Queue<T>(null));
         }
 
         #endregion

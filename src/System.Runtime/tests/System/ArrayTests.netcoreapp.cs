@@ -112,8 +112,8 @@ namespace System.Tests
         [Fact]
         public static void Reverse_Generic_NullArray_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null));
-            Assert.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Array.Reverse((string[])null, 0, 0));
         }
 
         [Fact]
@@ -143,9 +143,9 @@ namespace System.Tests
         [Fact]
         public static void CreateInstance_TypeNotRuntimeType_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
-            Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1], new int[1]));
+            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
+            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
+            AssertExtensions.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1], new int[1]));
         }
     }
 }

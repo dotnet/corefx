@@ -138,7 +138,7 @@ namespace System.Data.SqlClient.Tests
         public void RetrieveStatistics_Add_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Add(null, 100L));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Add(null, 100L));
         }
 
         [Theory]
@@ -169,7 +169,7 @@ namespace System.Data.SqlClient.Tests
         public void RetrieveStatistics_Setter_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d[null] = 100L);
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d[null] = 100L);
         }
 
         [Fact]
@@ -237,14 +237,14 @@ namespace System.Data.SqlClient.Tests
         public void RetrieveStatistics_Remove_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Remove(null));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Remove(null));
         }
 
         [Fact]
         public void RetrieveStatistics_Contains_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Contains(null));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Contains(null));
         }
 
         [Fact]
@@ -268,8 +268,8 @@ namespace System.Data.SqlClient.Tests
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
 
-            Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => d.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => d.CopyTo(null, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => d.CopyTo(new DictionaryEntry[20], -1));
             Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 18));
             Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 1000));
@@ -433,8 +433,8 @@ namespace System.Data.SqlClient.Tests
             IDictionary d = new SqlConnection().RetrieveStatistics();
             ICollection c = d.Keys;
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new string[20], -1));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 18));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 1000));
@@ -543,8 +543,8 @@ namespace System.Data.SqlClient.Tests
             IDictionary d = new SqlConnection().RetrieveStatistics();
             ICollection c = d.Values;
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new long[20], -1));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 18));
             Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 1000));

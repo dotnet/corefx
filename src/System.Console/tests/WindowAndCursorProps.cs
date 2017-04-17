@@ -158,7 +158,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [Fact]
     public static void Title_Set_Windows_Null_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("value", () => Console.Title = null);
+        AssertExtensions.Throws<ArgumentNullException>("value", () => Console.Title = null);
     }
 
     [Fact]
@@ -429,8 +429,8 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [PlatformSpecific(TestPlatforms.Windows)]
     public void MoveBufferArea_InvalidColor_ThrowsException(ConsoleColor color)
     {
-        Assert.Throws<ArgumentException>("sourceForeColor", () => Console.MoveBufferArea(0, 0, 0, 0, 0, 0, 'a', color, ConsoleColor.Black));
-        Assert.Throws<ArgumentException>("sourceBackColor", () => Console.MoveBufferArea(0, 0, 0, 0, 0, 0, 'a', ConsoleColor.Black, color));
+        AssertExtensions.Throws<ArgumentException>("sourceForeColor", () => Console.MoveBufferArea(0, 0, 0, 0, 0, 0, 'a', color, ConsoleColor.Black));
+        AssertExtensions.Throws<ArgumentException>("sourceBackColor", () => Console.MoveBufferArea(0, 0, 0, 0, 0, 0, 'a', ConsoleColor.Black, color));
     }
 
     [Fact]

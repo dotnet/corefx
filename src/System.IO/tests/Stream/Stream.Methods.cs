@@ -275,8 +275,8 @@ namespace System.IO.Tests
             Assert.Equal(TaskStatus.Canceled, stream.WriteAsync(new byte[1], 0, 1, new CancellationToken(canceled: true)).Status);
             Assert.Equal(TaskStatus.Canceled, stream.FlushAsync(new CancellationToken(canceled: true)).Status);
 
-            Assert.Throws<ArgumentNullException>("buffer", () => { stream.ReadAsync(null, 0, 0); });
-            Assert.Throws<ArgumentNullException>("buffer", () => { stream.WriteAsync(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { stream.ReadAsync(null, 0, 0); });
+            AssertExtensions.Throws<ArgumentNullException>("buffer", () => { stream.WriteAsync(null, 0, 0); });
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { stream.ReadAsync(new byte[1], -1, 0); });
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { stream.WriteAsync(new byte[1], -1, 0); });

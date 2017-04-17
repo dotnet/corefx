@@ -30,7 +30,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void Ctor_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => new Collection<int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("list", () => new Collection<int>(null));
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace System.Collections.ObjectModel.Tests
         public static void Item_Set_InvalidType_ThrowsArgumentException()
         {
             var collection = new Collection<int>(new Collection<int>(s_intArray));
-            Assert.Throws<ArgumentException>("value", () => ((IList)collection)[1] = "Two");
+            AssertExtensions.Throws<ArgumentException>("value", () => ((IList)collection)[1] = "Two");
         }
 
         [Fact]

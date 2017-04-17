@@ -83,21 +83,21 @@ namespace System.CodeDom.Tests
         [Fact]
         public void AddRange_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CtorArray(null));
-            Assert.Throws<ArgumentNullException>("value", () => CtorCollection(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CtorArray(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CtorCollection(null));
 
             var collection = Ctor();
-            Assert.Throws<ArgumentNullException>("value", () => AddRange(collection, (TItem[])null));
-            Assert.Throws<ArgumentNullException>("value", () => AddRange(collection, (TCollection)null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => AddRange(collection, (TItem[])null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => AddRange(collection, (TCollection)null));
         }
 
         [Fact]
         public void AddRange_NullObjectInValue_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CtorArray(new TItem[] { null }));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CtorArray(new TItem[] { null }));
 
             var collection = Ctor();
-            Assert.Throws<ArgumentNullException>("value", () => AddRange(collection, new TItem[] { null }));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => AddRange(collection, new TItem[] { null }));
         }
 
         [Fact]
@@ -126,7 +126,7 @@ namespace System.CodeDom.Tests
         public void Add_Null_ThrowsArgumentNullException()
         {
             var collection = Ctor();
-            Assert.Throws<ArgumentNullException>("value", () => Add(collection, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => Add(collection, null));
         }
 
         [Theory]
@@ -142,14 +142,14 @@ namespace System.CodeDom.Tests
         public void Insert_Null_ThrowsArgumentNullException()
         {
             var collection = Ctor();
-            Assert.Throws<ArgumentNullException>("value", () => Insert(collection, 0, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => Insert(collection, 0, null));
         }
 
         [Fact]
         public void Remove_Null_ThrowsArgumentNullException()
         {
             var collection = Ctor();
-            Assert.Throws<ArgumentNullException>("value", () => Remove(collection, null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => Remove(collection, null));
         }
 
         [Fact]

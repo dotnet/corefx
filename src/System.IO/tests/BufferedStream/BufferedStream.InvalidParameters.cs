@@ -50,7 +50,7 @@ namespace System.IO.Tests
             using (BufferedStream stream = new BufferedStream(new MemoryStream()))
             {
                 byte[] array = new byte[10];
-                Assert.Throws<ArgumentNullException>("array", () => stream.Read(null, 1, 1));
+                AssertExtensions.Throws<ArgumentNullException>("array", () => stream.Read(null, 1, 1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(array, -1, 1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(array, 1, -1));
                 Assert.Throws<ArgumentException>(() => stream.Read(array, 9, 2));
@@ -63,7 +63,7 @@ namespace System.IO.Tests
             using (BufferedStream stream = new BufferedStream(new MemoryStream()))
             {
                 byte[] array = new byte[10];
-                Assert.Throws<ArgumentNullException>("array", () => stream.Write(null, 1, 1));
+                AssertExtensions.Throws<ArgumentNullException>("array", () => stream.Write(null, 1, 1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(array, -1, 1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(array, 1, -1));
                 Assert.Throws<ArgumentException>(() => stream.Write(array, 9, 2));
@@ -119,7 +119,7 @@ namespace System.IO.Tests
             using (var s = new BufferedStream(new MemoryStream()))
             {
                 // Null destination
-                Assert.Throws<ArgumentNullException>("destination", () => { s.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { s.CopyToAsync(null); });
 
                 // Buffer size out-of-range
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { s.CopyToAsync(new MemoryStream(), 0); });

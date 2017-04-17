@@ -563,7 +563,7 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void ReplaceMissingThrowsTest()
         {
-            Assert.Throws<ArgumentException>("oldValue", () => ImmutableList<int>.Empty.Replace(5, 3));
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => ImmutableList<int>.Empty.Replace(5, 3));
         }
 
         [Fact]
@@ -613,7 +613,7 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void RemoveAllNullTest()
         {
-            Assert.Throws<ArgumentNullException>("match", () => ImmutableList<int>.Empty.RemoveAll(null));
+            AssertExtensions.Throws<ArgumentNullException>("match", () => ImmutableList<int>.Empty.RemoveAll(null));
         }
 
         [Fact]
@@ -643,7 +643,7 @@ namespace System.Collections.Immutable.Tests
         public void RemoveRangeEnumerableTest()
         {
             var list = ImmutableList.Create(1, 2, 3);
-            Assert.Throws<ArgumentNullException>("items", () => list.RemoveRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => list.RemoveRange(null));
 
             ImmutableList<int> removed2 = list.RemoveRange(new[] { 2 });
             Assert.Equal(2, removed2.Count);
@@ -661,7 +661,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new[] { 1, 2, 3 }, listWithDuplicates.RemoveRange(new[] { 2 }));
             Assert.Equal(new[] { 1, 3 }, listWithDuplicates.RemoveRange(new[] { 2, 2 }));
 
-            Assert.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)ImmutableList.Create(1, 2, 3)).RemoveRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => ((IImmutableList<int>)ImmutableList.Create(1, 2, 3)).RemoveRange(null));
             Assert.Equal(new[] { 1, 3 }, ((IImmutableList<int>)ImmutableList.Create(1, 2, 3)).RemoveRange(new[] { 2 }));
         }
 

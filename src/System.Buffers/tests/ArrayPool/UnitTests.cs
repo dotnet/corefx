@@ -146,7 +146,7 @@ namespace System.Buffers.ArrayPool.Tests
         [MemberData(nameof(BytePoolInstances))]
         public static void CallingReturnBufferWithNullBufferThrows(ArrayPool<byte> pool)
         {
-            Assert.Throws<ArgumentNullException>("array", () => pool.Return(null));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => pool.Return(null));
         }
 
         private static void FillArray(byte[] buffer)
@@ -481,7 +481,7 @@ namespace System.Buffers.ArrayPool.Tests
         [MemberData(nameof(BytePoolInstances))]
         public static void ReturningANonPooledBufferOfDifferentSizeToThePoolThrows(ArrayPool<byte> pool)
         {
-            Assert.Throws<ArgumentException>("array", () => pool.Return(new byte[1]));
+            AssertExtensions.Throws<ArgumentException>("array", () => pool.Return(new byte[1]));
         }
 
         [Theory]

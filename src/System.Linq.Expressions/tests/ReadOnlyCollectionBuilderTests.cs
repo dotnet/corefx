@@ -47,7 +47,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void ReadOnlyCollectionBuilder_Ctor_Collection_ArgumentChecking()
         {
-            Assert.Throws<ArgumentNullException>("collection", () => new ReadOnlyCollectionBuilder<int>(null));
+            AssertExtensions.Throws<ArgumentNullException>("collection", () => new ReadOnlyCollectionBuilder<int>(null));
         }
 
         [Theory]
@@ -280,8 +280,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => rocb.Insert(-1, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => rocb.Insert(1, 1));
 
-            Assert.Throws<ArgumentException>("value", () => rocb.Insert(1, "bar"));
-            Assert.Throws<ArgumentException>("value", () => rocb.Insert(1, null));
+            AssertExtensions.Throws<ArgumentException>("value", () => rocb.Insert(1, "bar"));
+            AssertExtensions.Throws<ArgumentException>("value", () => rocb.Insert(1, null));
 
             rocb.Insert(0, 1);
 
@@ -454,8 +454,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<IndexOutOfRangeException>(() => rocb[-1] = -1);
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => rocb[4] = -1);
 
-            Assert.Throws<ArgumentException>("value", () => rocb[0] = "bar");
-            Assert.Throws<ArgumentException>("value", () => rocb[0] = null);
+            AssertExtensions.Throws<ArgumentException>("value", () => rocb[0] = "bar");
+            AssertExtensions.Throws<ArgumentException>("value", () => rocb[0] = null);
 
             rocb[0] = -1;
             Assert.Equal(-1, rocb[0]);

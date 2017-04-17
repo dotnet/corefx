@@ -16,8 +16,8 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public static void NullPipeName_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("pipeName", () => new NamedPipeClientStream(null));
-            Assert.Throws<ArgumentNullException>("pipeName", () => new NamedPipeClientStream(".", null));
+            AssertExtensions.Throws<ArgumentNullException>("pipeName", () => new NamedPipeClientStream(null));
+            AssertExtensions.Throws<ArgumentNullException>("pipeName", () => new NamedPipeClientStream(".", null));
         }
 
         [Fact]
@@ -33,10 +33,10 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeDirection.Out)]
         public static void NullServerName_Throws_ArgumentNullException(PipeDirection direction)
         {
-            Assert.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1"));
-            Assert.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction));
-            Assert.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction, PipeOptions.None));
-            Assert.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction, PipeOptions.None, TokenImpersonationLevel.None));
+            AssertExtensions.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1"));
+            AssertExtensions.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction));
+            AssertExtensions.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction, PipeOptions.None));
+            AssertExtensions.Throws<ArgumentNullException>("serverName", () => new NamedPipeClientStream(null, "client1", direction, PipeOptions.None, TokenImpersonationLevel.None));
         }
 
         [Theory]
@@ -111,7 +111,7 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeDirection.Out)]
         public static void NullHandle_Throws_ArgumentNullException(PipeDirection direction)
         {
-            Assert.Throws<ArgumentNullException>("safePipeHandle", () => new NamedPipeClientStream(direction, false, true, null));
+            AssertExtensions.Throws<ArgumentNullException>("safePipeHandle", () => new NamedPipeClientStream(direction, false, true, null));
         }
 
         [Theory]
@@ -121,7 +121,7 @@ namespace System.IO.Pipes.Tests
         public static void InvalidHandle_Throws_ArgumentException(PipeDirection direction)
         {
             SafePipeHandle pipeHandle = new SafePipeHandle(new IntPtr(-1), true);
-            Assert.Throws<ArgumentException>("safePipeHandle", () => new NamedPipeClientStream(direction, false, true, pipeHandle));
+            AssertExtensions.Throws<ArgumentException>("safePipeHandle", () => new NamedPipeClientStream(direction, false, true, pipeHandle));
         }
 
         [Theory]

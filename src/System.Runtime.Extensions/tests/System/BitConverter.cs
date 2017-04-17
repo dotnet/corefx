@@ -20,19 +20,19 @@ namespace System.Tests
         [Fact]
         public static void ValueArgumentNull()
         {
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToBoolean(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToChar(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToDouble(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToInt16(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToInt32(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToInt64(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToSingle(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt16(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt32(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt64(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null, 0));
-            Assert.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null, 0, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToBoolean(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToChar(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToDouble(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToInt16(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToInt32(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToInt64(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToSingle(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt16(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt32(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToUInt64(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => BitConverter.ToString(null, 0, 0));
         }
 
         [Fact]
@@ -93,16 +93,16 @@ namespace System.Tests
         public static void StartIndexPlusNeededLengthTooLong()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => BitConverter.ToBoolean(new byte[0], 0));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToChar(new byte[2], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToDouble(new byte[8], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToInt16(new byte[2], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToInt32(new byte[4], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToInt64(new byte[8], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToSingle(new byte[4], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToUInt16(new byte[2], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToUInt32(new byte[4], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToUInt64(new byte[8], 1));
-            Assert.Throws<ArgumentException>("value", () => BitConverter.ToString(new byte[2], 1, 2));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToChar(new byte[2], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToDouble(new byte[8], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToInt16(new byte[2], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToInt32(new byte[4], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToInt64(new byte[8], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToSingle(new byte[4], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToUInt16(new byte[2], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToUInt32(new byte[4], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToUInt64(new byte[8], 1));
+            AssertExtensions.Throws<ArgumentException>("value", () => BitConverter.ToString(new byte[2], 1, 2));
         }
 
         [Fact]
