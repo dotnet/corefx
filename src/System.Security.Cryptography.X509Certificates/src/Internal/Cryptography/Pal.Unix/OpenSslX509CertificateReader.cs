@@ -315,7 +315,10 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }
 
-            using (typedKey = new DSAOpenSsl(privateKey.ExportParameters(true)))
+            DSAParameters dsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(dsaParameters.X))
+            using (typedKey = new DSAOpenSsl(dsaParameters))
             {
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }
@@ -330,9 +333,12 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }
 
+            ECParameters ecParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(ecParameters.D))
             using (typedKey = new ECDsaOpenSsl())
             {
-                typedKey.ImportParameters(privateKey.ExportParameters(true));
+                typedKey.ImportParameters(ecParameters);
 
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }
@@ -347,7 +353,15 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }
 
-            using (typedKey = new RSAOpenSsl(privateKey.ExportParameters(true)))
+            RSAParameters rsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(rsaParameters.D))
+            using (PinAndClear.Track(rsaParameters.P))
+            using (PinAndClear.Track(rsaParameters.Q))
+            using (PinAndClear.Track(rsaParameters.DP))
+            using (PinAndClear.Track(rsaParameters.DQ))
+            using (PinAndClear.Track(rsaParameters.InverseQ))
+            using (typedKey = new RSAOpenSsl(rsaParameters))
             {
                 return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
             }

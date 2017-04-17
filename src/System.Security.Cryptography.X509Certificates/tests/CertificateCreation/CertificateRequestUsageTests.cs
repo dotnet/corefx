@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
 using Test.Cryptography;
 using Xunit;
 
@@ -313,7 +312,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         }
 
         [Fact]
-        public static void AutomaticVersion()
+        public static void AlwaysVersion3()
         {
             using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp384r1Data.KeyParameters))
             {
@@ -322,7 +321,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 using (X509Certificate2 cert = request.CreateSelfSigned(now, now.AddHours(1)))
                 {
-                    Assert.Equal(1, cert.Version);
+                    Assert.Equal(3, cert.Version);
                 }
 
                 request.CertificateExtensions.Add(null);

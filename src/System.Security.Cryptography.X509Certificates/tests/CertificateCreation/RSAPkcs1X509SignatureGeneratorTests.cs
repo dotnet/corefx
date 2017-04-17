@@ -57,8 +57,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         }
 
         [Theory]
-        [InlineData("MD5")]
-        [InlineData("SHA1")]
         [InlineData("SHA256")]
         [InlineData("SHA384")]
         [InlineData("SHA512")]
@@ -84,6 +82,25 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         [Theory]
         [InlineData("MD5")]
         [InlineData("SHA1")]
+        [InlineData("Potato")]
+        public static void SignatureAlgorithm_NotSupported(string hashAlgorithmName)
+        {
+            using (RSA rsa = RSA.Create())
+            {
+                RSAParameters parameters = TestData.RsaBigExponentParams;
+                rsa.ImportParameters(parameters);
+
+                var signatureGenerator = X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);
+
+                HashAlgorithmName hashAlgorithm = new HashAlgorithmName(hashAlgorithmName);
+
+                Assert.Throws<ArgumentOutOfRangeException>(
+                    "hashAlgorithm",
+                    () => signatureGenerator.GetSignatureAlgorithmIdentifier(hashAlgorithm));
+            }
+        }
+
+        [Theory]
         [InlineData("SHA256")]
         [InlineData("SHA384")]
         [InlineData("SHA512")]

@@ -20,6 +20,13 @@ namespace System.Security.Cryptography
         private const byte ConstructedSequenceTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Sequence;
         private const byte ConstructedSetTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Set;
 
+        private static readonly byte[][] s_nullTlv =
+        {
+            new byte[] { (byte)DerSequenceReader.DerTag.Null },
+            new byte[] { 0 },
+            Array.Empty<byte>(),
+        };
+
         private static byte[] EncodeLength(int length)
         {
             Debug.Assert(length >= 0);
@@ -387,12 +394,7 @@ namespace System.Security.Cryptography
 
         internal static byte[][] SegmentedEncodeNull()
         {
-            return new byte[][]
-            {
-                new byte[] { (byte)DerSequenceReader.DerTag.Null },
-                EncodeLength(0),
-                Array.Empty<byte>(),
-            };
+            return s_nullTlv;
         }
 
         /// <summary>

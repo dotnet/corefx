@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreation
@@ -39,17 +40,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 // Use SHA-1 because the FULL and SCHANNEL providers can't handle SHA-2.
                 HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA1;
+                var generator = new RSASha1Pkcs1SignatureGenerator(rsaCsp);
                 byte[] signature;
 
                 CertificateRequest request = new CertificateRequest(
-                    $"CN={KeyName}-{provType}-{keyNumber}",
-                    rsaCsp,
+                    new X500DistinguishedName($"CN={KeyName}-{provType}-{keyNumber}"),
+                    generator.PublicKey,
                     hashAlgorithm);
 
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
-                using (X509Certificate2 cert = request.CreateSelfSigned(now, now.AddDays(1)))
-                using (RSA rsa = cert.GetRSAPrivateKey())
+                using (X509Certificate2 cert = request.Create(request.SubjectName, generator, now, now.AddDays(1), new byte[1]))
+                using (X509Certificate2 withPrivateKey = cert.CopyWithPrivateKey(rsaCsp))
+                using (RSA rsa = withPrivateKey.GetRSAPrivateKey())
                 {
                     signature = rsa.SignData(Array.Empty<byte>(), hashAlgorithm, RSASignaturePadding.Pkcs1);
 
@@ -97,6 +100,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 // Use SHA-1 because the FULL and SCHANNEL providers can't handle SHA-2.
                 HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA1;
+                var generator = new RSASha1Pkcs1SignatureGenerator(rsaCsp);
                 byte[] signature;
 
                 CertificateRequest request = new CertificateRequest(
@@ -106,8 +110,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
-                using (X509Certificate2 cert = request.CreateSelfSigned(now, now.AddDays(1)))
-                using (RSA rsa = cert.GetRSAPrivateKey())
+                using (X509Certificate2 cert = request.Create(request.SubjectName, generator, now, now.AddDays(1), new byte[1]))
+                using (X509Certificate2 withPrivateKey = cert.CopyWithPrivateKey(rsaCsp))
+                using (RSA rsa = withPrivateKey.GetRSAPrivateKey())
                 {
                     // `rsa` will be an RSACng wrapping the CAPI key, which means it does not expose the
                     // KeyNumber from CAPI.
@@ -118,8 +123,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                         rsa,
                         hashAlgorithm);
 
-                    using (X509Certificate2 cert2 = request.CreateSelfSigned(now, now.AddDays(1)))
-                    using (RSA rsa2 = cert2.GetRSAPrivateKey())
+                    X509Certificate2 cert2 = request.Create(
+                        request.SubjectName,
+                        generator,
+                        now,
+                        now.AddDays(1),
+                        new byte[1]);
+
+                    using (cert2)
+                    using (X509Certificate2 withPrivateKey2 = cert2.CopyWithPrivateKey(rsaCsp))
+                    using (RSA rsa2 = withPrivateKey2.GetRSAPrivateKey())
                     {
                         signature = rsa2.SignData(
                             Array.Empty<byte>(),
@@ -513,6 +526,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 Assert.True(ecdsaOther.VerifyData(data, signature, hashAlgorithm));
             }
+        }
+
+        private sealed class RSASha1Pkcs1SignatureGenerator : X509SignatureGenerator
+        {
+            private readonly X509SignatureGenerator _realRsaGenerator;
+
+            internal RSASha1Pkcs1SignatureGenerator(RSA rsa)
+            {
+                _realRsaGenerator = X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);
+            }
+
+            protected override PublicKey BuildPublicKey() => _realRsaGenerator.PublicKey;
+
+            public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
+            {
+                if (hashAlgorithm == HashAlgorithmName.SHA1)
+                    return "300D06092A864886F70D0101050500".HexToByteArray();
+
+                throw new InvalidOperationException();
+            }
+
+            public override byte[] SignData(byte[] data, HashAlgorithmName hashAlgorithm) =>
+                _realRsaGenerator.SignData(data, hashAlgorithm);
         }
     }
 }

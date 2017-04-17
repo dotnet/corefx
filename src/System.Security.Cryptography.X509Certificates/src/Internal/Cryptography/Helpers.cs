@@ -159,4 +159,27 @@ namespace Internal.Cryptography
             }
         }
     }
+
+    internal struct PinAndClear : IDisposable
+    {
+        private byte[] _data;
+        private System.Runtime.InteropServices.GCHandle _gcHandle;
+
+        internal static PinAndClear Track(byte[] data)
+        {
+            return new PinAndClear
+            {
+                _gcHandle = System.Runtime.InteropServices.GCHandle.Alloc(
+                    data,
+                    System.Runtime.InteropServices.GCHandleType.Pinned),
+                _data = data,
+            };
+        }
+
+        public void Dispose()
+        {
+            Array.Clear(_data, 0, _data.Length);
+            _gcHandle.Free();
+        }
+    }
 }

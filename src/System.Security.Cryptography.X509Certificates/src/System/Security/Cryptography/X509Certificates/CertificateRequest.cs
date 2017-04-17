@@ -295,20 +295,12 @@ namespace System.Security.Cryptography.X509Certificates
                 rng.GetBytes(serialNumber);
             }
 
-            TbsCertificate tbsCertificate = new TbsCertificate
-            {
-                SerialNumber = serialNumber,
-                Issuer = SubjectName,
-                PublicKey = PublicKey,
-                NotBefore = notBefore,
-                NotAfter = notAfter,
-                Subject = SubjectName,
-            };
-
-            tbsCertificate.Extensions.AddRange(CertificateExtensions);
-
-            byte[] certBytes = tbsCertificate.Sign(_generator, HashAlgorithm);
-            using (X509Certificate2 certificate = new X509Certificate2(certBytes))
+            using (X509Certificate2 certificate = Create(
+                SubjectName,
+                _generator,
+                notBefore,
+                notAfter,
+                serialNumber))
             {
                 RSA rsa = _key as RSA;
 
@@ -377,27 +369,31 @@ namespace System.Security.Cryptography.X509Certificates
             string keyAlgorithm = issuerCertificate.GetKeyAlgorithm();
             X509SignatureGenerator generator;
 
-            switch (keyAlgorithm)
+            try
             {
-                case Oids.RsaRsa:
-                    RSA rsa = issuerCertificate.GetRSAPrivateKey();
-                    key = rsa;
-                    generator = X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);
-                    break;
-                case Oids.Ecc:
-                    ECDsa ecdsa = issuerCertificate.GetECDsaPrivateKey();
-                    key = ecdsa;
-                    generator = X509SignatureGenerator.CreateForECDsa(ecdsa);
-                    break;
-                default:
-                    throw new ArgumentException(
-                        SR.Format(SR.Cryptography_UnknownKeyAlgorithm, keyAlgorithm),
-                        nameof(issuerCertificate));
-            }
+                switch (keyAlgorithm)
+                {
+                    case Oids.RsaRsa:
+                        RSA rsa = issuerCertificate.GetRSAPrivateKey();
+                        key = rsa;
+                        generator = X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1);
+                        break;
+                    case Oids.Ecc:
+                        ECDsa ecdsa = issuerCertificate.GetECDsaPrivateKey();
+                        key = ecdsa;
+                        generator = X509SignatureGenerator.CreateForECDsa(ecdsa);
+                        break;
+                    default:
+                        throw new ArgumentException(
+                            SR.Format(SR.Cryptography_UnknownKeyAlgorithm, keyAlgorithm),
+                            nameof(issuerCertificate));
+                }
 
-            using (key)
-            {
                 return Create(issuerCertificate.SubjectName, generator, notBefore, notAfter, serialNumber);
+            }
+            finally
+            {
+                key?.Dispose();
             }
         }
 
@@ -447,6 +443,7 @@ namespace System.Security.Cryptography.X509Certificates
 
             TbsCertificate tbsCertificate = new TbsCertificate
             {
+                Version = 2,
                 SerialNumber = serialNumber,
                 Issuer = issuerName,
                 PublicKey = PublicKey,

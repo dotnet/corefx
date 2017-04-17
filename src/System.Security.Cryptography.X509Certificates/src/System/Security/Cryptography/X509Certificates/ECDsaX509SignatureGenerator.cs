@@ -22,11 +22,7 @@ namespace System.Security.Cryptography.X509Certificates
         {
             string oid;
 
-            if (hashAlgorithm == HashAlgorithmName.SHA1)
-            {
-                oid = Oids.ECDsaSha1;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA256)
+            if (hashAlgorithm == HashAlgorithmName.SHA256)
             {
                 oid = Oids.ECDsaSha256;
             }
@@ -72,7 +68,7 @@ namespace System.Security.Cryptography.X509Certificates
 
             string curveOid = ecParameters.Curve.Oid.Value;
 
-            if (curveOid == null)
+            if (string.IsNullOrEmpty(curveOid))
             {
                 string friendlyName = ecParameters.Curve.Oid.FriendlyName;
 

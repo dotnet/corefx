@@ -57,7 +57,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         }
 
         [Theory]
-        [InlineData("SHA1")]
         [InlineData("SHA256")]
         [InlineData("SHA384")]
         [InlineData("SHA512")]
@@ -77,7 +76,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         }
 
         [Theory]
+        [InlineData("MD5")]
         [InlineData("SHA1")]
+        [InlineData("Potato")]
+        public static void SignatureAlgorithm_NotSupported(string hashAlgorithmName)
+        {
+            using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp256r1Data.KeyParameters))
+            {
+                HashAlgorithmName hashAlgorithm = new HashAlgorithmName(hashAlgorithmName);
+                var generator = X509SignatureGenerator.CreateForECDsa(ecdsa);
+
+                Assert.Throws<ArgumentOutOfRangeException>(
+                    "hashAlgorithm",
+                    () => generator.GetSignatureAlgorithmIdentifier(hashAlgorithm));
+            }
+        }
+
+        [Theory]
         [InlineData("SHA256")]
         [InlineData("SHA384")]
         [InlineData("SHA512")]

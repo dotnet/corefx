@@ -414,9 +414,12 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
 
+            DSAParameters dsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(dsaParameters.X))
             using (typedKey = new DSAImplementation.DSASecurityTransforms())
             {
-                typedKey.ImportParameters(privateKey.ExportParameters(true));
+                typedKey.ImportParameters(dsaParameters);
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
         }
@@ -430,9 +433,12 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
 
+            ECParameters ecParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(ecParameters.D))
             using (typedKey = new ECDsaImplementation.ECDsaSecurityTransforms())
             {
-                typedKey.ImportParameters(privateKey.ExportParameters(true));
+                typedKey.ImportParameters(ecParameters);
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
         }
@@ -446,9 +452,17 @@ namespace Internal.Cryptography.Pal
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
 
+            RSAParameters rsaParameters = privateKey.ExportParameters(true);
+            
+            using (PinAndClear.Track(rsaParameters.D))
+            using (PinAndClear.Track(rsaParameters.P))
+            using (PinAndClear.Track(rsaParameters.Q))
+            using (PinAndClear.Track(rsaParameters.DP))
+            using (PinAndClear.Track(rsaParameters.DQ))
+            using (PinAndClear.Track(rsaParameters.InverseQ))
             using (typedKey = new RSAImplementation.RSASecurityTransforms())
             {
-                typedKey.ImportParameters(privateKey.ExportParameters(true));
+                typedKey.ImportParameters(rsaParameters);
                 return CopyWithPrivateKey(typedKey.GetKeys());
             }
         }

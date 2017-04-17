@@ -111,6 +111,7 @@ namespace Internal.Cryptography.Pal
 
             DSAParameters privateParameters = dsa.ExportParameters(true);
 
+            using (PinAndClear.Track(privateParameters.X))
             using (DSACng clonedKey = new DSACng())
             {
                 clonedKey.ImportParameters(privateParameters);
@@ -135,6 +136,7 @@ namespace Internal.Cryptography.Pal
 
             ECParameters privateParameters = ecdsa.ExportParameters(true);
 
+            using (PinAndClear.Track(privateParameters.D))
             using (ECDsaCng clonedKey = new ECDsaCng())
             {
                 clonedKey.ImportParameters(privateParameters);
@@ -172,6 +174,12 @@ namespace Internal.Cryptography.Pal
 
             RSAParameters privateParameters = rsa.ExportParameters(true);
 
+            using (PinAndClear.Track(privateParameters.D))
+            using (PinAndClear.Track(privateParameters.P))
+            using (PinAndClear.Track(privateParameters.Q))
+            using (PinAndClear.Track(privateParameters.DP))
+            using (PinAndClear.Track(privateParameters.DQ))
+            using (PinAndClear.Track(privateParameters.InverseQ))
             using (RSACng clonedKey = new RSACng())
             {
                 clonedKey.ImportParameters(privateParameters);
@@ -426,78 +434,115 @@ namespace Internal.Cryptography.Pal
                     cspParameters.Flags |= CspProviderFlags.UseMachineKeyStore;
                 }
 
-                if (algorithmGroup == CngAlgorithmGroup.Rsa)
+                int keySpec;
+
+                if (TryGuessKeySpec(cspParameters, algorithmGroup, out keySpec))
                 {
-                    // Try the AT_SIGNATURE spot in each of the 4 RSA provider type values,
-                    // ideally one of them will work.
-                    const int PROV_RSA_FULL = 1;
-                    const int PROV_RSA_SIG = 2;
-                    const int PROV_RSA_SCHANNEL = 12;
-                    const int PROV_RSA_AES = 24;
-
-                    // These are ordered in terms of perceived likeliness, given that the key
-                    // is AT_SIGNATURE.
-                    int[] provTypes =
-                    {
-                        PROV_RSA_FULL,
-                        PROV_RSA_AES,
-                        PROV_RSA_SCHANNEL,
-
-                        // Nothing should be PROV_RSA_SIG, but if everything else has failed,
-                        // just try this last thing.
-                        PROV_RSA_SIG,
-                    };
-
-                    foreach (int provType in provTypes)
-                    {
-                        cspParameters.ProviderType = provType;
-
-                        try
-                        {
-                            using (new RSACryptoServiceProvider(cspParameters))
-                            {
-                                return cspParameters.KeyNumber;
-                            }
-                        }
-                        catch (CryptographicException)
-                        {
-                        }
-                    }
-
-                    Debug.Fail("RSA key did not open with KeyNumber 0 or AT_SIGNATURE");
-                }
-                else if (algorithmGroup == CngAlgorithmGroup.Dsa)
-                {
-                    const int PROV_DSS = 3;
-                    const int PROV_DSS_DH = 13;
-
-                    int[] provTypes =
-                    {
-                        PROV_DSS_DH,
-                        PROV_DSS,
-                    };
-
-                    foreach (int provType in provTypes)
-                    {
-                        cspParameters.ProviderType = provType;
-
-                        try
-                        {
-                            using (new DSACryptoServiceProvider(cspParameters))
-                            {
-                                return cspParameters.KeyNumber;
-                            }
-                        }
-                        catch (CryptographicException)
-                        {
-                        }
-                    }
-
-                    Debug.Fail("DSA key did not open with KeyNumber 0 or AT_SIGNATURE");
+                    return keySpec;
                 }
 
                 throw;
             }
+        }
+
+        private static bool TryGuessKeySpec(
+            CspParameters cspParameters,
+            CngAlgorithmGroup algorithmGroup,
+            out int keySpec)
+        {
+            if (algorithmGroup == CngAlgorithmGroup.Rsa)
+            {
+                return TryGuessRsaKeySpec(cspParameters, out keySpec);
+            }
+
+            if (algorithmGroup == CngAlgorithmGroup.Dsa)
+            {
+                return TryGuessDsaKeySpec(cspParameters, out keySpec);
+            }
+
+            keySpec = 0;
+            return false;
+        }
+
+        private static bool TryGuessRsaKeySpec(CspParameters cspParameters, out int keySpec)
+        {
+            // Try the AT_SIGNATURE spot in each of the 4 RSA provider type values,
+            // ideally one of them will work.
+            const int PROV_RSA_FULL = 1;
+            const int PROV_RSA_SIG = 2;
+            const int PROV_RSA_SCHANNEL = 12;
+            const int PROV_RSA_AES = 24;
+
+            // These are ordered in terms of perceived likeliness, given that the key
+            // is AT_SIGNATURE.
+            int[] provTypes =
+            {
+                PROV_RSA_FULL,
+                PROV_RSA_AES,
+                PROV_RSA_SCHANNEL,
+
+                // Nothing should be PROV_RSA_SIG, but if everything else has failed,
+                // just try this last thing.
+                PROV_RSA_SIG,
+            };
+
+            foreach (int provType in provTypes)
+            {
+                cspParameters.ProviderType = provType;
+
+                try
+                {
+                    using (new RSACryptoServiceProvider(cspParameters))
+                    {
+                        {
+                            keySpec = cspParameters.KeyNumber;
+                            return true;
+                        }
+                    }
+                }
+                catch (CryptographicException)
+                {
+                }
+            }
+
+            Debug.Fail("RSA key did not open with KeyNumber 0 or AT_SIGNATURE");
+            keySpec = 0;
+            return false;
+        }
+
+        private static bool TryGuessDsaKeySpec(CspParameters cspParameters, out int keySpec)
+        {
+            const int PROV_DSS = 3;
+            const int PROV_DSS_DH = 13;
+
+            int[] provTypes =
+            {
+                PROV_DSS_DH,
+                PROV_DSS,
+            };
+
+            foreach (int provType in provTypes)
+            {
+                cspParameters.ProviderType = provType;
+
+                try
+                {
+                    using (new DSACryptoServiceProvider(cspParameters))
+                    {
+                        {
+                            keySpec = cspParameters.KeyNumber;
+                            return true;
+                        }
+                    }
+                }
+                catch (CryptographicException)
+                {
+                }
+            }
+
+            Debug.Fail("DSA key did not open with KeyNumber 0 or AT_SIGNATURE");
+            keySpec = 0;
+            return false;
         }
 
         private unsafe ICertificatePal CopyWithPersistedCapiKey(CspKeyContainerInfo keyContainerInfo)

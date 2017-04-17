@@ -27,7 +27,9 @@ namespace System.Security.Cryptography.X509Certificates
     */
     internal sealed class TbsCertificate
     {
-        public byte? Version { get; set; }
+        // If TbsCertificate is made public API, consider having Version nullable to be
+        // automatically assigned a value per RFC 3280.
+        public byte Version { get; set; }
         public byte[] SerialNumber { get; set; }
         public byte[] SignatureAlgorithm { get; set; }
         public X500DistinguishedName Issuer { get; set; }
@@ -35,8 +37,8 @@ namespace System.Security.Cryptography.X509Certificates
         public DateTimeOffset NotAfter { get; set; }
         public X500DistinguishedName Subject { get; set; }
         public PublicKey PublicKey { get; set; }
-        public byte[] IssuerUniqueId { get; set; }
-        public byte[] SubjectUniqueId { get; set; }
+        // We don't support the IssuerUniqueId or SubjectUniqueId fields.
+        // They might be needed if TbsCertificate becomes public API.
         public Collection<X509Extension> Extensions { get; } = new Collection<X509Extension>();
 
         private byte[] Encode(X509SignatureGenerator signatureGenerator, HashAlgorithmName hashAlgorithm)
@@ -56,7 +58,7 @@ namespace System.Security.Cryptography.X509Certificates
 
             List<byte[][]> encodedFields = new List<byte[][]>();
 
-            byte version = GetEffectiveVersion();
+            byte version = Version;
 
             if (version != 0)
             {
@@ -86,24 +88,12 @@ namespace System.Security.Cryptography.X509Certificates
 
             encodedFields.Add(PublicKey.SegmentedEncodeSubjectPublicKeyInfo());
 
-            if (IssuerUniqueId != null)
-            {
-                byte[][] issuerUniqueId = DerEncoder.SegmentedEncodeBitString(IssuerUniqueId);
-                issuerUniqueId[0][0] = DerSequenceReader.ContextSpecificConstructedTag1;
-
-                encodedFields.Add(issuerUniqueId);
-            }
-
-            if (SubjectUniqueId != null)
-            {
-                byte[][] subjectUniqueId = DerEncoder.SegmentedEncodeBitString(SubjectUniqueId);
-                subjectUniqueId[0][0] = DerSequenceReader.ContextSpecificConstructedTag2;
-
-                encodedFields.Add(subjectUniqueId);
-            }
+            // Issuer and Subject Unique ID values would go here, if they were supported.
 
             if (Extensions.Count > 0)
             {
+                Debug.Assert(version >= 2);
+
                 List<byte[][]> encodedExtensions = new List<byte[][]>(Extensions.Count);
 
                 // extensions[3]  Extensions OPTIONAL
@@ -146,7 +136,7 @@ namespace System.Security.Cryptography.X509Certificates
             return DerEncoder.ConstructSequence(encodedFields);
         }
 
-        private byte[][] EncodeValidityField(DateTimeOffset validityField, string propertyName)
+        private static byte[][] EncodeValidityField(DateTimeOffset validityField, string propertyName)
         {
             /* https://tools.ietf.org/html/rfc3280#section-4.1.2.5
              4.1.2.5  Validity
@@ -185,33 +175,6 @@ namespace System.Security.Cryptography.X509Certificates
             }
 
             return DerEncoder.SegmentedEncodeGeneralizedTime(utcValue);
-        }
-
-        private byte GetEffectiveVersion()
-        {
-            byte version;
-
-            if (Version.HasValue)
-            {
-                version = Version.Value;
-            }
-            else if (Extensions.Count > 0)
-            {
-                // Extensions present forces X509v3 (encoded as 2)
-                version = 2;
-            }
-            else if (IssuerUniqueId != null || SubjectUniqueId != null)
-            {
-                // These fields were added in X509v2
-                version = 1;
-            }
-            else
-            {
-                // X509v1
-                version = 0;
-            }
-
-            return version;
         }
 
         internal byte[] Sign(X509SignatureGenerator signatureGenerator, HashAlgorithmName hashAlgorithm)

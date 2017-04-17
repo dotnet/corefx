@@ -49,15 +49,7 @@ namespace System.Security.Cryptography.X509Certificates
         {
             string oid;
 
-            if (hashAlgorithm == HashAlgorithmName.MD5)
-            {
-                oid = Oids.RsaPkcs1Md5;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA1)
-            {
-                oid = Oids.RsaPkcs1Sha1;
-            }
-            else if (hashAlgorithm == HashAlgorithmName.SHA256)
+            if (hashAlgorithm == HashAlgorithmName.SHA256)
             {
                 oid = Oids.RsaPkcs1Sha256;
             }
