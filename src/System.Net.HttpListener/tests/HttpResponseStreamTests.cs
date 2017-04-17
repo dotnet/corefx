@@ -247,7 +247,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // NotSupportedException thrown instead of InvalidOperationException
         public async Task CanRead_Get_ReturnsFalse()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -262,7 +261,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // Windows returns Task.CompletedTask in FlushAsync
         public async Task CanWrite_Get_ReturnsTrue()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -277,7 +275,6 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_NullBuffer_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -291,7 +288,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData(-1)]
         [InlineData(3)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset)
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -306,7 +302,6 @@ namespace System.Net.Tests
         [InlineData(0, 3)]
         [InlineData(1, 2)]
         [InlineData(2, 1)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)]
         public async Task Write_InvalidOffsetSize_ThrowsArgumentOutOfRangeException(int offset, int size)
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -404,7 +399,6 @@ namespace System.Net.Tests
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
-        [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.        
         public async Task Write_HeadersToClosedConnectionAsynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -420,9 +414,8 @@ namespace System.Net.Tests
                 HttpListenerContext context = await listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
 
                 // Writing to a disconnected client should fail.
                 await Assert.ThrowsAsync<HttpListenerException>(() => context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length));
@@ -436,7 +429,6 @@ namespace System.Net.Tests
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
-        [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
         public async Task Write_HeadersToClosedConnectionSynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -452,10 +444,9 @@ namespace System.Net.Tests
                 HttpListenerContext context = await listener.GetContextAsync();
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                
+                client.Shutdown(SocketShutdown.Both);
+                Helpers.WaitForSocketShutdown(client);
+
                 // Writing to, a closed connection should fail.
                 Assert.Throws<HttpListenerException>(() => context.Response.OutputStream.Write(buffer, 0, buffer.Length));
                 
@@ -548,9 +539,12 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
-        public async Task EndWrite_NullAsyncResult_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task EndWrite_NullAsyncResult_ThrowsArgumentNullException(bool ignoreWriteExceptions)
         {
+            _listener.IgnoreWriteExceptions = ignoreWriteExceptions;
             using (HttpListenerResponse response = await _helper.GetResponse())
             using (Stream outputStream = response.OutputStream)
             {

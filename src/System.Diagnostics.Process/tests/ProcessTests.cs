@@ -810,8 +810,8 @@ namespace System.Diagnostics.Tests
 
         public static IEnumerable<object[]> MachineName_Remote_TestData()
         {
-            yield return new object[] { "machine" };
-            yield return new object[] { "\\machine" };
+            yield return new object[] { Guid.NewGuid().ToString("N") };
+            yield return new object[] { "\\" + Guid.NewGuid().ToString("N") };
         }
 
         [Theory]
@@ -825,8 +825,7 @@ namespace System.Diagnostics.Tests
             Assert.All(processes, process => Assert.Equal(machineName, process.MachineName));
         }
 
-        [ActiveIssue(18324)]
-        [Theory]
+        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
         [MemberData(nameof(MachineName_Remote_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)] // Accessing processes on remote machines is only supported on Windows.
         public void GetProcessesByName_RemoteMachineNameWindows_ReturnsExpected(string machineName)
@@ -871,7 +870,7 @@ namespace System.Diagnostics.Tests
             yield return new object[] { currentProcess, Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProcess.Id).Single() };
         }
 
-        private static bool ProcessPeformanceCounterEnabled()
+        private static bool ProcessPerformanceCounterEnabled()
         {
             try
             {
@@ -885,15 +884,13 @@ namespace System.Diagnostics.Tests
             }
             catch (Exception)
             {
-                // Ignore exceptions, and just assume the counter is enabled.
+                // Ignore exceptions, and just assume the counter is disabled.
+                return false;
             }
-
-            return true;
         }
 
-        [ActiveIssue(18324)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [ConditionalTheory(nameof(ProcessPeformanceCounterEnabled))]
+        [ConditionalTheory(nameof(ProcessPerformanceCounterEnabled))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/18212")]
         [MemberData(nameof(GetTestProcess))]
         public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)

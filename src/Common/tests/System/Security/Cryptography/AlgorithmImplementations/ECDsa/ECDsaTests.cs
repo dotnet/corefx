@@ -518,6 +518,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             Assert.True(ecdsa.VerifyData(halfData, dataSignature, HashAlgorithmName.SHA256));
         }
 
+#if netcoreapp // uses ECParameters not available in desktop.
         [Fact]
         public void PublicKey_CannotSign()
         {
@@ -531,6 +532,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
                     () => ecdsa.SignData(new byte[] { 1, 2, 3, 4, 5 }, HashAlgorithmName.SHA256));
             }
         }
+#endif
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
