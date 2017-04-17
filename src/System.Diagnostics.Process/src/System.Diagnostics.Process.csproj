@@ -6,7 +6,8 @@
     <ProjectGuid>{F55047F8-E47B-46E3-B221-C23595AFE168}</ProjectGuid>
     <RootNamespace>System.Diagnostics.Process</RootNamespace>
     <AssemblyName>System.Diagnostics.Process</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<DefineConstants Condition="'$(TargetGroup)' != 'uap'">$(DefineConstants);FEATURE_REGISTRY</DefineConstants>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
