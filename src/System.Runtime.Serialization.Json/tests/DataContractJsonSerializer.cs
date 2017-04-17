@@ -2513,7 +2513,7 @@ public static partial class DataContractJsonSerializerTests
         var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
 
         var baseline = $"\"\\/Date(1291161600000{timeZoneString})\\/\"";
-        if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.VersionString.Contains("Windows"))
+        if (Environment.OSVersion.VersionString.ToLower().Contains("osx") || Environment.OSVersion.VersionString.ToLower().Contains("windows"))
         {
             baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
         }
@@ -2544,6 +2544,10 @@ public static partial class DataContractJsonSerializerTests
         var dt35832 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 3, 58, 32);
         var dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         var expected_DT_list = "[\"03:58:32.00 a.m.\",\"12:00:00.00 a.m.\",\"12:00:00.00 a.m.\",\"03:58:32.00 a.m.\"]";
+        if (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu"))
+        {
+            expected_DT_list = "[\"03:58:32.00 a. m.\",\"12:00:00.00 a. m.\",\"12:00:00.00 a. m.\",\"03:58:32.00 a. m.\"]";
+        }
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_hmsFt };
         var actual4 = SerializeAndDeserialize(jsonTypes.DT_List, expected_DT_list, dcjsSettings);
         Assert.NotNull(actual4);
@@ -2551,8 +2555,12 @@ public static partial class DataContractJsonSerializerTests
         Assert.True(actual4[1] == dt);
         Assert.True(actual4[2] == dt);
         Assert.True(actual4[3] == dt35832);
-
+        
         var expected_DT_dictionary = "[{\"Key\":\"03:58:32.00 a.m.\",\"Value\":\"03:58:32.00 a.m.\"},{\"Key\":\"12:00:00.00 a.m.\",\"Value\":\"12:00:00.00 a.m.\"}]";
+        if (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu"))
+        {
+            expected_DT_dictionary = "[{\"Key\":\"03:58:32.00 a. m.\",\"Value\":\"03:58:32.00 a. m.\"},{\"Key\":\"12:00:00.00 a. m.\",\"Value\":\"12:00:00.00 a. m.\"}]";
+        }
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_hmsFt };
         var actual5 = SerializeAndDeserialize(jsonTypes.DT_Dictionary, expected_DT_dictionary, dcjsSettings);
         Assert.NotNull(actual5);
@@ -2592,7 +2600,7 @@ public static partial class DataContractJsonSerializerTests
             EmitTypeInformation = EmitTypeInformation.AsNeeded, 
             KnownTypes = new List<Type>()
         };
-        var baseline = (Environment.OSVersion.VersionString.Contains("Ubuntu")) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";
+        var baseline = (Environment.OSVersion.VersionString.ToLower().Contains("ubuntu")) ? "\"03:58:32.00 a. m.\"" : "\"03:58:32.00 a.m.\"";
         var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), baseline, dcjsSettings);
         Assert.NotNull(actual2);
         Assert.True(actual2 == new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 3, 58, 32));
