@@ -29,17 +29,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         [Fact]
         public static void CreateChain_RSA()
         {
-            using (RSA rootKey = RSA.Create())
-            using (RSA intermed1Key = RSA.Create())
-            using (RSA intermed2Key = RSA.Create())
-            using (RSA leafKey = RSA.Create())
-            using (RSA leafPubKey = RSA.Create())
+            using (RSA rootKey = RSA.Create(3072))
+            using (RSA intermed1Key = RSA.Create(2048))
+            using (RSA intermed2Key = RSA.Create(2048))
+            using (RSA leafKey = RSA.Create(1536))
+            using (RSA leafPubKey = RSA.Create(leafKey.ExportParameters(false)))
             {
-                rootKey.KeySize = 3072;
-                intermed1Key.KeySize = 2048;
-                intermed2Key.KeySize = 2048;
-                leafKey.KeySize = 1536;
-
                 leafPubKey.ImportParameters(leafKey.ExportParameters(false));
 
                 CreateAndTestChain(
@@ -54,14 +49,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         public static void CreateChain_Hybrid()
         {
             using (ECDsa rootKey = ECDsa.Create(ECCurve.NamedCurves.nistP521))
-            using (RSA intermed1Key = RSA.Create())
-            using (RSA intermed2Key = RSA.Create())
+            using (RSA intermed1Key = RSA.Create(2048))
+            using (RSA intermed2Key = RSA.Create(2048))
             using (ECDsa leafKey = ECDsa.Create(ECCurve.NamedCurves.nistP256))
             using (ECDsa leafPubKey = ECDsa.Create(leafKey.ExportParameters(false)))
             {
-                intermed1Key.KeySize = 2048;
-                intermed2Key.KeySize = 2048;
-                
                 CreateAndTestChain(
                     rootKey,
                     intermed1Key,
