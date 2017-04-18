@@ -65,12 +65,6 @@ namespace System.Globalization.Tests
         {
             Assert.Throws<ArgumentException>(() => "\uFB01".Normalize((NormalizationForm)7));
 
-<<<<<<< HEAD
-            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uFFFE".Normalize()); // Invalid codepoint
-            AssertExtensions.Throws<ArgumentException>("strInput", () => "\uD800\uD800".Normalize()); // Invalid surrogate pair
-
-            AssertExtensions.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.Normalize(null));
-=======
             Assert.Throws<ArgumentException>("strInput", () => "\uFFFE".Normalize()); // Invalid codepoint
             Assert.Throws<ArgumentException>("strInput", () => "\uD800\uD800".Normalize()); // Invalid surrogate pair
         }
@@ -80,7 +74,6 @@ namespace System.Globalization.Tests
         public void Normalize_Null()
         {
             Assert.Throws<ArgumentNullException>("strInput", () => StringNormalizationExtensions.Normalize(null));
->>>>>>> 205b5c3167fb2167e9e04096923332f5e7c0fce0
         }
     }
 }
