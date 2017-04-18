@@ -79,20 +79,10 @@ if (FEATURE_DISTRO_AGNOSTIC_SSL)
         VERBATIM
     )
 
-    # Link with libdl.so to get the dlopen / dlsym / dlclose
-    target_link_libraries(System.Security.Cryptography.Native
-      dl
-    )
-
     target_link_libraries(System.Security.Cryptography.Native.OpenSsl
       dl
     )
 else()
-    target_link_libraries(System.Security.Cryptography.Native
-      ${OPENSSL_CRYPTO_LIBRARY}
-      ${OPENSSL_SSL_LIBRARY}
-    )
-  
     target_link_libraries(System.Security.Cryptography.Native.OpenSsl
       ${OPENSSL_CRYPTO_LIBRARY}
       ${OPENSSL_SSL_LIBRARY}
