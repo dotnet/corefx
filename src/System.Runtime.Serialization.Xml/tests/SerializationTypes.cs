@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -4377,4 +4377,33 @@ public static class Outer
         public string MiddleName { get; set; }
         public string LastName { get; set; }
     }
+}
+
+public class Orchestra
+{
+    public Instrument[] Instruments;
+}
+
+public class Instrument
+{
+    public string Name;
+}
+
+public class Brass : Instrument
+{
+    public bool IsValved;
+}
+
+public class Trumpet : Brass
+{
+    public char Modulation;
+}
+
+public class Pet
+{
+    [DefaultValueAttribute("Dog")]
+    public string Animal;
+    [XmlIgnoreAttribute]
+    public string Comment;
+    public string Comment2;
 }
