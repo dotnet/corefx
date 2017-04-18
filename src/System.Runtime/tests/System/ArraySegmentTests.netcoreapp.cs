@@ -122,6 +122,8 @@ namespace System.Tests
         {
             const int CopyPadding = 5;
             const int DestinationSegmentPadding = 3;
+            
+            int count = arraySegment.Count;
 
             var destinationModel = new int[count + 2 * CopyPadding];
 
@@ -212,6 +214,10 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator(ArraySegment<int> arraySegment)
         {
+            int[] array = arraySegment.Array;
+            int index = arraySegment.Offset;
+            int count = arraySegment.Count;
+            
             ArraySegment<int>.Enumerator enumerator = arraySegment.GetEnumerator();
 
             var actual = new List<int>();
@@ -232,6 +238,9 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator_Dispose(ArraySegment<int> arraySegment)
         {
+            int[] array = arraySegment.Array;
+            int index = arraySegment.Offset;
+            
             ArraySegment<int>.Enumerator enumerator = arraySegment.GetEnumerator();
 
             bool expected = arraySegment.Count > 0;
@@ -294,6 +303,10 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetSetItem_InRange(ArraySegment<int> arraySegment)
         {
+            int[] array = arraySegment.Array;
+            int index = arraySegment.Offset;
+            int count = arraySegment.Count;
+            
             int[] expected = array.Skip(index).Take(count).ToArray();
 
             for (int i = 0; i < count; i++)
@@ -323,6 +336,8 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetSetItem_NotInRange_Invalid(ArraySegment<int> arraySegment)
         {
+            int[] array = arraySegment.Array;
+            
             // Before array start
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1]);
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1] = default(int));
@@ -336,8 +351,8 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Count] = default(int));
 
             // After array end
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + arraySegment.Array.Length]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + arraySegment.Array.Length] = default(int));
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length]);
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length] = default(int));
         }
 
         [Theory]
