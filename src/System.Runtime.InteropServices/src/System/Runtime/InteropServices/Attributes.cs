@@ -95,7 +95,6 @@ namespace System.Runtime.InteropServices
         SystemDefinedImpl = 0,
     }
 
-
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class ImportedFromTypeLibAttribute : Attribute
     {
