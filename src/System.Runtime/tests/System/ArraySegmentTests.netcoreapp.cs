@@ -388,17 +388,30 @@ namespace System.Tests
                 yield return new object[] { arraySegment, 0, arraySegment.Count / 2 }; // Preserve start, multiple items, end at middle
                 yield return new object[] { arraySegment, arraySegment.Count / 2, arraySegment.Count / 2 }; // Start at middle, multiple items, end at middle (due to integer division truncation) or preserve end
                 yield return new object[] { arraySegment, arraySegment.Count / 4, arraySegment.Count / 2 }; // Start at middle, multiple items, end at middle
-
-                // ArraySegment.Slice permits negative indices. This allows the user to backtrack the start of the ArraySegment within the array.
-                // It also allows users to pass in counts larger than the count of the ArraySegment, provided that it will be able to fit within
-                // the ArraySegment's array.
-
-                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset }; // Previous segment
-                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset + arraySegment.Count }; // Previous + This segment
-                yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Array.Length }; // Previous + This + Next segment
-                yield return new object[] { arraySegment, 0, arraySegment.Array.Length - arraySegment.Offset }; // This + Next segment
-                yield return new object[] { arraySegment, arraySegment.Count, arraySegment.Array.Length - arraySegment.Offset - arraySegment.Count }; // Next segment
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(Slice_Invalid_TestData))]
+        public static void Slice_Invalid(ArraySegment<int> arraySegment, int index, int count)
+        {
+            if (index + count == arraySegment.Count)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("index", () => arraySegment.Slice(index));
+            }
+
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => arraySegment.Slice(index, count));
+        }
+
+        public static IEnumerable<object[]> Slice_Invalid_TestData()
+        {
+            var arraySegment = new ArraySegment<int>(new int[3], offset: 1, count: 1);
+
+            yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset };
+            yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Offset + arraySegment.Count };
+            yield return new object[] { arraySegment, -arraySegment.Offset, arraySegment.Array.Length };
+            yield return new object[] { arraySegment, 0, arraySegment.Array.Length - arraySegment.Offset };
+            yield return new object[] { arraySegment, arraySegment.Count, arraySegment.Array.Length - arraySegment.Offset - arraySegment.Count };
         }
 
         [Theory]
