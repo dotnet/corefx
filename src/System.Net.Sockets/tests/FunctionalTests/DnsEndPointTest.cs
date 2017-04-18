@@ -317,7 +317,6 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         [Trait("IPv4", "true")]
         [Trait("IPv6", "true")]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void Socket_StaticConnectAsync_Success(SocketImplementationType type)
         {
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
@@ -327,7 +326,7 @@ namespace System.Net.Sockets.Tests
             using (SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(type, IPAddress.IPv6Loopback, out port6))
             {
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port4);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port4);
                 args.Completed += OnConnectAsyncCompleted;
 
                 ManualResetEvent complete = new ManualResetEvent(false);
@@ -345,7 +344,7 @@ namespace System.Net.Sockets.Tests
 
                 args.ConnectSocket.Dispose();
 
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port6);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port6);
                 complete.Reset();
 
                 Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));

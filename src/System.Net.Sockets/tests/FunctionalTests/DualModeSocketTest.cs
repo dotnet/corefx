@@ -303,14 +303,13 @@ namespace System.Net.Sockets.Tests
     {
         [Theory]
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void DualModeConnect_LoopbackDnsToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
             {
-                socket.Connect("localhost", port);
+                socket.Connect("www.microsoft.com", port);
                 Assert.True(socket.Connected);
             }
         }
@@ -322,14 +321,13 @@ namespace System.Net.Sockets.Tests
     {
         [Theory]
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void DualModeConnect_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
             {
-                socket.Connect(new DnsEndPoint("localhost", port, AddressFamily.Unspecified));
+                socket.Connect(new DnsEndPoint("www.microsoft.com", port, AddressFamily.Unspecified));
                 Assert.True(socket.Connected);
             }
         }
@@ -615,7 +613,6 @@ namespace System.Net.Sockets.Tests
 
         [Theory]
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
@@ -625,7 +622,7 @@ namespace System.Net.Sockets.Tests
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.Completed += new EventHandler<SocketAsyncEventArgs>(AsyncCompleted);
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port);
                 args.UserToken = waitHandle;
 
                 socket.ConnectAsync(args);
@@ -641,7 +638,6 @@ namespace System.Net.Sockets.Tests
 
         [Theory]
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
-        [ActiveIssue(4002, TestPlatforms.AnyUnix)]
         public void DualModeConnectAsync_Static_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
@@ -650,7 +646,7 @@ namespace System.Net.Sockets.Tests
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.Completed += new EventHandler<SocketAsyncEventArgs>(AsyncCompleted);
-                args.RemoteEndPoint = new DnsEndPoint("localhost", port);
+                args.RemoteEndPoint = new DnsEndPoint("www.microsoft.com", port);
                 args.UserToken = waitHandle;
 
                 Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args);
