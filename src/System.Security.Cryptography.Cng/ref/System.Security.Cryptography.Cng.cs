@@ -289,9 +289,9 @@ namespace System.Security.Cryptography
 #if !netfx // types missing from netfx targeting pack
         public override System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
         public override System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
-        public void FromXmlString(string xml, ECKeyXmlFormat format) { throw null; }
         public override void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
 #endif
+        public void FromXmlString(string xml, ECKeyXmlFormat format) { throw null; }
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
 #if !netfx // types missing from netfx targeting pack
