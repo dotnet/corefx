@@ -4,7 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{F24D3391-2928-4E83-AADE-B34423498750}</ProjectGuid>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
-    <UseOpenKey>true</UseOpenKey>
     <!-- To allow this library to work on V4.5 runtimes and other old platforms
          we also have a separate complilation of this DLL that works for V4.5
          (which is netstandard1.1).  Again we duplicate in a portable-* folder
@@ -17,6 +16,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'net45' OR '$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
     <DefineConstants>$(DefineConstants);ALLOW_PARTIALLY_TRUSTED_CALLERS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)' == 'net46'">
+    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45-Windows_NT-Debug|AnyCPU'" />
@@ -57,6 +62,9 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'net45' OR '$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
     <Compile Include="System\Diagnostics\Activity.Id.MachineName.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
+    <Compile Include="System\Diagnostics\HttpHandlerDiagnosticListener.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net46' AND '$(TargetGroup)' != 'netfx'">
     <Reference Include="System.Collections" />

@@ -61,6 +61,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(16945)] // Packet loss, potentially due to other tests running at the same time
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
@@ -604,7 +605,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ActiveIssue(13778, TestPlatforms.OSX)]
         [Fact]
         public async Task SendRecv_0ByteReceive_Success()
         {
@@ -634,9 +634,13 @@ namespace System.Net.Sockets.Tests
 
                         // The client should now wake up, getting 0 bytes with 1 byte available.
                         Assert.Equal(0, await receive);
-                        Assert.Equal(1, client.Available); // Due to #13778, this sometimes fails on macOS
+                        Assert.Equal(1, client.Available);
 
-                        // Receive that byte
+                        // We should be able to do another 0-byte receive that completes immediateliy
+                        Assert.Equal(0, await ReceiveAsync(client, new ArraySegment<byte>(new byte[1], 0, 0)));
+                        Assert.Equal(1, client.Available);
+
+                        // Then receive the byte
                         Assert.Equal(1, await ReceiveAsync(client, new ArraySegment<byte>(new byte[1])));
                         Assert.Equal(0, client.Available);
                     }
@@ -702,9 +706,8 @@ namespace System.Net.Sockets.Tests
                     client.SendBufferSize = 0;
                     server.ReceiveBufferSize = 0;
 
-                    var sendBuffer = new byte[5000000];
+                    var sendBuffer = new byte[10000];
                     Task sendTask = SendAsync(client, new ArraySegment<byte>(sendBuffer));
-                    Assert.False(sendTask.IsCompleted);
 
                     int totalReceived = 0;
                     var receiveBuffer = new ArraySegment<byte>(new byte[4096]);

@@ -29,6 +29,9 @@
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\DCRSampleType.cs" />
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\DCRTypeLibrary.cs" />
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\Primitives.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>CommonTest\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
     <Compile Include="$(TestSourceFolder)..\SerializationTypes.CoreCLR.cs" />

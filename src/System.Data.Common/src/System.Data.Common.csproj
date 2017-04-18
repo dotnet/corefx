@@ -7,6 +7,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <!-- CSC adds typeforwards for several internal nested types to the reference assembly, however
+         GenFacades doesn't consider this as a viable target for a typeforward since it's internal -->
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
@@ -170,7 +173,9 @@
     <Compile Include="System\Data\Common\DBCommandBuilder.cs" />
     <Compile Include="System\Data\Common\DbConnection.cs" />
     <Compile Include="System\Data\Common\DbConnectionOptions.cs" />
-    <Compile Include="System\Data\Common\DbConnectionPoolKey.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionPoolKey.cs">
+      <Link>System\Data\Common\DbConnectionPoolKey.cs</Link>
+    </Compile>
     <Compile Include="System\Data\Common\DBConnectionString.cs" />
     <Compile Include="System\Data\Common\DbConnectionStringBuilder.cs" />
     <Compile Include="System\Data\Common\DbConnectionStringCommon.cs" />
@@ -198,8 +203,12 @@
     <Compile Include="System\Data\Common\Int16Storage.cs" />
     <Compile Include="System\Data\Common\Int32Storage.cs" />
     <Compile Include="System\Data\Common\Int64Storage.cs" />
-    <Compile Include="System\Data\Common\MultipartIdentifier.cs" />
-    <Compile Include="System\Data\Common\NameValuePair.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\MultipartIdentifier.cs">
+      <Link>System\Data\Common\MultipartIdentifier.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\NameValuePair.cs">
+      <Link>System\Data\Common\NameValuePair.cs</Link>
+    </Compile>
     <Compile Include="System\Data\Common\ObjectStorage.cs" />
     <Compile Include="System\Data\Common\RowUpdatedEventArgs.cs" />
     <Compile Include="System\Data\Common\RowUpdatingEventArgs.cs" />
@@ -253,7 +262,9 @@
     <Compile Include="System\Data\SQLTypes\SQLInt32.cs" />
     <Compile Include="System\Data\SQLTypes\SQLInt64.cs" />
     <Compile Include="System\Data\SQLTypes\SQLMoney.cs" />
-    <Compile Include="System\Data\SQLTypes\SQLResource.cs" />
+    <Compile Include="$(CommonPath)\System\Data\Common\SQLResource.cs">
+      <Link>System\Data\SQLTypes\SQLResource.cs</Link>
+    </Compile>
     <Compile Include="System\Data\SQLTypes\SQLSingle.cs" />
     <Compile Include="System\Data\SQLTypes\SQLString.cs" />
     <Compile Include="System\Data\SQLTypes\SQLUtility.cs" />

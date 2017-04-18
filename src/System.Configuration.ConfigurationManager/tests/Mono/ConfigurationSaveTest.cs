@@ -350,6 +350,7 @@ namespace MonoTests.System.Configuration
             });
         }
 
+        [ActiveIssue(18431)]
         [Fact]
         public void AddDefaultListElement()
         {
@@ -372,6 +373,7 @@ namespace MonoTests.System.Configuration
             });
         }
 
+        [ActiveIssue(18431)]
         [Fact]
         public void AddDefaultListElement2()
         {
@@ -502,6 +504,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(18431)]
         public void NotModifiedAfterSave()
         {
             Run<DefaultMachineConfig>("NotModifiedAfterSave", (config, label) =>
@@ -610,6 +613,7 @@ namespace MonoTests.System.Configuration
             });
         }
 
+        [ActiveIssue(18431)]
         [Fact]
         public void ModifyListElement()
         {
@@ -630,6 +634,7 @@ namespace MonoTests.System.Configuration
             });
         }
 
+        [ActiveIssue(18431)]
         [Fact]
         public void ModifyListElement2()
         {
@@ -654,6 +659,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(18431)]
         public void TestElementWithCollection()
         {
             Run<DefaultMachineConfig2>("TestElementWithCollection", (config, label) =>
@@ -711,6 +717,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue(18431)]
         public void TestElementWithCollection2()
         {
             Run<DefaultMachineConfig2>("TestElementWithCollection2", (config, label) =>

@@ -23,27 +23,25 @@ System.Reflection.CustomAttributesTests.Data.TypeAttr(typeof(Object), name = "Ty
 
 namespace System.Reflection.Tests
 {
-    public class AssemblyTests : IDisposable
+    public class AssemblyTests
     {
 
-        string sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly.dll");
-        string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly", "TestAssembly.dll");
+        static string sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly.dll");
+        static string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly", "TestAssembly.dll");
+        static string loadFromTestPath;
 
-        public AssemblyTests()
+        static AssemblyTests()
         {
             // Move TestAssembly.dll to subfolder TestAssembly
-            if(!File.Exists(destTestAssemblyPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
+            if (File.Exists(sourceTestAssemblyPath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
+                File.Delete(destTestAssemblyPath);
                 File.Move(sourceTestAssemblyPath, destTestAssemblyPath);
             }
-        }
-
-        public void Dispose()
-        {
-            // Revert TestAssembly.dll back to its previous location
-            if(!File.Exists(sourceTestAssemblyPath))
-                File.Move(destTestAssemblyPath, sourceTestAssemblyPath);
+            string currAssemblyPath = typeof(AssemblyTests).Assembly.Location;
+            loadFromTestPath = Path.Combine(Path.GetDirectoryName(currAssemblyPath), "TestAssembly", Path.GetFileName(currAssemblyPath));
+            File.Copy(currAssemblyPath, loadFromTestPath, true);
         }
 
         public static IEnumerable<object[]> Equality_TestData()
@@ -197,8 +195,7 @@ namespace System.Reflection.Tests
             Assert.NotEmpty(assembly.GetModules());
             foreach (Module module in assembly.GetModules())
             {
-                Assert.NotNull(module);
-                Assert.Equal(module, assembly.GetModule(module.Name));
+                Assert.Equal(module, assembly.GetModule(module.ToString()));
             }
         }
 
@@ -210,7 +207,7 @@ namespace System.Reflection.Tests
             foreach (Module module in assembly.GetLoadedModules())
             {
                 Assert.NotNull(module);
-                Assert.Equal(module, assembly.GetModule(module.Name));
+                Assert.Equal(module, assembly.GetModule(module.ToString()));
             }
         }
 
@@ -257,55 +254,116 @@ namespace System.Reflection.Tests
         public static void Test_GlobalAssemblyCache()
         {
             Assert.False(typeof(AssemblyTests).Assembly.GlobalAssemblyCache);
-        }        
+        }
 
         [Fact]
         public static void Test_HostContext()
         {
             Assert.Equal(0, typeof(AssemblyTests).Assembly.HostContext);
-        }        
+        }
 
         [Fact]
         public static void Test_IsFullyTrusted()
         {
             Assert.True(typeof(AssemblyTests).Assembly.IsFullyTrusted);
-        }        
+        }
 
         [Fact]
-        public static void Test_SecurityRuleSet()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework supports SecurityRuleSet")]
+        public static void Test_SecurityRuleSet_Netcore()
         {
             Assert.Equal(SecurityRuleSet.None, typeof(AssemblyTests).Assembly.SecurityRuleSet);
-        }        
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "SecurityRuleSet is ignored in .NET Core")]
+        public static void Test_SecurityRuleSet_Netfx()
+        {
+            Assert.Equal(SecurityRuleSet.Level2, typeof(AssemblyTests).Assembly.SecurityRuleSet);
+        }
 
         [Fact]
         public static void Test_LoadFile()
         {
-            var assem = typeof(AssemblyTests).Assembly;
-            string path = "System.Runtime.Tests.dll";
-            string fullpath = Path.GetFullPath(path);
-            Assert.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
-            Assert.Throws<ArgumentException>(() => Assembly.LoadFile(path));
-            var loadfile1 = Assembly.LoadFile(fullpath);
-            Assert.NotEqual(assem, loadfile1);
-            string dir = Path.GetDirectoryName(fullpath);
-            fullpath = Path.Combine(dir, ".", path);
-            var loadfile2 = Assembly.LoadFile(fullpath);
-            Assert.Equal(loadfile1,loadfile2);
-        }        
+            Assembly currentAssembly = typeof(AssemblyTests).Assembly;
+            const string RuntimeTestsDll = "System.Runtime.Tests.dll";
+            string fullRuntimeTestsPath = Path.GetFullPath(RuntimeTestsDll);
+
+            var loadedAssembly1 = Assembly.LoadFile(fullRuntimeTestsPath);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Equal(currentAssembly, loadedAssembly1);
+            }
+            else
+            {
+                Assert.NotEqual(currentAssembly, loadedAssembly1);
+            }
+
+            string dir = Path.GetDirectoryName(fullRuntimeTestsPath);
+            fullRuntimeTestsPath = Path.Combine(dir, ".", RuntimeTestsDll);
+
+            Assembly loadedAssembly2 = Assembly.LoadFile(fullRuntimeTestsPath);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotEqual(loadedAssembly1, loadedAssembly2);
+            }
+            else
+            {
+                Assert.Equal(loadedAssembly1, loadedAssembly2);
+            }
+        }
 
         [Fact]
-        public static void Test_LoadFromUsingHashValue()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework has a bug and throws a NullReferenceException")]
+        public static void LoadFile_NullPath_Netcore_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Core fixed a bug where LoadFile(null) throws a NullReferenceException")]
+        public static void LoadFile_NullPath_Netfx_ThrowsNullReferenceException()
+        {
+            Assert.Throws<NullReferenceException>(() => Assembly.LoadFile(null));
+        }
+
+        [Fact]
+        public static void LoadFile_NoSuchPath_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => Assembly.LoadFile("System.Runtime.Tests.dll"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework supports Assembly.LoadFrom")]
+        public static void Test_LoadFromUsingHashValue_Netcore()
         {
             Assert.Throws<NotSupportedException>(() => Assembly.LoadFrom("abc", null, System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
-        }        
+        }
 
         [Fact]
-        public static void Test_LoadModule()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The implementation of Assembly.LoadFrom is stubbed out in .NET Core")]
+        public static void Test_LoadFromUsingHashValue_Netfx()
         {
-            var assem = typeof(AssemblyTests).Assembly;
-            Assert.Throws<NotImplementedException>(() => assem.LoadModule("abc", null));
-            Assert.Throws<NotImplementedException>(() => assem.LoadModule("abc", null, null));
-        }        
+            Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("abc", null, System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework supports more than one module per assembly")]
+        public static void Test_LoadModule_Netcore()
+        {
+            Assembly assembly = typeof(AssemblyTests).Assembly;
+            Assert.Throws<NotImplementedException>(() => assembly.LoadModule("abc", null));
+            Assert.Throws<NotImplementedException>(() => assembly.LoadModule("abc", null, null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr doesn't support more than one module per assembly")]
+        public static void Test_LoadModule_Netfx()
+        {
+            Assembly assembly = typeof(AssemblyTests).Assembly;
+            Assert.Throws<ArgumentNullException>(null, () => assembly.LoadModule("abc", null));
+            Assert.Throws<ArgumentNullException>(null, () => assembly.LoadModule("abc", null, null));
+        }
 
 #pragma warning disable 618
         [Fact]
@@ -318,20 +376,66 @@ namespace System.Reflection.Tests
 #pragma warning restore 618
 
         [Fact]
-        public void Test_LoadFrom()
+        public void LoadFrom_SamePath_ReturnsEqualAssemblies()
         {
-            var assem = Assembly.LoadFrom(destTestAssemblyPath);
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
-            var assem1 = Assembly.LoadFrom(destTestAssemblyPath);
-            Assert.Equal(assem, assem1);
-        }        
+            Assembly assembly1 = Assembly.LoadFrom(destTestAssemblyPath);
+            Assembly assembly2 = Assembly.LoadFrom(destTestAssemblyPath);
+            Assert.Equal(assembly1, assembly2);
+        }
 
         [Fact]
-        public void Test_UnsafeLoadFrom()
+        public void LoadFrom_SameIdentityAsAssemblyWithDifferentPath_ReturnsEqualAssemblies()
         {
-            var assem = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
+            Assembly assembly1 = Assembly.LoadFrom(typeof(AssemblyTests).Assembly.Location);
+            Assert.Equal(assembly1, typeof(AssemblyTests).Assembly);
+
+            Assembly assembly2 = Assembly.LoadFrom(loadFromTestPath);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotEqual(assembly1, assembly2);
+            }
+            else
+            {
+                Assert.Equal(assembly1, assembly2);
+            }
+        }
+
+        [Fact]
+        public void LoadFrom_NullAssemblyFile_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
             Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
-        }        
+        }
+
+        [Fact]
+        public void LoadFrom_EmptyAssemblyFile_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(null, (() => Assembly.LoadFrom("")));
+            Assert.Throws<ArgumentException>(null, (() => Assembly.UnsafeLoadFrom("")));
+        }
+
+        [Fact]
+        public void LoadFrom_NoSuchFile_ThrowsFileNotFoundException()
+        {
+            Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("NoSuchPath"));
+            Assert.Throws<FileNotFoundException>(() => Assembly.UnsafeLoadFrom("NoSuchPath"));
+        }
+
+        [Fact]
+        public void UnsafeLoadFrom_SamePath_ReturnsEqualAssemblies()
+        {
+            Assembly assembly1 = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
+            Assembly assembly2 = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
+            Assert.Equal(assembly1, assembly2);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The implementation of LoadFrom(string, byte[], AssemblyHashAlgorithm is not supported in .NET Core.")]
+        public void LoadFrom_WithHashValue_NetCoreCore_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Assembly.LoadFrom(destTestAssemblyPath, new byte[0], Configuration.Assemblies.AssemblyHashAlgorithm.None));
+        }
 
         [Fact]
         public void GetFile()

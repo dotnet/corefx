@@ -49,6 +49,9 @@ namespace System.Collections.Generic
 
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) { throw null; }
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue) { throw null; }
+
+        public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value) { throw null; }
+        public static bool Remove<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, out TValue value) { throw null; }
     }
     public abstract partial class Comparer<T> : System.Collections.Generic.IComparer<T>, System.Collections.IComparer
     {
@@ -94,6 +97,7 @@ namespace System.Collections.Generic
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public virtual void OnDeserialization(object sender) { }
         public bool Remove(TKey key) { throw null; }
+        public bool Remove(TKey key, out TValue value) { throw null; }
         public bool TryAdd(TKey key, TValue value) { throw null; }
         void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Add(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Contains(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { throw null; }
@@ -107,8 +111,6 @@ namespace System.Collections.Generic
         void System.Collections.IDictionary.Remove(object key) { }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public bool TryGetValue(TKey key, out TValue value) { throw null; }
-        public TValue GetValueOrDefault(TKey key) { throw null; }
-        public TValue GetValueOrDefault(TKey key, TValue defaultValue) { throw null; }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IDictionaryEnumerator, System.Collections.IEnumerator, System.IDisposable
         {
