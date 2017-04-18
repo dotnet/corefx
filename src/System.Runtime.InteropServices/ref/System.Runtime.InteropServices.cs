@@ -467,12 +467,8 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class ImportedFromTypeLibAttribute : Attribute
     {
-        internal String _val;
-        public ImportedFromTypeLibAttribute(String tlbFile)
-        {
-            _val = tlbFile;
-        }
-        public String Value { get {return _val;} }
+        public ImportedFromTypeLibAttribute(String tlbFile) { }
+        public String Value { get { throw null; } }
     }         
     [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
     public sealed partial class InAttribute : System.Attribute
@@ -835,12 +831,8 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Interface, Inherited = false)]
     public sealed class TypeLibImportClassAttribute : Attribute
     {
-        internal String _importClassName;
-        public TypeLibImportClassAttribute(Type importClass)
-        {
-            _importClassName = importClass.ToString();
-        }
-        public String Value { get { return _importClassName; } }
+        public TypeLibImportClassAttribute(Type importClass) { }
+        public String Value { get { throw null; } }
     }
     [Serializable]
     [Flags()]
@@ -900,60 +892,31 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Struct, Inherited = false)]
     public sealed class  TypeLibTypeAttribute : Attribute
     {
-        internal TypeLibTypeFlags _val;
-        public TypeLibTypeAttribute(TypeLibTypeFlags flags)
-        {
-            _val = flags;
-        }
-        public TypeLibTypeAttribute(short flags)
-        {
-            _val = (TypeLibTypeFlags)flags;
-        }
-        public TypeLibTypeFlags Value { get {return _val;} }
+        public TypeLibTypeAttribute(TypeLibTypeFlags flags)  {}
+        public TypeLibTypeAttribute(short flags) { }
+        public TypeLibTypeFlags Value { get { throw null; } }
     }
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class TypeLibFuncAttribute : Attribute
     {
-        internal TypeLibFuncFlags _val;
-        public TypeLibFuncAttribute(TypeLibFuncFlags flags)
-        {
-            _val = flags;
-        }
-        public TypeLibFuncAttribute(short flags)
-        {
-            _val = (TypeLibFuncFlags)flags;
-        }
-        public TypeLibFuncFlags Value { get {return _val;} }
+        public TypeLibFuncAttribute(TypeLibFuncFlags flags) { }
+        public TypeLibFuncAttribute(short flags) { }
+        public TypeLibFuncFlags Value { get { throw null; } }
     }
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class TypeLibVarAttribute : Attribute
     {
-        internal TypeLibVarFlags _val;
-        public TypeLibVarAttribute(TypeLibVarFlags flags)
-        {
-            _val = flags;
-        }
-        public TypeLibVarAttribute(short flags)
-        {
-            _val = (TypeLibVarFlags)flags;
-        }
-        public TypeLibVarFlags Value { get {return _val;} }
+        public TypeLibVarAttribute(TypeLibVarFlags flags) { }
+        public TypeLibVarAttribute(short flags) { }
+        public TypeLibVarFlags Value { get { throw null; } }
     }
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class TypeLibVersionAttribute : Attribute
     {
-        internal int _major;
-        internal int _minor;
-
-        public TypeLibVersionAttribute(int major, int minor)
-        {
-            _major = major;
-            _minor = minor;
-        }
-
-        public int MajorVersion { get {return _major;} }
-        public int MinorVersion { get {return _minor;} }
+        public TypeLibVersionAttribute(int major, int minor) {}
+        public int MajorVersion { get { throw null; } }
+        public int MinorVersion { get { throw null; } }
     }   
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("UnknownWrapper and support for marshalling to the VARIANT type may be unavailable in future releases.")]

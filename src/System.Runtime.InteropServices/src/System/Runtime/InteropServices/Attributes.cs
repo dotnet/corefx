@@ -103,7 +103,7 @@ namespace System.Runtime.InteropServices
         {
             _val = tlbFile;
         }
-        public String Value { get {return _val;} }
+        public String Value { get { return _val; } }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
@@ -222,7 +222,7 @@ namespace System.Runtime.InteropServices
         {
             _val = (TypeLibTypeFlags)flags;
         }
-        public TypeLibTypeFlags Value { get {return _val;} }
+        public TypeLibTypeFlags Value { get { return _val; } }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
@@ -237,7 +237,7 @@ namespace System.Runtime.InteropServices
         {
             _val = (TypeLibFuncFlags)flags;
         }
-        public TypeLibFuncFlags Value { get {return _val;} }
+        public TypeLibFuncFlags Value { get { return _val; } }
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
@@ -252,7 +252,7 @@ namespace System.Runtime.InteropServices
         {
             _val = (TypeLibVarFlags)flags;
         }
-        public TypeLibVarFlags Value { get {return _val;} }
+        public TypeLibVarFlags Value { get { return _val; } }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
@@ -268,7 +268,7 @@ namespace System.Runtime.InteropServices
             _minor = minor;
         }
 
-        public int MajorVersion { get {return _major;} }
-        public int MinorVersion { get {return _minor;} }
+        public int MajorVersion { get { return _major; } }
+        public int MinorVersion { get { return _minor; } }
     }
 }
