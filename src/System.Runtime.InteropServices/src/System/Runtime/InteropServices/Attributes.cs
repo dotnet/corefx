@@ -98,12 +98,11 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class ImportedFromTypeLibAttribute : Attribute
     {
-        internal String _val;
         public ImportedFromTypeLibAttribute(String tlbFile)
         {
-            _val = tlbFile;
+            Value = tlbFile;
         }
-        public String Value { get { return _val; } }
+        public string Value { get; }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
@@ -144,16 +143,15 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Interface, Inherited = false)]
     public sealed class TypeLibImportClassAttribute : Attribute
     {
-        internal String _importClassName;
         public TypeLibImportClassAttribute(Type importClass)
         {
-            _importClassName = importClass.ToString();
+            Value = importClass.ToString();
         }
-        public String Value { get { return _importClassName; } }
+        public string Value { get; }
     }
 
     [Serializable]
-    [Flags()]
+    [Flags]
     public enum TypeLibTypeFlags
     {
         FAppObject      = 0x0001,
@@ -173,7 +171,7 @@ namespace System.Runtime.InteropServices
     }
 
     [Serializable]
-    [Flags()]
+    [Flags]
     public enum TypeLibFuncFlags
     {
         FRestricted         = 0x0001,
@@ -192,7 +190,7 @@ namespace System.Runtime.InteropServices
     }
 
     [Serializable]
-    [Flags()]
+    [Flags]
     public enum TypeLibVarFlags
     {
         FReadOnly           = 0x0001,
@@ -213,62 +211,56 @@ namespace System.Runtime.InteropServices
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Struct, Inherited = false)]
     public sealed class  TypeLibTypeAttribute : Attribute
     {
-        internal TypeLibTypeFlags _val;
         public TypeLibTypeAttribute(TypeLibTypeFlags flags)
         {
-            _val = flags;
+            Value = flags;
         }
         public TypeLibTypeAttribute(short flags)
         {
-            _val = (TypeLibTypeFlags)flags;
+            Value = (TypeLibTypeFlags)flags;
         }
-        public TypeLibTypeFlags Value { get { return _val; } }
+        public TypeLibTypeFlags Value { get; }
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class TypeLibFuncAttribute : Attribute
     {
-        internal TypeLibFuncFlags _val;
         public TypeLibFuncAttribute(TypeLibFuncFlags flags)
         {
-            _val = flags;
+            Value = flags;
         }
         public TypeLibFuncAttribute(short flags)
         {
-            _val = (TypeLibFuncFlags)flags;
+            Value = (TypeLibFuncFlags)flags;
         }
-        public TypeLibFuncFlags Value { get { return _val; } }
+        public TypeLibFuncFlags Value { get; }
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class TypeLibVarAttribute : Attribute
     {
-        internal TypeLibVarFlags _val;
         public TypeLibVarAttribute(TypeLibVarFlags flags)
         {
-            _val = flags;
+            Value = flags;
         }
         public TypeLibVarAttribute(short flags)
         {
-            _val = (TypeLibVarFlags)flags;
+            Value = (TypeLibVarFlags)flags;
         }
-        public TypeLibVarFlags Value { get { return _val; } }
+        public TypeLibVarFlags Value { get; }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class TypeLibVersionAttribute : Attribute
     {
-        internal int _major;
-        internal int _minor;
-
         public TypeLibVersionAttribute(int major, int minor)
         {
-            _major = major;
-            _minor = minor;
+            MajorVersion = major;
+            MinorVersion = minor;
         }
 
-        public int MajorVersion { get { return _major; } }
-        public int MinorVersion { get { return _minor; } }
+        public int MajorVersion { get; }
+        public int MinorVersion { get; }
     }
 }
