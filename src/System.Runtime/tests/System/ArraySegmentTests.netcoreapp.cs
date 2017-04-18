@@ -183,6 +183,8 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void CopyTo_Invalid(ArraySegment<int> arraySegment)
         {
+            int count = arraySegment.Count;
+
             // ArraySegment.CopyTo calls Array.Copy internally, so the exception parameter names come from there.
 
             // Destination is null
@@ -199,6 +201,10 @@ namespace System.Tests
                 Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new int[count - 1]));
                 Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new int[count - 1], 0));
                 Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new ArraySegment<int>(new int[count - 1])));
+
+                // Don't write beyond the limits of the destination in cases where source.Count > destination.Count
+                Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new ArraySegment<int>(new int[count], 1, 0))); // destination.Array can't fit source at destination.Offset
+                Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new ArraySegment<int>(new int[count], 0, count - 1))); // destination.Array can fit source at destination.Offset, but destination can't
             }
         }
 
