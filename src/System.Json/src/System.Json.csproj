@@ -4,8 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{B11B5B76-F583-44EA-A4B7-3ABD990594F6}</ProjectGuid>
     <!-- 
-        System.Json mainly provide compatibility for Mono apps. we should keep the identity of this library matching 
-        the one used in Mono which is signed with Silverlight extension key 
+        System.Json is a library for compat purposes so we want to keep the same identity as it originally shipped with in Silverlight
     -->
     <AssemblyKey>SilverlightExtension</AssemblyKey>
   </PropertyGroup>
