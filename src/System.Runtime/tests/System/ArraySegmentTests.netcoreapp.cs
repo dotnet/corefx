@@ -315,43 +315,23 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetSetItem_NotInRange(ArraySegment<int> arraySegment)
+        public static void GetSetItem_NotInRange_Invalid(ArraySegment<int> arraySegment)
         {
-            TestGetSetItem_NotInRange(arraySegment, start: -arraySegment.Offset, end: 0); // Check values before start
-            TestGetSetItem_NotInRange(arraySegment, start: arraySegment.Count, end: arraySegment.Offset + array.Length); // Check values after end
-        }
-        
-        private static void TestGetSetItem_NotInRange(ArraySegment<int> arraySegment, int start, int end)
-        {
-            int[] array = arraySegment.Array;
-            var r = new Random(1);
-
-            for (int i = start; i < end; i++)
-            {
-                Assert.Equal(array[arraySegment.Offset + i], arraySegment[i]);
-
-                int next = r.Next(int.MinValue, int.MaxValue);
-                int oldValue = arraySegment[i];
-
-                array[arraySegment.Offset + i] ^= next;
-                Assert.Equal(oldValue ^ next, arraySegment[i]);
-
-                arraySegment[i] ^= next;
-                Assert.Equal(oldValue, array[arraySegment.Offset + i]);
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(ArraySegment_TestData))]
-        public static void GetSetItem_Invalid(ArraySegment<int> arraySegment)
-        {
-            // Before start of array
+            // Before array start
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1]);
             Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1] = default(int));
 
-            // After end of array
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Offset + array.Length]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Offset + array.Length] = default(int));
+            // After array start (if Offset > 0), before start
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-1]);
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-1] = default(int));
+
+            // Before array end (if Offset + Count < Array.Length), after end
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Count]);
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Count] = default(int));
+
+            // After array end
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + arraySegment.Array.Length]);
+            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + arraySegment.Array.Length] = default(int));
         }
 
         [Theory]
