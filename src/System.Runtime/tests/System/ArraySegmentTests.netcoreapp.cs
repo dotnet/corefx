@@ -120,17 +120,17 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void CopyTo(ArraySegment<int> arraySegment)
         {
-            const int CopyLining = 5;
-            const int DestinationSegmentLining = 3;
+            const int CopyPadding = 5;
+            const int DestinationSegmentPadding = 3;
 
-            var destinationModel = new int[count + 2 * CopyLining];
+            var destinationModel = new int[count + 2 * CopyPadding];
 
             // CopyTo(T[])
             CopyAndInvoke(destinationModel, destination =>
             {
                 arraySegment.CopyTo(destination);
                 
-                Assert.Equal(Enumerable.Repeat(default(int), 2 * CopyLining), destination.Skip(count));
+                Assert.Equal(Enumerable.Repeat(default(int), 2 * CopyPadding), destination.Skip(count));
 
                 Assert.Equal(arraySegment, destination.Take(count));
             });
@@ -138,23 +138,23 @@ namespace System.Tests
             // CopyTo(T[], int)
             CopyAndInvoke(destinationModel, destination =>
             {
-                arraySegment.CopyTo(destination, CopyLining);
+                arraySegment.CopyTo(destination, CopyPadding);
                 
-                Assert.Equal(Enumerable.Repeat(default(int), CopyLining), destination.Take(CopyLining));
-                Assert.Equal(Enumerable.Repeat(default(int), CopyLining), destination.Skip(CopyLining + count));
+                Assert.Equal(Enumerable.Repeat(default(int), CopyPadding), destination.Take(CopyPadding));
+                Assert.Equal(Enumerable.Repeat(default(int), CopyPadding), destination.Skip(CopyPadding + count));
 
-                Assert.Equal(arraySegment, destination.Skip(CopyLining).Take(count));
+                Assert.Equal(arraySegment, destination.Skip(CopyPadding).Take(count));
             });
 
             // ICollection<T>.CopyTo(T[], int)
             CopyAndInvoke(destinationModel, destination =>
             {
-                ((ICollection<int>)arraySegment).CopyTo(destination, CopyLining);
+                ((ICollection<int>)arraySegment).CopyTo(destination, CopyPadding);
                 
-                Assert.Equal(Enumerable.Repeat(default(int), CopyLining), destination.Take(CopyLining));
-                Assert.Equal(Enumerable.Repeat(default(int), CopyLining), destination.Skip(CopyLining + count));
+                Assert.Equal(Enumerable.Repeat(default(int), CopyPadding), destination.Take(CopyPadding));
+                Assert.Equal(Enumerable.Repeat(default(int), CopyPadding), destination.Skip(CopyPadding + count));
 
-                Assert.Equal(arraySegment, destination.Skip(CopyLining).Take(count));
+                Assert.Equal(arraySegment, destination.Skip(CopyPadding).Take(count));
             });
 
             // CopyTo(ArraySegment<T>)
@@ -163,8 +163,8 @@ namespace System.Tests
                 // We want to make sure this overload is handling edge cases correctly, like ArraySegments that
                 // do not begin at the array's start, do not end at the array's end, or have a bigger count than
                 // the source ArraySegment. Construct an ArraySegment that will test all of these conditions.
-                int destinationIndex = DestinationSegmentLining;
-                int destinationCount = destination.Length - 2 * DestinationSegmentLining;
+                int destinationIndex = DestinationSegmentPadding;
+                int destinationCount = destination.Length - 2 * DestinationSegmentPadding;
                 var destinationSegment = new ArraySegment<int>(destination, destinationIndex, destinationCount);
 
                 arraySegment.CopyTo(destinationSegment);
