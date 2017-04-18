@@ -27,7 +27,7 @@ namespace System.Tests
         [Fact]
         public void Empty()
         {
-            var empty = ArraySegment<T>.Empty;
+            ArraySegment<T> empty = ArraySegment<T>.Empty;
 
             Assert.NotEqual(default(ArraySegment<T>), empty);
             // Check that two Empty invocations return equal ArraySegments.
@@ -47,13 +47,13 @@ namespace System.Tests
             var ienumerableoft = (IEnumerable<T>)arraySegment;
             var ienumerable = (IEnumerable)arraySegment;
 
-            var enumerator = arraySegment.GetEnumerator();
+            ArraySegment<T>.Enumerator enumerator = arraySegment.GetEnumerator();
             Assert.IsType<ArraySegment<T>.Enumerator>(enumerator);
             Assert.IsAssignableFrom<IEnumerator<T>>(enumerator);
             Assert.IsAssignableFrom<IEnumerator>(enumerator);
 
-            var ienumeratoroft = ienumerableoft.GetEnumerator();
-            var ienumerator = ienumerable.GetEnumerator();
+            IEnumerator<T> ienumeratoroft = ienumerableoft.GetEnumerator();
+            IEnumerator ienumerator = ienumerable.GetEnumerator();
 
             Assert.Equal(enumerator.GetType(), ienumeratoroft.GetType());
             Assert.Equal(ienumeratoroft.GetType(), ienumerator.GetType());
@@ -206,7 +206,7 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator(ArraySegment<int> arraySegment)
         {
-            var enumerator = arraySegment.GetEnumerator();
+            ArraySegment<int>.Enumerator enumerator = arraySegment.GetEnumerator();
 
             var actual = new List<int>();
 
@@ -226,7 +226,7 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator_Dispose(ArraySegment<int> arraySegment)
         {
-            var enumerator = arraySegment.GetEnumerator();
+            ArraySegment<int>.Enumerator enumerator = arraySegment.GetEnumerator();
 
             bool expected = arraySegment.Count > 0;
             
@@ -269,7 +269,7 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator_Invalid(ArraySegment<int> arraySegment)
         {
-            var enumerator = arraySegment.GetEnumerator();
+            ArraySegment<int>.Enumerator enumerator = arraySegment.GetEnumerator();
 
             // Before beginning
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
@@ -370,7 +370,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Slice_TestData()
         {
-            var arraySegments = ArraySegment_TestData().Select(array => array.Single()).Cast<ArraySegment<int>>();
+            IEnumerable<ArraySegment<int>> arraySegments = ArraySegment_TestData().Select(array => array.Single()).Cast<ArraySegment<int>>();
 
             foreach (ArraySegment<int> arraySegment in arraySegments)
             {
@@ -406,7 +406,7 @@ namespace System.Tests
         public static void ToArray(ArraySegment<int> arraySegment)
         {
             // ToList is called here so we copy the data and raise an assert if ToArray modifies the underlying array.
-            var expected = arraySegment.Array.Skip(arraySegment.Offset).Take(arraySegment.Count).ToList();
+            List<int> expected = arraySegment.Array.Skip(arraySegment.Offset).Take(arraySegment.Count).ToList();
             Assert.Equal(expected, arraySegment.ToArray());
         }
 
@@ -422,7 +422,7 @@ namespace System.Tests
                 (array: new[] { 3, 4, 5, 6 }, index: 1, count: 0) // Non-empty array, count == 0
             };
             
-            return arraySegments.Select(as => new object[] { new ArraySegment<int>(as.array, as.index, as.count) });
+            return arraySegments.Select(aseg => new object[] { new ArraySegment<int>(aseg.array, aseg.index, aseg.count) });
         }
     }
 }
