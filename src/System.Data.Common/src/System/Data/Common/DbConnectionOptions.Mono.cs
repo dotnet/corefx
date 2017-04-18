@@ -9,7 +9,6 @@ namespace System.Data.Common
 {
     internal partial class DbConnectionOptions
     {
-
         protected DbConnectionOptions(string connectionString, Dictionary<string, string> synonyms)
             : this (connectionString, new Hashtable(synonyms), false)
         {
