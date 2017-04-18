@@ -314,5 +314,63 @@ namespace System.Linq.Expressions.Tests
             ListInitExpression e2 = Expression.ListInit(Expression.New(typeof(List<int>)), Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"));
             Assert.Equal("new List`1() {Void Add(Int32)(x), Void Add(Int32)(y)}", e2.ToString());
         }
+
+        private class MixedAddable : IEnumerable
+        {
+            private readonly List<string> _strings = new List<string>();
+            private readonly List<int> _ints = new List<int>();
+
+            public void Add(string value)
+            {
+                _strings.Add(value);
+            }
+
+            public void Add(int value)
+            {
+                _ints.Add(value);
+            }
+
+            public void Add(object value)
+            {
+                Assert.False(true, "Bad overload to pick");
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                return _strings.Concat(_ints.Select(i => i.ToString())).GetEnumerator();
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void MixedAddableListInit(bool useInterpreter)
+        {
+            Expression<Func<MixedAddable>> exp = Expression.Lambda<Func<MixedAddable>>(
+                Expression.ListInit(
+                    Expression.New(typeof(MixedAddable)),
+                    Expression.Constant(0), Expression.Constant("a"),
+                    Expression.Constant(1), Expression.Constant("b")));
+            Func<MixedAddable> func = exp.Compile(useInterpreter);
+            Assert.Equal(new []{"a", "b", "0", "1"}, func().Cast<string>());
+        }
+
+        private class MixedAddableStrings : IEnumerable<string>
+        {
+            private List<string> _store = new List<string>();
+
+            public IEnumerator<string> GetEnumerator() => _store.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            public void Add(ICloneable item) => _store.Add(item as string);
+
+            public void Add(IEnumerable item) => _store.Add(item as string);
+        }
+
+        [Fact]
+        public void MixedAddableEquallyGoodAddMethods()
+        {
+            NewExpression newExp = Expression.New(typeof(MixedAddableStrings));
+            Assert.Throws<InvalidOperationException>(() => Expression.ListInit(newExp, Expression.Constant("abc")));
+        }
     }
 }
