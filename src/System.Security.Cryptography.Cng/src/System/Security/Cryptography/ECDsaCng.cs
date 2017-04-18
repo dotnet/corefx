@@ -92,6 +92,9 @@ namespace System.Security.Cryptography
             return ECCng.ExportFullKeyBlob(Key, includePrivateParameters);
         }
 
+        public void FromXmlString(string xml, ECKeyXmlFormat format)
+            => throw new PlatformNotSupportedException();
+
         public byte[] SignData(byte[] data)
             => SignData(data, new HashAlgorithmName(HashAlgorithm.Algorithm));
 
@@ -100,6 +103,9 @@ namespace System.Security.Cryptography
 
         public byte[] SignData(Stream data)
             => SignData(data, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public string ToXmlString(ECKeyXmlFormat format)
+            => throw new PlatformNotSupportedException();
 
         public bool VerifyData(byte[] data, byte[] signature)
             => VerifyData(data, signature, new HashAlgorithmName(HashAlgorithm.Algorithm));

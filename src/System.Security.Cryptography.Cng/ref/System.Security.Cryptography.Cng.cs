@@ -289,6 +289,7 @@ namespace System.Security.Cryptography
 #if !netfx // types missing from netfx targeting pack
         public override System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
         public override System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
+        public void FromXmlString(string xml, ECKeyXmlFormat format) { throw null; }
         public override void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
 #endif
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
@@ -300,10 +301,18 @@ namespace System.Security.Cryptography
         public byte[] SignData(byte[] data, int offset, int count) { throw null; }
         public byte[] SignData(System.IO.Stream data) { throw null; }
         public override byte[] SignHash(byte[] hash) { throw null; }
+        public string ToXmlString(ECKeyXmlFormat format) { throw null; }
         public bool VerifyData(byte[] data, byte[] signature) { throw null; }
         public bool VerifyData(byte[] data, int offset, int count, byte[] signature) { throw null; }
         public bool VerifyData(System.IO.Stream data, byte[] signature) { throw null; }
         public override bool VerifyHash(byte[] hash, byte[] signature) { throw null; }
+    }
+    public enum ECKeyXmlFormat
+    {
+        /// <summary>
+        ///     Use the format described in RFC 4050
+        /// </summary>
+        Rfc4050
     }
     public sealed partial class RSACng : System.Security.Cryptography.RSA
     {
