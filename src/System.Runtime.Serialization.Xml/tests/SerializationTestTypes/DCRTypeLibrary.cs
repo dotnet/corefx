@@ -1,30 +1,30 @@
 ﻿using System.Runtime.Serialization;
 
-namespace DesktopTestData
+namespace SerializationTestTypes
 {
     [DataContract]
     public class ObjectContainer
     {
         [DataMember]
-        private object data;
+        private object _data;
 
         [DataMember]
-        private object data2;
+        private object _data2;
 
         public ObjectContainer(object input)
         {
-            data = input;
-            data2 = data;
+            _data = input;
+            _data2 = _data;
         }
 
         public object Data
         {
-            get { return data; }
+            get { return _data; }
         }
 
         public object Data2
         {
-            get { return data2; }
+            get { return _data2; }
         }
     }
 }

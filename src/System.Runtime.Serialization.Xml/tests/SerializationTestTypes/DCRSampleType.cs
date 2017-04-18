@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace DesktopTestData
+namespace SerializationTestTypes
 {
     [DataContract]
     public class PrimitiveContainer

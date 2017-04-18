@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace DesktopTestData
+namespace SerializationTestTypes
 {
     [DataContract]
     public struct VT
@@ -61,7 +61,7 @@ namespace DesktopTestData
         public MyStruct(bool init)
         {
             value = 10;
-            globName = "ﺥﺣﺨﺪﺣﺻﻂﻃ";
+            globName = "\uFEA5\uFEA3\uFEA8\uFEAA\uFEA3\uFEBB\uFEC2\uFEC3";
         }
     }
 
@@ -79,6 +79,5 @@ namespace DesktopTestData
 
         [DataMember]
         public object p3 = new MyStruct();
-
     }
 }

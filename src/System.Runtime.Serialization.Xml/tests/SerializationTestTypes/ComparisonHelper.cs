@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace DesktopTestData
+namespace SerializationTestTypes
 {
     public enum ComparisionType
     {
@@ -170,7 +170,6 @@ namespace DesktopTestData
                 {
                     throw new Exception(String.Format("Comparision failed: Original string data {0} is not same as deserialized string data {1}", originalData, deserializedData));
                 }
-
             }
             #endregion
 
@@ -276,7 +275,7 @@ namespace DesktopTestData
                 #endregion
             }
             #endregion
-            
+
             #region Types which know how to compare themselves
             else if (equalsMethod.DeclaringType == originalData.GetType())
             {
@@ -459,7 +458,7 @@ namespace DesktopTestData
                 }
             }
         }
-        
+
         /// <summary>
         /// </summary>
         /// <param name="data"></param>
