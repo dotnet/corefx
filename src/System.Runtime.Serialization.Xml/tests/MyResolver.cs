@@ -62,6 +62,7 @@ public class EmptyNamespaceResolver : DataContractResolver
         {
             return typeof(UknownEmptyNSAddress);
         }
+
         return knownTypeResolver.ResolveName(typeName, typeNamespace, declaredType, null);
     }
 }
