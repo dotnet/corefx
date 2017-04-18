@@ -353,7 +353,8 @@
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -388,7 +389,8 @@
     "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -430,7 +432,8 @@
     "runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -465,7 +468,8 @@
     "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -500,7 +504,8 @@
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -535,7 +540,8 @@
     "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -570,7 +576,8 @@
     "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -605,7 +612,8 @@
     "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
         "1.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -948,7 +956,8 @@
     "System.Data.SqlClient": {
       "StableVersions": [
         "4.1.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -987,7 +996,8 @@
     "System.Diagnostics.DiagnosticSource": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1368,7 +1378,8 @@
         "4.1.0",
         "4.1.1",
         "4.3.0",
-        "4.3.1"
+        "4.3.1",
+        "4.3.2"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1394,7 +1405,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1473,7 +1485,8 @@
     "System.Net.Security": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -1522,7 +1535,8 @@
     "System.Net.WebSockets.Client": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -2174,7 +2188,8 @@
     "System.Text.Encodings.Web": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -2499,7 +2514,8 @@
     },
     "System.ValueTuple": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0",
       "AssemblyVersionInPackageVersion": {
@@ -2515,19 +2531,22 @@
     },
     "runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2557,19 +2576,22 @@
     },
     "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2599,13 +2621,15 @@
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2617,25 +2641,29 @@
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -2665,13 +2693,15 @@
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
     "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
