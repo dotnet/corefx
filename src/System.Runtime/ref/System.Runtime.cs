@@ -6820,8 +6820,18 @@ namespace System.Security
         public object PermitOnlySetInstance { get { throw null; } set { } }
         public string RefusedSet { get { throw null; } set { } }
         public string Url { get { throw null; } set { } }
+        public SecurityZone Zone { get { throw null; } set { } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
+    }
+    public enum SecurityZone
+    {
+        MyComputer = 0,
+        Intranet = 1,
+        Trusted = 2,
+        Internet = 3,
+        Untrusted = 4,
+        NoZone = -1
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), AllowMultiple=false)]
     public sealed partial class SecurityRulesAttribute : System.Attribute
