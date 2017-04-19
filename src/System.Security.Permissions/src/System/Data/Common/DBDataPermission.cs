@@ -10,10 +10,12 @@ namespace System.Data.Common
     [Serializable]
     public abstract class DBDataPermission : CodeAccessPermission, IUnrestrictedPermission
     {
+        [Obsolete]
         protected DBDataPermission() { }
         protected DBDataPermission(DBDataPermission dataPermission) { }
         protected DBDataPermission(DBDataPermissionAttribute attribute) { }
         protected DBDataPermission(PermissionState state) { }
+        [Obsolete]
         protected DBDataPermission(PermissionState state, bool blankPassword) { }
         public bool AllowBlankPassword { get; set; }
         public virtual void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
