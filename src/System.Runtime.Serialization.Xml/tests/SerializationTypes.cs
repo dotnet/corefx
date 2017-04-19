@@ -4355,17 +4355,17 @@ public class MyCollection1 : IEnumerable<DateTime>, IEnumerable
 
     public void Add(DateTime value)
     {
-        this._values.Add(value);
+        _values.Add(value);
     }
 
     IEnumerator<DateTime> IEnumerable<DateTime>.GetEnumerator()
     {
-        return this._values.GetEnumerator();
+        return _values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return this._values.GetEnumerator();
+        return _values.GetEnumerator();
     }
 }
 
