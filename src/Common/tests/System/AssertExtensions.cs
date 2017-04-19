@@ -24,8 +24,31 @@ namespace System
             string expectedParamName =
                 RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
                 netFxParamName : netCoreParamName;
-            
-            Assert.Equal(expectedParamName, exception.ParamName);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(expectedParamName, exception.ParamName);
+        }
+
+        public static T Throws<T>(string paramName, Action action)
+            where T : ArgumentException
+        {
+            T exception = Assert.Throws<T>(action);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
+        }
+
+        public static T Throws<T>(string paramName, Func<object> testCode)
+            where T : ArgumentException
+        {
+            T exception = Assert.Throws<T>(testCode);
+
+            if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"))
+                Assert.Equal(paramName, exception.ParamName);
+
+            return exception;
         }
     }
 }

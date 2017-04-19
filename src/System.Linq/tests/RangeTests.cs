@@ -59,16 +59,16 @@ namespace System.Linq.Tests
         [Fact]
         public void Range_ThrowExceptionOnNegativeCount()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1, int.MinValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1, int.MinValue));
         }
 
         [Fact]
         public void Range_ThrowExceptionOnOverflow()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1000, int.MaxValue));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(int.MaxValue, 1000));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(Int32.MaxValue - 10, 20));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1000, int.MaxValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(int.MaxValue, 1000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(Int32.MaxValue - 10, 20));
         }
 
         [Fact]
@@ -185,7 +185,7 @@ namespace System.Linq.Tests
         [Fact]
         public void ElementAtExcessiveThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => Enumerable.Range(0, 10).ElementAt(100));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Enumerable.Range(0, 10).ElementAt(100));
         }
 
         [Fact]
@@ -213,12 +213,14 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core optimizes Enumerable.Range().Last(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
         public void Last()
         {
             Assert.Equal(1000000056, Enumerable.Range(57, 1000000000).Last());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core optimizes Enumerable.Range().LastOrDefault(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
         public void LastOrDefault()
         {
             Assert.Equal(int.MaxValue - 101, Enumerable.Range(-100, int.MaxValue).LastOrDefault());

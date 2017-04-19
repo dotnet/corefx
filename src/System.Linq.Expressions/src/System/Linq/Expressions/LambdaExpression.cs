@@ -20,7 +20,7 @@ namespace System.Linq.Expressions
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
     [DebuggerTypeProxy(typeof(LambdaExpressionProxy))]
-    public abstract partial class LambdaExpression : Expression, IParameterProvider
+    public abstract class LambdaExpression : Expression, IParameterProvider
     {
         private readonly Expression _body;
 
@@ -66,7 +66,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Gets the return type of the lambda expression.
         /// </summary>
-        public Type ReturnType => Type.GetMethod("Invoke").ReturnType;
+        public Type ReturnType => Type.GetInvokeMethod().ReturnType;
 
         /// <summary>
         /// Gets the value that indicates if the lambda expression will be compiled with
@@ -172,7 +172,7 @@ namespace System.Linq.Expressions
     /// <remarks>
     /// Lambda expressions take input through parameters and are expected to be fully bound.
     /// </remarks>
-    public partial class Expression<TDelegate> : LambdaExpression
+    public class Expression<TDelegate> : LambdaExpression
     {
         internal Expression(Expression body)
             : base(body)
@@ -897,7 +897,7 @@ namespace System.Linq.Expressions
             CacheDict<Type, MethodInfo> ldc = s_lambdaDelegateCache;
             if (!ldc.TryGetValue(delegateType, out mi))
             {
-                mi = delegateType.GetMethod("Invoke");
+                mi = delegateType.GetInvokeMethod();
                 if (delegateType.CanCache())
                 {
                     ldc[delegateType] = mi;

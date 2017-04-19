@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,11 +15,11 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Ctor_NullSocket_ThrowsArgumentNullExceptions()
         {
-            Assert.Throws<ArgumentNullException>("socket", () => new NetworkStream(null));
-            Assert.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, false));
-            Assert.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, true));
-            Assert.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, FileAccess.ReadWrite));
-            Assert.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, FileAccess.ReadWrite, false));
+            AssertExtensions.Throws<ArgumentNullException>("socket", () => new NetworkStream(null));
+            AssertExtensions.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, false));
+            AssertExtensions.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, true));
+            AssertExtensions.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, FileAccess.ReadWrite));
+            AssertExtensions.Throws<ArgumentNullException>("socket", () => new NetworkStream(null, FileAccess.ReadWrite, false));
         }
 
         [Fact]
@@ -581,8 +582,8 @@ namespace System.Net.Sockets.Tests
         {
             await RunWithConnectedNetworkStreamsAsync((server, client) =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => server.ReadTimeout = invalidTimeout);
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => server.WriteTimeout = invalidTimeout);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => server.ReadTimeout = invalidTimeout);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => server.WriteTimeout = invalidTimeout);
                 return Task.CompletedTask;
             });
         }
@@ -645,11 +646,11 @@ namespace System.Net.Sockets.Tests
             await RunWithConnectedNetworkStreamsAsync((stream, _) =>
             {
                 // Null destination
-                Assert.Throws<ArgumentNullException>("destination", () => { stream.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { stream.CopyToAsync(null); });
 
                 // Buffer size out-of-range
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { stream.CopyToAsync(new MemoryStream(), 0); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { stream.CopyToAsync(new MemoryStream(), -1, CancellationToken.None); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { stream.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { stream.CopyToAsync(new MemoryStream(), -1, CancellationToken.None); });
 
                 // Copying to non-writable stream
                 Assert.Throws<NotSupportedException>(() => { stream.CopyToAsync(new MemoryStream(new byte[0], writable: false)); });
@@ -669,19 +670,33 @@ namespace System.Net.Sockets.Tests
             });
         }
 
-        [ActiveIssue(16611, TestPlatforms.AnyUnix)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Optimized .NET Core CopyToAsync doesn't use Begin/EndRead, skipping code that throws ObjectDisposedException on netfx")]
         [Fact]
-        public async Task CopyToAsync_DisposedSourceStream_Throws()
+        public async Task CopyToAsync_DisposedSourceStream_ThrowsOnWindows_NoThrowOnUnix()
         {
             await RunWithConnectedNetworkStreamsAsync(async (stream, _) =>
             {
-                // Copying while and then after disposing the stream
+                // Copying while disposing the stream
                 Task copyTask = stream.CopyToAsync(new MemoryStream());
                 stream.Dispose();
-                await Assert.ThrowsAsync<IOException>(() => copyTask);
+                Exception e = await Record.ExceptionAsync(() => copyTask);
+
+                // Difference in shutdown/close behavior between Windows and Unix.
+                // On Windows, the outstanding receive is completed as aborted when the
+                // socket is closed.  On Unix, it's completed as successful once or after
+                // the shutdown is issued, but depending on timing, if it's then closed
+                // before that takes effect, it may also complete as aborted.
+                bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows); 
+                Assert.True(
+                    (isWindows && e is IOException) ||
+                    (!isWindows && (e == null || e is IOException)),
+                    $"Got unexpected exception: {e?.ToString() ?? "(null)"}");
+
+                // Copying after disposing the stream
                 Assert.Throws<ObjectDisposedException>(() => { stream.CopyToAsync(new MemoryStream()); });
             });
         }
+
 
         [Fact]
         public async Task CopyToAsync_NonReadableSourceStream_Throws()

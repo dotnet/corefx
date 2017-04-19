@@ -10,7 +10,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal abstract class CType : ITypeOrNamespace
+    internal abstract class CType
     {
         private TypeKind _typeKind;
         private Name _pName;
@@ -97,14 +97,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ArrayType:
                     ArrayType a = src.AsArrayType();
                     Type elementType = a.GetElementType().AssociatedSystemType;
-                    if (a.rank == 1)
-                    {
-                        result = elementType.MakeArrayType();
-                    }
-                    else
-                    {
-                        result = elementType.MakeArrayType(a.rank);
-                    }
+                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.rank);
                     break;
 
                 case TypeKind.TK_NullableType:
@@ -196,14 +189,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return uninstantiatedType;
         }
-
-        // ITypeOrNamespace
-        public bool IsType => true;
-
-        public bool IsNamespace => false;
-
-        public AssemblyQualifiedNamespaceSymbol AsNamespace() { throw Error.InternalCompilerError(); }
-        public CType AsType() { return this; }
 
         public TypeKind GetTypeKind() { return _typeKind; }
         public void SetTypeKind(TypeKind kind) { _typeKind = kind; }
@@ -316,14 +301,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             _fHasErrors = typePar.HasErrors();
             _fUnres = typePar.IsUnresolved();
-#if CSEE
-
-            this.typeRes = this;
-            if (!this.fUnres)
-                this.tsRes = ktsImportMax;
-            this.fDirty = typePar.fDirty;
-            this.tsDirty = typePar.tsDirty;
-#endif // CSEE
         }
 
         public bool HasErrors()
