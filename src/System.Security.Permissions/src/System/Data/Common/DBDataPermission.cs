@@ -11,13 +11,15 @@ namespace System.Data.Common
     [SecurityPermission(SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
     public abstract class DBDataPermission : CodeAccessPermission, IUnrestrictedPermission
     {
+        [Obsolete("DBDataPermission() has been deprecated.  Use the DBDataPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
         protected DBDataPermission() { }
         protected DBDataPermission(DBDataPermission dataPermission) { }
         protected DBDataPermission(DBDataPermissionAttribute attribute) { }
         protected DBDataPermission(PermissionState state) { }
+        [Obsolete("DBDataPermission(PermissionState state,Boolean allowBlankPassword) has been deprecated.  Use the DBDataPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
         protected DBDataPermission(PermissionState state, bool blankPassword) { }
         public bool AllowBlankPassword { get; set; }
-        public void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
+        public virtual void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
         protected void Clear() { }
         protected DBDataPermission CreateInstance() => null;
         public override IPermission Copy() => this;

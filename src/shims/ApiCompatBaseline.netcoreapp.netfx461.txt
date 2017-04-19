@@ -28,6 +28,11 @@ MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.S
 MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData..ctor(System.String, System.Data.SqlDbType, System.Type, System.String, System.Boolean, System.Boolean, System.Data.SqlClient.SortOrder, System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData.DbType.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'Microsoft.SqlServer.Server.SqlMetaData.Type.get()' does not exist in the implementation but it does exist in the contract.
+CannotMakeMemberNonVirtual : Member 'System.Data.Common.DBDataPermission.Add(System.String, System.String, System.Data.KeyRestrictionBehavior)' is non-virtual in the implementation but is virtual in the contract.
+CannotMakeMemberNonVirtual : Member 'System.Data.Common.DBDataPermission.CreateInstance()' is non-virtual in the implementation but is virtual in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Data.Common.DBDataPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.Data.Common.DBDataPermissionAttribute.ShouldSerializeConnectionString()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Data.Common.DBDataPermissionAttribute.ShouldSerializeKeyRestrictions()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.Common.DbProviderFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.Odbc.OdbcConnection.EnlistDistributedTransaction(System.EnterpriseServices.ITransaction)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.Odbc.OdbcFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
@@ -88,6 +93,8 @@ MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.UdtTypeName.get()'
 MembersMustExist : Member 'System.Data.SqlClient.SqlParameter.UdtTypeName.set(System.String)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlParameterCollection.Add(System.String, System.Data.SqlDbType, System.Int32, System.String)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlParameterCollection.Add(System.String, System.Object)' does not exist in the implementation but it does exist in the contract.
+Compat issues with assembly System.Drawing:
+CannotRemoveBaseTypeOrInterface : Type 'System.Drawing.Printing.PrintingPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 Compat issues with assembly System.Xml:
 MembersMustExist : Member 'System.Xml.Xsl.XslCompiledTransform.TemporaryFiles.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Xml.Xsl.XslTransform.Load(System.Xml.XPath.XPathNavigator, System.Xml.XmlResolver, System.Security.Policy.Evidence)' does not exist in the implementation but it does exist in the contract.
