@@ -28,6 +28,7 @@ namespace System.Buffers.ArrayPool.Tests
         public static void SharedInstanceCreatesAnInstanceOnFirstCall()
         {
             Assert.NotNull(ArrayPool<byte>.Shared);
+            throw new Exception("This should not trigger dumpling.");
         }
 
         [Fact]
