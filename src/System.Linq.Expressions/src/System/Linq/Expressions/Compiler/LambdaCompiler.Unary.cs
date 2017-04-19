@@ -333,22 +333,22 @@ namespace System.Linq.Expressions.Compiler
                         paramType = paramType.GetElementType();
                     }
 
-                    UnaryExpression e = Expression.Convert(
+                    node = Expression.Convert(
                         Expression.Call(
                             node.Method,
                             Expression.Convert(node.Operand, paramType)
                         ),
                         node.Type
                     );
-
-                    EmitConvert(e, flags);
                 }
                 else
                 {
                     EmitUnaryMethod(node, flags);
+                    return;
                 }
             }
-            else if (node.Type == typeof(void))
+
+            if (node.Type == typeof(void))
             {
                 EmitExpressionAsVoid(node.Operand, flags);
             }
