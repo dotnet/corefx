@@ -260,6 +260,10 @@ namespace System.Tests
         [MemberData(nameof(ArraySegment_TestData))]
         public static void GetEnumerator_Reset(ArraySegment<int> arraySegment)
         {
+            int[] array = arraySegment.Array;
+            int index = arraySegment.Offset;
+            int count = arraySegment.Count;
+            
             var enumerator = (IEnumerator<int>)arraySegment.GetEnumerator();
 
             int[] expected = array.Skip(index).Take(count).ToArray();
