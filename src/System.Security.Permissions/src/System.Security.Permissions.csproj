@@ -119,12 +119,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Data.Common" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
