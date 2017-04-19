@@ -5,7 +5,7 @@
     <StablePackage Include="System.Reflection.Metadata">
       <Version>1.2.0</Version>
     </StablePackage>
-  
+
     <!-- Packages shipped stable at VS 2015 Update 2 for UWP 5.1.0 meta-package -->
     <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.1.0</Version>
@@ -46,7 +46,7 @@
     <StablePackage Include="runtime.aot.System.Private.DataContractSerialization">
       <Version>4.1.0</Version>
     </StablePackage>
-    
+
     <!-- Packages shipped stable at Dev14 RTM -->
     <StablePackage Include="Microsoft.CSharp">
       <Version>4.0.0</Version>
@@ -1316,7 +1316,7 @@
     <StablePackage Include="System.ServiceModel.Security">
       <Version>4.0.1</Version>
     </StablePackage>
-    
+
     <!-- Servicing -->
     <StablePackage Include="Microsoft.NETCore.Portable.Compatibility">
       <Version>1.0.2</Version>
@@ -1355,6 +1355,50 @@
     </StablePackage>
     <StablePackage Include="System.Runtime.Serialization.Xml">
       <Version>4.1.2</Version>
+    </StablePackage>
+
+    <!-- Servicing 1.0.5 wave -->
+    <StablePackage Include="Microsoft.NETCore.Targets">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Http">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Http.WebHttpHandler">
+      <Version>4.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Security">
+      <Version>4.0.1</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.WebSockets.Client">
+      <Version>4.0.1</Version>
+    </StablePackage>
+    <StablePackage Include="System.Text.Encodings.Web">
+      <Version>4.0.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.debian.8-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.fedora.23-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.native.System.Security.Cryptography">
+      <Version>4.0.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.rhel.7-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography">
+      <Version>1.0.2</Version>
     </StablePackage>
   </ItemGroup>
 </Project>
