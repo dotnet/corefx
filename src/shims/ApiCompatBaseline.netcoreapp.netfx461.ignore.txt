@@ -688,6 +688,7 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Data.SyntaxErrorException' does n
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.VersionNotFoundException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.Common.DbException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.Common.DbProviderSpecificTypePropertyAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Data.Common.DBDataPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.Odbc.OdbcException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlClient.SqlException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlAlreadyFilledException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
@@ -695,6 +696,7 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlNotFilledExcepti
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlNullValueException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlTruncateException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlTypeException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Drawing.Printing.PrintingPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.CookieException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.WebException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Sockets.SocketException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
