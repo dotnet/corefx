@@ -4,33 +4,32 @@
   <PropertyGroup>
     <AssemblyName>System.Diagnostics.Tracing</AssemblyName>
     <ProjectGuid>{EB880FDC-326D-42B3-A3FD-0CD3BA29A7F4}</ProjectGuid>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <NoWarn>CA2002</NoWarn>
-    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
-    <!-- Disable binplacing for now since we need to use the uapaot version of this assembly -->
-    <BinPlaceILCInputFolder>false</BinPlaceILCInputFolder>
+    <!-- CSC adds a typeforward for the internal nested type EventSource.EventMetadata but
+         GenFacades doesn't consider this as a viable target for a typeforward since it's internal -->
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx'">true</GenFacadesIgnoreMissingTypes>
+    <DefineContants Condition="'$(TargetGroup)' != 'netfx'">$(DefineConstants);SUPPORTS_EVENTCOMMANDEXECUTED</DefineContants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="FxCopBaseline.cs" />
+    <Compile Include="System\Diagnostics\Tracing\EventCounter.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Diagnostics\Tracing\EventCounter.cs" Condition="'$(TargetGroup)'!='uapaot'" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Diagnostics.Contracts\src\System.Diagnostics.Contracts.csproj" />
-    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Reference Include="mscorlib" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

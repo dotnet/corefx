@@ -169,70 +169,70 @@ namespace System.Linq.Tests
         public void NullSource()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10));
         }
 
         [Fact]
         public void NullSourceExplicitComparer()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullSourceElementSelector()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2));
         }
 
         [Fact]
         public void NullSourceElementSelectorExplicitComparer()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullKeySelector()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector));
         }
 
         [Fact]
         public void NullKeySelectorExplicitComparer()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullKeySelectorElementSelector()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2));
         }
 
         [Fact]
         public void NullKeySelectorElementSelectorExplicitComparer()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullElementSelector()
         {
             Func<int, int> elementSelector = null;
-            Assert.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector));
         }
 
         [Fact]
         public void NullElementSelectorExplicitComparer()
         {
             Func<int, int> elementSelector = null;
-            Assert.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector, EqualityComparer<int>.Default));
         }
 
         [Theory]
@@ -292,6 +292,7 @@ namespace System.Linq.Tests
 
         [Theory]
         [MemberData(nameof(DebuggerAttributesValid_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Lookup<T> doesn't have a Debugger proxy in the full .NET framework. See https://github.com/dotnet/corefx/issues/14790.")]
         public void DebuggerAttributesValid<TKey, TElement>(ILookup<TKey, TElement> lookup, TKey dummy1, TElement dummy2)
         {
             // The dummy parameters can be removed once https://github.com/dotnet/buildtools/pull/1300 is brought in.

@@ -477,11 +477,25 @@ namespace System.Runtime.Serialization
             }
         }
 
+        private static Type s_typeOfXmlSchemaType;
+        internal static Type TypeOfXmlSchemaType
+        {
+            get
+            {
+                if (s_typeOfXmlSchemaType == null)
+                {
+                    s_typeOfXmlSchemaType = typeof(XmlSchemaType);
+                }
+
+                return s_typeOfXmlSchemaType;
+            }
+        }
+
         private static Type s_typeOfIExtensibleDataObject;
-        internal static Type TypeOfIExtensibleDataObject => s_typeOfIExtensibleDataObject ?? (s_typeOfIExtensibleDataObject = typeof (IExtensibleDataObject));
+        internal static Type TypeOfIExtensibleDataObject => s_typeOfIExtensibleDataObject ?? (s_typeOfIExtensibleDataObject = typeof(IExtensibleDataObject));
 
         private static Type s_typeOfExtensionDataObject;
-        internal static Type TypeOfExtensionDataObject => s_typeOfExtensionDataObject ?? (s_typeOfExtensionDataObject = typeof (ExtensionDataObject));
+        internal static Type TypeOfExtensionDataObject => s_typeOfExtensionDataObject ?? (s_typeOfExtensionDataObject = typeof(ExtensionDataObject));
 
         private static Type s_typeOfISerializableDataNode;
         internal static Type TypeOfISerializableDataNode
@@ -517,7 +531,7 @@ namespace System.Runtime.Serialization
         }
 
         private static Type s_typeOfXmlDataNode;
-        internal static Type TypeOfXmlDataNode => s_typeOfXmlDataNode ?? (s_typeOfXmlDataNode = typeof (XmlDataNode));
+        internal static Type TypeOfXmlDataNode => s_typeOfXmlDataNode ?? (s_typeOfXmlDataNode = typeof(XmlDataNode));
 
 #if uapaot
         private static Type s_typeOfSafeSerializationManager;
@@ -778,35 +792,14 @@ namespace System.Runtime.Serialization
             }
         }
 
-        private static bool s_shouldGetDBNullType = true;
-
         private static Type s_typeOfDBNull;
         internal static Type TypeOfDBNull
         {
-            get
+           get
             {
-                if (s_typeOfDBNull == null && s_shouldGetDBNullType)
-                {
-                    s_typeOfDBNull = Type.GetType("System.DBNull, System.Data.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", false);
-                    s_shouldGetDBNullType = false;
-                }
+                if (s_typeOfDBNull == null)
+                    s_typeOfDBNull = typeof(DBNull);
                 return s_typeOfDBNull;
-            }
-        }
-
-        private static object s_valueOfDBNull;
-        internal static object ValueOfDBNull
-        {
-            get
-            {
-                if (s_valueOfDBNull == null && TypeOfDBNull != null)
-                {
-                    var fieldInfo = TypeOfDBNull.GetField("Value");
-                    if (fieldInfo != null)
-                        s_valueOfDBNull = fieldInfo.GetValue(null);
-                }
-
-                return s_valueOfDBNull;
             }
         }
 
@@ -893,11 +886,6 @@ namespace System.Runtime.Serialization
         {
             Debug.Assert(s_deserializeFunc != null);
             return Globals.s_deserializeFunc(json);
-        }
-
-        internal static bool IsDBNullValue(object o)
-        {
-            return o != null && ValueOfDBNull != null && ValueOfDBNull.Equals(o);
         }
 
         public const bool DefaultIsRequired = false;
@@ -999,5 +987,48 @@ namespace System.Runtime.Serialization
         public const string SafeSerializationManagerName = "SafeSerializationManager";
         public const string SafeSerializationManagerNamespace = "http://schemas.datacontract.org/2004/07/System.Runtime.Serialization";
         public const string ISerializableFactoryTypeLocalName = "FactoryType";
+        public const string SerializationSchema = @"<?xml version='1.0' encoding='utf-8'?>
+<xs:schema elementFormDefault='qualified' attributeFormDefault='qualified' xmlns:tns='http://schemas.microsoft.com/2003/10/Serialization/' targetNamespace='http://schemas.microsoft.com/2003/10/Serialization/' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:element name='anyType' nillable='true' type='xs:anyType' />
+  <xs:element name='anyURI' nillable='true' type='xs:anyURI' />
+  <xs:element name='base64Binary' nillable='true' type='xs:base64Binary' />
+  <xs:element name='boolean' nillable='true' type='xs:boolean' />
+  <xs:element name='byte' nillable='true' type='xs:byte' />
+  <xs:element name='dateTime' nillable='true' type='xs:dateTime' />
+  <xs:element name='decimal' nillable='true' type='xs:decimal' />
+  <xs:element name='double' nillable='true' type='xs:double' />
+  <xs:element name='float' nillable='true' type='xs:float' />
+  <xs:element name='int' nillable='true' type='xs:int' />
+  <xs:element name='long' nillable='true' type='xs:long' />
+  <xs:element name='QName' nillable='true' type='xs:QName' />
+  <xs:element name='short' nillable='true' type='xs:short' />
+  <xs:element name='string' nillable='true' type='xs:string' />
+  <xs:element name='unsignedByte' nillable='true' type='xs:unsignedByte' />
+  <xs:element name='unsignedInt' nillable='true' type='xs:unsignedInt' />
+  <xs:element name='unsignedLong' nillable='true' type='xs:unsignedLong' />
+  <xs:element name='unsignedShort' nillable='true' type='xs:unsignedShort' />
+  <xs:element name='char' nillable='true' type='tns:char' />
+  <xs:simpleType name='char'>
+    <xs:restriction base='xs:int'/>
+  </xs:simpleType>
+  <xs:element name='duration' nillable='true' type='tns:duration' />
+  <xs:simpleType name='duration'>
+    <xs:restriction base='xs:duration'>
+      <xs:pattern value='\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?' />
+      <xs:minInclusive value='-P10675199DT2H48M5.4775808S' />
+      <xs:maxInclusive value='P10675199DT2H48M5.4775807S' />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name='guid' nillable='true' type='tns:guid' />
+  <xs:simpleType name='guid'>
+    <xs:restriction base='xs:string'>
+      <xs:pattern value='[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}' />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:attribute name='FactoryType' type='xs:QName' />
+  <xs:attribute name='Id' type='xs:ID' />
+  <xs:attribute name='Ref' type='xs:IDREF' />
+</xs:schema>
+";
     }
 }

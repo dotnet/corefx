@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 
 using Xunit;
@@ -13,6 +14,7 @@ namespace System.PrivateUri.Tests
         //This test tests a case where the Core implementation of UriBuilder differs from Desktop Framework UriBuilder.
         //The Query property will not longer prepend a ? character if the string being assigned is already prepended.
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior")]
         public static void TestQuery()
         {
             var uriBuilder = new UriBuilder(@"http://foo/bar/baz?date=today");
@@ -75,14 +77,14 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void Ctor_String_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("uriString", () => new UriBuilder((string)null)); // UriString is null
+            AssertExtensions.Throws<ArgumentNullException>("uriString", () => new UriBuilder((string)null)); // UriString is null
             Assert.Throws<UriFormatException>(() => new UriBuilder(@"http://host\")); // UriString is invalid
         }
 
         [Fact]
         public void Ctor_Uri_Null()
         {
-            Assert.Throws<ArgumentNullException>("uri", () => new UriBuilder((Uri)null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("uri", () => new UriBuilder((Uri)null)); // Uri is null
         }
 
         [Theory]
@@ -289,9 +291,23 @@ namespace System.PrivateUri.Tests
         }
 
         [Theory]
-        [InlineData("fragment", "#fragment")]
         [InlineData("#fragment", "#fragment")]
         [InlineData("#", "#")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "In NET Core if the value starts with # then no other # is prepended, in Desktop we always prepend #")]
+        public void Fragment_Get_Set_StartsWithPound(string value, string expected)
+        {
+            var uriBuilder = new UriBuilder();
+            uriBuilder.Fragment = value;
+            Assert.Equal(expected, uriBuilder.Fragment);
+
+            Uri oldUri = uriBuilder.Uri;
+            uriBuilder.Fragment = value;
+            Assert.NotSame(uriBuilder.Uri, oldUri); // Should generate new uri
+            Assert.Equal(uriBuilder.Fragment, uriBuilder.Uri.Fragment);
+        }
+
+        [Theory]
+        [InlineData("fragment", "#fragment")]
         [InlineData("", "")]
         [InlineData(null, "")]
         public void Fragment_Get_Set(string value, string expected)

@@ -10,11 +10,13 @@
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
+    <Compile Include="ArrayHandling.cs" />
     <Compile Include="CSharpArgumentInfoTests.cs" />
     <Compile Include="EnumArithmeticTests.cs" />
     <Compile Include="IntegerBinaryOperationTests.cs" />
     <Compile Include="IntegerUnaryOperationTests.cs" />
     <Compile Include="RuntimeBinderExceptionTests.cs" />
+    <Compile Include="RuntimeBinderInternalCompilerExceptionTests.cs" />
     <Compile Include="RuntimeBinderTests.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

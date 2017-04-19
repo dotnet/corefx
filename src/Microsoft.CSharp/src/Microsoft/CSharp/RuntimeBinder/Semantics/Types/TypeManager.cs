@@ -169,15 +169,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public ArrayType GetArray(CType elementType, int args)
+        public ArrayType GetArray(CType elementType, int args, bool isSZArray)
         {
             Name name;
 
             Debug.Assert(args > 0 && args < 32767);
+            Debug.Assert(args == 1 || !isSZArray);
 
             switch (args)
             {
                 case 1:
+                    if (isSZArray)
+                    {
+                        goto case 2;
+                    }
+                    else
+                    {
+                        goto default;
+                    }
                 case 2:
                     name = NameManager.GetPredefinedName(PredefinedName.PN_ARRAY0 + args);
                     break;
@@ -191,7 +200,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
-                pArray = _typeFactory.CreateArray(name, elementType, args);
+                pArray = _typeFactory.CreateArray(name, elementType, args, isSZArray);
                 pArray.InitFromParent();
 
                 _typeTable.InsertArray(name, elementType, pArray);
@@ -236,19 +245,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
 
                 pAggregate.SetErrors(false);
-#if CSEE
-
-                SpecializedSymbolCreationEE* pSymCreate = static_cast<SpecializedSymbolCreationEE*>(m_BSymmgr.GetSymFactory().m_pSpecializedSymbolCreation);
-                AggregateSymbolExtra* pExtra = pSymCreate.GetHashTable().GetElement(agg).AsAggregateSymbolExtra();
-                pAggregate.typeRes = pAggregate;
-                if (!pAggregate.IsUnresolved())
-                {
-                    pAggregate.tsRes = ktsImportMax;
-                }
-                pAggregate.fDirty = pExtra.IsDirty() || pAggregate.IsUnresolved();
-                pAggregate.tsDirty = pExtra.GetLastComputedDirtyBit();
-#endif // CSEE
-
                 _typeTable.InsertAggregate(name, agg, pAggregate);
 
                 // If we have a generic type definition, then we need to set the
@@ -567,7 +563,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ArrayType:
                     typeDst = SubstTypeCore(typeSrc = type.AsArrayType().GetElementType(), pctx);
-                    return (typeDst == typeSrc) ? type : GetArray(typeDst, type.AsArrayType().rank);
+                    return (typeDst == typeSrc) ? type : GetArray(typeDst, type.AsArrayType().rank, type.AsArrayType().IsSZArray);
 
                 case TypeKind.TK_PointerType:
                     typeDst = SubstTypeCore(typeSrc = type.AsPointerType().GetReferentType(), pctx);
@@ -703,7 +699,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
 
                 case TypeKind.TK_ArrayType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_ArrayType || typeDst.AsArrayType().rank != typeSrc.AsArrayType().rank)
+                    if (typeDst.GetTypeKind() != TypeKind.TK_ArrayType || typeDst.AsArrayType().rank != typeSrc.AsArrayType().rank || typeDst.AsArrayType().IsSZArray != typeSrc.AsArrayType().IsSZArray)
                         return false;
                     goto LCheckBases;
 
@@ -1114,7 +1110,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             typeDst = null;
 
-            if (semanticChecker.CheckTypeAccess(typeSrc, bindingContext.ContextForMemberLookup()))
+            if (semanticChecker.CheckTypeAccess(typeSrc, bindingContext.ContextForMemberLookup))
             {
                 // If we already have an accessible type, then use it. This is the terminal point of the recursion.
                 typeDst = typeSrc;
@@ -1138,7 +1134,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Example: IEnumerable<PrivateConcreteFoo> --> IEnumerable<PublicAbstractFoo>
                 typeDst = intermediateType;
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
             }
 
@@ -1149,7 +1145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Example: PrivateConcreteFoo[] --> PublicAbstractFoo[]
                 typeDst = intermediateType;
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
             }
 
@@ -1158,7 +1154,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We have an inaccessible nullable type, which means that the best we can do is System.ValueType.
                 typeDst = this.GetOptPredefAgg(PredefinedType.PT_VALUE).getThisType();
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
             }
 
@@ -1168,7 +1164,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // with a covariant conversion, so the best we can do is System.Array.
                 typeDst = this.GetReqPredefAgg(PredefinedType.PT_ARRAY).getThisType();
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
             }
 
@@ -1204,7 +1200,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateSymbol aggSym = typeSrc.GetOwningAggregate();
             AggregateType aggOpenType = aggSym.getThisType();
 
-            if (!semanticChecker.CheckTypeAccess(aggOpenType, bindingContext.ContextForMemberLookup()))
+            if (!semanticChecker.CheckTypeAccess(aggOpenType, bindingContext.ContextForMemberLookup))
             {
                 // if the aggregate symbol itself is not accessible, then forget it, there is no
                 // variance that will help us arrive at an accessible type.
@@ -1217,7 +1213,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int i = 0; i < typeArgs.Count; i++)
             {
-                if (semanticChecker.CheckTypeAccess(typeArgs[i], bindingContext.ContextForMemberLookup()))
+                if (semanticChecker.CheckTypeAccess(typeArgs[i], bindingContext.ContextForMemberLookup))
                 {
                     // we have an accessible argument, this position is not a problem.
                     newTypeArgsTemp[i] = typeArgs[i];
@@ -1258,7 +1254,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             typeDst = intermediateType;
-            Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+            Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
             return true;
         }
 
@@ -1282,9 +1278,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType intermediateType;
             if (GetBestAccessibleType(semanticChecker, bindingContext, elementType, out intermediateType))
             {
-                typeDst = this.GetArray(intermediateType, typeSrc.rank);
+                typeDst = this.GetArray(intermediateType, typeSrc.rank, typeSrc.IsSZArray);
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup()));
+                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
             }
 

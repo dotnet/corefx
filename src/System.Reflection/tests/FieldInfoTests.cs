@@ -366,8 +366,8 @@ namespace System.Reflection.Tests
             fieldInfo.SetValue(obj, BTypeWithAllB_Contra);
             Assert.Equal(BTypeWithAllB_Contra, fieldInfo.GetValue(obj));
 
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
+            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
+            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
         }
 
         public static IEnumerable<object[]> FieldInfoRTGenericTests_TestData()
@@ -525,6 +525,11 @@ namespace System.Reflection.Tests
 
         struct FieldData
         {
+            public Inner inner;
+        }
+
+        struct Inner
+        {
             public object field;
         }
 
@@ -540,12 +545,14 @@ namespace System.Reflection.Tests
         [InlineData(null)]
         public static void SetValueDirect_GetValueDirectRoundDataTest(object value)
         {
-            FieldData testField = new FieldData { field = -1 };
+            FieldData testField = new FieldData { inner = new Inner() { field = -1 } };
+            FieldInfo innerFieldInfo = typeof(FieldData).GetField(nameof(FieldData.inner));
+            FieldInfo[] fields = { innerFieldInfo };
+            FieldInfo fieldFieldInfo = typeof(Inner).GetField(nameof(Inner.field));
+            TypedReference reference = TypedReference.MakeTypedReference(testField, fields);
+            fieldFieldInfo.SetValueDirect(reference, value);
+            object result = fieldFieldInfo.GetValueDirect(reference);
 
-            FieldInfo info = testField.GetType().GetField("field");
-            TypedReference reference = __makeref(testField);
-            info.SetValueDirect(reference, value);
-            object result = info.GetValueDirect(reference);
             Assert.Equal(value, result);
         }
     }

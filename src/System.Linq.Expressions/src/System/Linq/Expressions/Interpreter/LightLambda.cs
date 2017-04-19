@@ -6,12 +6,8 @@ using System.Collections.Generic;
 using System.Dynamic.Utils;
 using System.Globalization;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Text;
-using System.Threading;
-
 using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Linq.Expressions.Interpreter
@@ -212,7 +208,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private static Func<LightLambda, Delegate> MakeRunDelegateCtor(Type delegateType)
         {
-            MethodInfo method = delegateType.GetMethod("Invoke");
+            MethodInfo method = delegateType.GetInvokeMethod();
             ParameterInfo[] paramInfos = method.GetParametersCached();
             Type[] paramTypes;
             string name = "Run";
@@ -292,7 +288,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             //PerfTrack.NoteEvent(PerfTrack.Categories.Compiler, "Synchronously compiling a custom delegate");
 
-            MethodInfo method = delegateType.GetMethod("Invoke");
+            MethodInfo method = delegateType.GetInvokeMethod();
             ParameterInfo[] paramInfos = method.GetParametersCached();
             var parameters = new ParameterExpression[paramInfos.Length];
             var parametersAsObject = new Expression[paramInfos.Length];
@@ -360,7 +356,7 @@ namespace System.Linq.Expressions.Interpreter
         internal Delegate MakeDelegate(Type delegateType)
         {
 #if !NO_FEATURE_STATIC_DELEGATE
-            MethodInfo method = delegateType.GetMethod("Invoke");
+            MethodInfo method = delegateType.GetInvokeMethod();
             if (method.ReturnType == typeof(void))
             {
                 return System.Dynamic.Utils.DelegateHelpers.CreateObjectArrayDelegate(delegateType, RunVoid);

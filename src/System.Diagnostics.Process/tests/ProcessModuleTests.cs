@@ -43,5 +43,30 @@ namespace System.Diagnostics.Tests
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("libcoreclr"));
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("System.Native"));
         }
+
+        [Fact]
+        public void Modules_GetMultipleTimes_ReturnsSameInstance()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Assert.Same(currentProcess.Modules, currentProcess.Modules);
+        }
+
+        [Fact]
+        public void Modules_GetNotStarted_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.Modules);
+        }
+
+        [Fact]
+        public void ModuleCollectionSubClass_DefaultConstructor_Success()
+        {
+            Assert.Empty(new ModuleCollectionSubClass());
+        }
+
+        public class ModuleCollectionSubClass : ProcessModuleCollection
+        {
+            public ModuleCollectionSubClass() : base() { }
+        }
     }
 }
