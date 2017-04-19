@@ -11,9 +11,9 @@ You need a Debian based host, and the following packages need to be installed:
 
     lgs@ubuntu ~/git/corefx/ $ sudo apt-get install qemu qemu-user-static binfmt-support debootstrap
 
-In addition, to cross compile CoreFX, the binutils for the target are required. So for arm you need:
+In addition, to cross compile CoreFX, binutils, gcc and g++ for the target are required. So for arm you need:
 
-    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-arm-linux-gnueabihf
+    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf  g++-arm-linux-gnueabihf
 
 for armel:
 
@@ -21,7 +21,7 @@ for armel:
 
 and for arm64 you need:
 
-    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-aarch64-linux-gnu
+    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
 
 Generating the rootfs
@@ -40,7 +40,7 @@ For example, to generate an arm rootfs:
 
 and if you wanted to generate the rootfs elsewhere:
 
-    lgs@ubuntu ~/git/corefx/ $ sudo ROOTFS_DIR=/home/lgs/corefx-cross/arm ./build-rootfs.sh arm
+    lgs@ubuntu ~/git/corefx/ $ sudo ROOTFS_DIR=/home/lgs/corefx-cross/arm ./cross/build-rootfs.sh arm
 
 
 Cross compiling for native CoreFX
