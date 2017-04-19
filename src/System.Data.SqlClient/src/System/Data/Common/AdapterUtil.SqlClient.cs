@@ -2,17 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
-using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
@@ -52,20 +46,19 @@ namespace System.Data.Common
             }
         }
 
-        private static readonly bool s_isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
-        internal static bool IsWindows
-        {
-            get
-            {
-                return s_isWindows;
-            }
-        }
-
-
         //
         // COM+ exceptions
         //
+        internal static IndexOutOfRangeException IndexOutOfRange(int value)
+        {
+            IndexOutOfRangeException e = new IndexOutOfRangeException(value.ToString(CultureInfo.InvariantCulture));
+            return e;
+        }
+        internal static IndexOutOfRangeException IndexOutOfRange()
+        {
+            IndexOutOfRangeException e = new IndexOutOfRangeException();
+            return e;
+        }
         internal static TimeoutException TimeoutException(string error)
         {
             TimeoutException e = new TimeoutException(error);
@@ -106,7 +99,6 @@ namespace System.Data.Common
             IOException e = new IOException(error, inner);
             return e;
         }
-
         internal static ObjectDisposedException ObjectDisposed(object instance)
         {
             ObjectDisposedException e = new ObjectDisposedException(instance.GetType().Name);
@@ -119,11 +111,6 @@ namespace System.Data.Common
             return e;
         }
 
-        internal static ArgumentException BadParameterName(string parameterName)
-        {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_BadParameterName, parameterName));
-            return e;
-        }
 
         // IDbCommand.CommandType
         internal static ArgumentOutOfRangeException InvalidCommandType(CommandType value)
@@ -139,14 +126,6 @@ namespace System.Data.Common
             }
 #endif
             return InvalidEnumerationValue(typeof(CommandType), (int)value);
-        }
-
-        internal static void ValidateCommandBehavior(CommandBehavior value)
-        {
-            if (((int)value < 0) || (0x3F < (int)value))
-            {
-                throw InvalidEnumerationValue(typeof(CommandBehavior), (int)value);
-            }
         }
 
         // IDbConnection.BeginTransaction, OleDbTransaction.Begin
@@ -203,11 +182,6 @@ namespace System.Data.Common
             }
 #endif
             return InvalidEnumerationValue(typeof(UpdateRowSource), (int)value);
-        }
-
-        internal static ArgumentOutOfRangeException NotSupportedCommandBehavior(CommandBehavior value, string method)
-        {
-            return NotSupportedEnumerationValue(typeof(CommandBehavior), value.ToString(), method);
         }
 
         //
@@ -355,10 +329,6 @@ namespace System.Data.Common
         //
         // : ConnectionUtil
         //
-        internal static Exception ConnectionIsDisabled(Exception InnerException)
-        {
-            return InvalidOperation(SR.GetString(SR.ADP_ConnectionIsDisabled), InnerException);
-        }
         internal static Exception ClosedConnectionError()
         {
             return InvalidOperation(SR.GetString(SR.ADP_ClosedConnectionError));
@@ -422,7 +392,7 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.ADP_UnknownDataType, dataType.FullName));
         }
-        internal static ArgumentException DbTypeNotSupported(System.Data.DbType type, Type enumtype)
+        internal static ArgumentException DbTypeNotSupported(DbType type, Type enumtype)
         {
             return Argument(SR.GetString(SR.ADP_DbTypeNotSupported, type.ToString(), enumtype.Name));
         }
@@ -514,8 +484,6 @@ namespace System.Data.Common
         internal const string ParameterName = "ParameterName";
         internal const string ParameterSetPosition = "set_Position";
 
-        internal const int DecimalMaxPrecision = 29;
-        internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
         internal const int DefaultCommandTimeout = 30;
         internal const float FailoverTimeoutStep = 0.08F;    // fraction of timeout to use for fast failover connections
 

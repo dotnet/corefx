@@ -2,20 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System
 {
@@ -57,11 +50,10 @@ namespace System.Data.Common
                 return caught;
             }
         }
-
-        // this method accepts BID format as an argument, this attribute allows FXCopBid rule to validate calls to it
-        static partial void TraceException(string trace, Exception e)
+        internal static void TraceExceptionWithoutRethrow(Exception e)
         {
-            Debug.Assert(null != e, "TraceException: null Exception");
+            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
+            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
         }
 
         //
@@ -85,10 +77,6 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        internal static InvalidOperationException DataAdapter(string error, Exception inner)
-        {
-            return InvalidOperation(error, inner);
-        }
 
         //
         // Helper Functions
@@ -101,8 +89,6 @@ namespace System.Data.Common
                 throw Argument(SR.GetString(SR.ADP_EmptyString, parameterName)); // MDAC 94859
             }
         }
-
-        // Invalid Enumeration
 
         // IDbCommand.CommandType
         internal static ArgumentOutOfRangeException InvalidCommandType(CommandType value)
@@ -189,20 +175,6 @@ namespace System.Data.Common
             return InvalidEnumerationValue(typeof(ParameterDirection), (int)value);
         }
 
-        internal static ArgumentOutOfRangeException InvalidPermissionState(PermissionState value)
-        {
-#if DEBUG
-            switch (value)
-            {
-                case PermissionState.Unrestricted:
-                case PermissionState.None:
-                    Debug.Assert(false, "valid PermissionState " + value.ToString());
-                    break;
-            }
-#endif
-            return InvalidEnumerationValue(typeof(PermissionState), (int)value);
-        }
-
         // IDbCommand.UpdateRowSource
         internal static ArgumentOutOfRangeException InvalidUpdateRowSource(UpdateRowSource value)
         {
@@ -223,11 +195,6 @@ namespace System.Data.Common
         //
         // DbConnectionOptions, DataAccess
         //
-        /*
-        static internal ArgumentException EmptyKeyValue(string keyword) { // MDAC 80715
-            return Argument(Res.GetString(Res.ADP_EmptyKeyValue, keyword));
-        }
-        */
         internal static InvalidOperationException InvalidDataDirectory()
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidDataDirectory));
@@ -274,14 +241,6 @@ namespace System.Data.Common
         internal static Exception NonPooledOpenTimeout()
         {
             return ADP.TimeoutException(SR.GetString(SR.ADP_NonPooledOpenTimeout));
-        }
-
-        //
-        // Generic Data Provider Collection
-        //
-        internal static Exception CollectionUniqueValue(Type itemType, string propertyName, string propertyValue)
-        {
-            return Argument(SR.GetString(SR.ADP_CollectionUniqueValue, itemType.Name, propertyName, propertyValue));
         }
 
         //
@@ -491,12 +450,6 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_TransactionZombied, obj.GetType().Name));
         }
-
-        internal static Exception DbRecordReadOnly(string methodname)
-        {
-            return InvalidOperation(SR.GetString(SR.ADP_DbRecordReadOnly, methodname));
-        }
-
         internal static Exception OffsetOutOfRangeException()
         {
             return InvalidOperation(SR.GetString(SR.ADP_OffsetOutOfRangeException));
@@ -598,70 +551,20 @@ namespace System.Data.Common
 
 
         // global constant strings
-        internal const string Append = "Append";
-        internal const string BeginExecuteNonQuery = "BeginExecuteNonQuery";
-        internal const string BeginExecuteReader = "BeginExecuteReader";
         internal const string BeginTransaction = "BeginTransaction";
-        internal const string BeginExecuteXmlReader = "BeginExecuteXmlReader";
         internal const string ChangeDatabase = "ChangeDatabase";
-        internal const string Cancel = "Cancel";
-        internal const string Clone = "Clone";
-        internal const string ColumnEncryptionSystemProviderNamePrefix = "MSSQL_";
         internal const string CommitTransaction = "CommitTransaction";
         internal const string CommandTimeout = "CommandTimeout";
-        internal const string ConnectionString = "ConnectionString";
-        internal const string DataSetColumn = "DataSetColumn";
-        internal const string DataSetTable = "DataSetTable";
-        internal const string Delete = "Delete";
-        internal const string DeleteCommand = "DeleteCommand";
         internal const string DeriveParameters = "DeriveParameters";
-        internal const string EndExecuteNonQuery = "EndExecuteNonQuery";
-        internal const string EndExecuteReader = "EndExecuteReader";
-        internal const string EndExecuteXmlReader = "EndExecuteXmlReader";
         internal const string ExecuteReader = "ExecuteReader";
-        internal const string ExecuteRow = "ExecuteRow";
         internal const string ExecuteNonQuery = "ExecuteNonQuery";
         internal const string ExecuteScalar = "ExecuteScalar";
-        internal const string ExecuteSqlScalar = "ExecuteSqlScalar";
-        internal const string ExecuteXmlReader = "ExecuteXmlReader";
-        internal const string Fill = "Fill";
-        internal const string FillPage = "FillPage";
-        internal const string FillSchema = "FillSchema";
-        internal const string GetBytes = "GetBytes";
-        internal const string GetChars = "GetChars";
-        internal const string GetOleDbSchemaTable = "GetOleDbSchemaTable";
-        internal const string GetProperties = "GetProperties";
         internal const string GetSchema = "GetSchema";
         internal const string GetSchemaTable = "GetSchemaTable";
-        internal const string GetServerTransactionLevel = "GetServerTransactionLevel";
-        internal const string Insert = "Insert";
-        internal const string Open = "Open";
         internal const string Parameter = "Parameter";
-        internal const string ParameterBuffer = "buffer";
-        internal const string ParameterCount = "count";
-        internal const string ParameterDestinationType = "destinationType";
-        internal const string ParameterIndex = "index";
         internal const string ParameterName = "ParameterName";
-        internal const string ParameterOffset = "offset";
-        internal const string ParameterSetPosition = "set_Position";
-        internal const string ParameterService = "Service";
-        internal const string ParameterTimeout = "Timeout";
-        internal const string ParameterUserData = "UserData";
         internal const string Prepare = "Prepare";
-        internal const string QuoteIdentifier = "QuoteIdentifier";
-        internal const string Read = "Read";
-        internal const string ReadAsync = "ReadAsync";
-        internal const string Remove = "Remove";
         internal const string RollbackTransaction = "RollbackTransaction";
-        internal const string SaveTransaction = "SaveTransaction";
-        internal const string SetProperties = "SetProperties";
-        internal const string SourceColumn = "SourceColumn";
-        internal const string SourceVersion = "SourceVersion";
-        internal const string SourceTable = "SourceTable";
-        internal const string UnquoteIdentifier = "UnquoteIdentifier";
-        internal const string Update = "Update";
-        internal const string UpdateCommand = "UpdateCommand";
-        internal const string UpdateRows = "UpdateRows";
 
         internal const int DecimalMaxPrecision = 29;
         internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
@@ -734,12 +637,6 @@ namespace System.Data.Common
             return result;
         }
 
-        private static long TimerToSeconds(long timerValue)
-        {
-            long result = timerValue / TimeSpan.TicksPerSecond;
-            return result;
-        }
-
         internal static void EscapeSpecialCharacters(string unescapedString, StringBuilder escapedString)
         {
             // note special characters list is from character escapes
@@ -755,7 +652,6 @@ namespace System.Data.Common
                 }
                 escapedString.Append(currentChar);
             }
-            return;
         }
 
 
@@ -780,6 +676,11 @@ namespace System.Data.Common
             }
             Debug.Assert(8 == ADP.PtrSize, "8 != IntPtr.Size"); // MDAC 73747
             return (IntPtr)checked(pbase.ToInt64() + offset);
+        }
+
+        internal static bool IsEmptyArray(string[] array)
+        {
+            return ((null == array) || (0 == array.Length));
         }
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
@@ -25,8 +24,6 @@ namespace System.Data.Common
         private static Task<bool> _falseTask;
         internal static Task<bool> FalseTask => _falseTask ?? (_falseTask = Task.FromResult(false));
 
-        internal static Task<T> CreatedTaskWithCancellation<T>() => Task.FromCanceled<T>(new CancellationToken(true));
-
         internal const CompareOptions DefaultCompareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
         internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
 
@@ -35,18 +32,6 @@ namespace System.Data.Common
         internal static void TraceExceptionAsReturnValue(Exception e)
         {
             TraceException("<comm.ADP.TraceException|ERR|THROW> '{0}'", e);
-        }
-
-        internal static void TraceExceptionForCapture(Exception e)
-        {
-            Debug.Assert(IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '{0}'", e);
-        }
-
-        internal static void TraceExceptionWithoutRethrow(Exception e)
-        {
-            Debug.Assert(IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '{0}'", e);
         }
 
         internal static ArgumentException Argument(string error)
@@ -98,28 +83,9 @@ namespace System.Data.Common
             return e;
         }
 
-        internal static IndexOutOfRangeException IndexOutOfRange()
-        {
-            IndexOutOfRangeException e = new IndexOutOfRangeException();
-            return e;
-        }
-
         internal static IndexOutOfRangeException IndexOutOfRange(string error)
         {
             IndexOutOfRangeException e = new IndexOutOfRangeException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        internal static IndexOutOfRangeException IndexOutOfRange(int value)
-        {
-            IndexOutOfRangeException e = new IndexOutOfRangeException(value.ToString(CultureInfo.InvariantCulture));
-            return e;
-        }
-
-        internal static DataException Data(string message)
-        {
-            DataException e = new DataException(message);
             TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -240,21 +206,12 @@ namespace System.Data.Common
         // Invalid Enumeration
         internal static ArgumentOutOfRangeException InvalidEnumerationValue(Type type, int value)
         {
-            return ArgumentOutOfRange(SR.Format(SR.ADP_InvalidEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
-        }
-
-        internal static ArgumentOutOfRangeException NotSupportedEnumerationValue(Type type, string value, string method)
-        {
-            return ArgumentOutOfRange(SR.Format(SR.ADP_NotSupportedEnumerationValue, type.Name, value, method), type.Name);
+            return ArgumentOutOfRange(SR.Format(SR.ADP_InvalidEnumerationValue, type.Name, value.ToString(CultureInfo.InvariantCulture)), type.Name);
         }
 
         //
         // DbConnectionOptions, DataAccess
         //
-        internal static Exception WrongType(Type got, Type expected)
-        {
-            return Argument(SR.Format(SR.SQL_WrongType, got.ToString(), expected.ToString()));
-        }
         internal static ArgumentException ConnectionStringSyntax(int index)
         {
             return Argument(SR.Format(SR.ADP_ConnectionStringSyntax, index));
@@ -335,7 +292,6 @@ namespace System.Data.Common
             return InvalidOperation(SR.Format(SR.ADP_StreamClosed, method));
         }
 
-
         internal static string BuildQuotedString(string quotePrefix, string quoteSuffix, string unQuotedString)
         {
             var resultString = new StringBuilder();
@@ -356,54 +312,6 @@ namespace System.Data.Common
             }
 
             return resultString.ToString();
-        }
-
-        // { "a", "a", "a" } -> { "a", "a1", "a2" }
-        // { "a", "a", "a1" } -> { "a", "a2", "a1" }
-        // { "a", "A", "a" } -> { "a", "A1", "a2" }
-        // { "a", "A", "a1" } -> { "a", "A2", "a1" }
-        internal static void BuildSchemaTableInfoTableNames(string[] columnNameArray)
-        {
-            Dictionary<string, int> hash = new Dictionary<string, int>(columnNameArray.Length);
-
-            int startIndex = columnNameArray.Length; // lowest non-unique index
-            for (int i = columnNameArray.Length - 1; 0 <= i; --i)
-            {
-                string columnName = columnNameArray[i];
-                if ((null != columnName) && (0 < columnName.Length))
-                {
-                    columnName = columnName.ToLowerInvariant();
-                    int index;
-                    if (hash.TryGetValue(columnName, out index))
-                    {
-                        startIndex = Math.Min(startIndex, index);
-                    }
-                    hash[columnName] = i;
-                }
-                else
-                {
-                    columnNameArray[i] = string.Empty;
-                    startIndex = i;
-                }
-            }
-            int uniqueIndex = 1;
-            for (int i = startIndex; i < columnNameArray.Length; ++i)
-            {
-                string columnName = columnNameArray[i];
-                if (0 == columnName.Length)
-                { // generate a unique name
-                    columnNameArray[i] = "Column";
-                    uniqueIndex = GenerateUniqueName(hash, ref columnNameArray[i], i, uniqueIndex);
-                }
-                else
-                {
-                    columnName = columnName.ToLowerInvariant();
-                    if (i != hash[columnName])
-                    {
-                        GenerateUniqueName(hash, ref columnNameArray[i], i, 1);
-                    }
-                }
-            }
         }
 
         //
@@ -490,10 +398,6 @@ namespace System.Data.Common
 
         internal static int DstCompare(string strA, string strB) => CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, ADP.DefaultCompareOptions);
 
-        internal static int SrcCompare(string strA, string strB) => strA == strB ? 0 : 1;
-
-        internal static bool IsEmptyArray(string[] array) => (null == array) || (0 == array.Length);
-
         internal static bool IsNull(object value)
         {
             if ((null == value) || (DBNull.Value == value))
@@ -502,22 +406,6 @@ namespace System.Data.Common
             }
             INullable nullable = (value as INullable);
             return ((null != nullable) && nullable.IsNull);
-        }
-
-        private static int GenerateUniqueName(Dictionary<string, int> hash, ref string columnName, int index, int uniqueIndex)
-        {
-            for (; ; ++uniqueIndex)
-            {
-                string uniqueName = columnName + uniqueIndex.ToString(CultureInfo.InvariantCulture);
-                string lowerName = uniqueName.ToLowerInvariant();
-                if (!hash.ContainsKey(lowerName))
-                {
-                    columnName = uniqueName;
-                    hash.Add(lowerName, index);
-                    break;
-                }
-            }
-            return uniqueIndex;
         }
 
         internal static Exception InvalidSeekOrigin(string parameterName)
