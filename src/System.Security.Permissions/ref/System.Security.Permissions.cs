@@ -32,18 +32,15 @@ namespace System.Data.Common
     [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
     public abstract partial class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
-        [System.Obsolete("DBDataPermission() has been deprecated.  Use the DBDataPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
         protected DBDataPermission() { }
         protected DBDataPermission(System.Data.Common.DBDataPermission permission) { }
         protected DBDataPermission(System.Data.Common.DBDataPermissionAttribute permissionAttribute) { }
         protected DBDataPermission(System.Security.Permissions.PermissionState state) { }
-        [System.Obsolete("DBDataPermission(PermissionState state,Boolean allowBlankPassword) has been deprecated.  Use the DBDataPermission(PermissionState.None) constructor.  http://go.microsoft.com/fwlink/?linkid=14202", true)]
         protected DBDataPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) { }
         public bool AllowBlankPassword { get; set; }
         public virtual void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
         protected void Clear() { }
         public override System.Security.IPermission Copy() { throw null; }
-        [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.Demand, Name = "FullTrust")]
         protected virtual System.Data.Common.DBDataPermission CreateInstance() { throw null; }
         public override void FromXml(System.Security.SecurityElement securityElement) { }
         public override System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
