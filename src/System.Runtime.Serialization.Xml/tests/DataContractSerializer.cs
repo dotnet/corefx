@@ -2777,6 +2777,41 @@ public static partial class DataContractSerializerTests
 
     #region DesktopTest
 
+    [Fact]
+    public static void DCS_ResolveNameReturnsEmptyNamespace()
+    {
+        SerializationTestTypes.EmptyNsContainer instance = new SerializationTestTypes.EmptyNsContainer(new SerializationTestTypes.EmptyNSAddress());
+        var settings = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        string baseline1 = @"<EmptyNsContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>P1</Name><address i:type=""EmptyNSAddress"" xmlns=""""><street>downing street</street></address></EmptyNsContainer>";
+        var result = SerializeAndDeserialize(instance, baseline1, settings);
+        Assert.True(result.address == null, "Address not null");
+
+        settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.EmptyNamespaceResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        result = SerializeAndDeserialize(instance, baseline1, settings);
+        Assert.True(result.address == null, "Address not null");
+
+        instance = new SerializationTestTypes.EmptyNsContainer(new SerializationTestTypes.UknownEmptyNSAddress());        
+        string baseline2 = @"<EmptyNsContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name>P1</Name><address i:type=""AddressFoo"" xmlns=""""><street>downing street</street></address></EmptyNsContainer>";
+        result = SerializeAndDeserialize(instance, baseline2, settings);
+        Assert.True(result.address == null, "Address not null");       
+    }
+
+    [Fact]
+    public static void DCS_ResolveDatacontractBaseType()
+    {
+        SerializationTestTypes.Customer customerInstance = new SerializationTestTypes.PreferredCustomerProxy();
+        Type customerBaseType = customerInstance.GetType().BaseType;
+        var settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.ProxyDataContractResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        string baseline1 = @"<Customer z:Id=""1"" i:type=""PreferredCustomer"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Name i:nil=""true""/><VipInfo i:nil=""true""/></Customer>";
+        object result = SerializeAndDeserialize(customerInstance, baseline1, settings);
+        Assert.Equal(customerBaseType, result.GetType());
+
+        settings = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.ProxyDataContractResolver(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = false };
+        string baseline2 = @"<Customer z:Id=""i1"" i:type=""PreferredCustomer"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Name i:nil=""true""/><VipInfo i:nil=""true""/></Customer>";
+        result = SerializeAndDeserialize(customerInstance, baseline2, settings);
+        Assert.Equal(customerBaseType, result.GetType());
+    }
+
     /// <summary>
     /// Roundtrips a Datacontract type  which contains Primitive types assigned to member of type object. 
     /// Resolver is plugged in and resolves the primitive types. Verify resolver called during ser and deser

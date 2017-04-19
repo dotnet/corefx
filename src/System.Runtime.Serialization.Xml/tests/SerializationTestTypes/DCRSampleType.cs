@@ -236,4 +236,61 @@ namespace SerializationTestTypes
         [DataMember]
         public List<DateTimeOffset> lDTO = new List<DateTimeOffset>();
     }
+
+    [DataContract]
+    [KnownType(typeof(EmptyNSAddress))]
+    public class EmptyNsContainer
+    {
+        [DataMember]
+        public object address;
+
+        [DataMember]
+        public string Name;
+
+        public EmptyNsContainer(EmptyNSAddress obj)
+        {
+            address = obj;
+            Name = "P1";
+        }
+    }
+
+    [DataContract(Namespace = "")]
+    public class UknownEmptyNSAddress : EmptyNSAddress
+    {
+        public UknownEmptyNSAddress()
+        {
+        }
+    }
+
+    [DataContract(Namespace = "")]
+    public class EmptyNSAddress
+    {
+        [DataMember]
+        public string street;
+
+        public EmptyNSAddress()
+        {
+            street = "downing street";
+        }
+    }
+
+    [DataContract(IsReference = true)]
+    [KnownType(typeof(PreferredCustomer))]
+    public class Customer
+    {
+        [DataMember]
+        public string Name { get; set; }
+    }
+
+    [DataContract(IsReference = true)]
+    public class PreferredCustomer : Customer
+    {
+        [DataMember]
+        public string VipInfo { get; set; }
+    }
+
+    [DataContract(IsReference = true)]
+    public class PreferredCustomerProxy : PreferredCustomer
+    {
+    }
 }
