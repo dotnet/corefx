@@ -29,7 +29,6 @@ namespace System
 
 namespace System.Data.Common
 {
-    [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
     public abstract partial class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
         protected DBDataPermission() { }

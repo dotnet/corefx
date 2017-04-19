@@ -8,7 +8,6 @@ using System.Security.Permissions;
 namespace System.Data.Common
 {
     [Serializable]
-    [SecurityPermission(SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
     public abstract class DBDataPermission : CodeAccessPermission, IUnrestrictedPermission
     {
         protected DBDataPermission() { }
