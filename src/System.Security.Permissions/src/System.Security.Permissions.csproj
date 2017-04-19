@@ -141,5 +141,9 @@
     <Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Data\Common\DBDataPermission.cs" />
+    <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
