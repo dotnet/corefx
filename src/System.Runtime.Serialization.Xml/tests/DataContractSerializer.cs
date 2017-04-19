@@ -2860,6 +2860,88 @@ public static partial class DataContractSerializerTests
         SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
     }
 
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation1()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var setting1 = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.SimpleResolver_Ser(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true};
+        var setting2 = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.SimpleResolver_DeSer(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true};
+        var dcs1 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting1);
+        var dcs2 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting2);
+
+        MemoryStream ms = new MemoryStream();
+        dcs1.WriteObject(ms, dcrVariationsGoing);
+        ms.Position = 0;
+        var dcrVariationsReturning = dcs2.ReadObject(ms);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation2()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();                
+        var setting = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        xmlWriter.Flush();
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false, dcr2);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation3()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
+        var setting = new DataContractSerializerSettings() { DataContractResolver = dcr2, MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        xmlWriter.Flush();
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    [Fact]
+    public static void DCS_BasicRoundtripDCRVariation4()
+    {
+        SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
+        dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
+        dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
+
+        var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
+        var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
+
+        var setting = new DataContractSerializerSettings() { DataContractResolver = dcr1, MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
+        var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+
+        MemoryStream ms = new MemoryStream();
+        var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
+        dcs.WriteObject(xmlWriter, dcrVariationsGoing);
+        xmlWriter.Flush();
+        ms.Position = 0;
+        var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+        var dcrVariationsReturning = dcs.ReadObject(xmlReader, false, dcr2);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
     #endregion
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

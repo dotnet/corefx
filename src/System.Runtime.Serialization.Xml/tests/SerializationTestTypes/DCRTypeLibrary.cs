@@ -27,4 +27,50 @@ namespace SerializationTestTypes
             get { return _data2; }
         }
     }
+
+    [DataContract]
+    public class DCRVariations
+    {
+        [DataMember]
+        public object unknownType1;
+
+        [DataMember]
+        public object unknownType2;
+    }
+
+    [DataContract]
+    public class CustomClass
+    {
+        [DataMember()]
+        private object[] knownTypes;
+
+        [DataMember()]
+        private object[] dataContractResolverTypes;
+
+        [DataMember()]
+        public virtual object[] KnownTypes
+        {
+            get
+            {
+                return knownTypes;
+            }
+            set
+            {
+                knownTypes = value;
+            }
+        }
+
+        [DataMember()]
+        public virtual object[] DataContractResolverTypes
+        {
+            get
+            {
+                return dataContractResolverTypes;
+            }
+            set
+            {
+                dataContractResolverTypes = value;
+            }
+        }
+    }
 }
