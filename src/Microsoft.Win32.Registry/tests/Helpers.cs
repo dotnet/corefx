@@ -30,7 +30,7 @@ namespace Microsoft.Win32.RegistryTests
             return RegQueryValueEx(key.Handle, null, null, IntPtr.Zero, b, ref size) != ERROR_FILE_NOT_FOUND;
         }
 
-        [DllImport(Interop.Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport(Interop.Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "SetEnvironmentVariableW", SetLastError = true)]
         internal static extern bool SetEnvironmentVariable(string lpName, string lpValue);
     }
 }
