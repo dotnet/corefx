@@ -16,5 +16,9 @@ namespace System.Data.Common
         public string ConnectionString { get; set; }
         public KeyRestrictionBehavior KeyRestrictionBehavior { get; set; }
         public string KeyRestrictions { get; set; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public bool ShouldSerializeConnectionString() { return false; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public bool ShouldSerializeKeyRestrictions() { return false; }
     }
 }
