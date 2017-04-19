@@ -27,6 +27,40 @@ namespace System
     }
 }
 
+namespace System.Data.Common
+{
+    public abstract class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        protected DBDataPermission() { }
+        protected DBDataPermission(DBDataPermission dataPermission) { }
+        protected DBDataPermission(DBDataPermissionAttribute attribute) { }
+        protected DBDataPermission(System.Security.Permissions.PermissionState state) { }
+        protected DBDataPermission(System.Security.Permissions.PermissionState state, bool blankPassword) { }
+        public bool AllowBlankPassword { get; set; }
+        public void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
+        protected void Clear() { }
+        protected DBDataPermission CreateInstance() => null;
+        public override System.Security.IPermission Copy() => this;
+        public override void FromXml(System.Security.SecurityElement elem) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) => null;
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() => null;
+        public override System.Security.IPermission Union(System.Security.IPermission other) { return default(System.Security.IPermission); }
+    }
+
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method,
+        AllowMultiple = true, Inherited = false)]
+    public abstract class DBDataPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        protected DBDataPermissionAttribute(Security.Permissions.SecurityAction action) : base(action) { }
+        public bool AllowBlankPassword { get; set; }
+        public string ConnectionString { get; set; }
+        public KeyRestrictionBehavior KeyRestrictionBehavior { get; set; }
+        public string KeyRestrictions { get; set; }
+    }
+}
+
 namespace System.Net.NetworkInformation
 {
     [Flags]

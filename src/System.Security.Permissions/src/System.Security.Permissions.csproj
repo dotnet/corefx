@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
+    <Reference Include="System.Data.Common"/>
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
@@ -153,6 +154,10 @@
     <Compile Include="System\Security\Permissions\StorePermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Data\Common\DBDataPermission.cs" />
+    <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
