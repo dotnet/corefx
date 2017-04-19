@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Metadata.Ecma335.Tests
@@ -211,7 +210,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new MetadataBuilder();
 
             var badHandleKind = CustomAttributeHandle.FromRowId(1);
-            
+
             Assert.Throws<ArgumentNullException>(() => builder.AddAssembly(default(StringHandle), null, default(StringHandle), default(BlobHandle), 0, 0));
             Assert.Throws<ArgumentNullException>(() => builder.AddAssemblyReference(default(StringHandle), null, default(StringHandle), default(BlobHandle), 0, default(BlobHandle)));
             Assert.Throws<ArgumentException>(() => builder.AddTypeDefinition(0, default(StringHandle), default(StringHandle), badHandleKind, default(FieldDefinitionHandle), default(MethodDefinitionHandle)));
@@ -300,7 +299,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             mdBuilder.WriteHeapsTo(builder, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // #String
                 0x00, 0x00, 0x00, 0x00, // #US
@@ -355,17 +354,17 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var heaps = new BlobBuilder();
             mdBuilder.WriteHeapsTo(heaps, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 // #String
-                0x00, 
+                0x00,
                 0x66, 0x6F, 0x6F, 0x00,
                 0x00, 0x00, 0x00,
                 // #US
                 0x00,
                 0x01, 0x00,
                 0x07, 0x62, 0x00, 0x61, 0x00, 0x72, 0x00, 0x00,
-                0x00, 
+                0x00,
                 // #Guid
                 0x59, 0x35, 0x9F, 0xD3, 0x6A, 0x47, 0x1E, 0x4D, 0xB6, 0xD2, 0x88, 0xE6, 0x63, 0x95, 0x23, 0x0B,
                 // #Blob
@@ -393,13 +392,13 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var heaps = new BlobBuilder();
             mdBuilder.WriteHeapsTo(heaps, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // #String
                 0x00, 0x00, 0x00, 0x00,
                 // #US
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 0x00,              // 0x00
 
                 // ""
@@ -413,7 +412,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x05, (byte)'/', 0x00, 0x04, 0x06, 0x08,
 
                 // 0x10
-                0x02, (byte)'c', (byte)'c', 
+                0x02, (byte)'c', (byte)'c',
 
                 // @"\a\b\cc"
                 0x05, (byte)'\\', 0x00, 0x04, 0x06, 0x10,
@@ -432,7 +431,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
                 // @"/\a/\b\\//c"
                 0x06, (byte)'/', 0x00, 0x22, 0x25, 0x00, 0x08,
-                
+
                 // @"a/"
                 0x03, (byte)'/', 0x04, 0x00,
 
@@ -502,7 +501,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
         {
             var mdBuilder = new MetadataBuilder(
                 userStringHeapStartOffset: 0x10,
-                stringHeapStartOffset: 0x20, 
+                stringHeapStartOffset: 0x20,
                 blobHeapStartOffset: 0x30,
                 guidHeapStartOffset: 0x40);
 
@@ -542,7 +541,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var heaps = new BlobBuilder();
             mdBuilder.WriteHeapsTo(heaps, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // #String
                 0x00,
@@ -552,7 +551,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00,
                 0x01, 0x00,
                 0x07, 0x62, 0x00, 0x61, 0x00, 0x72, 0x00, 0x00,
-                0x00, 
+                0x00,
                 // #Guid
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -582,14 +581,14 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             mdBuilder.WriteHeapsTo(builder, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // #String
                 0x00, 0x00, 0x00, 0x00,
                 // #US
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 // #Guid
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 // #Blob
                 0x00, 0x00, 0x00, 0x00
             }, builder.ToArray());
@@ -597,7 +596,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             guid.CreateWriter().WriteGuid(new Guid("D39F3559-476A-4D1E-B6D2-88E66395230B"));
             us.CreateWriter().WriteUserString("bar");
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // #String
                 0x00, 0x00, 0x00, 0x00,
@@ -635,8 +634,8 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var builder4 = new MetadataBuilder(userStringHeapStartOffset: 0x00fffff7);
             Assert.Equal(0x70fffff8, MetadataTokens.GetToken(builder4.GetOrAddUserString("1"))); // 4B
-            Assert.Equal(0x70fffffc, MetadataTokens.GetToken(builder4.GetOrAddUserString("2"))); // 4B 
-            Assert.Throws<ImageFormatLimitationException>(() => builder4.GetOrAddUserString("3")); // hits the limit exactly 
+            Assert.Equal(0x70fffffc, MetadataTokens.GetToken(builder4.GetOrAddUserString("2"))); // 4B
+            Assert.Throws<ImageFormatLimitationException>(() => builder4.GetOrAddUserString("3")); // hits the limit exactly
 
             var builder5 = new MetadataBuilder(userStringHeapStartOffset: 0x00fffff8);
             Assert.Equal(0x70fffff9, MetadataTokens.GetToken(builder5.GetOrAddUserString("1"))); // 4B

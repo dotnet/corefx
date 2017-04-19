@@ -79,7 +79,6 @@
     <Compile Include="Utilities\StreamExtensionsTests.cs" />
     <Compile Include="Metadata\MetadataReaderProviderTests.cs" />
     <Compile Include="Resources\TestResources.cs" />
-    <Compile Include="TestUtilities\AssertEx.cs" />
     <Compile Include="TestUtilities\DiffUtil.cs" />
     <Compile Include="TestUtilities\TestMetadataResolver.cs" />
     <Compile Include="PortableExecutable\TestStreamBase.cs" />

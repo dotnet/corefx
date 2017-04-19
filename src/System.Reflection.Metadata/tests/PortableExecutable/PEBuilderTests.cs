@@ -46,16 +46,16 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Equal(".text", headers.SectionHeaders[headers.GetContainingSectionIndex(rva)].Name);
 
             var signature = peReader.GetSectionData(rva).GetContent(0, size);
-            AssertEx.Equal(expectedSignature ?? new byte[size], signature);
+            Assert.Equal(expectedSignature ?? new byte[size], signature);
         }
 
         private static readonly Guid s_guid = new Guid("97F4DBD4-F6D1-4FAD-91B3-1001F92068E5");
         private static readonly BlobContentId s_contentId = new BlobContentId(s_guid, 0x04030201);
 
         private static void WritePEImage(
-            Stream peStream, 
-            MetadataBuilder metadataBuilder, 
-            BlobBuilder ilBuilder, 
+            Stream peStream,
+            MetadataBuilder metadataBuilder,
+            BlobBuilder ilBuilder,
             MethodDefinitionHandle entryPointHandle,
             Blob mvidFixup = default(Blob),
             byte[] privateKeyOpt = null)
@@ -124,7 +124,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 var entryPoint = BasicValidationEmit(metadataBuilder, ilBuilder);
                 WritePEImage(peStream, metadataBuilder, ilBuilder, entryPoint, privateKeyOpt: Misc.KeyPair);
 
-                VerifyPE(peStream, expectedSignature: new byte[] 
+                VerifyPE(peStream, expectedSignature: new byte[]
                 {
                     0x58, 0xD4, 0xD7, 0x88, 0x3B, 0xF9, 0x19, 0x9F, 0x3A, 0x55, 0x8F, 0x1B, 0x88, 0xBE, 0xA8, 0x42,
                     0x09, 0x2B, 0xE3, 0xB4, 0xC7, 0x09, 0xD5, 0x96, 0x35, 0x50, 0x0F, 0x3C, 0x87, 0x95, 0x6A, 0x31,
@@ -141,10 +141,10 @@ namespace System.Reflection.PortableExecutable.Tests
         private static MethodDefinitionHandle BasicValidationEmit(MetadataBuilder metadata, BlobBuilder ilBuilder)
         {
             metadata.AddModule(
-                0, 
-                metadata.GetOrAddString("ConsoleApplication.exe"), 
+                0,
+                metadata.GetOrAddString("ConsoleApplication.exe"),
                 metadata.GetOrAddGuid(s_guid),
-                default(GuidHandle), 
+                default(GuidHandle),
                 default(GuidHandle));
 
             metadata.AddAssembly(
@@ -303,7 +303,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 systemObjectTypeRef,
                 fieldList: MetadataTokens.FieldDefinitionHandle(1),
                 methodList: mainMethodDef);
-           
+
             return mainMethodDef;
         }
 
@@ -411,7 +411,7 @@ namespace System.Reflection.PortableExecutable.Tests
             var derivedClassSumCacheFieldDef = metadata.AddFieldDefinition(
                 FieldAttributes.Assembly,
                 metadata.GetOrAddString("_sumCache"),
-                metadata.GetOrAddBlob(BuildSignature(e => 
+                metadata.GetOrAddBlob(BuildSignature(e =>
                 {
                     var inst = e.FieldSignature().GenericInstantiation(genericType: dictionaryTypeRef, genericArgumentCount: 2, isValueType: false);
                     inst.AddArgument().Int32();
@@ -478,18 +478,18 @@ namespace System.Reflection.PortableExecutable.Tests
             var peStream = new MemoryStream();
             var ilBuilder = new BlobBuilder();
             var metadataBuilder = new MetadataBuilder();
-            
+
             var peBuilder = new ManagedPEBuilder(
                 PEHeaderBuilder.CreateLibraryHeader(),
                 new MetadataRootBuilder(metadataBuilder),
                 ilBuilder,
                 nativeResources: new TestResourceSectionBuilder(),
                 deterministicIdProvider: content => s_contentId);
-            
+
             var peBlob = new BlobBuilder();
-            
+
             var contentId = peBuilder.Serialize(peBlob);
-            
+
             peBlob.WriteContentTo(peStream);
 
             peStream.Position = 0;
@@ -544,7 +544,7 @@ namespace System.Reflection.PortableExecutable.Tests
             builder.WriteBytes(2, 6);
             Assert.Equal(1, builder.GetBlobs().Count());
 
-            AssertEx.Equal(
+            Assert.Equal(
                 new[]
                 {
                     "0: [0, 2)",
@@ -568,7 +568,7 @@ namespace System.Reflection.PortableExecutable.Tests
             builder.WriteBytes(5, 10);
             Assert.Equal(6, builder.GetBlobs().Count());
 
-            AssertEx.Equal(
+            Assert.Equal(
                 new[]
                 {
                     "0: [0, 16)",
@@ -594,7 +594,7 @@ namespace System.Reflection.PortableExecutable.Tests
             builder.WriteBytes(6, 1);
             Assert.Equal(7, builder.GetBlobs().Count());
 
-            AssertEx.Equal(
+            Assert.Equal(
                 new[]
                 {
                     "0: [0, 1)",
@@ -696,7 +696,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 var snBlob = new Blob(buffer, snOffset, peHeaders.CorHeader.StrongNameSignatureDirectory.Size);
                 var expectedSignature = snBlob.GetBytes().ToArray();
                 var signature = SigningUtilities.CalculateRsaSignature(PEBuilder.GetContentToSign(peImage, peHeadersSize, peHeaders.PEHeader.FileAlignment, snBlob), privateKeyOpt);
-                AssertEx.Equal(expectedSignature, signature);
+                Assert.Equal(expectedSignature, signature);
             }
 
             return true;
@@ -718,7 +718,7 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Same(buffer, b.Buffer);
             Assert.Equal(0, b.Start);
             Assert.Equal(2, b.Length);
-            
+
             // 0, [1, <2, 3>, 4], 5
             b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 1, length: 4), new Blob(buffer, start: 2, length: 2));
             Assert.Same(buffer, b.Buffer);

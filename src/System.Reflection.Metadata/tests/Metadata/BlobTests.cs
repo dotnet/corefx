@@ -51,10 +51,41 @@ namespace System.Reflection.Metadata.Tests
             builder.WriteInt64(1);
             Assert.Equal(8, builder.Count);
 
-            AssertEx.Equal(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, builder.ToArray());
+            Assert.Equal(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, builder.ToArray());
         }
 
-        private void TestContentEquals(byte[] left, byte[] right)
+        public static IEnumerable<object[]> ContentEquals_MemberData()
+        {
+            var empty = new byte[] { };
+            var single = new byte[] { 1 };
+            var b16 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            var b17 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            var b34 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            var b35 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+            var b35c = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+
+            yield return new object[] { empty, empty };
+            yield return new object[] { empty, single };
+            yield return new object[] { single, empty };
+            yield return new object[] { single, single };
+
+            yield return new object[] { b16, b16 };
+            yield return new object[] { b16, b17 };
+            yield return new object[] { b17, b16 };
+            yield return new object[] { b17, b17 };
+
+            yield return new object[] { b34, b34 };
+            yield return new object[] { b35, b34 };
+            yield return new object[] { b34, b35 };
+            yield return new object[] { b35, b35 };
+
+            yield return new object[] { b35c, b35 };
+            yield return new object[] { b35, b35c };
+        }
+
+        [Theory]
+        [MemberData(nameof(ContentEquals_MemberData))]
+        public static void ContentEquals(byte[] left, byte[] right)
         {
             var builder1 = new BlobBuilder(0);
             builder1.WriteBytes(left);
@@ -72,51 +103,6 @@ namespace System.Reflection.Metadata.Tests
             var builder = new BlobBuilder();
             Assert.True(builder.ContentEquals(builder));
             Assert.False(builder.ContentEquals(null));
-
-            TestContentEquals(new byte[] { }, new byte[] { });
-            TestContentEquals(new byte[] { 1 }, new byte[] { });
-            TestContentEquals(new byte[] { }, new byte[] { 1 });
-            TestContentEquals(new byte[] { 1 }, new byte[] { 1 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
         }
 
         [Fact]
@@ -187,7 +173,7 @@ namespace System.Reflection.Metadata.Tests
         {
             var builder = new BlobBuilder(16);
 
-            AssertEx.Equal(new byte[] { }, builder.ToArray(0, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(0, 0));
 
             for (int i = 0; i < 13; i++)
             {
@@ -196,29 +182,29 @@ namespace System.Reflection.Metadata.Tests
 
             builder.WriteUInt32(0xaabbccdd);
 
-            AssertEx.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0xDD, 0xCC, 0xBB, 0xAA }, builder.ToArray());
-            AssertEx.Equal(new byte[] { }, builder.ToArray(0, 0));
-            AssertEx.Equal(new byte[] { 0 }, builder.ToArray(0, 1));
-            AssertEx.Equal(new byte[] { 1 }, builder.ToArray(1, 1));
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0xDD, 0xCC, 0xBB, 0xAA }, builder.ToArray());
+            Assert.Equal(new byte[] { }, builder.ToArray(0, 0));
+            Assert.Equal(new byte[] { 0 }, builder.ToArray(0, 1));
+            Assert.Equal(new byte[] { 1 }, builder.ToArray(1, 1));
 
-            AssertEx.Equal(new byte[] { }, builder.ToArray(14, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToArray(15, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToArray(16, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToArray(17, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(14, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(15, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(16, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(17, 0));
 
-            AssertEx.Equal(new byte[] { 0xdd }, builder.ToArray(13, 1));
-            AssertEx.Equal(new byte[] { 0xcc }, builder.ToArray(14, 1));
-            AssertEx.Equal(new byte[] { 0xbb }, builder.ToArray(15, 1));
-            AssertEx.Equal(new byte[] { 0xaa }, builder.ToArray(16, 1));
+            Assert.Equal(new byte[] { 0xdd }, builder.ToArray(13, 1));
+            Assert.Equal(new byte[] { 0xcc }, builder.ToArray(14, 1));
+            Assert.Equal(new byte[] { 0xbb }, builder.ToArray(15, 1));
+            Assert.Equal(new byte[] { 0xaa }, builder.ToArray(16, 1));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc }, builder.ToArray(13, 2));
-            AssertEx.Equal(new byte[] { 0xcc, 0xbb }, builder.ToArray(14, 2));
-            AssertEx.Equal(new byte[] { 0xbb, 0xaa }, builder.ToArray(15, 2));
+            Assert.Equal(new byte[] { 0xdd, 0xcc }, builder.ToArray(13, 2));
+            Assert.Equal(new byte[] { 0xcc, 0xbb }, builder.ToArray(14, 2));
+            Assert.Equal(new byte[] { 0xbb, 0xaa }, builder.ToArray(15, 2));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc, 0xbb }, builder.ToArray(13, 3));
-            AssertEx.Equal(new byte[] { 0xcc, 0xbb, 0xaa }, builder.ToArray(14, 3));
+            Assert.Equal(new byte[] { 0xdd, 0xcc, 0xbb }, builder.ToArray(13, 3));
+            Assert.Equal(new byte[] { 0xcc, 0xbb, 0xaa }, builder.ToArray(14, 3));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc, 0xbb, 0xaa }, builder.ToArray(13, 4));
+            Assert.Equal(new byte[] { 0xdd, 0xcc, 0xbb, 0xaa }, builder.ToArray(13, 4));
         }
 
         [Fact]
@@ -226,36 +212,36 @@ namespace System.Reflection.Metadata.Tests
         {
             var builder = new BlobBuilder(16);
 
-            AssertEx.Equal(new byte[] { }, builder.ToArray(0, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(0, 0));
 
             for (int i = 0; i < 34; i++)
             {
                 builder.WriteByte((byte)i);
             }
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
                 0x20, 0x21
             }, builder.ToArray());
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x0E, 0x0F,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
                 0x20, 0x21
             }, builder.ToArray(0x0e, 20));
 
-            AssertEx.Equal(new byte[] { 0x0E }, builder.ToArray(0x0e, 1));
-            AssertEx.Equal(new byte[] { 0x0E, 0x0F }, builder.ToArray(0x0e, 2));
-            AssertEx.Equal(new byte[] { 0x0E, 0x0F, 0x10 }, builder.ToArray(0x0e, 3));
-            AssertEx.Equal(new byte[] { 0x0E, 0x0F, 0x10, 0x11 }, builder.ToArray(0x0e, 4));
+            Assert.Equal(new byte[] { 0x0E }, builder.ToArray(0x0e, 1));
+            Assert.Equal(new byte[] { 0x0E, 0x0F }, builder.ToArray(0x0e, 2));
+            Assert.Equal(new byte[] { 0x0E, 0x0F, 0x10 }, builder.ToArray(0x0e, 3));
+            Assert.Equal(new byte[] { 0x0E, 0x0F, 0x10, 0x11 }, builder.ToArray(0x0e, 4));
 
-            AssertEx.Equal(new byte[] { 0x1E }, builder.ToArray(0x1e, 1));
-            AssertEx.Equal(new byte[] { 0x1E, 0x1F }, builder.ToArray(0x1e, 2));
-            AssertEx.Equal(new byte[] { 0x1E, 0x1F, 0x20 }, builder.ToArray(0x1e, 3));
-            AssertEx.Equal(new byte[] { 0x1E, 0x1F, 0x20, 0x21 }, builder.ToArray(0x1e, 4));
+            Assert.Equal(new byte[] { 0x1E }, builder.ToArray(0x1e, 1));
+            Assert.Equal(new byte[] { 0x1E, 0x1F }, builder.ToArray(0x1e, 2));
+            Assert.Equal(new byte[] { 0x1E, 0x1F, 0x20 }, builder.ToArray(0x1e, 3));
+            Assert.Equal(new byte[] { 0x1E, 0x1F, 0x20, 0x21 }, builder.ToArray(0x1e, 4));
         }
 
         [Fact]
@@ -275,7 +261,7 @@ namespace System.Reflection.Metadata.Tests
         {
             var builder = new BlobBuilder(16);
 
-            AssertEx.Equal(new byte[] { }, builder.ToArray(0, 0));
+            Assert.Equal(new byte[] { }, builder.ToArray(0, 0));
 
             for (int i = 0; i < 13; i++)
             {
@@ -284,29 +270,29 @@ namespace System.Reflection.Metadata.Tests
 
             builder.WriteUInt32(0xaabbccdd);
 
-            AssertEx.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0xDD, 0xCC, 0xBB, 0xAA }, builder.ToImmutableArray());
-            AssertEx.Equal(new byte[] { }, builder.ToImmutableArray(0, 0));
-            AssertEx.Equal(new byte[] { 0 }, builder.ToImmutableArray(0, 1));
-            AssertEx.Equal(new byte[] { 1 }, builder.ToImmutableArray(1, 1));
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0xDD, 0xCC, 0xBB, 0xAA }, builder.ToImmutableArray());
+            Assert.Equal(new byte[] { }, builder.ToImmutableArray(0, 0));
+            Assert.Equal(new byte[] { 0 }, builder.ToImmutableArray(0, 1));
+            Assert.Equal(new byte[] { 1 }, builder.ToImmutableArray(1, 1));
 
-            AssertEx.Equal(new byte[] { }, builder.ToImmutableArray(14, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToImmutableArray(15, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToImmutableArray(16, 0));
-            AssertEx.Equal(new byte[] { }, builder.ToImmutableArray(17, 0));
+            Assert.Equal(new byte[] { }, builder.ToImmutableArray(14, 0));
+            Assert.Equal(new byte[] { }, builder.ToImmutableArray(15, 0));
+            Assert.Equal(new byte[] { }, builder.ToImmutableArray(16, 0));
+            Assert.Equal(new byte[] { }, builder.ToImmutableArray(17, 0));
 
-            AssertEx.Equal(new byte[] { 0xdd }, builder.ToImmutableArray(13, 1));
-            AssertEx.Equal(new byte[] { 0xcc }, builder.ToImmutableArray(14, 1));
-            AssertEx.Equal(new byte[] { 0xbb }, builder.ToImmutableArray(15, 1));
-            AssertEx.Equal(new byte[] { 0xaa }, builder.ToImmutableArray(16, 1));
+            Assert.Equal(new byte[] { 0xdd }, builder.ToImmutableArray(13, 1));
+            Assert.Equal(new byte[] { 0xcc }, builder.ToImmutableArray(14, 1));
+            Assert.Equal(new byte[] { 0xbb }, builder.ToImmutableArray(15, 1));
+            Assert.Equal(new byte[] { 0xaa }, builder.ToImmutableArray(16, 1));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc }, builder.ToImmutableArray(13, 2));
-            AssertEx.Equal(new byte[] { 0xcc, 0xbb }, builder.ToImmutableArray(14, 2));
-            AssertEx.Equal(new byte[] { 0xbb, 0xaa }, builder.ToImmutableArray(15, 2));
+            Assert.Equal(new byte[] { 0xdd, 0xcc }, builder.ToImmutableArray(13, 2));
+            Assert.Equal(new byte[] { 0xcc, 0xbb }, builder.ToImmutableArray(14, 2));
+            Assert.Equal(new byte[] { 0xbb, 0xaa }, builder.ToImmutableArray(15, 2));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc, 0xbb }, builder.ToImmutableArray(13, 3));
-            AssertEx.Equal(new byte[] { 0xcc, 0xbb, 0xaa }, builder.ToImmutableArray(14, 3));
+            Assert.Equal(new byte[] { 0xdd, 0xcc, 0xbb }, builder.ToImmutableArray(13, 3));
+            Assert.Equal(new byte[] { 0xcc, 0xbb, 0xaa }, builder.ToImmutableArray(14, 3));
 
-            AssertEx.Equal(new byte[] { 0xdd, 0xcc, 0xbb, 0xaa }, builder.ToImmutableArray(13, 4));
+            Assert.Equal(new byte[] { 0xdd, 0xcc, 0xbb, 0xaa }, builder.ToImmutableArray(13, 4));
         }
 
         [Fact]
@@ -332,7 +318,7 @@ namespace System.Reflection.Metadata.Tests
 
             var stream = new MemoryStream();
             builder.WriteContentTo(stream);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13
             }, stream.ToArray());
@@ -340,7 +326,7 @@ namespace System.Reflection.Metadata.Tests
             builder.WriteByte(0xff);
 
             builder.WriteContentTo(stream);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
@@ -369,7 +355,7 @@ namespace System.Reflection.Metadata.Tests
 
             var writer = new BlobWriter(256);
             builder.WriteContentTo(ref writer);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13
             }, writer.ToArray());
@@ -377,7 +363,7 @@ namespace System.Reflection.Metadata.Tests
             builder.WriteByte(0xff);
 
             builder.WriteContentTo(ref writer);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
@@ -396,7 +382,7 @@ namespace System.Reflection.Metadata.Tests
 
             var builder2 = new BlobBuilder(256);
             builder1.WriteContentTo(builder2);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13
             }, builder2.ToArray());
@@ -404,7 +390,7 @@ namespace System.Reflection.Metadata.Tests
             builder1.WriteByte(0xff);
 
             builder1.WriteContentTo(builder2);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
@@ -425,7 +411,7 @@ namespace System.Reflection.Metadata.Tests
 
             builder1.LinkSuffix(builder2);
 
-            AssertEx.Equal(new byte[] { 1, 2, 3, 4 }, builder1.ToArray());
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, builder1.ToArray());
             Assert.Equal(4, builder1.Count);
             Assert.Equal(1, builder2.Count);
 
@@ -438,7 +424,7 @@ namespace System.Reflection.Metadata.Tests
             builder3.LinkSuffix(builder4);
             builder1.LinkSuffix(builder3);
 
-            AssertEx.Equal(new byte[] { 1, 2, 3, 4, 5, 6 }, builder1.ToArray());
+            Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6 }, builder1.ToArray());
             Assert.Equal(6, builder1.Count);
             Assert.Equal(2, builder3.Count);
             Assert.Equal(1, builder4.Count);
@@ -455,7 +441,7 @@ namespace System.Reflection.Metadata.Tests
 
             builder1.LinkSuffix(builder2);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
@@ -474,7 +460,7 @@ namespace System.Reflection.Metadata.Tests
 
             builder1.LinkSuffix(builder2);
 
-            AssertEx.Equal(new byte[] { 0x02 }, builder1.ToArray());
+            Assert.Equal(new byte[] { 0x02 }, builder1.ToArray());
 
             Assert.Equal(1, builder1.Count);
             Assert.Equal(1, builder2.Count);
@@ -487,7 +473,7 @@ namespace System.Reflection.Metadata.Tests
             var builder2 = new BlobBuilder(16);
             builder1.LinkSuffix(builder2);
 
-            AssertEx.Equal(new byte[0], builder1.ToArray());
+            Assert.Equal(new byte[0], builder1.ToArray());
 
             Assert.Equal(0, builder1.Count);
             Assert.Equal(0, builder2.Count);
@@ -505,7 +491,7 @@ namespace System.Reflection.Metadata.Tests
             builder2.ReserveBytes(0);
             builder1.LinkSuffix(builder2);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -528,7 +514,7 @@ namespace System.Reflection.Metadata.Tests
 
             builder1.LinkPrefix(builder2);
 
-            AssertEx.Equal(new byte[] { 4, 1, 2, 3 }, builder1.ToArray());
+            Assert.Equal(new byte[] { 4, 1, 2, 3 }, builder1.ToArray());
 
             Assert.Equal(4, builder1.Count);
             Assert.Equal(1, builder2.Count);
@@ -553,7 +539,7 @@ namespace System.Reflection.Metadata.Tests
             builder5.WriteByte(5);
 
             builder2.LinkPrefix(builder1);
-            AssertEx.Equal(new byte[] { 1, 2 }, builder2.ToArray());
+            Assert.Equal(new byte[] { 1, 2 }, builder2.ToArray());
             Assert.Throws<InvalidOperationException>(() => builder1.ToArray());
             Assert.Throws<InvalidOperationException>(() => builder2.LinkPrefix(builder1));
             Assert.Throws<InvalidOperationException>(() => builder1.WriteByte(0xff));
@@ -566,15 +552,15 @@ namespace System.Reflection.Metadata.Tests
             Assert.Throws<InvalidOperationException>(() => builder1.WriteUTF8("str", allowUnpairedSurrogates: false));
 
             builder2.LinkSuffix(builder3);
-            AssertEx.Equal(new byte[] { 1, 2, 3 }, builder2.ToArray());
+            Assert.Equal(new byte[] { 1, 2, 3 }, builder2.ToArray());
             Assert.Throws<InvalidOperationException>(() => builder3.LinkPrefix(builder5));
 
             builder2.LinkPrefix(builder4);
-            AssertEx.Equal(new byte[] { 4, 1, 2, 3 }, builder2.ToArray());
+            Assert.Equal(new byte[] { 4, 1, 2, 3 }, builder2.ToArray());
             Assert.Throws<InvalidOperationException>(() => builder4.LinkPrefix(builder5));
 
             builder2.LinkSuffix(builder5);
-            AssertEx.Equal(new byte[] { 4, 1, 2, 3, 5 }, builder2.ToArray());
+            Assert.Equal(new byte[] { 4, 1, 2, 3, 5 }, builder2.ToArray());
         }
 
         [Fact]
@@ -615,7 +601,7 @@ namespace System.Reflection.Metadata.Tests
             var writer1 = new BlobWriter(builder.ReserveBytes(1));
             var writer2 = new BlobWriter(builder.ReserveBytes(2));
             Assert.Equal(3, builder.Count);
-            AssertEx.Equal(new byte[] { 0, 0, 0 }, builder.ToArray());
+            Assert.Equal(new byte[] { 0, 0, 0 }, builder.ToArray());
 
             Assert.Equal(0, writer0.Length);
             Assert.Equal(0, writer0.RemainingBytes);
@@ -638,7 +624,7 @@ namespace System.Reflection.Metadata.Tests
 
             var blobs = builder.GetBlobs().ToArray();
             Assert.Equal(1, blobs.Length);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -646,49 +632,37 @@ namespace System.Reflection.Metadata.Tests
             }, blobs[0].GetBytes().ToArray());
         }
 
-        // TODO: 
+        // TODO:
         // WriteBytes(byte*)
         // WriteBytes(stream)
         // WriteBytes(byte[])
         // WriteBytes(IA<byte>)
         // WriteReference
 
-        private static void TestCompressedUnsignedInteger(byte[] expected, int value)
+        [Theory]
+        // These examples are straight from the CLI spec.
+        [InlineData(new byte[] { 0x00 }, 0)]
+        [InlineData(new byte[] { 0x03 }, 0x03)]
+        [InlineData(new byte[] { 0x7f }, 0x7F)]
+        [InlineData(new byte[] { 0x80, 0x80 }, 0x80)]
+        [InlineData(new byte[] { 0xAE, 0x57 }, 0x2E57)]
+        [InlineData(new byte[] { 0xBF, 0xFF }, 0x3FFF)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 0x4000)]
+        [InlineData(new byte[] { 0xDF, 0xFF, 0xFF, 0xFF }, 0x1FFFFFFF)]
+        public static void CompressUnsignedIntegersFromSpecExamples(byte[] expected, int value)
         {
             var writer = new BlobWriter(4);
             writer.WriteCompressedInteger(value);
-            AssertEx.Equal(expected, writer.ToArray());
+            Assert.Equal(expected, writer.ToArray());
 
             var builder = new BlobBuilder();
             builder.WriteCompressedInteger(value);
-            AssertEx.Equal(expected, builder.ToArray());
-        }
-
-        private static void TestCompressedSignedInteger(byte[] expected, int value)
-        {
-            var writer = new BlobWriter(4);
-            writer.WriteCompressedSignedInteger(value);
-            AssertEx.Equal(expected, writer.ToArray());
-
-            var builder = new BlobBuilder();
-            builder.WriteCompressedSignedInteger(value);
-            AssertEx.Equal(expected, builder.ToArray());
+            Assert.Equal(expected, builder.ToArray());
         }
 
         [Fact]
         public void CompressUnsignedIntegersFromSpecExamples()
         {
-            // These examples are straight from the CLI spec.
-
-            TestCompressedUnsignedInteger(new byte[] { 0x00 }, 0);
-            TestCompressedUnsignedInteger(new byte[] { 0x03 }, 0x03);
-            TestCompressedUnsignedInteger(new byte[] { 0x7f }, 0x7F);
-            TestCompressedUnsignedInteger(new byte[] { 0x80, 0x80 }, 0x80);
-            TestCompressedUnsignedInteger(new byte[] { 0xAE, 0x57 }, 0x2E57);
-            TestCompressedUnsignedInteger(new byte[] { 0xBF, 0xFF }, 0x3FFF);
-            TestCompressedUnsignedInteger(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 0x4000);
-            TestCompressedUnsignedInteger(new byte[] { 0xDF, 0xFF, 0xFF, 0xFF }, 0x1FFFFFFF);
-
             var writer = new BlobWriter(4);
             var builder = new BlobBuilder();
 
@@ -698,22 +672,33 @@ namespace System.Reflection.Metadata.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => builder.WriteCompressedInteger(BlobWriterImpl.MaxCompressedIntegerValue + 1));
         }
 
+        [Theory]
+        // These examples are straight from the CLI spec.
+        [InlineData(new byte[] { 0x00 }, 0)]
+        [InlineData(new byte[] { 0x02 }, 1)]
+        [InlineData(new byte[] { 0x06 }, 3)]
+        [InlineData(new byte[] { 0x7f }, -1)]
+        [InlineData(new byte[] { 0x7b }, -3)]
+        [InlineData(new byte[] { 0x80, 0x80 }, 64)]
+        [InlineData(new byte[] { 0x01 }, -64)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 8192)]
+        [InlineData(new byte[] { 0x80, 0x01 }, -8192)]
+        [InlineData(new byte[] { 0xDF, 0xFF, 0xFF, 0xFE }, 268435455)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x00, 0x01 }, -268435456)]
+        public static void CompressSignedIntegersFromSpecExamples(byte[] expected, int value)
+        {
+            var writer = new BlobWriter(4);
+            writer.WriteCompressedSignedInteger(value);
+            Assert.Equal(expected, writer.ToArray());
+
+            var builder = new BlobBuilder();
+            builder.WriteCompressedSignedInteger(value);
+            Assert.Equal(expected, builder.ToArray());
+        }
+
         [Fact]
         public void CompressSignedIntegersFromSpecExamples()
         {
-            // These examples are straight from the CLI spec.
-            TestCompressedSignedInteger(new byte[] { 0x00 }, 0);
-            TestCompressedSignedInteger(new byte[] { 0x02 }, 1);
-            TestCompressedSignedInteger(new byte[] { 0x06 }, 3);
-            TestCompressedSignedInteger(new byte[] { 0x7f }, -1);
-            TestCompressedSignedInteger(new byte[] { 0x7b }, -3);
-            TestCompressedSignedInteger(new byte[] { 0x80, 0x80 }, 64);
-            TestCompressedSignedInteger(new byte[] { 0x01 }, -64);
-            TestCompressedSignedInteger(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 8192);
-            TestCompressedSignedInteger(new byte[] { 0x80, 0x01 }, -8192);
-            TestCompressedSignedInteger(new byte[] { 0xDF, 0xFF, 0xFF, 0xFE }, 268435455);
-            TestCompressedSignedInteger(new byte[] { 0xC0, 0x00, 0x00, 0x01 }, -268435456);
-
             var writer = new BlobWriter(4);
             var builder = new BlobBuilder();
 
@@ -747,7 +732,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteBytes(guid.ToByteArray());
             writer.WriteGuid(guid);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x44, 0x33, 0x22, 0x11,
                 0x66, 0x55,
@@ -783,7 +768,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteBytes(new byte[] { 0x0c }, 1, 0);
             writer.WriteBytes(new byte[] { 0x0d, 0x0e }, 1, 1);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04,
                 0x05, 0x06, 0x07, 0x08,
@@ -805,7 +790,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteBytes(0xff, 0);
             writer.WriteBytes(3, 1);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01, 0x01,
                 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
@@ -835,7 +820,7 @@ namespace System.Reflection.Metadata.Tests
             writer.Align(2);
             writer.Align(1);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x00, 0x02, 0x00,
                 0x03, 0x00, 0x00, 0x00,
@@ -860,7 +845,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteUTF16(new char[] { '\udc00', '\ud800' }); // lo + hi
             writer.WriteUTF16("\u1234");
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x61, 0x00,
                 0x00, 0xD8,
@@ -887,7 +872,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteSerializedString("\udc00\ud800"); // lo + hi
             writer.WriteSerializedString("\u1234");
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00,
                 0x01, 0x61,
@@ -923,7 +908,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteUTF8("\0\ud800\udc00", allowUnpairedSurrogates: true); // pair
             writer.WriteUTF8("\0\udc00\ud800", allowUnpairedSurrogates: true); // lo + hi
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)'a',
                 (byte)'b', (byte)'c',
@@ -959,7 +944,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteUTF8("\0\ud800\udc00", allowUnpairedSurrogates: false); // pair
             writer.WriteUTF8("\0\udc00\ud800", allowUnpairedSurrogates: false); // lo + hi
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)'a',
                 (byte)'b', (byte)'c',
@@ -978,35 +963,35 @@ namespace System.Reflection.Metadata.Tests
         {
             var writer = new BlobBuilder(4);
             writer.WriteUTF8("abc", 0, 0, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new byte[0], writer.ToArray());
+            Assert.Equal(new byte[0], writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 0, 1, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'a' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'a' }, writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 0, 2, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'a', (byte)'b' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'a', (byte)'b' }, writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 0, 3, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'a', (byte)'b', (byte)'c' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'a', (byte)'b', (byte)'c' }, writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 1, 0, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new byte[0], writer.ToArray());
+            Assert.Equal(new byte[0], writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 1, 1, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'b' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'b' }, writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 1, 2, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'b', (byte)'c' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'b', (byte)'c' }, writer.ToArray());
             writer.Clear();
 
             writer.WriteUTF8("abc", 2, 1, allowUnpairedSurrogates: true, prependSize: false);
-            AssertEx.Equal(new[] { (byte)'c' }, writer.ToArray());
+            Assert.Equal(new[] { (byte)'c' }, writer.ToArray());
             writer.Clear();
         }
 
@@ -1074,7 +1059,7 @@ namespace System.Reflection.Metadata.Tests
 
             var builder = new BlobBuilder();
             Assert.Equal(sourceArray.Length, builder.TryWriteBytes(stream, sourceArray.Length));
-            AssertEx.Equal(sourceArray, builder.ToArray());
+            Assert.Equal(sourceArray, builder.ToArray());
         }
 
         [Fact]
@@ -1089,7 +1074,7 @@ namespace System.Reflection.Metadata.Tests
             // Try to write more bytes than exist in the stream
             Assert.Equal(4, builder.TryWriteBytes(stream, 6));
 
-            AssertEx.Equal(sourceArray, builder.ToArray());
+            Assert.Equal(sourceArray, builder.ToArray());
         }
     }
 }

@@ -66,7 +66,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             pdbBuilder.Serialize(builder);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // signature:
                 0x42, 0x53, 0x4A, 0x42,
@@ -82,7 +82,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
                 // padded version:
                 (byte)'P', (byte)'D', (byte)'B', (byte)' ', (byte)'v', (byte)'1', (byte)'.', (byte)'0', 0x00, 0x00, 0x00, 0x00,
-                
+
                 // flags (0):
                 0x00, 0x00,
 
@@ -133,7 +133,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
                 // #~
                 // --------
-                
+
                 // Reserved (0)
                 0x00, 0x00, 0x00, 0x00,
 
@@ -160,7 +160,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
                 // Padding and alignment
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // --------
                 // #Strings
                 // --------
@@ -182,7 +182,6 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
 
                 0x00, 0x00, 0x00, 0x00,
-
             }, builder.ToArray());
         }
 
@@ -203,7 +202,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             pdbBuilder.Serialize(builder);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // PDB ID
                 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0xAA, 0x99, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
@@ -218,7 +217,6 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // TypeSystemTableRows
                 0x56, 0x34, 0x12, 0x00,
                 0xFF, 0xFF, 0xFF, 0x00
-
             }, builder.Slice(124, -40));
         }
     }

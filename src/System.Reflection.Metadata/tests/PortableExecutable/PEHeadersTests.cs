@@ -58,7 +58,7 @@ namespace System.Reflection.PortableExecutable.Tests
         public void Sections()
         {
             var peHeaders = new PEReader(SynthesizedPeImages.Image1).PEHeaders;
-            AssertEx.Equal(new[]
+            Assert.Equal(new[]
             {
                 ".s1 offset=0x200 rva=0x200 size=512",
                 ".s2 offset=0x400 rva=0x400 size=512",
@@ -85,7 +85,7 @@ namespace System.Reflection.PortableExecutable.Tests
         {
             var peHeaders = new PEReader(SynthesizedPeImages.Image1).PEHeaders;
             var dir = peHeaders.PEHeader.CopyrightTableDirectory;
-            
+
             Assert.Equal(0x400 + 5, dir.RelativeVirtualAddress);
             Assert.Equal(10, dir.Size);
 

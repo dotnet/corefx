@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
 using System.Reflection.Internal;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Tests;
@@ -49,7 +48,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var blob = new BlobBuilder();
             b.Serialize(blob, new SectionLocation(0x1000, 0x2000), 0x50);
-            AssertEx.Equal(new byte[0], blob.ToArray());
+            Assert.Equal(new byte[0], blob.ToArray());
         }
 
         [Fact]
@@ -63,7 +62,7 @@ namespace System.Reflection.PortableExecutable.Tests
             b.Serialize(blob, new SectionLocation(0x1000, 0x2000), 0x50);
             var bytes = blob.ToArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x78, 0x56, 0x34, 0x12, // Stamp
@@ -73,7 +72,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 0x6C, 0x10, 0x00, 0x00, // AddressOfRawData
                 0x6C, 0x20, 0x00, 0x00, // PointerToRawData
                 // data
-                (byte)'R', (byte)'S', (byte)'D', (byte)'S', 
+                (byte)'R', (byte)'S', (byte)'D', (byte)'S',
                 0x6E, 0xE6, 0x88, 0x3C, 0xB9, 0xE0, 0x08, 0x45, 0x92, 0x90, 0x11, 0xE0, 0xDB, 0x51, 0xA1, 0xC5, // GUID
                 0x01, 0x00, 0x00, 0x00, // age
                 (byte)'f', (byte)'o', (byte)'o', (byte)'.', (byte)'p', (byte)'d', (byte)'b', 0x00 // path
@@ -105,7 +104,7 @@ namespace System.Reflection.PortableExecutable.Tests
             b.Serialize(blob, new SectionLocation(0x1000, 0x2000), 0x50);
             var bytes = blob.ToArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x78, 0x56, 0x34, 0x12, // Stamp
@@ -120,7 +119,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 0x01, 0x00, 0x00, 0x00, // age
                 (byte)'f', (byte)'o', (byte)'o', (byte)'.', (byte)'p', (byte)'d', (byte)'b', 0x00, // path
                 // path padding:
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -163,7 +162,7 @@ namespace System.Reflection.PortableExecutable.Tests
             b.Serialize(blob, new SectionLocation(0x1000, 0x2000), 0x50);
             var bytes = blob.ToArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x00, 0x00, 0x00, 0x00, // Stamp
@@ -202,7 +201,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var blob = new BlobBuilder();
             b.Serialize(blob, new SectionLocation(0x1000, 0x2000), 0x50);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x00, 0x00, 0x00, 0x00, // Stamp
@@ -219,7 +218,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 0x1A, 0x00, 0x00, 0x00, // SizeOfData
                 0xC0, 0x10, 0x00, 0x00, // AddressOfRawData
                 0xC0, 0x20, 0x00, 0x00, // PointerToRawData
-                
+
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x00, 0x00, 0x00, 0x00, // Stamp
                 0x00, 0x00, 0x00, 0x00, // Version
@@ -264,7 +263,7 @@ namespace System.Reflection.PortableExecutable.Tests
             b.Serialize(blob, new SectionLocation(0, 0), sectionOffset: 0);
             var bytes = blob.ToImmutableArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // Characteristics
                 0x00, 0x00, 0x00, 0x00, // Stamp
@@ -296,7 +295,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 using (var block = provider.GetMemoryBlock(actual[0].DataPointer, actual[0].DataSize))
                 {
                     var decoded = PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block);
-                    AssertEx.Equal(new byte[] { 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, decoded);
+                    Assert.Equal(new byte[] { 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, decoded);
                 }
             }
         }
