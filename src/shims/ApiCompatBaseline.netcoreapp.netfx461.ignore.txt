@@ -1349,8 +1349,6 @@ TypesMustExist : Type 'System.Data.DataSetSchemaImporterExtension' does not exis
 TypesMustExist : Type 'System.Data.PropertyAttributes' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.TypedDataSetGenerator' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.TypedDataSetGeneratorException' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.Common.DBDataPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.Common.DBDataPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.Common.DbProviderConfigurationHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.Common.DbProviderFactories' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.Common.DbProviderFactoriesConfigurationHandler' does not exist in the implementation but it does exist in the contract.
@@ -1581,9 +1579,6 @@ TypesMustExist : Type 'System.Drawing.Printing.PrinterUnit' does not exist in th
 TypesMustExist : Type 'System.Drawing.Printing.PrinterUnitConvert' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Drawing.Printing.PrintEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Drawing.Printing.PrintEventHandler' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Drawing.Printing.PrintingPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Drawing.Printing.PrintingPermissionAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Drawing.Printing.PrintingPermissionLevel' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Drawing.Printing.PrintPageEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Drawing.Printing.PrintPageEventHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Drawing.Printing.PrintRange' does not exist in the implementation but it does exist in the contract.

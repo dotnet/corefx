@@ -122,7 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
-    <Reference Include="System.Data.Common"/>
+    <Reference Include="System.Data.Common" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
@@ -158,6 +158,9 @@
   <ItemGroup>
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
