@@ -31,10 +31,12 @@ namespace System.Data.Common
 {
     public abstract partial class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
+        [Obsolete]
         protected DBDataPermission() { }
         protected DBDataPermission(System.Data.Common.DBDataPermission permission) { }
         protected DBDataPermission(System.Data.Common.DBDataPermissionAttribute permissionAttribute) { }
         protected DBDataPermission(System.Security.Permissions.PermissionState state) { }
+        [Obsolete]
         protected DBDataPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) { }
         public bool AllowBlankPassword { get; set; }
         public virtual void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
