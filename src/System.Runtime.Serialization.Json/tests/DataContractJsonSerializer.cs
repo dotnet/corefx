@@ -2497,9 +2497,25 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(18538, TestPlatforms.FreeBSD)]
-    [ActiveIssue(18538, TestPlatforms.Linux)]
-    [ActiveIssue(18538, TestPlatforms.NetBSD)]
+    [ActiveIssue(18538, TestPlatforms.FreeBSD | TestPlatforms.Linux | TestPlatforms.NetBSD)]
+    public static void DCJS_VerifyDateTimeForFormatStringDCJsonSerSetting()
+    {
+        var dcjsSettings = new DataContractJsonSerializerSettings()
+        {
+            DateTimeFormat = null,
+            UseSimpleDictionaryFormat = true,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            KnownTypes = new List<Type>()
+        };
+        var value = new DateTime(2010, 12, 1);
+        var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
+        var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
+        var baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
+        var actual = SerializeAndDeserialize(value, baseline, dcjsSettings);
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
     [ActiveIssue(18539, TestPlatforms.Linux)]
     public static void DCJS_VerifyDateTimeForFormatStringDCJsonSerSettings()
     {
@@ -2511,13 +2527,6 @@ public static partial class DataContractJsonSerializerTests
             EmitTypeInformation = EmitTypeInformation.AsNeeded,
             KnownTypes = new List<Type>()
         };
-
-        var value = new DateTime(2010, 12, 1);
-        var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
-        var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
-        var baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
-        var actual = SerializeAndDeserialize(value, baseline, dcjsSettings);
-        Assert.Equal(value, actual);
 
         var DTF_class = new JsonTypes.DTF_class()
         {

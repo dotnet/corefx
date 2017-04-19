@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -4271,7 +4271,7 @@ public class PurchaseOrder
         billAddress.State = "WA";
         billAddress.Zip = "00000";
         po.ShipTo = billAddress;
-        po.OrderDate = new DateTime(2017,4,10).ToLongDateString();
+        po.OrderDate = new DateTime(2017, 4, 10).ToString("D", CultureInfo.InvariantCulture);
 
         OrderedItem item = new OrderedItem();
         item.ItemName = "Widget S";
@@ -4355,17 +4355,17 @@ public class MyCollection1 : IEnumerable<DateTime>, IEnumerable
 
     public void Add(DateTime value)
     {
-        this._values.Add(value);
+        _values.Add(value);
     }
 
     IEnumerator<DateTime> IEnumerable<DateTime>.GetEnumerator()
     {
-        return this._values.GetEnumerator();
+        return _values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return this._values.GetEnumerator();
+        return _values.GetEnumerator();
     }
 }
 
@@ -4377,6 +4377,35 @@ public static class Outer
         public string MiddleName { get; set; }
         public string LastName { get; set; }
     }
+}
+
+public class Orchestra
+{
+    public Instrument[] Instruments;
+}
+
+public class Instrument
+{
+    public string Name;
+}
+
+public class Brass : Instrument
+{
+    public bool IsValved;
+}
+
+public class Trumpet : Brass
+{
+    public char Modulation;
+}
+
+public class Pet
+{
+    [DefaultValueAttribute("Dog")]
+    public string Animal;
+    [XmlIgnoreAttribute]
+    public string Comment;
+    public string Comment2;
 }
 
 public class JsonTypes
