@@ -19,14 +19,14 @@ namespace System.ConfigurationTests
         [Fact]
         public void Constructor_MinValueAndMaxValue()
         {
-            //Won't fail
+            // This should complete with no errors.
             StringValidator validator = new StringValidator(5, 10);
         }
 
         [Fact]
         public void Constructor_MinValueMaxValueAndInvalidChars()
         {
-            //Won't fail.
+            // this should complete with no errors.
             StringValidator validator = new StringValidator(5, 10, "abcde");
         }
 
@@ -44,6 +44,71 @@ namespace System.ConfigurationTests
             StringValidator validator = new StringValidator(5);
             bool result = validator.CanValidate(typeof(Int32));
             Assert.False(result);
+        }
+
+        [Fact]
+        public void Validate_PassInNonString()
+        {
+            StringValidator validator = new StringValidator(5);
+            ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate(5));
+            ArgumentException expected = new ArgumentException(SR.Validator_value_type_invalid, string.Empty);
+            Assert.Equal(expected.Message, thrownException.Message);
+        }
+
+        [Fact]
+        public void Validate_StringTooSmall()
+        {
+            StringValidator validator = new StringValidator(5);
+            ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate("Hi"));
+            ArgumentException expected = new ArgumentException(string.Format(SR.Validator_string_min_length, 5), string.Empty);
+            Assert.Equal(expected.Message, thrownException.Message);
+        }
+
+        [Fact]
+        public void Validate_StringTooBig()
+        {
+            StringValidator validator = new StringValidator(5, 10);
+            ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate("This is more than ten"));
+            ArgumentException expected = new ArgumentException(string.Format(SR.Validator_string_max_length, 10), string.Empty);
+            Assert.Equal(expected.Message, thrownException.Message);
+        }
+
+        [Fact]
+        public void Validate_EmptyString()
+        {
+            // this should complete with no errors.
+            StringValidator validator = new StringValidator(0);
+            validator.Validate(string.Empty);
+        }
+
+        [Theory]
+        [InlineData("Hello-")]
+        [InlineData("Hello_")]
+        [InlineData("-Hello")]
+        [InlineData("_Hello")]
+        [InlineData("He-llo")]
+        [InlineData("He_llo")]
+        [InlineData("H-e-l-l-o")]
+        [InlineData("H_e_l_l_o_")]
+        [InlineData("H_e-l_l-o_")]
+        [InlineData("He__llo")]
+        [InlineData("He--;o")]
+        [InlineData("H_-el- -o")]
+        [InlineData("_")]
+        [InlineData("-")]
+        public void Validate_UsinginvalidCharacters(string stringToValidate)
+        {
+            StringValidator validator = new StringValidator(1, 20, "_-");
+            ArgumentException expectedException = new ArgumentException((string.Format(SR.Validator_string_invalid_chars, "_-")));
+            ArgumentException result = Assert.Throws<ArgumentException>(() => validator.Validate(stringToValidate));
+            Assert.Equal(expectedException.Message, result.Message);
+        }
+
+        [Fact]
+        public void Validate_NoINvalidCharactersSpecified()
+        {
+            StringValidator validator = new StringValidator(5);
+            validator.Validate("Hello");
         }
     }
 }
