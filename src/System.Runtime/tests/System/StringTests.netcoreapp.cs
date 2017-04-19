@@ -255,14 +255,14 @@ namespace System.Tests
         }
 
         [Fact]
-        public void Replace_StringComparsion_NullOldValue_ThrowsArgumentException()
+        public void Replace_StringComparison_NullOldValue_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", StringComparison.CurrentCulture));
             Assert.Throws<ArgumentNullException>("oldValue", () => "abc".Replace(null, "def", true, CultureInfo.CurrentCulture));
         }
 
         [Fact]
-        public void Replace_StringComparsion_EmptyOldValue_ThrowsArgumentException()
+        public void Replace_StringComparison_EmptyOldValue_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", StringComparison.CurrentCulture));
             Assert.Throws<ArgumentException>("oldValue", () => "abc".Replace("", "def", true, CultureInfo.CurrentCulture));
