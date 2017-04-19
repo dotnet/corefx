@@ -122,6 +122,11 @@
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="System\Data\Common\DBDataPermission.cs" />
+    <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
+    <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
     <Compile Include="System\Security\Permissions\FileIOPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\IsolatedStorageContainment.cs" />
     <Compile Include="System\Security\Permissions\IsolatedStorageFilePermission.cs" />
@@ -140,13 +145,6 @@
     <Compile Include="System\Security\Permissions\StorePermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Data\Common\DBDataPermission.cs" />
-    <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -11,6 +11,6 @@ namespace System.Drawing.Printing
     {
         public PrintingPermissionAttribute(SecurityAction action) : base(action) { }
         public PrintingPermissionLevel Level { get; set; }
-        public override System.Security.IPermission CreatePermission() { throw null; }
+        public override System.Security.IPermission CreatePermission() { return null; }
     }
 }
