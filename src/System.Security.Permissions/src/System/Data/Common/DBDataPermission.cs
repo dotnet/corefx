@@ -21,7 +21,7 @@ namespace System.Data.Common
         public bool AllowBlankPassword { get; set; }
         public virtual void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
         protected void Clear() { }
-        protected DBDataPermission CreateInstance() => null;
+        protected virtual DBDataPermission CreateInstance() => null;
         public override IPermission Copy() => this;
         public override void FromXml(SecurityElement elem) { }
         public override IPermission Intersect(IPermission target) => null;
