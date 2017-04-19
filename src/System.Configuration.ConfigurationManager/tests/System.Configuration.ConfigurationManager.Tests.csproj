@@ -96,7 +96,6 @@
     <Compile Include="System\Configuration\TimeSpanValidatorAttributeTests.cs" />
     <Compile Include="System\Configuration\TypeUtilTests.cs" />
     <Compile Include="System\Configuration\UriSectionTests.cs" />
-    <Compile Include="System\Configuration\UrlPathTests.cs" />
     <Compile Include="System\Configuration\ValidatiorUtilsTests.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
