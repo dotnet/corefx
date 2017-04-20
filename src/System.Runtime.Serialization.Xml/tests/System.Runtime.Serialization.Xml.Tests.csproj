@@ -31,14 +31,11 @@
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
-    <Compile Include="SerializationTestTypes\ObjRefSample.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\ObjRefSample.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
     <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
     <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -2926,10 +2926,8 @@ public static partial class DataContractSerializerTests
         SerializationTestTypes.DCRVariations dcrVariationsGoing = new SerializationTestTypes.DCRVariations();
         dcrVariationsGoing.unknownType1 = new SerializationTestTypes.Person();
         dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
-
         var dcr1 = new SerializationTestTypes.SimpleResolver_Ser();
         var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
-
         var setting = new DataContractSerializerSettings() { DataContractResolver = dcr1, MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
 

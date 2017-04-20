@@ -90,14 +90,11 @@ namespace SerializationTestTypes
     [Serializable]
     public class SimpleResolver_Ser : DataContractResolver
     {
-        public string defaultNS = "http://schemas.datacontract.org/2004/07/";
-
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
         {
             XmlDictionary dictionary = new XmlDictionary();
             typeName = dictionary.Add(dcType.FullName);
             typeNamespace = dictionary.Add(dcType.Assembly.FullName);
-
             return true;
         }
 
@@ -110,8 +107,6 @@ namespace SerializationTestTypes
     [Serializable]
     public class SimpleResolver_DeSer : DataContractResolver
     {
-        public string defaultNS = "http://schemas.datacontract.org/2004/07/";
-
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
         {
             throw new NotImplementedException("Serialization is supposed to be handled by the SimpleResolver_Ser resolver.");

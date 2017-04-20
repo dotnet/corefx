@@ -86,8 +86,8 @@ namespace SerializationTestTypes
     {
         public Person(string variation)
         {
-            age = 6;
-            name = "smith";
+            Age = 6;
+            Name = "smith";
         }
 
         public Person()
@@ -95,9 +95,9 @@ namespace SerializationTestTypes
         }
 
         [DataMember]
-        public int age;
+        public int Age;
 
         [DataMember]
-        public string name;
+        public string Name;
     }
 }
