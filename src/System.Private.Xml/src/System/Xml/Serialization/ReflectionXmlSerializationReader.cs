@@ -698,7 +698,7 @@ namespace System.Xml.Serialization
                     }
                 }
 
-                anyText.Source.Invoke(value);
+                anyText.Source(value);
                 return true;
             }
 
@@ -1003,7 +1003,7 @@ namespace System.Xml.Serialization
             return DummyReadArrayMethod;
         }
 
-        private void NoopAction(object o)
+        private static void NoopAction(object o)
         {
         }
 
@@ -1579,7 +1579,7 @@ namespace System.Xml.Serialization
                 if (structMapping.TypeDesc.Type != null && typeof(XmlSchemaObject).IsAssignableFrom(structMapping.TypeDesc.Type))
                 {
                     // #10589: To Support Serializing XmlSchemaObject
-                    throw new NotImplementedException("XmlSchemaObject");
+                    throw new NotImplementedException(nameof(XmlSchemaObject));
                 }
 
                 object o = ReflectionCreateObject(structMapping.TypeDesc.Type);

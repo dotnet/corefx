@@ -954,7 +954,7 @@ namespace System.Xml.Serialization
                 {
                     if (((EnumMapping)mapping).IsFlags)
                     {
-                        IEnumerable<string> defaultEnumFlagValues = defaultValue.ToString().Split(null).Where((s) => !string.IsNullOrWhiteSpace(s));
+                        IEnumerable<string> defaultEnumFlagValues = defaultValue.ToString().Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
                         string defaultEnumFlagString = string.Join(", ", defaultEnumFlagValues);
 
                         if (o.ToString() == defaultEnumFlagString)
