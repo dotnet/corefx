@@ -157,7 +157,7 @@ namespace System.SpanTests
                     if (allocatedFirst && allocatedSecond)
                     {
                         ref Guid memoryFirst = ref Unsafe.AsRef<Guid>(memBlockFirst.ToPointer());
-                        var spanFirst = new Span<Guid>(memBlockFirst.ToPointer(), GuidCount);
+                        var spanFirst = new ReadOnlySpan<Guid>(memBlockFirst.ToPointer(), GuidCount);
 
                         ref Guid memorySecond = ref Unsafe.AsRef<Guid>(memBlockSecond.ToPointer());
                         var spanSecond = new Span<Guid>(memBlockSecond.ToPointer(), GuidCount);
