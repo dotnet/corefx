@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security;
+#if TargetsWindows
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
+#endif
 
 namespace System.IO.IsolatedStorage
 {
@@ -49,7 +51,8 @@ namespace System.IO.IsolatedStorage
 
             DirectoryInfo info = Directory.CreateDirectory(path);
 
-            if (IsMachine(scope) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#if TargetsWindows
+            if (IsMachine(scope))
             {
                 // Need to emulate COMIsolatedStorage::CreateDirectoryWithDacl(), which gives the following rights:
                 //
@@ -96,6 +99,7 @@ namespace System.IO.IsolatedStorage
 
                 info.SetAccessControl(security);
             }
+#endif
         }
 
         internal static void GetDefaultIdentityAndHash(out object identity, out string hash, char separator)
