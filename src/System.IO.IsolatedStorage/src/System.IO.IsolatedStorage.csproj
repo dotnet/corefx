@@ -4,7 +4,6 @@
   <PropertyGroup>
     <AssemblyName>System.IO.IsolatedStorage</AssemblyName>
     <ProjectGuid>{FAF5D1E4-BA43-4663-8429-C069066D75CB}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TargetsWindows</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
@@ -27,7 +26,13 @@
     <Compile Include="System\IO\IsolatedStorage\IsolatedStorageException.Serialization.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
-    <Compile Include="System\IO\IsolatedStorage\Helper.Win32.Unix.cs" />
+    <Compile Include="System\IO\IsolatedStorage\Helper.Win32Unix.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsWindows)' == 'true'">
+	<Compile Include="System\IO\IsolatedStorage\Helper.Win32.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsWindows)' == 'false'">
+    <Compile Include="System\IO\IsolatedStorage\Helper.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Compile Include="System\IO\IsolatedStorage\Helper.WinRT.cs" />
@@ -44,7 +49,7 @@
     <Reference Include="System.Security.AccessControl" Condition="'$(TargetsWindows)' == 'true'" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Primitives" />
-    <Reference Include="System.Security.Principal.Windows" Condition="'$(TargetsWindows)' == 'true'" />
+    <Reference Include="System.Security.Principal.Windows" Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'uap'" />
     <Reference Include="System.Threading" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
