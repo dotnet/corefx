@@ -91,4 +91,4 @@ MembersMustExist : Member 'System.Data.SqlClient.SqlParameterCollection.Add(Syst
 Compat issues with assembly System.Xml:
 MembersMustExist : Member 'System.Xml.Xsl.XslCompiledTransform.TemporaryFiles.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Xml.Xsl.XslTransform.Load(System.Xml.XPath.XPathNavigator, System.Xml.XmlResolver, System.Security.Policy.Evidence)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 92
+Total Issues: 82
