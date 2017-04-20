@@ -9,24 +9,24 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>ee8cf8d1c5908ea7f63f0a769439456ff14672eb</CoreFxCurrentRef>
-    <CoreClrCurrentRef>ee8cf8d1c5908ea7f63f0a769439456ff14672eb</CoreClrCurrentRef>
+    <CoreFxCurrentRef>ebfffae3d419c4a18a7adc0eb0efcd72e45d4bed</CoreFxCurrentRef>
+    <CoreClrCurrentRef>ebfffae3d419c4a18a7adc0eb0efcd72e45d4bed</CoreClrCurrentRef>
     <ExternalCurrentRef>3b8a99621d89ad9877f053ba8af25e0f25dcd9d8</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>4ddbf159025d0c1f43f7e8132d514e4949b5f531</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>4ddbf159025d0c1f43f7e8132d514e4949b5f531</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>ebfffae3d419c4a18a7adc0eb0efcd72e45d4bed</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>ebfffae3d419c4a18a7adc0eb0efcd72e45d4bed</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>05650e53f2aa4497f74cd6e9b053d3f69f64b0bd</SniCurrentRef>
-    <StandardCurrentRef>4ddbf159025d0c1f43f7e8132d514e4949b5f531</StandardCurrentRef>
+    <StandardCurrentRef>ebfffae3d419c4a18a7adc0eb0efcd72e45d4bed</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview1-25218-03</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview1-25218-03</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview1-25220-02</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview1-25220-03</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-25016-01</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25218-01</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25218-01</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25218-01</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.0-preview1-25218-01</NETStandardPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25220-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25220-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25220-00</ProjectNTfsTestILCPackageVersion>
+    <NETStandardPackageVersion>2.0.0-preview1-25220-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <!-- Use the SNI runtime package -->
     <SniPackageVersion>4.4.0-beta-25007-02</SniPackageVersion>
