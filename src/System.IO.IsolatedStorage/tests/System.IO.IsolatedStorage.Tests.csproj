@@ -28,7 +28,7 @@
       <Link>Internals\Helper.Win32.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsWindows)' == 'false'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsUnix)' == 'true'">
     <Compile Include="..\src\System\IO\IsolatedStorage\Helper.Unix.cs">
       <Link>Internals\Helper.Unix.cs</Link>
     </Compile>

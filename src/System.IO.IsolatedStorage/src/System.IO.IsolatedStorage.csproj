@@ -31,7 +31,7 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsWindows)' == 'true'">
 	<Compile Include="System\IO\IsolatedStorage\Helper.Win32.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsWindows)' == 'false'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetsUnix)' == 'true'">
     <Compile Include="System\IO\IsolatedStorage\Helper.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
