@@ -10,18 +10,16 @@ namespace System.Data.Common
     [Serializable]
     public abstract class DBDataPermission : CodeAccessPermission, IUnrestrictedPermission
     {
-        [Obsolete]
         protected DBDataPermission() { }
         protected DBDataPermission(DBDataPermission dataPermission) { }
         protected DBDataPermission(DBDataPermissionAttribute attribute) { }
         protected DBDataPermission(PermissionState state) { }
-        [Obsolete]
         protected DBDataPermission(PermissionState state, bool blankPassword) { }
         public bool AllowBlankPassword { get; set; }
         public virtual void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior) { }
         protected void Clear() { }
         protected virtual DBDataPermission CreateInstance() => null;
-        public override IPermission Copy() => this;
+        public override IPermission Copy() => null;
         public override void FromXml(SecurityElement elem) { }
         public override IPermission Intersect(IPermission target) => null;
         public override bool IsSubsetOf(IPermission target) => false;

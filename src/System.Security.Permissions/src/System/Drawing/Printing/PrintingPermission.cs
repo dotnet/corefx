@@ -13,7 +13,7 @@ namespace System.Drawing.Printing
         public PrintingPermission(PrintingPermissionLevel printingLevel) { }
         public PrintingPermission(PermissionState state) { }
         public PrintingPermissionLevel Level { get; set; }
-        public override IPermission Copy() => this;
+        public override IPermission Copy() => null;
         public override void FromXml(SecurityElement element) { }
         public override IPermission Intersect(IPermission target) => null;
         public override bool IsSubsetOf(IPermission target) => false;
