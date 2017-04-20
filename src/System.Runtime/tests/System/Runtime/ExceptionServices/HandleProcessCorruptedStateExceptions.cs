@@ -18,9 +18,10 @@ namespace System.Runtime.ExceptionServices.Tests
         static extern void RaiseException(uint dwExceptionCode, uint dwExceptionFlags, uint nNumberOfArguments, IntPtr lpArguments);
 
         [HandleProcessCorruptedStateExceptions]
-        static void causeAVInNative()
+        static void CauseAVInNative()
         {
-            try {
+            try 
+            {
                 RaiseException(0xC0000005, 0, 0, IntPtr.Zero);
             }
             catch (AccessViolationException)
