@@ -140,6 +140,8 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Data"/>
+    <Reference Include="System.Drawing"/>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
