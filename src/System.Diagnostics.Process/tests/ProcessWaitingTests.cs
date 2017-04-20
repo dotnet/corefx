@@ -105,6 +105,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18210")]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(127)]
@@ -202,6 +203,20 @@ namespace System.Diagnostics.Tests
             child.Start();
             Assert.True(child.WaitForExit(WaitInMS));
             Assert.NotEqual(SuccessExitCode, child.ExitCode);
+        }
+
+        [Fact]
+        public void WaitForInputIdle_NotDirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.WaitForInputIdle());
+        }
+
+        [Fact]
+        public void WaitForExit_NotDirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.WaitForExit());
         }
     }
 }

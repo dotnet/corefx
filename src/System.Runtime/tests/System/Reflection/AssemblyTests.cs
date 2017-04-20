@@ -23,31 +23,28 @@ System.Reflection.CustomAttributesTests.Data.TypeAttr(typeof(Object), name = "Ty
 
 namespace System.Reflection.Tests
 {
-    public class AssemblyTests : IDisposable
+    public class AssemblyTests
     {
 
-        string sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly.dll");
-        string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly", "TestAssembly.dll");
-        string loadFromTestPath;
+        static string sourceTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly.dll");
+        static string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAssembly", "TestAssembly.dll");
+        static string loadFromTestPath;
 
-        public AssemblyTests()
+        static AssemblyTests()
         {
+            loadFromTestPath = null;
+#if !uapaot  // Assembly.Location not supported (properly) on uapaot.
             // Move TestAssembly.dll to subfolder TestAssembly
-            if(!File.Exists(destTestAssemblyPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
+            if (File.Exists(sourceTestAssemblyPath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
+                File.Delete(destTestAssemblyPath);
                 File.Move(sourceTestAssemblyPath, destTestAssemblyPath);
             }
             string currAssemblyPath = typeof(AssemblyTests).Assembly.Location;
             loadFromTestPath = Path.Combine(Path.GetDirectoryName(currAssemblyPath), "TestAssembly", Path.GetFileName(currAssemblyPath));
             File.Copy(currAssemblyPath, loadFromTestPath, true);
-        }
-
-        public void Dispose()
-        {
-            // Revert TestAssembly.dll back to its previous location
-            if(!File.Exists(sourceTestAssemblyPath))
-                File.Move(destTestAssemblyPath, sourceTestAssemblyPath);
+#endif
         }
 
         public static IEnumerable<object[]> Equality_TestData()
@@ -68,7 +65,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void GetAssembly_Nullery()
         {
-            Assert.Throws<ArgumentNullException>("type", () => Assembly.GetAssembly(null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Assembly.GetAssembly(null));
         }
 
         public static IEnumerable<object[]> GetAssembly_TestData()
@@ -105,6 +102,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.GetSatelliteAssembly() not supported on UapAot")]
         public static void GetSatelliteAssemblyNeg()
         {
             Assert.Throws<ArgumentNullException>(() => (typeof(AssemblyTests).Assembly.GetSatelliteAssembly(null)));
@@ -112,6 +110,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.Load(String) not supported on UapAot")]
         public static void AssemblyLoadFromString()
         {
             AssemblyName an = typeof(AssemblyTests).Assembly.GetName();
@@ -138,6 +137,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
         public static void AssemblyLoadFromBytes()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -149,6 +149,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
         public static void AssemblyLoadFromBytesNeg()
         {
             Assert.Throws<ArgumentNullException>(() => Assembly.Load((byte[])null));
@@ -156,6 +157,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.Load(byte[]) not supported on UapAot")]
         public static void AssemblyLoadFromBytesWithSymbols()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -167,12 +169,14 @@ namespace System.Reflection.Tests
             Assert.Equal(assembly.FullName, loadedAssembly.FullName);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public static void AssemblyReflectionOnlyLoadFromString()
         {
             AssemblyName an = typeof(AssemblyTests).Assembly.GetName();
             Assert.Throws<NotSupportedException>(() => Assembly.ReflectionOnlyLoad(an.FullName));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public static void AssemblyReflectionOnlyLoadFromBytes()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -180,6 +184,7 @@ namespace System.Reflection.Tests
             Assert.Throws<NotSupportedException>(() => Assembly.ReflectionOnlyLoad(aBytes));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.ReflectionOnlyLoad() not supported on UapAot")]
         public static void AssemblyReflectionOnlyLoadFromNeg()
         {
             Assert.Throws<ArgumentNullException>(() => Assembly.ReflectionOnlyLoad((string)null));
@@ -196,17 +201,18 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(GetModules_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.GetModules() is not supported on UapAot.")]
         public static void GetModules_GetModule(Assembly assembly)
         {
             Assert.NotEmpty(assembly.GetModules());
             foreach (Module module in assembly.GetModules())
             {
-                Assert.NotNull(module);
-                Assert.Equal(module, assembly.GetModule(module.Name));
+                Assert.Equal(module, assembly.GetModule(module.ToString()));
             }
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.GetLoadedModules() is not supported on UapAot.")]
         public static void GetLoadedModules()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -214,7 +220,7 @@ namespace System.Reflection.Tests
             foreach (Module module in assembly.GetLoadedModules())
             {
                 Assert.NotNull(module);
-                Assert.Equal(module, assembly.GetModule(module.Name));
+                Assert.Equal(module, assembly.GetModule(module.ToString()));
             }
         }
 
@@ -261,58 +267,122 @@ namespace System.Reflection.Tests
         public static void Test_GlobalAssemblyCache()
         {
             Assert.False(typeof(AssemblyTests).Assembly.GlobalAssemblyCache);
-        }        
+        }
 
         [Fact]
         public static void Test_HostContext()
         {
             Assert.Equal(0, typeof(AssemblyTests).Assembly.HostContext);
-        }        
+        }
 
         [Fact]
         public static void Test_IsFullyTrusted()
         {
             Assert.True(typeof(AssemblyTests).Assembly.IsFullyTrusted);
-        }        
+        }
 
         [Fact]
-        public static void Test_SecurityRuleSet()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework supports SecurityRuleSet")]
+        public static void Test_SecurityRuleSet_Netcore()
         {
             Assert.Equal(SecurityRuleSet.None, typeof(AssemblyTests).Assembly.SecurityRuleSet);
-        }        
+        }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "SecurityRuleSet is ignored in .NET Core")]
+        public static void Test_SecurityRuleSet_Netfx()
+        {
+            Assert.Equal(SecurityRuleSet.Level2, typeof(AssemblyTests).Assembly.SecurityRuleSet);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFile() not supported on UapAot")]
         public static void Test_LoadFile()
         {
-            var assem = typeof(AssemblyTests).Assembly;
-            string path = "System.Runtime.Tests.dll";
-            string fullpath = Path.GetFullPath(path);
-            Assert.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
-            Assert.Throws<ArgumentException>(() => Assembly.LoadFile(path));
-            var loadfile1 = Assembly.LoadFile(fullpath);
-            Assert.NotEqual(assem, loadfile1);
-            string dir = Path.GetDirectoryName(fullpath);
-            fullpath = Path.Combine(dir, ".", path);
-            var loadfile2 = Assembly.LoadFile(fullpath);
-            Assert.Equal(loadfile1,loadfile2);
-        }        
+            Assembly currentAssembly = typeof(AssemblyTests).Assembly;
+            const string RuntimeTestsDll = "System.Runtime.Tests.dll";
+            string fullRuntimeTestsPath = Path.GetFullPath(RuntimeTestsDll);
+
+            var loadedAssembly1 = Assembly.LoadFile(fullRuntimeTestsPath);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Equal(currentAssembly, loadedAssembly1);
+            }
+            else
+            {
+                Assert.NotEqual(currentAssembly, loadedAssembly1);
+            }
+
+            string dir = Path.GetDirectoryName(fullRuntimeTestsPath);
+            fullRuntimeTestsPath = Path.Combine(dir, ".", RuntimeTestsDll);
+
+            Assembly loadedAssembly2 = Assembly.LoadFile(fullRuntimeTestsPath);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotEqual(loadedAssembly1, loadedAssembly2);
+            }
+            else
+            {
+                Assert.Equal(loadedAssembly1, loadedAssembly2);
+            }
+        }
 
         [Fact]
-        public static void Test_LoadFromUsingHashValue()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "The full .NET Framework has a bug and throws a NullReferenceException")]
+        public static void LoadFile_NullPath_Netcore_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("path", () => Assembly.LoadFile(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Core fixed a bug where LoadFile(null) throws a NullReferenceException")]
+        public static void LoadFile_NullPath_Netfx_ThrowsNullReferenceException()
+        {
+            Assert.Throws<NullReferenceException>(() => Assembly.LoadFile(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFile() not supported on UapAot")]
+        public static void LoadFile_NoSuchPath_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => Assembly.LoadFile("System.Runtime.Tests.dll"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "The full .NET Framework supports Assembly.LoadFrom")]
+        public static void Test_LoadFromUsingHashValue_Netcore()
         {
             Assert.Throws<NotSupportedException>(() => Assembly.LoadFrom("abc", null, System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
-        }        
+        }
 
         [Fact]
-        public static void Test_LoadModule()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The implementation of Assembly.LoadFrom is stubbed out in .NET Core")]
+        public static void Test_LoadFromUsingHashValue_Netfx()
         {
-            var assem = typeof(AssemblyTests).Assembly;
-            Assert.Throws<NotImplementedException>(() => assem.LoadModule("abc", null));
-            Assert.Throws<NotImplementedException>(() => assem.LoadModule("abc", null, null));
-        }        
+            Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("abc", null, System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "The full .NET Framework supports more than one module per assembly")]
+        public static void Test_LoadModule_Netcore()
+        {
+            Assembly assembly = typeof(AssemblyTests).Assembly;
+            Assert.Throws<NotImplementedException>(() => assembly.LoadModule("abc", null));
+            Assert.Throws<NotImplementedException>(() => assembly.LoadModule("abc", null, null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr doesn't support more than one module per assembly")]
+        public static void Test_LoadModule_Netfx()
+        {
+            Assembly assembly = typeof(AssemblyTests).Assembly;
+            Assert.Throws<ArgumentNullException>(null, () => assembly.LoadModule("abc", null));
+            Assert.Throws<ArgumentNullException>(null, () => assembly.LoadModule("abc", null, null));
+        }
 
 #pragma warning disable 618
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFromWithPartialName() not supported on UapAot")]
         public static void Test_LoadWithPartialName()
         {
             string simplename = typeof(AssemblyTests).Assembly.GetName().Name;
@@ -322,29 +392,75 @@ namespace System.Reflection.Tests
 #pragma warning restore 618
 
         [Fact]
-        public void Test_LoadFrom()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() not supported on UapAot")]
+        public void LoadFrom_SamePath_ReturnsEqualAssemblies()
         {
-            var assem = Assembly.LoadFrom(destTestAssemblyPath);
+            Assembly assembly1 = Assembly.LoadFrom(destTestAssemblyPath);
+            Assembly assembly2 = Assembly.LoadFrom(destTestAssemblyPath);
+            Assert.Equal(assembly1, assembly2);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() not supported on UapAot")]
+        public void LoadFrom_SameIdentityAsAssemblyWithDifferentPath_ReturnsEqualAssemblies()
+        {
+            Assembly assembly1 = Assembly.LoadFrom(typeof(AssemblyTests).Assembly.Location);
+            Assert.Equal(assembly1, typeof(AssemblyTests).Assembly);
+
+            Assembly assembly2 = Assembly.LoadFrom(loadFromTestPath);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotEqual(assembly1, assembly2);
+            }
+            else
+            {
+                Assert.Equal(assembly1, assembly2);
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() not supported on UapAot")]
+        public void LoadFrom_NullAssemblyFile_ThrowsArgumentNullException()
+        {
             Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.LoadFrom(null));
-            var assem1 = Assembly.LoadFrom(destTestAssemblyPath);
-            Assert.Equal(assem, assem1);
-
-            assem = Assembly.LoadFrom(typeof(AssemblyTests).Assembly.Location);
-            Assert.Equal(assem, typeof(AssemblyTests).Assembly);
-
-            // Test that loading assembly of same identity as TPA returns TPA assembly even if paths differ
-            assem1 = Assembly.LoadFrom(loadFromTestPath);
-            Assert.Equal(assem, assem1);
-        }        
-
-        [Fact]
-        public void Test_UnsafeLoadFrom()
-        {
-            var assem = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
             Assert.Throws<ArgumentNullException>("assemblyFile", () => Assembly.UnsafeLoadFrom(null));
-        }        
+        }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() not supported on UapAot")]
+        public void LoadFrom_EmptyAssemblyFile_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(null, (() => Assembly.LoadFrom("")));
+            Assert.Throws<ArgumentException>(null, (() => Assembly.UnsafeLoadFrom("")));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() not supported on UapAot")]
+        public void LoadFrom_NoSuchFile_ThrowsFileNotFoundException()
+        {
+            Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom("NoSuchPath"));
+            Assert.Throws<FileNotFoundException>(() => Assembly.UnsafeLoadFrom("NoSuchPath"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.UnsafeLoadFrom() not supported on UapAot")]
+        public void UnsafeLoadFrom_SamePath_ReturnsEqualAssemblies()
+        {
+            Assembly assembly1 = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
+            Assembly assembly2 = Assembly.UnsafeLoadFrom(destTestAssemblyPath);
+            Assert.Equal(assembly1, assembly2);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "The implementation of LoadFrom(string, byte[], AssemblyHashAlgorithm is not supported in .NET Core.")]
+        public void LoadFrom_WithHashValue_NetCoreCore_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Assembly.LoadFrom(destTestAssemblyPath, new byte[0], Configuration.Assemblies.AssemblyHashAlgorithm.None));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.GetFile() not supported on UapAot")]
         public void GetFile()
         {
             Assert.Throws<ArgumentNullException>(() => typeof(AssemblyTests).Assembly.GetFile(null));
@@ -355,6 +471,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.GetFiles() not supported on UapAot")]
         public void GetFiles()
         {
             Assert.NotNull(typeof(AssemblyTests).Assembly.GetFiles());

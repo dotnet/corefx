@@ -21,6 +21,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     }
 
     [Theory]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18220")]
     [MemberData(nameof(InputData))]
     public void TestEncoding(string inputString)
     {
@@ -92,6 +93,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18220")]
     public void InputEncoding_SetWithInInitialized_ResetsIn()
     {
         RemoteInvoke(() =>
@@ -114,7 +116,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     [Fact]
     public void InputEncoding_SetNull_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("value", () => Console.InputEncoding = null);
+        AssertExtensions.Throws<ArgumentNullException>("value", () => Console.InputEncoding = null);
     }
 
     [Fact]
@@ -127,6 +129,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18220")]
     public void OutputEncoding_SetWithErrorAndOutputInitialized_ResetsErrorAndOutput()
     {
         RemoteInvoke(() =>
@@ -155,10 +158,11 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     [Fact]
     public void OutputEncoding_SetNull_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("value", () => Console.OutputEncoding = null);
+        AssertExtensions.Throws<ArgumentNullException>("value", () => Console.OutputEncoding = null);
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18220")]
     [PlatformSpecific(TestPlatforms.Windows)]
     public void OutputEncoding_SetEncodingWithInvalidCodePage_ThrowsIOException()
     {
