@@ -15,6 +15,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="System\ApplicationIdentity.cs" />
+	<Compile Include="System\Data\Common\DBDataPermission.cs" />
+	<Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
+	<Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
+	<Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
+	<Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationAccess.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermission.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInformationPermissionAttribute.cs" />
@@ -113,6 +118,24 @@
     <Compile Include="System\Security\HostSecurityManagerOptions.cs" />
     <Compile Include="System\Security\HostSecurityManager.cs" />
     <Compile Include="System\Security\HostProtectionException.cs" />
+	<Compile Include="System\Security\Permissions\FileIOPermissionAttribute.cs" />
+	<Compile Include="System\Security\Permissions\IsolatedStorageContainment.cs" />
+	<Compile Include="System\Security\Permissions\IsolatedStorageFilePermission.cs" />
+	<Compile Include="System\Security\Permissions\IsolatedStorageFilePermissionAttribute.cs" />
+	<Compile Include="System\Security\Permissions\IsolatedStoragePermission.cs" />
+	<Compile Include="System\Security\Permissions\IsolatedStoragePermissionAttribute.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermission.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntry.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryCollection.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryEnumerator.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
+	<Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
+	<Compile Include="System\Security\Permissions\ResourcePermissionBase.cs" />
+	<Compile Include="System\Security\Permissions\ResourcePermissionBaseEntry.cs" />
+	<Compile Include="System\Security\Permissions\StorePermission.cs" />
+	<Compile Include="System\Security\Permissions\StorePermissionAttribute.cs" />
+	<Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
+	<Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
@@ -120,33 +143,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
-    <Compile Include="System\Security\Permissions\FileIOPermissionAttribute.cs" />
-    <Compile Include="System\Security\Permissions\IsolatedStorageContainment.cs" />
-    <Compile Include="System\Security\Permissions\IsolatedStorageFilePermission.cs" />
-    <Compile Include="System\Security\Permissions\IsolatedStorageFilePermissionAttribute.cs" />
-    <Compile Include="System\Security\Permissions\IsolatedStoragePermission.cs" />
-    <Compile Include="System\Security\Permissions\IsolatedStoragePermissionAttribute.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermission.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntry.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryCollection.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryEnumerator.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
-    <Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
-    <Compile Include="System\Security\Permissions\ResourcePermissionBase.cs" />
-    <Compile Include="System\Security\Permissions\ResourcePermissionBaseEntry.cs" />
-    <Compile Include="System\Security\Permissions\StorePermission.cs" />
-    <Compile Include="System\Security\Permissions\StorePermissionAttribute.cs" />
-    <Compile Include="System\Security\Permissions\StorePermissionFlags.cs" />
-    <Compile Include="System\Security\Permissions\TypeDescriptorPermissionAttribute.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Data\Common\DBDataPermission.cs" />
-    <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermission.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermissionAttribute.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
