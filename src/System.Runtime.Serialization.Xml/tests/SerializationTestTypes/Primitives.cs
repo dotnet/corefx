@@ -80,4 +80,24 @@ namespace SerializationTestTypes
         [DataMember]
         public object p3 = new MyStruct();
     }
+
+    [DataContract]
+    public class Person
+    {
+        public Person(string variation)
+        {
+            Age = 6;
+            Name = "smith";
+        }
+
+        public Person()
+        {
+        }
+
+        [DataMember]
+        public int Age;
+
+        [DataMember]
+        public string Name;
+    }
 }

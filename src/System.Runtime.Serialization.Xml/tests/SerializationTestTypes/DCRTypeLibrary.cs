@@ -27,4 +27,25 @@ namespace SerializationTestTypes
             get { return _data2; }
         }
     }
+
+    [DataContract(Name = "EmptyDCType", Namespace = "http://www.Default.com")]
+    public class EmptyDCType
+    {
+    }
+
+    [KnownType(typeof(EmptyDCType))]
+    public class POCOObjectContainer
+    {
+        public POCOObjectContainer() { Data = new EmptyDCType(); }
+
+        public object Data;
+
+        [IgnoreDataMember]
+        public object NonSerializedData;
+
+        public POCOObjectContainer(object input)
+        {
+            Data = input;
+        }
+    }
 }

@@ -86,4 +86,53 @@ namespace SerializationTestTypes
             return knownTypeResolver.TryResolveType(actualDataContractType, declaredType, null, out typeName, out typeNamespace);
         }
     }
+
+    [Serializable]
+    public class POCOTypeResolver : DataContractResolver
+    {
+        public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
+        {
+            string resolvedTypeName = string.Empty;
+            string resolvedNamespace = string.Empty;
+            resolvedNamespace = "http://www.default.com";
+            switch (dcType.Name)
+            {
+                case "POCOObjectContainer":
+                    {
+                        resolvedTypeName = "POCO";
+                    }
+                    break;
+                case "Person":
+                    {
+                        throw new InvalidOperationException("Member with attribute 'IgnoreDataMember' should be ignored during ser");
+                    }
+                default:
+                    {
+                        return KTResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
+                    }
+            }
+            //for types resolved by the DCR
+            XmlDictionary dic = new XmlDictionary();
+            typeName = dic.Add(resolvedTypeName);
+            typeNamespace = dic.Add(resolvedNamespace);
+            return true;
+        }
+
+        public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
+        {
+            if (typeNamespace.Equals("http://www.default.com"))
+            {
+                if (typeName.Equals("POCO"))
+                {
+                    return typeof(POCOObjectContainer);
+                }
+            }
+            if (typeName.Equals("Person"))
+            {
+                throw new InvalidOperationException("Member with attribute 'IgnoreDataMember' should be ignored during deser");
+            }
+            Type result = KTResolver.ResolveName(typeName, typeNamespace, declaredType, null);
+            return result;
+        }
+    }
 }

@@ -2859,6 +2859,26 @@ public static partial class DataContractSerializerTests
         var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
     }
+    [Fact]
+    public static void DCS_BasicRoundTripPOCOWithIgnoreDM()
+    {
+        var dataContractSerializerSettings = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.POCOTypeResolver(),
+            IgnoreExtensionDataObject = false,
+            KnownTypes = null,
+            MaxItemsInObjectGraph = int.MaxValue,
+            PreserveObjectReferences = false
+        };
+
+        string baseline = @"<POCOObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><data i:type=""a:EmptyDCType"" xmlns:a=""http://www.Default.com""/></POCOObjectContainer>";
+        var value = new SerializationTestTypes.POCOObjectContainer();
+        value.NonSerializedData = new SerializationTestTypes.Person();
+        
+        var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
+
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
+    }
 
     #endregion
 
