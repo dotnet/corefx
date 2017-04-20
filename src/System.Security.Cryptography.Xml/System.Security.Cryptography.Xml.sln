@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptography.Xml.Tests", "tests\System.Security.Cryptography.Xml.Tests.csproj", "{4A85232C-E914-4E06-8542-26DAF4B22D60}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -23,21 +23,63 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
 		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|ARM.ActiveCfg = uap-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|ARM.Build.0 = uap-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|x64.ActiveCfg = uap-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|x64.Build.0 = uap-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|x86.ActiveCfg = uap-Debug|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Debug|x86.Build.0 = uap-Debug|Any CPU
 		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
 		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|ARM.ActiveCfg = uap-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|ARM.Build.0 = uap-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|x64.ActiveCfg = uap-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|x64.Build.0 = uap-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|x86.ActiveCfg = uap-Release|Any CPU
+		{4A85232C-E914-4E06-8542-26DAF4B22D60}.Release|x86.Build.0 = uap-Release|Any CPU
 		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
 		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|ARM.ActiveCfg = uap-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|ARM.Build.0 = uap-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|x64.ActiveCfg = uap-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|x64.Build.0 = uap-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|x86.ActiveCfg = uap-Debug|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Debug|x86.Build.0 = uap-Debug|Any CPU
 		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
 		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|ARM.ActiveCfg = uap-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|ARM.Build.0 = uap-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|x64.ActiveCfg = uap-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|x64.Build.0 = uap-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|x86.ActiveCfg = uap-Release|Any CPU
+		{0544EAE3-0CF2-4EA6-93BE-A9FF8B52724A}.Release|x86.Build.0 = uap-Release|Any CPU
 		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
 		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|ARM.ActiveCfg = uap-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|ARM.Build.0 = uap-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|x64.ActiveCfg = uap-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|x64.Build.0 = uap-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|x86.ActiveCfg = uap-Debug|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Debug|x86.Build.0 = uap-Debug|Any CPU
 		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
 		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|ARM.ActiveCfg = uap-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|ARM.Build.0 = uap-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|x64.ActiveCfg = uap-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|x64.Build.0 = uap-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|x86.ActiveCfg = uap-Release|Any CPU
+		{C7266957-DB20-4250-9C2E-E1FF83EDBD71}.Release|x86.Build.0 = uap-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

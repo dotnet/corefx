@@ -2,19 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
     public class KeyInfo : IEnumerable
     {
-        private string _id = null;
         private ArrayList _keyInfoClauses;
 
         //
@@ -30,11 +24,7 @@ namespace System.Security.Cryptography.Xml
         // public properties
         //
 
-        public string Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
+        public string Id { get; set; }
 
         public XmlElement GetXml()
         {
@@ -47,9 +37,9 @@ namespace System.Security.Cryptography.Xml
         {
             // Create the KeyInfo element itself
             XmlElement keyInfoElement = xmlDocument.CreateElement("KeyInfo", SignedXml.XmlDsigNamespaceUrl);
-            if (!string.IsNullOrEmpty(_id))
+            if (!string.IsNullOrEmpty(Id))
             {
-                keyInfoElement.SetAttribute("Id", _id);
+                keyInfoElement.SetAttribute("Id", Id);
             }
 
             // Add all the clauses that go underneath it
@@ -70,7 +60,7 @@ namespace System.Security.Cryptography.Xml
                 throw new ArgumentNullException(nameof(value));
 
             XmlElement keyInfoElement = value;
-            _id = Utils.GetAttribute(keyInfoElement, "Id", SignedXml.XmlDsigNamespaceUrl);
+            Id = Utils.GetAttribute(keyInfoElement, "Id", SignedXml.XmlDsigNamespaceUrl);
 
             XmlNode child = keyInfoElement.FirstChild;
             while (child != null)

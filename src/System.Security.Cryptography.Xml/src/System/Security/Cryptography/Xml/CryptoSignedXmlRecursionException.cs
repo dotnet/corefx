@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -19,10 +18,5 @@ namespace System.Security.Cryptography.Xml
         public CryptoSignedXmlRecursionException() : base() { }
         public CryptoSignedXmlRecursionException(string message) : base(message) { }
         public CryptoSignedXmlRecursionException(string message, System.Exception inner) : base(message, inner) { }
-        // A constructor is needed for serialization when an 
-        // exception propagates from a remoting server to the client.  
-        protected CryptoSignedXmlRecursionException(System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context)
-        { }
     }
 }

@@ -2,38 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Xml;
-using System.IO;
 using System.Text;
-using System.Collections;
-using System.Security.Cryptography;
 
 namespace System.Security.Cryptography.Xml
 {
     // the class that provides node subset state and canonicalization function to XmlComment
     internal class CanonicalXmlComment : XmlComment, ICanonicalizableNode
     {
-        private bool _isInNodeSet;
-        private bool _includeComments;
-
         public CanonicalXmlComment(string comment, XmlDocument doc, bool defaultNodeSetInclusionState, bool includeComments)
             : base(comment, doc)
         {
-            _isInNodeSet = defaultNodeSetInclusionState;
-            _includeComments = includeComments;
+            IsInNodeSet = defaultNodeSetInclusionState;
+            IncludeComments = includeComments;
         }
 
-        public bool IsInNodeSet
-        {
-            get { return _isInNodeSet; }
-            set { _isInNodeSet = value; }
-        }
+        public bool IsInNodeSet { get; set; }
 
-        public bool IncludeComments
-        {
-            get { return _includeComments; }
-        }
+        public bool IncludeComments { get; private set; }
 
         public void Write(StringBuilder strBuilder, DocPosition docPos, AncestralNamespaceContextManager anc)
         {

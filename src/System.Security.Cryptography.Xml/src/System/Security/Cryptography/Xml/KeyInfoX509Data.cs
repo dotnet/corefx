@@ -2,22 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Globalization;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
     public class KeyInfoX509Data : KeyInfoClause
     {
-        // An array of certificates representing the certificate chain 
-        private ArrayList _certificates = null;
         // An array of issuer serial structs
         private ArrayList _issuerSerials = null;
         // An array of SKIs
@@ -99,22 +93,19 @@ namespace System.Security.Cryptography.Xml
         //
         // public properties
         //
-
-        public ArrayList Certificates
-        {
-            get { return _certificates; }
-        }
+        // An array of certificates representing the certificate chain 
+        public ArrayList Certificates { get; private set; }
 
         public void AddCertificate(X509Certificate certificate)
         {
             if (certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
 
-            if (_certificates == null)
-                _certificates = new ArrayList();
+            if (Certificates == null)
+                Certificates = new ArrayList();
 
             X509Certificate2 x509 = new X509Certificate2(certificate);
-            _certificates.Add(x509);
+            Certificates.Add(x509);
         }
 
         public ArrayList SubjectKeyIds
@@ -185,7 +176,7 @@ namespace System.Security.Cryptography.Xml
             if (_subjectKeyIds != null) _subjectKeyIds.Clear();
             if (_subjectNames != null) _subjectNames.Clear();
             if (_issuerSerials != null) _issuerSerials.Clear();
-            if (_certificates != null) _certificates.Clear();
+            if (Certificates != null) Certificates.Clear();
         }
 
         //
@@ -238,9 +229,9 @@ namespace System.Security.Cryptography.Xml
                 }
             }
 
-            if (_certificates != null)
+            if (Certificates != null)
             {
-                foreach (X509Certificate certificate in _certificates)
+                foreach (X509Certificate certificate in Certificates)
                 {
                     XmlElement x509Element = xmlDocument.CreateElement("X509Certificate", SignedXml.XmlDsigNamespaceUrl);
                     x509Element.AppendChild(xmlDocument.CreateTextNode(Convert.ToBase64String(certificate.GetRawCertData())));

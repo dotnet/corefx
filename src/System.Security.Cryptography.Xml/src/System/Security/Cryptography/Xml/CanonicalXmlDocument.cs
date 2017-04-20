@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Xml;
-using System.IO;
 using System.Text;
-using System.Collections;
-using System.Security.Cryptography;
 
 namespace System.Security.Cryptography.Xml
 {
@@ -17,20 +13,15 @@ namespace System.Security.Cryptography.Xml
     {
         private bool _defaultNodeSetInclusionState;
         private bool _includeComments;
-        private bool _isInNodeSet;
 
         public CanonicalXmlDocument(bool defaultNodeSetInclusionState, bool includeComments) : base()
         {
             PreserveWhitespace = true;
             _includeComments = includeComments;
-            _isInNodeSet = _defaultNodeSetInclusionState = defaultNodeSetInclusionState;
+            IsInNodeSet = _defaultNodeSetInclusionState = defaultNodeSetInclusionState;
         }
 
-        public bool IsInNodeSet
-        {
-            get { return _isInNodeSet; }
-            set { _isInNodeSet = value; }
-        }
+        public bool IsInNodeSet { get; set; }
 
         public void Write(StringBuilder strBuilder, DocPosition docPos, AncestralNamespaceContextManager anc)
         {

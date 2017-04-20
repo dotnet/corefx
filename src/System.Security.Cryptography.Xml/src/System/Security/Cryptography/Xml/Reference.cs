@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Xml;
 using System.Globalization;
 using System.Runtime.Versioning;
@@ -15,7 +11,6 @@ namespace System.Security.Cryptography.Xml
 {
     public class Reference
     {
-        private string _id;
         private string _uri;
         private string _type;
         private TransformChain _transformChain;
@@ -25,7 +20,6 @@ namespace System.Security.Cryptography.Xml
         private object _refTarget;
         private ReferenceTargetType _refTargetType;
         private XmlElement _cachedXml;
-        private SignedXml _signedXml = null;
         internal CanonicalXmlNodeList _namespaces = null;
 
         //
@@ -73,11 +67,7 @@ namespace System.Security.Cryptography.Xml
         // public properties
         //
 
-        public string Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
+        public string Id { get; set; }
 
         public string Uri
         {
@@ -142,11 +132,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        internal SignedXml SignedXml
-        {
-            get { return _signedXml; }
-            set { _signedXml = value; }
-        }
+        internal SignedXml SignedXml { get; set; }
 
         internal ReferenceTargetType ReferenceTargetType
         {
@@ -174,8 +160,8 @@ namespace System.Security.Cryptography.Xml
             // Create the Reference
             XmlElement referenceElement = document.CreateElement("Reference", SignedXml.XmlDsigNamespaceUrl);
 
-            if (!string.IsNullOrEmpty(_id))
-                referenceElement.SetAttribute("Id", _id);
+            if (!string.IsNullOrEmpty(Id))
+                referenceElement.SetAttribute("Id", Id);
 
             if (_uri != null)
                 referenceElement.SetAttribute("URI", _uri);
@@ -214,7 +200,7 @@ namespace System.Security.Cryptography.Xml
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            _id = Utils.GetAttribute(value, "Id", SignedXml.XmlDsigNamespaceUrl);
+            Id = Utils.GetAttribute(value, "Id", SignedXml.XmlDsigNamespaceUrl);
             _uri = Utils.GetAttribute(value, "URI", SignedXml.XmlDsigNamespaceUrl);
             _type = Utils.GetAttribute(value, "Type", SignedXml.XmlDsigNamespaceUrl);
 
@@ -309,7 +295,6 @@ namespace System.Security.Cryptography.Xml
             // Let's go get the target.
             string baseUri = (document == null ? System.Environment.CurrentDirectory + "\\" : document.BaseURI);
             Stream hashInputStream = null;
-            WebResponse response = null;
             Stream inputStream = null;
             XmlResolver resolver = null;
             byte[] hashval = null;
@@ -381,8 +366,8 @@ namespace System.Security.Cryptography.Xml
                                             && (Utils.GetAttribute(tempElem, "Id", SignedXml.XmlDsigNamespaceUrl).Equals(idref)))
                                         {
                                             elem = tempElem;
-                                            if (_signedXml._context != null)
-                                                _namespaces = Utils.GetPropagatedAttributes(_signedXml._context);
+                                            if (SignedXml._context != null)
+                                                _namespaces = Utils.GetPropagatedAttributes(SignedXml._context);
                                             break;
                                         }
                                     }
@@ -431,8 +416,6 @@ namespace System.Security.Cryptography.Xml
             {
                 if (hashInputStream != null)
                     hashInputStream.Close();
-                if (response != null)
-                    response.Close();
                 if (inputStream != null)
                     inputStream.Close();
             }

@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -16,7 +15,7 @@ namespace System.Security.Cryptography.Xml
         private string _encoding;
         private EncryptionMethod _encryptionMethod;
         private CipherData _cipherData;
-        private EncryptionPropertyCollection _props;
+        private List<EncryptionProperty> _props;
         private KeyInfo _keyInfo;
         internal XmlElement _cachedXml = null;
 
@@ -89,12 +88,12 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        public virtual EncryptionPropertyCollection EncryptionProperties
+        public virtual List<EncryptionProperty> EncryptionProperties
         {
             get
             {
                 if (_props == null)
-                    _props = new EncryptionPropertyCollection();
+                    _props = new List<EncryptionProperty>();
                 return _props;
             }
         }

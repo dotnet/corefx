@@ -2,43 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
     public class RSAKeyValue : KeyInfoClause
     {
-        private RSA _key;
-
         //
         // public constructors
         //
 
         public RSAKeyValue()
         {
-            _key = RSA.Create();
+            Key = RSA.Create();
         }
 
         public RSAKeyValue(RSA key)
         {
-            _key = key;
+            Key = key;
         }
 
         //
         // public properties
         //
 
-        public RSA Key
-        {
-            get { return _key; }
-            set { _key = value; }
-        }
+        public RSA Key { get; set; }
 
         //
         // public methods
@@ -67,7 +55,7 @@ namespace System.Security.Cryptography.Xml
 
         internal override XmlElement GetXml(XmlDocument xmlDocument)
         {
-            RSAParameters rsaParams = _key.ExportParameters(false);
+            RSAParameters rsaParams = Key.ExportParameters(false);
 
             XmlElement keyValueElement = xmlDocument.CreateElement(KeyValueElementName, SignedXml.XmlDsigNamespaceUrl);
             XmlElement rsaKeyValueElement = xmlDocument.CreateElement(RSAKeyValueElementName, SignedXml.XmlDsigNamespaceUrl);

@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Xml;
-using System.IO;
-using System.Text;
 using System.Collections;
 
 namespace System.Security.Cryptography.Xml
@@ -19,7 +16,7 @@ namespace System.Security.Cryptography.Xml
             return (NamespaceFrame)_ancestorStack[i];
         }
 
-        internal NamespaceFrame GetCurrentScope()
+        private NamespaceFrame GetCurrentScope()
         {
             return GetScopeAt(_ancestorStack.Count - 1);
         }
@@ -74,7 +71,7 @@ namespace System.Security.Cryptography.Xml
             nsLocallyDeclared.Values.CopyTo(attrs, 0);
             foreach (object attr in attrs)
             {
-                AddUnrendered((XmlAttribute)attr);
+                GetCurrentScope().AddUnrendered((XmlAttribute)attr);
             }
         }
 
@@ -82,18 +79,8 @@ namespace System.Security.Cryptography.Xml
         {
             foreach (object attr in nsRenderedList.GetKeyList())
             {
-                AddRendered((XmlAttribute)attr);
+                GetCurrentScope().AddRendered((XmlAttribute)attr);
             }
-        }
-
-        internal void AddRendered(XmlAttribute attr)
-        {
-            GetCurrentScope().AddRendered(attr);
-        }
-
-        internal void AddUnrendered(XmlAttribute attr)
-        {
-            GetCurrentScope().AddUnrendered(attr);
         }
     }
 }

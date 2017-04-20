@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -109,7 +107,7 @@ namespace System.Security.Cryptography.Xml
                 XmlElement encryptionPropertiesElement = document.CreateElement("EncryptionProperties", EncryptedXml.XmlEncNamespaceUrl);
                 for (int index = 0; index < EncryptionProperties.Count; index++)
                 {
-                    EncryptionProperty ep = EncryptionProperties.Item(index);
+                    EncryptionProperty ep = EncryptionProperties[index];
                     encryptionPropertiesElement.AppendChild(ep.GetXml(document));
                 }
                 encryptedDataElement.AppendChild(encryptionPropertiesElement);

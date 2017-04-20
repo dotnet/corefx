@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Xml;
 
@@ -10,20 +9,11 @@ namespace System.Security.Cryptography.Xml
 {
     public class Signature
     {
-        private string _id;
         private SignedInfo _signedInfo;
-        private byte[] _signatureValue;
         private string _signatureValueId;
         private KeyInfo _keyInfo;
-        private IList _embeddedObjects;
-        private CanonicalXmlNodeList _referencedItems;
-        private SignedXml _signedXml = null;
 
-        internal SignedXml SignedXml
-        {
-            get { return _signedXml; }
-            set { _signedXml = value; }
-        }
+        internal SignedXml SignedXml { get; set; }
 
         //
         // public constructors
@@ -31,19 +21,15 @@ namespace System.Security.Cryptography.Xml
 
         public Signature()
         {
-            _embeddedObjects = new ArrayList();
-            _referencedItems = new CanonicalXmlNodeList();
+            ObjectList = new ArrayList();
+            ReferencedItems = new CanonicalXmlNodeList();
         }
 
         //
         // public properties
         //
 
-        public string Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
+        public string Id { get; set; }
 
         public SignedInfo SignedInfo
         {
@@ -56,11 +42,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        public byte[] SignatureValue
-        {
-            get { return _signatureValue; }
-            set { _signatureValue = value; }
-        }
+        public byte[] SignatureValue { get; set; }
 
         public KeyInfo KeyInfo
         {
@@ -73,16 +55,9 @@ namespace System.Security.Cryptography.Xml
             set { _keyInfo = value; }
         }
 
-        public IList ObjectList
-        {
-            get { return _embeddedObjects; }
-            set { _embeddedObjects = value; }
-        }
+        public IList ObjectList { get; set; }
 
-        internal CanonicalXmlNodeList ReferencedItems
-        {
-            get { return _referencedItems; }
-        }
+        internal CanonicalXmlNodeList ReferencedItems { get; private set; }
 
         //
         // public methods
@@ -99,8 +74,8 @@ namespace System.Security.Cryptography.Xml
         {
             // Create the Signature
             XmlElement signatureElement = (XmlElement)document.CreateElement("Signature", SignedXml.XmlDsigNamespaceUrl);
-            if (!string.IsNullOrEmpty(_id))
-                signatureElement.SetAttribute("Id", _id);
+            if (!string.IsNullOrEmpty(Id))
+                signatureElement.SetAttribute("Id", Id);
 
             // Add the SignedInfo
             if (_signedInfo == null)
@@ -109,11 +84,11 @@ namespace System.Security.Cryptography.Xml
             signatureElement.AppendChild(_signedInfo.GetXml(document));
 
             // Add the SignatureValue
-            if (_signatureValue == null)
+            if (SignatureValue == null)
                 throw new CryptographicException(SR.Cryptography_Xml_SignatureValueRequired);
 
             XmlElement signatureValueElement = document.CreateElement("SignatureValue", SignedXml.XmlDsigNamespaceUrl);
-            signatureValueElement.AppendChild(document.CreateTextNode(Convert.ToBase64String(_signatureValue)));
+            signatureValueElement.AppendChild(document.CreateTextNode(Convert.ToBase64String(SignatureValue)));
             if (!string.IsNullOrEmpty(_signatureValueId))
                 signatureValueElement.SetAttribute("Id", _signatureValueId);
             signatureElement.AppendChild(signatureValueElement);
@@ -123,7 +98,7 @@ namespace System.Security.Cryptography.Xml
                 signatureElement.AppendChild(KeyInfo.GetXml(document));
 
             // Add the Objects
-            foreach (object obj in _embeddedObjects)
+            foreach (object obj in ObjectList)
             {
                 DataObject dataObj = obj as DataObject;
                 if (dataObj != null)
@@ -147,7 +122,7 @@ namespace System.Security.Cryptography.Xml
                 throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "Signature");
 
             // Id attribute -- optional
-            _id = Utils.GetAttribute(signatureElement, "Id", SignedXml.XmlDsigNamespaceUrl);
+            Id = Utils.GetAttribute(signatureElement, "Id", SignedXml.XmlDsigNamespaceUrl);
 
             XmlNamespaceManager nsm = new XmlNamespaceManager(value.OwnerDocument.NameTable);
             nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
@@ -164,7 +139,7 @@ namespace System.Security.Cryptography.Xml
             XmlElement signatureValueElement = signatureElement.SelectSingleNode("ds:SignatureValue", nsm) as XmlElement;
             if (signatureValueElement == null)
                 throw new CryptographicException(SR.Cryptography_Xml_InvalidElement, "SignedInfo/SignatureValue");
-            _signatureValue = Convert.FromBase64String(Utils.DiscardWhiteSpaces(signatureValueElement.InnerText));
+            SignatureValue = Convert.FromBase64String(Utils.DiscardWhiteSpaces(signatureValueElement.InnerText));
             _signatureValueId = Utils.GetAttribute(signatureValueElement, "Id", SignedXml.XmlDsigNamespaceUrl);
 
             XmlNodeList keyInfoNodes = signatureElement.SelectNodes("ds:KeyInfo", nsm);
@@ -180,7 +155,7 @@ namespace System.Security.Cryptography.Xml
             }
 
             XmlNodeList objectNodes = signatureElement.SelectNodes("ds:Object", nsm);
-            _embeddedObjects.Clear();
+            ObjectList.Clear();
             if (objectNodes != null)
             {
                 foreach (XmlNode node in objectNodes)
@@ -190,7 +165,7 @@ namespace System.Security.Cryptography.Xml
                     {
                         DataObject dataObj = new DataObject();
                         dataObj.LoadXml(objectElement);
-                        _embeddedObjects.Add(dataObj);
+                        ObjectList.Add(dataObj);
                     }
                 }
             }
@@ -201,14 +176,14 @@ namespace System.Security.Cryptography.Xml
             {
                 foreach (XmlNode node in nodeList)
                 {
-                    _referencedItems.Add(node);
+                    ReferencedItems.Add(node);
                 }
             }
         }
 
         public void AddObject(DataObject dataObject)
         {
-            _embeddedObjects.Add(dataObject);
+            ObjectList.Add(dataObject);
         }
     }
 }
