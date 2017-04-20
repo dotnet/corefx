@@ -33,7 +33,7 @@ namespace System.Runtime.ExceptionServices.Tests
         [PlatformSpecific(TestPlatforms.Windows)] // Feature Corrupting Exceptions not present for Linux
         public static void ProcessExit_Called()
         {
-            using (Process p = RemoteInvoke(() => { causeAVInNative(); return SuccessExitCode; }).Process)
+            using (Process p = RemoteInvoke(() => { CauseAVInNative(); return SuccessExitCode; }).Process)
             {
                 p.WaitForExit();
                 if (PlatformDetection.IsFullFramework)
