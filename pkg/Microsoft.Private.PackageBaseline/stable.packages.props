@@ -1364,7 +1364,7 @@
     <StablePackage Include="System.Net.Http">
       <Version>4.1.2</Version>
     </StablePackage>
-    <StablePackage Include="System.Net.Http.WebHttpHandler">
+    <StablePackage Include="System.Net.Http.WinHttpHandler">
       <Version>4.0.2</Version>
     </StablePackage>
     <StablePackage Include="System.Net.Security">
