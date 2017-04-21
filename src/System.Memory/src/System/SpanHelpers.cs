@@ -22,26 +22,14 @@ namespace System
         /// </summary>
         public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
         {
-            IntPtr srcMinusDst = Unsafe.ByteOffset<T>(ref dst, ref src);
-            bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int)) ? srcMinusDst.ToInt32() >= 0 : srcMinusDst.ToInt64() >= 0;
-            IntPtr tailDiff;
+            const long srcStart = 0;
+            long srcEnd = srcStart + (long)Unsafe.ByteOffset(ref src, ref Unsafe.Add(ref src, srcLength));
 
-            if (srcGreaterThanDst)
-            {
-                // If the start of source is greater than the start of destination, then we need to calculate
-                // the different between the end of destination relative to the start of source.
-                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref dst, dstLength), ref src);
-            }
-            else
-            {
-                // If the start of source is less than the start of destination, then we need to calculate
-                // the different between the end of source relative to the start of destunation.
-                tailDiff = Unsafe.ByteOffset<T>(ref Unsafe.Add<T>(ref src, srcLength), ref dst);
-            }
+            long dstStart = (long)Unsafe.ByteOffset(ref src, ref dst);
+            long dstEnd = dstStart + (long)Unsafe.ByteOffset(ref dst, ref Unsafe.Add(ref dst, dstLength));
 
-            // If the source is entirely before or entirely after the destination and the type inside the span is not
-            // itself a reference type or containing reference types, then we can do a simple block copy of the data.
-            bool isOverlapped = (sizeof(IntPtr) == sizeof(int)) ? tailDiff.ToInt32() < 0 : tailDiff.ToInt64() < 0;
+            bool isOverlapped = (srcStart < dstEnd) && (dstStart < srcEnd);
+
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
@@ -61,7 +49,7 @@ namespace System
             }
             else
             {
-                if (srcGreaterThanDst)
+                if (srcStart >= dstStart)
                 {
                     // Source address greater than or equal to destination address. Can do normal copy.
                     for (int i = 0; i < srcLength; i++)
