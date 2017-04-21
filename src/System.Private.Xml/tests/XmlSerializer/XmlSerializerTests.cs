@@ -4199,7 +4199,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(myGroup3.CreationTime, actual3.CreationTime);
 
         var myGroup4 = new Group4WithXmlTextAttr();
-        Assert.Throws(typeof(System.InvalidOperationException), () => { SerializeAndDeserialize(myGroup4, null, null, true); });
+        Assert.Throws<InvalidOperationException>(() => { SerializeAndDeserialize(myGroup4, null, null, true); });
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";
