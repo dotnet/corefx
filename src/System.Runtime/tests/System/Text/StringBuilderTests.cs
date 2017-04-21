@@ -975,6 +975,18 @@ namespace System.Text.Tests
             Assert.Equal(expected, new StringBuilder().AppendJoin("|", stringValues).ToString());
         }
 
+        [Fact]
+        public static void AppendJoin_NullToStringValues()
+        {
+            AppendJoin_TestValues(new object[] { new NullToStringObject() }, "");
+            AppendJoin_TestValues(new object[] { new NullToStringObject(), new NullToStringObject() }, "|");
+        }
+
+        private sealed class NullToStringObject
+        {
+            public override string ToString() => null;
+        }
+
         [Theory]
         [InlineData(null, "123")]
         [InlineData("", "123")]
