@@ -21,6 +21,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Causing other tests to intermittently fail on netfx")]
         public static void EnsureLegalSizesValuesIsolated()
         {
             new AesLegalSizesBreaker().Dispose();

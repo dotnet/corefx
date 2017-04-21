@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Test.Cryptography;
 using Xunit;
 
@@ -608,14 +609,40 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
 
         private static byte[] AesEncryptDirectKey(Aes aes, byte[] key, byte[] iv, byte[] plainBytes)
         {
-            using (MemoryStream output = new MemoryStream())
-            using (CryptoStream cryptoStream = new CryptoStream(output, aes.CreateEncryptor(key, iv), CryptoStreamMode.Write))
+            try
             {
-                cryptoStream.Write(plainBytes, 0, plainBytes.Length);
-                cryptoStream.FlushFinalBlock();
+                using (MemoryStream output = new MemoryStream())
+                using (CryptoStream cryptoStream = new CryptoStream(output, aes.CreateEncryptor(key, iv), CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(plainBytes, 0, plainBytes.Length);
+                    cryptoStream.FlushFinalBlock();
 
-                return output.ToArray();
+                    return output.ToArray();
+                }
             }
+            catch (Exception e)
+            {
+                throw new Exception(
+                    $"key.Length = {key.Length};\n"
+                    + $"iv.Length = {iv.Length};\n"
+                    + $"aes.KeySize = {aes.KeySize};\n"
+                    + $"aes.GetType().FullName = {aes.GetType().FullName};\n"
+                    + $"aes.ValidKeySize(192)? = {aes.ValidKeySize(192)};\n"
+                    + $"aes.LegalKeySizes = {{{KeySizesStringifier(aes.LegalKeySizes)}}}",
+                    e);
+            }
+        }
+
+        private static string KeySizesStringifier(KeySizes[] keySizes)
+        {
+            if (keySizes == null)
+            {
+                return "null";
+            }
+
+            return string.Join(", ", keySizes.Select((ks) => {
+                return $"KeySizes(MinSize = {ks.MinSize}, MaxSize = {ks.MaxSize}, SkipSize = {ks.SkipSize})";
+            }));
         }
 
         private static byte[] AesDecryptDirectKey(Aes aes, byte[] key, byte[] iv, byte[] cipherBytes)
