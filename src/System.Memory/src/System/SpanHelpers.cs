@@ -22,19 +22,20 @@ namespace System
         /// </summary>
         public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
         {
-            const long srcStart = 0;
-            long srcEnd = srcStart + (long)Unsafe.ByteOffset(ref src, ref Unsafe.Add(ref src, srcLength));
+            IntPtr srcByteCount = Unsafe.ByteOffset(ref src, ref Unsafe.Add(ref src, srcLength));
+            IntPtr dstByteCount = Unsafe.ByteOffset(ref dst, ref Unsafe.Add(ref dst, dstLength));
 
-            long dstStart = (long)Unsafe.ByteOffset(ref src, ref dst);
-            long dstEnd = dstStart + (long)Unsafe.ByteOffset(ref dst, ref Unsafe.Add(ref dst, dstLength));
+            IntPtr diff = Unsafe.ByteOffset(ref src, ref dst);
 
-            bool isOverlapped = (srcStart < dstEnd) && (dstStart < srcEnd);
+            bool isOverlapped = (sizeof(IntPtr) == sizeof(int))
+                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
+                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
 
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ref byte dstBytes = ref Unsafe.As<T, byte>(ref dst);
                 ref byte srcBytes = ref Unsafe.As<T, byte>(ref src);
-                ulong byteCount = (ulong)srcLength * (ulong)Unsafe.SizeOf<T>();
+                ulong byteCount = (ulong)srcByteCount;
                 ulong index = 0;
 
                 while (index < byteCount)
@@ -49,9 +50,13 @@ namespace System
             }
             else
             {
-                if (srcStart >= dstStart)
+                bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int))
+                    ? (uint)diff > uint.MaxValue - (uint)dstByteCount
+                    : (ulong)diff > ulong.MaxValue - (ulong)dstByteCount;
+
+                if (srcGreaterThanDst)
                 {
-                    // Source address greater than or equal to destination address. Can do normal copy.
+                    // Source address greater than destination address. Can do normal copy.
                     for (int i = 0; i < srcLength; i++)
                     {
                         Unsafe.Add<T>(ref dst, i) = Unsafe.Add<T>(ref src, i);
@@ -59,7 +64,7 @@ namespace System
                 }
                 else
                 {
-                    // Source address less than destination address. Must do backward copy.
+                    // Source address less than or equal to destination address. Must do backward copy.
                     int i = srcLength;
                     while (i-- != 0)
                     {
