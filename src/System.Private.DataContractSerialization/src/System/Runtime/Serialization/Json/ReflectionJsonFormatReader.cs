@@ -63,12 +63,12 @@ namespace System.Runtime.Serialization.Json
 
             int memberIndex = -1;
 
-            ExtensionDataObject extensionObj = null;
+            ExtensionDataObject extensionData = null;
 
             if (classContract.HasExtensionData)
             {
-                extensionObj = new ExtensionDataObject();
-                ((IExtensibleDataObject)obj).ExtensionData = extensionObj;
+                extensionData = new ExtensionDataObject();
+                ((IExtensibleDataObject)obj).ExtensionData = extensionData;
             }
 
             while (true)
@@ -78,7 +78,7 @@ namespace System.Runtime.Serialization.Json
                     return;
                 }
 
-                memberIndex = jsonContext.GetJsonMemberIndex(xmlReader, memberNames, memberIndex, extensionObj);
+                memberIndex = jsonContext.GetJsonMemberIndex(xmlReader, memberNames, memberIndex, extensionData);
                 // GetMemberIndex returns memberNames.Length if member not found
                 if (memberIndex < members.Length)
                 {
