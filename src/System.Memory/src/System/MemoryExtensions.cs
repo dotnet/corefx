@@ -294,7 +294,7 @@ namespace System
 
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static unsafe bool Overlaps<T>(Span<T> first, ReadOnlySpan<T> second)
+        public static unsafe bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
         {
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
@@ -312,7 +312,7 @@ namespace System
         /// <summary>
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static unsafe bool Overlaps<T>(ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static unsafe bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
         {
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
