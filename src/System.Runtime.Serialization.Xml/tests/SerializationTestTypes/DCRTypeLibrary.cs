@@ -50,27 +50,15 @@ namespace SerializationTestTypes
         [DataMember()]
         public virtual object[] KnownTypes
         {
-            get
-            {
-                return knownTypes;
-            }
-            set
-            {
-                knownTypes = value;
-            }
+            get { return knownTypes; }
+            set { knownTypes = value; }
         }
 
         [DataMember()]
         public virtual object[] DataContractResolverTypes
         {
-            get
-            {
-                return dataContractResolverTypes;
-            }
-            set
-            {
-                dataContractResolverTypes = value;
-            }
+            get { return dataContractResolverTypes; }
+            set { dataContractResolverTypes = value; }
         }
     }
 }
