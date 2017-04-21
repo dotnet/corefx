@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Configuration;
+using System.Reflection;
 using Xunit;
 
 namespace System.ConfigurationTests
@@ -13,22 +14,44 @@ namespace System.ConfigurationTests
         [Fact]
         public void Constructor_MinLength()
         {
-            // We don't expect this to fail
             StringValidator validator = new StringValidator(5);
+            int expectedMinimumLength = 5;
+
+            int actualMinimumLength = Convert.ToInt32(typeof(StringValidator).GetField("_minLength", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator));
+
+            Assert.Equal(expectedMinimumLength, actualMinimumLength);
         }
 
         [Fact]
         public void Constructor_MinValueAndMaxValue()
         {
-            // This should complete with no errors.
             StringValidator validator = new StringValidator(5, 10);
+            int expectedMinimumLength = 5;
+            int expectedMaximumLength = 10;
+
+            int actualMinimumLength = Convert.ToInt32(typeof(StringValidator).GetField("_minLength", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator));
+            int actualMaximumLength = Convert.ToInt32(typeof(StringValidator).GetField("_maxLength", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator));
+
+            Assert.Equal(expectedMinimumLength, actualMinimumLength);
+            Assert.Equal(expectedMaximumLength, actualMaximumLength);
+
         }
 
         [Fact]
         public void Constructor_MinValueMaxValueAndInvalidChars()
         {
-            // This should complete with no errors.
             StringValidator validator = new StringValidator(5, 10, "abcde");
+            int expectedMinimumLength = 5;
+            int expectedMaximumLength = 10;
+            string expectedInvalidChars = "abcde";
+
+            int actualMinimumLength = Convert.ToInt32(typeof(StringValidator).GetField("_minLength", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator));
+            int actualMaximumLength = Convert.ToInt32(typeof(StringValidator).GetField("_maxLength", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator));
+            string actualInvalidChars = typeof(StringValidator).GetField("_invalidChars", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField).GetValue(validator).ToString();
+
+            Assert.Equal(expectedMinimumLength, actualMinimumLength);
+            Assert.Equal(expectedMaximumLength, actualMaximumLength);
+            Assert.Equal(expectedInvalidChars, actualInvalidChars);
         }
 
         [Fact]
