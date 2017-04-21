@@ -299,35 +299,37 @@ namespace System
         /// <summary>
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static bool Overlap<T>(Span<T> first, ReadOnlySpan<T> second)
+        public static unsafe bool Overlaps<T>(Span<T> first, ReadOnlySpan<T> second)
         {
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
-            const long firstStart = 0;
-            long firstEnd = firstStart + (long)Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr srcByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr dstByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
 
-            long secondStart = (long)Unsafe.ByteOffset(ref firstRef, ref secondRef);
-            long secondEnd = secondStart + (long)Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
-            return (firstStart < secondEnd) && (secondStart < firstEnd);
+            return (sizeof(IntPtr) == sizeof(int))
+                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
+                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
         }
 
         /// <summary>
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static bool Overlap<T>(ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static unsafe bool Overlaps<T>(ReadOnlySpan<T> first, ReadOnlySpan<T> second)
         {
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
-            const long firstStart = 0;
-            long firstEnd = firstStart + (long)Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr srcByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr dstByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
 
-            long secondStart = (long)Unsafe.ByteOffset(ref firstRef, ref secondRef);
-            long secondEnd = secondStart + (long)Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
-            return (firstStart < secondEnd) && (secondStart < firstEnd);
+            return (sizeof(IntPtr) == sizeof(int))
+                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
+                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
         }
     }
 }
