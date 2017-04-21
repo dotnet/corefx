@@ -51,8 +51,6 @@ namespace System.ConfigurationTests
         {
             StringValidator validator = new StringValidator(5);
             ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate(5));
-            ArgumentException expected = new ArgumentException(SR.Validator_value_type_invalid, string.Empty);
-            Assert.Equal(expected.Message, thrownException.Message);
         }
 
         [Fact]
@@ -60,8 +58,6 @@ namespace System.ConfigurationTests
         {
             StringValidator validator = new StringValidator(5);
             ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate("Hi"));
-            ArgumentException expected = new ArgumentException(string.Format(SR.Validator_string_min_length, 5), string.Empty);
-            Assert.Equal(expected.Message, thrownException.Message);
         }
 
         [Fact]
@@ -69,8 +65,6 @@ namespace System.ConfigurationTests
         {
             StringValidator validator = new StringValidator(5, 10);
             ArgumentException thrownException = Assert.Throws<ArgumentException>(() => validator.Validate("This is more than ten"));
-            ArgumentException expected = new ArgumentException(string.Format(SR.Validator_string_max_length, 10), string.Empty);
-            Assert.Equal(expected.Message, thrownException.Message);
         }
 
         [Fact]
@@ -99,9 +93,7 @@ namespace System.ConfigurationTests
         public void Validate_UsinginvalidCharacters(string stringToValidate)
         {
             StringValidator validator = new StringValidator(1, 20, "_-");
-            ArgumentException expectedException = new ArgumentException((string.Format(SR.Validator_string_invalid_chars, "_-")));
             ArgumentException result = Assert.Throws<ArgumentException>(() => validator.Validate(stringToValidate));
-            Assert.Equal(expectedException.Message, result.Message);
         }
 
         [Fact]
