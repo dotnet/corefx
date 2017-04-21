@@ -960,6 +960,8 @@ namespace System.Text.Tests
         [InlineData(new object[] { 10, null, 30 }, "10||30")]
         [InlineData(new object[] { 10, 20, null }, "10|20|")]
         [InlineData(new object[] { 10, 20, 30 }, "10|20|30")]
+        [InlineData(new object[] { "" }, "")]
+        [InlineData(new object[] { "", "" }, "|")]
         public static void AppendJoin_TestValues(object[] values, string expected)
         {
             var stringValues = Array.ConvertAll(values, _ => _?.ToString());
