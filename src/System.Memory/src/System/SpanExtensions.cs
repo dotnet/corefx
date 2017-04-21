@@ -295,5 +295,39 @@ namespace System
         {
             new ReadOnlySpan<T>(array).CopyTo(destination);
         }
+
+        /// <summary>
+        /// Determines whether two sequences overlap.
+        /// </summary>
+        public static bool Overlap<T>(Span<T> first, ReadOnlySpan<T> second)
+        {
+            ref T firstRef = ref first.DangerousGetPinnableReference();
+            ref T secondRef = ref second.DangerousGetPinnableReference();
+
+            const long firstStart = 0;
+            long firstEnd = firstStart + (long)Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+
+            long secondStart = (long)Unsafe.ByteOffset(ref firstRef, ref secondRef);
+            long secondEnd = secondStart + (long)Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+
+            return (firstStart < secondEnd) && (secondStart < firstEnd);
+        }
+
+        /// <summary>
+        /// Determines whether two sequences overlap.
+        /// </summary>
+        public static bool Overlap<T>(ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        {
+            ref T firstRef = ref first.DangerousGetPinnableReference();
+            ref T secondRef = ref second.DangerousGetPinnableReference();
+
+            const long firstStart = 0;
+            long firstEnd = firstStart + (long)Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+
+            long secondStart = (long)Unsafe.ByteOffset(ref firstRef, ref secondRef);
+            long secondEnd = secondStart + (long)Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+
+            return (firstStart < secondEnd) && (secondStart < firstEnd);
+        }
     }
 }
