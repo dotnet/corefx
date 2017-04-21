@@ -75,8 +75,7 @@ namespace System.IO.IsolatedStorage
             }
             else
             {
-                hash = IdentityHelper.GetNormalizedUriHash(codeBase);
-                hash = "Url" + separator + hash;
+                hash = "Url" + separator + IdentityHelper.GetNormalizedUriHash(codeBase);
                 identity = codeBase;
             }
         }

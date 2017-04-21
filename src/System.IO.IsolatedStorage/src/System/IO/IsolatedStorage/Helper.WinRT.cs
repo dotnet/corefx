@@ -21,16 +21,13 @@ namespace System.IO.IsolatedStorage
             {
                 dataDirectory = ApplicationData.Current.SharedLocalFolder.Path;
             }
+            if (!IsRoaming(scope))
+            {
+                dataDirectory = ApplicationData.Current.LocalFolder.Path;
+            }
             else
             {
-                if (!IsRoaming(scope))
-                {
-                    dataDirectory = ApplicationData.Current.LocalFolder.Path;
-                }
-                else
-                {
-                    dataDirectory = ApplicationData.Current.RoamingFolder.Path;
-                }
+                dataDirectory = ApplicationData.Current.RoamingFolder.Path;
             }
 
             dataDirectory = Path.Combine(dataDirectory, IsolatedStorageDirectoryName);
