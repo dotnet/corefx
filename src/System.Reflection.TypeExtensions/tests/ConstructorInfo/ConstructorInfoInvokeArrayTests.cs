@@ -33,6 +33,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Multidim arrays of rank 1 not supported on UapAot: https://github.com/dotnet/corert/issues/3331")]
         public void Invoke_1DArrayConstructor()
         {
             Type type = Type.GetType("System.Char[*]");
@@ -134,6 +135,12 @@ namespace System.Reflection.Tests
                             int[] invalidLengths3 = new int[] { -11, -10, 0 };
                             int[] invalidLengths4 = new int[] { -33, 0, -20 };
 
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(invalidLowerBounds1, 0, invalidLowerBounds1.Length);
+                                Array.Clear(invalidLowerBounds2, 0, invalidLowerBounds2.Length);
+                            }
+
                             for (int j = 0; j < invalidLengths3.Length; j++)
                             {
                                 Assert.Throws<OverflowException>(() => constructors[i].Invoke(new object[] { invalidLowerBounds1[j], invalidLengths3[j], invalidLowerBounds2[j], invalidLengths4[j] }));
@@ -163,6 +170,12 @@ namespace System.Reflection.Tests
                                             cnt++;
                                         }
 
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(validLowerBounds1, 0, validLowerBounds1.Length);
+                                Array.Clear(validLowerBounds2, 0, validLowerBounds2.Length);
+                            }
+
                             for (int j = 0; j < validLengths1.Length; j++)
                             {
                                 int[,] arr = (int[,])constructors[i].Invoke(new object[] { validLowerBounds1[j], validLengths1[j], validLowerBounds2[j], validLengths2[j] });
@@ -178,6 +191,12 @@ namespace System.Reflection.Tests
                             validLowerBounds2 = new int[] { 5, 99, -100, 30, 4, -5, 99, 100, -30, 0 };
                             validLengths1 = new int[] { 1, 200, 2, 40, 0, 1, 200, 2, 40, 65535 };
                             validLengths2 = new int[] { 5, 10, 1, 0, 4, 5, 65535, 1, 0, 4 };
+
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(validLowerBounds1, 0, validLowerBounds1.Length);
+                                Array.Clear(validLowerBounds2, 0, validLowerBounds2.Length);
+                            }
 
                             for (int j = 0; j < validLengths1.Length; j++)
                             {
