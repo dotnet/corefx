@@ -34,7 +34,7 @@ For Visual Studio 2017:
   * .NET Framework 4.6 Targeting Pack
   * Windows Universal CRT SDK
   * VC++ 2015.3 v140 Toolset (x86, x64)
-* Ensure you are running from the "Developer Command Prompt for VS2017"; Otherwise, the build will attempt to locate and use the VS2015 toolset.
+* Ensure you are running from the "Developer Command Prompt for VS 2017"; Otherwise, the build will attempt to locate and use the VS2015 toolset.
 
 [CMake](https://cmake.org/) is required to build the native libraries for Windows. To build these libraries cmake must be installed from [the CMake download page](https://cmake.org/download/#latest) and added to your path.
 

@@ -10,8 +10,12 @@ if %1=="/?" GOTO :USAGE
 
 setlocal
 set __sourceDir=%~dp0
-:: VS 2015 is the minimum supported toolset
-set __VSString=14 2015
+
+:: Set Visual Studio version from input parameter (build-native.cmd). VS 2015 is the minimum supported toolset
+set __VSString=%2
+set __VSString=%__VSString:"=%
+
+if "%__VSString%"=="" (set __VSString=14 2015)
 
 :: Set the target architecture to a format cmake understands. ANYCPU defaults to x64
 if /i "%3" == "x86"     (set __VSString=%__VSString%)
