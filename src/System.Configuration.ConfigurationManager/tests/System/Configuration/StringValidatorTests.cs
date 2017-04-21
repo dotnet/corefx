@@ -13,7 +13,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void Constructor_MinLength()
         {
-            //We don't expect this to fail
+            // We don't expect this to fail
             StringValidator validator = new StringValidator(5);
         }
 
@@ -27,7 +27,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void Constructor_MinValueMaxValueAndInvalidChars()
         {
-            // this should complete with no errors.
+            // This should complete with no errors.
             StringValidator validator = new StringValidator(5, 10, "abcde");
         }
 
@@ -35,16 +35,14 @@ namespace System.ConfigurationTests
         public void CanValidate_PassInStringType()
         {
             StringValidator validator = new StringValidator(5);
-            bool result = validator.CanValidate(typeof(string));
-            Assert.True(result);
+            Assert.True(validator.CanValidate(typeof(string)));
         }
 
         [Fact]
         public void CanValidate_PassInNotStringType()
         {
             StringValidator validator = new StringValidator(5);
-            bool result = validator.CanValidate(typeof(Int32));
-            Assert.False(result);
+            Assert.False(validator.CanValidate(typeof(Int32)));
         }
 
         [Fact]
@@ -85,7 +83,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        public void Validate_NoINvalidCharactersSpecified()
+        public void Validate_NoInvalidCharactersSpecified()
         {
             StringValidator validator = new StringValidator(5);
             validator.Validate("Hello");
