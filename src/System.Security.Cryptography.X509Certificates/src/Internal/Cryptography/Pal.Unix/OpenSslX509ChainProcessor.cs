@@ -486,7 +486,7 @@ namespace Internal.Cryptography.Pal
             HashSet<X509Certificate2> downloadedCerts,
             ref TimeSpan remainingDownloadTime)
         {
-            if (IsSelfSigned(cert))
+            if (cert.IsSelfSigned())
             {
                 // It's a root cert, we won't make any progress.
                 return null;
@@ -556,11 +556,6 @@ namespace Internal.Cryptography.Pal
             }
 
             return null;
-        }
-
-        private static bool IsSelfSigned(X509Certificate2 cert)
-        {
-            return StringComparer.Ordinal.Equals(cert.Subject, cert.Issuer);
         }
 
         private static X509Certificate2 DownloadCertificate(
