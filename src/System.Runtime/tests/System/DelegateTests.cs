@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace System.Tests
@@ -14,6 +17,11 @@ namespace System.Tests
         public static DelegateTests.TestStruct TestFunc(this DelegateTests.TestClass testparam)
         {
             return testparam.structField;
+        }
+
+        public static void IncrementX(this DelegateTests.TestSerializableClass t)
+        {
+            t.x++;
         }
     }
 
@@ -30,6 +38,12 @@ namespace System.Tests
             public TestStruct structField;
         }
 
+        [Serializable]
+        public class TestSerializableClass
+        {
+            public int x = 1;
+        }
+
         private static void EmptyFunc() { }
 
         public delegate TestStruct StructReturningDelegate();
@@ -44,6 +58,22 @@ namespace System.Tests
             TestStruct returnedStruct = testDelegate();
             Assert.Same(foo.structField.o1, returnedStruct.o1);
             Assert.Same(foo.structField.o2, returnedStruct.o2);
+        }
+
+        [Fact]
+        public static void ClosedStaticDelegateSerialization()
+        {
+            var t = new TestSerializableClass();
+            Assert.Equal(1, t.x);
+            Action d = t.IncrementX;
+            d();
+            Assert.Equal(2, t.x);
+
+            d = BinaryFormatterHelpers.Clone(d);
+            t = (TestSerializableClass)d.Target;
+            Assert.Equal(2, t.x);
+            d();
+            Assert.Equal(3, t.x);
         }
 
         public class A { }
@@ -101,7 +131,7 @@ namespace System.Tests
         public static void DynamicInvoke_MissingTypeForNonDefaultParameter_ThrowsArgumentException()
         {
             Delegate d = new IntIntDelegate(IntIntMethod);
-            Assert.Throws<ArgumentException>("parameters", () => d.DynamicInvoke(7, Type.Missing));
+            AssertExtensions.Throws<ArgumentException>("parameters", () => d.DynamicInvoke(7, Type.Missing));
         }
 
         [Theory]
@@ -564,7 +594,7 @@ namespace System.Tests
             C c = new C();
             MethodInfo mi = typeof(C).GetMethod("S");
             Delegate dg = Delegate.CreateDelegate(typeof(D), mi);
-            Assert.Same(mi, dg.Method);
+            Assert.Equal(mi, dg.Method);
             Assert.Null(dg.Target);
             D d = (D)dg;
             d(c);
@@ -614,9 +644,12 @@ namespace System.Tests
             Assert.NotNull(e);
             Assert.Equal(4, e(new C()));
 
-            e = (E)Delegate.CreateDelegate(typeof(E), new C(), "Execute");
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+            if (IsDelegateLookupBugFixed)
+            {
+                e = (E)Delegate.CreateDelegate(typeof(E), new C(), "Execute");
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
+            }
 
             e = (E)Delegate.CreateDelegate(typeof(E), new C(), "DoExecute");
             Assert.NotNull(e);
@@ -774,10 +807,13 @@ namespace System.Tests
             Assert.NotNull(e);
             Assert.Equal(5, e(new C()));
 
-            // matching static method
-            e = (E)Delegate.CreateDelegate(typeof(E), typeof(C), "Run");
-            Assert.NotNull(e);
-            Assert.Equal(5, e(new C()));
+            if (IsDelegateLookupBugFixed)
+            {
+                // matching static method
+                e = (E)Delegate.CreateDelegate(typeof(E), typeof(C), "Run");
+                Assert.NotNull(e);
+                Assert.Equal(5, e(new C()));
+            }
 
             // matching static method
             e = (E)Delegate.CreateDelegate(typeof(E), typeof(C), "DoRun");
@@ -948,25 +984,31 @@ namespace System.Tests
 
             C c = new C();
 
-            // instance method, exact case, ignore case
-            e = (E)Delegate.CreateDelegate(typeof(E), c, "Execute", true);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+            if (IsDelegateLookupBugFixed)
+            {
+                // instance method, exact case, ignore case
+                e = (E)Delegate.CreateDelegate(typeof(E), c, "Execute", true);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
+            }
 
             // instance method, exact case, ignore case
             e = (E)Delegate.CreateDelegate(typeof(E), c, "DoExecute", true);
             Assert.NotNull(e);
             Assert.Equal(102, e(new C()));
 
-            // instance method, exact case, do not ignore case
-            e = (E)Delegate.CreateDelegate(typeof(E), c, "Execute", false);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+            if (IsDelegateLookupBugFixed)
+            {
+                // instance method, exact case, do not ignore case
+                e = (E)Delegate.CreateDelegate(typeof(E), c, "Execute", false);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
 
-            // instance method, case mismatch, ignore case
-            e = (E)Delegate.CreateDelegate(typeof(E), c, "ExecutE", true);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+                // instance method, case mismatch, ignore case
+                e = (E)Delegate.CreateDelegate(typeof(E), c, "ExecutE", true);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
+            }
         }
 
         [Fact]
@@ -1141,29 +1183,32 @@ namespace System.Tests
             Assert.NotNull(e);
             Assert.Equal(4, e(new C()));
 
-            // do not ignore case, do not throw bind failure
-            e = (E)Delegate.CreateDelegate(typeof(E), new C(),
-                "Execute", false, false);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+            if (IsDelegateLookupBugFixed)
+            {
+                // do not ignore case, do not throw bind failure
+                e = (E)Delegate.CreateDelegate(typeof(E), new C(),
+                    "Execute", false, false);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
 
-            // do not ignore case, throw bind failure
-            e = (E)Delegate.CreateDelegate(typeof(E), new C(),
-                "Execute", false, true);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+                // do not ignore case, throw bind failure
+                e = (E)Delegate.CreateDelegate(typeof(E), new C(),
+                    "Execute", false, true);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
 
-            // ignore case, do not throw bind failure
-            e = (E)Delegate.CreateDelegate(typeof(E), new C(),
-                "Execute", true, false);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+                // ignore case, do not throw bind failure
+                e = (E)Delegate.CreateDelegate(typeof(E), new C(),
+                    "Execute", true, false);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
 
-            // ignore case, throw bind failure
-            e = (E)Delegate.CreateDelegate(typeof(E), new C(),
-                "Execute", true, true);
-            Assert.NotNull(e);
-            Assert.Equal(4, e(new C()));
+                // ignore case, throw bind failure
+                e = (E)Delegate.CreateDelegate(typeof(E), new C(),
+                    "Execute", true, true);
+                Assert.NotNull(e);
+                Assert.Equal(4, e(new C()));
+            }
 
             // do not ignore case, do not throw bind failure
             e = (E)Delegate.CreateDelegate(typeof(E), new C(),
@@ -1375,6 +1420,23 @@ namespace System.Tests
                 Assert.NotNull(ex.Message);
                 Assert.NotNull(ex.ParamName);
                 Assert.Equal("type", ex.ParamName);
+            }
+        }
+
+        // @todo: https://github.com/dotnet/corert/issues/3387
+        // Once issue 3387 is fixed in CoreRT, delete this property.
+        private static bool IsDelegateLookupBugFixed
+        {
+            get
+            {
+#if !uapaot
+                return true;
+#else
+                // "Execute" is defined as a private method (with the wrong return type) in C and as a private method
+                // (with the right return type) in C's base class. CoreCLR finds it anyway. CoreRT does not.
+                Delegate d = Delegate.CreateDelegate(typeof(E), new C(), "Execute", ignoreCase: false, throwOnBindFailure: false);
+                return d != null;
+#endif
             }
         }
 

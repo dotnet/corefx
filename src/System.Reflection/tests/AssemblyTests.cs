@@ -121,7 +121,10 @@ namespace System.Reflection.Tests
         public void GetEntryAssembly()
         {
             Assert.NotNull(Assembly.GetEntryAssembly());
-            Assert.StartsWith("xunit.console.netcore", Assembly.GetEntryAssembly().ToString(), StringComparison.OrdinalIgnoreCase);
+            string assembly = Assembly.GetEntryAssembly().ToString();
+            bool correct = assembly.IndexOf("xunit.console.netcore", StringComparison.OrdinalIgnoreCase) != -1 ||
+                           assembly.IndexOf("XUnit.Runner.Uap", StringComparison.OrdinalIgnoreCase) != -1;
+            Assert.True(correct, $"Unexpected assembly name {assembly}");
         }
 
         public static IEnumerable<object[]> GetHashCode_TestData()
@@ -191,7 +194,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Load_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("assemblyRef", () => Assembly.Load((AssemblyName)null)); // AssemblyRef is null
+            Assert.Throws<ArgumentNullException>(() => Assembly.Load((AssemblyName)null)); // AssemblyRef is null
             Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName("no such assembly"))); // No such assembly
         }
 
@@ -204,12 +207,14 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CodeBase is not supported on UapAot")]
         public void CodeBase()
         {
             Assert.NotEmpty(Helpers.ExecutingAssembly.CodeBase);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ImageRuntimeVersion is not supported on UapAot.")]
         public void ImageRuntimeVersion()
         {
             Assert.NotEmpty(Helpers.ExecutingAssembly.ImageRuntimeVersion);
@@ -260,6 +265,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "GetReferencedAssemblies is not supported on UapAot.")]
         public void GetReferencedAssemblies()
         {
             // It is too brittle to depend on the assembly references so we just call the method and check that it does not throw.

@@ -16,7 +16,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Diagnostics\FileVersionInfo.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Diagnostics\FileVersionInfo.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -43,13 +43,23 @@
       <Link>Common\Interop\Windows\Interop.VSFixedFileInfo.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="('$(TargetsUnix)' == 'true' And '$(TargetGroup)' == 'netcoreapp') OR '$(TargetGroup)' == 'uap'">
-    <Compile Include="System\Diagnostics\FileVersionInfo.Metadata.cs" />
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Diagnostics\FileVersionInfo.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+      <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>

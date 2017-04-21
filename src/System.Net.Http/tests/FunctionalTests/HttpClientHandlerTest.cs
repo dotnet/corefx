@@ -512,9 +512,10 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(3, 4)]
         public async Task GetAsync_MaxAutomaticRedirectionsNServerHops_ThrowsIfTooMany(int maxHops, int hops)
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10VersionInsiderPreviewOrGreater)
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1703OrGreater)
             {
-                // Run this test only on windows10 build greater than 14917.
+                // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
+                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
                 return;
             }
 
@@ -1652,7 +1653,9 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && method == "TRACE")
                     {
-                        // [ActiveIssue(9023, TestPlatforms.Windows)]
+                        // .NET Framework also allows the HttpWebRequest and HttpClient APIs to send a request using 'TRACE' 
+                        // verb and a request body. The usual response from a server is "400 Bad Request".
+                        // See here for more info: https://github.com/dotnet/corefx/issues/9023
                         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
                     }
                     else
@@ -1700,9 +1703,10 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(Http2Servers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10VersionInsiderPreviewOrGreater)
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1703OrGreater)
             {
-                // Run this test only on windows10 build greater than 14917.
+                // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
+                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
                 return;
             }
 

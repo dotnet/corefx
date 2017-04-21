@@ -49,7 +49,15 @@ namespace System.IO
                 {
                     attrs |= FileAttributes.ReparsePoint;
                 }
-                if (Path.GetFileName(FullPath).StartsWith("."))
+
+                // If the filename starts with a period, it's hidden. Or if this is a directory ending in a slash,
+                // if the directory name starts with a period, it's hidden.
+                string fileName = Path.GetFileName(FullPath);
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = Path.GetFileName(Path.GetDirectoryName(FullPath));
+                }
+                if (!string.IsNullOrEmpty(fileName) && fileName[0] == '.')
                 {
                     attrs |= FileAttributes.Hidden;
                 }
@@ -163,16 +171,16 @@ namespace System.IO
             get
             {
                 EnsureStatInitialized();
-                return (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
-                    DateTimeOffset.FromUnixTimeSeconds(_fileStatus.BirthTime).ToLocalTime() :
-                    default(DateTimeOffset);
+                long rawTime = (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
+                    _fileStatus.BirthTime :
+                    Math.Min(_fileStatus.CTime, _fileStatus.MTime); // fall back to the oldest time we have in between change and modify time
+                return DateTimeOffset.FromUnixTimeSeconds(rawTime).ToLocalTime();
             }
             set
             {
-                // The ctime in Unix can be interpreted differently by different formats so there isn't
-                // a reliable way to set this; however, we can't just do nothing since the FileSystemWatcher
-                // specifically looks for this call to make a Metatdata Change, so we should set the
-                // LastAccessTime of the file to cause the metadata change we need.
+                // There isn't a reliable way to set this; however, we can't just do nothing since the
+                // FileSystemWatcher specifically looks for this call to make a Metatdata Change, so we
+                // should set the LastAccessTime of the file to cause the metadata change we need.
                 LastAccessTime = LastAccessTime;
             }
         }
