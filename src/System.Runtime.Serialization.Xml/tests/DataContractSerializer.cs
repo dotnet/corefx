@@ -2870,9 +2870,11 @@ public static partial class DataContractSerializerTests
         var setting2 = new DataContractSerializerSettings() { DataContractResolver = new SerializationTestTypes.SimpleResolver_DeSer(), MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true};
         var dcs1 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting1);
         var dcs2 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting2);
+        string baseline = @"<CustomClass z:Id=""1"" i:type=""a:SerializationTestTypes.DCRVariations"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC""><Data i:nil=""true""/></unknownType2></CustomClass>";
 
         MemoryStream ms = new MemoryStream();
         dcs1.WriteObject(ms, dcrVariationsGoing);
+        CompareBaseline(dcrVariationsGoing, ms, baseline);
         ms.Position = 0;
         var dcrVariationsReturning = dcs2.ReadObject(ms);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
@@ -2888,10 +2890,12 @@ public static partial class DataContractSerializerTests
         var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();                
         var setting = new DataContractSerializerSettings() { MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
-        
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""";
+
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
         dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        CompareBaseline(dcrVariationsGoing, ms, baseline);
         xmlWriter.Flush();
         ms.Position = 0;
         var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
@@ -2909,10 +2913,12 @@ public static partial class DataContractSerializerTests
         var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
         var setting = new DataContractSerializerSettings() { DataContractResolver = dcr2, MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""";
 
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
         dcs.WriteObject(xmlWriter, dcrVariationsGoing, dcr1);
+        CompareBaseline(dcrVariationsGoing, ms, baseline);
         xmlWriter.Flush();
         ms.Position = 0;
         var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
@@ -2930,15 +2936,26 @@ public static partial class DataContractSerializerTests
         var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();
         var setting = new DataContractSerializerSettings() { DataContractResolver = dcr1, MaxItemsInObjectGraph = int.MaxValue, IgnoreExtensionDataObject = false, PreserveObjectReferences = true };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""";
 
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
         dcs.WriteObject(xmlWriter, dcrVariationsGoing);
+        CompareBaseline(dcrVariationsGoing, ms, baseline);
         xmlWriter.Flush();
         ms.Position = 0;
         var xmlReader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
         var dcrVariationsReturning = dcs.ReadObject(xmlReader, false, dcr2);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(dcrVariationsGoing, dcrVariationsReturning);
+    }
+
+    public static void CompareBaseline(object t, MemoryStream ms,string baseline)
+    {
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+        var result = Utils.Compare(baseline, actualOutput);
+        Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
+                Environment.NewLine, result.ErrorMessage, t, baseline, actualOutput));
     }
     #endregion
 
