@@ -607,6 +607,26 @@
             "#import": [ "alpine.3.4.3", "alpine.3-arm64" ]
         },
 
+        "android": {
+            "#import": [ "linux" ]
+        },
+        "android-arm": {
+            "#import": [ "android", "linux-arm" ]
+        },
+        "android-arm64": {
+            "#import": [ "android", "linux-arm64" ]
+        },
+
+        "android.21": {
+            "#import": [ "android" ]
+        },
+        "android.21-arm": {
+            "#import": [ "android.21", "android-arm" ]
+        },
+        "android.21-arm64": {
+            "#import": [ "android.21", "android-arm64" ]
+        },
+
         "corert": {
             "#import": [ "any" ]
         },
