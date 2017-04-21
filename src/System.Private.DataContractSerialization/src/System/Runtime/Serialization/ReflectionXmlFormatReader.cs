@@ -61,20 +61,27 @@ namespace System.Runtime.Serialization
             DataMember[] members = new DataMember[memberCount];
             int reflectedMemberCount = ReflectionGetMembers(classContract, members);
             Debug.Assert(reflectedMemberCount == memberCount, "The value returned by ReflectionGetMembers() should equal to memberCount.");
+            ExtensionDataObject extensionObj = null;
+
+            if (classContract.HasExtensionData)
+            {
+                extensionObj = new ExtensionDataObject();
+                ((IExtensibleDataObject)obj).ExtensionData = extensionObj;
+            }
 
             while (true)
             {
                 if (!XmlObjectSerializerReadContext.MoveToNextElement(xmlReader))
-                {
+                {                  
                     return;
                 }
                 if (hasRequiredMembers)
                 {
-                    memberIndex = context.GetMemberIndexWithRequiredMembers(xmlReader, memberNames, memberNamespaces, memberIndex, requiredIndex, null);
+                    memberIndex = context.GetMemberIndexWithRequiredMembers(xmlReader, memberNames, memberNamespaces, memberIndex, requiredIndex, extensionObj);
                 }
                 else
                 {
-                    memberIndex = context.GetMemberIndex(xmlReader, memberNames, memberNamespaces, memberIndex, null);
+                    memberIndex = context.GetMemberIndex(xmlReader, memberNames, memberNamespaces, memberIndex, extensionObj);
                 }
 
                 // GetMemberIndex returns memberNames.Length if member not found
