@@ -30,6 +30,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyName.CodeBase and EscapedCodeBase not supported on UapAot")]
         public static void Verify_EscapedCodeBase()
         {
             AssemblyName n = new AssemblyName("MyAssemblyName");
@@ -75,9 +76,10 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyName.GetAssemblyName() not supported on UapAot")]
         public static void GetAssemblyName()
         {
-            Assert.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
             Assert.Throws<ArgumentException>(() => AssemblyName.GetAssemblyName(string.Empty));
             Assert.Throws<System.IO.FileNotFoundException>(() => AssemblyName.GetAssemblyName("IDontExist"));
 

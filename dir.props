@@ -148,12 +148,12 @@
     <NativeBinDir>$(BinDir)$(OSGroup).$(ArchGroup).$(ConfigurationGroup)/native</NativeBinDir>
   </PropertyGroup>
 
-  <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
-
-  <PropertyGroup>
-    <!-- illink fails to run on Alpine CLI : https://github.com/dotnet/corefx/issues/18029 -->
-    <ILLinkTrimAssembly Condition="$(RuntimeOS.StartsWith('alpine'))">false</ILLinkTrimAssembly>
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netfx' AND '$(IsTestProject)' != 'true'">
+    <!-- when building for netfx (net461) we also need to build for net462 and net47 in order to produce the netfx netstandard2.0 support package -->
+    <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);net462-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup);net47-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</AdditionalBuildConfigurations>
   </PropertyGroup>
+
+  <Import Project="$(BuildConfigurationImportFile)" Condition="Exists('$(BuildConfigurationImportFile)')" />
 
   <!-- Import packaging props -->
   <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>

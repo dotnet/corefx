@@ -4,6 +4,7 @@
 
 // #define StressTest // set to raise the amount of time spent in concurrency tests that stress the collections
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Tests;
 using System.Diagnostics;
@@ -43,7 +44,7 @@ namespace System.Collections.Concurrent.Tests
         [Fact]
         public void Ctor_InvalidArgs_Throws()
         {
-            Assert.Throws<ArgumentNullException>("collection", () => CreateProducerConsumerCollection(null));
+            AssertExtensions.Throws<ArgumentNullException>("collection", () => CreateProducerConsumerCollection(null));
         }
 
         [Fact]
@@ -414,6 +415,7 @@ namespace System.Collections.Concurrent.Tests
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(100)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Multidim rank 1 arrays not supported: https://github.com/dotnet/corert/issues/3331")]
         public void CopyTo_ArrayZeroLowerBound_ZeroIndex_ExpectedElementsCopied(int size)
         {
             IEnumerable<int> initialItems = Enumerable.Range(1, size);
@@ -432,6 +434,9 @@ namespace System.Collections.Concurrent.Tests
         [Fact]
         public void CopyTo_ArrayNonZeroLowerBound_ExpectedElementsCopied()
         {
+            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                return;
+
             int[] initialItems = Enumerable.Range(1, 10).ToArray();
 
             const int LowerBound = 1;
@@ -455,7 +460,7 @@ namespace System.Collections.Concurrent.Tests
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection(Enumerable.Range(0, 10));
             int[] dest = new int[10];
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
             Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
             Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
@@ -469,7 +474,7 @@ namespace System.Collections.Concurrent.Tests
             ICollection c = CreateProducerConsumerCollection(Enumerable.Range(0, 10));
             Array dest = new int[10];
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => c.CopyTo(dest, -1));
             Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length));
             Assert.Throws<ArgumentException>(() => c.CopyTo(dest, dest.Length - 2));
