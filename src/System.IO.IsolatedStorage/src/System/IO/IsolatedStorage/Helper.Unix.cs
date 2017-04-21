@@ -8,9 +8,6 @@ namespace System.IO.IsolatedStorage
     {
         internal static void CreateDirectory(string path, IsolatedStorageScope scope)
         {
-            if (Directory.Exists(path))
-                return;
-
             Directory.CreateDirectory(path);
         }
     }
