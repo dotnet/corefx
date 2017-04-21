@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Tests;
 using System.Text;
 using Xunit;
@@ -927,6 +928,65 @@ namespace System.Text.Tests
             Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => builder.AppendLine());
             Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => builder.AppendLine("a"));
         }
+
+
+        #region AppendJoin
+
+
+        [Fact]
+        public static void AppendJoin_NullValues_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin('|', (object[])null));
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin('|', (IEnumerable<object>)null));
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin('|', (string[])null));
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin("|", (object[])null));
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin("|", (IEnumerable<object>)null));
+            Assert.Throws<ArgumentNullException>("values", () => new StringBuilder().AppendJoin("|", (string[])null));
+        }
+
+        [Theory]
+        [InlineData(new object[0], "")]
+        [InlineData(new object[] { null }, "")]
+        [InlineData(new object[] { 10 }, "10")]
+        [InlineData(new object[] { null, null }, "|")]
+        [InlineData(new object[] { null, 20 }, "|20")]
+        [InlineData(new object[] { 10, null }, "10|")]
+        [InlineData(new object[] { 10, 20 }, "10|20")]
+        [InlineData(new object[] { null, null, null }, "||")]
+        [InlineData(new object[] { null, null, 30 }, "||30")]
+        [InlineData(new object[] { null, 20, null }, "|20|")]
+        [InlineData(new object[] { null, 20, 30 }, "|20|30")]
+        [InlineData(new object[] { 10, null, null }, "10||")]
+        [InlineData(new object[] { 10, null, 30 }, "10||30")]
+        [InlineData(new object[] { 10, 20, null }, "10|20|")]
+        [InlineData(new object[] { 10, 20, 30 }, "10|20|30")]
+        public static void AppendJoin_TestValues(object[] values, string expected)
+        {
+            var stringValues = Array.ConvertAll(values, _ => _?.ToString());
+            var enumerable = values.Select(_ => _);
+
+            Assert.Equal(expected, new StringBuilder().AppendJoin('|', values).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin('|', enumerable).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin('|', stringValues).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin("|", values).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin("|", enumerable).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin("|", stringValues).ToString());
+        }
+
+        [Theory]
+        [InlineData(null, "123")]
+        [InlineData("", "123")]
+        [InlineData(" ", "1 2 3")]
+        [InlineData(", ", "1, 2, 3")]
+        public static void AppendJoin_TestStringSeparators(string separator, string expected)
+        {
+            Assert.Equal(expected, new StringBuilder().AppendJoin(separator, new object[] { 1, 2, 3 }).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin(separator, Enumerable.Range(1, 3)).ToString());
+            Assert.Equal(expected, new StringBuilder().AppendJoin(separator, new string[] { "1", "2", "3" }).ToString());
+        }
+
+        #endregion
+
 
         [Fact]
         public static void Clear()
