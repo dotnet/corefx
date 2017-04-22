@@ -165,7 +165,7 @@ Breaking Change Rules
 
 * Adding a constructor to a class which previously had no constructor, without also adding the default constructor
 
-* Introducing or removing an override to non-sealed `protected` or `protected internal` types
+* Introducing or removing an override to non-sealed types
 > Introducing an override will cause previous consumers to skip over the override when calling `base` if not compiled against the new version.
 > Removing an override, although not breaking code compiled against a previous version, will fall into the previous case if latter re-added later.
 
