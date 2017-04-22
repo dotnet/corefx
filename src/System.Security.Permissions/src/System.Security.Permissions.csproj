@@ -136,15 +136,29 @@
     <Compile Include="System\Security\SecurityState.cs" />
     <Compile Include="System\Security\SecurityZone.cs" />
     <Compile Include="System\Security\XmlSyntaxException.cs" />
+    <Compile Include="System\Data\SqlClient\SqlClientPermission.cs" />
+    <Compile Include="System\Data\SqlClient\SqlClientPermissionAttribute.cs" />
+    <Compile Include="System\Diagnostics\PerformanceCounterPermission.cs" />
+    <Compile Include="System\Diagnostics\PerformanceCounterPermissionAccess.cs" />
+    <Compile Include="System\Diagnostics\PerformanceCounterPermissionAttribute.cs" />
+    <Compile Include="System\Diagnostics\PerformanceCounterPermissionEntry.cs" />
+    <Compile Include="System\Diagnostics\PerformanceCounterPermissionEntryCollection.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
-    <Reference Include="System.Data"/>
-    <Reference Include="System.Drawing"/>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Diagnostics\EventLogPermission.cs" />
+    <Compile Include="System\Diagnostics\EventLogPermissionAccess.cs" />
+    <Compile Include="System\Diagnostics\EventLogPermissionAttribute.cs" />
+    <Compile Include="System\Diagnostics\EventLogPermissionEntry.cs" />
+    <Compile Include="System\Diagnostics\EventLogPermissionEntryCollection.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

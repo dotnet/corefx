@@ -95,6 +95,132 @@ namespace System.Drawing.Printing
     }
 }
 
+
+//namespace System.Data.SqlClient
+//{
+//    public sealed partial class SqlClientPermission : System.Data.Common.DBDataPermission
+//    {
+//        public SqlClientPermission() : base(default(System.Security.Permissions.PermissionState)) { }
+//        public SqlClientPermission(System.Security.Permissions.PermissionState state) : base(default(System.Security.Permissions.PermissionState)) { }
+//        public SqlClientPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) : base(default(System.Security.Permissions.PermissionState)) { }
+//        public override void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
+//        public override System.Security.IPermission Copy() { return null; }
+//    }
+//    [System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method,
+//        AllowMultiple = true, Inherited = false)]
+//    public sealed partial class SqlClientPermissionAttribute : System.Data.Common.DBDataPermissionAttribute
+//    {
+//        public SqlClientPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+//        public override System.Security.IPermission CreatePermission() { return null; }
+//    }
+//}
+
+
+namespace System.Diagnostics
+{
+    public sealed partial class EventLogPermission : System.Security.Permissions.ResourcePermissionBase
+    {
+        public EventLogPermission() { }
+        public EventLogPermission(System.Diagnostics.EventLogPermissionAccess permissionAccess, string machineName) { }
+        public EventLogPermission(System.Diagnostics.EventLogPermissionEntry[] permissionAccessEntries) { }
+        public EventLogPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Diagnostics.EventLogPermissionEntryCollection PermissionEntries { get { throw null; } }
+    }
+    [System.Flags]
+    public enum EventLogPermissionAccess
+    {
+        Administer = 48,
+        Audit = 10,
+        Browse = 2,
+        Instrument = 6,
+        None = 0,
+        Write = 16,
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct
+        | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
+    public partial class EventLogPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public EventLogPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string MachineName { get { return null; } set { } }
+        public System.Diagnostics.EventLogPermissionAccess PermissionAccess { get; set; }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+    public partial class EventLogPermissionEntry
+    {
+        public EventLogPermissionEntry(System.Diagnostics.EventLogPermissionAccess permissionAccess, string machineName) { }
+        public string MachineName { get { return null; } }
+        public System.Diagnostics.EventLogPermissionAccess PermissionAccess { get; }
+    }
+    public partial class EventLogPermissionEntryCollection : System.Collections.CollectionBase
+    {
+        internal EventLogPermissionEntryCollection() { }
+        public System.Diagnostics.EventLogPermissionEntry this[int index] { get { return null; } set { } }
+        public int Add(System.Diagnostics.EventLogPermissionEntry value) { return 0; }
+        public void AddRange(System.Diagnostics.EventLogPermissionEntryCollection value) { }
+        public void AddRange(System.Diagnostics.EventLogPermissionEntry[] value) { }
+        public bool Contains(System.Diagnostics.EventLogPermissionEntry value) { return false; }
+        public void CopyTo(System.Diagnostics.EventLogPermissionEntry[] array, int index) { }
+        public int IndexOf(System.Diagnostics.EventLogPermissionEntry value) { return 0; }
+        public void Insert(int index, System.Diagnostics.EventLogPermissionEntry value) { }
+        protected override void OnClear() { }
+        protected override void OnInsert(int index, object value) { }
+        protected override void OnRemove(int index, object value) { }
+        protected override void OnSet(int index, object oldValue, object newValue) { }
+        public void Remove(System.Diagnostics.EventLogPermissionEntry value) { }
+    }
+    public sealed partial class PerformanceCounterPermission : System.Security.Permissions.ResourcePermissionBase
+    {
+        public PerformanceCounterPermission() { }
+        public PerformanceCounterPermission(System.Diagnostics.PerformanceCounterPermissionAccess permissionAccess, string machineName, string categoryName) { }
+        public PerformanceCounterPermission(System.Diagnostics.PerformanceCounterPermissionEntry[] permissionAccessEntries) { }
+        public PerformanceCounterPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Diagnostics.PerformanceCounterPermissionEntryCollection PermissionEntries { get { return null; } }
+    }
+    [System.Flags]
+    public enum PerformanceCounterPermissionAccess
+    {
+        Administer = 7,
+        Browse = 1,
+        Instrument = 3,
+        None = 0,
+        Read = 1,
+        Write = 2,
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor
+        | AttributeTargets.Method | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
+    public partial class PerformanceCounterPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public PerformanceCounterPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string CategoryName { get { return null; } set { } }
+        public string MachineName { get { return null; } set { } }
+        public System.Diagnostics.PerformanceCounterPermissionAccess PermissionAccess { get; set; }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+    public partial class PerformanceCounterPermissionEntry
+    {
+        public PerformanceCounterPermissionEntry(System.Diagnostics.PerformanceCounterPermissionAccess permissionAccess, string machineName, string categoryName) { }
+        public string CategoryName { get { return null; } }
+        public string MachineName { get { return null; } }
+        public System.Diagnostics.PerformanceCounterPermissionAccess PermissionAccess { get; }
+    }
+    public partial class PerformanceCounterPermissionEntryCollection : System.Collections.CollectionBase
+    {
+        internal PerformanceCounterPermissionEntryCollection() { }
+        public System.Diagnostics.PerformanceCounterPermissionEntry this[int index] { get { return null; } }
+        public int Add(System.Diagnostics.PerformanceCounterPermissionEntry value) { return 0; }
+        public void AddRange(System.Diagnostics.PerformanceCounterPermissionEntryCollection value) { }
+        public void AddRange(System.Diagnostics.PerformanceCounterPermissionEntry[] value) { }
+        public bool Contains(System.Diagnostics.PerformanceCounterPermissionEntry value) { return false; }
+        public void CopyTo(System.Diagnostics.PerformanceCounterPermissionEntry[] array, int index) { }
+        public int IndexOf(System.Diagnostics.PerformanceCounterPermissionEntry value) { return 0; }
+        public void Insert(int index, System.Diagnostics.PerformanceCounterPermissionEntry value) { }
+        protected override void OnClear() { }
+        protected override void OnInsert(int index, object value) { }
+        protected override void OnRemove(int index, object value) { }
+        protected override void OnSet(int index, object oldValue, object newValue) { }
+        public void Remove(System.Diagnostics.PerformanceCounterPermissionEntry value) { }
+    }
+}
 namespace System.Net.NetworkInformation
 {
     [Flags]
@@ -278,7 +404,7 @@ namespace System.Security
         public static void RestoreFlow() { }
         public static void Run(System.Security.SecurityContext securityContext, System.Threading.ContextCallback callback, object state) { }
         public static System.Threading.AsyncFlowControl SuppressFlow() { throw null; }
-        public static System.Threading.AsyncFlowControl SuppressFlowWindowsIdentity() { throw null; }        
+        public static System.Threading.AsyncFlowControl SuppressFlowWindowsIdentity() { throw null; }
     }
     public enum SecurityContextSource
     {

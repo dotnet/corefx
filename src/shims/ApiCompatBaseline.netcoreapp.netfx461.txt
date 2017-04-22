@@ -33,6 +33,8 @@ MembersMustExist : Member 'System.Data.Odbc.OdbcConnection.EnlistDistributedTran
 MembersMustExist : Member 'System.Data.Odbc.OdbcFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlBulkCopyOptions System.Data.SqlClient.SqlBulkCopyOptions.AllowEncryptedValueModifications' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlClientFactory.CreatePermission(System.Security.Permissions.PermissionState)' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Data.SqlClient.SqlClientPermission' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Data.SqlClient.SqlClientPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlCommand..ctor(System.String, System.Data.SqlClient.SqlConnection, System.Data.SqlClient.SqlTransaction, System.Data.SqlClient.SqlCommandColumnEncryptionSetting)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteNonQuery()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Data.SqlClient.SqlCommand.BeginExecuteNonQuery(System.AsyncCallback, System.Object)' does not exist in the implementation but it does exist in the contract.

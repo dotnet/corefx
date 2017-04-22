@@ -1084,11 +1084,6 @@ TypesMustExist : Type 'System.Diagnostics.OverflowAction' does not exist in the 
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterCategory' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterCategoryType' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.PerformanceCounterManager' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.PerformanceCounterPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.PerformanceCounterPermissionAccess' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.PerformanceCounterPermissionAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.PerformanceCounterPermissionEntry' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.PerformanceCounterPermissionEntryCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.XmlWriterTraceListener' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.IO.IODescriptionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Media.SoundPlayer' does not exist in the implementation but it does exist in the contract.
@@ -1366,8 +1361,6 @@ TypesMustExist : Type 'System.Data.Sql.SqlNotificationRequest' does not exist in
 TypesMustExist : Type 'System.Data.SqlClient.OnChangeEventHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.SqlClient.SqlAuthenticationMethod' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.SqlClient.SqlClientMetaDataCollectionNames' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.SqlClient.SqlClientPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.SqlClient.SqlClientPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.SqlClient.SqlColumnEncryptionCertificateStoreProvider' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.SqlClient.SqlColumnEncryptionCngProvider' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.SqlClient.SqlColumnEncryptionCspProvider' does not exist in the implementation but it does exist in the contract.
