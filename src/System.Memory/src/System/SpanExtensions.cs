@@ -307,14 +307,14 @@ namespace System
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
-            IntPtr srcByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr dstByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
 
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > ~(uint)dstByteCount + 1)
-                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ~(ulong)dstByteCount + 1);
+                ? ((uint)diff < (uint)firstByteCount) || ((uint)diff > ~(uint)secondByteCount + 1)
+                : ((ulong)diff < (ulong)firstByteCount) || ((ulong)diff > ~(ulong)secondByteCount + 1);
         }
 
         /// <summary>
@@ -328,14 +328,14 @@ namespace System
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
-            IntPtr srcByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr dstByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
+            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
 
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > ~(uint)dstByteCount + 1)
-                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ~(ulong)dstByteCount + 1);
+                ? ((uint)diff < (uint)firstByteCount) || ((uint)diff > ~(uint)secondByteCount + 1)
+                : ((ulong)diff < (ulong)firstByteCount) || ((ulong)diff > ~(ulong)secondByteCount + 1);
         }
     }
 }
