@@ -22,14 +22,16 @@ namespace System
         /// </summary>
         public static unsafe void CopyTo<T>(ref T dst, int dstLength, ref T src, int srcLength)
         {
+            Debug.Assert(dstLength != 0);
+
             IntPtr srcByteCount = Unsafe.ByteOffset(ref src, ref Unsafe.Add(ref src, srcLength));
             IntPtr dstByteCount = Unsafe.ByteOffset(ref dst, ref Unsafe.Add(ref dst, dstLength));
 
             IntPtr diff = Unsafe.ByteOffset(ref src, ref dst);
 
             bool isOverlapped = (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
-                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
+                ? (uint)diff < (uint)srcByteCount || (uint)diff > ~(uint)dstByteCount + 1
+                : (ulong)diff < (ulong)srcByteCount || (ulong)diff > ~(ulong)dstByteCount + 1;
 
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
@@ -51,8 +53,8 @@ namespace System
             else
             {
                 bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int))
-                    ? (uint)diff > uint.MaxValue - (uint)dstByteCount
-                    : (ulong)diff > ulong.MaxValue - (ulong)dstByteCount;
+                    ? (uint)diff > ~(uint)dstByteCount + 1
+                    : (ulong)diff > ~(ulong)dstByteCount + 1;
 
                 if (srcGreaterThanDst)
                 {
