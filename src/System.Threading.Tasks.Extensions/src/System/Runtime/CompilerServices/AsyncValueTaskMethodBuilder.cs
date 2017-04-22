@@ -24,12 +24,14 @@ namespace System.Runtime.CompilerServices
 
         /// <summary>Creates an instance of the <see cref="AsyncValueTaskMethodBuilder{TResult}"/> struct.</summary>
         /// <returns>The initialized instance.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static AsyncValueTaskMethodBuilder<TResult> Create() =>
             new AsyncValueTaskMethodBuilder<TResult>() { _methodBuilder = AsyncTaskMethodBuilder<TResult>.Create() };
 
         /// <summary>Begins running the builder with the associated state machine.</summary>
         /// <typeparam name="TStateMachine">The type of the state machine.</typeparam>
         /// <param name="stateMachine">The state machine instance, passed by reference.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
             _methodBuilder.Start(ref stateMachine); // will provide the right ExecutionContext semantics
@@ -45,13 +47,20 @@ namespace System.Runtime.CompilerServices
         {
             if (_useBuilder)
             {
-                _methodBuilder.SetResult(result);
+                // _methodBuilder.SetResult will inline so move it out of flow
+                SetResultFromTask(result);
             }
             else
             {
                 _result = result;
                 _haveResult = true;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void SetResultFromTask(TResult result)
+        {
+            _methodBuilder.SetResult(result);
         }
 
         /// <summary>Marks the task as failed and binds the specified exception to the task.</summary>
@@ -61,18 +70,15 @@ namespace System.Runtime.CompilerServices
         /// <summary>Gets the task for this builder.</summary>
         public ValueTask<TResult> Task
         {
-            get
-            {
-                if (_haveResult)
-                {
-                    return new ValueTask<TResult>(_result);
-                }
-                else
-                {
-                    _useBuilder = true;
-                    return new ValueTask<TResult>(_methodBuilder.Task);
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _haveResult ? new ValueTask<TResult>(_result) : GetTaskFromMethodBuilder(); }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private ValueTask<TResult> GetTaskFromMethodBuilder()
+        {
+            _useBuilder = true;
+            return new ValueTask<TResult>(_methodBuilder.Task);
         }
 
         /// <summary>Schedules the state machine to proceed to the next action when the specified awaiter completes.</summary>

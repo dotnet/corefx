@@ -59,10 +59,11 @@ namespace System.Threading.Tasks
 
         /// <summary>Initialize the <see cref="ValueTask{TResult}"/> with the result of the successful operation.</summary>
         /// <param name="result">The result.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ValueTask(TResult result)
         {
-            _task = null;
             _result = result;
+            _task = null;
         }
 
         /// <summary>
@@ -73,11 +74,12 @@ namespace System.Threading.Tasks
         {
             if (task == null)
             {
-                throw new ArgumentNullException(nameof(task));
+                ThrowHelper.ThrowNullTaskException();
             }
 
-            _task = task;
+            // Set result before reference (Memory barrier assign)
             _result = default(TResult);
+            _task = task;
         }
 
         /// <summary>Returns the hash code for this instance.</summary>
@@ -134,7 +136,13 @@ namespace System.Threading.Tasks
         public bool IsCompleted { get { return _task == null || _task.IsCompleted; } }
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a successfully completed operation.</summary>
-        public bool IsCompletedSuccessfully { get { return _task == null || _task.Status == TaskStatus.RanToCompletion; } }
+        public bool IsCompletedSuccessfully { get { return _task == null || IsTaskCompletedSuccessfully(); } }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private bool IsTaskCompletedSuccessfully()
+        {
+            return _task.Status == TaskStatus.RanToCompletion;
+        }
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a failed operation.</summary>
         public bool IsFaulted { get { return _task != null && _task.IsFaulted; } }
@@ -143,9 +151,16 @@ namespace System.Threading.Tasks
         public bool IsCanceled { get { return _task != null && _task.IsCanceled; } }
 
         /// <summary>Gets the result.</summary>
-        public TResult Result { get { return _task == null ? _result : _task.GetAwaiter().GetResult(); } }
+        public TResult Result { get { return _task == null ? _result : GetResultFromTask(); } }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private TResult GetResultFromTask()
+        {
+            return _task.GetAwaiter().GetResult();
+        }
 
         /// <summary>Gets an awaiter for this value.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ValueTaskAwaiter<TResult> GetAwaiter()
         {
             return new ValueTaskAwaiter<TResult>(this);
@@ -155,6 +170,7 @@ namespace System.Threading.Tasks
         /// <param name="continueOnCapturedContext">
         /// true to attempt to marshal the continuation back to the captured context; otherwise, false.
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ConfiguredValueTaskAwaitable<TResult> ConfigureAwait(bool continueOnCapturedContext)
         {
             return new ConfiguredValueTaskAwaitable<TResult>(this, continueOnCapturedContext: continueOnCapturedContext);
@@ -184,4 +200,18 @@ namespace System.Threading.Tasks
         [EditorBrowsable(EditorBrowsableState.Never)] // intended only for compiler consumption
         public static AsyncValueTaskMethodBuilder<TResult> CreateAsyncMethodBuilder() => AsyncValueTaskMethodBuilder<TResult>.Create();
     }
+
+    internal static class ThrowHelper
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static ArgumentNullException GetNullTaskException()
+        {
+            return new ArgumentNullException("task");
+        }
+
+        public static void ThrowNullTaskException()
+        {
+            throw GetNullTaskException();
+        }
+    } 
 }
