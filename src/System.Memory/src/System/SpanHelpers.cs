@@ -30,8 +30,8 @@ namespace System
             IntPtr diff = Unsafe.ByteOffset(ref src, ref dst);
 
             bool isOverlapped = (sizeof(IntPtr) == sizeof(int))
-                ? (uint)diff < (uint)srcByteCount || (uint)diff > ~(uint)dstByteCount + 1
-                : (ulong)diff < (ulong)srcByteCount || (ulong)diff > ~(ulong)dstByteCount + 1;
+                ? (uint)diff < (uint)srcByteCount || (uint)diff > (uint)-(int)dstByteCount
+                : (ulong)diff < (ulong)srcByteCount || (ulong)diff > (ulong)-(long)dstByteCount;
 
             if (!isOverlapped && !SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
@@ -53,8 +53,8 @@ namespace System
             else
             {
                 bool srcGreaterThanDst = (sizeof(IntPtr) == sizeof(int))
-                    ? (uint)diff > ~(uint)dstByteCount + 1
-                    : (ulong)diff > ~(ulong)dstByteCount + 1;
+                    ? (uint)diff > (uint)-(int)dstByteCount
+                    : (ulong)diff > (ulong)-(long)dstByteCount;
 
                 if (srcGreaterThanDst)
                 {
