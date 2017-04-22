@@ -733,6 +733,7 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.TypeLibIm
 CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.TypeLibTypeAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.TypeLibVarAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.TypeLibVersionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Diagnostics.PerformanceCounterPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 
 // TypesMustExist isn't a goal for netcore20:
 TypesMustExist : Type 'System._AppDomain' does not exist in the implementation but it does exist in the contract.
@@ -1069,11 +1070,6 @@ TypesMustExist : Type 'System.Diagnostics.EventLog' does not exist in the implem
 TypesMustExist : Type 'System.Diagnostics.EventLogEntry' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.EventLogEntryCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.EventLogEntryType' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.EventLogPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.EventLogPermissionAccess' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.EventLogPermissionAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.EventLogPermissionEntry' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Diagnostics.EventLogPermissionEntryCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.EventLogTraceListener' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.EventSourceCreationData' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.ICollectData' does not exist in the implementation but it does exist in the contract.
