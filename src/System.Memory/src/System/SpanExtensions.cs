@@ -301,6 +301,9 @@ namespace System
         /// </summary>
         public static unsafe bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
         {
+            if (second.IsEmpty)
+                return false;
+
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
@@ -310,8 +313,8 @@ namespace System
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
-                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
+                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > ~(uint)dstByteCount + 1)
+                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ~(ulong)dstByteCount + 1);
         }
 
         /// <summary>
@@ -319,6 +322,9 @@ namespace System
         /// </summary>
         public static unsafe bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
         {
+            if (second.IsEmpty)
+                return false;
+
             ref T firstRef = ref first.DangerousGetPinnableReference();
             ref T secondRef = ref second.DangerousGetPinnableReference();
 
@@ -328,8 +334,8 @@ namespace System
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > uint.MaxValue - (uint)dstByteCount)
-                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ulong.MaxValue - (ulong)dstByteCount);
+                ? ((uint)diff < (uint)srcByteCount) || ((uint)diff > ~(uint)dstByteCount + 1)
+                : ((ulong)diff < (ulong)srcByteCount) || ((ulong)diff > ~(ulong)dstByteCount + 1);
         }
     }
 }
