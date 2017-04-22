@@ -313,8 +313,8 @@ namespace System
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)firstByteCount) || ((uint)diff > ~(uint)secondByteCount + 1)
-                : ((ulong)diff < (ulong)firstByteCount) || ((ulong)diff > ~(ulong)secondByteCount + 1);
+                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
+                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
         }
 
         /// <summary>
@@ -334,8 +334,8 @@ namespace System
             IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
 
             return (sizeof(IntPtr) == sizeof(int))
-                ? ((uint)diff < (uint)firstByteCount) || ((uint)diff > ~(uint)secondByteCount + 1)
-                : ((ulong)diff < (ulong)firstByteCount) || ((ulong)diff > ~(ulong)secondByteCount + 1);
+                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
+                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
         }
     }
 }
