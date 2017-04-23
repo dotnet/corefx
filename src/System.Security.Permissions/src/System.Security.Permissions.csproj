@@ -168,10 +168,16 @@
   <ItemGroup>
     <Compile Include="System\Net\DnsPermission.cs" />
     <Compile Include="System\Net\DnsPermissionAttribute.cs" />
+    <Compile Include="System\Net\NetworkAccess.cs" />
     <Compile Include="System\Net\PeerToPeer\Collaboration\PeerCollaborationPermission.cs" />
     <Compile Include="System\Net\PeerToPeer\Collaboration\PeerCollaborationPermissionAttribute.cs" />
     <Compile Include="System\Net\PeerToPeer\PnrpPermission.cs" />
     <Compile Include="System\Net\PeerToPeer\PnrpPermissionAttribute.cs" />
+    <Compile Include="System\Net\SocketPermission.cs" />
+    <Compile Include="System\Net\SocketPermissionAttribute.cs" />
+    <Compile Include="System\Net\TransportType.cs" />
+    <Compile Include="System\Net\WebPermission.cs" />
+    <Compile Include="System\Net\WebPermissionAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Net\PeerToPeer\PnrpScope.cs" />

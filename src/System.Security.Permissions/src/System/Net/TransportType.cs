@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 namespace System.Net
 {
-    [Flags]
-    public enum NetworkAccess
+    public enum TransportType
     {
-        Accept = 128,
-        Connect = 64,
+        All = 3,
+        Connectionless = 1,
+        ConnectionOriented = 2,
+        Tcp = 2,
+        Udp = 1,
     }
 }

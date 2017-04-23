@@ -320,6 +320,41 @@ namespace System.Net
         Accept = 128,
         Connect = 64,
     }
+    public sealed partial class SocketPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public const int AllPorts = -1;
+        public SocketPermission(System.Net.NetworkAccess access, System.Net.TransportType transport, string hostName, int portNumber) { }
+        public SocketPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Collections.IEnumerator AcceptList { get { return null; } }
+        public System.Collections.IEnumerator ConnectList { get { return null; } }
+        public void AddPermission(System.Net.NetworkAccess access, System.Net.TransportType transport, string hostName, int portNumber) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class |
+        AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
+    public sealed partial class SocketPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public SocketPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string Access { get { return null; } set { } }
+        public string Host { get { return null; } set { } }
+        public string Port { get { return null; } set { } }
+        public string Transport { get { return null; } set { } }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+    public enum TransportType
+    {
+        All = 3,
+        Connectionless = 1,
+        ConnectionOriented = 2,
+        Tcp = 2,
+        Udp = 1,
+    }
     public sealed partial class WebPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
         public WebPermission() { }
