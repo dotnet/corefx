@@ -314,6 +314,41 @@ namespace System.Net
         public DnsPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
         public override System.Security.IPermission CreatePermission() { return null; }
     }
+    [System.Flags]
+    public enum NetworkAccess
+    {
+        Accept = 128,
+        Connect = 64,
+    }
+    public sealed partial class WebPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public WebPermission() { }
+        public WebPermission(System.Net.NetworkAccess access, string uriString) { }
+        public WebPermission(System.Net.NetworkAccess access, System.Text.RegularExpressions.Regex uriRegex) { }
+        public WebPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Collections.IEnumerator AcceptList { get { return null; } }
+        public System.Collections.IEnumerator ConnectList { get { return null; } }
+        public void AddPermission(System.Net.NetworkAccess access, string uriString) { }
+        public void AddPermission(System.Net.NetworkAccess access, System.Text.RegularExpressions.Regex uriRegex) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class |
+        AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
+    public sealed partial class WebPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public WebPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string Accept { get { return null; } set { } }
+        public string AcceptPattern { get { return null; } set { } }
+        public string Connect { get { return null; } set { } }
+        public string ConnectPattern { get { return null; } set { } }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
 }
 namespace System.Net.NetworkInformation
 {

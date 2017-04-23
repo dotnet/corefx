@@ -1087,12 +1087,9 @@ TypesMustExist : Type 'System.Media.SystemSound' does not exist in the implement
 TypesMustExist : Type 'System.Media.SystemSounds' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.EndpointPermission' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.ICertificatePolicy' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.NetworkAccess' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.SocketPermission' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.SocketPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.TransportType' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.WebPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.WebPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.AuthenticationModuleElement' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.AuthenticationModuleElementCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.AuthenticationModulesSection' does not exist in the implementation but it does exist in the contract.
