@@ -64,6 +64,79 @@ namespace System.Data.Common
     }
 }
 
+namespace System.Data.Odbc
+{
+    public sealed partial class OdbcPermission : System.Data.Common.DBDataPermission
+    {
+        public OdbcPermission() : base(default(System.Security.Permissions.PermissionState)) { }
+        public OdbcPermission(System.Security.Permissions.PermissionState state) : base(default(System.Security.Permissions.PermissionState)) { }
+        public OdbcPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) : base(default(System.Security.Permissions.PermissionState)) { }
+        public override void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
+        public override System.Security.IPermission Copy() { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method,
+    AllowMultiple = true, Inherited = false)]
+    public sealed partial class OdbcPermissionAttribute : System.Data.Common.DBDataPermissionAttribute
+    {
+        public OdbcPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
+namespace System.Data.OleDb
+{
+    public sealed partial class OleDbPermission : System.Data.Common.DBDataPermission
+    {
+        public OleDbPermission() : base(default(System.Security.Permissions.PermissionState)) { }
+        public OleDbPermission(System.Security.Permissions.PermissionState state) : base(default(System.Security.Permissions.PermissionState)) { }
+        public OleDbPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) : base(default(System.Security.Permissions.PermissionState)) { }
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)]
+        public string Provider { get { return null; } set { } }
+        public override System.Security.IPermission Copy() { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct |
+        AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    public sealed partial class OleDbPermissionAttribute : System.Data.Common.DBDataPermissionAttribute
+    {
+        public OleDbPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)]
+        public string Provider { get { return null; } set { } }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
+namespace System.Data.OracleClient
+{
+    public sealed partial class OraclePermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public OraclePermission(System.Security.Permissions.PermissionState state) { }
+        public bool AllowBlankPassword { get; set; }
+        public void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct |
+        AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    public sealed partial class OraclePermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public OraclePermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public bool AllowBlankPassword { get; set; }
+        public string ConnectionString { get { return null; } set { } }
+        public System.Data.KeyRestrictionBehavior KeyRestrictionBehavior { get; set; }
+        public string KeyRestrictions { get { return null; } set { } }
+        public override System.Security.IPermission CreatePermission() { return null; }
+        [System.ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Never)]
+        public bool ShouldSerializeConnectionString() => false;
+        [System.ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Never)]
+        public bool ShouldSerializeKeyRestrictions() => false;
+    }
+}
+
 namespace System.Drawing.Printing
 {
     public sealed partial class PrintingPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
@@ -221,6 +294,27 @@ namespace System.Diagnostics
         public void Remove(System.Diagnostics.PerformanceCounterPermissionEntry value) { }
     }
 }
+namespace System.Net
+{
+    public sealed partial class DnsPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public DnsPermission(System.Security.Permissions.PermissionState state) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class |
+        AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
+    public sealed partial class DnsPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public DnsPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
 namespace System.Net.NetworkInformation
 {
     [Flags]
@@ -250,6 +344,55 @@ namespace System.Net.NetworkInformation
         public NetworkInformationPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
         public string Access { get { throw null; } set { } }
         public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+}
+namespace System.Net.PeerToPeer
+{
+    public sealed partial class PnrpPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public PnrpPermission(System.Security.Permissions.PermissionState state) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement e) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct |
+        AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    public sealed partial class PnrpPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public PnrpPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+    public enum PnrpScope
+    {
+        All = 0,
+        Global = 1,
+        LinkLocal = 3,
+        SiteLocal = 2,
+    }
+}
+namespace System.Net.PeerToPeer.Collaboration
+{
+    public sealed partial class PeerCollaborationPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public PeerCollaborationPermission(System.Security.Permissions.PermissionState state) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement e) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct |
+       AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    public sealed partial class PeerCollaborationPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public PeerCollaborationPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public override System.Security.IPermission CreatePermission() { return null; }
     }
 }
 namespace System.Security

@@ -1085,8 +1085,6 @@ TypesMustExist : Type 'System.IO.IODescriptionAttribute' does not exist in the i
 TypesMustExist : Type 'System.Media.SoundPlayer' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Media.SystemSound' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Media.SystemSounds' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.DnsPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.DnsPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.EndpointPermission' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.ICertificatePolicy' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.NetworkAccess' does not exist in the implementation but it does exist in the contract.
@@ -1323,8 +1321,6 @@ TypesMustExist : Type 'System.Data.TypedDataSetGeneratorException' does not exis
 TypesMustExist : Type 'System.Data.Common.DbProviderConfigurationHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.Common.DbProviderFactories' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.Common.DbProviderFactoriesConfigurationHandler' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.Odbc.OdbcPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.Odbc.OdbcPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbCommand' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbCommandBuilder' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbConnection' does not exist in the implementation but it does exist in the contract.
@@ -1343,8 +1339,6 @@ TypesMustExist : Type 'System.Data.OleDb.OleDbMetaDataCollectionNames' does not 
 TypesMustExist : Type 'System.Data.OleDb.OleDbMetaDataColumnNames' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbParameter' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbParameterCollection' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.OleDb.OleDbPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Data.OleDb.OleDbPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbRowUpdatedEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbRowUpdatedEventHandler' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Data.OleDb.OleDbRowUpdatingEventArgs' does not exist in the implementation but it does exist in the contract.
@@ -1574,9 +1568,6 @@ TypesMustExist : Type 'System.Net.PeerToPeer.PeerNameRegistration' does not exis
 TypesMustExist : Type 'System.Net.PeerToPeer.PeerNameResolver' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.PeerNameType' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.PeerToPeerException' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.PeerToPeer.PnrpPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.PeerToPeer.PnrpPermissionAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.PeerToPeer.PnrpScope' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.ResolveCompletedEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.ResolveProgressChangedEventArgs' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.ApplicationChangedEventArgs' does not exist in the implementation but it does exist in the contract.
@@ -1592,8 +1583,6 @@ TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerApplicationLaunch
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerApplicationRegistrationType' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerChangeType' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerCollaboration' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerCollaborationPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerCollaborationPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerContact' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerContactCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.PeerToPeer.Collaboration.PeerEndPoint' does not exist in the implementation but it does exist in the contract.
