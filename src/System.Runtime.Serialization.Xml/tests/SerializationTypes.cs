@@ -15,6 +15,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using System.Reflection;
 
 namespace SerializationTypes
 {
@@ -3159,11 +3160,34 @@ public class TypeWithTimeSpanProperty
 
 public class TypeWithDefaultTimeSpanProperty
 {
-    [DefaultValue(typeof(TimeSpan), "00:01:00")]
-    public TimeSpan TimeSpanProperty;
+    public TypeWithDefaultTimeSpanProperty()
+    {
+        TimeSpanProperty = GetDefaultValue("TimeSpanProperty");
+        TimeSpanProperty2 = GetDefaultValue("TimeSpanProperty2");
+    }
 
-    [DefaultValue(typeof(TimeSpan), "00:0:01")]
-    public TimeSpan TimeSpanProperty2;
+    [DefaultValue(typeof(TimeSpan), "00:01:00")]
+    public TimeSpan TimeSpanProperty { get; set; }
+
+    [DefaultValue(typeof(TimeSpan), "00:00:01")]
+    public TimeSpan TimeSpanProperty2 { get; set; }
+
+    public TimeSpan GetDefaultValue(string propertyName)
+    {
+        var property = this.GetType().GetProperty(propertyName);
+
+        var attribute = property.GetCustomAttribute(typeof(DefaultValueAttribute))
+                as DefaultValueAttribute;
+
+        if (attribute != null)
+        {
+            return (TimeSpan)attribute.Value;
+        }
+        else
+        {
+            return new TimeSpan(0, 0, 0);
+        }
+    }
 }
 
 public class TypeWithByteProperty
