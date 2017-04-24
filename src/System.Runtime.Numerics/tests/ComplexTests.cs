@@ -559,6 +559,9 @@ namespace System.Numerics.Tests
             yield return new object[] { double.MaxValue, double.MaxValue, Math.Cos(double.MaxValue) * double.PositiveInfinity, double.NegativeInfinity };
             yield return new object[] { double.MinValue, double.MinValue, double.NegativeInfinity, double.NegativeInfinity };
 
+            yield return new object[] { double.MinValue, double.MaxValue, double.NegativeInfinity, double.PositiveInfinity };
+            yield return new object[] { double.MaxValue, double.MinValue, double.PositiveInfinity, double.PositiveInfinity };
+
             // Invalid values
             foreach (double invalidReal in s_invalidDoubleValues)
             {
