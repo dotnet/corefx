@@ -3161,6 +3161,9 @@ public class TypeWithDefaultTimeSpanProperty
 {
     [DefaultValue(typeof(TimeSpan), "00:01:00")]
     public TimeSpan TimeSpanProperty;
+
+    [DefaultValue(typeof(TimeSpan), "00:0:01")]
+    public TimeSpan TimeSpanProperty2;
 }
 
 public class TypeWithByteProperty

@@ -1661,11 +1661,13 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void Xml_TypeWithDefaultTimeSpanProperty()
     {
-        var obj = new TypeWithDefaultTimeSpanProperty { TimeSpanProperty = new TimeSpan(0, 1, 0) };
+        var obj = new TypeWithDefaultTimeSpanProperty { TimeSpanProperty = new TimeSpan(0, 1, 0), TimeSpanProperty2 = new TimeSpan(0, 1, 0) };
         var deserializedObj = SerializeAndDeserialize(obj,
 @"<?xml version=""1.0""?>
-<TypeWithDefaultTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""/>");
-        Assert.NotNull(obj);
+<TypeWithDefaultTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><TimeSpanProperty2>PT1M</TimeSpanProperty2></TypeWithDefaultTimeSpanProperty>");
+        Assert.NotNull(deserializedObj);
+        Assert.Equal(new TimeSpan(0, 0, 0), deserializedObj.TimeSpanProperty);
+        Assert.Equal(obj.TimeSpanProperty2, deserializedObj.TimeSpanProperty2);
     }
 
     [Fact]

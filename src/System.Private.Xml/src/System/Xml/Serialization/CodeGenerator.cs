@@ -859,7 +859,6 @@ namespace System.Xml.Serialization
                         }
                         else
                         {
-                            Debug.Assert(false, "UnknownConstantType");
                             throw new NotSupportedException(SR.Format(SR.UnknownConstantType, valueType.AssemblyQualifiedName));
                         }
                 }
