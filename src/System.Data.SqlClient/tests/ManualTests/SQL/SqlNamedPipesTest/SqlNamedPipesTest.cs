@@ -15,19 +15,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.NpConnStr);
             builder.ConnectTimeout = 5;
 
-            string plainConnString = builder.ConnectionString;
-            builder.DataSource = "np:" + GetHostFromDataSource(builder.DataSource);
-            string serverNameOnlyConnString = builder.ConnectionString;
-
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                OpenBadConnection<PlatformNotSupportedException>(plainConnString);
-                OpenBadConnection<PlatformNotSupportedException>(serverNameOnlyConnString);
+                OpenBadConnection<PlatformNotSupportedException>(builder.ConnectionString);
             }
             else
             {
-                OpenGoodConnection(plainConnString);
-                OpenGoodConnection(serverNameOnlyConnString);
+                OpenGoodConnection(builder.ConnectionString);
             }
         }
 
@@ -40,26 +34,24 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.NpConnStr);
             builder.ConnectTimeout = 2;
 
-            string host = GetHostFromDataSource(builder.DataSource);
-
             // Using forward slashes
-            builder.DataSource = "np://" + host + "/pipe/sql/query";
+            builder.DataSource = "np://NotARealServer/pipe/sql/query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Without pipe token
-            builder.DataSource = @"np:\\" + host + @"\sql\query";
+            builder.DataSource = @"np:\\NotARealServer\sql\query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Without a pipe name
-            builder.DataSource = @"np:\\" + host + @"\pipe";
+            builder.DataSource = @"np:\\NotARealServer\pipe";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Nothing after server
-            builder.DataSource = @"np:\\" + host;
+            builder.DataSource = @"np:\\NotARealServer";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // No leading slashes
-            builder.DataSource = @"np:" + host + @"\pipe\sql\query";
+            builder.DataSource = @"np:NotARealServer\pipe\sql\query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // No server name
@@ -86,24 +78,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             {
                 conn.Open();
                 DataTestUtility.AssertEqualsWithDescription(ConnectionState.Open, conn.State, "FAILED: Connection should be in open state");
-            }
-        }
-
-        private static string GetHostFromDataSource(string dataSource)
-        {
-            // NP Data Source can be prefixed with "np:" and then a path/hostname, or can just be the hostname
-            int colonIndex = dataSource.IndexOf(':');
-            if (colonIndex != -1)
-            {
-                if("np" != dataSource.Substring(0, colonIndex))
-                {
-                    throw new InvalidOperationException("Connection string did not contain expected NP token in Server Name string!");
-                }
-                return dataSource.Contains(@"\") ? (new Uri(dataSource.Substring(colonIndex + 1))).Host : dataSource.Substring(colonIndex+1);
-            }
-            else
-            {
-                return dataSource;
             }
         }
     }
