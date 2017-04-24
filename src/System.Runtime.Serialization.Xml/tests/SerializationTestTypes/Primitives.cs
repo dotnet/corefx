@@ -100,4 +100,28 @@ namespace SerializationTestTypes
         [DataMember]
         public string Name;
     }
+
+    [DataContract]
+    public class CharClass
+    {
+        public CharClass()
+        {
+            c = default(Char);
+            c1 = char.MaxValue;
+            c2 = char.MinValue;
+            c3 = 'c';
+        }
+
+        [DataMember]
+        public char c;
+
+        [DataMember]
+        public char c1;
+
+        [DataMember]
+        public char c2;
+
+        [DataMember]
+        public char c3;
+    }
 }
