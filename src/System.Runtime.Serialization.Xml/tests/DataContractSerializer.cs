@@ -2881,7 +2881,7 @@ public static partial class DataContractSerializerTests
         };
         var dcs1 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting1);
         var dcs2 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting2);
-        string baseline = @"<CustomClass z:Id=""1"" i:type=""a:SerializationTestTypes.DCRVariations"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC""><Data i:nil=""true""/></unknownType2></CustomClass>";
+        string baseline = @"<CustomClass z:Id=""1"" i:type=""a:SerializationTestTypes.DCRVariations"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC""><Data i:nil=""true""/></unknownType2></CustomClass>";
 
         MemoryStream ms = new MemoryStream();
         dcs1.WriteObject(ms, dcrVariationsGoing);
@@ -2906,7 +2906,7 @@ public static partial class DataContractSerializerTests
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
-        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
 
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
@@ -2935,7 +2935,7 @@ public static partial class DataContractSerializerTests
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
-        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
 
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
@@ -2964,7 +2964,7 @@ public static partial class DataContractSerializerTests
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
-        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""System.Runtime.Serialization.Xml.Tests, Version=4.1.3.0, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb""><Data i:nil=""true""/></unknownType2></DCRVariations>";
+        string baseline = @"<DCRVariations z:Id=""1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><unknownType1 z:Id=""2"" i:type=""a:SerializationTestTypes.Person"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Age>0</Age><Name i:nil=""true""/></unknownType1><unknownType2 z:Id=""3"" i:type=""a:SerializationTestTypes.SimpleDC"" xmlns:a=""http://schemas.datacontract.org/2004/07/""><Data i:nil=""true""/></unknownType2></DCRVariations>";
 
         MemoryStream ms = new MemoryStream();
         var xmlWriter = XmlDictionaryWriter.CreateTextWriter(ms);
