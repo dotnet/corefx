@@ -1666,7 +1666,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 @"<?xml version=""1.0""?>
 <TypeWithDefaultTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><TimeSpanProperty2>PT1M</TimeSpanProperty2></TypeWithDefaultTimeSpanProperty>");
         Assert.NotNull(deserializedObj);
-        Assert.Equal(obj.GetDefaultValue("TimeSpanProperty"), deserializedObj.TimeSpanProperty);
+        Assert.Equal(obj.TimeSpanProperty, deserializedObj.TimeSpanProperty);
         Assert.Equal(obj.TimeSpanProperty2, deserializedObj.TimeSpanProperty2);
     }
 
