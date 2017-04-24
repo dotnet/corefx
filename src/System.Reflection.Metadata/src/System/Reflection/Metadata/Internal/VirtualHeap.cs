@@ -47,7 +47,9 @@ namespace System.Reflection.Metadata.Ecma335
         protected override void Release()
         {
             // Make sure the current thread isn't aborted in the middle of the operation.
+#if !NETSTANDARD11
             RuntimeHelpers.PrepareConstrainedRegions();
+#endif
             try
             {
             }
@@ -93,7 +95,9 @@ namespace System.Reflection.Metadata.Ecma335
             var blobs = GetBlobs();
 
             MemoryBlock result;
+#if !NETSTANDARD11
             RuntimeHelpers.PrepareConstrainedRegions();
+#endif
             try
             {
             }
