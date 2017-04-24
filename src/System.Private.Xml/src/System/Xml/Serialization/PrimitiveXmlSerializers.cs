@@ -237,7 +237,7 @@ namespace System.Xml.Serialization
     }
 
 #if !XMLSERIALIZERGENERATOR
-    internal class XmlSerializationPrimitiveReader : Microsoft.XmlSerializer.Generator.XmlSerializationReader
+    internal class XmlSerializationPrimitiveReader : System.Xml.Serialization.XmlSerializationReader
     {
         internal object Read_string()
         {
