@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Reflection.Internal;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -45,7 +44,7 @@ namespace System.Reflection.Metadata.Ecma335
             _blobs = new Dictionary<uint, PinnedBlob>();
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void Release()
         {
             // Make sure the current thread isn't aborted in the middle of the operation.
             RuntimeHelpers.PrepareConstrainedRegions();

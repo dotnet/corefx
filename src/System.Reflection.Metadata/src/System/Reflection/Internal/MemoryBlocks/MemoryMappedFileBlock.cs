@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -35,7 +34,7 @@ namespace System.Reflection.Internal
                 }
             }
 
-            protected override void Dispose(bool disposing)
+            protected override void Release()
             {
                 // Make sure the current thread isn't aborted in between zeroing the references and releasing/disposing.
                 // Safe buffer only frees the underlying resource if its ref count drops to zero, so we have to make sure it does.

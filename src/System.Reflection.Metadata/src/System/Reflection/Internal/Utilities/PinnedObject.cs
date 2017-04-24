@@ -25,7 +25,7 @@ namespace System.Reflection.Internal
             }
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void Release()
         {
             // Make sure the current thread isn't aborted in between zeroing the handle and freeing it.
             RuntimeHelpers.PrepareConstrainedRegions();

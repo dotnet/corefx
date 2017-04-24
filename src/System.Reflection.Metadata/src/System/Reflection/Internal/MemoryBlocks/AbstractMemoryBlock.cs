@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
-using System.Runtime.ConstrainedExecution;
 
 namespace System.Reflection.Internal
 {

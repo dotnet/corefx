@@ -22,7 +22,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Reflection\Internal\Utilities\PinnedObject.cs" />
-    <Compile Include="System\Reflection\Internal\Utilities\CriticalDisposableObject.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\CriticalDisposableObject.cs" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
+    <Compile Include="System\Reflection\Internal\Utilities\CriticalDisposableObject.netstandard1.1.cs" Condition="'$(TargetGroup)' == 'netstandard1.1'" />
     <Compile Include="System\Reflection\Internal\Utilities\ExceptionUtilities.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\PathUtilities.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\FunctionPointerAttributes.cs" />

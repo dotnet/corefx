@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -34,7 +33,7 @@ namespace System.Reflection.Internal
                 }
             }
                         
-            protected override void Dispose(bool disposing)
+            protected override void Release()
             {
                 // make sure the current thread isn't aborted in between zeroing the pointer and freeing the memory
                 RuntimeHelpers.PrepareConstrainedRegions();
