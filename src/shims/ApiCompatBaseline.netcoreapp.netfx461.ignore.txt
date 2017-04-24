@@ -1121,9 +1121,6 @@ TypesMustExist : Type 'System.Net.Configuration.WebRequestModuleElement' does no
 TypesMustExist : Type 'System.Net.Configuration.WebRequestModuleElementCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.WebRequestModulesSection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.WebUtilityElement' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.Mail.SmtpAccess' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.Mail.SmtpPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.Mail.SmtpPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Sockets.SocketClientAccessPolicyProtocol' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Reflection.ICustomTypeProvider' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.InteropServices.StandardOleMarshalObject' does not exist in the implementation but it does exist in the contract.

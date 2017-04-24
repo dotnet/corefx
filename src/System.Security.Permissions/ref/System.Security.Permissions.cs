@@ -385,6 +385,38 @@ namespace System.Net
         public override System.Security.IPermission CreatePermission() { return null; }
     }
 }
+namespace System.Net.Mail
+{
+    public enum SmtpAccess
+    {
+        Connect = 1,
+        ConnectToUnrestrictedPort = 2,
+        None = 0,
+    }
+    public sealed partial class SmtpPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public SmtpPermission(bool unrestricted) { }
+        public SmtpPermission(System.Net.Mail.SmtpAccess access) { }
+        public SmtpPermission(System.Security.Permissions.PermissionState state) { }
+        public System.Net.Mail.SmtpAccess Access { get; }
+        public void AddPermission(System.Net.Mail.SmtpAccess access) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class |
+        AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
+    public sealed partial class SmtpPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public SmtpPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string Access { get { return null; } set { } }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
 namespace System.Net.NetworkInformation
 {
     [Flags]

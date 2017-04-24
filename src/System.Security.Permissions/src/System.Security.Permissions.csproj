@@ -168,6 +168,9 @@
   <ItemGroup>
     <Compile Include="System\Net\DnsPermission.cs" />
     <Compile Include="System\Net\DnsPermissionAttribute.cs" />
+    <Compile Include="System\Net\Mail\SmtpAccess.cs" />
+    <Compile Include="System\Net\Mail\SmtpPermission.cs" />
+    <Compile Include="System\Net\Mail\SmtpPermissionAttribute.cs" />
     <Compile Include="System\Net\NetworkAccess.cs" />
     <Compile Include="System\Net\PeerToPeer\Collaboration\PeerCollaborationPermission.cs" />
     <Compile Include="System\Net\PeerToPeer\Collaboration\PeerCollaborationPermissionAttribute.cs" />
