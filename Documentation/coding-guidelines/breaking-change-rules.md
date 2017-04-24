@@ -167,7 +167,7 @@ Breaking Change Rules
 
 * Introducing or removing an override to non-sealed types
 > Introducing an override will cause previous consumers to skip over the override when calling `base` if not compiled against the new version.
-> Removing an override, although not breaking code compiled against a previous version, will fall into the previous case if latter re-added later.
+> Removing an override, although not breaking code compiled against a previous version, will fall into the previous case if re-added later.
 
 * Adding an overload that precludes an existing overload, and defines different behavior  
 > This will break existing clients that were bound to the previous overload. For example, if you have a class that has a single version of a method that accepts a `uint`, an existing consumer will 
