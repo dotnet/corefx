@@ -34,7 +34,6 @@ namespace System.Net
 {
     internal sealed class ChunkedInputStream : HttpRequestStream
     {
-        private bool _disposed;
         private ChunkStream _decoder;
         private readonly HttpListenerContext _context;
         private bool _no_more_data;
@@ -78,7 +77,7 @@ namespace System.Net
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_disposed)
+            if (_closed)
                 throw new ObjectDisposedException(GetType().ToString());
 
             if (buffer == null)
@@ -156,7 +155,7 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_disposed)
+            if (_closed)
                 throw new ObjectDisposedException(GetType().ToString());
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
@@ -172,15 +171,6 @@ namespace System.Net
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.Format(SR.net_io_operation_aborted, ares._error.Message));
 
             return ares._count;
-        }
-
-        public override void Close()
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-                base.Close();
-            }
         }
     }
 }

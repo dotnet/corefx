@@ -37,5 +37,25 @@ namespace System.Net
         }
 
         public override void EndWrite(IAsyncResult asyncResult) => throw new InvalidOperationException(SR.net_readonlystream);
+
+        internal bool Closed => _closed;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this);
+            try
+            {
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Info(this, "_closed:" + _closed);
+                _closed = true;
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Exit(this);
+        }
     }
 }

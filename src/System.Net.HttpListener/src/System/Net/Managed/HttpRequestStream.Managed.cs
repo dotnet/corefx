@@ -42,7 +42,7 @@ namespace System.Net
         private int _offset;
         private int _length;
         private long _remainingBody;
-        private bool _disposed;
+        protected bool _closed;
         private Stream _stream;
 
         internal HttpRequestStream(Stream stream, byte[] buffer, int offset, int length)
@@ -178,8 +178,8 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
+            if (_closed)
+                return 0;
 
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));

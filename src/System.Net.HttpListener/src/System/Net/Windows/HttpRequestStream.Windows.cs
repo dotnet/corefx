@@ -12,10 +12,10 @@ namespace System.Net
 {
     internal sealed unsafe partial class HttpRequestStream : Stream
     {
+        private bool _closed;
         private readonly HttpListenerContext _httpContext;
         private uint _dataChunkOffset;
         private int _dataChunkIndex;
-        private bool _closed;
         internal const int MaxReadSize = 0x20000; //http.sys recommends we limit reads to 128k
         private bool _inOpaqueMode;
 
@@ -25,14 +25,6 @@ namespace System.Net
             _httpContext = httpContext;
         }
 
-
-        internal bool Closed
-        {
-            get
-            {
-                return _closed;
-            }
-        }
 
         internal bool BufferedDataChunksAvailable
         {
@@ -309,22 +301,6 @@ namespace System.Net
             }
 
             return (int)dataRead + (int)castedAsyncResult._dataAlreadyRead;
-        }
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            try
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "_closed:" + _closed);
-                _closed = true;
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
         internal void SwitchToOpaqueMode()
