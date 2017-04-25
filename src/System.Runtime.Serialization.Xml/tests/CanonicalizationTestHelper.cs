@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.IO;
 using System.Text;
 using System.Xml;
 
@@ -168,7 +172,6 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             }
             return result;
         }
-
     }
 
     public class Helper
@@ -202,7 +205,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
         public static void DumpToFile(string fileName, byte[] buffer)
         {
             DumpToFile(fileName, buffer, 0, buffer.Length);
-        }        
+        }
     }
 }
 

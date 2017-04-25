@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,30 +11,30 @@ using System.Xml.Serialization;
 internal static class TestConfigHelper
 {
     private static readonly XmlSerializer s_Serializer = new XmlSerializer(typeof(TestCasesConfig));
-    private static TestCase _currentTest;
-    private static TestCasesConfig _allTests;
+    private static TestCase s_currentTest;
+    private static TestCasesConfig s_allTests;
 
     public static TestCase CurrentTest
     {
-        get { return _currentTest; }
+        get { return s_currentTest; }
     }
 
     public static TestCasesConfig AllTests
     {
-        get { return _allTests; }
+        get { return s_allTests; }
     }
 
     public static void LoadAllTests(string path)
     {
         using (var stream = File.OpenRead(path))
         {
-            _allTests = (TestCasesConfig)s_Serializer.Deserialize(stream);
+            s_allTests = (TestCasesConfig)s_Serializer.Deserialize(stream);
         }
     }
 
     public static TestCase GetTest(string name)
     {
-        return _currentTest = _allTests.TestCases.Where(tc => tc.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        return s_currentTest = s_allTests.TestCases.Where(tc => tc.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
     }
 }
 
