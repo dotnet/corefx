@@ -176,14 +176,6 @@ namespace System.Net
             }
         }
 
-        public string[] AcceptTypes
-        {
-            get
-            {
-                return Helpers.ParseMultivalueHeader(GetKnownHeader(HttpRequestHeader.Accept));
-            }
-        }
-
         public long ContentLength64
         {
             get
@@ -377,14 +369,6 @@ namespace System.Net
             get
             {
                 return GetKnownHeader(HttpRequestHeader.Host);
-            }
-        }
-
-        public string[] UserLanguages
-        {
-            get
-            {
-                return Helpers.ParseMultivalueHeader(GetKnownHeader(HttpRequestHeader.AcceptLanguage));
             }
         }
 

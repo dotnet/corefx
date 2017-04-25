@@ -51,7 +51,6 @@ namespace System.Net
             }
         }
 
-        private string[] _acceptTypes;
         private long _contentLength;
         private bool _clSet;
         private CookieCollection _cookies;
@@ -60,7 +59,6 @@ namespace System.Net
         private Stream _inputStream;
         private NameValueCollection _queryString; // check if null is ok, check if read-only, check case-sensitiveness
         private Uri _referrer;
-        private string[] _userLanguages;
         private HttpListenerContext _context;
         private bool _isChunked;
         private bool _kaSet;
@@ -261,12 +259,6 @@ namespace System.Net
             _headers.Set(name, val);
             switch (lower)
             {
-                case "accept-language":
-                    _userLanguages = Helpers.ParseMultivalueHeader(val);
-                    break;
-                case "accept":
-                    _acceptTypes = Helpers.ParseMultivalueHeader(val);
-                    break;
                 case "content-length":
                     try
                     {
@@ -383,11 +375,6 @@ namespace System.Net
                     return false;
                 }
             }
-        }
-        
-        public string[] AcceptTypes
-        {
-            get { return _acceptTypes; }
         }
 
         public int ClientCertificateError
@@ -541,11 +528,6 @@ namespace System.Net
         public string UserHostName
         {
             get { return _headers["host"]; }
-        }
-
-        public string[] UserLanguages
-        {
-            get { return _userLanguages; }
         }
 
         public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)

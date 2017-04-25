@@ -11,9 +11,37 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListenerRequest
     {
+        private string[] _acceptTypes;
+        private string[] _userLanguages;
         private string _rawUrl;
         private Uri _requestUri;
         private Version _version;
+
+        public string[] AcceptTypes
+        {
+            get
+            {
+                if (_acceptTypes == null)
+                {
+                    _acceptTypes = Helpers.ParseMultivalueHeader(Headers["accept"]);
+                }
+
+                return _acceptTypes;
+            }
+        }
+
+        public string[] UserLanguages
+        {
+            get
+            {
+                if (_userLanguages == null)
+                {
+                    _userLanguages = Helpers.ParseMultivalueHeader(Headers["accept-language"]);
+                }
+
+                return _userLanguages;
+            }
+        }
 
         public Encoding ContentEncoding
         {
