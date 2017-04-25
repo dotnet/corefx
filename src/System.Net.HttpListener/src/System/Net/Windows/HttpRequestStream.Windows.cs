@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Net
 {
-    internal sealed unsafe class HttpRequestStream : Stream
+    internal sealed unsafe partial class HttpRequestStream : Stream
     {
         private readonly HttpListenerContext _httpContext;
         private uint _dataChunkOffset;
@@ -25,29 +25,6 @@ namespace System.Net
             _httpContext = httpContext;
         }
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool CanWrite
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool CanRead
-        {
-            get
-            {
-                return true;
-            }
-        }
 
         internal bool Closed
         {
@@ -76,44 +53,6 @@ namespace System.Net
             }
         }
 
-        public override void Flush()
-        {
-        }
-
-        public override Task FlushAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        public override long Length
-        {
-            get
-            {
-                throw new NotSupportedException(SR.net_noseek);
-            }
-        }
-
-        public override long Position
-        {
-            get
-            {
-                throw new NotSupportedException(SR.net_noseek);
-            }
-            set
-            {
-                throw new NotSupportedException(SR.net_noseek);
-            }
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
 
         public override int Read(byte[] buffer, int offset, int size)
         {
@@ -372,21 +311,6 @@ namespace System.Net
             return (int)dataRead + (int)castedAsyncResult._dataAlreadyRead;
         }
 
-        public override void Write(byte[] buffer, int offset, int size)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
-        }
-
-
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
-        }
-
-        public override void EndWrite(IAsyncResult asyncResult)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
-        }
 
         protected override void Dispose(bool disposing)
         {

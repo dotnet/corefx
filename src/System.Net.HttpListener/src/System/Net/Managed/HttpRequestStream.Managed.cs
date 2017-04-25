@@ -36,7 +36,7 @@ using System.Threading.Tasks;
 
 namespace System.Net
 {
-    internal class HttpRequestStream : Stream
+    internal partial class HttpRequestStream : Stream
     {
         private byte[] _buffer;
         private int _offset;
@@ -58,35 +58,6 @@ namespace System.Net
             _length = length;
             _remainingBody = contentlength;
         }
-
-        public override bool CanRead => true;
-
-        public override bool CanSeek => false;
-
-        public override bool CanWrite => false;
-
-        public override long Length
-        {
-            get { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override long Position
-        {
-            get { throw new NotSupportedException(SR.net_noseek); }
-            set { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override void Close() => _disposed = true;
-
-        public override void Flush()
-        {
-        }
-        
-        public override Task FlushAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
 
         // Returns 0 if we can keep reading from the base stream,
         // > 0 if we read something from the buffer.
@@ -228,32 +199,6 @@ namespace System.Net
             }
 
             return nread;
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
-        }
-
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count,
-                            AsyncCallback cback, object state)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
-        }
-
-        public override void EndWrite(IAsyncResult async_result)
-        {
-            throw new InvalidOperationException(SR.net_readonlystream);
         }
     }
 }
