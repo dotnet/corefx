@@ -1190,7 +1190,7 @@ namespace System.Net
             int cSpaces = 0;
             int cUnsafe = 0;
 
-            // count them first
+            // Count them first.
             for (int i = 0; i < count; i++)
             {
                 char ch = (char) bytes[offset + i];
@@ -1205,11 +1205,11 @@ namespace System.Net
                 }
             }
 
-            // if nothing to expand
+            // If nothing to expand.
             if (!alwaysCreateReturnValue && cSpaces == 0 && cUnsafe == 0)
                 return bytes;
 
-            // expand not 'safe' characters into %XX, spaces to +s
+            // Expand not 'safe' characters into %XX, spaces to +.
             byte[] expandedBytes = new byte[count + cUnsafe * 2];
             int pos = 0;
 
