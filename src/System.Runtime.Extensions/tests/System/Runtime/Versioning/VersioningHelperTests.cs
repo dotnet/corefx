@@ -10,6 +10,7 @@ namespace System.Runtime.Versioning.Tests
     public static class VersioningHelperTests
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "r3 suffix is hardcoded in .Net Core")]
         public static void Test1()
         {
             string str1 = VersioningHelper.MakeVersionSafeName("TestFile", ResourceScope.Process, ResourceScope.AppDomain);
