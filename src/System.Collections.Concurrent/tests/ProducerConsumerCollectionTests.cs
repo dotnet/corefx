@@ -735,6 +735,8 @@ namespace System.Collections.Concurrent.Tests
             }
         }
 
+        private const int MaxConcurrentCollectionSize = 300000;
+
         [Theory]
         [InlineData(3000000)]
         [OuterLoop]
@@ -745,11 +747,16 @@ namespace System.Collections.Concurrent.Tests
             // Thread that adds
             Task<HashSet<int>> adds = ThreadFactory.StartNew(() =>
             {
+                var added = new HashSet<int>();
                 for (int i = int.MinValue; i < (int.MinValue + operations); i++)
                 {
-                    Assert.True(c.TryAdd(i));
+                    if (c.Count < MaxConcurrentCollectionSize)
+                    {
+                        Assert.True(c.TryAdd(i));
+                        added.Add(i);
+                    }
                 }
-                return new HashSet<int>(Enumerable.Range(int.MinValue, operations));
+                return added;
             });
 
             // Thread that adds and takes
@@ -761,8 +768,11 @@ namespace System.Collections.Concurrent.Tests
                 // avoid 0 as default(T), to detect accidentally reading a default value
                 for (int i = 1; i < (1 + operations); i++)
                 {
-                    Assert.True(c.TryAdd(i));
-                    added.Add(i);
+                    if (c.Count < MaxConcurrentCollectionSize)
+                    {
+                        Assert.True(c.TryAdd(i));
+                        added.Add(i);
+                    }
 
                     int item;
                     if (c.TryTake(out item))
