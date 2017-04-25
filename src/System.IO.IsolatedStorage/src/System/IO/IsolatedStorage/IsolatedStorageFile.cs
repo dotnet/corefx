@@ -691,7 +691,7 @@ namespace System.IO.IsolatedStorage
             if (Disposed)
                 throw new ObjectDisposedException(null, SR.IsolatedStorage_StoreNotOpen);
 
-            if (_closed)
+            if (_closed || IsDeleted)
                 throw new InvalidOperationException(SR.IsolatedStorage_StoreNotOpen);
         }
 
