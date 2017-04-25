@@ -959,6 +959,33 @@
         "Trusted-All-Debug-Linux",
         "Trusted-All-Debug-Linux-Crossbuild"
       ]
+    },
+    {
+      "Name": "Archive symbols - Release",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "PB_ConfigurationGroup": "Release"
+      },
+      "Definitions": [
+        {
+          "Name": "DotNet-Trusted-Symbol-Archive",
+          "Parameters": {
+          },
+          "ReportingParameters": {
+            "TaskName": "Symbol Archive",
+            "Type": "build/publish/",
+            "ConfigurationGroup": "Release - Archive Symbols"
+          }
+        }
+      ],
+      "DependsOn": [
+        "Trusted-All-Release-Windows",
+        "Trusted-All-Release-OSX",
+        "Trusted-All-Release-Linux",
+        "Trusted-All-Release-Linux-Crossbuild"
+      ]
     }
   ]
 }
