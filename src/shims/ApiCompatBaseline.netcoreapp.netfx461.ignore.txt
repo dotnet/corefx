@@ -584,7 +584,6 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Net.Mail.SmtpException' does not 
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Mail.SmtpFailedRecipientException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Mail.SmtpFailedRecipientsException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.NetworkInformation.NetworkInformationException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Net.NetworkInformation.NetworkInformationPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Sockets.SocketException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.WebSockets.WebSocketException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Runtime.InteropServices.DefaultParameterValueAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
@@ -665,7 +664,6 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlNotFilledExcepti
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlNullValueException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlTruncateException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.SqlTypes.SqlTypeException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Drawing.Printing.PrintingPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.CookieException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.WebException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Sockets.SocketException' does not implement interface 'System.Runtime.InteropServices._Exception' in the implementation but it does in the contract.
@@ -1657,8 +1655,6 @@ TypesMustExist : Type 'System.ServiceModel.Web.WebMessageBodyStyle' does not exi
 TypesMustExist : Type 'System.ServiceModel.Web.WebMessageFormat' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.ServiceModel.Web.WebOperationContext' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.ServiceModel.Web.WebServiceHost' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Transactions.DistributedTransactionPermission' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Transactions.DistributedTransactionPermissionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Transactions.Configuration.DefaultSettingsSection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Transactions.Configuration.MachineSettingsSection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Transactions.Configuration.TransactionsSectionGroup' does not exist in the implementation but it does exist in the contract.

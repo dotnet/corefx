@@ -1893,3 +1893,24 @@ namespace System.Security.Policy
         public System.Security.SecurityElement ToXml(System.Security.Policy.PolicyLevel level) { throw null; }
     }
 }
+namespace System.Transactions
+{
+    public sealed partial class DistributedTransactionPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
+    {
+        public DistributedTransactionPermission(System.Security.Permissions.PermissionState state) { }
+        public override System.Security.IPermission Copy() { return null; }
+        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override System.Security.IPermission Intersect(System.Security.IPermission target) { return null; }
+        public override bool IsSubsetOf(System.Security.IPermission target) => false;
+        public bool IsUnrestricted() => false;
+        public override System.Security.SecurityElement ToXml() { return null; }
+        public override System.Security.IPermission Union(System.Security.IPermission target) { return null; }
+    }
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    public sealed partial class DistributedTransactionPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public DistributedTransactionPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public new bool Unrestricted { get; set; }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
