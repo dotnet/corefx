@@ -82,9 +82,19 @@ namespace System.Net
             }
         }
 
+        public string ContentType => Headers["content-type"];
+
+        public bool IsLocal => LocalEndPoint.Address.Equals(RemoteEndPoint.Address);
+
         public string RawUrl => _rawUrl;
 
         private string RequestScheme => IsSecureConnection ? "https" : "http";
+
+        public string UserAgent => Headers["user-agent"];
+
+        public string UserHostAddress => LocalEndPoint.ToString();
+
+        public string UserHostName => Headers["host"];
 
         public Uri UrlReferrer
         {

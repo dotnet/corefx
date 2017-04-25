@@ -390,11 +390,6 @@ namespace System.Net
             }
         }
 
-        public string ContentType
-        {
-            get { return _headers["content-type"]; }
-        }
-
         public CookieCollection Cookies
         {
             get
@@ -439,11 +434,6 @@ namespace System.Net
         public bool IsAuthenticated
         {
             get { return false; }
-        }
-
-        public bool IsLocal
-        {
-            get { return LocalEndPoint.Address.Equals(RemoteEndPoint.Address); }
         }
 
         public bool IsSecureConnection => _context.Connection.IsSecure;
@@ -496,21 +486,6 @@ namespace System.Net
         public Guid RequestTraceIdentifier
         {
             get { return Guid.Empty; }
-        }
-
-        public string UserAgent
-        {
-            get { return _headers["user-agent"]; }
-        }
-
-        public string UserHostAddress
-        {
-            get { return LocalEndPoint.ToString(); }
-        }
-
-        public string UserHostName
-        {
-            get { return _headers["host"]; }
         }
 
         public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)

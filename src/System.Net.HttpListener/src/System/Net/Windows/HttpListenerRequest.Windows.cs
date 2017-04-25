@@ -209,14 +209,6 @@ namespace System.Net
             }
         }
 
-        public string ContentType
-        {
-            get
-            {
-                return GetKnownHeader(HttpRequestHeader.ContentType);
-            }
-        }
-
         public NameValueCollection Headers
         {
             get
@@ -263,14 +255,6 @@ namespace System.Net
             {
                 IPrincipal user = HttpListenerContext.User;
                 return user != null && user.Identity != null && user.Identity.IsAuthenticated;
-            }
-        }
-
-        public bool IsLocal
-        {
-            get
-            {
-                return LocalEndPoint.Address.Equals(RemoteEndPoint.Address);
             }
         }
 
@@ -331,30 +315,6 @@ namespace System.Net
         {
             get { return _serviceName; }
             internal set { _serviceName = value; }
-        }
-
-        public string UserAgent
-        {
-            get
-            {
-                return GetKnownHeader(HttpRequestHeader.UserAgent);
-            }
-        }
-
-        public string UserHostAddress
-        {
-            get
-            {
-                return LocalEndPoint.ToString();
-            }
-        }
-
-        public string UserHostName
-        {
-            get
-            {
-                return GetKnownHeader(HttpRequestHeader.Host);
-            }
         }
 
         public int ClientCertificateError
