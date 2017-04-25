@@ -2513,7 +2513,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(18539, TestPlatforms.Linux)]
     public static void DCJS_VerifyDateTimeForFormatStringDCJsonSerSettings()
     {
         var jsonTypes = new JsonTypes();
