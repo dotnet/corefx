@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Net.WebSockets;
 using System.Text;
 
 namespace System.Net
@@ -85,6 +86,47 @@ namespace System.Net
         public string ContentType => Headers["content-type"];
 
         public bool IsLocal => LocalEndPoint.Address.Equals(RemoteEndPoint.Address);
+
+        public bool IsWebSocketRequest
+        {
+            get
+            {
+                if (!SupportsWebSockets)
+                {
+                    return false;
+                }
+
+                bool foundConnectionUpgradeHeader = false;
+                if (string.IsNullOrEmpty(Headers[HttpKnownHeaderNames.Connection]) || string.IsNullOrEmpty(Headers[HttpKnownHeaderNames.Upgrade]))
+                {
+                    return false;
+                }
+
+                foreach (string connection in Headers.GetValues(HttpKnownHeaderNames.Connection))
+                {
+                    if (string.Equals(connection, HttpKnownHeaderNames.Upgrade, StringComparison.OrdinalIgnoreCase))
+                    {
+                        foundConnectionUpgradeHeader = true;
+                        break;
+                    }
+                }
+
+                if (!foundConnectionUpgradeHeader)
+                {
+                    return false;
+                }
+
+                foreach (string upgrade in Headers.GetValues(HttpKnownHeaderNames.Upgrade))
+                {
+                    if (string.Equals(upgrade, HttpWebSocket.WebSocketUpgradeToken, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
 
         public string RawUrl => _rawUrl;
 

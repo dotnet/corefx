@@ -523,46 +523,12 @@ namespace System.Net
             }
         }
 
-        public bool IsWebSocketRequest
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Headers[HttpKnownHeaderNames.Connection]) || string.IsNullOrEmpty(Headers[HttpKnownHeaderNames.Upgrade]))
-                {
-                    return false;
-                }
-
-                bool foundConnectionUpgradeHeader = false;
-                foreach (string connection in Headers.GetValues(HttpKnownHeaderNames.Connection))
-                {
-                    if (string.Equals(connection, HttpKnownHeaderNames.Upgrade, StringComparison.OrdinalIgnoreCase))
-                    {
-                        foundConnectionUpgradeHeader = true;
-                        break;
-                    }
-                }
-
-                if (!foundConnectionUpgradeHeader)
-                {
-                    return false;
-                }
-
-                foreach (string upgrade in Headers.GetValues(HttpKnownHeaderNames.Upgrade))
-                {
-                    if (string.Equals(upgrade, HttpWebSocket.WebSocketUpgradeToken, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
         public Task<X509Certificate2> GetClientCertificateAsync()
         {
             return Task<X509Certificate2>.Factory.FromAsync(BeginGetClientCertificate, EndGetClientCertificate, null);
         }
+
+        private bool SupportsWebSockets => true;
     }
 }
 

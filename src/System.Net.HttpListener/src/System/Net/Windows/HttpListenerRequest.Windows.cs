@@ -260,47 +260,6 @@ namespace System.Net
 
         public bool IsSecureConnection => _sslStatus != SslStatus.Insecure;
 
-        public bool IsWebSocketRequest
-        {
-            get
-            {
-                if (!WebSocketProtocolComponent.IsSupported)
-                {
-                    return false;
-                }
-
-                bool foundConnectionUpgradeHeader = false;
-                if (string.IsNullOrEmpty(this.Headers[HttpKnownHeaderNames.Connection]) || string.IsNullOrEmpty(this.Headers[HttpKnownHeaderNames.Upgrade]))
-                {
-                    return false;
-                }
-
-                foreach (string connection in this.Headers.GetValues(HttpKnownHeaderNames.Connection))
-                {
-                    if (string.Compare(connection, HttpKnownHeaderNames.Upgrade, StringComparison.OrdinalIgnoreCase) == 0)
-                    {
-                        foundConnectionUpgradeHeader = true;
-                        break;
-                    }
-                }
-
-                if (!foundConnectionUpgradeHeader)
-                {
-                    return false;
-                }
-
-                foreach (string upgrade in this.Headers.GetValues(HttpKnownHeaderNames.Upgrade))
-                {
-                    if (string.Equals(upgrade, HttpWebSocket.WebSocketUpgradeToken, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
         public NameValueCollection QueryString
         {
             get
@@ -775,5 +734,7 @@ namespace System.Net
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
         }
+
+        private bool SupportsWebSockets => WebSocketProtocolComponent.IsSupported;
     }
 }
