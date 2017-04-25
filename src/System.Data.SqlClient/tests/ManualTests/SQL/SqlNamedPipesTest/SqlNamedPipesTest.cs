@@ -34,24 +34,26 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.NpConnStr);
             builder.ConnectTimeout = 2;
 
+            string fakeServerName = Guid.NewGuid().ToString("N");
+
             // Using forward slashes
-            builder.DataSource = "np://NotARealServer/pipe/sql/query";
+            builder.DataSource = "np://" + fakeServerName + "/pipe/sql/query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Without pipe token
-            builder.DataSource = @"np:\\NotARealServer\sql\query";
+            builder.DataSource = @"np:\\" + fakeServerName + @"\sql\query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Without a pipe name
-            builder.DataSource = @"np:\\NotARealServer\pipe";
+            builder.DataSource = @"np:\\" + fakeServerName + @"\pipe";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // Nothing after server
-            builder.DataSource = @"np:\\NotARealServer";
+            builder.DataSource = @"np:\\" + fakeServerName;
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // No leading slashes
-            builder.DataSource = @"np:NotARealServer\pipe\sql\query";
+            builder.DataSource = @"np:" + fakeServerName + @"\pipe\sql\query";
             OpenBadConnection<SqlException>(builder.ConnectionString, invalidConnStringError);
 
             // No server name
