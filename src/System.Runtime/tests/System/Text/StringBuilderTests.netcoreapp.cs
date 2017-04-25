@@ -75,5 +75,56 @@ namespace System.Text.Tests
             Assert.Equal(expected, new StringBuilder().AppendJoin(separator, Enumerable.Range(1, 3)).ToString());
             Assert.Equal(expected, new StringBuilder().AppendJoin(separator, new string[] { "1", "2", "3" }).ToString());
         }
+
+
+        private static StringBuilder CreateBuilderWithNoSpareCapacity()
+        {
+            return new StringBuilder(0, 5).Append("Hello");
+        }
+
+        [Theory]
+        [InlineData(null, new object[] { null, null })]
+        [InlineData("", new object[] { "", "" })]
+        [InlineData(" ", new object[] { })]
+        [InlineData(", ", new object[] { "" })]
+        public static void AppendJoin_NoValues_NoSpareCapacity_DoesNotThrow(string separator, object[] values)
+        {
+            var stringValues = Array.ConvertAll(values, _ => _?.ToString());
+            var enumerable = values.Select(_ => _);
+
+            if (separator?.Length == 1)
+            {
+                CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], values);
+                CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], enumerable);
+                CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], stringValues);
+            }
+            CreateBuilderWithNoSpareCapacity().AppendJoin(separator, values);
+            CreateBuilderWithNoSpareCapacity().AppendJoin(separator, enumerable);
+            CreateBuilderWithNoSpareCapacity().AppendJoin(separator, stringValues);
+        }
+
+        [Theory]
+        [InlineData(null, new object[] { " " })]
+        [InlineData(" ", new object[] { " " })]
+        [InlineData(" ", new object[] { null, null })]
+        [InlineData(" ", new object[] { "", "" })]
+        public static void AppendJoin_NoSpareCapacity_ThrowsArgumentOutOfRangeException(string separator, object[] values)
+        {
+            var builder = new StringBuilder(0, 5);
+            builder.Append("Hello");
+
+            var stringValues = Array.ConvertAll(values, _ => _?.ToString());
+            var enumerable = values.Select(_ => _);
+
+            if (separator?.Length == 1)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], values));
+                Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], enumerable));
+                Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator[0], stringValues));
+            }
+            Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator, values));
+            Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator, enumerable));
+            Assert.Throws<ArgumentOutOfRangeException>(s_noCapacityParamName, () => CreateBuilderWithNoSpareCapacity().AppendJoin(separator, stringValues));
+        }
     }
 }
