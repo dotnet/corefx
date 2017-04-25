@@ -78,6 +78,3 @@ public class Argument
     [XmlElement("choice", IsNullable = true)]
     public List<string> Choices { get; set; }
 }
-
-
-

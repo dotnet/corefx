@@ -451,5 +451,3 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
         }
     }
 }
-
-

@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serializatio
 		{9D747A18-C8FD-4D7A-8913-4ED7911683B4} = {9D747A18-C8FD-4D7A-8913-4ED7911683B4}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Xml.ReflectionOnly.Tests", "tests\ReflectionOnly\System.Runtime.Serialization.Xml.ReflectionOnly.Tests.csproj", "{38889701-0AF4-48B3-999C-E99D639C61B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Serialization.Xml.ReflectionOnly.Tests", "tests\ReflectionOnly\System.Runtime.Serialization.Xml.ReflectionOnly.Tests.csproj", "{38889701-0af4-48b3-999c-e99d639c61b6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9D747A18-C8FD-4D7A-8913-4ED7911683B4} = {9D747A18-C8FD-4D7A-8913-4ED7911683B4}
 	EndProjectSection
