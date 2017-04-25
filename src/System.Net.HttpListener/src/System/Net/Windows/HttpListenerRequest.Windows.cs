@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,7 +14,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
@@ -113,13 +111,7 @@ namespace System.Net
             }
         }
 
-        internal HttpListenerContext HttpListenerContext
-        {
-            get
-            {
-                return _httpContext;
-            }
-        }
+        internal HttpListenerContext HttpListenerContext => _httpContext;
 
         // Note: RequestBuffer may get moved in memory. If you dereference a pointer from inside the RequestBuffer, 
         // you must use 'OriginalBlobAddress' below to adjust the location of the pointer to match the location of
@@ -158,13 +150,7 @@ namespace System.Net
             _memoryBlob.ReleasePins();
         }
 
-        internal ulong RequestId
-        {
-            get
-            {
-                return _requestId;
-            }
-        }
+        internal ulong RequestId => _requestId;
 
         public Guid RequestTraceIdentifier
         {
@@ -262,8 +248,8 @@ namespace System.Net
 
         public string ServiceName
         {
-            get { return _serviceName; }
-            internal set { _serviceName = value; }
+            get => _serviceName;
+            internal set => _serviceName = value;
         }
 
         public int ClientCertificateError
@@ -282,18 +268,12 @@ namespace System.Net
 
         internal X509Certificate2 ClientCertificate
         {
-            set
-            {
-                _clientCertificate = value;
-            }
+            set => _clientCertificate = value;
         }
 
         internal ListenerClientCertState ClientCertState
         {
-            set
-            {
-                _clientCertState = value;
-            }
+            set => _clientCertState = value;
         }
 
         internal void SetClientCertificateError(int clientCertificateError)
@@ -360,13 +340,7 @@ namespace System.Net
                 this);
         }
 
-        public TransportContext TransportContext
-        {
-            get
-            {
-                return new HttpListenerRequestContext(this);
-            }
-        }
+        public TransportContext TransportContext => new HttpListenerRequestContext(this);
 
         private CookieCollection ParseCookies(Uri uri, string setCookieHeader)
         {

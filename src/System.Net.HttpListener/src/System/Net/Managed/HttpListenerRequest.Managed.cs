@@ -391,20 +391,11 @@ namespace System.Net
             }
         }
 
-        public bool HasEntityBody
-        {
-            get { return (_contentLength > 0 || _isChunked); }
-        }
+        public bool HasEntityBody => (_contentLength > 0 || _isChunked);
 
-        public NameValueCollection Headers
-        {
-            get { return _headers; }
-        }
+        public NameValueCollection Headers => _headers;
 
-        public string HttpMethod
-        {
-            get { return _method; }
-        }
+        public string HttpMethod => _method;
 
         public Stream InputStream
         {
@@ -422,10 +413,7 @@ namespace System.Net
             }
         }
 
-        public bool IsAuthenticated
-        {
-            get { return false; }
-        }
+        public bool IsAuthenticated => false;
 
         public bool IsSecureConnection => _context.Connection.IsSecure;
 
@@ -459,20 +447,11 @@ namespace System.Net
             }
         }
 
-        public IPEndPoint LocalEndPoint
-        {
-            get { return _context.Connection.LocalEndPoint; }
-        }
+        public IPEndPoint LocalEndPoint => _context.Connection.LocalEndPoint;
 
-        public IPEndPoint RemoteEndPoint
-        {
-            get { return _context.Connection.RemoteEndPoint; }
-        }
+        public IPEndPoint RemoteEndPoint => _context.Connection.RemoteEndPoint;
 
-        public Guid RequestTraceIdentifier
-        {
-            get { return Guid.Empty; }
-        }
+        public Guid RequestTraceIdentifier => Guid.Empty;
 
         public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
         {
@@ -488,26 +467,11 @@ namespace System.Net
             return TaskToApm.End<X509Certificate2>(asyncResult);
         }
 
-        public X509Certificate2 GetClientCertificate()
-        {
-            return _context.Connection.ClientCertificate;
-        }
+        public X509Certificate2 GetClientCertificate() => _context.Connection.ClientCertificate;
 
-        public string ServiceName
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public string ServiceName => null;
 
-        public TransportContext TransportContext
-        {
-            get
-            {
-                return new Context();
-            }
-        }
+        public TransportContext TransportContext => new Context();
 
         public Task<X509Certificate2> GetClientCertificateAsync()
         {
@@ -517,4 +481,3 @@ namespace System.Net
         private bool SupportsWebSockets => true;
     }
 }
-
