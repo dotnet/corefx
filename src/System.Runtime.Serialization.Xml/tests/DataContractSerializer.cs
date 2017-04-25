@@ -2859,6 +2859,7 @@ public static partial class DataContractSerializerTests
         var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
         SerializationTestTypes.ComparisonHelper.CompareRecursively(value, actual);
     }
+
     [Fact]
     public static void DCS_BasicRoundTripPOCOWithIgnoreDM()
     {
