@@ -260,16 +260,6 @@ namespace System.Net
 
         public bool IsSecureConnection => _sslStatus != SslStatus.Insecure;
 
-        public NameValueCollection QueryString
-        {
-            get
-            {
-                NameValueCollection queryString = new NameValueCollection();
-                Helpers.FillFromString(queryString, Url.Query, true, ContentEncoding);
-                return queryString;
-            }
-        }
-
         public string ServiceName
         {
             get { return _serviceName; }

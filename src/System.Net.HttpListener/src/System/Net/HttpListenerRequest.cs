@@ -128,6 +128,16 @@ namespace System.Net
             }
         }
 
+        public NameValueCollection QueryString
+        {
+            get
+            {
+                NameValueCollection queryString = new NameValueCollection();
+                Helpers.FillFromString(queryString, Url.Query, true, ContentEncoding);
+                return queryString;
+            }
+        }
+
         public string RawUrl => _rawUrl;
 
         private string RequestScheme => IsSecureConnection ? "https" : "http";

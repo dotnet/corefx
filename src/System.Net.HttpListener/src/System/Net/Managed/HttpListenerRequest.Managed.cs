@@ -57,7 +57,6 @@ namespace System.Net
         private WebHeaderCollection _headers;
         private string _method;
         private Stream _inputStream;
-        private NameValueCollection _queryString; // check if null is ok, check if read-only, check case-sensitiveness
         private HttpListenerContext _context;
         private bool _isChunked;
         private bool _kaSet;
@@ -117,12 +116,6 @@ namespace System.Net
                 _context.ErrorMessage = "Invalid request line (version).";
                 return;
             }
-        }
-
-        private void CreateQueryString(string query)
-        {
-            _queryString = new NameValueCollection();
-            Helpers.FillFromString(_queryString, Url.Query, true, ContentEncoding);
         }
 
         private static bool MaybeUri(string s)
@@ -198,8 +191,6 @@ namespace System.Net
                 _context.ErrorMessage = WebUtility.HtmlEncode("Invalid url: " + base_uri + path);
                 return;
             }
-
-            CreateQueryString(_requestUri.Query);
 
             _requestUri = HttpListenerRequestUriBuilder.GetRequestUri(_rawUrl, _requestUri.Scheme,
                                 _requestUri.Authority, _requestUri.LocalPath, _requestUri.Query);
@@ -471,11 +462,6 @@ namespace System.Net
         public IPEndPoint LocalEndPoint
         {
             get { return _context.Connection.LocalEndPoint; }
-        }
-
-        public NameValueCollection QueryString
-        {
-            get { return _queryString; }
         }
 
         public IPEndPoint RemoteEndPoint
