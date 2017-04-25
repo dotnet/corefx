@@ -12,7 +12,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private const string COMMAND_TEXT_1 = "SELECT EmployeeID, LastName, FirstName, Title, Address, City, Region, PostalCode, Country from Employees";
         private const string COMMAND_TEXT_2 = "SELECT LastName from Employees";
         private const string COLUMN_NAME_2 = "LastName";
-        private const string CHANGE_DATABASE_NAME = "tempdb";
+        private const string CHANGE_DATABASE_NAME = "master";
 
         private enum ReaderTestType
         {
