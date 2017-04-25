@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -45,26 +44,8 @@ namespace System.Net
             }
         }
 
-
-        public override int Read(byte[] buffer, int offset, int size)
+        private int ReadCore(byte[] buffer, int offset, int size)
         {
-            if (NetEventSource.IsEnabled)
-            {
-                NetEventSource.Enter(this);
-                NetEventSource.Info(this, "size:" + size + " offset:" + offset);
-            }
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            if (offset < 0 || offset > buffer.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            if (size < 0 || size > buffer.Length - offset)
-            {
-                throw new ArgumentOutOfRangeException(nameof(size));
-            }
             if (size == 0 || _closed)
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, "dataRead:0");
@@ -144,22 +125,8 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, "statusCode:" + statusCode + " _closed:" + _closed);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
+        public IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            if (NetEventSource.IsEnabled) NetEventSource.Info(this, "buffer.Length:" + buffer.Length + " size:" + size + " offset:" + offset);
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            if (offset < 0 || offset > buffer.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            if (size < 0 || size > buffer.Length - offset)
-            {
-                throw new ArgumentOutOfRangeException(nameof(size));
-            }
             if (size == 0 || _closed)
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this);

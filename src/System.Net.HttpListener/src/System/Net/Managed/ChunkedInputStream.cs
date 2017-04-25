@@ -69,26 +69,16 @@ namespace System.Net
             set { _decoder = value; }
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        protected override int ReadCore(byte[] buffer, int offset, int count)
         {
-            IAsyncResult ares = BeginRead(buffer, offset, count, null, null);
+            IAsyncResult ares = BeginReadCore(buffer, offset, count, null, null);
             return EndRead(ares);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
+        protected override IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
             if (_closed)
                 throw new ObjectDisposedException(GetType().ToString());
-
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
-
-            int len = buffer.Length;
-            if (offset < 0 || offset > len)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.offset_out_of_range);
-
-            if (size < 0 || offset > len - size)
-                throw new ArgumentOutOfRangeException(nameof(size), SR.offset_out_of_range);
 
             HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
             ares._callback = cback;
@@ -120,7 +110,7 @@ namespace System.Net
             ares._count = 8192;
             ReadBufferState rb = new ReadBufferState(buffer, offset, size, ares);
             rb.InitialCount += nread;
-            base.BeginRead(ares._buffer, ares._offset, ares._count, OnRead, rb);
+            base.BeginReadCore(ares._buffer, ares._offset, ares._count, OnRead, rb);
             return ares;
         }
 
@@ -144,7 +134,7 @@ namespace System.Net
                 }
                 ares._offset = 0;
                 ares._count = Math.Min(8192, _decoder.ChunkLeft + 6);
-                base.BeginRead(ares._buffer, ares._offset, ares._count, OnRead, rb);
+                base.BeginReadCore(ares._buffer, ares._offset, ares._count, OnRead, rb);
             }
             catch (Exception e)
             {

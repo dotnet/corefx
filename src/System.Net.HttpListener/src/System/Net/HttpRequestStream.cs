@@ -14,6 +14,51 @@ namespace System.Net
         public override bool CanWrite => false;
         public override bool CanRead => true;
 
+        public override int Read(byte[] buffer, int offset, int size)
+        {
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.Enter(this);
+                NetEventSource.Info(this, "size:" + size + " offset:" + offset);
+            }
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            if (offset < 0 || offset > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            if (size < 0 || size > buffer.Length - offset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size));
+            }
+
+            return ReadCore(buffer, offset, size);
+        }
+
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
+        {
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(this, "buffer.Length:" + buffer.Length + " size:" + size + " offset:" + offset);
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            if (offset < 0 || offset > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            if (size < 0 || size > buffer.Length - offset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size));
+            }
+
+            return BeginReadCore(buffer, offset, size, callback, state);
+        }
+
         public override void Flush() { }
         public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
