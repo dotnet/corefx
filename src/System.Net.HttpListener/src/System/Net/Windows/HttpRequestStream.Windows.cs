@@ -46,12 +46,6 @@ namespace System.Net
 
         private int ReadCore(byte[] buffer, int offset, int size)
         {
-            if (size == 0 || _closed)
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, "dataRead:0");
-                return 0;
-            }
-
             uint dataRead = 0;
 
             if (_dataChunkIndex != -1)

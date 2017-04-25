@@ -33,6 +33,12 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
+            if (size == 0 || _closed)
+            {
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Exit(this, "dataRead:0");
+                return 0;
+            }
 
             return ReadCore(buffer, offset, size);
         }

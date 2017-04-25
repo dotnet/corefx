@@ -91,8 +91,6 @@ namespace System.Net
 
         protected virtual int ReadCore(byte[] buffer, int offset, int size)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
             // Call FillFromBuffer to check for buffer boundaries even when remaining_body is 0
             int nread = FillFromBuffer(buffer, offset, size);
             if (nread == -1)
@@ -112,9 +110,13 @@ namespace System.Net
 
         protected virtual IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
+            if (size == 0 || _closed)
             {
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+                ares._callback = cback;
+                ares._state = state;
+                ares.Complete();
+                return ares;
             }
 
             int nread = FillFromBuffer(buffer, offset, size);
@@ -143,9 +145,6 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_closed)
-                return 0;
-
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
@@ -156,6 +155,9 @@ namespace System.Net
                     asyncResult.AsyncWaitHandle.WaitOne();
                 return r._synchRead;
             }
+
+            if (_closed)
+                return 0;
 
             int nread = _stream.EndRead(asyncResult);
             if (_remainingBody > 0 && nread > 0)

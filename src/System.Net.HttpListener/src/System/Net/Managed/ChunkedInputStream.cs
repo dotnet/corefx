@@ -77,13 +77,10 @@ namespace System.Net
 
         protected override IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_closed)
-                throw new ObjectDisposedException(GetType().ToString());
-
             HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
             ares._callback = cback;
             ares._state = state;
-            if (_no_more_data)
+            if (_no_more_data || size == 0 || _closed)
             {
                 ares.Complete();
                 return ares;
@@ -145,8 +142,6 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_closed)
-                throw new ObjectDisposedException(GetType().ToString());
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
