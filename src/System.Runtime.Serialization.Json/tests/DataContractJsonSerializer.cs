@@ -2494,7 +2494,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(18538, TestPlatforms.FreeBSD | TestPlatforms.Linux | TestPlatforms.NetBSD)]
     public static void DCJS_VerifyDateTimeForFormatStringDCJsonSerSetting()
     {
         var dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2507,7 +2506,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new DateTime(2010, 12, 1);
         var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(new DateTime()).TotalMinutes;
         var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
-        var baseline = $"\"\\/Date(1291190400000{timeZoneString})\\/\"";
+        var baseline = $"\"\\/Date({1291161600000 - offsetMinutes * 60 * 1000}{timeZoneString})\\/\"";
         var actual = SerializeAndDeserialize(value, baseline, dcjsSettings);
         Assert.Equal(value, actual);
     }
