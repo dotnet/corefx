@@ -314,6 +314,16 @@ namespace System.Net
         public DnsPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
         public override System.Security.IPermission CreatePermission() { return null; }
     }
+    public partial class EndpointPermission
+    {
+        internal EndpointPermission() { }
+        public string Hostname { get { return null; } }
+        public int Port { get { return 0; } }
+        public TransportType Transport { get; }
+        public override bool Equals(object obj) { return false; }
+        public override int GetHashCode() { return 0; }
+    }
+
     [System.Flags]
     public enum NetworkAccess
     {

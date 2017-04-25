@@ -1085,7 +1085,6 @@ TypesMustExist : Type 'System.IO.IODescriptionAttribute' does not exist in the i
 TypesMustExist : Type 'System.Media.SoundPlayer' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Media.SystemSound' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Media.SystemSounds' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Net.EndpointPermission' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.ICertificatePolicy' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.AuthenticationModuleElement' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Net.Configuration.AuthenticationModuleElementCollection' does not exist in the implementation but it does exist in the contract.
