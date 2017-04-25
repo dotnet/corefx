@@ -58,9 +58,7 @@ namespace System.Net
         private WebHeaderCollection _headers;
         private string _method;
         private Stream _inputStream;
-        private Version _version;
         private NameValueCollection _queryString; // check if null is ok, check if read-only, check case-sensitiveness
-        private string _rawUrl;
         private Uri _url;
         private Uri _referrer;
         private string[] _userLanguages;
@@ -514,19 +512,9 @@ namespace System.Net
             get { return _context.Connection.LocalEndPoint; }
         }
 
-        public Version ProtocolVersion
-        {
-            get { return _version; }
-        }
-
         public NameValueCollection QueryString
         {
             get { return _queryString; }
-        }
-
-        public string RawUrl
-        {
-            get { return _rawUrl; }
         }
 
         public IPEndPoint RemoteEndPoint

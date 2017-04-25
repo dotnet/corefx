@@ -11,6 +11,8 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListenerRequest
     {
+        private string _rawUrl;
+        private Version _version;
 
         public Encoding ContentEncoding
         {
@@ -50,6 +52,10 @@ namespace System.Net
                 return Encoding.Default;
             }
         }
+
+        public string RawUrl => _rawUrl;
+
+        public Version ProtocolVersion => _version;
 
         private static class Helpers
         {

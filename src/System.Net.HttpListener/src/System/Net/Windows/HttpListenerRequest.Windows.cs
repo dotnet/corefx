@@ -26,7 +26,6 @@ namespace System.Net
         private ulong _requestId;
         internal ulong _connectionId;
         private SslStatus _sslStatus;
-        private string _rawUrl;
         private string _cookedUrlHost;
         private string _cookedUrlPath;
         private string _cookedUrlQuery;
@@ -34,7 +33,6 @@ namespace System.Net
         private Stream _requestStream;
         private string _httpMethod;
         private bool? _keepAlive;
-        private Version _version;
         private WebHeaderCollection _webHeaders;
         private IPEndPoint _localEndPoint;
         private IPEndPoint _remoteEndPoint;
@@ -344,14 +342,6 @@ namespace System.Net
             }
         }
 
-        public string RawUrl
-        {
-            get
-            {
-                return _rawUrl;
-            }
-        }
-
         public string ServiceName
         {
             get { return _serviceName; }
@@ -540,14 +530,6 @@ namespace System.Net
                     }
                 }
                 return _cookies;
-            }
-        }
-
-        public Version ProtocolVersion
-        {
-            get
-            {
-                return _version;
             }
         }
 
