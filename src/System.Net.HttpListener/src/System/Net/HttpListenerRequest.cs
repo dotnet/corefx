@@ -163,7 +163,7 @@ namespace System.Net
             }
         }
 
-        public Uri Url => _requestUri;
+        public Uri Url => RequestUri;
 
         public Version ProtocolVersion => _version;
 

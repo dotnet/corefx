@@ -478,6 +478,7 @@ namespace System.Net
             return Task<X509Certificate2>.Factory.FromAsync(BeginGetClientCertificate, EndGetClientCertificate, null);
         }
 
+        private Uri RequestUri => _requestUri;
         private bool SupportsWebSockets => true;
     }
 }
