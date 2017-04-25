@@ -333,21 +333,6 @@ namespace System.Net
             internal set { _serviceName = value; }
         }
 
-        public Uri UrlReferrer
-        {
-            get
-            {
-                string referrer = GetKnownHeader(HttpRequestHeader.Referer);
-                if (referrer == null)
-                {
-                    return null;
-                }
-                Uri urlReferrer;
-                bool success = Uri.TryCreate(referrer, UriKind.RelativeOrAbsolute, out urlReferrer);
-                return success ? urlReferrer : null;
-            }
-        }
-
         public string UserAgent
         {
             get

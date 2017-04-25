@@ -86,6 +86,21 @@ namespace System.Net
 
         private string RequestScheme => IsSecureConnection ? "https" : "http";
 
+        public Uri UrlReferrer
+        {
+            get
+            {
+                string referrer = Headers["referer"];
+                if (referrer == null)
+                {
+                    return null;
+                }
+
+                bool success = Uri.TryCreate(referrer, UriKind.RelativeOrAbsolute, out Uri urlReferrer);
+                return success ? urlReferrer : null;
+            }
+        }
+
         public Uri Url => _requestUri;
 
         public Version ProtocolVersion => _version;

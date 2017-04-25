@@ -58,7 +58,6 @@ namespace System.Net
         private string _method;
         private Stream _inputStream;
         private NameValueCollection _queryString; // check if null is ok, check if read-only, check case-sensitiveness
-        private Uri _referrer;
         private HttpListenerContext _context;
         private bool _isChunked;
         private bool _kaSet;
@@ -272,17 +271,6 @@ namespace System.Net
                         _context.ErrorMessage = "Invalid Content-Length.";
                     }
 
-                    break;
-                case "referer":
-                    try
-                    {
-                        _referrer = new Uri(val, UriKind.RelativeOrAbsolute);
-                    }
-                    catch
-                    {
-                        _referrer = null;
-                    }
-                    
                     break;
                 case "cookie":
                     if (_cookies == null)
@@ -508,11 +496,6 @@ namespace System.Net
         public Guid RequestTraceIdentifier
         {
             get { return Guid.Empty; }
-        }
-
-        public Uri UrlReferrer
-        {
-            get { return _referrer; }
         }
 
         public string UserAgent
