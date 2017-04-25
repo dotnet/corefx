@@ -22,7 +22,6 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListenerRequest
     {
-        private Uri _requestUri;
         private ulong _requestId;
         internal ulong _connectionId;
         private SslStatus _sslStatus;
@@ -283,13 +282,7 @@ namespace System.Net
             }
         }
 
-        public bool IsSecureConnection
-        {
-            get
-            {
-                return _sslStatus != SslStatus.Insecure;
-            }
-        }
+        public bool IsSecureConnection => _sslStatus != SslStatus.Insecure;
 
         public bool IsWebSocketRequest
         {
@@ -346,14 +339,6 @@ namespace System.Net
         {
             get { return _serviceName; }
             internal set { _serviceName = value; }
-        }
-
-        public Uri Url
-        {
-            get
-            {
-                return RequestUri;
-            }
         }
 
         public Uri UrlReferrer
@@ -827,14 +812,6 @@ namespace System.Net
                 }
             }
             _clientCertState = ListenerClientCertState.Completed;
-        }
-
-        private string RequestScheme
-        {
-            get
-            {
-                return IsSecureConnection ? "https" : "http";
-            }
         }
 
         private Uri RequestUri

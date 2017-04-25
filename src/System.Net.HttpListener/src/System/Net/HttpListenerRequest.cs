@@ -12,6 +12,7 @@ namespace System.Net
     public sealed unsafe partial class HttpListenerRequest
     {
         private string _rawUrl;
+        private Uri _requestUri;
         private Version _version;
 
         public Encoding ContentEncoding
@@ -54,6 +55,10 @@ namespace System.Net
         }
 
         public string RawUrl => _rawUrl;
+
+        private string RequestScheme => IsSecureConnection ? "https" : "http";
+
+        public Uri Url => _requestUri;
 
         public Version ProtocolVersion => _version;
 

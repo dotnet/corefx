@@ -59,7 +59,6 @@ namespace System.Net
         private string _method;
         private Stream _inputStream;
         private NameValueCollection _queryString; // check if null is ok, check if read-only, check case-sensitiveness
-        private Uri _url;
         private Uri _referrer;
         private string[] _userLanguages;
         private HttpListenerContext _context;
@@ -197,16 +196,16 @@ namespace System.Net
                                 (IsSecureConnection) ? "https" : "http",
                                 host, LocalEndPoint.Port);
 
-            if (!Uri.TryCreate(base_uri + path, UriKind.Absolute, out _url))
+            if (!Uri.TryCreate(base_uri + path, UriKind.Absolute, out _requestUri))
             {
                 _context.ErrorMessage = WebUtility.HtmlEncode("Invalid url: " + base_uri + path);
                 return;
             }
 
-            CreateQueryString(_url.Query);
+            CreateQueryString(_requestUri.Query);
 
-            _url = HttpListenerRequestUriBuilder.GetRequestUri(_rawUrl, _url.Scheme,
-                                _url.Authority, _url.LocalPath, _url.Query);
+            _requestUri = HttpListenerRequestUriBuilder.GetRequestUri(_rawUrl, _requestUri.Scheme,
+                                _requestUri.Authority, _requestUri.LocalPath, _requestUri.Query);
 
             if (_version >= HttpVersion.Version11)
             {
@@ -472,10 +471,7 @@ namespace System.Net
             get { return LocalEndPoint.Address.Equals(RemoteEndPoint.Address); }
         }
 
-        public bool IsSecureConnection
-        {
-            get { return _context.Connection.IsSecure; }
-        }
+        public bool IsSecureConnection => _context.Connection.IsSecure;
 
         public bool KeepAlive
         {
@@ -525,11 +521,6 @@ namespace System.Net
         public Guid RequestTraceIdentifier
         {
             get { return Guid.Empty; }
-        }
-
-        public Uri Url
-        {
-            get { return _url; }
         }
 
         public Uri UrlReferrer
