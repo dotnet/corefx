@@ -9,7 +9,7 @@ namespace System.Diagnostics
     public class PerformanceCounterPermissionEntryCollection : CollectionBase
     {
         internal PerformanceCounterPermissionEntryCollection() { }
-        public PerformanceCounterPermissionEntry this[int index] { get { return null; } }
+        public PerformanceCounterPermissionEntry this[int index] { get { return null; } set { } }
         public int Add(PerformanceCounterPermissionEntry value) { return 0; }
         public void AddRange(PerformanceCounterPermissionEntryCollection value) { }
         public void AddRange(PerformanceCounterPermissionEntry[] value) { }

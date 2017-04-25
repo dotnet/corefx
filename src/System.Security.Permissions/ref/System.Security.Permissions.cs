@@ -167,28 +167,24 @@ namespace System.Drawing.Printing
         SafePrinting = 1,
     }
 }
-
-
-//namespace System.Data.SqlClient
-//{
-//    public sealed partial class SqlClientPermission : System.Data.Common.DBDataPermission
-//    {
-//        public SqlClientPermission() : base(default(System.Security.Permissions.PermissionState)) { }
-//        public SqlClientPermission(System.Security.Permissions.PermissionState state) : base(default(System.Security.Permissions.PermissionState)) { }
-//        public SqlClientPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) : base(default(System.Security.Permissions.PermissionState)) { }
-//        public override void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
-//        public override System.Security.IPermission Copy() { return null; }
-//    }
-//    [System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method,
-//        AllowMultiple = true, Inherited = false)]
-//    public sealed partial class SqlClientPermissionAttribute : System.Data.Common.DBDataPermissionAttribute
-//    {
-//        public SqlClientPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
-//        public override System.Security.IPermission CreatePermission() { return null; }
-//    }
-//}
-
-
+namespace System.Data.SqlClient
+{
+    public sealed partial class SqlClientPermission : System.Data.Common.DBDataPermission
+    {
+        public SqlClientPermission() : base(default(System.Security.Permissions.PermissionState)) { }
+        public SqlClientPermission(System.Security.Permissions.PermissionState state) : base(default(System.Security.Permissions.PermissionState)) { }
+        public SqlClientPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) : base(default(System.Security.Permissions.PermissionState)) { }
+        public override void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
+        public override System.Security.IPermission Copy() { return null; }
+    }
+    [System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method,
+        AllowMultiple = true, Inherited = false)]
+    public sealed partial class SqlClientPermissionAttribute : System.Data.Common.DBDataPermissionAttribute
+    {
+        public SqlClientPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+        public override System.Security.IPermission CreatePermission() { return null; }
+    }
+}
 namespace System.Diagnostics
 {
     public sealed partial class EventLogPermission : System.Security.Permissions.ResourcePermissionBase
@@ -279,7 +275,7 @@ namespace System.Diagnostics
     public partial class PerformanceCounterPermissionEntryCollection : System.Collections.CollectionBase
     {
         internal PerformanceCounterPermissionEntryCollection() { }
-        public System.Diagnostics.PerformanceCounterPermissionEntry this[int index] { get { return null; } }
+        public System.Diagnostics.PerformanceCounterPermissionEntry this[int index] { get { return null; } set { } }
         public int Add(System.Diagnostics.PerformanceCounterPermissionEntry value) { return 0; }
         public void AddRange(System.Diagnostics.PerformanceCounterPermissionEntryCollection value) { }
         public void AddRange(System.Diagnostics.PerformanceCounterPermissionEntry[] value) { }
