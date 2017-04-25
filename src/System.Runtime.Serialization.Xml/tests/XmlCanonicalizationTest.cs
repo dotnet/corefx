@@ -13,6 +13,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             TestConfigHelper.LoadAllTests(@"TestsConfig.xml");
         }
 
+        [ActiveIssue(18910)]
         [Fact]
         public static void C14NWriterNegativeTests()
         {
@@ -73,6 +74,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             }
         }
 
+        [ActiveIssue(18910)]
         [Fact]
         public static void TestC14NInclusivePrefixes()
         {
@@ -166,6 +168,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             }
         }
 
+        [ActiveIssue(18910)]
         [Fact]
         public static void ReaderWriter_C14N_DifferentReadersWriters()
         {
