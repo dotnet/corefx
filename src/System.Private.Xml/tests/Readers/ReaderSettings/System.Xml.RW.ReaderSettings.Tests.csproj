@@ -28,6 +28,9 @@
     <Compile Include="TCOneByteStream.cs" />
     <Compile Include="TCReaderSettings.cs" />
     <Compile Include="TCRSGeneric.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>CommonTest\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Xml\BaseLibManaged\BaseLibManaged.csproj" />
