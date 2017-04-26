@@ -2545,7 +2545,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.NotNull(actual3);
         var expected3 = new DateTimeOffset(DateTime.Now.Year, 5, 1, 0, 0, 0, new TimeSpan(1, 0, 0));
         Assert.True(actual3 == expected3, 
-            $"actual3 was not as expected.\r\nExpected: {expected3} \r\n Actual: {actual3}");
+            $"{nameof(actual3)} was not as expected.\r\nExpected: {expected3} \r\n Actual: {actual3}");
 
         var dt35832 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 3, 58, 32);
         var dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
