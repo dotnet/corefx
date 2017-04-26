@@ -10,7 +10,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     [PlatformSpecific(TestPlatforms.OSX)]
     public static class X509StoreMutableTests_OSX
     {
-        public static bool PermissionsAllowStoreWrite => TestPermissions();
+        public static bool PermissionsAllowStoreWrite { get; } = TestPermissions();
 
         private static bool TestPermissions()
         {
