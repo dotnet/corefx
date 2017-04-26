@@ -10,7 +10,8 @@ public class WellKnownSidTypeTests
 {
     public static bool AccountIsDomainJoined()
     {
-        return WindowsIdentity.GetCurrent().Owner.AccountDomainSid != null;
+        using (var identity = WindowsIdentity.GetCurrent())
+            return identity.Owner.AccountDomainSid != null;
     }
 
     [ConditionalTheory(nameof(AccountIsDomainJoined))]
@@ -115,10 +116,13 @@ public class WellKnownSidTypeTests
     [InlineData(WellKnownSidType.WinCapabilityRemovableStorageSid)]
     public void CanCreateSecurityIdentifierFromWellKnownSidType(WellKnownSidType sidType)
     {
-        var currentDomainSid = WindowsIdentity.GetCurrent().Owner.AccountDomainSid;
-        var wellKnownSidInstance = new SecurityIdentifier(sidType, currentDomainSid);
+        using (var identity = WindowsIdentity.GetCurrent())
+        {
+            var currentDomainSid = identity.Owner.AccountDomainSid;
+            var wellKnownSidInstance = new SecurityIdentifier(sidType, currentDomainSid);
 
-        Assert.True(wellKnownSidInstance.IsWellKnown(sidType));
+            Assert.True(wellKnownSidInstance.IsWellKnown(sidType));
+        }
     }
 
     [Theory]
