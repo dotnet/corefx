@@ -53,12 +53,13 @@ namespace System
             return exception;
         }
 
-        public static void Throws<TNetCoreExceptionType, TNetfxExceptionType>(string paramName, Action action) 
-        where TNetCoreExceptionType : ArgumentException where TNetfxExceptionType : ArgumentException
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, Action action) 
+            where TNetCoreExceptionType : ArgumentException 
+            where TNetFxExceptionType : ArgumentException
         {
             if (IsFullFramework)
             {
-                Throws<TNetfxExceptionType>(paramName, action);
+                Throws<TNetFxExceptionType>(paramName, action);
             }
             else
             {
@@ -66,12 +67,13 @@ namespace System
             }
         }
 
-        public static void Throws<TNetCoreExceptionType, TNetfxExceptionType>(string netCoreParamName, string netFxParamName, Action action)
-        where TNetCoreExceptionType : ArgumentException where TNetfxExceptionType : ArgumentException
+        public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string netCoreParamName, string netFxParamName, Action action)
+            where TNetCoreExceptionType : ArgumentException 
+            where TNetFxExceptionType : ArgumentException
         {
             if (IsFullFramework)
             {
-                Throws<TNetfxExceptionType>(netFxParamName, action);
+                Throws<TNetFxExceptionType>(netFxParamName, action);
             }
             else
             {
