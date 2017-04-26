@@ -177,15 +177,15 @@ namespace SerializationTestTypes
             string resolvedNamespace = "http://www.default.com";
             switch (dcType.Name)
             {
-                case "UnknownEmployee":                    
-                        resolvedTypeName = "int";
-                        resolvedNamespace = "http://www.w3.org/2001/XMLSchema";                    
+                case "UnknownEmployee":
+                    resolvedTypeName = "int";                                          
+                    resolvedNamespace = "http://www.w3.org/2001/XMLSchema";
                     break;
                 case "UserTypeContainer":                    
-                        resolvedTypeName = "UserType";                    
+                    resolvedTypeName = "UserType";                    
                     break;
                 default:                    
-                        return KTResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
+                    return KTResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
             }
             
             XmlDictionary dic = new XmlDictionary();
