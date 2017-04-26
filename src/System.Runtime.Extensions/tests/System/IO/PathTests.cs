@@ -658,13 +658,27 @@ namespace System.IO.Tests
         [InlineData(@"\\.\UNC\LOCALHOST\shareF\test.txt.~SS", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS")]
         [InlineData(@"\\.\UNC\LOCALHOST\shareG", @"\\.\UNC\LOCALHOST\shareG")]
         [InlineData(@"\\.\UNC\LOCALHOST\shareH\dir", @"\\.\UNC\LOCALHOST\shareH\dir")]
-        [InlineData(@"\\.\UNC\LOCALHOST\shareI\", @"\\.\UNC\LOCALHOST\shareI\. ")]
-        [InlineData(@"\\.\UNC\LOCALHOST\shareJ\", @"\\.\UNC\LOCALHOST\shareJ\.. ")]
         [InlineData(@"\\.\UNC\LOCALHOST\shareK\", @"\\.\UNC\LOCALHOST\shareK\    ")]
         [InlineData(@"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\")]
-
         public static void GetFullPath_Windows_UNC_Valid(string expected, string input)
         {
+            if (input.StartsWith(@"\\?\") && PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                Assert.Throws<ArgumentException>(() => Path.GetFullPath(input));
+            }
+            else
+            {
+                Assert.Equal(expected, Path.GetFullPath(input));
+            }
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests valid paths based on UNC
+        [Theory]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareI\", @"\\.\UNC\LOCALHOST\shareI", @"\\.\UNC\LOCALHOST\shareI\. ")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareJ\", @"\\.\UNC\LOCALHOST", @"\\.\UNC\LOCALHOST\shareJ\.. ")]
+        public static void GetFullPath_Windows_UNC_Valid_LegacyPathSupport(string normalExpected, string legacyExpected, string input)
+        {
+            string expected = PathFeatures.IsUsingLegacyPathNormalization() ? legacyExpected : normalExpected;
             Assert.Equal(expected, Path.GetFullPath(input));
         }
 
