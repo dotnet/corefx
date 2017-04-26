@@ -192,14 +192,24 @@ namespace System.IO.Tests
         [InlineData(@"\\a\b\", @"\\a\b")]
         [InlineData(@"\\a\b", @"\\a\b")]
         [InlineData(@"\\test\unc", @"\\test\unc")]
-        [InlineData(@"\\?\UNC\test\unc\path\to\something", @"\\?\UNC\test\unc")]
-        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC\test\unc")]
-        [InlineData(@"\\?\UNC\a\b1", @"\\?\UNC\a\b1")]
-        [InlineData(@"\\?\UNC\a\b2\", @"\\?\UNC\a\b2")]
-        [InlineData(@"\\?\C:\foo\bar.txt", @"\\?\C:\")]
         public static void GetPathRoot_Windows_UncAndExtended(string value, string expected)
         {
             Assert.True(Path.IsPathRooted(value));
+            Assert.Equal(expected, Path.GetPathRoot(value));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests UNC
+        [Theory]
+        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC", @"\\?\UNC\test\unc\path\to\something")]
+        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC", @"\\?\UNC\test\unc")]
+        [InlineData(@"\\?\UNC\a\b1", @"\\?\UNC", @"\\?\UNC\a\b1")]
+        [InlineData(@"\\?\UNC\a\b2", @"\\?\UNC", @"\\?\UNC\a\b2\")]
+        [InlineData(@"\\?\C:\", @"\\?\C:", @"\\?\C:\foo\bar.txt")]
+        public static void GetPathRoot_Windows_UncAndExtended_WithLegacySupport(string normalExpected, string legacyExpected, string value)
+        {
+            Assert.True(Path.IsPathRooted(value));
+
+            string expected = PathFeatures.IsUsingLegacyPathNormalization() ? legacyExpected : normalExpected;
             Assert.Equal(expected, Path.GetPathRoot(value));
         }
 
