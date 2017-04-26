@@ -168,8 +168,7 @@ namespace SerializationTestTypes
             return t;
         }
     }
-
-    [Serializable]
+        
     public class UserTypeToPrimitiveTypeResolver : DataContractResolver
     {
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
@@ -178,21 +177,15 @@ namespace SerializationTestTypes
             string resolvedNamespace = "http://www.default.com";
             switch (dcType.Name)
             {
-                case "UnknownEmployee":
-                    {
+                case "UnknownEmployee":                    
                         resolvedTypeName = "int";
-                        resolvedNamespace = "http://www.w3.org/2001/XMLSchema";
-                    }
+                        resolvedNamespace = "http://www.w3.org/2001/XMLSchema";                    
                     break;
-                case "UserTypeContainer":
-                    {
-                        resolvedTypeName = "UserType";
-                    }
+                case "UserTypeContainer":                    
+                        resolvedTypeName = "UserType";                    
                     break;
-                default:
-                    {
+                default:                    
                         return KTResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
-                    }
             }
             
             XmlDictionary dic = new XmlDictionary();
