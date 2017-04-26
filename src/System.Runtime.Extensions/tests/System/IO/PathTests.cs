@@ -580,14 +580,6 @@ namespace System.IO.Tests
         [InlineData(@"\\?\UNC\server5\share\.")]
         [InlineData(@"\\?\UNC\server6\share\..")]
         [InlineData(@"\\?\UNC\a\b\\")]
-        [InlineData(@"\\.\UNC\")]
-        [InlineData(@"\\.\UNC\server7")]
-        [InlineData(@"\\.\UNC\server8\")]
-        [InlineData(@"\\.\UNC\server9\\")]
-        [InlineData(@"\\.\UNC\serverA\..")]
-        [InlineData(@"\\.\UNC\serverB\share\.")]
-        [InlineData(@"\\.\UNC\serverC\share\..")]
-        [InlineData(@"\\.\UNC\a\b\\")]
         [InlineData(@"\\.\")]
         [InlineData(@"\\.\.")]
         [InlineData(@"\\.\..")]
@@ -600,6 +592,24 @@ namespace System.IO.Tests
         [InlineData(@"\\.\C:\Foo2\..")]
         public static void GetFullPath_Windows_ValidExtendedPaths(string path)
         {
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // Legacy Path doesn't support any of these paths.
+                try
+                {
+                    Path.GetFullPath(path);
+                }
+                catch (Exception e)
+                {
+                    if (e is ArgumentException || e is NotSupportedException)
+                    {
+                        return;
+                    }
+                    Assert.True(false, "Legacy path threw an unexpected exception on invalid path form");
+                }
+                Assert.True(false, "Legacy path didn't throw an exception on invalid path form");
+            }
+
             // None of these should throw
             if (path.StartsWith(@"\\?\"))
             {
@@ -609,6 +619,22 @@ namespace System.IO.Tests
             {
                 Path.GetFullPath(path);
             }
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
+        [Theory]
+        [InlineData(@"\\.\UNC\")]
+        [InlineData(@"\\.\UNC\server7")]
+        [InlineData(@"\\.\UNC\server8\")]
+        [InlineData(@"\\.\UNC\server9\\")]
+        [InlineData(@"\\.\UNC\serverA\..")]
+        [InlineData(@"\\.\UNC\serverB\share\.")]
+        [InlineData(@"\\.\UNC\serverC\share\..")]
+        [InlineData(@"\\.\UNC\a\b\\")]
+        public static void GetFullPath_Windows_ValidLegacy_ValidExtendedPaths(string path)
+        {
+            // should not throw
+            Path.GetFullPath(path);
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests valid paths based on UNC
