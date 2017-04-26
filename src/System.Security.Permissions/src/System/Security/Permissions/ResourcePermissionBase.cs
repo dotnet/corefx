@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace System.Security.Permissions
 {
+    [Serializable]
     [SecurityPermission(SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
     public abstract class ResourcePermissionBase : CodeAccessPermission, IUnrestrictedPermission
     {

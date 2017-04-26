@@ -193,7 +193,7 @@ namespace System.Diagnostics
         public EventLogPermission(System.Diagnostics.EventLogPermissionAccess permissionAccess, string machineName) { }
         public EventLogPermission(System.Diagnostics.EventLogPermissionEntry[] permissionAccessEntries) { }
         public EventLogPermission(System.Security.Permissions.PermissionState state) { }
-        public System.Diagnostics.EventLogPermissionEntryCollection PermissionEntries { get { throw null; } }
+        public System.Diagnostics.EventLogPermissionEntryCollection PermissionEntries { get { return null; } }
     }
     [System.Flags]
     public enum EventLogPermissionAccess
