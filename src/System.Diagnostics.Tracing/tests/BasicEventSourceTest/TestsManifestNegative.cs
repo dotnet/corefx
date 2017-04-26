@@ -42,6 +42,7 @@ namespace BasicEventSourceTests
         /// For NuGet EventSources we validate both "runtime" and "validation" behavior
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full Framework doesn't have System.SR type which is used in this test.")]
         public void Test_GenerateManifest_InvalidEventSources()
         {
             TestUtilities.CheckNoEventSourcesRunning("Start");
