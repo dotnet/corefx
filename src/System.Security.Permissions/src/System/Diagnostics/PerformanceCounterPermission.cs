@@ -6,7 +6,6 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-    [Serializable]
     public sealed class PerformanceCounterPermission : ResourcePermissionBase
     {
         public PerformanceCounterPermission() { }
