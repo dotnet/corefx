@@ -23,7 +23,7 @@ namespace System
         {
             if (platform < PlatformID.Win32S || platform > PlatformID.MacOSX)
             {
-                throw new ArgumentOutOfRangeException(nameof(platform), platform, SR.Arg_EnumIllegalVal);
+                throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, platform), nameof(platform));
             }
 
             if (version == null)
