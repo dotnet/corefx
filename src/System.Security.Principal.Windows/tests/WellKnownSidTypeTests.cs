@@ -8,8 +8,12 @@ using Xunit;
 
 public class WellKnownSidTypeTests
 {
-    [ActiveIssue(15436)]
-    [Theory]
+    public static bool AccountIsDomainJoined()
+    {
+        return WindowsIdentity.GetCurrent().Owner.AccountDomainSid != null;
+    }
+
+    [ConditionalTheory(nameof(AccountIsDomainJoined))]
     [InlineData(WellKnownSidType.NullSid)]
     [InlineData(WellKnownSidType.WorldSid)]
     [InlineData(WellKnownSidType.LocalSid)]
