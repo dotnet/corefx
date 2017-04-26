@@ -14,9 +14,11 @@ namespace System.Diagnostics
     public abstract class RemoteExecutorTestBase : FileCleanupTestBase
     {
         /// <summary>The name of the test console app.</summary>
-        protected const string TestConsoleApp = "RemoteExecutorConsoleApp.exe";
-        /// <summary>The name of the CoreCLR host used to host the test console app.</summary>
-        protected static readonly string HostRunnerName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dotnet.exe" : "dotnet";
+        protected static readonly string TestConsoleApp = "RemoteExecutorConsoleApp.exe";
+        /// <summary>The name, without an extension, of the host used to host the test console app.</summary>
+        private static readonly string HostRunnerExecutableName = IsFullFramework ? "xunit.console" : "dotnet";
+        /// <summary>The name, with an extension, of the host host used to host the test console app.</summary>
+        protected static readonly string HostRunnerName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? HostRunnerExecutableName + ".exe" : HostRunnerExecutableName;
         /// <summary>The absolute path to the host runner executable.</summary>
         protected static string HostRunner => Process.GetCurrentProcess().MainModule.FileName;
 
@@ -27,6 +29,8 @@ namespace System.Diagnostics
 
         /// <summary>Determines if we're running on the .NET Framework (rather than .NET Core).</summary>
         internal static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
+
+        internal static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
@@ -135,11 +139,24 @@ namespace System.Diagnostics
 
             // If we need the host (if it exists), use it, otherwise target the console app directly.
             string testConsoleAppArgs = "\"" + a.FullName + "\" " + t.FullName + " " + method.Name + " " + string.Join(" ", args);
-            
+
+            if (!File.Exists(TestConsoleApp))
+                throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
+
             if (IsFullFramework)
             {
                 psi.FileName = TestConsoleApp;
                 psi.Arguments = testConsoleAppArgs;
+            }
+            else if (IsNetNative)
+            {
+                psi.FileName = TestConsoleApp;
+                psi.Arguments = testConsoleAppArgs;
+
+                // The test pipeline does not have the infrastructure to copy RemoteExecutorConsoleApp.exe to the test directly, let alone
+                // ILC it against whatever assembly it might be asked to load up. (Is UWP even allowed to spin up a process!?)
+                // Until, and unless that's fixed, throw an informative exception so as not to waste debugging time.
+                throw new Exception(".NET Native platforms cannot run tests that use RemoteExecutorTestBase.RemoteInvoke()");
             }
             else
             {
