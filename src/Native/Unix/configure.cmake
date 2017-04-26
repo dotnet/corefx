@@ -33,24 +33,33 @@ check_include_files(
     HAVE_LINUX_IN_H)
 
 if (HAVE_LINUX_IN_H)
-    set (SOCKET_INCLUDES ${SOCKET_INCLUDES} linux/in.h)
+    set (SOCKET_INCLUDES linux/in.h)
 else ()
-    set (SOCKET_INCLUDES ${SOCKET_INCLUDES} netinet/in.h)
+    set (SOCKET_INCLUDES netinet/in.h)
 endif ()
 
-set(CMAKE_EXTRA_INCLUDE_FILES ${SOCKET_INCLUDES})
+check_c_source_compiles(
+    "
+    #include <${SOCKET_INCLUDES}>
+    int main()
+    {
+        struct in_pktinfo;
+        return 0;
+    }
+    "
+    HAVE_IN_PKTINFO)
 
-check_type_size(
-    "struct in_pktinfo"
-    HAVE_IN_PKTINFO
-    BUILTIN_TYPES_ONLY)
+check_c_source_compiles(
+    "
+    #include <${SOCKET_INCLUDES}>
+    int main()
+    {
+        struct ip_mreqn;
+        return 0;
+    }
+    "
+    HAVE_IP_MREQN)
 
-check_type_size(
-    "struct ip_mreqn"
-    HAVE_IP_MREQN
-    BUILTIN_TYPES_ONLY)
-
-set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 # /in_pktinfo
 
 check_c_source_compiles(
@@ -306,6 +315,28 @@ check_cxx_source_compiles(
      }
      "
      HAVE_GETHOSTBYNAME_R)
+
+set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
+check_cxx_source_compiles(
+     "
+     #include <sys/types.h>
+     #include <netdb.h>
+
+     int main()
+     {
+        const struct sockaddr *addr;
+        socklen_t addrlen;
+        char *host;
+        socklen_t hostlen;
+        char *serv;
+        socklen_t servlen;
+        int flags;
+        int result = getnameinfo(addr, addrlen, host, hostlen, serv, servlen, flags);
+        return 0;
+     }
+     "
+     HAVE_GETNAMEINFO_SIGNED_FLAGS)
+set(CMAKE_REQUIRED_FLAGS -Werror)
 
 set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
@@ -675,6 +706,16 @@ if (HAVE_CRT_EXTERNS_H)
 endif()
 
 set (CMAKE_REQUIRED_LIBRARIES)
+
+check_cxx_source_compiles(
+    "
+    #include <sys/inotify.h>
+    int main()
+    {
+        uint32_t mask = IN_EXCL_UNLINK;   
+    }
+    "
+    HAVE_IN_EXCL_UNLINK)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/pal_config.h.in
