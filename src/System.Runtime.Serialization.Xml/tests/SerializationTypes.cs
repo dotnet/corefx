@@ -15,6 +15,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using System.Reflection;
 
 namespace SerializationTypes
 {
@@ -433,6 +434,23 @@ namespace SerializationTypes
             get
             {
                 return _ro2;
+            }
+        }
+    }
+
+    public class TypeWithMyCollectionField
+    {
+        public MyCollection<string> Collection;
+    }
+
+    public class TypeWithReadOnlyMyCollectionProperty
+    {
+        private MyCollection<string> _ro = new MyCollection<string>();
+        public MyCollection<string> Collection
+        {
+            get
+            {
+                return _ro;
             }
         }
     }
@@ -2807,6 +2825,22 @@ namespace SerializationTypes
         Amount
     }
 
+    public class TypeWithPropertyHavingChoice
+    {
+        // The ManyChoices field can contain an array
+        // of choices. Each choice must be matched to
+        // an array item in the ChoiceArray field.
+        [XmlChoiceIdentifier("ChoiceArray")]
+        [XmlElement("Item", typeof(string))]
+        [XmlElement("Amount", typeof(int))]
+        public object[] ManyChoices { get; set; }
+
+        // TheChoiceArray field contains the enumeration
+        // values, one for each item in the ManyChoices array.
+        [XmlIgnore]
+        public MoreChoices[] ChoiceArray;
+    }
+
     public class TypeWithFieldsOrdered
     {
         [XmlElement(Order = 0)]
@@ -3122,6 +3156,38 @@ public class TypeWithBinaryProperty
 public class TypeWithTimeSpanProperty
 {
     public TimeSpan TimeSpanProperty;
+}
+
+public class TypeWithDefaultTimeSpanProperty
+{
+    public TypeWithDefaultTimeSpanProperty()
+    {
+        TimeSpanProperty = GetDefaultValue("TimeSpanProperty");
+        TimeSpanProperty2 = GetDefaultValue("TimeSpanProperty2");
+    }
+
+    [DefaultValue(typeof(TimeSpan), "00:01:00")]
+    public TimeSpan TimeSpanProperty { get; set; }
+
+    [DefaultValue(typeof(TimeSpan), "00:00:01")]
+    public TimeSpan TimeSpanProperty2 { get; set; }
+
+    public TimeSpan GetDefaultValue(string propertyName)
+    {
+        var property = this.GetType().GetProperty(propertyName);
+
+        var attribute = property.GetCustomAttribute(typeof(DefaultValueAttribute))
+                as DefaultValueAttribute;
+
+        if (attribute != null)
+        {
+            return (TimeSpan)attribute.Value;
+        }
+        else
+        {
+            return new TimeSpan(0, 0, 0);
+        }
+    }
 }
 
 public class TypeWithByteProperty
@@ -4052,6 +4118,14 @@ public class SoapEncodedTestType3
     public string StringValue;
 }
 
+public class SoapEncodedTestType4
+{
+    [SoapElement(IsNullable = true)]
+    public int? IntValue;
+    [SoapElement(IsNullable = true)]
+    public double? DoubleValue;
+}
+
 public class SoapEncodedTestType5
 {
     public string Name;
@@ -4180,6 +4254,26 @@ public partial class CompositeTypeForXmlMembersMapping
             StringValueField = value;
         }
     }
+}
+
+public class XmlMembersMappingTypeHavingIntArray
+{
+    public int[] IntArray;
+}
+
+public class TypeWithXmlAttributes
+{
+    [XmlAttribute(Namespace = "http://www.MyNs.org")]
+    public string MyName;
+
+    [XmlAttribute(DataType = "date", AttributeName = "CreationDate")]
+    public DateTime Today;
+}
+
+public class TypeWithNullableObject
+{
+    [SoapElement(IsNullable = true)]
+    public object MyObject;
 }
 
 public delegate void MyDelegate();
@@ -4848,4 +4942,40 @@ public class DerivedType : BaseType
 {
     [DataMember]
     public string StrDerived = "derived";
+}
+
+public class Group1WithXmlTextAttr
+{
+    [XmlText(typeof(string))]
+    [XmlElement(typeof(int))]
+    [XmlElement(typeof(double))]
+    public object[] All = new object[] { 321, "One", 2, 3.0, "Two" };
+}
+
+public class Group2WithXmlTextAttr
+{
+    [XmlText(Type = typeof(GroupType))]
+    public GroupType TypeOfGroup;
+}
+
+public enum GroupType
+{
+    Small,
+    Medium,
+    Large
+}
+
+public class Group3WithXmlTextAttr
+{
+    [XmlText(Type = typeof(DateTime))]
+    public DateTime CreationTime = new DateTime(2017, 4, 20, 3, 8, 15, DateTimeKind.Utc);
+}
+
+public class Group4WithXmlTextAttr
+{
+    [XmlText(Type = typeof(DateTime))]
+    public DateTime CreationTime = new DateTime(2017, 4, 20, 3, 8, 15, DateTimeKind.Utc);
+
+    [XmlText]
+    public string Text = "SomeText";
 }

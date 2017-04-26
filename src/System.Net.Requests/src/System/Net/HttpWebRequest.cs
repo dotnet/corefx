@@ -138,14 +138,11 @@ namespace System.Net
         {
             get
             {
-                return false;
+                return _allowReadStreamBuffering;
             }
             set
             {
-                if (value)
-                {
-                    throw new InvalidOperationException(SR.net_OperationNotSupportedException);
-                }
+                _allowReadStreamBuffering = value;
             }            
         }
 
@@ -799,7 +796,7 @@ namespace System.Net
         {
             get
             {
-                return (_sendRequestTask != null) && (_sendRequestTask.Status == TaskStatus.RanToCompletion);
+                return (_sendRequestTask != null) && (_sendRequestTask.IsCompletedSuccessfully);
             }
         }
 
