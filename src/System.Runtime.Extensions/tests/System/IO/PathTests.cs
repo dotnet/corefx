@@ -623,12 +623,12 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
         [Theory]
         [InlineData(@"\\.\UNC\")]
-        [InlineData(@"\\.\UNC\server7")]
-        [InlineData(@"\\.\UNC\server8\")]
-        [InlineData(@"\\.\UNC\server9\\")]
-        [InlineData(@"\\.\UNC\serverA\..")]
-        [InlineData(@"\\.\UNC\serverB\share\.")]
-        [InlineData(@"\\.\UNC\serverC\share\..")]
+        [InlineData(@"\\.\UNC\LOCALHOST")]
+        [InlineData(@"\\.\UNC\localHOST\")]
+        [InlineData(@"\\.\UNC\LOcaLHOST\\")]
+        [InlineData(@"\\.\UNC\lOCALHOST\..")]
+        [InlineData(@"\\.\UNC\LOCALhost\share\.")]
+        [InlineData(@"\\.\UNC\loCALHOST\share\..")]
         [InlineData(@"\\.\UNC\a\b\\")]
         public static void GetFullPath_Windows_ValidLegacy_ValidExtendedPaths(string path)
         {

@@ -77,7 +77,7 @@ namespace System
 
         public static void ThrowsAny(Type firstExceptionType, Type secondExceptionType, Action action)
         {
-             try
+            try
             {
                 action();
             }
