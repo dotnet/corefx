@@ -14,36 +14,28 @@ namespace System.IO
         public void NullStorageFile_ThrowsArgumentNull()
         {
             IStorageFile file = null;
-            Assert.Equal(
-                "windowsRuntimeFile",
-                Assert.Throws<ArgumentNullException>(() => file.CreateSafeFileHandle()).ParamName);
+            Assert.Throws<ArgumentNullException>("windowsRuntimeFile", () => file.CreateSafeFileHandle());
         }
 
         [Fact]
         public void FromStorageFile_BadAccessThrowsOutOfRange()
         {
             IStorageFile file = new StorageFileMock();
-            Assert.Equal(
-                "access",
-                Assert.Throws<ArgumentOutOfRangeException>(() => file.CreateSafeFileHandle((FileAccess)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("access", () => file.CreateSafeFileHandle((FileAccess)100));
         }
 
         [Fact]
         public void FromStorageFile_BadSharingThrowsOutOfRange()
         {
             IStorageFile file = new StorageFileMock();
-            Assert.Equal(
-                "share",
-                Assert.Throws<ArgumentOutOfRangeException>(() => file.CreateSafeFileHandle(FileAccess.ReadWrite, (FileShare)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("share", () => file.CreateSafeFileHandle(FileAccess.ReadWrite, (FileShare)100));
         }
 
         [Fact]
         public void FromStorageFile_BadOptionsThrowsOutOfRange()
         {
             IStorageFile file = new StorageFileMock();
-            Assert.Equal(
-                "options",
-                Assert.Throws<ArgumentOutOfRangeException>(() => file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.Read, (FileOptions)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("options", () => file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.Read, (FileOptions)100));
         }
 
         [Fact]
@@ -72,54 +64,42 @@ namespace System.IO
         public void NullStorageFolder_ThrowsArgumentNull()
         {
             IStorageFolder folder = null;
-            Assert.Equal(
-                "rootDirectory",
-                Assert.Throws<ArgumentNullException>(() => folder.CreateSafeFileHandle("foo", FileMode.OpenOrCreate)).ParamName);
+            Assert.Throws<ArgumentNullException>("rootDirectory", () => folder.CreateSafeFileHandle("foo", FileMode.OpenOrCreate));
         }
 
         [Fact]
         public void NullStorageFolder_ThrowsArgumentNull2()
         {
             IStorageFolder folder = null;
-            Assert.Equal(
-                "rootDirectory",
-                Assert.Throws<ArgumentNullException>(() => folder.CreateSafeFileHandle("foo", FileMode.OpenOrCreate, FileAccess.Write)).ParamName);
+            Assert.Throws<ArgumentNullException>("rootDirectory", () => folder.CreateSafeFileHandle("foo", FileMode.OpenOrCreate, FileAccess.Write));
         }
 
         [Fact]
         public void FromStorageFolder_BadModeThrowsOutOfRange()
         {
             IStorageFolder folder = new StorageFolderMock();
-            Assert.Equal(
-                "mode",
-                Assert.Throws<ArgumentOutOfRangeException>(() => folder.CreateSafeFileHandle("Foo", (FileMode)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("mode", () => folder.CreateSafeFileHandle("Foo", (FileMode)100));
         }
 
         [Fact]
         public void FromStorageFolder_BadAccessThrowsOutOfRange()
         {
             IStorageFolder folder = new StorageFolderMock();
-            Assert.Equal(
-                "access",
-                Assert.Throws<ArgumentOutOfRangeException>(() => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, (FileAccess)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("access", () => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, (FileAccess)100));
         }
 
         [Fact]
         public void FromStorageFolder_BadSharingThrowsOutOfRange()
         {
             IStorageFolder folder = new StorageFolderMock();
-            Assert.Equal(
-                "share",
-                Assert.Throws<ArgumentOutOfRangeException>(() => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, FileAccess.ReadWrite, (FileShare)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("share", () => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, FileAccess.ReadWrite, (FileShare)100));
         }
 
         [Fact]
         public void FromStorageFolder_BadOptionsThrowsOutOfRange()
         {
             IStorageFolder folder = new StorageFolderMock();
-            Assert.Equal(
-                "options",
-                Assert.Throws<ArgumentOutOfRangeException>(() => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, (FileOptions)100)).ParamName);
+            Assert.Throws<ArgumentOutOfRangeException>("options", () => folder.CreateSafeFileHandle("Foo", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, (FileOptions)100));
         }
 
         [Fact]
@@ -141,10 +121,11 @@ namespace System.IO
         {
             StorageFolder folder = ApplicationData.Current.TemporaryFolder;
             string filename = "FromStorageFolder_Basic_" + Path.GetRandomFileName();
-            SafeFileHandle handle = folder.CreateSafeFileHandle(filename, FileMode.CreateNew);
-            Assert.NotNull(handle);
-            Assert.False(handle.IsInvalid);
-            handle.Close();
+            using (SafeFileHandle handle = folder.CreateSafeFileHandle(filename, FileMode.CreateNew))
+            {
+                Assert.NotNull(handle);
+                Assert.False(handle.IsInvalid);
+            }
             File.Delete(Path.Combine(folder.Path, filename));
         }
 
@@ -153,10 +134,11 @@ namespace System.IO
         {
             StorageFolder folder = ApplicationData.Current.TemporaryFolder;
             string filename = "FromStorageFolder_SurfaceIOException_" + Path.GetRandomFileName();
-            SafeFileHandle handle = folder.CreateSafeFileHandle(filename, FileMode.CreateNew);
-            Assert.NotNull(handle);
-            Assert.False(handle.IsInvalid);
-            handle.Close();
+            using (SafeFileHandle handle = folder.CreateSafeFileHandle(filename, FileMode.CreateNew))
+            {
+                Assert.NotNull(handle);
+                Assert.False(handle.IsInvalid);
+            }
             Assert.Contains(
                 filename,
                 Assert.Throws<IOException>(() => folder.CreateSafeFileHandle(filename, FileMode.CreateNew)).Message);
@@ -201,10 +183,11 @@ namespace System.IO
             StorageFolder folder = ApplicationData.Current.TemporaryFolder;
             string filename = "FromStorageFile_Basic_" + Path.GetRandomFileName();
             StorageFile file = folder.CreateFileAsync(filename, CreationCollisionOption.FailIfExists).AsTask().Result;
-            SafeFileHandle handle = file.CreateSafeFileHandle();
-            Assert.NotNull(handle);
-            Assert.False(handle.IsInvalid);
-            handle.Close();
+            using (SafeFileHandle handle = file.CreateSafeFileHandle())
+            {
+                Assert.NotNull(handle);
+                Assert.False(handle.IsInvalid);
+            }
             file.DeleteAsync().AsTask().Wait();
         }
 
@@ -237,12 +220,13 @@ namespace System.IO
             StorageFolder folder = ApplicationData.Current.TemporaryFolder;
             string filename = "FromStorageFile_SurfaceIOException_" + Path.GetRandomFileName();
             StorageFile file = folder.CreateFileAsync(filename, CreationCollisionOption.FailIfExists).AsTask().Result;
-            SafeFileHandle handle = file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.None);
-            Assert.Contains(
-                filename,
-                Assert.Throws<IOException>(() => file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.None)).Message);
+            using (SafeFileHandle handle = file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.None))
+            {
+                Assert.Contains(
+                    filename,
+                    Assert.Throws<IOException>(() => file.CreateSafeFileHandle(FileAccess.ReadWrite, FileShare.None)).Message);
+            }
 
-            handle.Close();
             file.DeleteAsync().AsTask().Wait();
         }
     }

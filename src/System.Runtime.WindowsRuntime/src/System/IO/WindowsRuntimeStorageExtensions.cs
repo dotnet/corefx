@@ -271,7 +271,7 @@ namespace System.IO
                     return HANDLE_ACCESS_OPTIONS.HAO_WRITE;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(access));
+            throw new ArgumentOutOfRangeException(nameof(access), access, null);
         }
 
         private static HANDLE_SHARING_OPTIONS FileShareToHandleSharingOptions(FileShare share)
@@ -279,7 +279,7 @@ namespace System.IO
             if ((share & FileShare.Inheritable) != 0)
                 throw new NotSupportedException(SR.NotSupported_Inheritable);
             if (share < FileShare.None || share > (FileShare.ReadWrite | FileShare.Delete))
-                throw new ArgumentOutOfRangeException(nameof(share));
+                throw new ArgumentOutOfRangeException(nameof(share), share, null);
 
             HANDLE_SHARING_OPTIONS sharingOptions = HANDLE_SHARING_OPTIONS.HSO_SHARE_NONE;
             if ((share & FileShare.Read) != 0)
@@ -299,7 +299,7 @@ namespace System.IO
             if (options != FileOptions.None && (options &
                 ~(FileOptions.WriteThrough | FileOptions.Asynchronous | FileOptions.RandomAccess | FileOptions.DeleteOnClose |
                   FileOptions.SequentialScan | (FileOptions)0x20000000 /* NoBuffering */)) != 0)
-                throw new ArgumentOutOfRangeException(nameof(options));
+                throw new ArgumentOutOfRangeException(nameof(options), options, null);
 
             return (HANDLE_OPTIONS)options;
         }
@@ -307,7 +307,7 @@ namespace System.IO
         private static HANDLE_CREATION_OPTIONS FileModeToCreationOptions(FileMode mode)
         {
             if (mode < FileMode.CreateNew || mode > FileMode.Append)
-                throw new ArgumentOutOfRangeException(nameof(mode));
+                throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
 
             if (mode == FileMode.Append)
                 return HANDLE_CREATION_OPTIONS.HCO_CREATE_ALWAYS;

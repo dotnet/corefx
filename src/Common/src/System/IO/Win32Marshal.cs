@@ -104,7 +104,7 @@ namespace System.IO
         internal static int MakeHRFromErrorCode(int errorCode)
         {
             // Don't convert it if it is already an HRESULT
-            if ((0xFFFF0000 & errorCode) == 0)
+            if ((0xFFFF0000 & errorCode) != 0)
                 return errorCode;
 
             return unchecked(((int)0x80070000) | errorCode);
