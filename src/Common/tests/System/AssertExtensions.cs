@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System
 {
@@ -86,9 +87,9 @@ namespace System
                 {
                     return;
                 }
-                Assert.False(true, $"Expected: ({firstExceptionType}) or ({secondExceptionType}) -> Actual: ({e.GetType()})");
+                throw new XunitException($"Expected: ({firstExceptionType}) or ({secondExceptionType}) -> Actual: ({e.GetType()})");
             }
-            Assert.False(true, "AssertExtensions.ThrowsAny<firstExceptionType, secondExceptionType> didn't throw any exception");
+            throw new XunitException("AssertExtensions.ThrowsAny<firstExceptionType, secondExceptionType> didn't throw any exception");
         }
 
         public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType>(Action action)
