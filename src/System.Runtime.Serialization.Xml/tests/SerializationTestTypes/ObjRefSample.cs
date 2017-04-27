@@ -16,5 +16,6 @@ namespace SerializationTestTypes
             Data = DateTime.MaxValue.ToLongTimeString();
         }
     }
+
     #endregion
 }

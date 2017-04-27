@@ -215,11 +215,11 @@ namespace SerializationTestTypes
     [Serializable]
     public class SimpleResolver_Ser : DataContractResolver
     {
-        public string defaultNS = "http://schemas.datacontract.org/2004/07/";
+        private static readonly string s_defaultNs = "http://schemas.datacontract.org/2004/07/";
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
         {
             string resolvedNamespace = string.Empty;
-            resolvedNamespace = defaultNS;
+            resolvedNamespace = s_defaultNs;
             XmlDictionary dictionary = new XmlDictionary();
             typeName = dictionary.Add(dcType.FullName);
             typeNamespace = dictionary.Add(resolvedNamespace);
@@ -235,7 +235,7 @@ namespace SerializationTestTypes
     [Serializable]
     public class SimpleResolver_DeSer : DataContractResolver
     {
-        public string defaultNS = "http://schemas.datacontract.org/2004/07/";
+        private static readonly string s_defaultNs = "http://schemas.datacontract.org/2004/07/";
         public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
         {
             throw new NotImplementedException("Serialization is supposed to be handled by the SimpleResolver_Ser resolver.");
@@ -243,7 +243,7 @@ namespace SerializationTestTypes
 
         public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
         {
-            if (typeNamespace.Equals(defaultNS))
+            if (typeNamespace.Equals(s_defaultNs))
             {
                 if (typeName.Equals(typeof(DCRVariations).FullName))
                 {

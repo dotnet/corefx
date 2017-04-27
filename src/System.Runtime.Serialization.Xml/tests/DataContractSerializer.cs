@@ -2865,15 +2865,12 @@ public static partial class DataContractSerializerTests
         dcrVariationsGoing.unknownType2 = new SerializationTestTypes.SimpleDC();
         var setting1 = new DataContractSerializerSettings()
         {
-            DataContractResolver = new SerializationTestTypes.SimpleResolver_Ser(),
-            MaxItemsInObjectGraph = int.MaxValue,
-            IgnoreExtensionDataObject = false,
+            DataContractResolver = new SerializationTestTypes.SimpleResolver_Ser(),            
             PreserveObjectReferences = true
         };
         var setting2 = new DataContractSerializerSettings()
-        { DataContractResolver = new SerializationTestTypes.SimpleResolver_DeSer(),
-            MaxItemsInObjectGraph = int.MaxValue,
-            IgnoreExtensionDataObject = false,
+        {
+            DataContractResolver = new SerializationTestTypes.SimpleResolver_DeSer(),            
             PreserveObjectReferences = true
         };
         var dcs1 = new DataContractSerializer(typeof(SerializationTestTypes.CustomClass), setting1);
@@ -2898,8 +2895,6 @@ public static partial class DataContractSerializerTests
         var dcr2 = new SerializationTestTypes.SimpleResolver_DeSer();                
         var setting = new DataContractSerializerSettings()
         {
-            MaxItemsInObjectGraph = int.MaxValue,
-            IgnoreExtensionDataObject = false,
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
@@ -2927,8 +2922,6 @@ public static partial class DataContractSerializerTests
         var setting = new DataContractSerializerSettings()
         {
             DataContractResolver = dcr2,
-            MaxItemsInObjectGraph = int.MaxValue,
-            IgnoreExtensionDataObject = false,
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
@@ -2956,8 +2949,6 @@ public static partial class DataContractSerializerTests
         var setting = new DataContractSerializerSettings()
         {
             DataContractResolver = dcr1,
-            MaxItemsInObjectGraph = int.MaxValue,
-            IgnoreExtensionDataObject = false,
             PreserveObjectReferences = true
         };
         var dcs = new DataContractSerializer(typeof(SerializationTestTypes.DCRVariations), setting);
@@ -2982,6 +2973,7 @@ public static partial class DataContractSerializerTests
         Assert.True(result.Equal, string.Format("{1}{0}Test failed.{0}Expected: {2}{0}Actual: {3}",
                 Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
     }
+
     [Fact]
     public static void DCS_BasicRoundTripPOCOWithIgnoreDM()
     {
