@@ -117,6 +117,7 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "XmlCustomFormatter.FromTime is quirked, which causes behavior difference. See the method for more details.")]
     public static void Xml_TypeWithDateTimePropertyAsXmlTime()
     {
         DateTime localTime = new DateTime(549269870000L, DateTimeKind.Local);
