@@ -594,6 +594,9 @@ namespace System.Xml.Serialization
                 {
                     MemberMapping m = members[i];
 
+                    if (m.Xmlns != null)
+                        continue;
+
                     bool isSpecified = true;
                     bool shouldPersist = true;
                     if (m.CheckSpecified != SpecifiedAccessor.None)
@@ -608,9 +611,6 @@ namespace System.Xml.Serialization
                         MethodInfo method = o.GetType().GetTypeInfo().GetDeclaredMethod(methodInvoke);
                         shouldPersist = (bool)method.Invoke(o, Array.Empty<object>());
                     }
-
-                    if (m.Xmlns != null)
-                        continue;
 
                     bool checkShouldPersist = m.CheckShouldPersist && (m.Elements.Length > 0 || m.Text != null);
 
@@ -631,6 +631,7 @@ namespace System.Xml.Serialization
                         WriteMember(memberValue, choiceSource, m.ElementsSortedByDerivation, m.Text, m.ChoiceIdentifier, m.TypeDesc, true);
                     }
                 }
+
                 if (!mapping.IsSoap)
                 {
                     WriteEndElement(o);
