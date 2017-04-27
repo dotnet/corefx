@@ -1530,22 +1530,7 @@ namespace System.Diagnostics.Tests
             Assert.Same(password, p.StartInfo.Password);
             Assert.Equal(domain, p.StartInfo.Domain);
 
-            // Make sure that process is fully created before killing it to avoid a Win32Exception.
-            while (true)
-            {
-                try
-                {
-                    bool pId = p.Id > 0;
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                }
-            }
-
-            p.Kill();
-            p.WaitForExit();
+            Assert.True(p.WaitForExit(WaitInMS));
             password.Dispose();
         }
 
