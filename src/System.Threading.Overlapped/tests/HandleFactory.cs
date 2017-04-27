@@ -24,7 +24,7 @@ internal static partial class HandleFactory
 
     private static unsafe Win32Handle CreateHandle(bool async, string fileName = null)
     {
-#if !uapaot
+#if !uap
         // Assume the current directory is writable
         return DllImport.CreateFile(fileName ?? @"Overlapped.tmp", DllImport.FileAccess.GenericWrite, DllImport.FileShare.Write, IntPtr.Zero, DllImport.CreationDisposition.CreateAlways, async ? DllImport.FileAttributes.Overlapped : DllImport.FileAttributes.Normal, IntPtr.Zero);
 #else

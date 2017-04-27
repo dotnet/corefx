@@ -8,7 +8,7 @@ using System.Threading;
 
 internal static class DllImport
 {
-#if !uapaot
+#if !uap
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
     internal static extern Win32Handle CreateFile(String lpFileName,
        FileAccess dwDesiredAccess, FileShare dwShareMode,
