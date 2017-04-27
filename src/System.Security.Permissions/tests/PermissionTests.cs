@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace System.Security.Permissions.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public class PermissionTests
     {
         [Fact]

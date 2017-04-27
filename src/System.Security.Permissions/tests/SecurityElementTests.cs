@@ -33,6 +33,7 @@ using Xunit;
 
 namespace System.Security.Permissions.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public class SecurityElementTest
     {
         private static SecurityElement CreateElement()

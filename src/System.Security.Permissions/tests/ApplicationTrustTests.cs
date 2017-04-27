@@ -7,6 +7,7 @@ using Xunit;
 
 namespace System.Security.Permissions.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public class ApplicationTrustTests
     {
         [Fact]
