@@ -451,7 +451,7 @@ namespace System.Diagnostics
         private int _currentChildId;  // A unique number for all children of this activity.  
 
         // Used to generate an ID it represents the machine and process we are in.  
-        private static string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
+        private static readonly string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
 
         //A unique number inside the appdomain, randomized between appdomains. 
         //Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
