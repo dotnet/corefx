@@ -605,19 +605,8 @@ namespace System.IO.Tests
             if (PathFeatures.IsUsingLegacyPathNormalization())
             {
                 // Legacy Path doesn't support any of these paths.
-                try
-                {
-                    Path.GetFullPath(path);
-                }
-                catch (Exception e)
-                {
-                    if (e is ArgumentException || e is NotSupportedException)
-                    {
-                        return;
-                    }
-                    Assert.True(false, "Legacy path threw an unexpected exception on invalid path form");
-                }
-                Assert.True(false, "Legacy path didn't throw an exception on invalid path form");
+                AssertExtensions.ThrowsAny<ArgumentException, NotSupportedException>(() => Path.GetFullPath(path));
+                return;
             }
 
             // None of these should throw

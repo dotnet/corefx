@@ -73,5 +73,29 @@ namespace System
                 Throws<TNetCoreExceptionType>(netCoreParamName, action);
             }
         }
+
+        public static void ThrowsAny(Type firstExceptionType, Type secondExceptionType, Action action)
+        {
+             try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                if (e.GetType().Equals(firstExceptionType) || e.GetType().Equals(secondExceptionType))
+                {
+                    return;
+                }
+                Assert.False(true, $"Expected: ({firstExceptionType}) or ({secondExceptionType}) -> Actual: ({e.GetType()})");
+            }
+            Assert.False(true, "AssertExtensions.ThrowsAny<firstExceptionType, secondExceptionType> didn't throw any exception");
+        }
+
+        public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType>(Action action)
+            where TFirstExceptionType : Exception
+            where TSecondExceptionType : Exception
+        {
+           ThrowsAny(typeof(TFirstExceptionType), typeof(TSecondExceptionType), action);
+        }
     }
 }
