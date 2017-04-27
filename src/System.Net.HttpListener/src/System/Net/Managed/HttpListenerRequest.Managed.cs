@@ -137,7 +137,7 @@ namespace System.Net
 
             char c = scheme[0];
             if (c == 'h')
-                return (scheme == UriScheme.Http || UriScheme.Https);
+                return (scheme == UriScheme.Http ||  scheme == UriScheme.Https);
             if (c == 'f')
                 return (scheme == UriScheme.File || scheme == UriScheme.Ftp);
 
