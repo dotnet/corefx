@@ -137,20 +137,20 @@ namespace System.Net
 
             char c = scheme[0];
             if (c == 'h')
-                return (scheme == "http" || scheme == "https");
+                return (scheme == UriScheme.Http || UriScheme.Https);
             if (c == 'f')
-                return (scheme == "file" || scheme == "ftp");
+                return (scheme == UriScheme.File || scheme == UriScheme.Ftp);
 
             if (c == 'n')
             {
                 c = scheme[1];
                 if (c == 'e')
-                    return (scheme == "news" || scheme == "net.pipe" || scheme == "net.tcp");
-                if (scheme == "nntp")
+                    return (scheme == UriScheme.News || scheme == UriScheme.NetPipe || scheme == UriScheme.NetTcp);
+                if (scheme == UriScheme.Nntp)
                     return true;
                 return false;
             }
-            if ((c == 'g' && scheme == "gopher") || (c == 'm' && scheme == "mailto"))
+            if ((c == 'g' && scheme == UriScheme.Gopher) || (c == 'm' && scheme == UriScheme.Mailto))
                 return true;
 
             return false;
@@ -182,9 +182,7 @@ namespace System.Net
             if (colon >= 0)
                 host = host.Substring(0, colon);
 
-            string base_uri = String.Format("{0}://{1}:{2}",
-                                (IsSecureConnection) ? "https" : "http",
-                                host, LocalEndPoint.Port);
+            string base_uri = $"{RequestScheme}://{host}:{LocalEndPoint.Port}";
 
             if (!Uri.TryCreate(base_uri + path, UriKind.Absolute, out _requestUri))
             {
@@ -197,7 +195,7 @@ namespace System.Net
 
             if (_version >= HttpVersion.Version11)
             {
-                string t_encoding = Headers["Transfer-Encoding"];
+                string t_encoding = Headers[HttpKnownHeaderNames.TransferEncoding];
                 _isChunked = (t_encoding != null && string.Equals(t_encoding, "chunked", StringComparison.OrdinalIgnoreCase));
                 // 'identity' is not valid!
                 if (t_encoding != null && !_isChunked)
@@ -217,7 +215,7 @@ namespace System.Net
                 }
             }
 
-            if (String.Compare(Headers["Expect"], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(Headers[HttpKnownHeaderNames.Expect], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 HttpResponseStream output = _context.Connection.GetResponseStream();
                 output.InternalWrite(s_100continue, 0, s_100continue.Length);
@@ -428,10 +426,10 @@ namespace System.Net
                 // 1. Connection header
                 // 2. Protocol (1.1 == keep-alive by default)
                 // 3. Keep-Alive header
-                string cnc = _headers["Connection"];
+                string cnc = Headers[HttpKnownHeaderNames.Connection];
                 if (!String.IsNullOrEmpty(cnc))
                 {
-                    _keepAlive = (0 == String.Compare(cnc, "keep-alive", StringComparison.OrdinalIgnoreCase));
+                    _keepAlive = string.Equals(cnc, "keep-alive", StringComparison.OrdinalIgnoreCase);
                 }
                 else if (_version == HttpVersion.Version11)
                 {
@@ -439,9 +437,9 @@ namespace System.Net
                 }
                 else
                 {
-                    cnc = _headers["keep-alive"];
+                    cnc = Headers[HttpKnownHeaderNames.KeepAlive];
                     if (!String.IsNullOrEmpty(cnc))
-                        _keepAlive = (0 != String.Compare(cnc, "closed", StringComparison.OrdinalIgnoreCase));
+                        _keepAlive = !string.Equals(cnc, "closed", StringComparison.OrdinalIgnoreCase);
                 }
                 return _keepAlive;
             }

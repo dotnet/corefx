@@ -24,7 +24,7 @@ namespace System.Net
             {
                 if (_acceptTypes == null)
                 {
-                    _acceptTypes = Helpers.ParseMultivalueHeader(Headers["accept"]);
+                    _acceptTypes = Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.Accept]);
                 }
 
                 return _acceptTypes;
@@ -37,7 +37,7 @@ namespace System.Net
             {
                 if (_userLanguages == null)
                 {
-                    _userLanguages = Helpers.ParseMultivalueHeader(Headers["accept-language"]);
+                    _userLanguages = Helpers.ParseMultivalueHeader(Headers[HttpKnownHeaderNames.AcceptLanguage]);
                 }
 
                 return _userLanguages;
@@ -83,7 +83,7 @@ namespace System.Net
             }
         }
 
-        public string ContentType => Headers["content-type"];
+        public string ContentType => Headers[HttpKnownHeaderNames.ContentType];
 
         public bool IsLocal => LocalEndPoint.Address.Equals(RemoteEndPoint.Address);
 
@@ -140,19 +140,19 @@ namespace System.Net
 
         public string RawUrl => _rawUrl;
 
-        private string RequestScheme => IsSecureConnection ? "https" : "http";
+        private string RequestScheme => IsSecureConnection ? UriScheme.Https : UriScheme.Http;
 
-        public string UserAgent => Headers["user-agent"];
+        public string UserAgent => Headers[HttpKnownHeaderNames.UserAgent];
 
         public string UserHostAddress => LocalEndPoint.ToString();
 
-        public string UserHostName => Headers["host"];
+        public string UserHostName => Headers[HttpKnownHeaderNames.Host];
 
         public Uri UrlReferrer
         {
             get
             {
-                string referrer = Headers["referer"];
+                string referrer = Headers[HttpKnownHeaderNames.Referer];
                 if (referrer == null)
                 {
                     return null;
