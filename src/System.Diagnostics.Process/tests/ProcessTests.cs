@@ -1529,7 +1529,11 @@ namespace System.Diagnostics.Tests
             Assert.Equal(userName, p.StartInfo.UserName);
             Assert.Same(password, p.StartInfo.Password);
             Assert.Equal(domain, p.StartInfo.Domain);
+
+            // Make sure that process is fully created before killing it to avoid AccessDeniedExceptions.
+            Thread.Sleep(500);
             p.Kill();
+            p.WaitForExit();
             password.Dispose();
         }
 
