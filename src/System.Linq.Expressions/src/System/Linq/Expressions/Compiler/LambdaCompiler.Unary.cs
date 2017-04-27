@@ -333,13 +333,12 @@ namespace System.Linq.Expressions.Compiler
                         paramType = paramType.GetElementType();
                     }
 
-                    node = Expression.Convert(
-                        Expression.Call(
-                            node.Method,
-                            Expression.Convert(node.Operand, paramType)
-                        ),
-                        node.Type
-                    );
+                    UnaryExpression operand = Expression.Convert(node.Operand, paramType);
+                    Debug.Assert(operand.Method == null);
+
+                    node = Expression.Convert(Expression.Call(node.Method, operand), node.Type);
+
+                    Debug.Assert(node.Method == null);
                 }
                 else
                 {
