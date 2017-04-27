@@ -105,6 +105,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 }
                 catch (CryptographicException) when (PlatformDetection.IsFullFramework) // Expected on full FX
                 {
+                    return;
                 }
             }
             byte[] encodedMessage = ecms.Encode();
