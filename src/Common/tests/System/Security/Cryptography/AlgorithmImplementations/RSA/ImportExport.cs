@@ -13,6 +13,11 @@ namespace System.Security.Cryptography.Rsa.Tests
         [Fact]
         public static void ExportAutoKey()
         {
+            if (PlatformDetection.IsSmallerThan462)
+            {
+                return;
+            }
+            
             RSAParameters privateParams;
             RSAParameters publicParams;
             int keySize;

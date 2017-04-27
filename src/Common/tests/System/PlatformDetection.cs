@@ -43,6 +43,15 @@ namespace System
 
         public static int WindowsVersion => GetWindowsVersion();
 
+        public static bool IsSmallerThan462
+        {
+            get
+            {
+                string description = RuntimeInformation.FrameworkDescription;
+                return IsFullFramework && !description.Contains("4.6.2") && !description.Contains("4.7");
+            }
+        }
+
         private static int s_isWinRT = -1;
 
         public static bool IsWinRT
