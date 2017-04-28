@@ -734,7 +734,7 @@ namespace System.Net
 
             if (!string.IsNullOrEmpty(connection))
             {
-                //hwr.Connection = connection; // TODO #11881: Uncomment once member is available
+                hwr.Connection = connection;
             }
 
             if (!string.IsNullOrEmpty(contentType))
@@ -744,22 +744,22 @@ namespace System.Net
 
             if (!string.IsNullOrEmpty(expect))
             {
-                //hwr.Expect = expect; // TODO #11881: Uncomment once member is available
+                hwr.Expect = expect;
             }
 
             if (!string.IsNullOrEmpty(referrer))
             {
-                //hwr.Referer = referrer; // TODO #11881: Uncomment once member is available
+                hwr.Referer = referrer;
             }
 
             if (!string.IsNullOrEmpty(userAgent))
             {
-                //hwr.UserAgent = userAgent; // TODO #11881: Uncomment once member is available
+                hwr.UserAgent = userAgent;
             }
 
             if (!string.IsNullOrEmpty(host))
             {
-                //hwr.Host = host; // TODO #11881: Uncomment once member is available
+                hwr.Host = host;
             }
         }
 

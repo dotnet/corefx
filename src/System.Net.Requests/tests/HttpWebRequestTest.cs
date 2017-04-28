@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -41,8 +42,13 @@ namespace System.Net.Tests
             Assert.Null(request.Credentials);
             Assert.False(request.HaveResponse);
             Assert.NotNull(request.Headers);
+            Assert.True(request.KeepAlive);
             Assert.Equal(0, request.Headers.Count);
+            Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
             Assert.Equal("GET", request.Method);
+            Assert.Equal(HttpWebRequest.DefaultMaximumResponseHeadersLength, 64);
+            Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
+            Assert.Equal(HttpWebRequest.DefaultCachePolicy.Level, RequestCacheLevel.BypassCache);
             Assert.NotNull(request.Proxy);
             Assert.Equal(remoteServer, request.RequestUri);
             Assert.True(request.SupportsCookieContainer);
@@ -122,6 +128,30 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
+        public void ContentLength_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.ContentLength = 255);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ContentLength_SetNegativeOne_ThrowsArgumentOutOfRangeException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => request.ContentLength = -1);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ContentLength_SetThenGetOne_Success(Uri remoteServer)
+        {
+            const int contentLength = 1;
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.ContentLength = contentLength;
+            Assert.Equal(contentLength, request.ContentLength);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
         public void ContentType_SetThenGet_ExpectSameValue(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
@@ -136,6 +166,55 @@ namespace System.Net.Tests
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.ContentType = string.Empty;
             Assert.Null(request.ContentType);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MaximumResponseHeadersLength_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.MaximumResponseHeadersLength = 255);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MaximumResponseHeadersLength_SetNegativeTwo_ThrowsArgumentOutOfRangeException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => request.MaximumResponseHeadersLength = -2);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MaximumResponseHeadersLength_SetThenGetNegativeOne_Success(Uri remoteServer)
+        {
+            const int maximumResponseHeaderLength = -1;
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.MaximumResponseHeadersLength = maximumResponseHeaderLength;
+            Assert.Equal(maximumResponseHeaderLength, request.MaximumResponseHeadersLength);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MaximumAutomaticRedirections_SetZeroOrNegative_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.MaximumAutomaticRedirections = 0);
+            Assert.Throws<ArgumentException>(() => request.MaximumAutomaticRedirections = -1);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MaximumAutomaticRedirections_SetThenGetOne_Success(Uri remoteServer)
+        {
+            const int maximumAutomaticRedirections = 1;
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.MaximumAutomaticRedirections = maximumAutomaticRedirections;
+            Assert.Equal(maximumAutomaticRedirections, request.MaximumAutomaticRedirections);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ContinueTimeout_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.ContinueTimeout = 255);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -158,6 +237,430 @@ namespace System.Net.Tests
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             Assert.Throws<ArgumentOutOfRangeException>(() => request.ContinueTimeout = -2);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Timeout_SetThenGetZero_ExpectZero(Uri remoteServer)
+        {
+            const int timeout = 0;
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Timeout = timeout;
+            Assert.Equal(timeout, request.Timeout);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Timeout_SetNegativeOne_Success(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Timeout = -1;
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Timeout_SetNegativeTwo_ThrowsArgumentOutOfRangeException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => request.Timeout = -2);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Address_CtorAddress_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Equal(remoteServer, request.Address);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void UserAgent_SetThenGetWindows_ValuesMatch(Uri remoteServer)
+        {
+            const string userAgent = "Windows";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.UserAgent = userAgent;
+            Assert.Equal(userAgent, request.UserAgent);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.Host = "localhost");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetNullValue_ThrowsArgumentNullException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentNullException>(() => request.Host = null);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetSlash_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.Host = "/localhost");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetInvalidUri_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.Host = "NoUri+-*");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetThenGetCustomUri_ValuesMatch(Uri remoteServer)
+        {
+            const string host = "localhost";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Host = host;
+            Assert.Equal(host, request.Host);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_SetThenGetCustomUriWithPort_ValuesMatch(Uri remoteServer)
+        {
+            const string host = "localhost:8080";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Host = host;
+            Assert.Equal(host, request.Host);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Host_GetDefaultHostSameAsAddress_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Equal(remoteServer.Host, request.Host);
+        }
+
+        [Theory]
+        [InlineData("https://microsoft.com:8080")]
+        public void Host_GetDefaultHostWithCustomPortSameAsAddress_ValuesMatch(string endpoint)
+        {
+            Uri endpointUri = new Uri(endpoint);
+            HttpWebRequest request = WebRequest.CreateHttp(endpointUri);
+            Assert.Equal(endpointUri.Host + ":" + endpointUri.Port, request.Host);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Pipelined_SetThenGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Pipelined = true;
+            Assert.True(request.Pipelined);
+            request.Pipelined = false;
+            Assert.False(request.Pipelined);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Referer_SetThenGetReferer_ValuesMatch(Uri remoteServer)
+        {
+            const string referer = "Referer";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Referer = referer;
+            Assert.Equal(referer, request.Referer);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void TransferEncoding_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
+        {
+            const string transferEncoding = "xml";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.SendChunked = true;
+            request.TransferEncoding = transferEncoding;
+            Assert.Equal(transferEncoding, request.TransferEncoding);
+            request.TransferEncoding = null;
+            Assert.Equal(null, request.TransferEncoding);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void TransferEncoding_SetChunked_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.TransferEncoding = "chunked");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void TransferEncoding_SetWithSendChunkedFalse_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<InvalidOperationException>(() => request.TransferEncoding = "xml");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void KeepAlive_SetThenGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.KeepAlive = true;
+            Assert.True(request.KeepAlive);
+            request.KeepAlive = false;
+            Assert.False(request.KeepAlive);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void AutomaticDecompression_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.AutomaticDecompression = DecompressionMethods.Deflate);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void AutomaticDecompression_SetAndGetDeflate_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.AutomaticDecompression = DecompressionMethods.Deflate;
+            Assert.Equal(DecompressionMethods.Deflate, request.AutomaticDecompression);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void AllowWriteStreamBuffering_SetAndGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.AllowWriteStreamBuffering = true;
+            Assert.True(request.AllowWriteStreamBuffering);
+            request.AllowWriteStreamBuffering = false;
+            Assert.False(request.AllowWriteStreamBuffering);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void AllowAutoRedirect_SetAndGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.AllowAutoRedirect = true;
+            Assert.True(request.AllowAutoRedirect);
+            request.AllowAutoRedirect = false;
+            Assert.False(request.AllowAutoRedirect);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "ConnectionGroupName isn't implemented in Core")]
+        public void ConnectionGroupName_SetAndGetGroup_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.ConnectionGroupName = "Group";
+            Assert.Equal("Group", request.ConnectionGroupName);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void PreAuthenticate_SetAndGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.PreAuthenticate = true;
+            Assert.True(request.PreAuthenticate);
+            request.PreAuthenticate = false;
+            Assert.False(request.PreAuthenticate);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Connection_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
+        {
+            const string connection = "connect";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Connection = connection;
+            Assert.Equal(connection, request.Connection);
+            request.Connection = null;
+            Assert.Equal(null, request.Connection);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Connection_SetKeepAliveAndClose_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.Connection = "keep-alive");
+            Assert.Throws<ArgumentException>(() => request.Connection = "close");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Expect_SetNullOrWhiteSpace_ValuesMatch(Uri remoteServer)
+        {
+            const string expect = "101-go";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.Expect = expect;
+            Assert.Equal(expect, request.Expect);
+            request.Expect = null;
+            Assert.Equal(null, request.Expect);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Expect_Set100Continue_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.Expect = "100-continue");
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
+        {
+            // Save default value
+            int defaultMaximumResponseHeadersLength = HttpWebRequest.DefaultMaximumResponseHeadersLength;
+
+            int newDefaultMaximumResponseHeadersLength = 255;
+            HttpWebRequest.DefaultMaximumResponseHeadersLength = newDefaultMaximumResponseHeadersLength;
+            Assert.Equal(newDefaultMaximumResponseHeadersLength, HttpWebRequest.DefaultMaximumResponseHeadersLength);
+
+            // Cleanup
+            HttpWebRequest.DefaultMaximumResponseHeadersLength = defaultMaximumResponseHeadersLength;
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void DefaultMaximumErrorResponseLength_SetAndGetLength_ValuesMatch(Uri remoteServer)
+        {
+            // Save default value
+            int defaultMaximumErrorsResponseLength = HttpWebRequest.DefaultMaximumErrorResponseLength;
+
+            int newDefaultMaximumErrorsResponseLength = 255;
+            HttpWebRequest.DefaultMaximumErrorResponseLength = newDefaultMaximumErrorsResponseLength;
+            Assert.Equal(newDefaultMaximumErrorsResponseLength, HttpWebRequest.DefaultMaximumErrorResponseLength);
+
+            // Cleanup
+            HttpWebRequest.DefaultMaximumErrorResponseLength = defaultMaximumErrorsResponseLength;
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void DefaultCachePolicy_SetAndGetPolicyReload_ValuesMatch(Uri remoteServer)
+        {
+            // Save default value
+            RequestCachePolicy requestCachePolicy = HttpWebRequest.DefaultCachePolicy;
+
+            RequestCachePolicy newRequestCachePolicy = new RequestCachePolicy(RequestCacheLevel.Reload);
+            HttpWebRequest.DefaultCachePolicy = newRequestCachePolicy;
+            Assert.Equal(newRequestCachePolicy.Level, HttpWebRequest.DefaultCachePolicy.Level);
+
+            // Cleanup
+            HttpWebRequest.DefaultCachePolicy = requestCachePolicy;
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void IfModifiedSince_SetMinDateAfterValidDate_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+
+            DateTime newIfModifiedSince = new DateTime(2000, 1, 1);
+            request.IfModifiedSince = newIfModifiedSince;
+            Assert.Equal(newIfModifiedSince, request.IfModifiedSince);
+
+            DateTime ifModifiedSince = DateTime.MinValue;
+            request.IfModifiedSince = ifModifiedSince;
+            Assert.Equal(ifModifiedSince, request.IfModifiedSince);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Date_SetMinDateAfterValidDate_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+
+            DateTime newDate = new DateTime(2000, 1, 1);
+            request.Date = newDate;
+            Assert.Equal(newDate, request.Date);
+
+            DateTime date = DateTime.MinValue;
+            request.Date = date;
+            Assert.Equal(date, request.Date);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void SendChunked_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.SendChunked = true);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void SendChunked_SetAndGetBoolean_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.SendChunked = true;
+            Assert.True(request.SendChunked);
+            request.SendChunked = false;
+            Assert.False(request.SendChunked);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ContinueDelegate_SetNullDelegate_Success(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.ContinueDelegate = null;
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ContinueDelegate_SetDelegateThenGet_ValuesSame(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            HttpContinueDelegate continueDelegate = new HttpContinueDelegate((a, b) => { });
+            request.ContinueDelegate = continueDelegate;
+            Assert.Same(continueDelegate, request.ContinueDelegate);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "ServicePoint resolution isn't implemented in Core")]
+        public void ServicePoint_GetNotNull_ThrowsPlatformNotSupportedException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.NotNull(request.ServicePoint);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ServerCertificateValidationCallback_SetCallbackThenGet_ValuesSame(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            var serverCertificateVallidationCallback = new Security.RemoteCertificateValidationCallback((a, b, c, d) => true);
+            request.ServerCertificateValidationCallback = serverCertificateVallidationCallback;
+            Assert.Same(serverCertificateVallidationCallback, request.ServerCertificateValidationCallback);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ClientCertificates_SetNullX509_ThrowsArgumentNullException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentNullException>(() => request.ClientCertificates = null);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ClientCertificates_SetThenGetX509_ValuesSame(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            var certificateCollection = new System.Security.Cryptography.X509Certificates.X509CertificateCollection();
+            request.ClientCertificates = certificateCollection;
+            Assert.Same(certificateCollection, request.ClientCertificates);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ProtocolVersion_SetInvalidHttpVersion_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.ProtocolVersion = new Version());
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void ProtocolVersion_SetThenGetHttpVersions_ValuesMatch(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+
+            request.ProtocolVersion = HttpVersion.Version10;
+            Assert.Equal(HttpVersion.Version10, request.ProtocolVersion);
+
+            request.ProtocolVersion = HttpVersion.Version11;
+            Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Implemented in .NET Framework")]
+        public void ReadWriteTimeout_SetThenGet_ThrowsNotImplementedException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<NotImplementedException>(() => request.ReadWriteTimeout = 5);
+            Assert.Throws<NotImplementedException>(() => request.ReadWriteTimeout);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void CookieContainer_SetThenGetContainer_Success(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.CookieContainer = null;
+            var cookieContainer = new CookieContainer();
+            request.CookieContainer = cookieContainer;
+            Assert.Same(cookieContainer, request.CookieContainer);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -396,6 +899,14 @@ namespace System.Net.Tests
             Assert.True(request.HaveResponse);
         }
 
+        [MemberData(nameof(EchoServers))]
+        public void Headers_SetAfterRequestSubmitted_ThrowsInvalidOperationException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.GetResponse();
+            Assert.Throws<InvalidOperationException>(() => request.Headers = null);
+        }
+
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotFedoraOrRedHatOrCentos))] // #16201
         [MemberData(nameof(EchoServers))]
         public async Task Headers_GetResponseHeaders_ContainsExpectedValue(Uri remoteServer)
@@ -421,6 +932,15 @@ namespace System.Net.Tests
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.Method = HttpMethod.Post.Method;
             Assert.Equal(HttpMethod.Post.Method, request.Method);
+        }
+
+        [Theory, MemberData(nameof(EchoServers))]
+        public void Method_SetInvalidString_ThrowsArgumentException(Uri remoteServer)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            Assert.Throws<ArgumentException>(() => request.Method = null);
+            Assert.Throws<ArgumentException>(() => request.Method = string.Empty);
+            Assert.Throws<ArgumentException>(() => request.Method = "Method(2");
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -493,8 +1013,9 @@ namespace System.Net.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
         {
+            const string contentType = "text/plain; charset=utf-8";
             HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.ContentType = "application/json";
+            request.ContentType = contentType;
 
             HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
             Stream responseStream = response.GetResponseStream();
@@ -506,10 +1027,18 @@ namespace System.Net.Tests
             _output.WriteLine(responseBody);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(responseBody.Contains("Content-Type"));
+            Assert.True(responseBody.Contains($"\"Content-Type\": \"{contentType}\""));
         }
 
-        [ActiveIssue(19083)]
+        [Theory, MemberData(nameof(EchoServers))]
+        public void MediaType_SetThenGet_ValuesMatch(Uri remoteServer)
+        {
+            const string mediaType = "text/plain";
+            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
+            request.MediaType = mediaType;
+            Assert.Equal(mediaType, request.MediaType);
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException(Uri remoteServer)
         {
@@ -520,10 +1049,13 @@ namespace System.Net.Tests
 
             request.BeginGetResponse(new AsyncCallback(RequestStreamCallback), state);
 
-            request.Abort();
-            Assert.Equal(1, state.RequestStreamCallbackCallCount);
-            WebException wex = state.SavedRequestStreamException as WebException;
-            Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
+            if (!request.HaveResponse)
+            {
+                request.Abort();
+                Assert.Equal(1, state.RequestStreamCallbackCallCount);
+                WebException wex = state.SavedRequestStreamException as WebException;
+                Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
+            }
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ResponseCallback not called after Abort on netfx")]
@@ -536,8 +1068,11 @@ namespace System.Net.Tests
 
             request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
 
-            request.Abort();
-            Assert.Equal(1, state.ResponseCallbackCallCount);
+            if (!request.HaveResponse)
+            {
+                request.Abort();
+                Assert.Equal(1, state.ResponseCallbackCallCount);
+            }
         }
 
         [ActiveIssue(18800)]
@@ -550,9 +1085,12 @@ namespace System.Net.Tests
 
             request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
 
-            request.Abort();
-            WebException wex = state.SavedResponseException as WebException;
-            Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
+            if (!request.HaveResponse)
+            {
+                request.Abort();
+                WebException wex = state.SavedResponseException as WebException;
+                Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -562,7 +1100,10 @@ namespace System.Net.Tests
 
             request.BeginGetResponse(null, null);
 
-            request.Abort();
+            if (!request.HaveResponse)
+            {
+                request.Abort();
+            }
         }
 
         [Theory, MemberData(nameof(EchoServers))]
