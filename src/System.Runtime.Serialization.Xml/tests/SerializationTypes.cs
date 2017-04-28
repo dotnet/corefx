@@ -5099,3 +5099,40 @@ public class Group4WithXmlTextAttr
     [XmlText]
     public string Text = "SomeText";
 }
+
+[DataContract]
+public class DelegateClass
+{
+    public DelegateClass() { }
+
+    [DataMember]
+    public object container;
+
+    [DataMember]
+    public static string delegateVariable = "";
+
+    [DataMember]
+    public static object someType;
+}
+
+public delegate void Del(People P);
+
+[DataContract]
+public class People
+{
+    public People(string variation)
+    {
+        Age = 6;
+        Name = "smith";
+    }
+
+    public People()
+    {
+    }
+
+    [DataMember]
+    public int Age;
+
+    [DataMember]
+    public string Name;
+}
