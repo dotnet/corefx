@@ -3040,9 +3040,9 @@ public static partial class DataContractSerializerTests
 
         string coreAssemblyName = typeof(System.Delegate).Assembly.FullName;
         string assemblyName = typeof(DelegateClass).Assembly.FullName;
-        string baseline = $@"<DelegateClass xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><container i:type=""a:Del"" z:FactoryType=""b:System.DelegateSerializationHolder"" xmlns:a=""{assemblyName}"" xmlns:b=""{coreAssemblyName}"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Delegate i:type=""b:System.DelegateSerializationHolder+DelegateEntry"" xmlns=""""><assembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</assembly><delegateEntry i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><methodName xmlns=""http://schemas.datacontract.org/2004/07/System"">TestingTheDelegate</methodName><target i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><targetTypeAssembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</targetTypeAssembly><targetTypeName xmlns=""http://schemas.datacontract.org/2004/07/System"">DataContractSerializerTests</targetTypeName><type xmlns=""http://schemas.datacontract.org/2004/07/System"">Del</type></Delegate><method0 i:type=""b:System.Reflection.RuntimeMethodInfo"" z:FactoryType=""b:System.Reflection.MemberInfoSerializationHolder"" xmlns=""""><Name i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">TestingTheDelegate</Name><AssemblyName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">{assemblyName}</AssemblyName><ClassName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">DataContractSerializerTests</ClassName><Signature i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">Void TestingTheDelegate(People)</Signature><Signature2 i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">System.Void TestingTheDelegate(People)</Signature2><MemberType i:type=""c:int"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">8</MemberType><GenericArguments i:nil=""true""/></method0></container></DelegateClass>";
+        string baseline = $@"<DelegateClass xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><container i:type=""a:Del"" z:FactoryType=""b:System.DelegateSerializationHolder"" xmlns:a=""{assemblyName}"" xmlns:b=""{coreAssemblyName}"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Delegate i:type=""b:System.DelegateSerializationHolder+DelegateEntry"" xmlns=""""><assembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</assembly><delegateEntry i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><methodName xmlns=""http://schemas.datacontract.org/2004/07/System"">TestingTheDelegate</methodName><target i:nil=""true"" xmlns=""http://schemas.datacontract.org/2004/07/System""/><targetTypeAssembly xmlns=""http://schemas.datacontract.org/2004/07/System"">{assemblyName}</targetTypeAssembly><targetTypeName xmlns=""http://schemas.datacontract.org/2004/07/System"">DelegateClass</targetTypeName><type xmlns=""http://schemas.datacontract.org/2004/07/System"">Del</type></Delegate><method0 i:type=""b:System.Reflection.RuntimeMethodInfo"" z:FactoryType=""b:System.Reflection.MemberInfoSerializationHolder"" xmlns=""""><Name i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">TestingTheDelegate</Name><AssemblyName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">{assemblyName}</AssemblyName><ClassName i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">DelegateClass</ClassName><Signature i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">Void TestingTheDelegate(People)</Signature><Signature2 i:type=""c:string"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">System.Void TestingTheDelegate(People)</Signature2><MemberType i:type=""c:int"" xmlns:c=""http://www.w3.org/2001/XMLSchema"">8</MemberType><GenericArguments i:nil=""true""/></method0></container></DelegateClass>";
         var value = new DelegateClass();
-        Del handle = TestingTheDelegate;
+        Del handle = DelegateClass.TestingTheDelegate;
         value.container = handle;
         People people = new People();
         var actual = SerializeAndDeserialize(value, baseline, dataContractSerializerSettings);
@@ -3050,12 +3050,6 @@ public static partial class DataContractSerializerTests
         Assert.NotNull(actual);
         Assert.NotNull(actual.container);
         Assert.Equal(DelegateClass.delegateVariable, "Verifying the Delegate Test");
-    }
-
-    private static void TestingTheDelegate(People P)
-    {
-        DelegateClass.delegateVariable = "Verifying the Delegate Test";
-        DelegateClass.someType = P;
     }
 
     [Fact]

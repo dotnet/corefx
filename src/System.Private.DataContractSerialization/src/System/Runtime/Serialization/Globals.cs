@@ -243,7 +243,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        static Type s_typeOfIObjectReference;
+        private static Type s_typeOfIObjectReference;
         internal static Type TypeOfIObjectReference
         {
             get

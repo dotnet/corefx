@@ -42,10 +42,9 @@ namespace System.Runtime.Serialization
                 ReflectionReadMembers(xmlReader, context, memberNames, memberNamespaces, classContract, ref obj);
             }
 
-            bool hasFactoryMethod = Globals.TypeOfIObjectReference.IsAssignableFrom(classContract.UnderlyingType);
-            if (hasFactoryMethod)
+            if (obj is IObjectReference objectReference)
             {
-                obj = context.GetRealObject((IObjectReference)obj, context.GetObjectId());
+                obj = context.GetRealObject(objectReference, context.GetObjectId());
             }
 
             obj = ResolveAdapterObject(obj, classContract);

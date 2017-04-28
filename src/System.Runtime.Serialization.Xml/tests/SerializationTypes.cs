@@ -5113,6 +5113,12 @@ public class DelegateClass
 
     [DataMember]
     public static object someType;
+
+    public static void TestingTheDelegate(People P)
+    {
+        delegateVariable = "Verifying the Delegate Test";
+        someType = P;
+    }
 }
 
 public delegate void Del(People P);

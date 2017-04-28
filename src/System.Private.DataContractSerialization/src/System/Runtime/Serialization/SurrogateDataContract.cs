@@ -10,17 +10,17 @@ namespace System.Runtime.Serialization
 
     internal sealed class SurrogateDataContract : DataContract
     {
-        SurrogateDataContractCriticalHelper helper;
+        private SurrogateDataContractCriticalHelper _helper;
 
         internal SurrogateDataContract(Type type, ISerializationSurrogate serializationSurrogate)
             : base(new SurrogateDataContractCriticalHelper(type, serializationSurrogate))
         {
-            helper = base.Helper as SurrogateDataContractCriticalHelper;
+            _helper = base.Helper as SurrogateDataContractCriticalHelper;
         }
 
         internal ISerializationSurrogate SerializationSurrogate
         {
-            get { return helper.SerializationSurrogate; }
+            get { return _helper.SerializationSurrogate; }
         }
 
         public override void WriteXmlValue(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context)
@@ -47,7 +47,6 @@ namespace System.Runtime.Serialization
         {
             return FormatterServices.GetUninitializedObject(objType);
         }
-
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void SerializationSurrogateGetObjectData(object obj, SerializationInfo serInfo, StreamingContext context)
