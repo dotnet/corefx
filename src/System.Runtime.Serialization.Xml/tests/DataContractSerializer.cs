@@ -3032,10 +3032,6 @@ public static partial class DataContractSerializerTests
         var dataContractSerializerSettings = new DataContractSerializerSettings()
         {
             DataContractResolver = new VerySimpleResolver(),
-            IgnoreExtensionDataObject = false,
-            KnownTypes = null,
-            MaxItemsInObjectGraph = int.MaxValue,
-            PreserveObjectReferences = false
         };
 
         string coreAssemblyName = typeof(System.Delegate).Assembly.FullName;
