@@ -29,9 +29,13 @@ namespace System.Tests
         {
             ArraySegment<T> empty = ArraySegment<T>.Empty;
 
-            Assert.NotEqual(default(ArraySegment<T>), empty);
+            // Assert.NotEqual uses its own Comparer, when it is comparing IEnumerables it calls GetEnumerator()
+            // ArraySegment<T>.GetEnumerator() throws InvalidOperationException when the array is null and default() returns null
+            Assert.True(default(ArraySegment<T>) != empty);
+
             // Check that two Empty invocations return equal ArraySegments.
             Assert.Equal(empty, ArraySegment<T>.Empty);
+
             // Check that two Empty invocations return ArraySegments with a cached empty array.
             // An empty array is necessary to ensure that someone doesn't use the indexer to store data in the array Empty refers to.
             Assert.Same(empty.Array, ArraySegment<T>.Empty.Array);
@@ -195,14 +199,16 @@ namespace System.Tests
 
             // Destination index not within range
             Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => arraySegment.CopyTo(new int[0], -1));
-            Assert.Throws<ArgumentOutOfRangeException>("destinationIndex", () => arraySegment.CopyTo(new int[0], 1));
+
+            // Destination array too small arraySegment.Count + destinationIndex > destinationArray.Length
+            Assert.Throws<ArgumentException>("destinationArray", () => arraySegment.CopyTo(new int[arraySegment.Count * 2], arraySegment.Count + 1));
 
             if (arraySegment.Any())
             {
                 // Destination not large enough
-                Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new int[count - 1]));
-                Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new int[count - 1], 0));
-                Assert.Throws<ArgumentOutOfRangeException>("destinationArray", () => arraySegment.CopyTo(new ArraySegment<int>(new int[count - 1])));
+                Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new int[count - 1]));
+                Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new int[count - 1], 0));
+                Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new ArraySegment<int>(new int[count - 1])));
 
                 // Don't write beyond the limits of the destination in cases where source.Count > destination.Count
                 Assert.Throws<ArgumentException>(() => arraySegment.CopyTo(new ArraySegment<int>(new int[count], 1, 0))); // destination.Array can't fit source at destination.Offset
@@ -343,20 +349,20 @@ namespace System.Tests
             int[] array = arraySegment.Array;
             
             // Before array start
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1] = default(int));
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-arraySegment.Offset - 1] = default(int));
 
             // After array start (if Offset > 0), before start
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-1]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-1] = default(int));
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-1] = default(int));
 
             // Before array end (if Offset + Count < Array.Length), after end
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Count]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[arraySegment.Count] = default(int));
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[arraySegment.Count]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[arraySegment.Count] = default(int));
 
             // After array end
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length]);
-            Assert.Throws<IndexOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length] = default(int));
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => arraySegment[-arraySegment.Offset + array.Length] = default(int));
         }
 
         [Theory]
