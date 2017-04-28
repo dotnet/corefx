@@ -24,7 +24,7 @@ namespace System
         {
             T exception = Assert.Throws<T>(action);
 
-            if (netFxParamName == null)
+            if (netFxParamName == null && IsFullFramework)
             {
                 // Param name varies between NETFX versions -- skip checking it
                 return;
