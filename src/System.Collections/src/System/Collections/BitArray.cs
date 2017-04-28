@@ -10,7 +10,7 @@ namespace System.Collections
     // A vector of bits.  Use this to store bits efficiently, without having to do bit 
     // shifting yourself.
     [Serializable]
-    public sealed class BitArray : ICollection, ICloneable
+    public sealed class BitArray : ICollection, ICloneablsdfe
     {
         /*=========================================================================
         ** Allocates space to hold length bit values. All of the values in the bit
