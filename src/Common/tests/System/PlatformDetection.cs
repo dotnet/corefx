@@ -43,13 +43,31 @@ namespace System
 
         public static int WindowsVersion => GetWindowsVersion();
 
-        public static bool IsSmallerThan462
+        public static bool IsAtLeast462()
         {
-            get
+            if (!IsFullFramework)
             {
-                string description = RuntimeInformation.FrameworkDescription;
-                return IsFullFramework && !description.Contains("4.6.2") && !description.Contains("4.7");
+                return true;
             }
+
+            string[] descriptionArray = RuntimeInformation.FrameworkDescription.Split(' ');
+            if (descriptionArray.Length < 3)
+            {
+                return true;
+            }
+                
+            Version result;
+            Version net462 = new Version(4, 6, 2);
+            string runningVersion = descriptionArray[2];
+
+            // we could get a version with build number > 1 e.g 4.6.1375 but we only want to have 4.6.1
+            // since the first would be greater than 4.6.2
+            if (runningVersion.Length > 5)
+            {
+                runningVersion = runningVersion.Substring(0, 5);
+            }
+
+            return !Version.TryParse(runningVersion, out result) || result >= net462;
         }
 
         private static int s_isWinRT = -1;

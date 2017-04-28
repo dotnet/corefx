@@ -10,14 +10,11 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
-        [Fact]
+        private static bool IsAtLeast462 => PlatformDetection.IsAtLeast462();
+
+        [ConditionalFact(nameof(IsAtLeast462))]
         public static void ExportAutoKey()
         {
-            if (PlatformDetection.IsSmallerThan462)
-            {
-                return;
-            }
-            
             RSAParameters privateParams;
             RSAParameters publicParams;
             int keySize;
