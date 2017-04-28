@@ -50,24 +50,30 @@ namespace System
                 return false;
             }
 
+            Version net462 = new Version(4, 6, 2);
+            Version runningVersion = GetFrameworkVersion();
+            return runningVersion != null && runningVersion >= net462;
+        }
+
+        public static Version GetFrameworkVersion()
+        {
             string[] descriptionArray = RuntimeInformation.FrameworkDescription.Split(' ');
             if (descriptionArray.Length < 3)
             {
-                return false;
+                return null;
             }
                 
-            Version result;
-            Version net462 = new Version(4, 6, 2);
             string runningVersion = descriptionArray[2];
 
             // we could get a version with build number > 1 e.g 4.6.1375 but we only want to have 4.6.1
-            // since the first would be greater than 4.6.2
+            // so that we get the actual Framework Version
             if (runningVersion.Length > 5)
             {
                 runningVersion = runningVersion.Substring(0, 5);
             }
 
-            return !Version.TryParse(runningVersion, out result) || result >= net462;
+            Version result;
+            return Version.TryParse(runningVersion, out result) ? result : null;
         }
 
         private static int s_isWinRT = -1;
