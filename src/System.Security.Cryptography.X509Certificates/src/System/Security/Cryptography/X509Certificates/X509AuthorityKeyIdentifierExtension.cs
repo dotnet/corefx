@@ -71,12 +71,19 @@ namespace System.Security.Cryptography.X509Certificates
             DerSequenceReader reader = new DerSequenceReader(RawData);
             byte[] serialNumber = null;
 
-            if (reader.HasTag(DerSequenceReader.ContextSpecificConstructedTag0))
+            // Primitive Context 0
+            const byte KeyIdTag = DerSequenceReader.ContextSpecificTagFlag | 0;
+            // Constructed Context 1
+            const byte CertIssuerTag = DerSequenceReader.ContextSpecificConstructedTag1;
+            // Primitive Context 2
+            const byte CertSerialTag = DerSequenceReader.ContextSpecificTagFlag | 2;
+
+            if (reader.HasTag(KeyIdTag))
             {
                 keyId = reader.ReadOctetString().ToHexStringUpper();
             }
 
-            if (reader.HasTag(DerSequenceReader.ContextSpecificConstructedTag1))
+            if (reader.HasTag(CertIssuerTag))
             {
                 DerSequenceReader generalNames = reader.ReadSequence();
 
@@ -94,7 +101,7 @@ namespace System.Security.Cryptography.X509Certificates
                 }
             }
 
-            if (reader.HasTag(DerSequenceReader.ContextSpecificConstructedTag2))
+            if (reader.HasTag(CertSerialTag))
             {
                 serialNumber = reader.ReadOctetString();
             }
