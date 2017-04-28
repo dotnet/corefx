@@ -21,7 +21,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Project Include="$(MSBuildThisFileDirectory)System.Collections\tests\**\*$(_ProjectPattern).csproj" Exclude="@(TestProjectExclusions)" />
+    <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*$(_ProjectPattern).csproj" Exclude="@(TestProjectExclusions)" />
   </ItemGroup>
 
   <Import Project="$(ToolsDir)Build.Post.targets" Condition="Exists('$(ToolsDir)Build.Post.targets')" />

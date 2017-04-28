@@ -10,5 +10,4 @@ __toolRuntime=$__scriptpath/Tools
 __dotnet=$__toolRuntime/dotnetcli/dotnet
 
 $__dotnet $__toolRuntime/run.exe $*
-echo "Error code from run $?"
 exit $?
