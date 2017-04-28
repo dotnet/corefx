@@ -33,5 +33,6 @@ namespace System.Data
         Xml = 25,
         DateTime2 = 26,
         DateTimeOffset = 27,
+        Json = 28,
     }
 }
