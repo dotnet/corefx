@@ -43,17 +43,17 @@ namespace System
 
         public static int WindowsVersion => GetWindowsVersion();
 
-        public static bool IsAtLeast462()
+        public static bool IsNetfx462OrNewer()
         {
             if (!IsFullFramework)
             {
-                return true;
+                return false;
             }
 
             string[] descriptionArray = RuntimeInformation.FrameworkDescription.Split(' ');
             if (descriptionArray.Length < 3)
             {
-                return true;
+                return false;
             }
                 
             Version result;

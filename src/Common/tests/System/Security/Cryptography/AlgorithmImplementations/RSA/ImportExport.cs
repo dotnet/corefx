@@ -10,9 +10,9 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
-        private static bool IsAtLeast462 => PlatformDetection.IsAtLeast462();
+        private static bool EphemeralKeysAreExportable => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer();
 
-        [ConditionalFact(nameof(IsAtLeast462))]
+        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
         public static void ExportAutoKey()
         {
             RSAParameters privateParams;
