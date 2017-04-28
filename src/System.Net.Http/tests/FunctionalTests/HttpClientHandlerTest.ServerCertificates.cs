@@ -206,6 +206,7 @@ namespace System.Net.Http.Functional.Tests
                 //     MustNotCheck,
                 // }
 
+#if PLATFORM_UNIX
                 switch (CurlSslVersionDescription())
                 {
                     case "SecureTransport":
@@ -214,6 +215,9 @@ namespace System.Net.Http.Functional.Tests
                     default:
                         throw;
                 }
+#else
+                throw;
+#endif
             }
         }
 
@@ -351,16 +355,22 @@ namespace System.Net.Http.Functional.Tests
                     return false;
                 }
 
+#if PLATFORM_UNIX
                 // For other Unix-based systems it's true if (and only if) the openssl backend
                 // is used with libcurl.
                 return (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
+#else
+                return false;
+#endif
             }
         }
 
         private static bool BackendDoesNotSupportCustomCertificateHandling => !BackendSupportsCustomCertificateHandling;
 
+#if PLATFORM_UNIX
         [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
         private static extern string CurlSslVersionDescription();
+#endif
 
     }
 }

@@ -245,17 +245,26 @@ namespace System.Net.Http.Functional.Tests
         // https://technet.microsoft.com/en-us/library/dn786418.aspx#BKMK_SchannelTR_TLS12
 
         private static bool BackendSupportsSslConfiguration =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
+#if PLATFORM_UNIX
+            CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false;
+#else
+            true;
+#endif
 
         private static bool SSLv3DisabledByDefault =>
+#if PLATFORM_UNIX
             BackendSupportsSslConfiguration ||
             Version.Parse(CurlVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
+#else
+            true;
+#endif
 
+#if PLATFORM_UNIX
         [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetVersionDescription")]
         private static extern string CurlVersionDescription();
 
         [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
         private static extern string CurlSslVersionDescription();
+#endif
     }
 }
