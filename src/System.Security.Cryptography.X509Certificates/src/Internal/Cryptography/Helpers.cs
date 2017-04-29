@@ -150,14 +150,6 @@ namespace Internal.Cryptography
         {
             return (year >= calendar.GetYear(calendar.MinSupportedDateTime) && year <= calendar.GetYear(calendar.MaxSupportedDateTime));
         }
-
-        internal static void DisposeAll(this IEnumerable<IDisposable> disposables)
-        {
-            foreach (IDisposable disposable in disposables)
-            {
-                disposable.Dispose();
-            }
-        }
     }
 
     internal struct PinAndClear : IDisposable
