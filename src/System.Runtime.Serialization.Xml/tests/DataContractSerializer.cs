@@ -3092,7 +3092,7 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_FileStreamSurrogate()
     {
-        using(var testFile = TempFile.Create())
+        using (var testFile = TempFile.Create())
         {
             const string TestFileData = "Some data for data contract surrogate test";
 
@@ -3104,10 +3104,10 @@ public static partial class DataContractSerializerTests
             byte[] serializedStream;
 
             // Serialize the stream
-            using (MyFileStream stream1 = new MyFileStream(testFile.Path))
+            using (var stream1 = new MyFileStream(testFile.Path))
             {
                 stream1.WriteLine(TestFileData);
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (var memoryStream = new MemoryStream())
                 {
                     dcs.WriteObject(memoryStream, stream1);
                     serializedStream = memoryStream.ToArray();
@@ -3115,9 +3115,9 @@ public static partial class DataContractSerializerTests
             }
 
             // Deserialize the stream
-            using (MemoryStream stream = new MemoryStream(serializedStream))
+            using (var stream = new MemoryStream(serializedStream))
             {
-                using (MyFileStream stream2 = (MyFileStream)dcs.ReadObject(stream))
+                using (var stream2 = (MyFileStream)dcs.ReadObject(stream))
                 {
                     string fileData = stream2.ReadLine();
                     Assert.StrictEqual(TestFileData, fileData);
