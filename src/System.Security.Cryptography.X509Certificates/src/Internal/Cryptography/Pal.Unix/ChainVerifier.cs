@@ -54,7 +54,7 @@ namespace Internal.Cryptography.Pal
                     {
                         suppressionFlag = X509VerificationFlags.IgnoreEndRevocationUnknown;
                     }
-                    else if (element.Certificate.IsSelfSigned())
+                    else if (IsSelfSigned(element.Certificate))
                     {
                         suppressionFlag = X509VerificationFlags.IgnoreRootRevocationUnknown;
                     }
@@ -79,6 +79,11 @@ namespace Internal.Cryptography.Pal
             }
 
             return false;
+        }
+
+        private static bool IsSelfSigned(X509Certificate2 cert)
+        {
+            return cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData);
         }
 
         private static X509VerificationFlags? GetSuppressionFlag(X509ChainStatusFlags status)

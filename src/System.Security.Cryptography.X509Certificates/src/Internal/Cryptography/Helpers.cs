@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography
 {
@@ -158,74 +157,6 @@ namespace Internal.Cryptography
             {
                 disposable.Dispose();
             }
-        }
-
-        internal static bool IsSelfSigned(this X509Certificate2 cert)
-        {
-            Debug.Assert(cert != null);
-
-            X509Extension untypedAkid = cert.Extensions[Oids.AuthorityKeyIdentifier];
-
-            if (untypedAkid == null)
-            {
-                return IsSelfSigned(cert, null, null);
-            }
-
-            X509AuthorityKeyIdentifierExtension akid =
-                untypedAkid as X509AuthorityKeyIdentifierExtension ??
-                new X509AuthorityKeyIdentifierExtension(untypedAkid);
-
-            var skid = (X509SubjectKeyIdentifierExtension)cert.Extensions[Oids.SubjectKeyIdentifier];
-            return IsSelfSigned(cert, skid, akid);
-        }
-
-        internal static bool IsSelfSigned(
-            this X509Certificate2 cert,
-            X509SubjectKeyIdentifierExtension skid,
-            X509AuthorityKeyIdentifierExtension akid)
-        {
-            Debug.Assert(cert != null);
-
-            if (!cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
-            {
-                return false;
-            }
-
-            // No authority key identifier? Then the subject name / issuer name match is all.
-            if (akid == null)
-            {
-                return true;
-            }
-
-            if (akid.KeyIdentifier != null)
-            {
-                if (skid == null)
-                {
-                    return false;
-                }
-
-                if (akid.KeyIdentifier != skid.SubjectKeyIdentifier)
-                {
-                    return false;
-                }
-            }
-
-            // If there is no directory name consider it a match.
-            if (akid.FirstIssuerName != null &&
-                !akid.FirstIssuerName.RawData.ContentsEqual(cert.IssuerName.RawData))
-            {
-                return false;
-            }
-
-            // If there is no serial number consider it a match.
-            if (akid.SerialNumberNoCopy != null &&
-                !akid.SerialNumberNoCopy.ContentsEqual(cert.GetSerialNumber()))
-            {
-                return false;
-            }
-
-            // Out of things to say they don't match, they match.
-            return true;
         }
     }
 

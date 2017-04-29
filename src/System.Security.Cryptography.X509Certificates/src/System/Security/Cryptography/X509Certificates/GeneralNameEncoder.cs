@@ -10,7 +10,7 @@ namespace System.Security.Cryptography.X509Certificates
 {
     internal sealed class GeneralNameEncoder
     {
-        internal enum GeneralNameTag : byte
+        private enum GeneralNameTag : byte
         {
             // Constructed
             OtherName = DerSequenceReader.ContextSpecificConstructedTag0,

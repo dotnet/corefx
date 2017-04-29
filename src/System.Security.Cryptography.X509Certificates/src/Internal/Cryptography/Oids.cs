@@ -22,7 +22,6 @@ namespace Internal.Cryptography
         public const string CertPolicies                = "2.5.29.32";
         public const string AnyCertPolicy               = "2.5.29.32.0";
         public const string CertPolicyMappings          = "2.5.29.33";
-        public const string AuthorityKeyIdentifier      = "2.5.29.35";
         public const string CertPolicyConstraints       = "2.5.29.36";
         public const string EnhancedKeyUsage            = "2.5.29.37";
         public const string InhibitAnyPolicyExtension   = "2.5.29.54";
