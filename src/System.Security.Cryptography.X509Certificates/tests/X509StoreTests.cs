@@ -27,6 +27,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void Constructor_IsNotOpen()
+        {
+            using (X509Store store = new X509Store(StoreLocation.CurrentUser))
+            {
+                Assert.False(store.IsOpen);
+            }
+        }
+
+        [Fact]
         public static void Constructor_DefaultStoreLocation()
         {
             using (X509Store store = new X509Store(StoreName.My))
@@ -86,6 +95,32 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
 
             Assert.Throws<PlatformNotSupportedException>(() => new X509Chain(IntPtr.Zero));
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags_StoreName()
+        {
+            using (X509Store store = new X509Store("My", StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags_NonExistingStoreName_Throws()
+        {
+            Assert.Throws<CryptographicException>(() =>
+                new X509Store(new Guid().ToString("D"), StoreLocation.CurrentUser, OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly)
+            );
         }
 
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // StoreHandle not supported via OpenSSL
