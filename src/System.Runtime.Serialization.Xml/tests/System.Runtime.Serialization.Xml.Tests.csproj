@@ -27,6 +27,9 @@
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>CommonTest\System\IO\TempFile.cs</Link>
+    </Compile>
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\ObjRefSample.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">

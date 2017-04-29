@@ -3092,9 +3092,7 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_FileStreamSurrogate()
     {
-        string testFileName = Path.GetTempFileName();
-
-        try 
+        using(var testFile = TempFile.Create())
         {
             const string TestFileData = "Some data for data contract surrogate test";
 
@@ -3106,7 +3104,7 @@ public static partial class DataContractSerializerTests
             byte[] serializedStream;
 
             // Serialize the stream
-            using (MyFileStream stream1 = new MyFileStream(testFileName))
+            using (MyFileStream stream1 = new MyFileStream(testFile.Path))
             {
                 stream1.WriteLine(TestFileData);
                 using (MemoryStream memoryStream = new MemoryStream())
@@ -3125,10 +3123,6 @@ public static partial class DataContractSerializerTests
                     Assert.StrictEqual(TestFileData, fileData);
                 }
             }
-        }
-        finally 
-        {                
-            File.Delete(testFileName);
         }
     }
 
