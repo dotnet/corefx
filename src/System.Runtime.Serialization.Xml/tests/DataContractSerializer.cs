@@ -3092,7 +3092,7 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_FileStreamSurrogate()
     {
-        const string TestFileName = "Test.txt";
+        string TestFileName = Path.GetTempFileName();
         const string TestFileData = "Some data for data contract surrogate test";
 
         // Create the serializer and specify the surrogate
