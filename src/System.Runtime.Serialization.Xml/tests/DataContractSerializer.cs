@@ -3092,35 +3092,43 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_FileStreamSurrogate()
     {
-        string TestFileName = Path.GetTempFileName();
-        const string TestFileData = "Some data for data contract surrogate test";
+        string testFileName = Path.GetTempFileName();
 
-        // Create the serializer and specify the surrogate
-        var dcs = new DataContractSerializer(typeof(MyFileStream));
-        dcs.SetSerializationSurrogateProvider(MyFileStreamSurrogateProvider.Singleton);
-
-        // Create and initialize the stream
-        byte[] serializedStream;
-
-        // Serialize the stream
-        using (MyFileStream stream1 = new MyFileStream(TestFileName))
+        try 
         {
-            stream1.WriteLine(TestFileData);
-            using (MemoryStream memoryStream = new MemoryStream())
+            const string TestFileData = "Some data for data contract surrogate test";
+
+            // Create the serializer and specify the surrogate
+            var dcs = new DataContractSerializer(typeof(MyFileStream));
+            dcs.SetSerializationSurrogateProvider(MyFileStreamSurrogateProvider.Singleton);
+
+            // Create and initialize the stream
+            byte[] serializedStream;
+
+            // Serialize the stream
+            using (MyFileStream stream1 = new MyFileStream(testFileName))
             {
-                dcs.WriteObject(memoryStream, stream1);
-                serializedStream = memoryStream.ToArray();
+                stream1.WriteLine(TestFileData);
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    dcs.WriteObject(memoryStream, stream1);
+                    serializedStream = memoryStream.ToArray();
+                }
+            }
+
+            // Deserialize the stream
+            using (MemoryStream stream = new MemoryStream(serializedStream))
+            {
+                using (MyFileStream stream2 = (MyFileStream)dcs.ReadObject(stream))
+                {
+                    string fileData = stream2.ReadLine();
+                    Assert.StrictEqual(TestFileData, fileData);
+                }
             }
         }
-
-        // Deserialize the stream
-        using (MemoryStream stream = new MemoryStream(serializedStream))
-        {
-            using (MyFileStream stream2 = (MyFileStream)dcs.ReadObject(stream))
-            {
-                string fileData = stream2.ReadLine();
-                Assert.StrictEqual(TestFileData, fileData);
-            }
+        finally 
+        {                
+            File.Delete(testFileName);
         }
     }
 
