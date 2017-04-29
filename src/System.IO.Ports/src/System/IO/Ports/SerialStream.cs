@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 // Notes about the SerialStream:
 //  * The stream is always opened via the SerialStream constructor.
@@ -52,6 +53,7 @@ namespace System.IO.Ports
         // internal-use members
         internal SafeFileHandle _handle = null;
         internal EventLoopRunner _eventRunner;
+        private Task _waitForComEventTask = null;
 
         private byte[] _tempBuf;                 // used to avoid multiple array allocations in ReadByte()
 
@@ -714,13 +716,7 @@ namespace System.IO.Ports
 
                 // prep. for starting event cycle.
                 _eventRunner = new EventLoopRunner(this);
-
-                // We should consider migrating to a Task here rather than simple background Thread
-                // This would let any exceptions be marshalled back to the owner of the SerialPort
-                // Some discussion in GH issue #17666
-                Thread eventLoopThread = new Thread(_eventRunner.SafelyWaitForCommEvent);
-                eventLoopThread.IsBackground = true;
-                eventLoopThread.Start();
+                _waitForComEventTask = Task.Run(() => _eventRunner.SafelyWaitForCommEvent());
             }
             catch
             {
@@ -745,7 +741,6 @@ namespace System.IO.Ports
             {
                 try
                 {
-
                     _eventRunner.endEventLoop = true;
 
                     Thread.MemoryBarrier();
@@ -793,12 +788,9 @@ namespace System.IO.Ports
                         DiscardOutBuffer();
                     }
 
-                    if (disposing && _eventRunner != null)
+                    if (disposing && _eventRunner != null && _waitForComEventTask != null)
                     {
-                        // now we need to wait for the event loop to tell us it's done.  Without this we could get into a race where the
-                        // event loop kept the port open even after Dispose ended.
-                        _eventRunner.eventLoopEndedSignal.WaitOne();
-                        _eventRunner.eventLoopEndedSignal.Close();
+                        _waitForComEventTask.GetAwaiter().GetResult();
                         _eventRunner.waitCommEventWaitHandle.Close();
                     }
                 }
@@ -1647,7 +1639,6 @@ namespace System.IO.Ports
         internal sealed class EventLoopRunner
         {
             private WeakReference streamWeakReference;
-            internal ManualResetEvent eventLoopEndedSignal = new ManualResetEvent(false);
             internal ManualResetEvent waitCommEventWaitHandle = new ManualResetEvent(false);
             private SafeFileHandle handle = null;
             private bool isAsync;
@@ -1690,9 +1681,6 @@ namespace System.IO.Ports
             /// Call WaitForCommEvent (which is a thread function for a background thread)
             /// within an exception handler, so that unhandled exceptions in WaitForCommEvent
             /// don't cause process termination
-            /// Ultimately it would be good to migrate to a Task here rather than simple background Thread
-            /// This would let any exceptions be marshalled back to the owner of the SerialPort
-            /// Some discussion in GH issue #17666
             /// </summary>
             internal void SafelyWaitForCommEvent()
             {
@@ -1808,7 +1796,6 @@ namespace System.IO.Ports
                     endEventLoop = true;
                     Overlapped.Free(intOverlapped);
                 }
-                eventLoopEndedSignal.Set();
             }
 
             private unsafe void FreeNativeOverlappedCallback(uint errorCode, uint numBytes, NativeOverlapped* pOverlapped)
