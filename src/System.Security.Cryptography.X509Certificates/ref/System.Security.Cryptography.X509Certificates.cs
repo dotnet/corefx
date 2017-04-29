@@ -548,18 +548,12 @@ namespace System.Security.Cryptography.X509Certificates
         public X509Store(System.Security.Cryptography.X509Certificates.StoreLocation storeLocation) { }
         public X509Store(System.Security.Cryptography.X509Certificates.StoreName storeName) { }
         public X509Store(System.Security.Cryptography.X509Certificates.StoreName storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation) { }
-#if netcoreapp11
         public X509Store(System.Security.Cryptography.X509Certificates.StoreName storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.OpenFlags flags) { }
-#endif
         public X509Store(string storeName) { }
         public X509Store(string storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation) { }
-#if netcoreapp11
         public X509Store(string storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.OpenFlags flags) { }
-#endif
         public System.Security.Cryptography.X509Certificates.X509Certificate2Collection Certificates { get { throw null; } }
-#if netcoreapp11
         public bool IsOpen { get { throw null; } }
-#endif
         public System.Security.Cryptography.X509Certificates.StoreLocation Location { get { throw null; } }
         public string Name { get { throw null; } }
         public System.IntPtr StoreHandle { get { throw null; } }
