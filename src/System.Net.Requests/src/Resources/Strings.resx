@@ -265,4 +265,7 @@
   <data name="net_ftpstatuscode_ActionNotTakenFilenameNotAllowed" xml:space="preserve">
     <value>File name not allowed</value>
   </data>
+  <data name="net_readonlystream" xml:space="preserve">
+    <value>The stream does not support writing.</value>
+  </data>
 </root>
