@@ -27,6 +27,7 @@ namespace System.Reflection.Tests
         public static IEnumerable<object[]> Names_TestData()
         {
             yield return new object[] { "name", "name" };
+            yield return new object[] { "NAME", "NAME" };
             yield return new object[] { "name with spaces", "name with spaces" };
             yield return new object[] { "\uD800\uDC00", "\uD800\uDC00" };
             yield return new object[] { "\u043F\u0440\u0438\u0432\u0435\u0442", "\u043F\u0440\u0438\u0432\u0435\u0442" };
@@ -45,7 +46,7 @@ namespace System.Reflection.Tests
         public void Ctor_String(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            Assert.Equal(expectedName, assemblyName.Name);
+            Assert.Equal(expectedName.ToLowerInvariant(), assemblyName.Name.ToLowerInvariant());
             Assert.Equal(ProcessorArchitecture.None, assemblyName.ProcessorArchitecture);
         }
 
