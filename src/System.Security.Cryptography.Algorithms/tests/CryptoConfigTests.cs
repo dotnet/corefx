@@ -20,15 +20,53 @@ namespace System.Security.Cryptography.CryptoConfigTests
         }
 
         [Fact]
-        public static void AddOID_NotSupported()
+        public static void AddOID_MapNameToOID_ReturnsMapped()
         {
-            Assert.Throws<PlatformNotSupportedException>(() => CryptoConfig.AddOID(string.Empty, string.Empty));
+            CryptoConfig.AddOID("1.3.14.3.2.28", "SHAFancy");
+            Assert.Equal("1.3.14.3.2.28", CryptoConfig.MapNameToOID("SHAFancy"));
         }
 
         [Fact]
-        public static void AddAlgorithm_NotSupported()
+        public static void AddOID_EmptyString_Throws()
         {
-            Assert.Throws<PlatformNotSupportedException>(() => CryptoConfig.AddAlgorithm(typeof(CryptoConfigTests), string.Empty));
+            Assert.Throws<ArgumentException>(() => CryptoConfig.AddOID(string.Empty, string.Empty));
+        }
+
+        [Fact]
+        public static void AddOID_NullOid_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => CryptoConfig.AddOID(null, string.Empty));
+        }
+
+        [Fact]
+        public static void AddOID_NullNames_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => CryptoConfig.AddOID(string.Empty, null));
+        }
+
+        [Fact]
+        public static void AddAlgorithm_CreateFromName_ReturnsMapped()
+        {
+            CryptoConfig.AddAlgorithm(typeof(AesCryptoServiceProvider), "AESFancy");
+            Assert.Equal(typeof(AesCryptoServiceProvider).FullName, CryptoConfig.CreateFromName("AESFancy").GetType().FullName);
+        }
+
+        [Fact]
+        public static void AddAlgorithm_EmptyString_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => CryptoConfig.AddAlgorithm(typeof(CryptoConfigTests), string.Empty));
+        }
+
+        [Fact]
+        public static void AddAlgorithm_NullAlgorithm_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => CryptoConfig.AddAlgorithm(null, string.Empty));
+        }
+
+        [Fact]
+        public static void AddAlgorithm_NullNames_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => CryptoConfig.AddAlgorithm(typeof(CryptoConfigTests), null));
         }
 
         [Fact]

@@ -329,12 +329,19 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(name));
 
             Type retvalType = null;
+            
+            // Check to see if we have an applicaiton defined mapping
+            lock (InternalSyncObject) {
+                if (!appNameHT.TryGetValue(name, out retvalType)) {
+                    retvalType = null;
+                }
+            }
 
             // We allow the default table to Types and Strings
             // Types get used for types in .Algorithms assembly.
             // strings get used for delay-loaded stuff in other assemblies such as .Csp.
             object retvalObj;
-            if (DefaultNameHT.TryGetValue(name, out retvalObj))
+            if (retvalType == null && DefaultNameHT.TryGetValue(name, out retvalObj))
             {
                 if (retvalObj is Type)
                 {
@@ -465,7 +472,15 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(name));
 
             string oidName;
-            if (!DefaultOidHT.TryGetValue(name, out oidName))
+            
+            // Check to see if we have an application defined mapping
+            lock (InternalSyncObject) {
+                if (!appOidHT.TryGetValue(name, out oidName)) {
+                    oidName = null;
+                }
+            }
+
+            if (string.IsNullOrEmpty(oidName) && !DefaultOidHT.TryGetValue(name, out oidName))
             {
                 try
                 {
