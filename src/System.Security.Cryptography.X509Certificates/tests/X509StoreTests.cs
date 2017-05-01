@@ -116,6 +116,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void Constructor_OpenFlags_OpenAnyway()
+        {
+            using (X509Store store = new X509Store("My", StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
         public static void Constructor_OpenFlags_NonExistingStoreName_Throws()
         {
             Assert.ThrowsAny<CryptographicException>(() =>
@@ -162,6 +172,35 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 Assert.ThrowsAny<CryptographicException>(() => store.Open(OpenFlags.OpenExistingOnly));
             }
+        }
+
+        [Fact]
+        public static void Open_IsOpenTrue()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Dispose_IsOpenFalse()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            store.Dispose();
+            Assert.False(store.IsOpen);
+        }
+
+        [Fact]
+        public static void ReOpen_IsOpenTrue()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            store.Close();
+            store.Open(OpenFlags.ReadOnly);
+            Assert.True(store.IsOpen);
         }
 
         [Fact]

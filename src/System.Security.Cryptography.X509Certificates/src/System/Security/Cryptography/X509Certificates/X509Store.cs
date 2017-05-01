@@ -73,7 +73,7 @@ namespace System.Security.Cryptography.X509Certificates
         public X509Store(StoreName storeName, StoreLocation storeLocation, OpenFlags flags)
             : this(storeName, storeLocation)
         {
-            this.Open(flags);
+            Open(flags);
         }
 
         public X509Store(string storeName, StoreLocation storeLocation)
@@ -88,7 +88,7 @@ namespace System.Security.Cryptography.X509Certificates
         public X509Store(string storeName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.OpenFlags flags)
             : this(storeName, storeLocation)
         {
-            this.Open(flags);
+            Open(flags);
         }
 
 
