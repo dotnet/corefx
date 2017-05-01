@@ -22,7 +22,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentNullException>(() => stream.Write(null, 0, 1));
+                Assert.Throws<ArgumentNullException>("buffer", () => stream.Write(null, 0, 1));
             }
         }
 
@@ -31,7 +31,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(buffer, -1, buffer.Length));
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => stream.Write(buffer, -1, buffer.Length));
             }
         }
 
@@ -40,7 +40,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(buffer, 0, -1));
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.Write(buffer, 0, -1));
             }
         }
 
@@ -49,7 +49,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(buffer, 0, buffer.Length + 1));
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.Write(buffer, 0, buffer.Length + 1));
             }
         }
 
@@ -58,7 +58,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(buffer, int.MaxValue, int.MaxValue));
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => stream.Write(buffer, int.MaxValue, int.MaxValue));
             }
         }
 
@@ -71,7 +71,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentNullException>(() => { Task t = stream.WriteAsync(null, 0, 1); });
+                Assert.Throws<ArgumentNullException>("buffer", () => { Task t = stream.WriteAsync(null, 0, 1); });
             }
         }
 
@@ -80,7 +80,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => { Task t = stream.WriteAsync(buffer, -1, buffer.Length); });
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => { Task t = stream.WriteAsync(buffer, -1, buffer.Length); });
             }
         }
 
@@ -89,7 +89,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => { Task t = stream.WriteAsync(buffer, 0, -1); });
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => { Task t = stream.WriteAsync(buffer, 0, -1); });
             }
         }
 
@@ -98,7 +98,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => { Task t = stream.WriteAsync(buffer, 0, buffer.Length + 1); });
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => { Task t = stream.WriteAsync(buffer, 0, buffer.Length + 1); });
             }
         }
 
@@ -107,7 +107,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => { Task t = stream.WriteAsync(buffer, int.MaxValue, int.MaxValue); });
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => { Task t = stream.WriteAsync(buffer, int.MaxValue, int.MaxValue); });
             }
         }
 
@@ -137,22 +137,12 @@ namespace System.Net.Tests
 
         #region BeginWrite
 
-        private IAsyncResult BeginWriteWrapper(Stream stream, byte[] buffer, int offset, int count)
-        {
-            AsyncCallback callback = null;
-            object state = new object();
-            IAsyncResult result = stream.BeginWrite(buffer, offset, count, callback, state);
-            stream.EndWrite(result);
-
-            return result;
-        }
-
         [Fact]
         public void BeginWriteAsync_BufferIsNull_ThrowsArgumentNullException()
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentNullException>(() => BeginWriteWrapper(stream, null, 0, 1));
+                Assert.Throws<ArgumentNullException>("buffer", () => stream.BeginWrite(null, 0, 1, null, null));
             }
         }
 
@@ -161,7 +151,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => BeginWriteWrapper(stream, buffer, -1, buffer.Length));
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => stream.BeginWrite(buffer, -1, buffer.Length, null, null));
             }
         }
 
@@ -170,7 +160,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => BeginWriteWrapper(stream, buffer, 0, -1));
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.BeginWrite(buffer, 0, -1, null, null));
             }
         }
 
@@ -179,7 +169,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => BeginWriteWrapper(stream, buffer, 0, buffer.Length + 1));
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.BeginWrite(buffer, 0, buffer.Length + 1, null, null));
             }
         }
 
@@ -188,7 +178,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => BeginWriteWrapper(stream, buffer, int.MaxValue, int.MaxValue));
+                Assert.Throws<ArgumentOutOfRangeException>("offset", () => stream.BeginWrite(buffer, int.MaxValue, int.MaxValue, null, null));
             }
         }
 
@@ -197,7 +187,9 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                IAsyncResult result = BeginWriteWrapper(stream, buffer, 0, buffer.Length);
+                object state = new object();
+                IAsyncResult result = stream.BeginWrite(buffer, 0, buffer.Length, null, state);
+                stream.EndWrite(result);
                 Assert.True(result.IsCompleted);
             }
         }
