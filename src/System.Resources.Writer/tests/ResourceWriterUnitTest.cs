@@ -50,16 +50,9 @@ namespace System.Resources.ResourceWriterTests
         {
             byte[] buffer = new byte[_RefBuffer.Length];
             using (var ms2 = new MemoryStream(buffer, true))
+            using (var rw1 = new ResourceWriter(ms2))
             {
-                var rw1 = new ResourceWriter(ms2);
-                try
-                {
-                    Assert.Throws<ArgumentNullException>(() => rw1.AddResource(null, "args"));
-                }
-                finally
-                {
-                    rw1.Dispose();
-                }
+                Assert.Throws<ArgumentNullException>(() => rw1.AddResource(null, "args"));
             }
         }
 
@@ -101,18 +94,11 @@ namespace System.Resources.ResourceWriterTests
         {
             byte[] buffer = new byte[_RefBuffer.Length];
             using (var ms2 = new MemoryStream(buffer, true))
+            using (var rw1 = new ResourceWriter(ms2))
             {
-                var rw1 = new ResourceWriter(ms2);
-                try
-                {
-                    rw1.Generate();
-                    // 180 is the length of the resources header.
-                    Assert.Equal(180, ms2.Position);
-                }
-                finally
-                {
-                    rw1.Dispose();
-                }
+                rw1.Generate();
+                // 180 is the length of the resources header.
+                Assert.Equal(180, ms2.Position);
             }
         }
 
