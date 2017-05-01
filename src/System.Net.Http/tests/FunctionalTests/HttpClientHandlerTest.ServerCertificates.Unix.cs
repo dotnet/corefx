@@ -20,7 +20,9 @@ namespace System.Net.Http.Functional.Tests
             get
             {
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
                     return false;
+                }
 
                 // If a run on a clean macOS ever fails we need to consider that "false"
                 // for CheckCertificateRevocationList is actually "use a system default" now,
