@@ -118,7 +118,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void Constructor_OpenFlags_NonExistingStoreName_Throws()
         {
-            Assert.Throws<CryptographicException>(() =>
+            Assert.ThrowsAny<CryptographicException>(() =>
                 new X509Store(new Guid().ToString("D"), StoreLocation.CurrentUser, OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly)
             );
         }
