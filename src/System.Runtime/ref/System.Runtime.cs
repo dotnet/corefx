@@ -165,22 +165,6 @@ namespace System
         public void Handle(System.Func<System.Exception, bool> predicate) { }
         public override string ToString() { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct ArgIterator
-    {
-        public ArgIterator(System.RuntimeArgumentHandle arglist) { }
-        [System.CLSCompliantAttribute(false)]
-        public unsafe ArgIterator(System.RuntimeArgumentHandle arglist, void *ptr) { }
-        public void End() { }
-        public override bool Equals(Object o) { throw null; }
-        public override int GetHashCode() { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.TypedReference GetNextArg() { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
-        public unsafe System.RuntimeTypeHandle GetNextArgType() { throw null; }
-        public int GetRemainingCount() { throw null; }
-    }
     public partial class ArgumentException : System.SystemException, System.Runtime.Serialization.ISerializable
     {
         public ArgumentException() { }
