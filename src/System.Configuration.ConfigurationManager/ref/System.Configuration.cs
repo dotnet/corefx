@@ -1435,6 +1435,9 @@ namespace System.Configuration.Internal
         public virtual void VerifyDefinitionAllowed(string configPath, System.Configuration.ConfigurationAllowDefinition allowDefinition, System.Configuration.ConfigurationAllowExeDefinition allowExeDefinition, System.Configuration.Internal.IConfigErrorInfo errorInfo) { }
         public virtual void WriteCompleted(string streamName, bool success, object writeContext) { }
         public virtual void WriteCompleted(string streamName, bool success, object writeContext, bool assertPermissions) { }
+#if netfx
+        public virtual void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady) { permissionSet = default(System.Security.PermissionSet); isHostReady = default(bool); }
+#endif // netfx
     }
     public partial interface IConfigErrorInfo
     {
@@ -1563,6 +1566,12 @@ namespace System.Configuration.Internal
     }
     public delegate void InternalConfigEventHandler(object sender, System.Configuration.Internal.InternalConfigEventArgs e);
     public delegate void StreamChangeCallback(string streamName);
+#if netfx
+    public partial interface IInternalConfigHost
+    {
+        void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady);
+    }
+#endif // netfx
 }
 namespace System.Configuration.Provider
 {
