@@ -2022,7 +2022,6 @@ namespace System
         public static string Concat(string str0, string str1, string str2) { throw null; }
         public static string Concat(string str0, string str1, string str2, string str3) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static string Concat(object arg0, object arg1, object arg2, object arg3, __arglist) { throw null; } 
         public static string Concat(params string[] values) { throw null; }
         public static string Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public bool Contains(string value) { throw null; }
