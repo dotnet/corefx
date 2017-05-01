@@ -40,7 +40,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.Write(buffer, 0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => stream.Write(buffer, 0, -1));
             }
         }
 
@@ -49,7 +49,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.Write(buffer, 0, buffer.Length + 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => stream.Write(buffer, 0, buffer.Length + 1));
             }
         }
 
@@ -89,7 +89,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => { Task t = stream.WriteAsync(buffer, 0, -1); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => { Task t = stream.WriteAsync(buffer, 0, -1); });
             }
         }
 
@@ -98,7 +98,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => { Task t = stream.WriteAsync(buffer, 0, buffer.Length + 1); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => { Task t = stream.WriteAsync(buffer, 0, buffer.Length + 1); });
             }
         }
 
@@ -160,7 +160,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.BeginWrite(buffer, 0, -1, null, null));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => stream.BeginWrite(buffer, 0, -1, null, null));
             }
         }
 
@@ -169,7 +169,7 @@ namespace System.Net.Tests
         {
             using (Stream stream = GetRequestStream())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => stream.BeginWrite(buffer, 0, buffer.Length + 1, null, null));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", "size", () => stream.BeginWrite(buffer, 0, buffer.Length + 1, null, null));
             }
         }
 
