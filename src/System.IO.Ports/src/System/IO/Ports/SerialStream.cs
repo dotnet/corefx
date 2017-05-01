@@ -716,7 +716,8 @@ namespace System.IO.Ports
 
                 // prep. for starting event cycle.
                 _eventRunner = new EventLoopRunner(this);
-                _waitForComEventTask = Task.Run(() => _eventRunner.SafelyWaitForCommEvent());
+                _waitForComEventTask = Task.Factory.StartNew(s => ((EventLoopRunner)s).WaitForCommEvent(), _eventRunner, CancellationToken.None,
+                                                                   TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
             catch
             {
@@ -1674,30 +1675,6 @@ namespace System.IO.Ports
                 get
                 {
                     return endEventLoop;
-                }
-            }
-
-            /// <summary>
-            /// Call WaitForCommEvent (which is a thread function for a background thread)
-            /// within an exception handler, so that unhandled exceptions in WaitForCommEvent
-            /// don't cause process termination
-            /// </summary>
-            internal void SafelyWaitForCommEvent()
-            {
-                try
-                {
-                    WaitForCommEvent();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // These can happen in some messy tear-down situations (e.g. unexpected USB unplug)
-                    // See GH issue #17661
-                }
-                catch (Exception ex)
-                {
-                    // We don't know of any reason why this should happen, but we still
-                    // don't want process termination
-                    Debug.Fail("Unhandled exception thrown from WaitForCommEvent", ex.ToString());
                 }
             }
 
