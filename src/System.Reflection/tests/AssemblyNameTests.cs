@@ -263,7 +263,9 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
             string extended = expected + ", Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended);
+
+            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended,
+                        $"Expected\n{assemblyName.FullName} == {expected}\nor\n{assemblyName.FullName} == {extended}");
         }
 
         [Fact]
