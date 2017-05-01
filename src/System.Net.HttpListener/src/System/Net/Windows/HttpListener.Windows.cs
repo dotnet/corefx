@@ -21,13 +21,7 @@ namespace System.Net
 {
     public sealed unsafe partial class HttpListener
     {
-        public static bool IsSupported
-        {
-            get
-            {
-                return Interop.HttpApi.s_supported;
-            }
-        }
+        public static bool IsSupported => Interop.HttpApi.s_supported;
 
         private static readonly Type s_channelBindingStatusType = typeof(Interop.HttpApi.HTTP_REQUEST_CHANNEL_BIND_STATUS);
         private static readonly int s_requestChannelBindStatusSize =
@@ -64,13 +58,7 @@ namespace System.Net
         private bool _V2Initialized;
         private Dictionary<ulong, DisconnectAsyncResult> _disconnectResults;
 
-        internal SafeHandle RequestQueueHandle
-        {
-            get
-            {
-                return _requestQueueHandle;
-            }
-        }
+        internal SafeHandle RequestQueueHandle => _requestQueueHandle;
 
         private void ValidateV2Property()
         {
@@ -87,11 +75,7 @@ namespace System.Net
 
         public bool UnsafeConnectionNtlmAuthentication
         {
-            get
-            {
-                return _unsafeConnectionNtlmAuthentication;
-            }
-
+            get => _unsafeConnectionNtlmAuthentication;
             set
             {
                 CheckDisposed();
@@ -268,21 +252,6 @@ namespace System.Net
         }
 
         internal bool ContainsPrefix(string uriPrefix) => _uriPrefixes.Contains(uriPrefix);
-
-        public HttpListenerPrefixCollection Prefixes
-        {
-            get
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-                CheckDisposed();
-                if (_prefixes == null)
-                {
-                    _prefixes = new HttpListenerPrefixCollection(this);
-                }
-                if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-                return _prefixes;
-            }
-        }
 
         internal bool RemovePrefix(string uriPrefix)
         {

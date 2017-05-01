@@ -32,15 +32,6 @@ namespace System.Net
             }
         }
 
-        public HttpListenerPrefixCollection Prefixes
-        {
-            get
-            {
-                CheckDisposed();
-                return _prefixes;
-            }
-        }
-
         public void Start()
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
@@ -71,14 +62,8 @@ namespace System.Net
 
         public bool UnsafeConnectionNtlmAuthentication
         {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-            set
-            {
-                throw new PlatformNotSupportedException();
-            }
+            get => throw new PlatformNotSupportedException();
+            set => throw new PlatformNotSupportedException();
         }
 
         public void Stop()

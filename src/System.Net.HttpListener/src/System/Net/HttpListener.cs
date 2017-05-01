@@ -47,10 +47,7 @@ namespace System.Net
 
         public AuthenticationSchemeSelector AuthenticationSchemeSelectorDelegate
         {
-            get
-            {
-                return _authenticationDelegate;
-            }
+            get => _authenticationDelegate;
             set
             {
                 CheckDisposed();
@@ -60,10 +57,7 @@ namespace System.Net
 
         public ExtendedProtectionSelector ExtendedProtectionSelectorDelegate
         {
-            get
-            {
-                return _extendedProtectionSelectorDelegate;
-            }
+            get => _extendedProtectionSelectorDelegate;
             set
             {
                 CheckDisposed();
@@ -78,10 +72,7 @@ namespace System.Net
 
         public AuthenticationSchemes AuthenticationSchemes
         {
-            get
-            {
-                return _authenticationScheme;
-            }
+            get => _authenticationScheme;
             set
             {
                 CheckDisposed();
@@ -91,10 +82,7 @@ namespace System.Net
 
         public ExtendedProtectionPolicy ExtendedProtectionPolicy
         {
-            get
-            {
-                return _extendedProtectionPolicy;
-            }
+            get => _extendedProtectionPolicy;
             set
             {
                 CheckDisposed();
@@ -111,20 +99,22 @@ namespace System.Net
             }
         }
 
-        public ServiceNameCollection DefaultServiceNames
+        public ServiceNameCollection DefaultServiceNames => _defaultServiceNames.ServiceNames;
+
+        public HttpListenerPrefixCollection Prefixes
         {
             get
             {
-                return _defaultServiceNames.ServiceNames;
+                if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+                CheckDisposed();
+                if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+                return _prefixes;
             }
         }
 
         public string Realm
         {
-            get
-            {
-                return _realm;
-            }
+            get => _realm;
             set
             {
                 CheckDisposed();
@@ -136,10 +126,7 @@ namespace System.Net
 
         public bool IgnoreWriteExceptions
         {
-            get
-            {
-                return _ignoreWriteExceptions;
-            }
+            get => _ignoreWriteExceptions;
             set
             {
                 CheckDisposed();
@@ -189,9 +176,6 @@ namespace System.Net
             Closed,
         }
 
-        void IDisposable.Dispose()
-        {
-            Dispose();
-        }
+        void IDisposable.Dispose() => Dispose();
     }
 }
