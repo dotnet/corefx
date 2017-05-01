@@ -162,7 +162,7 @@ namespace System.Data.SqlClient.SNI
                     if (packet.Length == 0)
                     {
                         var e = new Win32Exception();
-                        ReportErrorAndReleasePacket(packet, (uint)e.NativeErrorCode, 0, e.Message);
+                        return ReportErrorAndReleasePacket(packet, (uint)e.NativeErrorCode, 0, e.Message);
                     }
                 }
                 catch (ObjectDisposedException ode)
