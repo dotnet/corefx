@@ -32,6 +32,10 @@ namespace System.Net
             }
         }
 
+        private void AddPrefixCore(string uriPrefix) => HttpEndPointManager.AddPrefix(uriPrefix, this);
+
+        private void RemovePrefixCore(string uriPrefix) => HttpEndPointManager.RemovePrefix(uriPrefix, this);
+
         public void Start()
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);

@@ -72,7 +72,6 @@ namespace System.Net
             }
         }
 
-
         public bool UnsafeConnectionNtlmAuthentication
         {
             get => _unsafeConnectionNtlmAuthentication;
@@ -159,165 +158,6 @@ namespace System.Net
                 ValidateV2Property();
                 Debug.Assert(_timeoutManager != null, "Timeout manager is not assigned");
                 return _timeoutManager;
-            }
-        }
-
-        internal void AddPrefix(string uriPrefix)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"uriPrefix:{uriPrefix}");
-            string registeredPrefix = null;
-            try
-            {
-                if (uriPrefix == null)
-                {
-                    throw new ArgumentNullException(nameof(uriPrefix));
-                }
-                CheckDisposed();
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "uriPrefix:" + uriPrefix);
-                int i;
-                if (string.Compare(uriPrefix, 0, "http://", 0, 7, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    i = 7;
-                }
-                else if (string.Compare(uriPrefix, 0, "https://", 0, 8, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    i = 8;
-                }
-                else
-                {
-                    throw new ArgumentException(SR.net_listener_scheme, nameof(uriPrefix));
-                }
-                bool inSquareBrakets = false;
-                int j = i;
-                while (j < uriPrefix.Length && uriPrefix[j] != '/' && (uriPrefix[j] != ':' || inSquareBrakets))
-                {
-                    if (uriPrefix[j] == '[')
-                    {
-                        if (inSquareBrakets)
-                        {
-                            j = i;
-                            break;
-                        }
-                        inSquareBrakets = true;
-                    }
-                    if (inSquareBrakets && uriPrefix[j] == ']')
-                    {
-                        inSquareBrakets = false;
-                    }
-                    j++;
-                }
-                if (i == j)
-                {
-                    throw new ArgumentException(SR.net_listener_host, nameof(uriPrefix));
-                }
-                if (uriPrefix[uriPrefix.Length - 1] != '/')
-                {
-                    throw new ArgumentException(SR.net_listener_slash, nameof(uriPrefix));
-                }
-                registeredPrefix = uriPrefix[j] == ':' ? String.Copy(uriPrefix) : uriPrefix.Substring(0, j) + (i == 7 ? ":80" : ":443") + uriPrefix.Substring(j);
-                fixed (char* pChar = registeredPrefix)
-                {
-                    i = 0;
-                    while (pChar[i] != ':')
-                    {
-                        pChar[i] = (char)CaseInsensitiveAscii.AsciiToLower[(byte)pChar[i]];
-                        i++;
-                    }
-                }
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "mapped uriPrefix:" + uriPrefix + " to registeredPrefix:" + registeredPrefix);
-                if (_state == State.Started)
-                {
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Calling Interop.HttpApi.HttpAddUrl[ToUrlGroup]");
-                    uint statusCode = InternalAddPrefix(registeredPrefix);
-                    if (statusCode != Interop.HttpApi.ERROR_SUCCESS)
-                    {
-                        if (statusCode == Interop.HttpApi.ERROR_ALREADY_EXISTS)
-                            throw new HttpListenerException((int)statusCode, SR.Format(SR.net_listener_already, registeredPrefix));
-                        else
-                            throw new HttpListenerException((int)statusCode);
-                    }
-                }
-                _uriPrefixes[uriPrefix] = registeredPrefix;
-                _defaultServiceNames.Add(uriPrefix);
-            }
-            catch (Exception exception)
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"AddPrefix {exception}");
-                throw;
-            }
-            finally
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"prefix: {registeredPrefix}");
-            }
-        }
-
-        internal bool ContainsPrefix(string uriPrefix) => _uriPrefixes.Contains(uriPrefix);
-
-        internal bool RemovePrefix(string uriPrefix)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"uriPrefix: {uriPrefix}");
-            try
-            {
-                CheckDisposed();
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"uriPrefix: {uriPrefix}");
-                if (uriPrefix == null)
-                {
-                    throw new ArgumentNullException(nameof(uriPrefix));
-                }
-
-                if (!_uriPrefixes.Contains(uriPrefix))
-                {
-                    return false;
-                }
-
-                if (_state == State.Started)
-                {
-                    InternalRemovePrefix((string)_uriPrefixes[uriPrefix]);
-                }
-
-                _uriPrefixes.Remove(uriPrefix);
-                _defaultServiceNames.Remove(uriPrefix);
-            }
-            catch (Exception exception)
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"RemovePrefix {exception}");
-                throw;
-            }
-            finally
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"uriPrefix: {uriPrefix}");
-            }
-            return true;
-        }
-
-        internal void RemoveAll(bool clear)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            try
-            {
-                CheckDisposed();
-                // go through the uri list and unregister for each one of them
-                if (_uriPrefixes.Count > 0)
-                {
-                    if (_state == State.Started)
-                    {
-                        foreach (string registeredPrefix in _uriPrefixes.Values)
-                        {
-                            // ignore possible failures
-                            InternalRemovePrefix(registeredPrefix);
-                        }
-                    }
-
-                    if (clear)
-                    {
-                        _uriPrefixes.Clear();
-                        _defaultServiceNames.Clear();
-                    }
-                }
-            }
-            finally
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
             }
         }
 
@@ -680,21 +520,7 @@ namespace System.Net
             }
         }
 
-        private uint InternalAddPrefix(string uriPrefix)
-        {
-            uint statusCode = 0;
-
-            statusCode =
-                Interop.HttpApi.HttpAddUrlToUrlGroup(
-                    _urlGroupId,
-                    uriPrefix,
-                    0,
-                    0);
-
-            return statusCode;
-        }
-
-        private bool InternalRemovePrefix(string uriPrefix)
+        private bool RemovePrefixCore(string uriPrefix)
         {
             uint statusCode = Interop.HttpApi.HttpRemoveUrlFromUrlGroup(_urlGroupId, uriPrefix, 0);
             return statusCode != Interop.HttpApi.ERROR_NOT_FOUND;
@@ -707,15 +533,24 @@ namespace System.Net
             {
                 foreach (string registeredPrefix in _uriPrefixes.Values)
                 {
-                    uint statusCode = InternalAddPrefix(registeredPrefix);
-                    if (statusCode != Interop.HttpApi.ERROR_SUCCESS)
-                    {
-                        if (statusCode == Interop.HttpApi.ERROR_ALREADY_EXISTS)
-                            throw new HttpListenerException((int)statusCode, SR.Format(SR.net_listener_already, registeredPrefix));
-                        else
-                            throw new HttpListenerException((int)statusCode);
-                    }
+                    AddPrefixCore(registeredPrefix);
                 }
+            }
+        }
+
+        private void AddPrefixCore(string registeredPrefix)
+        {
+            uint statusCode = Interop.HttpApi.HttpAddUrlToUrlGroup(
+                                  _urlGroupId,
+                                  registeredPrefix,
+                                  0,
+                                  0);
+            if (statusCode != Interop.HttpApi.ERROR_SUCCESS)
+            {
+                if (statusCode == Interop.HttpApi.ERROR_ALREADY_EXISTS)
+                    throw new HttpListenerException((int)statusCode, SR.Format(SR.net_listener_already, registeredPrefix));
+                else
+                    throw new HttpListenerException((int)statusCode);
             }
         }
 
