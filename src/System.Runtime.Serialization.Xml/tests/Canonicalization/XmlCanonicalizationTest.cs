@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
+using System.Linq;
 using Xunit;
 
 namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
@@ -41,7 +42,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                     catch (Exception ex)
                     {
                         //System.ArgumentNullException: {{ResLookup:;Value cannot be null.;ManagedString;mscorlib.dll;mscorlib;ArgumentNull_Generic}}
-                        Assert.Equal(ex.GetType().FullName, input.Arguments[1].Value);
+                        Assert.Equal(input.Arguments[1].Value, ex.GetType().FullName);
                     }
                 }
                 else if (testType == TestTypeNullElementInIncludePrefixes)
@@ -67,7 +68,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                     catch (Exception ex)
                     {
                         //System.ArgumentException: {{ResLookup:;The inclusive namespace prefix collection cannot contain null as one of the items.;ManagedString;System.Runtime.Serialization.dll;System.Runtime.Serialization;InvalidInclusivePrefixListCollection}}
-                        Assert.Equal(ex.GetType().FullName, input.Arguments[1].Value);
+                        Assert.Equal(input.Arguments[1].Value, ex.GetType().FullName);
                     }
                 }
                 else
@@ -159,7 +160,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 Helper.DumpToFile("fullDoc.xml", fullDoc);
                 Helper.DumpToFile("canonicalDoc.xml", canonicalDoc);
                 Helper.DumpToFile("docFromSecurity.xml", outputFromSecurity);
-                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, canonicalDoc, $"TestC14NInclusivePrefixes test variation #{count} failed"));
+                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, canonicalDoc), $"TestC14NInclusivePrefixes test variation #{count} failed");
             }
         }
 
@@ -246,7 +247,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
                         Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
                         Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
-                        Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
+                        Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
                     }
                 }
             }
@@ -299,7 +300,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 outputFromIndigo = canonicalStream.ToArray();
                 Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
                 Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
-                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
+                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
             }
 
             //TestC14NWriterWithManyAttributes
@@ -355,9 +356,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
             Helper.DumpToFile("nonCanonicalOutput.xml", nonCanonicalOutput);
 
-            Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
+            Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
             count++;
-            Assert.Equal(63, count);
+            Assert.Equal(params1.Inputs.Count * params2.Inputs.Count * params3.Inputs.Count + params4.Inputs.Count + 1, count);
         }
 
         private static byte[] StreamToByteArray(Stream stream)
