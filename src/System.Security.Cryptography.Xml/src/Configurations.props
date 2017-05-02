@@ -3,8 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
-      netfx;
-      uap-Windows_NT
+      netfx
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
