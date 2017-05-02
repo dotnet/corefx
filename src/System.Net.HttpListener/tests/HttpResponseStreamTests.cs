@@ -382,7 +382,6 @@ namespace System.Net.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Write_HeadersToClosedConnectionAsynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -401,8 +400,17 @@ namespace System.Net.Tests
                 Helpers.WaitForSocketShutdown(client);
 
                 // Writing to a disconnected client should fail.
-                await Assert.ThrowsAsync<HttpListenerException>(() => context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length));
-
+                if (!PlatformDetection.IsWindows && ignoreWriteExceptions)
+                {
+                    // Windows sends headers first, followed by content. If headers fail to send, then an exception is always thrown.
+                    // However, the managed implementation has already sent the headers by the time we run this test.
+                    // This means that if the content fails to send, an exception is only thrown if ignoreWriteExceptions == false.
+                    await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                }
+                else
+                {
+                    await Assert.ThrowsAsync<HttpListenerException>(() => context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length));
+                }
                 // Closing a response from a closed client if a writing has already failed should not fail.
                 context.Response.Close();
             }
@@ -411,7 +419,6 @@ namespace System.Net.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         public async Task Write_HeadersToClosedConnectionSynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
             const string Text = "Some-String";
@@ -429,8 +436,18 @@ namespace System.Net.Tests
                 // Disconnect the Socket from the HttpListener.
                 Helpers.WaitForSocketShutdown(client);
 
-                // Writing to, a closed connection should fail.
-                Assert.Throws<HttpListenerException>(() => context.Response.OutputStream.Write(buffer, 0, buffer.Length));
+                // Writing to a disconnected client should fail.
+                if (!PlatformDetection.IsWindows && ignoreWriteExceptions)
+                {
+                    // Windows sends headers first, followed by content. If headers fail to send, then an exception is always thrown.
+                    // However, the managed implementation has already sent the headers by the time we run this test.
+                    // This means that if the content fails to send, an exception is only thrown if ignoreWriteExceptions == false.
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                }
+                else
+                {
+                    Assert.Throws<HttpListenerException>(() => context.Response.OutputStream.Write(buffer, 0, buffer.Length));
+                }
                 
                 // Closing a response from a closed client if a writing has already failed should not fail.
                 context.Response.Close();
@@ -440,7 +457,6 @@ namespace System.Net.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
         public async Task Write_ContentToClosedConnectionAsynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
@@ -460,9 +476,7 @@ namespace System.Net.Tests
                 await context.Response.OutputStream.WriteAsync(buffer, 0, 1);
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                Helpers.WaitForSocketShutdown(client);
 
                 // Writing non-header content to a disconnected client should fail, only if IgnoreWriteExceptions is false.
                 if (ignoreWriteExceptions)
@@ -482,7 +496,6 @@ namespace System.Net.Tests
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(18128, platforms: TestPlatforms.AnyUnix)] // No exception thrown
         [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
         public async Task Write_ContentToClosedConnectionSynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
         {
@@ -502,9 +515,7 @@ namespace System.Net.Tests
                 context.Response.OutputStream.Write(buffer, 0, 1);
 
                 // Disconnect the Socket from the HttpListener.
-                client.Close();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                Helpers.WaitForSocketShutdown(client);
 
                 // Writing non-header content to a disconnected client should fail, only if IgnoreWriteExceptions is false.
                 if (ignoreWriteExceptions)
@@ -565,4 +576,3 @@ namespace System.Net.Tests
         }
     }
 }
-    
