@@ -39,9 +39,14 @@ namespace System.Diagnostics.Tests
             base.Dispose(disposing);
         }
 
+        public int SuccessFullExit()
+        {
+            return SuccessExitCode;
+        }
+
         protected Process CreateProcess(Func<int> method = null)
         {
-            Process p = RemoteInvoke(method ?? (() => SuccessExitCode), new RemoteInvokeOptions { Start = false }).Process;
+            Process p = RemoteInvoke(method ?? SuccessFullExit, new RemoteInvokeOptions { Start = false }).Process;
             lock (_processes)
             {
                 _processes.Add(p);
@@ -59,13 +64,15 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
+        public int ProcessWaitCallBack()
+        {
+            Thread.Sleep(WaitInMS);
+            return SuccessExitCode;
+        }
+
         protected Process CreateProcessLong()
         {
-            return CreateProcess(() =>
-            {
-                Thread.Sleep(WaitInMS);
-                return SuccessExitCode;
-            });
+            return CreateProcess(ProcessWaitCallBack);
         }
 
         protected void StartSleepKillWait(Process p)
