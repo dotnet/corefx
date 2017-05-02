@@ -154,7 +154,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetVolumeLabel_Returns_CorrectLabel()
         {
-            void doDriveCheck()
+            void DoDriveCheck()
             {
                 // Get Volume Label - valid drive
                 int serialNumber, maxFileNameLen, fileSystemFlags;
@@ -178,11 +178,11 @@ namespace System.IO.FileSystem.DriveInfoTests
             
             if (PlatformDetection.IsWinRT)
             {
-                Assert.Throws<UnauthorizedAccessException>(() => doDriveCheck());
+                Assert.Throws<UnauthorizedAccessException>(() => DoDriveCheck());
             }
             else 
             {
-                doDriveCheck();
+                DoDriveCheck();
             }
         }
 
