@@ -30,6 +30,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace System.Net
 {
@@ -140,7 +141,14 @@ namespace System.Net
             }
             else
             {
-                epl = new HttpEndPointListener(listener, addr, port, secure);
+                try
+                {
+                    epl = new HttpEndPointListener(listener, addr, port, secure);
+                }
+                catch (SocketException ex)
+                {
+                    throw new HttpListenerException(ex.ErrorCode, ex.Message);
+                }
                 p[port] = epl;
             }
 
