@@ -1408,6 +1408,7 @@ namespace System.Configuration.Internal
         public virtual string GetConfigPathFromLocationSubPath(string configPath, string locationSubPath) { throw null; }
         public virtual System.Type GetConfigType(string typeName, bool throwOnError) { throw null; }
         public virtual string GetConfigTypeName(System.Type t) { throw null; }
+        public virtual void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady) { permissionSet = default(System.Security.PermissionSet); isHostReady = default(bool); }
         public virtual string GetStreamName(string configPath) { throw null; }
         public virtual string GetStreamNameForConfigSource(string streamName, string configSource) { throw null; }
         public virtual object GetStreamVersion(string streamName) { throw null; }
@@ -1435,9 +1436,6 @@ namespace System.Configuration.Internal
         public virtual void VerifyDefinitionAllowed(string configPath, System.Configuration.ConfigurationAllowDefinition allowDefinition, System.Configuration.ConfigurationAllowExeDefinition allowExeDefinition, System.Configuration.Internal.IConfigErrorInfo errorInfo) { }
         public virtual void WriteCompleted(string streamName, bool success, object writeContext) { }
         public virtual void WriteCompleted(string streamName, bool success, object writeContext, bool assertPermissions) { }
-#if netfx
-        public virtual void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady) { permissionSet = default(System.Security.PermissionSet); isHostReady = default(bool); }
-#endif // netfx
     }
     public partial interface IConfigErrorInfo
     {
@@ -1497,6 +1495,7 @@ namespace System.Configuration.Internal
         string GetConfigPathFromLocationSubPath(string configPath, string locationSubPath);
         System.Type GetConfigType(string typeName, bool throwOnError);
         string GetConfigTypeName(System.Type t);
+        void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady);
         string GetStreamName(string configPath);
         string GetStreamNameForConfigSource(string streamName, string configSource);
         object GetStreamVersion(string streamName);
@@ -1566,12 +1565,6 @@ namespace System.Configuration.Internal
     }
     public delegate void InternalConfigEventHandler(object sender, System.Configuration.Internal.InternalConfigEventArgs e);
     public delegate void StreamChangeCallback(string streamName);
-#if netfx
-    public partial interface IInternalConfigHost
-    {
-        void GetRestrictedPermissions(System.Configuration.Internal.IInternalConfigRecord configRecord, out System.Security.PermissionSet permissionSet, out bool isHostReady);
-    }
-#endif // netfx
 }
 namespace System.Configuration.Provider
 {

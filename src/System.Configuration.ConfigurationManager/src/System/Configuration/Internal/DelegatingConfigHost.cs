@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Security;
 
 namespace System.Configuration.Internal
 {
@@ -63,6 +64,10 @@ namespace System.Configuration.Internal
         public virtual bool IsSecondaryRoot(string configPath)
         {
             return Host.IsSecondaryRoot(configPath);
+        }
+
+        public virtual void GetRestrictedPermissions(IInternalConfigRecord configRecord, out PermissionSet permissionSet, out bool isHostReady) {
+            Host.GetRestrictedPermissions(configRecord, out permissionSet, out isHostReady);
         }
 
         public virtual string GetStreamName(string configPath)
