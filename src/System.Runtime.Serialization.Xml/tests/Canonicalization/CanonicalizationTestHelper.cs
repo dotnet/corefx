@@ -14,16 +14,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
         {
             Binary,
             Text,
-            MTOM,
             WebData,
             WrappedWebData
         };
-
-        public static ReaderWriterType Binary = ReaderWriterType.Binary;
-        public static ReaderWriterType Text = ReaderWriterType.Text;
-        public static ReaderWriterType MTOM = ReaderWriterType.MTOM;
-        public static ReaderWriterType WebData = ReaderWriterType.WebData;
-        public static ReaderWriterType WrappedWebData = ReaderWriterType.WrappedWebData;
 
         public static XmlReader CreateXmlReader(ReaderWriterType rwType, byte[] buffer, Encoding encoding, XmlDictionaryReaderQuotas quotas, IXmlDictionary dictionary, OnXmlDictionaryReaderClose onClose)
         {
@@ -39,33 +32,34 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 case ReaderWriterType.WebData:
                     if (quotas != XmlDictionaryReaderQuotas.Max)
                     {
-                        throw new Exception("Cannot enforce quotas on the Webdata readers!");
+                        throw new InvalidOperationException("Cannot enforce quotas on the Webdata readers!");
                     }
+
                     if (onClose != null)
                     {
-                        throw new Exception("Webdata readers do not support the OnClose callback!");
+                        throw new InvalidOperationException("Webdata readers do not support the OnClose callback!");
                     }
+
                     XmlParserContext context = new XmlParserContext(null, null, null, XmlSpace.Default, encoding);
                     result = XmlReader.Create(new MemoryStream(buffer), new XmlReaderSettings(), context);
-                    break;
-                case ReaderWriterType.MTOM:
-                    result = XmlDictionaryReader.CreateMtomReader(buffer, 0, buffer.Length, new Encoding[] { encoding }, null, quotas, int.MaxValue, onClose);
                     break;
                 case ReaderWriterType.WrappedWebData:
                     if (quotas != XmlDictionaryReaderQuotas.Max)
                     {
-                        throw new Exception("There is no overload to create the webdata readers with quotas!");
+                        throw new InvalidOperationException("There is no overload to create the webdata readers with quotas!");
                     }
+
                     if (onClose != null)
                     {
-                        throw new Exception("Webdata readers do not support the OnClose callback!");
+                        throw new InvalidOperationException("Webdata readers do not support the OnClose callback!");
                     }
+
                     XmlParserContext context2 = new XmlParserContext(null, null, null, XmlSpace.Default, encoding);
                     result = XmlReader.Create(new MemoryStream(buffer), new XmlReaderSettings(), context2);
                     result = XmlDictionaryReader.CreateDictionaryReader(result);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("rwType");
+                    throw new ArgumentOutOfRangeException(nameof(rwType));
             }
             return result;
         }
@@ -81,28 +75,28 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 case ReaderWriterType.Text:
                     result = XmlDictionaryReader.CreateTextReader(stream, encoding, quotas, onClose);
                     break;
-                case ReaderWriterType.MTOM:
-                    result = XmlDictionaryReader.CreateMtomReader(stream, new Encoding[] { encoding }, null, quotas, int.MaxValue, onClose);
-                    break;
                 case ReaderWriterType.WebData:
                 case ReaderWriterType.WrappedWebData:
                     if (quotas != XmlDictionaryReaderQuotas.Max)
                     {
-                        throw new Exception("Webdata readers do not support quotas!");
+                        throw new InvalidOperationException("Webdata readers do not support quotas!");
                     }
+
                     if (onClose != null)
                     {
-                        throw new Exception("Webdata readers do not support the OnClose callback!");
+                        throw new InvalidOperationException("Webdata readers do not support the OnClose callback!");
                     }
+
                     XmlParserContext context = new XmlParserContext(null, null, null, XmlSpace.Default, encoding);
                     result = XmlReader.Create(stream, new XmlReaderSettings(), context);
                     if (rwType == ReaderWriterType.WrappedWebData)
                     {
                         result = XmlDictionaryReader.CreateDictionaryReader(result);
                     }
+
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("rwType");
+                    throw new ArgumentOutOfRangeException(nameof(rwType));
             }
             return result;
         }
@@ -153,9 +147,6 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 case ReaderWriterType.Text:
                     result = XmlDictionaryWriter.CreateTextWriter(stream, encoding);
                     break;
-                case ReaderWriterType.MTOM:
-                    result = XmlDictionaryWriter.CreateMtomWriter(stream, encoding, int.MaxValue, "myStartInfo", null, null, true, false);
-                    break;
                 case ReaderWriterType.WebData:
                     XmlWriterSettings settings = new XmlWriterSettings();
                     settings.Encoding = encoding;
@@ -168,7 +159,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                     result = XmlDictionaryWriter.CreateDictionaryWriter(result);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("rwType");
+                    throw new ArgumentOutOfRangeException(nameof(rwType));
             }
             return result;
         }
@@ -176,23 +167,11 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
     public class Helper
     {
-        public static void CompareArrays(byte[] array1, int offset1, byte[] array2, int offset2, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                if (array1[i + offset1] != array2[i + offset2])
-                {
-                    throw new Exception(String.Format("Error, arrays different at position {0} (array1[{1}]={2}, array2[{3}]={4})",
-                        i, i + offset1, array1[i + offset1], i + offset2, array2[i + offset2]));
-                }
-            }
-        }
-
         public static void DumpToFile(string fileName, byte[] buffer, int offset, int count)
         {
             try
             {
-                FileStream fs = File.Create(fileName);
+                FileStream fs = File.Create(Path.Combine(Path.GetTempPath(), fileName));
                 fs.Write(buffer, offset, count);
                 fs.Close();
             }

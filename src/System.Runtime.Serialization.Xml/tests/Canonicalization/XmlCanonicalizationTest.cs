@@ -159,15 +159,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 Helper.DumpToFile("fullDoc.xml", fullDoc);
                 Helper.DumpToFile("canonicalDoc.xml", canonicalDoc);
                 Helper.DumpToFile("docFromSecurity.xml", outputFromSecurity);
-
-                try
-                {
-                    Helper.CompareArrays(outputFromSecurity, 0, canonicalDoc, 0, canonicalDoc.Length);
-                }
-                catch (Exception ex)
-                {
-                    Assert.True(false, $"TestC14NInclusivePrefixes variation #{count} fail with error {ex.Message}");
-                }
+                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, canonicalDoc, $"TestC14NInclusivePrefixes test variation #{count} failed"));
             }
         }
 
@@ -254,8 +246,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
                         Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
                         Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
-
-                        Helper.CompareArrays(outputFromSecurity, 0, outputFromIndigo, 0, outputFromIndigo.Length);
+                        Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
                     }
                 }
             }
@@ -308,7 +299,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 outputFromIndigo = canonicalStream.ToArray();
                 Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
                 Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
-                Helper.CompareArrays(outputFromSecurity, 0, outputFromIndigo, 0, outputFromIndigo.Length);
+                Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
             }
 
             //TestC14NWriterWithManyAttributes
@@ -327,6 +318,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                     prefix = "p" + (prefixIndex++);
                     namespaceUri = "http://namespace_" + i;
                 }
+
                 string localName = "attr" + i;
                 string value = "attrValue" + i;
                 if (prefix == null)
@@ -363,7 +355,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
             Helper.DumpToFile("nonCanonicalOutput.xml", nonCanonicalOutput);
 
-            Helper.CompareArrays(outputFromSecurity, 0, outputFromIndigo, 0, outputFromIndigo.Length);
+            Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo, $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed"));
             count++;
             Assert.Equal(63, count);
         }
@@ -406,10 +398,12 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                             } while (r.MoveToNextAttribute());
                             r.MoveToElement();
                         }
+
                         if (r.IsEmptyElement)
                         {
                             w.WriteEndElement();
                         }
+
                         break;
                     case XmlNodeType.CDATA:
                         w.WriteCData(r.Value);
