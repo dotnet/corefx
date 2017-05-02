@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
-using System.Threading;
 
 namespace System.Security.Cryptography
 {
@@ -41,16 +40,7 @@ namespace System.Security.Cryptography
         public static bool AllowOnlyFipsAlgorithms => false;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject {
-            get {
-                if (s_InternalSyncObject == null) {
-                    Object o = new Object();
-                    Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
-                }
-                return s_InternalSyncObject;
-            }
-        }
+        private static Object s_InternalSyncObject = new Object();
 
         private static Dictionary<string, string> DefaultOidHT
         {
@@ -309,15 +299,19 @@ namespace System.Security.Cryptography
  
             // Pre-check the algorithm names for validity so that we don't add a few of the names and then
             // throw an exception if we find an invalid name partway through the list.
-            foreach (string name in algorithmNames) {
-                if (String.IsNullOrEmpty(name)) {
+            foreach (string name in algorithmNames)
+            {
+                if (String.IsNullOrEmpty(name))
+                {
                     throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
                 }
             }
  
             // Everything looks valid, so we're safe to take the table lock and add the name mappings.
-            lock (InternalSyncObject) {
-                foreach (string name in algorithmNames) {
+            lock (s_InternalSyncObject)
+            {
+                foreach (string name in algorithmNames)
+                {
                     appNameHT[name] = algorithm;
                 }
             }
@@ -330,9 +324,11 @@ namespace System.Security.Cryptography
 
             Type retvalType = null;
             
-            // Check to see if we have an applicaiton defined mapping
-            lock (InternalSyncObject) {
-                if (!appNameHT.TryGetValue(name, out retvalType)) {
+            // Check to see if we have an application defined mapping
+            lock (s_InternalSyncObject)
+            {
+                if (!appNameHT.TryGetValue(name, out retvalType))
+                {
                     retvalType = null;
                 }
             }
@@ -443,24 +439,28 @@ namespace System.Security.Cryptography
         public static void AddOID(string oid, params string[] names)
         {
             if (oid == null)
-                throw new ArgumentNullException("oid");
+                throw new ArgumentNullException(nameof(oid));
             if (names == null)
-                throw new ArgumentNullException("names");
+                throw new ArgumentNullException(nameof(names));
  
             string[] oidNames = new string[names.Length];
             Array.Copy(names, oidNames, oidNames.Length);
  
             // Pre-check the input names for validity, so that we don't add a few of the names and throw an
             // exception if an invalid name is found further down the array. 
-            foreach (string name in oidNames) {
-                if (String.IsNullOrEmpty(name)) {
+            foreach (string name in oidNames)
+            {
+                if (String.IsNullOrEmpty(name))
+                {
                     throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
                 }
             }
  
             // Everything is valid, so we're good to lock the hash table and add the application mappings
-            lock (InternalSyncObject) {
-                foreach (string name in oidNames) {
+            lock (s_InternalSyncObject)
+            {
+                foreach (string name in oidNames)
+                {
                     appOidHT[name] = oid;
                 }
             }
@@ -474,8 +474,10 @@ namespace System.Security.Cryptography
             string oidName;
             
             // Check to see if we have an application defined mapping
-            lock (InternalSyncObject) {
-                if (!appOidHT.TryGetValue(name, out oidName)) {
+            lock (s_InternalSyncObject)
+            {
+                if (!appOidHT.TryGetValue(name, out oidName))
+                {
                     oidName = null;
                 }
             }
