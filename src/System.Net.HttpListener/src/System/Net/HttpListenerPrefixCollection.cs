@@ -39,6 +39,11 @@ namespace System.Net
         public void CopyTo(Array array, int offset)
         {
             _httpListener.CheckDisposed();
+            // Preserve compatability with full .NET Framework.
+            if (array == null)
+            {
+                throw new NullReferenceException();
+            }
             if (Count > array.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(array), SR.net_array_too_small);
@@ -57,6 +62,11 @@ namespace System.Net
         public void CopyTo(string[] array, int offset)
         {
             _httpListener.CheckDisposed();
+            // Preserve compatability with full .NET Framework.
+            if (array == null)
+            {
+                throw new NullReferenceException();
+            }
             if (Count > array.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(array), SR.net_array_too_small);
