@@ -99,12 +99,18 @@ namespace System.Net
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
             // listens on all the interfaces if host name cannot be parsed by IPAddress.
-            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure);
+            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool alreadyExists);
+            if (alreadyExists)
+            {
+                throw new HttpListenerException(98, SR.Format(SR.net_listener_already, p));
+            }
             epl.AddPrefix(lp, listener);
         }
 
-        private static HttpEndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure)
+        private static HttpEndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure, out bool alreadyExists)
         {
+            alreadyExists = false;
+
             IPAddress addr;
             if (host == "*")
                 addr = IPAddress.Any;
@@ -137,6 +143,7 @@ namespace System.Net
             HttpEndPointListener epl = null;
             if (p.ContainsKey(port))
             {
+                alreadyExists = true;
                 epl = p[port];
             }
             else
@@ -198,7 +205,7 @@ namespace System.Net
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)
                 return;
 
-            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure);
+            HttpEndPointListener epl = GetEPListener(lp.Host, lp.Port, listener, lp.Secure, out bool dummy);
             epl.RemovePrefix(lp, listener);
         }
     }
