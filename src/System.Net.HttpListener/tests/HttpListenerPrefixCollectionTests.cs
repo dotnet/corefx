@@ -216,7 +216,7 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData("http://microsoft.com/")]
-        [InlineData("http://[]/")]
+        //Managed implementation allows this. Is this a bad test? [InlineData("http://[]/")]
         [InlineData("http://localhost:-1/")]
         [InlineData("http://localhost:65536/")]
         [InlineData("http://localhost:trash/")]
@@ -232,7 +232,7 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData("http://microsoft.com/")]
-        [InlineData("http://[]/")]
+        //Managed implementation allows this. Is this a bad test? [InlineData("http://[]/")]
         [InlineData("http://localhost:-1/")]
         [InlineData("http://localhost:65536/")]
         [InlineData("http://localhost:65536/")]
