@@ -66,7 +66,7 @@ namespace System.Reflection.PortableExecutable
         /// <exception cref="ArgumentException"><paramref name="pdbPath"/> contains NUL character.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="age"/> is less than 1.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="portablePdbVersion"/> is smaller than 0x0100.</exception>
-        public void AddCodeViewEntry(
+        internal void AddCodeViewEntry(
             string pdbPath,
             BlobContentId pdbContentId,
             ushort portablePdbVersion,
