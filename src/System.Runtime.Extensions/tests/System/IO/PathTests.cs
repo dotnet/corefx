@@ -512,9 +512,17 @@ namespace System.IO.Tests
         [InlineData(@"\ .\")]
         public static void GetFullPath_Windows_LegacyArgumentExceptionPaths(string path)
         {
-            // These paths are legitimate Windows paths that can be created without extended syntax.
-            // We now allow them through.
-            Path.GetFullPath(path);
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // We didn't allow these paths on < 4.6.2
+                Assert.Throws<ArgumentException>(() => Path.GetFullPath(path));
+            }
+            else
+            {
+                // These paths are legitimate Windows paths that can be created without extended syntax.
+                // We now allow them through.
+                Path.GetFullPath(path);
+            }
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests MaxPathNotTooLong on Windows
