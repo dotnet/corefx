@@ -61,9 +61,6 @@ namespace System.ConfigurationTests
             StringValidatorAttribute attribute = new StringValidatorAttribute();
             attribute.InvalidCharacters = "_-";
             Assert.Equal("_-", attribute.InvalidCharacters);
-
         }
-
-        
     }
 }
