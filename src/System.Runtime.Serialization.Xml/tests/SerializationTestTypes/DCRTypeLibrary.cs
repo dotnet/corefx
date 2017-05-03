@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace SerializationTestTypes
@@ -165,6 +167,31 @@ namespace SerializationTestTypes
         {
             get { return dataContractResolverTypes; }
             set { dataContractResolverTypes = value; }
+        }
+    }
+
+    [DataContract]
+    public class DefaultCollections
+    {
+        [DataMember]
+        ArrayList arrayList = new ArrayList() { new Person() };
+        [DataMember]
+        Dictionary<int, object> dictionary = new Dictionary<int, object>() { { 001, new CharClass() } };
+        [DataMember]
+        Hashtable hashtable = new Hashtable() { { "one", new Version1() } };
+        [DataMember]
+        object[] singleDimArray = new object[] { new Employee() };
+    }
+
+    [DataContract(Name = "Car", Namespace = "TestingVersionTolerance")]
+    public class Version1
+    {
+        [DataMember]
+        public object make;
+
+        public Version1()
+        {
+            make = "Chevrolet";
         }
     }
 }
