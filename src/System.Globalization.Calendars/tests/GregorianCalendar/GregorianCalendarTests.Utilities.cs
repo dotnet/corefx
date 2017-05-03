@@ -9,7 +9,7 @@ namespace System.Globalization.Tests
         [ThreadStatic]
         private static RandomDataGenerator s_randomDataGenerator;
 
-        private static RandomDataGenerator RDG
+        private static RandomDataGenerator RandomDataGenerator
         {
             get
             {
@@ -35,7 +35,7 @@ namespace System.Globalization.Tests
         {
             int maxYear = s_calendar.MaxSupportedDateTime.Year;
             int minYear = s_calendar.MinSupportedDateTime.Year;
-            return minYear + RDG.GetInt32(-55) % (maxYear + 1 - minYear);
+            return minYear + RandomDataGenerator.GetInt32(-55) % (maxYear + 1 - minYear);
         }
 
         public static int RandomLeapYear()
@@ -64,7 +64,7 @@ namespace System.Globalization.Tests
             return randomYear;
         }
 
-        public static int RandomMonth() => RDG.GetInt32(-55) % 12 + 1;
+        public static int RandomMonth() => RandomDataGenerator.GetInt32(-55) % 12 + 1;
 
         public static int RandomMonthNotFebruary()
         {
@@ -76,9 +76,9 @@ namespace System.Globalization.Tests
             return randomMonthNotFebruary;
         }
 
-        public static int RandomLeapYearDay(int month) => RDG.GetInt32(-55) % s_daysInMonthInLeapYear[month] + 1;
+        public static int RandomLeapYearDay(int month) => RandomDataGenerator.GetInt32(-55) % s_daysInMonthInLeapYear[month] + 1;
 
-        public static int RandomCommonYearDay(int month) => RDG.GetInt32(-55) % s_daysInMonthInCommonYear[month] + 1;
+        public static int RandomCommonYearDay(int month) => RandomDataGenerator.GetInt32(-55) % s_daysInMonthInCommonYear[month] + 1;
 
         public static int RandomDay(int year, int month)
         {

@@ -9,7 +9,7 @@ namespace System.Globalization.Tests
         [ThreadStatic]
         private static RandomDataGenerator s_randomDataGenerator;
 
-        private static RandomDataGenerator RDG
+        private static RandomDataGenerator RandomDataGenerator
         {
             get
             {
@@ -36,20 +36,20 @@ namespace System.Globalization.Tests
             TaiwanCalendar calendar = new TaiwanCalendar();
             int maxYear = calendar.MaxSupportedDateTime.Year;
             int minYear = calendar.MinSupportedDateTime.Year;
-            return minYear + RDG.GetInt32(-55) % (maxYear - 1911 + 1 - minYear);
+            return minYear + RandomDataGenerator.GetInt32(-55) % (maxYear - 1911 + 1 - minYear);
         }
 
-        public static int RandomMonth() => RDG.GetInt32(-55) % 12 + 1;
+        public static int RandomMonth() => RandomDataGenerator.GetInt32(-55) % 12 + 1;
 
         public static int RandomDay(int year, int month)
         {
             if (new TaiwanCalendar().IsLeapYear(year))
             {
-                return RDG.GetInt32(-55) % s_daysPerMonthLeapYear[month] + 1;
+                return RandomDataGenerator.GetInt32(-55) % s_daysPerMonthLeapYear[month] + 1;
             }
             else
             {
-                return RDG.GetInt32(-55) % s_daysPerMonthCommonYear[month] + 1;
+                return RandomDataGenerator.GetInt32(-55) % s_daysPerMonthCommonYear[month] + 1;
             }
         }
 
