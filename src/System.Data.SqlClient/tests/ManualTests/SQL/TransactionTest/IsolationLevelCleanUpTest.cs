@@ -10,8 +10,6 @@ namespace SQL.TransactionTest
         [CheckConnStrSetupFact]
         public static void TestIsolationLevelCleanUpOnClose()
         {
-            Console.WriteLine("TestIsolationLevelCleanUpOnClose Test");
-
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
             builder.Pooling = true;
 
