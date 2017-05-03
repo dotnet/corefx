@@ -64,7 +64,7 @@ namespace System.Configuration.Internal
         {
             return Host.IsSecondaryRoot(configPath);
         }
-        
+
         public virtual string GetStreamName(string configPath)
         {
             return Host.GetStreamName(configPath);
