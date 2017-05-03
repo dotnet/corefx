@@ -245,6 +245,7 @@ namespace System.IO.Tests
         [InlineData(@"[:\\")]       // 091 = [     090 = Z
         [InlineData(@"`:\foo")]    // 096 = `     097 = a
         [InlineData(@"{:\\")]       // 123 = {     122 = z
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug fixed on Core where it would return true if the first char is not a drive letter followed by a VolumeSeperatorChar coreclr/10297")]
         public static void IsPathRooted_Windows_Invalid(string value)
         {
             Assert.False(Path.IsPathRooted(value));
