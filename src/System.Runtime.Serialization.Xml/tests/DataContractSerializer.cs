@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using SerializationTestTypes;
 using SerializationTypes;
 using System;
 using System.Collections;
@@ -3031,7 +3030,7 @@ public static partial class DataContractSerializerTests
     {
         var dataContractSerializerSettings = new DataContractSerializerSettings()
         {
-            DataContractResolver = new VerySimpleResolver(),
+            DataContractResolver = new SerializationTestTypes.VerySimpleResolver(),
         };
 
         string coreAssemblyName = typeof(System.Delegate).Assembly.FullName;
