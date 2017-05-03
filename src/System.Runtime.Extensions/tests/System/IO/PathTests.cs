@@ -553,15 +553,31 @@ namespace System.IO.Tests
             // (such as "md ...\"). We used to filter these out, but now allow them to prevent apps from
             // being blocked when they hit these paths.
             string curDir = Directory.GetCurrentDirectory();
-            Assert.NotEqual(
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
-            Assert.NotEqual(
-                Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
-            Assert.NotEqual(
-                Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // Legacy path Path.GetFullePath() ignores . when there is less or more that two, when there is .. in the path it returns one directory up.
+                Assert.Equal(
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
+                Assert.Equal(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
+                Assert.Equal(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            }
+            else
+            {
+                Assert.NotEqual(
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
+                Assert.NotEqual(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
+                Assert.NotEqual(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            }
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
