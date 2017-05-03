@@ -16,8 +16,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             !PlatformDetection.IsFedora24 &&
             !PlatformDetection.IsFedora25 &&
             !PlatformDetection.IsFedora26 &&
-            !PlatformDetection.IsUbuntu1604 &&
-            !PlatformDetection.IsUbuntu1610;
+            (!PlatformDetection.IsUbuntu || PlatformDetection.IsUbuntu1404);
 
         private static bool TrustsMicrosoftDotComRoot
         {
