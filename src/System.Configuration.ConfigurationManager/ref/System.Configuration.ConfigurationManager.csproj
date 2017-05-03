@@ -13,9 +13,6 @@
     <SuppressPackageTargetFrameworkCompatibility Include="uap10.1" />
     <Compile Include="System.Configuration.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)'  != 'true'">
-    <Reference Include="System.Security.Permissions" />
-  </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)'  == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />

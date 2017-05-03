@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
 using System.Runtime.InteropServices;
 
 namespace System.Configuration.Internal
@@ -37,8 +36,6 @@ namespace System.Configuration.Internal
         void RequireCompleteInit(IInternalConfigRecord configRecord);
 
         bool IsSecondaryRoot(string configPath);
-
-        void GetRestrictedPermissions(IInternalConfigRecord configRecord, out PermissionSet permissionSet, out bool isHostReady);
 
         string GetStreamName(string configPath);
 
