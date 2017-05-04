@@ -175,8 +175,7 @@ namespace System.IO.Tests
         public static void GetPathRoot()
         {
             Assert.Null(Path.GetPathRoot(null));
-            Assert.Throws<ArgumentException>(() => Path.GetPathRoot(string.Empty));
-            Assert.Throws<ArgumentException>(() => Path.GetPathRoot(new string(' ', 265)));
+            Assert.Equal(string.Empty, Path.GetPathRoot(string.Empty));
 
             string cwd = Directory.GetCurrentDirectory();
             Assert.Equal(cwd.Substring(0, cwd.IndexOf(Path.DirectorySeparatorChar) + 1), Path.GetPathRoot(cwd));
@@ -225,6 +224,7 @@ namespace System.IO.Tests
         [InlineData(@"C://foo3", @"C:\")]
         public static void GetPathRoot_Windows(string value, string expected)
         {
+            Assert.False(Path.IsPathRooted(null));
             Assert.True(Path.IsPathRooted(value));
             Assert.Equal(expected, Path.GetPathRoot(value));
         }
@@ -233,16 +233,11 @@ namespace System.IO.Tests
         [Fact]
         public static void GetPathRoot_Unix()
         {
+            Assert.False(Path.IsPathRooted(null));
             // slashes are normal filename characters
             string uncPath = @"\\test\unc\path\to\something";
             Assert.False(Path.IsPathRooted(uncPath));
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
-        }
-
-        [Fact]
-        public static void IsPathRooted_NullAsPath_ReturnsFalse()
-        {
-            Assert.False(Path.IsPathRooted(null));
         }
 
         // Testing invalid drive letters !(a-zA-Z)
