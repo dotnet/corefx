@@ -1256,8 +1256,12 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.False(sign.CheckSignature(new HMACSHA256(badKey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA256(badKey)));
+            }
+
             Assert.True(sign.CheckSignature(new HMACSHA256(emptyHmacKey)));
         }
 
@@ -1288,8 +1292,12 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.False(sign.CheckSignature(new HMACSHA512(badKey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA512(badKey)));
+            }
+
             Assert.True(sign.CheckSignature(new HMACSHA512(emptyHmacKey)));
         }
 
@@ -1323,8 +1331,12 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.False(sign.CheckSignature(new HMACSHA384(badKey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACSHA384(badKey)));
+            }
+
             Assert.True(sign.CheckSignature(new HMACSHA384(emptyHmacKey)));
         }
 
@@ -1358,8 +1370,12 @@ namespace System.Security.Cryptography.Xml.Tests
             SignedXml sign = new SignedXml(doc);
             sign.LoadXml(doc.DocumentElement["Signature"]);
 
-            // verify MS-generated signature
-            Assert.False(sign.CheckSignature(new HMACMD5(badKey)));
+            // https://github.com/dotnet/corefx/issues/18690
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Assert.False(sign.CheckSignature(new HMACMD5(badKey)));
+            }
+
             Assert.True(sign.CheckSignature(new HMACMD5(emptyHmacKey)));
         }
 
