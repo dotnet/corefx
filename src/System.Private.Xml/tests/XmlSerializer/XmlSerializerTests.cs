@@ -1655,14 +1655,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void Xml_TypeWithTimeSpanProperty()
     {
-        var obj = new TypeWithTimeSpanProperty { TimeSpanProperty = TimeSpan.FromMilliseconds(1) };
-        var deserializedObj = SerializeAndDeserialize(obj,
+        if (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx470OrNewer())
+        {
+            var obj = new TypeWithTimeSpanProperty { TimeSpanProperty = TimeSpan.FromMilliseconds(1) };
+            var deserializedObj = SerializeAndDeserialize(obj,
 @"<?xml version=""1.0"" encoding=""utf-16""?>
 <TypeWithTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <TimeSpanProperty>PT0.001S</TimeSpanProperty>
 </TypeWithTimeSpanProperty>");
-        if (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx470OrNewer())
-        {
             Assert.StrictEqual(obj.TimeSpanProperty, deserializedObj.TimeSpanProperty);
         }
     }
