@@ -175,7 +175,8 @@ namespace System.IO.Tests
         public static void GetPathRoot()
         {
             Assert.Null(Path.GetPathRoot(null));
-            Assert.Equal(string.Empty, Path.GetPathRoot(string.Empty));
+            Assert.Throws<ArgumentException>(() => Path.GetPathRoot(string.Empty));
+            Assert.Throws<ArgumentException>(() => Path.GetPathRoot(new string(' ', 265)));
 
             string cwd = Directory.GetCurrentDirectory();
             Assert.Equal(cwd.Substring(0, cwd.IndexOf(Path.DirectorySeparatorChar) + 1), Path.GetPathRoot(cwd));
@@ -237,10 +238,18 @@ namespace System.IO.Tests
             Assert.False(Path.IsPathRooted(uncPath));
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
         }
-        
+
+        [Fact]
+        public static void IsPathRooted_NullAsPath_ReturnsFalse()
+        {
+            Assert.False(Path.IsPathRooted(null));
+        }
+
         // Testing invalid drive letters !(a-zA-Z)
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
         [InlineData(@"@:\foo")]    // 064 = @     065 = A
         [InlineData(@"[:\\")]       // 091 = [     090 = Z
         [InlineData(@"`:\foo")]    // 096 = `     097 = a
