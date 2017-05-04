@@ -224,7 +224,6 @@ namespace System.IO.Tests
         [InlineData(@"C://foo3", @"C:\")]
         public static void GetPathRoot_Windows(string value, string expected)
         {
-            Assert.False(Path.IsPathRooted(null));
             Assert.True(Path.IsPathRooted(value));
             Assert.Equal(expected, Path.GetPathRoot(value));
         }
@@ -233,11 +232,16 @@ namespace System.IO.Tests
         [Fact]
         public static void GetPathRoot_Unix()
         {
-            Assert.False(Path.IsPathRooted(null));
             // slashes are normal filename characters
             string uncPath = @"\\test\unc\path\to\something";
             Assert.False(Path.IsPathRooted(uncPath));
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
+        }
+
+        [Fact]
+        public static void IsPathRooted()
+        {
+            Assert.False(Path.IsPathRooted(null));
         }
 
         // Testing invalid drive letters !(a-zA-Z)
