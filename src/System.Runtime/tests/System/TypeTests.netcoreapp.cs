@@ -36,5 +36,42 @@ namespace System.Tests
         {
             Assert.Equal(expected, type.IsSZArray);
         }
+
+        private static IEnumerable<object[]> VariableBoundArrayOrNotTypes()
+        {
+            // Not arrays
+            yield return new object[] { typeof(void), false };
+            yield return new object[] { typeof(int), false };
+            yield return new object[] { typeof(int[]).MakeByRefType(), false };
+            yield return new object[] { typeof(TypeTests), false };
+            yield return new object[] { Type.GetType("System.Int32"), false };
+            yield return new object[] { typeof(Outside<int>.Inside<string>), false };
+
+            // Arrays, but SZ arrays
+            yield return new object[] { Type.GetType("System.Int32[]"), false };
+            yield return new object[] { typeof(int[]), false };
+            yield return new object[] { typeof(string[]), false };
+            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { 0 }).GetType(), false };
+            yield return new object[] { typeof(int[][]), false };
+            yield return new object[] { typeof(int).MakeArrayType(), false };
+            yield return new object[] { typeof(int).MakeArrayType().MakeArrayType(), false };
+            yield return new object[] { typeof(Outside<int>.Inside<string>[]), false };
+
+            // Variable bound arrays
+            yield return new object[] { typeof(int[,]), true };
+            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { -1 }).GetType(), true };
+            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { 1 }).GetType(), true };
+            yield return new object[] { typeof(int).MakeArrayType(1), true };
+            yield return new object[] { typeof(int).MakeArrayType(2), true };
+            yield return new object[] { typeof(Outside<int>.Inside<string>[,]), true };
+            yield return new object[] { Array.CreateInstance(typeof(Outside<int>.Inside<string>), new[] { 2 }, new[] { -1 }).GetType(), true };
+            yield return new object[] { Type.GetType("System.Int32[*]"), true };
+        }
+
+        [Theory, MemberData(nameof(VariableBoundArrayOrNotTypes))]
+        public void IsVariableBoundArray(Type type, bool expected)
+        {
+            Assert.Equal(expected, type.IsVariableBoundArray);
+        }
     }
 }

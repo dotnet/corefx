@@ -2634,6 +2634,7 @@ namespace System
         public virtual bool IsSerializable { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
         public virtual bool IsSZArray { get { throw null; } }
+        public bool IsVariableBoundArray { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public bool IsVisible { get { throw null; } }
