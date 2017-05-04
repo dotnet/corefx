@@ -238,17 +238,18 @@ namespace System.IO.Tests
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
         }
 
-        [Fact]
-        public static void IsPathRooted()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public static void IsPathRooted(string path)
         {
-            Assert.False(Path.IsPathRooted(null));
+            Assert.False(Path.IsPathRooted(path));
         }
 
         // Testing invalid drive letters !(a-zA-Z)
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
         [InlineData(@"@:\foo")]    // 064 = @     065 = A
         [InlineData(@"[:\\")]       // 091 = [     090 = Z
         [InlineData(@"`:\foo")]    // 096 = `     097 = a
