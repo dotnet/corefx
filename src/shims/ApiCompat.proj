@@ -20,7 +20,7 @@
     <ApiCompatImplementationDirs Condition="$(TargetGroup.StartsWith('uap'))">$(RuntimePath),$(GenFacadesOutputPath)</ApiCompatImplementationDirs>
     <!-- Set to true to build this project -->
     <!-- Separate property otherwise /p:BaselineApiCompat=true would force it to run even for non-UAP -->
-    <BaselineApiCompat>false</BaselineApiCompat>
+    <BaselineApiCompat Condition="'$(BaselineApiCompat)' == ''">false</BaselineApiCompat>
     <_RunApiCompat>$(BaselineApiCompat)</_RunApiCompat>
     <!-- Disable running apicompat for uap scenarios because the RuntimePath is not correctly setup in BuildAllConfigurations mode -->
     <_RunApiCompat Condition="'$(BuildAllConfigurations)' == 'true' and $(TargetGroup.StartsWith('uap'))">false</_RunApiCompat>
