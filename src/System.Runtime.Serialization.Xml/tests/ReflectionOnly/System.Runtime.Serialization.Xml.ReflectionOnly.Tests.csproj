@@ -59,6 +59,9 @@
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InheritenceCases.cs">
       <Link>SerializationTestTypes\InheritenceCases.cs</Link>
     </Compile>
+	<Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InheritenceObjectRef.cs">
+      <Link>SerializationTestTypes\InheritenceObjectRef.cs</Link>
+    </Compile>
     <Compile Include="$(TestSourceFolder)..\SerializationTestTypes\InstanceCreator.cs">
       <Link>SerializationTestTypes\InstanceCreator.cs</Link>
     </Compile>
