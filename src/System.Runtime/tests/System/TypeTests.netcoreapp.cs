@@ -18,7 +18,7 @@ namespace System.Tests
             Type.GetTypeFromCLSID(default(Guid)),
             new object().GetType().GetType()
         };
-        
+
         [Fact]
         public void IsSZArray_FalseForNonArrayTypes()
         {
@@ -47,6 +47,25 @@ namespace System.Tests
         }
 
         [Fact]
+        public void IsSZArray_FalseForNonArrayByRefType()
+        {
+            Assert.False(typeof(int).MakeByRefType().IsSZArray);
+        }
+
+        [Fact]
+        public void IsSZArray_FalseForByRefSZArrayType()
+        {
+            Assert.False(typeof(int[]).MakeByRefType().IsSZArray);
+        }
+
+
+        [Fact]
+        public void IsSZArray_FalseForByRefVariableArrayType()
+        {
+            Assert.False(typeof(int[,]).MakeByRefType().IsSZArray);
+        }
+
+        [Fact]
         public void IsVariableBoundArray_FalseForNonArrayTypes()
         {
             foreach (Type type in NonArrayBaseTypes)
@@ -71,6 +90,25 @@ namespace System.Tests
             {
                 Assert.True(type.IsVariableBoundArray);
             }
+        }
+
+        [Fact]
+        public void IsVariableBoundArray_FalseForNonArrayByRefType()
+        {
+            Assert.False(typeof(int).MakeByRefType().IsVariableBoundArray);
+        }
+
+        [Fact]
+        public void IsVariableBoundArray_FalseForByRefSZArrayType()
+        {
+            Assert.False(typeof(int[]).MakeByRefType().IsVariableBoundArray);
+        }
+
+
+        [Fact]
+        public void IsVariableBoundArray_FalseForByRefVariableArrayType()
+        {
+            Assert.False(typeof(int[,]).MakeByRefType().IsVariableBoundArray);
         }
     }
 }
