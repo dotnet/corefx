@@ -30,7 +30,7 @@ namespace System.Reflection.Tests
             yield return new object[] { "NAME", "NAME" };
             yield return new object[] { "name with spaces", "name with spaces" };
             yield return new object[] { "\uD800\uDC00", "\uD800\uDC00" };
-            yield return new object[] { "привет", "привет" };
+            yield return new object[] { "\u043F\u0440\u0438\u0432\u0435\u0442", "\u043F\u0440\u0438\u0432\u0435\u0442" };
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace System.Reflection.Tests
         public void Ctor_String(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            Assert.Equal(expectedName, assemblyName.Name);
+            Assert.Equal(expectedName.ToLowerInvariant(), assemblyName.Name.ToLowerInvariant());
             Assert.Equal(ProcessorArchitecture.None, assemblyName.ProcessorArchitecture);
         }
 
@@ -184,8 +184,11 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = new AssemblyName(name);
 
-            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expectedName || assemblyName.FullName == extended);
+            expectedName = expectedName.ToLowerInvariant();
+            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null".ToLowerInvariant();
+            string afn = assemblyName.FullName.ToLowerInvariant();
+
+            Assert.True(afn == expectedName || afn == extended, $"Expected\n{afn} == {expectedName}\nor\n{afn} == {extended}");
         }
 
         [Fact]
@@ -264,7 +267,9 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
             string extended = expected + ", Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended);
+
+            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended,
+                        $"Expected\n{assemblyName.FullName} == {expected}\nor\n{assemblyName.FullName} == {extended}");
         }
 
         [Fact]

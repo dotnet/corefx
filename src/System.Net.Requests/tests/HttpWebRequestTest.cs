@@ -1039,6 +1039,8 @@ namespace System.Net.Tests
             Assert.Equal(mediaType, request.MediaType);
         }
 
+        [ActiveIssue(19083)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19083")]
         [Theory, MemberData(nameof(EchoServers))]
         public void Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException(Uri remoteServer)
         {
