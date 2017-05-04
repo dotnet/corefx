@@ -7,18 +7,27 @@ namespace System.Tests
 {
     public class TypeTestsNetcore
     {
-        private static readonly IEnumerable<Type> NonArrayBaseTypes = new Type[]
-        {
-            typeof(int),
-            typeof(void),
-            typeof(int*),
-            typeof(Outside),
-            typeof(Outside<>),
-            typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0],
-            Type.GetTypeFromCLSID(default(Guid)),
-            new object().GetType().GetType()
-        };
+        private static readonly IList<Type> NonArrayBaseTypes;
 
+        static TypeTestsNetcore()
+        {
+            NonArrayBaseTypes = new List<Type>()
+            {
+                typeof(int),
+                typeof(void),
+                typeof(int*),
+                typeof(Outside),
+                typeof(Outside<>),
+                typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0],
+                new object().GetType().GetType()
+            };
+
+            if (PlatformDetection.IsWindows)
+            {
+                NonArrayBaseTypes.Add(Type.GetTypeFromCLSID(default(Guid)));
+            }
+        }
+        
         [Fact]
         public void IsSZArray_FalseForNonArrayTypes()
         {
