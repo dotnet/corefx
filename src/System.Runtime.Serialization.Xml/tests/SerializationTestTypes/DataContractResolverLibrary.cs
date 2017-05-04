@@ -298,7 +298,7 @@ namespace SerializationTestTypes
     [Serializable]
     public class SimpleResolver : DataContractResolver
     {
-        public string defaultNS = "http://schemas.datacontract.org/2004/07/";
+        private static readonly string s_defaultNS = "http://schemas.datacontract.org/2004/07/";
 
         private TypeLibraryManager _mgr = new TypeLibraryManager();
 
@@ -311,7 +311,7 @@ namespace SerializationTestTypes
             if (_mgr.AllTypesList.Contains(dcType))
             {
                 resolvedTypeName = dcType.FullName + "***";
-                resolvedNamespace = defaultNS + resolvedTypeName;
+                resolvedNamespace = s_defaultNS + resolvedTypeName;
                 typeName = dic.Add(resolvedTypeName);
                 typeNamespace = dic.Add(resolvedNamespace);
             }

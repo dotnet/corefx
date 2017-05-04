@@ -3061,8 +3061,55 @@ public static partial class DataContractSerializerTests
         SerializationTestTypes.ComparisonHelper.CompareRecursively(instance, result);
     }
 
+    [Fact]
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_IObjectRef()
+    {
+        var setting = new DataContractSerializerSettings()
+        {
+            DataContractResolver = new SerializationTestTypes.SimpleResolver()
+        };
+
+        //DCExplicitInterfaceIObjRef
+        string baseline1 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.DCExplicitInterfaceIObjRef***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCExplicitInterfaceIObjRef***""><data z:Id=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Data z:Ref=""i1""/></data></_data><_data2 i:type=""a:SerializationTestTypes.DCExplicitInterfaceIObjRef***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCExplicitInterfaceIObjRef***""><data z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></_data2></ObjectContainer>";
+        var valueDCExplicitInterfaceIObjRef = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCExplicitInterfaceIObjRef(true));
+        var resultDCExplicitInterfaceIObjRef = SerializeAndDeserialize(valueDCExplicitInterfaceIObjRef, baseline1, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCExplicitInterfaceIObjRef, resultDCExplicitInterfaceIObjRef);
+        valueDCExplicitInterfaceIObjRef.Data.Equals(resultDCExplicitInterfaceIObjRef.Data);
+
+        //DCIObjRef
+        string baseline2 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.DCIObjRef***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCIObjRef***""><data i:nil=""true""/></_data><_data2 i:type=""a:SerializationTestTypes.DCIObjRef***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCIObjRef***""><data i:nil=""true""/></_data2></ObjectContainer>";
+        var valueDCIObjRef = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCIObjRef(true));
+        var resutDCIObjRef = SerializeAndDeserialize(valueDCIObjRef, baseline2, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCIObjRef, resutDCIObjRef);
+
+        //SerExplicitInterfaceIObjRefReturnsPrivate
+        string baseline3 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.SerExplicitInterfaceIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SerExplicitInterfaceIObjRefReturnsPrivate***""/><_data2 i:type=""a:SerializationTestTypes.SerExplicitInterfaceIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SerExplicitInterfaceIObjRefReturnsPrivate***""/></ObjectContainer>";
+        var valueSerExplicitInterfaceIObjRefReturnsPrivate = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.SerExplicitInterfaceIObjRefReturnsPrivate());
+        var resutSerExplicitInterfaceIObjRefReturnsPrivate = SerializeAndDeserialize(valueSerExplicitInterfaceIObjRefReturnsPrivate, baseline3, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueSerExplicitInterfaceIObjRefReturnsPrivate, resutSerExplicitInterfaceIObjRefReturnsPrivate);
+
+        //SerIObjRefReturnsPrivate
+        string baseline4 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.SerIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SerIObjRefReturnsPrivate***""/><_data2 i:type=""a:SerializationTestTypes.SerIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SerIObjRefReturnsPrivate***""/></ObjectContainer>";
+        var valueSerIObjRefReturnsPrivate = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.SerIObjRefReturnsPrivate());
+        var resutSerIObjRefReturnsPrivate = SerializeAndDeserialize(valueSerIObjRefReturnsPrivate, baseline4, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueSerIObjRefReturnsPrivate, resutSerIObjRefReturnsPrivate);
+
+        //DCExplicitInterfaceIObjRefReturnsPrivate
+        string baseline5 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.DCExplicitInterfaceIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCExplicitInterfaceIObjRefReturnsPrivate***""><_data z:Id=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Data>7b4ac88f-972b-43e5-8f6a-5ae64480eaad</Data></_data></_data><_data2 i:type=""a:SerializationTestTypes.DCExplicitInterfaceIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCExplicitInterfaceIObjRefReturnsPrivate***""><_data z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></_data2></ObjectContainer>";
+        var valueDCExplicitInterfaceIObjRefReturnsPrivate = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCExplicitInterfaceIObjRefReturnsPrivate());
+        var resutDCExplicitInterfaceIObjRefReturnsPrivate = SerializeAndDeserialize(valueDCExplicitInterfaceIObjRefReturnsPrivate, baseline5, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCExplicitInterfaceIObjRefReturnsPrivate, resutDCExplicitInterfaceIObjRefReturnsPrivate);
+
+        //DCIObjRefReturnsPrivate
+        string baseline6 = @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.DCIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCIObjRefReturnsPrivate***""><_data z:Id=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><Data>7b4ac88f-972b-43e5-8f6a-5ae64480eaad</Data></_data></_data><_data2 i:type=""a:SerializationTestTypes.DCIObjRefReturnsPrivate***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCIObjRefReturnsPrivate***""><_data z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></_data2></ObjectContainer>";
+        var valueDCIObjRefReturnsPrivate = new SerializationTestTypes.ObjectContainer(new SerializationTestTypes.DCIObjRefReturnsPrivate());
+        var resutDCIObjRefReturnsPrivate = SerializeAndDeserialize(valueDCIObjRefReturnsPrivate, baseline6, setting);
+        SerializationTestTypes.ComparisonHelper.CompareRecursively(valueDCIObjRefReturnsPrivate, resutDCIObjRefReturnsPrivate);
+
+    }
+
     #endregion
-    
+
     [Fact]
     public static void DCS_MyPersonSurrogate()
     {
