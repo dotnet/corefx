@@ -132,6 +132,7 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
         public void ValidLicense()
         {
             XmlDocument doc = GetDocumentFromResource("System.Security.Cryptography.Xml.Tests.XmlLicenseSample.xml");
