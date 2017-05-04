@@ -10,10 +10,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)CanonicalizationTestHelper.cs" />
     <Compile Include="$(TestSourceFolder)TestConfigHelper.cs" />
     <Compile Include="$(TestSourceFolder)XmlCanonicalizationTest.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>Common\System\IO\TempFile.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(TestSourceFolder)baselines\ReaderWriter_C14N_BaselineXML.xml">

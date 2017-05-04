@@ -157,9 +157,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 byte[] outputFromSecurity = StreamToByteArray(transformedOutput);
                 //Finished creating the doc from the security class
 
-                Helper.DumpToFile("fullDoc.xml", fullDoc);
-                Helper.DumpToFile("canonicalDoc.xml", canonicalDoc);
-                Helper.DumpToFile("docFromSecurity.xml", outputFromSecurity);
+                Helper.DumpToFile(fullDoc);
+                Helper.DumpToFile(canonicalDoc);
+                Helper.DumpToFile(outputFromSecurity);
                 Assert.True(Enumerable.SequenceEqual(outputFromSecurity, canonicalDoc), $"TestC14NInclusivePrefixes test variation #{count} failed");
             }
         }
@@ -245,8 +245,8 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
 
                         outputFromIndigo = canonicalStream.ToArray();
 
-                        Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
-                        Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
+                        Helper.DumpToFile(outputFromSecurity);
+                        Helper.DumpToFile(outputFromIndigo);
                         Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
                     }
                 }
@@ -298,8 +298,8 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 dicReader.Close();
 
                 outputFromIndigo = canonicalStream.ToArray();
-                Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
-                Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
+                Helper.DumpToFile(outputFromSecurity);
+                Helper.DumpToFile(outputFromIndigo);
                 Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
             }
 
@@ -352,9 +352,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             transformedOutput = transform2.GetOutput(typeof(Stream)) as Stream;
             outputFromSecurity = StreamToByteArray(transformedOutput);
 
-            Helper.DumpToFile("outputFromSecurity.xml", outputFromSecurity);
-            Helper.DumpToFile("outputFromIndigo.xml", outputFromIndigo);
-            Helper.DumpToFile("nonCanonicalOutput.xml", nonCanonicalOutput);
+            Helper.DumpToFile(outputFromSecurity);
+            Helper.DumpToFile(outputFromIndigo);
+            Helper.DumpToFile(nonCanonicalOutput);
 
             Assert.True(Enumerable.SequenceEqual(outputFromSecurity, outputFromIndigo), $"ReaderWriter_C14N_DifferentReadersWriters test variation #{count} failed");
             count++;

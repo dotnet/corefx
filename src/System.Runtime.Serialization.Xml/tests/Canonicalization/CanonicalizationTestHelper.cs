@@ -61,6 +61,7 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rwType));
             }
+
             return result;
         }
 
@@ -161,29 +162,34 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rwType));
             }
+
             return result;
         }
     }
 
     public class Helper
     {
-        public static void DumpToFile(string fileName, byte[] buffer, int offset, int count)
+        public static void DumpToFile(byte[] buffer, int offset, int count)
         {
-            try
+            using (var testFile = TempFile.Create())
             {
-                FileStream fs = File.Create(Path.Combine(Path.GetTempPath(), fileName));
-                fs.Write(buffer, offset, count);
-                fs.Close();
-            }
-            catch (Exception e)
-            {
-                // This is just for debugging purposes, no problem if it fails.
-                System.Diagnostics.Trace.WriteLine("Failed dumping to file: " + e);
+                try
+                {
+                    FileStream fs = File.Create(testFile.Path);
+                    fs.Write(buffer, offset, count);
+                    fs.Close();
+                }
+                catch (Exception e)
+                {
+                    // This is just for debugging purposes, no problem if it fails.
+                    System.Diagnostics.Trace.WriteLine("Failed dumping to file: " + e);
+                }
             }
         }
-        public static void DumpToFile(string fileName, byte[] buffer)
+
+        public static void DumpToFile(byte[] buffer)
         {
-            DumpToFile(fileName, buffer, 0, buffer.Length);
+            DumpToFile(buffer, 0, buffer.Length);
         }
     }
 }
