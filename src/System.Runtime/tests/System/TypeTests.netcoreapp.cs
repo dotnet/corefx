@@ -153,6 +153,24 @@ namespace System.Tests
             Assert.False(type.IsTypeDefinition);
         }
 
+        // In the unlikely event we ever add new values to the CorElementType enumeration, CoreCLR will probably miss it because of the way IsTypeDefinition
+        // works. It's likely that such a type will live in the core assembly so to improve our chances of catching this situation, test IsTypeDefinition
+        // on every type exposed out of that assembly.
+        //
+        // Skipping this on .Net Native because:
+        //  - We really don't want to opt in all the metadata in System.Private.CoreLib
+        //  - The .Net Native implementation of IsTypeDefinition is not the one that works by enumerating selected values off CorElementType.
+        //    It has much less need of a test like this.
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
+        public void IsTypeDefinition_AllDefinedTypesInCoreAssembly()
+        {
+            foreach (Type type in typeof(object).Assembly.DefinedTypes)
+            {
+                Assert.True(type.IsTypeDefinition, "IsTypeDefinition expected to be true for type " + type);
+            }
+        }
+
         public static IEnumerable<object[]> DefinedTypes
         {
             get
