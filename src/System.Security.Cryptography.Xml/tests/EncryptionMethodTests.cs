@@ -45,7 +45,7 @@ namespace System.Security.Cryptography.Xml.Tests
         public void KeySize_SetNegativeValue_ThrowsArgumentOutOfRangeException(int value)
         {
             EncryptionMethod method = new EncryptionMethod();
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
+            Assert.Throws<ArgumentOutOfRangeException>(() => method.KeySize = value);
         }
 
         [Theory]
