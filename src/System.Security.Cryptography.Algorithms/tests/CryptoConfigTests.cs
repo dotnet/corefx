@@ -36,6 +36,7 @@ namespace System.Security.Cryptography.CryptoConfigTests
         public static void AddOID_EmptyNamesArray()
         {
             CryptoConfig.AddOID("1.3.14.3.2.28", new string[0]);
+            // There is no verifiable behavior in this case. We only check that we don't throw.
         }
 
         [Fact]
@@ -71,6 +72,13 @@ namespace System.Security.Cryptography.CryptoConfigTests
         public static void AddAlgorithm_EmptyString_Throws()
         {
             Assert.Throws<ArgumentException>(null, () => CryptoConfig.AddAlgorithm(typeof(CryptoConfigTests), string.Empty));
+        }
+
+        [Fact]
+        public static void AddAlgorithm_EmptyNamesArray()
+        {
+            CryptoConfig.AddAlgorithm(typeof(AesCryptoServiceProvider), new string[0]);
+            // There is no verifiable behavior in this case. We only check that we don't throw.
         }
 
         [Fact]
