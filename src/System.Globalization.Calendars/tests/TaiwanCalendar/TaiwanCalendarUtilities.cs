@@ -7,19 +7,9 @@ namespace System.Globalization.Tests
     public static class TaiwanCalendarUtilities
     {
         [ThreadStatic]
-        private static RandomDataGenerator s_randomDataGenerator;
+        private static RandomDataGenerator t_randomDataGenerator;
 
-        private static RandomDataGenerator RandomDataGenerator
-        {
-            get
-            {
-                if (s_randomDataGenerator == null)
-                {
-                    s_randomDataGenerator = new RandomDataGenerator();
-                }
-                return s_randomDataGenerator;
-            }
-        }
+        private static RandomDataGenerator Generator => t_randomDataGenerator ?? (t_randomDataGenerator = new RandomDataGenerator());
 
         private static readonly int[] s_daysPerMonthLeapYear = new int[]
         {
@@ -36,20 +26,20 @@ namespace System.Globalization.Tests
             TaiwanCalendar calendar = new TaiwanCalendar();
             int maxYear = calendar.MaxSupportedDateTime.Year;
             int minYear = calendar.MinSupportedDateTime.Year;
-            return minYear + RandomDataGenerator.GetInt32(-55) % (maxYear - 1911 + 1 - minYear);
+            return minYear + Generator.GetInt32(-55) % (maxYear - 1911 + 1 - minYear);
         }
 
-        public static int RandomMonth() => RandomDataGenerator.GetInt32(-55) % 12 + 1;
+        public static int RandomMonth() => Generator.GetInt32(-55) % 12 + 1;
 
         public static int RandomDay(int year, int month)
         {
             if (new TaiwanCalendar().IsLeapYear(year))
             {
-                return RandomDataGenerator.GetInt32(-55) % s_daysPerMonthLeapYear[month] + 1;
+                return Generator.GetInt32(-55) % s_daysPerMonthLeapYear[month] + 1;
             }
             else
             {
-                return RandomDataGenerator.GetInt32(-55) % s_daysPerMonthCommonYear[month] + 1;
+                return Generator.GetInt32(-55) % s_daysPerMonthCommonYear[month] + 1;
             }
         }
 

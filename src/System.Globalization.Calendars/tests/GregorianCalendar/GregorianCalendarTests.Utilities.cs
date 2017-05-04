@@ -7,19 +7,9 @@ namespace System.Globalization.Tests
     public class GregorianCalendarTestUtilities
     {
         [ThreadStatic]
-        private static RandomDataGenerator s_randomDataGenerator;
+        private static RandomDataGenerator t_randomDataGenerator;
 
-        private static RandomDataGenerator RandomDataGenerator
-        {
-            get
-            {
-                if (s_randomDataGenerator == null)
-                {
-                    s_randomDataGenerator = new RandomDataGenerator();
-                }
-                return s_randomDataGenerator;
-            }
-        }
+        private static RandomDataGenerator Generator => t_randomDataGenerator ?? (t_randomDataGenerator = new RandomDataGenerator());
 
         private static readonly Calendar s_calendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
 
@@ -35,7 +25,7 @@ namespace System.Globalization.Tests
         {
             int maxYear = s_calendar.MaxSupportedDateTime.Year;
             int minYear = s_calendar.MinSupportedDateTime.Year;
-            return minYear + RandomDataGenerator.GetInt32(-55) % (maxYear + 1 - minYear);
+            return minYear + Generator.GetInt32(-55) % (maxYear + 1 - minYear);
         }
 
         public static int RandomLeapYear()
@@ -64,7 +54,7 @@ namespace System.Globalization.Tests
             return randomYear;
         }
 
-        public static int RandomMonth() => RandomDataGenerator.GetInt32(-55) % 12 + 1;
+        public static int RandomMonth() => Generator.GetInt32(-55) % 12 + 1;
 
         public static int RandomMonthNotFebruary()
         {
@@ -76,9 +66,9 @@ namespace System.Globalization.Tests
             return randomMonthNotFebruary;
         }
 
-        public static int RandomLeapYearDay(int month) => RandomDataGenerator.GetInt32(-55) % s_daysInMonthInLeapYear[month] + 1;
+        public static int RandomLeapYearDay(int month) => Generator.GetInt32(-55) % s_daysInMonthInLeapYear[month] + 1;
 
-        public static int RandomCommonYearDay(int month) => RandomDataGenerator.GetInt32(-55) % s_daysInMonthInCommonYear[month] + 1;
+        public static int RandomCommonYearDay(int month) => Generator.GetInt32(-55) % s_daysInMonthInCommonYear[month] + 1;
 
         public static int RandomDay(int year, int month)
         {
