@@ -1,77 +1,76 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Tests
 {
     public class TypeTestsNetcore
-    { 
-        private static IEnumerable<object[]> SZArrayOrNotTypes()
+    {
+        private static readonly IEnumerable<Type> NonArrayBaseTypes = new Type[]
         {
-            yield return new object[] {typeof(int[]), true};
-            yield return new object[] {typeof(string[]), true};
-            yield return new object[] {typeof(void), false};
-            yield return new object[] {typeof(int), false};
-            yield return new object[] {typeof(int[]).MakeByRefType(), false};
-            yield return new object[] {typeof(int[,]), false};
-            yield return new object[] {typeof(TypeTests), false};
-            yield return new object[] {Array.CreateInstance(typeof(int), new[] {2}, new[] {-1}).GetType(), false};
-            yield return new object[] {Array.CreateInstance(typeof(int), new[] {2}, new[] {1}).GetType(), false};
-            yield return new object[] {Array.CreateInstance(typeof(int), new[] {2}, new[] {0}).GetType(), true};
-            yield return new object[] {typeof(int[][]), true};
-            yield return new object[] {Type.GetType("System.Int32[]"), true};
-            yield return new object[] {Type.GetType("System.Int32[*]"), false};
-            yield return new object[] {Type.GetType("System.Int32"), false};
-            yield return new object[] {typeof(int).MakeArrayType(), true};
-            yield return new object[] {typeof(int).MakeArrayType(1), false};
-            yield return new object[] {typeof(int).MakeArrayType().MakeArrayType(), true};
-            yield return new object[] {typeof(int).MakeArrayType(2), false};
-            yield return new object[] {typeof(Outside<int>.Inside<string>), false};
-            yield return new object[] {typeof(Outside<int>.Inside<string>[]), true};
-            yield return new object[] {typeof(Outside<int>.Inside<string>[,]), false};
-            yield return new object[] {Array.CreateInstance(typeof(Outside<int>.Inside<string>), new[] {2}, new[] {-1}).GetType(), false};
+            typeof(int),
+            typeof(void),
+            typeof(int*),
+            typeof(Outside),
+            typeof(Outside<>),
+            typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0],
+            Type.GetTypeFromCLSID(default(Guid)),
+            new object().GetType().GetType()
+        };
+        
+        [Fact]
+        public void IsSZArray_FalseForNonArrayTypes()
+        {
+            foreach (var type in NonArrayBaseTypes)
+            {
+                Assert.False(type.IsSZArray);
+            }
         }
 
-        [Theory, MemberData(nameof(SZArrayOrNotTypes))]
-        public void IsSZArray(Type type, bool expected)
+        [Fact]
+        public void IsSZArray_TrueForSZArrayTypes()
         {
-            Assert.Equal(expected, type.IsSZArray);
+            foreach (var type in NonArrayBaseTypes.Select(nonArrayBaseType => nonArrayBaseType.MakeArrayType()))
+            {
+                Assert.True(type.IsSZArray);
+            }
         }
 
-        private static IEnumerable<object[]> VariableBoundArrayOrNotTypes()
+        [Fact]
+        public void IsSZArray_FalseForVariableBoundArrayTypes()
         {
-            // Not arrays
-            yield return new object[] { typeof(void), false };
-            yield return new object[] { typeof(int), false };
-            yield return new object[] { typeof(int[]).MakeByRefType(), false };
-            yield return new object[] { typeof(TypeTests), false };
-            yield return new object[] { Type.GetType("System.Int32"), false };
-            yield return new object[] { typeof(Outside<int>.Inside<string>), false };
-
-            // Arrays, but SZ arrays
-            yield return new object[] { Type.GetType("System.Int32[]"), false };
-            yield return new object[] { typeof(int[]), false };
-            yield return new object[] { typeof(string[]), false };
-            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { 0 }).GetType(), false };
-            yield return new object[] { typeof(int[][]), false };
-            yield return new object[] { typeof(int).MakeArrayType(), false };
-            yield return new object[] { typeof(int).MakeArrayType().MakeArrayType(), false };
-            yield return new object[] { typeof(Outside<int>.Inside<string>[]), false };
-
-            // Variable bound arrays
-            yield return new object[] { typeof(int[,]), true };
-            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { -1 }).GetType(), true };
-            yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { 1 }).GetType(), true };
-            yield return new object[] { typeof(int).MakeArrayType(1), true };
-            yield return new object[] { typeof(int).MakeArrayType(2), true };
-            yield return new object[] { typeof(Outside<int>.Inside<string>[,]), true };
-            yield return new object[] { Array.CreateInstance(typeof(Outside<int>.Inside<string>), new[] { 2 }, new[] { -1 }).GetType(), true };
-            yield return new object[] { Type.GetType("System.Int32[*]"), true };
+            foreach (var type in NonArrayBaseTypes.Select(nonArrayBaseType => nonArrayBaseType.MakeArrayType(1)))
+            {
+                Assert.False(type.IsSZArray);
+            }
         }
 
-        [Theory, MemberData(nameof(VariableBoundArrayOrNotTypes))]
-        public void IsVariableBoundArray(Type type, bool expected)
+        [Fact]
+        public void IsVariableBoundArray_FalseForNonArrayTypes()
         {
-            Assert.Equal(expected, type.IsVariableBoundArray);
+            foreach (var type in NonArrayBaseTypes)
+            {
+                Assert.False(type.IsVariableBoundArray);
+            }
+        }
+
+        [Fact]
+        public void IsVariableBoundArray_FalseForSZArrayTypes()
+        {
+            foreach (var type in NonArrayBaseTypes.Select(nonArrayBaseType => nonArrayBaseType.MakeArrayType()))
+            {
+                Assert.False(type.IsVariableBoundArray);
+            }
+        }
+
+        [Fact]
+        public void IsVariableBoundArray_TrueForVariableBoundArrayTypes()
+        {
+            foreach (var type in NonArrayBaseTypes.Select(nonArrayBaseType => nonArrayBaseType.MakeArrayType(1)))
+            {
+                Assert.True(type.IsVariableBoundArray);
+            }
         }
     }
 }
