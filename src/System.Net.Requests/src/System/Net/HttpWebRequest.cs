@@ -1522,14 +1522,8 @@ namespace System.Net
 
         private bool TryGetHostUri(string hostName, out Uri hostUri)
         {
-            // Use StringBuilder rather than UriBuilder, since we don't know if the "hostName" will contain a
-            // port or not.
-            StringBuilder sb = new StringBuilder(Address.Scheme);
-            sb.Append("://");
-            sb.Append(hostName);
-            sb.Append(Address.PathAndQuery);
-
-            return Uri.TryCreate(sb.ToString(), UriKind.Absolute, out hostUri);
+            string s = Address.Scheme + "://" + hostName + Address.PathAndQuery;
+            return Uri.TryCreate(s, UriKind.Absolute, out hostUri);
         }
     }
 }
