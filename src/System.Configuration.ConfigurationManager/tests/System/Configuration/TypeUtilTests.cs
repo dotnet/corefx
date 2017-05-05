@@ -55,6 +55,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost()
         {
             TestHost host = new TestHost((s, b) => { return typeof(string); });
@@ -62,6 +63,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost_ThrowOnError()
         {
             TestHost host = new TestHost((s, b) => { if (b) throw new ArgumentException(); return null; });
@@ -69,6 +71,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost_NoThrowOnError()
         {
             TestHost host = new TestHost((s, b) => { if (b) throw new ArgumentException(); return null; });
