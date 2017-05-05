@@ -174,13 +174,13 @@ namespace SerializationTestTypes
     public class DefaultCollections
     {
         [DataMember]
-        ArrayList arrayList = new ArrayList() { new Person() };
+        private ArrayList _arrayList = new ArrayList() { new Person() };
         [DataMember]
-        Dictionary<int, object> dictionary = new Dictionary<int, object>() { { 001, new CharClass() } };
+        private Dictionary<int, object> _dictionary = new Dictionary<int, object>() { { 001, new CharClass() } };
         [DataMember]
-        Hashtable hashtable = new Hashtable() { { "one", new Version1() } };
+        private Hashtable _hashtable = new Hashtable() { { "one", new Version1() } };
         [DataMember]
-        object[] singleDimArray = new object[] { new Employee() };
+        private object[] _singleDimArray = new object[] { new Employee() };
     }
 
     [DataContract(Name = "Car", Namespace = "TestingVersionTolerance")]
