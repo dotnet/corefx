@@ -9,23 +9,23 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>1ec7eb334c406a82a41c020e73ff1717a0e90f92</CoreFxCurrentRef>
-    <CoreClrCurrentRef>ccf03e3ac9788a503bae623ca6b765224656a586</CoreClrCurrentRef>
+    <CoreFxCurrentRef>f50f877538b1e349b35ab13c70a74d135eb71019</CoreFxCurrentRef>
+    <CoreClrCurrentRef>f50f877538b1e349b35ab13c70a74d135eb71019</CoreClrCurrentRef>
     <ExternalCurrentRef>1ec7eb334c406a82a41c020e73ff1717a0e90f92</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>1ec7eb334c406a82a41c020e73ff1717a0e90f92</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>1ec7eb334c406a82a41c020e73ff1717a0e90f92</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>f50f877538b1e349b35ab13c70a74d135eb71019</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>f50f877538b1e349b35ab13c70a74d135eb71019</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>ca04b94304beb477534b4fa0d6080089c21a0284</SniCurrentRef>
     <StandardCurrentRef>1ec7eb334c406a82a41c020e73ff1717a0e90f92</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview2-25304-02</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>preview2-25304-02</CoreClrExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview2-25305-01</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>preview2-25305-03</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-25304-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25304-01</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25304-01</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25304-01</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25305-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25305-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>DEPENDENCY 'TestILCNugetPackageForCoreFX' NOT FOUND</ProjectNTfsTestILCPackageVersion>
     <NETStandardPackageVersion>2.0.0-preview2-25304-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <!-- Use the SNI runtime package -->
