@@ -186,6 +186,12 @@
       "values": [],
       "defaultValue": ""
     },
+    "StrictToolVersionMatchAdditionalArg": {
+      "description": "Pass additional argument to build to ensure version of each tool matches the declared version.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": ""
+    },
     "Project": {
       "description": "Project where the commands are going to be applied.",
       "valueType": "passThrough",
@@ -255,6 +261,10 @@
         "stripSymbols": {
           "description": "No-op. Added so that stripSymbols can be passed to build.sh without breaking build-managed.sh.",
           "settings": { }
+        },
+        "strictToolVersionMatch": {
+            "description": "No-op. Added so that strictToolVersionMatch can be passed to build.cmd without breaking build-managed.cmd.",
+            "settings": { }
         },
         "tests": {
           "description": "Builds src and then builds and runs the tests for the given configuration.",
@@ -398,10 +408,16 @@
             "StripSymbolsAdditionalArg": "stripSymbols"
           }
         },
+        "strictToolVersionMatch": {
+          "description": "Ensures version of each tool consumed in the build matches the declared version.",
+          "settings": {
+            "StrictToolVersionMatchAdditionalArg": "strictToolVersionMatch"
+          }
+        },
         "tests": {
           "description": "No-op for build-native, included just to enable easy combination with build-managed",
           "settings": { }
-        },
+        }
       },
       "defaultValues": {
         "toolName": "terminal",

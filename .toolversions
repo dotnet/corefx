@@ -1,0 +1,24 @@
+cmake="
+  DeclaredVersion='3.6.0'
+  DownloadFileLinux='cmake-3.6.0-Linux-x86_64.tar.gz'
+  DownloadFileOSX='cmake-3.6.0-Darwin-x86_64.tar.gz'
+  DownloadFileWindows32='cmake-3.6.0-win32-x86.zip'
+  DownloadFileWindows64='cmake-3.6.0-win64-x64.zip'
+  DownloadUrl='https://cmake.org/files/v3.6/'
+  LocalSearchPathLinux='cmake-3.6.0-Linux-x86_64/bin/cmake'
+  LocalSearchPathOSX='cmake-3.6.0-Darwin-x86_64/CMake.app/Contents/bin/cmake'
+  LocalSearchPathWindows32='cmake-3.6.0-win32-x86\\bin\\cmake.exe'
+  LocalSearchPathWindows64='cmake-3.6.0-win64-x64\\bin\\cmake.exe'
+  SearchPathsWindows='%programfiles(x86)%\\CMake\\bin\\cmake.exe
+                      %programfiles%\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\2017\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\Preview\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\Preview\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe
+                      %programfiles(x86)%\\Microsoft Visual Studio\\Preview\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe'
+  ToolNotFoundMessage='CMake is a required tool to build this repository. But this tool was not found in the PATH. Please try one of the following options to acquire CMake version \$DeclaredVersion. Download CMake version \$DeclaredVersion from \$DownloadUrl, and make sure to add CMake to PATH. Another option to acquire CMake is to run the script $acquireScriptPath with the following arguments $acquireScriptArgs.'
+"
+clang="
+  DeclaredVersion='4.0'
+"

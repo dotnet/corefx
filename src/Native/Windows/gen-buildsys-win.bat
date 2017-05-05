@@ -5,7 +5,7 @@ rem This file invokes cmake and generates the build system for windows.
 set argC=0
 for %%x in (%*) do Set /A argC+=1
 
-if NOT %argC%==3 GOTO :USAGE
+if %argC% LSS 5 GOTO :USAGE
 if %1=="/?" GOTO :USAGE
 
 setlocal
@@ -16,7 +16,8 @@ if "%__VSVersion%" == "vs2017" (
   set __VSString=15 2017
 ) else (
   set __VSString=14 2015
-)
+set "__OverrideScriptsFolderPath=%5"
+set "__StrictToolVersionMatch=%6"
 
 :: Set the target architecture to a format cmake understands. ANYCPU defaults to x64
 if /i "%3" == "x86"     (set __VSString=%__VSString%)
@@ -26,9 +27,21 @@ if /i "%3" == "arm64"   (set __VSString=%__VSString% Win64)
 
 if defined CMakePath goto DoGen
 
-:: Eval the output from probe-win1.ps1
+:: Get the path to CMake.
 pushd "%__sourceDir%"
-for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy ByPass "& .\probe-win.ps1"') do %%a
+setlocal EnableDelayedExpansion
+
+for /f "Tokens=* Delims=" %%x in ('powershell -NoProfile -ExecutionPolicy ByPass "& %__rootRepo%\tools-local\windows\probe-tool.ps1 cmake %__rootRepo% %__OverrideScriptsFolderPath% %__StrictToolVersionMatch%"') do set ProbeValue=!ProbeValue!%%x
+
+:: Evaluate the output from probe-tool.ps1
+if exist "%ProbeValue%" (
+    set "CMakePath=%ProbeValue%"
+    echo CMakePath=!CMakePath!
+) else (
+    echo "%ProbeValue%"
+    EXIT /B 1
+)
+
 popd
 
 :DoGen
