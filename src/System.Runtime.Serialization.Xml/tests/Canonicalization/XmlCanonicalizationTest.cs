@@ -188,9 +188,9 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
                         string rwTypeStr = input.Arguments[0].Value;
                         ReaderWriterFactory.ReaderWriterType rwType = (ReaderWriterFactory.ReaderWriterType)Enum.Parse(typeof(ReaderWriterFactory.ReaderWriterType), rwTypeStr, true);
                         Encoding encoding = Encoding.GetEncoding((string)input.Arguments[1].Value);
-                        string sampleXmlFileName = @"baselines\" + input2.Arguments[0].Value;
+                        string sampleXmlFileName = Path.Combine("baselines", input2.Arguments[0].Value);
                         bool mustSupportV14N = input.Arguments[2].Value == "true";
-                        string baselineFileName = @"baselines\" + input2.Arguments[1].Value;
+                        string baselineFileName = Path.Combine("baselines", input2.Arguments[1].Value);
 
                         bool testWithComments = input3.Arguments[0].Value == "true";
 
@@ -253,13 +253,13 @@ namespace System.Runtime.Serialization.Xml.Canonicalization.Tests
             foreach (var input in params4.Inputs)
             {
                 count++;
-                string sampleXmlFileName = @"baselines\" + input.Arguments[3].Value;
+                string sampleXmlFileName = Path.Combine("baselines", input.Arguments[3].Value);
                 string rwTypeStr = input.Arguments[0].Value;
                 ReaderWriterFactory.ReaderWriterType rwType = (ReaderWriterFactory.ReaderWriterType)Enum.Parse(typeof(ReaderWriterFactory.ReaderWriterType), rwTypeStr, true);
                 Encoding encoding = Encoding.GetEncoding((string)input.Arguments[1].Value);
 
                 bool mustSupportV14N = input.Arguments[2].Value == "true";
-                string baselineFileName = @"baselines\ReaderWriter_C14N_BaselineXML_OnlyLF.xml";
+                string baselineFileName = Path.Combine("baselines", "ReaderWriter_C14N_BaselineXML_OnlyLF.xml");
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.PreserveWhitespace = true;
