@@ -217,6 +217,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(19260, TestPlatforms.OSX)]
         public static void FindByValidThumbprint_RootCert()
         {
             using (X509Store machineRoot = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
