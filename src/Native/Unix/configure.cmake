@@ -199,6 +199,7 @@ check_cxx_source_compiles(
     {
         char buffer[1];
         char* c = strerror_r(0, buffer, 0);
+        return 0;
     }
     "
     HAVE_GNU_STRERROR_R)
@@ -246,7 +247,7 @@ check_struct_has_member(
 check_cxx_source_compiles(
     "
     #include <sys/sendfile.h>
-    int main() { int i = sendfile(0, 0, 0, 0); }
+    int main() { int i = sendfile(0, 0, 0, 0); return 0; }
     "
     HAVE_SENDFILE_4)
 
@@ -256,7 +257,7 @@ check_cxx_source_compiles(
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/uio.h>
-    int main() { int i = sendfile(0, 0, 0, NULL, NULL, 0); }
+    int main() { int i = sendfile(0, 0, 0, NULL, NULL, 0); return 0; }
     "
     HAVE_SENDFILE_6)
 
@@ -600,7 +601,7 @@ set (CMAKE_REQUIRED_FLAGS "-Werror -Weverything")
 check_cxx_source_compiles(
     "
     #include <unistd.h>
-    int main() { size_t namelen = 20; char name[20]; getdomainname(name, namelen); }
+    int main() { size_t namelen = 20; char name[20]; getdomainname(name, namelen); return 0; }
     "
     HAVE_GETDOMAINNAME_SIZET
 )
@@ -628,21 +629,21 @@ endif()
 check_cxx_source_compiles(
     "
     #include <curl/multi.h>
-    int main() { int i = CURLM_ADDED_ALREADY; }
+    int main() { int i = CURLM_ADDED_ALREADY; return 0; }
     "
     HAVE_CURLM_ADDED_ALREADY)
 
 check_cxx_source_compiles(
     "
     #include <curl/multi.h>
-    int main() { int i = CURL_HTTP_VERSION_2_0; }
+    int main() { int i = CURL_HTTP_VERSION_2_0; return 0; }
     "
     HAVE_CURL_HTTP_VERSION_2_0)
 
 check_cxx_source_compiles(
     "
     #include <curl/multi.h>
-    int main() { int i = CURLPIPE_MULTIPLEX; }
+    int main() { int i = CURLPIPE_MULTIPLEX; return 0; }
     "
     HAVE_CURLPIPE_MULTIPLEX)
 
@@ -654,6 +655,7 @@ check_cxx_source_compiles(
         int i = CURL_SSLVERSION_TLSv1_0;
         i = CURL_SSLVERSION_TLSv1_1;
         i = CURL_SSLVERSION_TLSv1_2;
+        return 0;
     }
     "
     HAVE_CURL_SSLVERSION_TLSv1_012)
@@ -700,7 +702,7 @@ if (HAVE_CRT_EXTERNS_H)
     check_cxx_source_compiles(
     "
     #include <crt_externs.h>
-    int main() { char** e = *(_NSGetEnviron()); }
+    int main() { char** e = *(_NSGetEnviron()); return 0; }
     "
     HAVE_NSGETENVIRON)
 endif()
@@ -712,7 +714,8 @@ check_cxx_source_compiles(
     #include <sys/inotify.h>
     int main()
     {
-        uint32_t mask = IN_EXCL_UNLINK;   
+        uint32_t mask = IN_EXCL_UNLINK;
+        return 0;
     }
     "
     HAVE_IN_EXCL_UNLINK)
