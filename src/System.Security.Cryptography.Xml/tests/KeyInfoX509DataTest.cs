@@ -144,18 +144,26 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
-        public void AddIssuerSerial_Null_Serial()
+        public void AddIssuerSerial_Issuer_Null()
         {
             KeyInfoX509Data data = new KeyInfoX509Data();
-            Assert.Throws<ArgumentException>(() => data.AddIssuerSerial(null, "serial"));
+            Assert.Throws<ArgumentException>("issuerName", () => data.AddIssuerSerial(null, "serial"));
         }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
-        public void AddIssuerSerial_Issuer_Null()
+        public void AddIssuerSerial_Null_Serial()
         {
             KeyInfoX509Data data = new KeyInfoX509Data();
-            Assert.Throws<ArgumentException>(() => data.AddIssuerSerial("issuer", null));
+            Assert.Throws<ArgumentException>("serialNumber", () => data.AddIssuerSerial("issuer", null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
+        public void AddIssuerSerial_Invalid_Serial()
+        {
+            KeyInfoX509Data data = new KeyInfoX509Data();
+            Assert.Throws<ArgumentException>("serialNumber", () => data.AddIssuerSerial("issuer", "NotANumber"));
         }
 
         [Fact]

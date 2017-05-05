@@ -134,7 +134,7 @@ namespace System.Security.Cryptography.Xml.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/16798")]
         public void LoadStreamInput_CorrectXml()
         {
             XmlDocument doc = new XmlDocument();

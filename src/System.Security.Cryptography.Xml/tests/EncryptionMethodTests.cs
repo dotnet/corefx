@@ -45,7 +45,10 @@ namespace System.Security.Cryptography.Xml.Tests
         public void KeySize_SetNegativeValue_ThrowsArgumentOutOfRangeException(int value)
         {
             EncryptionMethod method = new EncryptionMethod();
-            Assert.Throws<ArgumentOutOfRangeException>(() => method.KeySize = value);
+            if (PlatformDetection.IsFullFramework)
+                Assert.Throws<ArgumentOutOfRangeException>("The key size should be a non negative integer.", () => method.KeySize = value);
+            else
+                Assert.Throws<ArgumentOutOfRangeException>("value", () => method.KeySize = value);
         }
 
         [Theory]

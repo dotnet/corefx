@@ -1574,7 +1574,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
-        public void SignedXmlUsesSha256ByDefault()
+        public void CoreFxSignedXmlUsesSha256ByDefault()
         {
             const string expectedSignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
             const string expectedDigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256";
@@ -1583,7 +1583,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/issues/18690")]
-        public void SignedXmlUsesSha1ByDefault()
+        public void NetFxSignedXmlUsesSha1ByDefault()
         {
             const string expectedSignatureMethod = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
             const string expectedDigestMethod = "http://www.w3.org/2000/09/xmldsig#sha1";
