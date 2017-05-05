@@ -89,6 +89,13 @@ namespace System.Net.Http.Functional.Tests
         public HttpClientHandlerTest(ITestOutputHelper output)
         {
             _output = output;
+            if (PlatformDetection.IsFullFramework)
+            {
+                // On .NET Framework, the default limit for connections/server is very low (2). 
+                // On .NET Core, the default limit is higher. Since these tests run in parallel,
+                // the limit needs to be increased to avoid timeouts when running the tests.
+                System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+            }
         }
 
         [Fact]
@@ -123,7 +130,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
         [Fact]
         public void MaxRequestContentBufferSize_Get_ReturnsZero()
         {
@@ -133,7 +140,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxRequestContentBufferSize not used on .NET Core due to architecture differences")]
         [Fact]
         public void MaxRequestContentBufferSize_Set_ThrowsPlatformNotSupportedException()
         {
@@ -265,7 +272,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_Cancel_CancellationTokenPropagates()
@@ -278,7 +284,11 @@ namespace System.Net.Http.Functional.Tests
                 TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() =>
                     client.SendAsync(request, cts.Token));
                 Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
-                Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
+                if (!PlatformDetection.IsFullFramework)
+                {
+                    // .NET Framework has bug where it doesn't propagate token information.
+                    Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
+                }
             }
         }
 
@@ -459,7 +469,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpsToHttp_StatusCodeRedirect()
@@ -516,6 +526,13 @@ namespace System.Net.Http.Functional.Tests
             {
                 // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
                 _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
+                return;
+            }
+            else if (PlatformDetection.IsFullFramework)
+            {
+                // Skip this test if running on .NET Framework. Exceeding max redirections will not throw
+                // exception. Instead, it simply returns the 3xx response.
+                _output.WriteLine("Skipping test on .NET Framework due to behavior difference.");
                 return;
             }
 
@@ -888,7 +905,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ResponseHeadersRead_ReadFromEachIterativelyDoesntDeadlock()
@@ -934,7 +950,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Hangs on NETFX
+        [ActiveIssue(18864)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_ReadFromSlowStreamingServer_PartialDataReturned()
@@ -1364,147 +1380,25 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public async Task PostAsync_ResponseContentRead_RequestContentDisposedAfterResponseBuffered()
-        {
-            using (var client = new HttpClient())
-            {
-                await LoopbackServer.CreateServerAsync(async (server, url) =>
-                {
-                    bool contentDisposed = false;
-                    Task<HttpResponseMessage> post = client.SendAsync(new HttpRequestMessage(HttpMethod.Post, url)
-                    {
-                        Content = new DelegateContent
-                        {
-                            SerializeToStreamAsyncDelegate = (contentStream, contentTransport) => contentStream.WriteAsync(new byte[100], 0, 100),
-                            TryComputeLengthDelegate = () => Tuple.Create<bool, long>(true, 100),
-                            DisposeDelegate = _ => contentDisposed = true
-                        }
-                    }, HttpCompletionOption.ResponseContentRead);
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
-                    {
-                        // Read headers from client
-                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
-
-                        // Send back all headers and some but not all of the response
-                        await writer.WriteAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 10\r\n\r\n");
-                        await writer.WriteAsync("abcd"); // less than contentLength
-
-                        // The request content should not be disposed of until all of the response has been sent
-                        await Task.Delay(1); // a little time to let data propagate
-                        Assert.False(contentDisposed, "Expected request content not to be disposed");
-
-                        // Send remaining response content
-                        await writer.WriteAsync("efghij");
-                        s.Shutdown(SocketShutdown.Send);
-
-                        // The task should complete and the request content should be disposed
-                        using (HttpResponseMessage response = await post)
-                        {
-                            Assert.True(contentDisposed, "Expected request content to be disposed");
-                            Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
-                        }
-
-                        return null;
-                    });
-                });
-            }
-        }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public async Task PostAsync_ResponseHeadersRead_RequestContentDisposedAfterRequestFullySentAndResponseHeadersReceived()
+        [Theory, MemberData(nameof(EchoServers))] // NOTE: will not work for in-box System.Net.Http.dll due to disposal of request content
+        public async Task PostAsync_ReuseRequestContent_Success(Uri remoteServer)
         {
+            const string ContentString = "This is the content string.";
             using (var client = new HttpClient())
             {
-                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                var content = new StringContent(ContentString);
+                for (int i = 0; i < 2; i++)
                 {
-                    var trigger = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                    bool contentDisposed = false;
-                    Task<HttpResponseMessage> post = client.SendAsync(new HttpRequestMessage(HttpMethod.Post, url)
+                    using (HttpResponseMessage response = await client.PostAsync(remoteServer, content))
                     {
-                        Content = new DelegateContent
-                        {
-                            SerializeToStreamAsyncDelegate = async (contentStream, contentTransport) =>
-                            {
-                                await contentStream.WriteAsync(new byte[50], 0, 50);
-                                await trigger.Task;
-                                await contentStream.WriteAsync(new byte[50], 0, 50);
-                            },
-                            TryComputeLengthDelegate = () => Tuple.Create<bool, long>(true, 100),
-                            DisposeDelegate = _ => contentDisposed = true
-                        }
-                    }, HttpCompletionOption.ResponseHeadersRead);
-
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
-                    {
-                        // Read headers from client
-                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
-
-                        // Send back all headers and some but not all of the response
-                        await writer.WriteAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 10\r\n\r\n");
-                        await writer.WriteAsync("abcd"); // less than contentLength
-
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        {
-                            Assert.False(contentDisposed, "Expected request content to not be disposed while request data still being sent");
-                        }
-                        else // [ActiveIssue(9006, TestPlatforms.AnyUnix)]
-                        {
-                            await post;
-                            Assert.True(contentDisposed, "Current implementation will dispose of the request content once response headers arrive");
-                        }
-
-                        // Allow request content to complete
-                        trigger.SetResult(true);
-
-                        // Send remaining response content
-                        await writer.WriteAsync("efghij");
-                        s.Shutdown(SocketShutdown.Send);
-
-                        // The task should complete and the request content should be disposed
-                        using (HttpResponseMessage response = await post)
-                        {
-                            Assert.True(contentDisposed, "Expected request content to be disposed");
-                            Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
-                        }
-
-                        return null;
-                    });
-                });
-            }
-        }
-
-        private sealed class DelegateContent : HttpContent
-        {
-            internal Func<Stream, TransportContext, Task> SerializeToStreamAsyncDelegate;
-            internal Func<Tuple<bool, long>> TryComputeLengthDelegate;
-            internal Action<bool> DisposeDelegate;
-
-            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
-            {
-                return SerializeToStreamAsyncDelegate != null ?
-                    SerializeToStreamAsyncDelegate(stream, context) :
-                    Task.CompletedTask;
-            }
-
-            protected override bool TryComputeLength(out long length)
-            {
-                if (TryComputeLengthDelegate != null)
-                {
-                    var result = TryComputeLengthDelegate();
-                    length = result.Item2;
-                    return result.Item1;
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains(ContentString, await response.Content.ReadAsStringAsync());
+                    }
                 }
-
-                length = 0;
-                return false;
             }
-
-            protected override void Dispose(bool disposing) =>
-                DisposeDelegate?.Invoke(disposing);
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -1569,13 +1463,22 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethodsThatAllowContent))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithContent_Success(
             string method,
             bool secureServer)
         {
+            if (PlatformDetection.IsFullFramework)
+            {
+                // .NET Framework doesn't allow a content body with this HTTP verb.
+                // It will throw a System.Net.ProtocolViolation exception.
+                if (method == "GET")
+                {
+                    return;
+                }
+            }
+
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
@@ -1633,13 +1536,22 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethodsThatDontAllowContent))]
         public async Task SendAsync_SendRequestUsingNoBodyMethodToEchoServerWithContent_NoBodySent(
             string method,
             bool secureServer)
         {
+            if (PlatformDetection.IsFullFramework)
+            {
+                // .NET Framework doesn't allow a content body with this HTTP verb.
+                // It will throw a System.Net.ProtocolViolation exception.
+                if (method == "HEAD")
+                {
+                    return;
+                }
+            }
+
             using (var client = new HttpClient())
             {
                 var request = new HttpRequestMessage(
@@ -1687,7 +1599,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Hangs on NETFX
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Throws exception sending request using Version(0,0)")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
@@ -1698,6 +1610,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Http2Servers))]
@@ -1812,7 +1725,6 @@ namespace System.Net.Http.Functional.Tests
         #endregion
 
         #region Proxy tests
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CredentialsForProxy))]
@@ -1856,7 +1768,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #17691")] // Difference in behavior
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(BypassedProxies))]
@@ -1899,7 +1810,6 @@ namespace System.Net.Http.Functional.Tests
         private static IEnumerable<object[]> BypassedProxies()
         {
             yield return new object[] { null };
-            yield return new object[] { new PlatformNotSupportedWebProxy() };
             yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
         }
 
@@ -1908,7 +1818,6 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { null, false };
             foreach (bool wrapCredsInCache in new[] { true, false })
             {
-                yield return new object[] { CredentialCache.DefaultCredentials, wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }

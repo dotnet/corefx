@@ -956,19 +956,19 @@ namespace System.Linq.Expressions.Tests
         public static void InvalidTypeValueType()
         {
             // implicit cast, but not reference assignable.
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant(0, typeof(long)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant(0, typeof(long)));
         }
 
         [Fact]
         public static void InvalidTypeReferenceType()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Constant("hello", typeof(Expression)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Constant("hello", typeof(Expression)));
         }
 
         [Fact]
         public static void NullType()
         {
-            Assert.Throws<ArgumentNullException>("type", () => Expression.Constant("foo", null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Expression.Constant("foo", null));
         }
 
         [Fact]
@@ -980,7 +980,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void PointerType()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(string).MakePointerType()));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Constant(null, typeof(string).MakePointerType()));
         }
 
         [Fact]

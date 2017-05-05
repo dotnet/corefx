@@ -408,8 +408,8 @@ namespace System.IO.Compression.Tests
         {
             using (DeflateStream ds = new DeflateStream(new MemoryStream(), CompressionMode.Decompress))
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { ds.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { ds.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { ds.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { ds.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { ds.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 ds.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { ds.CopyToAsync(new MemoryStream()); });
@@ -832,6 +832,11 @@ namespace System.IO.Compression.Tests
         {
             isSync = sync;
         }
+
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) => TaskToApm.Begin(ReadAsync(buffer, offset, count), callback, state);
+        public override int EndRead(IAsyncResult asyncResult) => TaskToApm.End<int>(asyncResult);
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) => TaskToApm.Begin(WriteAsync(buffer, offset, count), callback, state);
+        public override void EndWrite(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
 
         public override async Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {

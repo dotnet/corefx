@@ -4,18 +4,12 @@
   <PropertyGroup>
     <ProjectGuid>{30CAB353-089E-4294-B23B-F2DD1D945654}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="$(TestSourceFolder)SerializationTypes.netcoreapp.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.netcoreapp.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializerStressTests.netcoreapp.cs" />
-  </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(TestSourceFolder)DataContractSerializerStressTests.cs" />
     <Compile Include="$(TestSourceFolder)Utils.cs" />
     <Compile Include="$(TestSourceFolder)SerializationTypes.cs" />
     <Compile Include="$(TestSourceFolder)DataContractSerializer.cs" />
@@ -23,9 +17,18 @@
     <Compile Include="$(TestSourceFolder)MyResolver.cs" />
     <Compile Include="$(TestSourceFolder)XmlDictionaryReaderTests.cs" />
     <Compile Include="$(TestSourceFolder)XmlDictionaryWriterTest.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\ComparisonHelper.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\DataContractResolverLibrary.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\DCRSampleType.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\DCRTypeLibrary.cs" />
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\Primitives.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
+      <Link>Common\System\IO\TempFile.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
+    <Compile Include="$(TestSourceFolder)SerializationTestTypes\ObjRefSample.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uap'">
     <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />

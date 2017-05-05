@@ -192,14 +192,24 @@ namespace System.IO.Tests
         [InlineData(@"\\a\b\", @"\\a\b")]
         [InlineData(@"\\a\b", @"\\a\b")]
         [InlineData(@"\\test\unc", @"\\test\unc")]
-        [InlineData(@"\\?\UNC\test\unc\path\to\something", @"\\?\UNC\test\unc")]
-        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC\test\unc")]
-        [InlineData(@"\\?\UNC\a\b", @"\\?\UNC\a\b")]
-        [InlineData(@"\\?\UNC\a\b\", @"\\?\UNC\a\b")]
-        [InlineData(@"\\?\C:\foo\bar.txt", @"\\?\C:\")]
         public static void GetPathRoot_Windows_UncAndExtended(string value, string expected)
         {
             Assert.True(Path.IsPathRooted(value));
+            Assert.Equal(expected, Path.GetPathRoot(value));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests UNC
+        [Theory]
+        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC", @"\\?\UNC\test\unc\path\to\something")]
+        [InlineData(@"\\?\UNC\test\unc", @"\\?\UNC", @"\\?\UNC\test\unc")]
+        [InlineData(@"\\?\UNC\a\b1", @"\\?\UNC", @"\\?\UNC\a\b1")]
+        [InlineData(@"\\?\UNC\a\b2", @"\\?\UNC", @"\\?\UNC\a\b2\")]
+        [InlineData(@"\\?\C:\", @"\\?\C:", @"\\?\C:\foo\bar.txt")]
+        public static void GetPathRoot_Windows_UncAndExtended_WithLegacySupport(string normalExpected, string legacyExpected, string value)
+        {
+            Assert.True(Path.IsPathRooted(value));
+
+            string expected = PathFeatures.IsUsingLegacyPathNormalization() ? legacyExpected : normalExpected;
             Assert.Equal(expected, Path.GetPathRoot(value));
         }
 
@@ -209,9 +219,9 @@ namespace System.IO.Tests
         [InlineData(@"C:\", @"C:\")]
         [InlineData(@"C:\\", @"C:\")]
         [InlineData(@"C://", @"C:\")]
-        [InlineData(@"C:\foo", @"C:\")]
-        [InlineData(@"C:\\foo", @"C:\")]
-        [InlineData(@"C://foo", @"C:\")]
+        [InlineData(@"C:\foo1", @"C:\")]
+        [InlineData(@"C:\\foo2", @"C:\")]
+        [InlineData(@"C://foo3", @"C:\")]
         public static void GetPathRoot_Windows(string value, string expected)
         {
             Assert.True(Path.IsPathRooted(value));
@@ -227,7 +237,16 @@ namespace System.IO.Tests
             Assert.False(Path.IsPathRooted(uncPath));
             Assert.Equal(string.Empty, Path.GetPathRoot(uncPath));
         }
-        
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public static void IsPathRooted(string path)
+        {
+            Assert.False(Path.IsPathRooted(path));
+        }
+
         // Testing invalid drive letters !(a-zA-Z)
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
@@ -235,6 +254,7 @@ namespace System.IO.Tests
         [InlineData(@"[:\\")]       // 091 = [     090 = Z
         [InlineData(@"`:\foo")]    // 096 = `     097 = a
         [InlineData(@"{:\\")]       // 123 = {     122 = z
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug fixed on Core where it would return true if the first char is not a drive letter followed by a VolumeSeparatorChar coreclr/10297")]
         public static void IsPathRooted_Windows_Invalid(string value)
         {
             Assert.False(Path.IsPathRooted(value));
@@ -502,9 +522,17 @@ namespace System.IO.Tests
         [InlineData(@"\ .\")]
         public static void GetFullPath_Windows_LegacyArgumentExceptionPaths(string path)
         {
-            // These paths are legitimate Windows paths that can be created without extended syntax.
-            // We now allow them through.
-            Path.GetFullPath(path);
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // We didn't allow these paths on < 4.6.2
+                Assert.Throws<ArgumentException>(() => Path.GetFullPath(path));
+            }
+            else
+            {
+                // These paths are legitimate Windows paths that can be created without extended syntax.
+                // We now allow them through.
+                Path.GetFullPath(path);
+            }
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests MaxPathNotTooLong on Windows
@@ -543,15 +571,31 @@ namespace System.IO.Tests
             // (such as "md ...\"). We used to filter these out, but now allow them to prevent apps from
             // being blocked when they hit these paths.
             string curDir = Directory.GetCurrentDirectory();
-            Assert.NotEqual(
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
-            Assert.NotEqual(
-                Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
-            Assert.NotEqual(
-                Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
-                Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // Legacy path Path.GetFullePath() ignores . when there is less or more that two, when there is .. in the path it returns one directory up.
+                Assert.Equal(
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
+                Assert.Equal(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
+                Assert.Equal(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            }
+            else
+            {
+                Assert.NotEqual(
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ". " + Path.DirectorySeparatorChar));
+                Assert.NotEqual(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + "..." + Path.DirectorySeparatorChar));
+                Assert.NotEqual(
+                    Path.GetFullPath(Path.GetDirectoryName(curDir) + Path.DirectorySeparatorChar),
+                    Path.GetFullPath(curDir + Path.DirectorySeparatorChar + ".. " + Path.DirectorySeparatorChar));
+            }
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
@@ -570,24 +614,16 @@ namespace System.IO.Tests
         [InlineData(@"\\?\C:\|")]
         [InlineData(@"\\?\C:\.")]
         [InlineData(@"\\?\C:\..")]
-        [InlineData(@"\\?\C:\Foo\.")]
-        [InlineData(@"\\?\C:\Foo\..")]
+        [InlineData(@"\\?\C:\Foo1\.")]
+        [InlineData(@"\\?\C:\Foo2\..")]
         [InlineData(@"\\?\UNC\")]
-        [InlineData(@"\\?\UNC\server")]
-        [InlineData(@"\\?\UNC\server\")]
-        [InlineData(@"\\?\UNC\server\\")]
-        [InlineData(@"\\?\UNC\server\..")]
-        [InlineData(@"\\?\UNC\server\share\.")]
-        [InlineData(@"\\?\UNC\server\share\..")]
+        [InlineData(@"\\?\UNC\server1")]
+        [InlineData(@"\\?\UNC\server2\")]
+        [InlineData(@"\\?\UNC\server3\\")]
+        [InlineData(@"\\?\UNC\server4\..")]
+        [InlineData(@"\\?\UNC\server5\share\.")]
+        [InlineData(@"\\?\UNC\server6\share\..")]
         [InlineData(@"\\?\UNC\a\b\\")]
-        [InlineData(@"\\.\UNC\")]
-        [InlineData(@"\\.\UNC\server")]
-        [InlineData(@"\\.\UNC\server\")]
-        [InlineData(@"\\.\UNC\server\\")]
-        [InlineData(@"\\.\UNC\server\..")]
-        [InlineData(@"\\.\UNC\server\share\.")]
-        [InlineData(@"\\.\UNC\server\share\..")]
-        [InlineData(@"\\.\UNC\a\b\\")]
         [InlineData(@"\\.\")]
         [InlineData(@"\\.\.")]
         [InlineData(@"\\.\..")]
@@ -596,10 +632,17 @@ namespace System.IO.Tests
         [InlineData(@"\\.\C:\|")]
         [InlineData(@"\\.\C:\.")]
         [InlineData(@"\\.\C:\..")]
-        [InlineData(@"\\.\C:\Foo\.")]
-        [InlineData(@"\\.\C:\Foo\..")]
+        [InlineData(@"\\.\C:\Foo1\.")]
+        [InlineData(@"\\.\C:\Foo2\..")]
         public static void GetFullPath_Windows_ValidExtendedPaths(string path)
         {
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // Legacy Path doesn't support any of these paths.
+                AssertExtensions.ThrowsAny<ArgumentException, NotSupportedException>(() => Path.GetFullPath(path));
+                return;
+            }
+
             // None of these should throw
             if (path.StartsWith(@"\\?\"))
             {
@@ -611,34 +654,64 @@ namespace System.IO.Tests
             }
         }
 
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
+        [Theory]
+        [InlineData(@"\\.\UNC\")]
+        [InlineData(@"\\.\UNC\LOCALHOST")]
+        [InlineData(@"\\.\UNC\localHOST\")]
+        [InlineData(@"\\.\UNC\LOcaLHOST\\")]
+        [InlineData(@"\\.\UNC\lOCALHOST\..")]
+        [InlineData(@"\\.\UNC\LOCALhost\share\.")]
+        [InlineData(@"\\.\UNC\loCALHOST\share\..")]
+        [InlineData(@"\\.\UNC\a\b\\")]
+        public static void GetFullPath_Windows_ValidLegacy_ValidExtendedPaths(string path)
+        {
+            // should not throw
+            Path.GetFullPath(path);
+        }
+
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests valid paths based on UNC
         [Theory]
         // https://github.com/dotnet/corefx/issues/11965
         [InlineData(@"\\LOCALHOST\share\test.txt.~SS", @"\\LOCALHOST\share\test.txt.~SS")]
-        [InlineData(@"\\LOCALHOST\share", @"\\LOCALHOST\share")]
-        [InlineData(@"\\LOCALHOST\share", @" \\LOCALHOST\share")]
-        [InlineData(@"\\LOCALHOST\share\dir", @"\\LOCALHOST\share\dir")]
-        [InlineData(@"\\LOCALHOST\share", @"\\LOCALHOST\share\.")]
-        [InlineData(@"\\LOCALHOST\share", @"\\LOCALHOST\share\..")]
-        [InlineData(@"\\LOCALHOST\share\", @"\\LOCALHOST\share\    ")]
-        [InlineData(@"\\LOCALHOST\  share\", @"\\LOCALHOST\  share\")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share\test.txt.~SS", @"\\?\UNC\LOCALHOST\share\test.txt.~SS")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share", @"\\?\UNC\LOCALHOST\share")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share\dir", @"\\?\UNC\LOCALHOST\share\dir")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share\. ", @"\\?\UNC\LOCALHOST\share\. ")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share\.. ", @"\\?\UNC\LOCALHOST\share\.. ")]
-        [InlineData(@"\\?\UNC\LOCALHOST\share\    ", @"\\?\UNC\LOCALHOST\share\    ")]
-        [InlineData(@"\\.\UNC\LOCALHOST\  share\", @"\\.\UNC\LOCALHOST\  share\")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share\test.txt.~SS", @"\\.\UNC\LOCALHOST\share\test.txt.~SS")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share", @"\\.\UNC\LOCALHOST\share")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share\dir", @"\\.\UNC\LOCALHOST\share\dir")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share\", @"\\.\UNC\LOCALHOST\share\. ")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share\", @"\\.\UNC\LOCALHOST\share\.. ")]
-        [InlineData(@"\\.\UNC\LOCALHOST\share\", @"\\.\UNC\LOCALHOST\share\    ")]
-        [InlineData(@"\\.\UNC\LOCALHOST\  share\", @"\\.\UNC\LOCALHOST\  share\")]
-
+        [InlineData(@"\\LOCALHOST\share1", @"\\LOCALHOST\share1")]
+        [InlineData(@"\\LOCALHOST\share2", @" \\LOCALHOST\share2")]
+        [InlineData(@"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir")]
+        [InlineData(@"\\LOCALHOST\share4", @"\\LOCALHOST\share4\.")]
+        [InlineData(@"\\LOCALHOST\share5", @"\\LOCALHOST\share5\..")]
+        [InlineData(@"\\LOCALHOST\share6\", @"\\LOCALHOST\share6\    ")]
+        [InlineData(@"\\LOCALHOST\  share7\", @"\\LOCALHOST\  share7\")]
+        [InlineData(@"\\?\UNC\LOCALHOST\share8\test.txt.~SS", @"\\?\UNC\LOCALHOST\share8\test.txt.~SS")]
+        [InlineData(@"\\?\UNC\LOCALHOST\share9", @"\\?\UNC\LOCALHOST\share9")]
+        [InlineData(@"\\?\UNC\LOCALHOST\shareA\dir", @"\\?\UNC\LOCALHOST\shareA\dir")]
+        [InlineData(@"\\?\UNC\LOCALHOST\shareB\. ", @"\\?\UNC\LOCALHOST\shareB\. ")]
+        [InlineData(@"\\?\UNC\LOCALHOST\shareC\.. ", @"\\?\UNC\LOCALHOST\shareC\.. ")]
+        [InlineData(@"\\?\UNC\LOCALHOST\shareD\    ", @"\\?\UNC\LOCALHOST\shareD\    ")]
+        [InlineData(@"\\.\UNC\LOCALHOST\  shareE\", @"\\.\UNC\LOCALHOST\  shareE\")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareF\test.txt.~SS", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareG", @"\\.\UNC\LOCALHOST\shareG")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareH\dir", @"\\.\UNC\LOCALHOST\shareH\dir")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareK\", @"\\.\UNC\LOCALHOST\shareK\    ")]
+        [InlineData(@"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\")]
         public static void GetFullPath_Windows_UNC_Valid(string expected, string input)
         {
+            if (input.StartsWith(@"\\?\") && PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                Assert.Throws<ArgumentException>(() => Path.GetFullPath(input));
+            }
+            else
+            {
+                Assert.Equal(expected, Path.GetFullPath(input));
+            }
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests valid paths based on UNC
+        [Theory]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareI\", @"\\.\UNC\LOCALHOST\shareI", @"\\.\UNC\LOCALHOST\shareI\. ")]
+        [InlineData(@"\\.\UNC\LOCALHOST\shareJ\", @"\\.\UNC\LOCALHOST", @"\\.\UNC\LOCALHOST\shareJ\.. ")]
+        public static void GetFullPath_Windows_UNC_Valid_LegacyPathSupport(string normalExpected, string legacyExpected, string input)
+        {
+            string expected = PathFeatures.IsUsingLegacyPathNormalization() ? legacyExpected : normalExpected;
             Assert.Equal(expected, Path.GetFullPath(input));
         }
 
@@ -705,7 +778,7 @@ namespace System.IO.Tests
         [InlineData('?')]
         public static void GetFullPath_Windows_Wildcards(char wildcard)
         {
-            Assert.Throws<ArgumentException>("path", () => Path.GetFullPath("test" + wildcard + "ing"));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFullPath("test" + wildcard + "ing"));
         }
 
         // Windows-only P/Invoke to create 8.3 short names from long names

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Tests
 {
-    public class GroupByTests : EnumerableTests
+    public partial class GroupByTests : EnumerableTests
     {
         public static void AssertGroupingCorrect<TKey, TElement>(IEnumerable<TKey> keys, IEnumerable<TElement> elements, IEnumerable<IGrouping<TKey, TElement>> grouping)
         {
@@ -147,8 +147,8 @@ namespace System.Linq.Tests
 
             Assert.True(e.MoveNext());
             IList<int> odds = (IList<int>)e.Current;
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => odds[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => odds[23]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => odds[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => odds[23]);
         }
 
         [Fact]
@@ -224,29 +224,29 @@ namespace System.Linq.Tests
         public void SourceIsNull()
         {
             Record[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, new AnagramEqualityComparer()));
-            Assert.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, new AnagramEqualityComparer()));
         }
 
         [Fact]
         public void SourceIsNullResultSelectorUsed()
         {
             Record[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, (k, es) => es.Sum(), new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, (k, es) => es.Sum(), new AnagramEqualityComparer()));
         }
 
         [Fact]
         public void SourceIsNullResultSelectorUsedNoComparer()
         {
             Record[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, (k, es) => es.Sum()));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, e => e.Score, (k, es) => es.Sum()));
         }
 
         [Fact]
         public void SourceIsNullResultSelectorUsedNoComparerOrElementSelector()
         {
             Record[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, (k, es) => es.Sum(e => e.Score)));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.GroupBy(e => e.Name, (k, es) => es.Sum(e => e.Score)));
         }
 
         [Fact]
@@ -262,8 +262,8 @@ namespace System.Linq.Tests
                 new Record { Name = "Tim", Score = 25 }
             };
 
-            Assert.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, e => e.Score, new AnagramEqualityComparer()));
-            Assert.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, e => e.Score, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -279,7 +279,7 @@ namespace System.Linq.Tests
                 new Record { Name = "Tim", Score = 25 }
             };
 
-            Assert.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, e => e.Score, (k, es) => es.Sum(), new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, e => e.Score, (k, es) => es.Sum(), new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -297,7 +297,7 @@ namespace System.Linq.Tests
 
             Func<Record, string> keySelector = null;
 
-            Assert.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(keySelector, e => e.Score, (k, es) => es.Sum()));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(keySelector, e => e.Score, (k, es) => es.Sum()));
         }
 
         [Fact]
@@ -307,7 +307,7 @@ namespace System.Linq.Tests
             int[] element = { 60, -10, 40, 100 };
             var source = key.Zip(element, (k, e) => new Record { Name = k, Score = e });
 
-            Assert.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, (k, es) => es.Sum(e => e.Score), new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => source.GroupBy(null, (k, es) => es.Sum(e => e.Score), new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -325,7 +325,7 @@ namespace System.Linq.Tests
 
             Func<Record, int> elementSelector = null;
 
-            Assert.Throws<ArgumentNullException>("elementSelector", () => source.GroupBy(e => e.Name, elementSelector, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => source.GroupBy(e => e.Name, elementSelector, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -343,7 +343,7 @@ namespace System.Linq.Tests
 
             Func<Record, int> elementSelector = null;
 
-            Assert.Throws<ArgumentNullException>("elementSelector", () => source.GroupBy(e => e.Name, elementSelector, (k, es) => es.Sum()));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => source.GroupBy(e => e.Name, elementSelector, (k, es) => es.Sum()));
         }
 
         [Fact]
@@ -360,7 +360,7 @@ namespace System.Linq.Tests
 
             Func<string, IEnumerable<int>, long> resultSelector = null;
 
-            Assert.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, e => e.Score, resultSelector, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, e => e.Score, resultSelector, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -377,7 +377,7 @@ namespace System.Linq.Tests
 
             Func<string, IEnumerable<int>, long> resultSelector = null;
 
-            Assert.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, e => e.Score, resultSelector));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, e => e.Score, resultSelector));
         }
 
         [Fact]
@@ -394,7 +394,7 @@ namespace System.Linq.Tests
 
             Func<string, IEnumerable<Record>, long> resultSelector = null;
 
-            Assert.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, resultSelector));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, resultSelector));
         }
 
         [Fact]
@@ -406,7 +406,7 @@ namespace System.Linq.Tests
 
             Func<string, IEnumerable<Record>, long> resultSelector = null;
 
-            Assert.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, resultSelector, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => source.GroupBy(e => e.Name, resultSelector, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -863,50 +863,6 @@ namespace System.Linq.Tests
             Type grouptype = group.GetType();
             PropertyInfo key = grouptype.GetProperty("Key", BindingFlags.Instance | BindingFlags.Public);
             Assert.NotNull(key);
-        }
-
-        [Theory]
-        [MemberData(nameof(DebuggerAttributesValid_Data))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Grouping<TKey, TValue> doesn't have a Debugger proxy in the full .NET Framework. See https://github.com/dotnet/corefx/issues/14790.")]
-        public void DebuggerAttributesValid<TKey, TElement>(IGrouping<TKey, TElement> grouping, string keyString, TKey dummy1, TElement dummy2)
-        {
-            // The dummy parameters can be removed once https://github.com/dotnet/buildtools/pull/1300 is brought in.
-            Assert.Equal($"Key = {keyString}", DebuggerAttributes.ValidateDebuggerDisplayReferences(grouping));
-            
-            object proxyObject = DebuggerAttributes.GetProxyObject(grouping);
-            
-            // Validate proxy fields
-            Assert.Empty(DebuggerAttributes.GetDebuggerVisibleFields(proxyObject.GetType()));
-
-            // Validate proxy properties
-            IEnumerable<PropertyInfo> properties = DebuggerAttributes.GetDebuggerVisibleProperties(proxyObject.GetType());
-            Assert.Equal(2, properties.Count());
-            
-            // Key
-            TKey key = (TKey)properties.Single(property => property.Name == "Key").GetValue(proxyObject);
-            Assert.Equal(grouping.Key, key);
-
-            // Values
-            PropertyInfo valuesProperty = properties.Single(property => property.Name == "Values");
-            Assert.Equal(DebuggerBrowsableState.RootHidden, DebuggerAttributes.GetDebuggerBrowsableState(valuesProperty));
-            TElement[] values = (TElement[])valuesProperty.GetValue(proxyObject);
-            Assert.IsType<TElement[]>(values); // Arrays can be covariant / of assignment-compatible types
-            Assert.Equal(grouping, values);
-            Assert.Same(values, valuesProperty.GetValue(proxyObject)); // The result should be cached, as Grouping is immutable.
-        }
-
-        public static IEnumerable<object[]> DebuggerAttributesValid_Data()
-        {
-            IEnumerable<int> source = new[] { 1 };
-            yield return new object[] { source.GroupBy(i => i).Single(), "1", 0, 0 };
-            yield return new object[] { source.GroupBy(i => i.ToString(), i => i).Single(), @"""1""", string.Empty, 0 };
-            yield return new object[] { source.GroupBy(i => TimeSpan.FromSeconds(i), i => i).Single(), "{00:00:01}", TimeSpan.Zero, 0 };
-
-            yield return new object[] { new string[] { null }.GroupBy(x => x).Single(), "null", string.Empty, string.Empty };
-            // This test won't even work with the work-around because nullables lose their type once boxed, so xUnit sees an `int` and thinks
-            // we're trying to pass an IGrouping<int, int> rather than an IGrouping<int?, int?>.
-            // However, it should also be fixed once that PR is brought in, so leaving in this comment.
-            // yield return new object[] { new int?[] { null }.GroupBy(x => x).Single(), "null", new int?(0), new int?(0) };
         }
     }
 }

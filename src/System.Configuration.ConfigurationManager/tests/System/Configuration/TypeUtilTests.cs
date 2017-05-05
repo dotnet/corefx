@@ -37,6 +37,7 @@ namespace System.ConfigurationTests
             InlineData("System.Collections.Specialized.StringCollection", typeof(StringCollection))
             InlineData("System.Collections.Specialized.NameValueCollection", typeof(NameValueCollection))
             ]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19340")]
         public void GetType_NoAssemblyQualifcation(string typeString, Type expectedType)
         {
             Assert.Equal(expectedType, TypeUtil.GetType(typeString, throwOnError: false));
@@ -55,6 +56,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost()
         {
             TestHost host = new TestHost((s, b) => { return typeof(string); });
@@ -62,6 +64,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost_ThrowOnError()
         {
             TestHost host = new TestHost((s, b) => { if (b) throw new ArgumentException(); return null; });
@@ -69,6 +72,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19339")]
         public void GetTypeConfigHost_NoThrowOnError()
         {
             TestHost host = new TestHost((s, b) => { if (b) throw new ArgumentException(); return null; });

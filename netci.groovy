@@ -221,6 +221,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                     osForMachineAffinity = "RHEL7.2"
                 }
 
+                def osGroup = osGroupMap[osName]
                 def archGroup = "x64"
                 def newJobName = "outerloop_${targetGroup}_${osShortName[osName]}_${configurationGroup.toLowerCase()}"
 
@@ -229,21 +230,27 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                         if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -framework:${targetGroup} -${configurationGroup}")
                             batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -framework:${targetGroup} -${configurationGroup} -outerloop -- /p:IsCIBuild=true")
+                            batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin\\runtime\\${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}")
                         }
                         else if (osName == 'OSX10.12') {
                             shell("HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()}")
                             shell("HOME=\$WORKSPACE/tempHome ./build-tests.sh -${configurationGroup.toLowerCase()} -outerloop -- /p:IsCIBuild=true")
+                            shell("tar -czf bin/build.tar.gz --directory=\"bin/runtime/${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}\" .")
                         }
                         else if (osName == 'CentOS7.1') {
                             // On Centos7.1, the cmake toolset is currently installed in /usr/local/bin (it was built manually).  When
                             // running sudo, that will be typically eliminated from the PATH, so let's add it back in.
                             shell("sudo PATH=\$PATH:/usr/local/bin HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()}")
                             shell("sudo PATH=\$PATH:/usr/local/bin HOME=\$WORKSPACE/tempHome ./build-tests.sh -${configurationGroup.toLowerCase()} -outerloop -- /p:IsCIBuild=true")
+                            shell("sudo tar -czf bin/build.tar.gz --directory=\"bin/runtime/${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}\" .")
                         }
                         else {
                             def portableLinux = (osName == 'PortableLinux') ? '-portable' : ''
                             shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} ${portableLinux}")
                             shell("sudo HOME=\$WORKSPACE/tempHome ./build-tests.sh -${configurationGroup.toLowerCase()} -outerloop -- /p:IsCIBuild=true")
+                            // Tar up the appropriate bits.
+                            shell("sudo tar -czf bin/build.tar.gz --directory=\"bin/runtime/${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}\" .")
+
                         }
                     }
                 }
@@ -252,7 +259,7 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 if (osName == 'Windows_NT' || osName == 'OSX10.12') {
                     Utilities.setMachineAffinity(newJob, osForMachineAffinity, "latest-or-auto-elevated")
                 }
-                else if (osGroupMap[osName] == 'Linux') {
+                else if (osGroup == 'Linux') {
                     Utilities.setMachineAffinity(newJob, osForMachineAffinity, 'outer-latest-or-auto')
                 } else {
                     Utilities.setMachineAffinity(newJob, osForMachineAffinity, 'latest-or-auto');
@@ -262,8 +269,16 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
                 // Add the unit test results
                 Utilities.addXUnitDotNETResults(newJob, 'bin/**/testResults.xml')
+                def archiveContents = "msbuild.log"
+                if (osName.contains('Windows')) {
+                    // Packer.exe is a .NET Framework application. When we can use it from the tool-runtime, we can archive the ".pack" file here.
+                    archiveContents += ",bin/build.pack"
+                }
+                else {
+                    archiveContents += ",bin/build.tar.gz"
+                }
                 // Add archival for the built data.
-                Utilities.addArchival(newJob, "msbuild.log", '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
+                Utilities.addArchival(newJob, archiveContents, '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
                 // Set up appropriate triggers.  PR on demand, otherwise nightly
                 if (isPR) {
                     // Set PR trigger.
@@ -276,37 +291,6 @@ def targetGroupOsMap = ['netcoreapp': ['Windows 10', 'Windows 7', 'Windows_NT', 
                 }
             }
         }
-    }
-}
-
-// **************************
-// Define perf testing.  Built locally and submitted to Helix.
-// **************************
-
-// builds with secrets should never be available for pull requests.
-// right now perf tests are only run on Win10 (but can be built on any Windows)
-['Windows 10'].each { osName ->
-    ['Debug', 'Release'].each { configurationGroup ->
-
-        def newJobName = "perf_${osShortName[osName]}_${configurationGroup.toLowerCase()}"
-
-        def newJob = job(Utilities.getFullJobName(project, newJobName, /* isPR */ false)) {
-            steps {
-                helix("Build.cmd -- /p:Creator=dotnet-bot /p:ArchiveTests=true /p:ConfigurationGroup=${configurationGroup} /p:Configuration=Windows_${configurationGroup} /p:TestDisabled=true /p:EnableCloudTest=true /p:BuildMoniker={uniqueId} /p:TargetQueue=Windows.10.Amd64 /p:TestProduct=CoreFx /p:Branch=master /p:OSGroup=Windows_NT /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken={CloudDropAccessToken} /p:CloudResultsAccessToken={CloudResultsAccessToken} /p:BuildCompleteConnection={BuildCompleteConnection} /p:BuildIsOfficialConnection={BuildIsOfficialConnection} /p:DocumentDbKey={DocumentDbKey} /p:DocumentDbUri=https://hms.documents.azure.com:443/ /p:FuncTestsDisabled=true /p:Performance=true")
-            }
-        }
-
-        Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
-
-        Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
-
-        // Set up standard options.
-        Utilities.standardJobSetup(newJob, project, /* isPR */ false, "*/${branch}")
-
-        // Set a periodic trigger
-        Utilities.addPeriodicTrigger(newJob, '@daily')
-
-        Utilities.addPrivatePermissions(newJob)
     }
 }
 

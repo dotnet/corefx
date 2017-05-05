@@ -138,14 +138,11 @@ namespace System.Net
         {
             get
             {
-                return false;
+                return _allowReadStreamBuffering;
             }
             set
             {
-                if (value)
-                {
-                    throw new InvalidOperationException(SR.net_OperationNotSupportedException);
-                }
+                _allowReadStreamBuffering = value;
             }            
         }
 
@@ -384,24 +381,7 @@ namespace System.Net
         }
 
 
-        public bool KeepAlive
-        {
-            get
-            {
-                return _webHeaderCollection[HttpKnownHeaderNames.KeepAlive] == bool.TrueString;
-            }
-            set
-            {
-                if (value)
-                {
-                    SetSpecialHeaders(HttpKnownHeaderNames.KeepAlive, bool.TrueString);
-                }
-                else
-                {
-                    SetSpecialHeaders(HttpKnownHeaderNames.KeepAlive, bool.FalseString);
-                }
-            }
-        } 
+        public bool KeepAlive { get; set; } = true;
 
         public bool UnsafeAuthenticatedConnectionSharing
         {
@@ -816,7 +796,7 @@ namespace System.Net
         {
             get
             {
-                return (_sendRequestTask != null) && (_sendRequestTask.Status == TaskStatus.RanToCompletion);
+                return (_sendRequestTask != null) && (_sendRequestTask.IsCompletedSuccessfully);
             }
         }
 
@@ -1187,6 +1167,15 @@ namespace System.Net
                 }
 
                 request.Headers.TransferEncodingChunked = SendChunked;
+
+                if (KeepAlive)
+                {
+                    request.Headers.Connection.Add(HttpKnownHeaderNames.KeepAlive);
+                }
+                else
+                {
+                    request.Headers.ConnectionClose = true;
+                }
 
                 _sendRequestTask = client.SendAsync(
                     request,

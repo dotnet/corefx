@@ -62,8 +62,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        internal BranchFalseInstruction() { }
-
         public override string InstructionName => "BranchFalse";
         public override int ConsumedStack => 1;
 
@@ -96,8 +94,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        internal BranchTrueInstruction() { }
-
         public override string InstructionName => "BranchTrue";
         public override int ConsumedStack => 1;
 
@@ -129,8 +125,6 @@ namespace System.Linq.Expressions.Interpreter
                 return s_cache;
             }
         }
-
-        internal CoalescingBranchInstruction() { }
 
         public override string InstructionName => "CoalescingBranch";
         public override int ConsumedStack => 1;
@@ -782,8 +776,10 @@ namespace System.Linq.Expressions.Interpreter
         {
             ConstructorInfo ctor = _runtimeWrappedExceptionCtor
                 ?? (_runtimeWrappedExceptionCtor = typeof(RuntimeWrappedException)
-                .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
-                .First(c => c.GetParametersCached().Length == 1));
+                .GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.ExactBinding, 
+                                null, 
+                                new Type[] { typeof(object) }, 
+                                null));
             return (RuntimeWrappedException)ctor.Invoke(new [] {thrown});
         }
     }

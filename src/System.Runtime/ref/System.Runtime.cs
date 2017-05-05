@@ -165,22 +165,6 @@ namespace System
         public void Handle(System.Func<System.Exception, bool> predicate) { }
         public override string ToString() { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct ArgIterator
-    {
-        public ArgIterator(System.RuntimeArgumentHandle arglist) { }
-        [System.CLSCompliantAttribute(false)]
-        public unsafe ArgIterator(System.RuntimeArgumentHandle arglist, void *ptr) { }
-        public void End() { }
-        public override bool Equals(Object o) { throw null; }
-        public override int GetHashCode() { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.TypedReference GetNextArg() { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
-        public unsafe System.RuntimeTypeHandle GetNextArgType() { throw null; }
-        public int GetRemainingCount() { throw null; }
-    }
     public partial class ArgumentException : System.SystemException, System.Runtime.Serialization.ISerializable
     {
         public ArgumentException() { }
@@ -346,14 +330,24 @@ namespace System
         public ArraySegment(T[] array, int offset, int count) { throw null; }
         public T[] Array { get { throw null; } }
         public int Count { get { throw null; } }
+        public static ArraySegment<T> Empty { get { throw null; } }
         public int Offset { get { throw null; } }
+        public T this[int index] { get { throw null; } set { } }
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
         T System.Collections.Generic.IList<T>.this[int index] { get { throw null; } set { } }
         T System.Collections.Generic.IReadOnlyList<T>.this[int index] { get { throw null; } }
+        public void CopyTo(T[] destination) { throw null; }
+        public void CopyTo(T[] destination, int destinationIndex) { throw null; }
+        public void CopyTo(ArraySegment<T> destination) { throw null; }
         public bool Equals(System.ArraySegment<T> obj) { throw null; }
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         public override int GetHashCode() { throw null; }
+        public ArraySegment<T> Slice(int index) { throw null; }
+        public ArraySegment<T> Slice(int index, int count) { throw null; }
+        public T[] ToArray() { throw null; }
         public static bool operator ==(System.ArraySegment<T> a, System.ArraySegment<T> b) { throw null; }
+        public static implicit operator ArraySegment<T>(T[] array) { throw null; }
         public static bool operator !=(System.ArraySegment<T> a, System.ArraySegment<T> b) { throw null; }
         void System.Collections.Generic.ICollection<T>.Add(T item) { }
         void System.Collections.Generic.ICollection<T>.Clear() { }
@@ -365,6 +359,15 @@ namespace System
         void System.Collections.Generic.IList<T>.Insert(int index, T item) { }
         void System.Collections.Generic.IList<T>.RemoveAt(int index) { }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct Enumerator : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable
+        {
+            public T Current { get { throw null; } }
+            object System.Collections.IEnumerator.Current { get { throw null; } }
+            public void Dispose() { }
+            public bool MoveNext() { throw null; }
+            void System.Collections.IEnumerator.Reset() { }
+        }
     }
     public partial class ArrayTypeMismatchException : System.SystemException
     {
@@ -2003,7 +2006,6 @@ namespace System
         public static string Concat(string str0, string str1, string str2) { throw null; }
         public static string Concat(string str0, string str1, string str2, string str3) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static string Concat(object arg0, object arg1, object arg2, object arg3, __arglist) { throw null; } 
         public static string Concat(params string[] values) { throw null; }
         public static string Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public bool Contains(string value) { throw null; }
@@ -2080,6 +2082,8 @@ namespace System
         public string Remove(int startIndex, int count) { throw null; }
         public string Replace(char oldChar, char newChar) { throw null; }
         public string Replace(string oldValue, string newValue) { throw null; }
+        public string Replace(string oldValue, string newValue, System.StringComparison comparisonType) { throw null; }
+        public string Replace(string oldValue, string newValue, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public string[] Split(char separator, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
         public string[] Split(char separator, int count, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
         public string[] Split(string separator, System.StringSplitOptions options = System.StringSplitOptions.None) { throw null; }
@@ -2630,6 +2634,7 @@ namespace System
         public virtual bool IsSerializable { get { throw null; } }
         public bool IsSpecialName { get { throw null; } }
         public virtual bool IsSZArray { get { throw null; } }
+        public virtual bool IsVariableBoundArray { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public bool IsVisible { get { throw null; } }
@@ -6132,6 +6137,7 @@ namespace System.Reflection
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsSZArray { get { throw null; } }
+        public override bool IsVariableBoundArray { get { throw null; } }
         public override System.Type GetElementType() { throw null; }
         protected override bool HasElementTypeImpl() { throw null; }
         public override System.Type UnderlyingSystemType { get { throw null; } }
@@ -6486,7 +6492,16 @@ namespace System.Runtime.CompilerServices
         Default = 0,
         Sometimes = 2,
     }
-    
+    public static class RuntimeFeature
+    {
+        public static bool IsSupported(string feature) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [AttributeUsage(AttributeTargets.All, Inherited = false)]
+    public sealed class IsReadOnlyAttribute : Attribute
+    {
+        public IsReadOnlyAttribute() { }
+    }
     public sealed partial class RuntimeWrappedException : System.Exception
     {
         internal RuntimeWrappedException() { }
@@ -6919,6 +6934,12 @@ namespace System.Text
         public System.Text.StringBuilder AppendFormat(string format, params object[] args) { throw null; }
         public System.Text.StringBuilder AppendLine() { throw null; }
         public System.Text.StringBuilder AppendLine(string value) { throw null; }
+        public StringBuilder AppendJoin(string separator, params object[] values) { throw null; }
+        public StringBuilder AppendJoin<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
+        public StringBuilder AppendJoin(string separator, params string[] values) { throw null; }
+        public StringBuilder AppendJoin(char separator, params object[] values) { throw null; }
+        public StringBuilder AppendJoin<T>(char separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
+        public StringBuilder AppendJoin(char separator, params string[] values) { throw null; }
         public System.Text.StringBuilder Clear() { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public int EnsureCapacity(int capacity) { throw null; }
@@ -7322,6 +7343,7 @@ namespace System.Threading.Tasks
         public int Id { get { throw null; } }
         public bool IsCanceled { get { throw null; } }
         public bool IsCompleted { get { throw null; } }
+        public bool IsCompletedSuccessfully { get { throw null; } }
         public bool IsFaulted { get { throw null; } }
         public System.Threading.Tasks.TaskStatus Status { get { throw null; } }
         System.Threading.WaitHandle System.IAsyncResult.AsyncWaitHandle { get { throw null; } }

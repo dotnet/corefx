@@ -107,7 +107,14 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
             Console.InputEncoding = Encoding.ASCII;
             Assert.Equal(Encoding.ASCII, Console.InputEncoding);
 
-            Assert.NotSame(inReader, Console.In);
+            if (PlatformDetection.IsWindows)
+            {
+                // Console.set_InputEncoding is effectively a nop on Unix,
+                // so although the reader accessed by Console.In will be reset,
+                // it'll be re-initialized on re-access to the same singleton,
+                // (assuming input isn't redirected).
+                Assert.NotSame(inReader, Console.In);
+            }
 
             return SuccessExitCode;
         }).Dispose();
@@ -116,7 +123,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     [Fact]
     public void InputEncoding_SetNull_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("value", () => Console.InputEncoding = null);
+        AssertExtensions.Throws<ArgumentNullException>("value", () => Console.InputEncoding = null);
     }
 
     [Fact]
@@ -158,7 +165,7 @@ public partial class ConsoleEncoding : RemoteExecutorTestBase
     [Fact]
     public void OutputEncoding_SetNull_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("value", () => Console.OutputEncoding = null);
+        AssertExtensions.Throws<ArgumentNullException>("value", () => Console.OutputEncoding = null);
     }
 
     [Fact]

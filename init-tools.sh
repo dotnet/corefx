@@ -11,58 +11,8 @@ export __BUILDTOOLS_USE_CSPROJ=true
 __BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
 __DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
 __BUILD_TOOLS_PATH=$__PACKAGES_DIR/microsoft.dotnet.buildtools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
-__PROJECT_JSON_PATH=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
-__PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
-__PROJECT_JSON_CONTENTS="<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>netcoreapp1.0</TargetFramework><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences></PropertyGroup><ItemGroup><PackageReference Include=\"Microsoft.DotNet.BuildTools\" Version=\"$__BUILD_TOOLS_PACKAGE_VERSION\" /></ItemGroup></Project>"
-__INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
-
-# Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
-get_current_linux_name() {
-    # Detect Distro
-    if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
-            echo "ubuntu.16.04"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 16.10)" -eq 1 ]; then
-            echo "ubuntu.16.10"
-            return 0
-        fi
-
-        echo "ubuntu"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
-        echo "centos"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-        echo "rhel"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
-        echo "debian"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 alpine)" -eq 1 ]; then
-        echo "alpine"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 24)" -eq 1 ]; then
-            echo "fedora.24"
-            return 0
-        fi
-    elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
-            echo "opensuse.13.2"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 42.1)" -eq 1 ]; then
-            echo "opensuse.42.1"
-            return 0
-        fi
-    fi
-
-    # Cannot determine Linux distribution, assuming Ubuntu 14.04.
-    echo "ubuntu"
-    return 0
-}
+__INIT_TOOLS_RESTORE_PROJECT=$__scriptpath/init-tools.msbuild
+__INIT_TOOLS_DONE_MARKER=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION/done
 
 if [ -z "$__DOTNET_PKG" ]; then
     if [ "$(uname -m | grep "i[3456]86")" = "i686" ]; then
@@ -77,14 +27,14 @@ OSName=$(uname -s)
             ;;
 
         Linux)
-            __DOTNET_PKG="dotnet-dev-$(get_current_linux_name)-x64"
+            __DOTNET_PKG=dotnet-dev-linux-x64
             OS=Linux
             ;;
 
         *)
-            echo "Unsupported OS '$OSName' detected. Downloading ubuntu-x64 tools."
+            echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
             OS=Linux
-            __DOTNET_PKG=dotnet-dev-ubuntu-x64
+            __DOTNET_PKG=dotnet-dev-linux-x64
             ;;
   esac
 fi
@@ -133,19 +83,17 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         echo "Copying $BUILD_TOOLS_TOOL_DIR to $__TOOLRUNTIME_DIR" >> $__init_tools_log
         cp -r $BUILD_TOOLS_TOOL_DIR/* $__TOOLRUNTIME_DIR
     else
-        if [ ! -d "$__PROJECT_JSON_PATH" ]; then mkdir "$__PROJECT_JSON_PATH"; fi
-        echo $__PROJECT_JSON_CONTENTS > "$__PROJECT_JSON_FILE"
-
         if [ ! -e $__BUILD_TOOLS_PATH ]; then
             echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
-            echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE" >> $__init_tools_log
-            $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE >> $__init_tools_log
+            echo "Running: $__DOTNET_CMD restore \"$__INIT_TOOLS_RESTORE_PROJECT\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE /p:BuildToolsPackageVersion=$__BUILD_TOOLS_PACKAGE_VERSION" >> $__init_tools_log
+            $__DOTNET_CMD restore "$__INIT_TOOLS_RESTORE_PROJECT" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE /p:BuildToolsPackageVersion=$__BUILD_TOOLS_PACKAGE_VERSION >> $__init_tools_log
             if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."1>&2; fi
         fi
 
         echo "Initializing BuildTools..."
         echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR" >> $__init_tools_log
 
+        # Executables restored with .NET Core 2.0 do not have executable permission flags. https://github.com/NuGet/Home/issues/4424
         chmod +x $__BUILD_TOOLS_PATH/init-tools.sh
         $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
         if [ "$?" != "0" ]; then
@@ -154,11 +102,12 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         fi
     fi
 
-    Tools-Override/crossgen.sh $__scriptpath/Tools
-
     echo "Making all .sh files executable under Tools."
+    # Executables restored with .NET Core 2.0 do not have executable permission flags. https://github.com/NuGet/Home/issues/4424
     ls $__scriptpath/Tools/*.sh | xargs chmod +x
     ls $__scriptpath/Tools/scripts/docker/*.sh | xargs chmod +x
+
+    Tools/crossgen.sh $__scriptpath/Tools
 
     touch $__INIT_TOOLS_DONE_MARKER
 

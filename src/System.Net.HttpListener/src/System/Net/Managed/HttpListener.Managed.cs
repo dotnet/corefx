@@ -27,7 +27,8 @@ namespace System.Net
         {
             get
             {
-                throw new PlatformNotSupportedException();
+                CheckDisposed();
+                return _timeoutManager;
             }
         }
 
@@ -366,6 +367,7 @@ namespace System.Net
 
         public HttpListenerContext GetContext()
         {
+            CheckDisposed();
             if (_state == State.Stopped)
             {
                 throw new InvalidOperationException(SR.Format(SR.net_listener_mustcall, "Start()"));
