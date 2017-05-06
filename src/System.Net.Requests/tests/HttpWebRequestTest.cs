@@ -296,17 +296,11 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public void Timeout_SetTenMillisecondsOnLoopback_ThrowsWebException()
+        public async Task Timeout_SetTenMillisecondsOnLoopback_ThrowsWebException()
         {
-            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
-                s.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-                s.Listen(0);
-
-                IPEndPoint ep = (IPEndPoint)s.LocalEndPoint;
-                Uri uri = new Uri($"http://{ep.Address}:{ep.Port}");
-
-                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                HttpWebRequest request = WebRequest.CreateHttp(url);
                 request.Timeout = 10; // ms.
 
                 var sw = Stopwatch.StartNew();
@@ -314,14 +308,16 @@ namespace System.Net.Tests
                 {
                     var response = (HttpWebResponse)request.GetResponse();
                 });
-
+                
                 sw.Stop();
 
-                Assert.InRange(sw.ElapsedMilliseconds, 1, 60 * 1000); // Allow a very wide range as this has taken over 10 seconds occasionally
+                Assert.InRange(sw.ElapsedMilliseconds, 1, 5 * 1000);
                 Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
                 Assert.Equal(null, exception.InnerException);
                 Assert.Equal(null, exception.Response);
-            }
+
+                return Task.FromResult<object>(null);
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1244,73 +1240,76 @@ namespace System.Net.Tests
             }
         }
 
-        [ActiveIssue(19083)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19083")]
-        [Theory, MemberData(nameof(EchoServers))]
-        public void Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException(Uri remoteServer)
+        [Fact]
+        public async Task Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.Method = "POST";
-            RequestState state = new RequestState();
-            state.Request = request;
-
-            request.BeginGetResponse(new AsyncCallback(RequestStreamCallback), state);
-
-            if (!request.HaveResponse)
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                request.Method = "POST";
+                RequestState state = new RequestState();
+                state.Request = request;
+
+                request.BeginGetResponse(new AsyncCallback(RequestStreamCallback), state);
+                
                 request.Abort();
                 Assert.Equal(1, state.RequestStreamCallbackCallCount);
                 WebException wex = state.SavedRequestStreamException as WebException;
                 Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
-            }
+
+                return Task.FromResult<object>(null);
+            });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ResponseCallback not called after Abort on netfx")]
-        [Theory, MemberData(nameof(EchoServers))]
-        public void Abort_BeginGetResponseThenAbort_ResponseCallbackCalledBeforeAbortReturns(Uri remoteServer)
+        [Fact]
+        public async Task Abort_BeginGetResponseThenAbort_ResponseCallbackCalledBeforeAbortReturns()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            RequestState state = new RequestState();
-            state.Request = request;
-
-            request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
-
-            if (!request.HaveResponse)
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                RequestState state = new RequestState();
+                state.Request = request;
+
+                request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
+
                 request.Abort();
                 Assert.Equal(1, state.ResponseCallbackCallCount);
-            }
+
+                return Task.FromResult<object>(null);
+            });
         }
 
-        [ActiveIssue(18800)]
-        [Theory, MemberData(nameof(EchoServers))]
-        public void Abort_BeginGetResponseThenAbort_EndGetResponseThrowsWebException(Uri remoteServer)
+        [Fact]
+        public async Task Abort_BeginGetResponseThenAbort_EndGetResponseThrowsWebException()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            RequestState state = new RequestState();
-            state.Request = request;
-
-            request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
-
-            if (!request.HaveResponse)
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                RequestState state = new RequestState();
+                state.Request = request;
+
+                request.BeginGetResponse(new AsyncCallback(ResponseCallback), state);
+
                 request.Abort();
+
                 WebException wex = state.SavedResponseException as WebException;
                 Assert.Equal(WebExceptionStatus.RequestCanceled, wex.Status);
-            }
+
+                return Task.FromResult<object>(null);
+            });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void Abort_BeginGetResponseUsingNoCallbackThenAbort_Success(Uri remoteServer)
+        [Fact]
+        public async Task Abort_BeginGetResponseUsingNoCallbackThenAbort_Success()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-
-            request.BeginGetResponse(null, null);
-
-            if (!request.HaveResponse)
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                request.BeginGetResponse(null, null);
                 request.Abort();
-            }
+
+                return Task.FromResult<object>(null);
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
