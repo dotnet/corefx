@@ -74,7 +74,17 @@ namespace System.Net.Tests
         }
 
         [Fact]
-        public void CopyTo_NullArray_ThrowsNullReferenceException()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core fixes a bug where HttpListenerPrefixCollection.CopyTo(null) throws an NRE.")]
+        public void CopyTo_NullArray_ThrowsArgumentNullExceptionOnNetCore()
+        {
+            var listener = new HttpListener();
+            Assert.Throws<ArgumentNullException>(() => listener.Prefixes.CopyTo((Array)null, 0));
+            Assert.Throws<ArgumentNullException>(() => listener.Prefixes.CopyTo(null, 0));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Core fixes a bug where HttpListenerPrefixCollection.CopyTo(null) throws an NRE.")]
+        public void CopyTo_NullArray_ThrowsNullReferenceExceptionOnNetFx()
         {
             var listener = new HttpListener();
             Assert.Throws<NullReferenceException>(() => listener.Prefixes.CopyTo((Array)null, 0));
