@@ -278,7 +278,7 @@ namespace System.Security.Cryptography
         public ECDsaCng() { }
         public ECDsaCng(int keySize) { }
         public ECDsaCng(System.Security.Cryptography.CngKey key) { }
-#if ectypes // types missing from netfx and net462 targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public ECDsaCng(System.Security.Cryptography.ECCurve curve) { }
 #endif
         public CngAlgorithm HashAlgorithm { get { throw null; } set { } }
@@ -286,7 +286,7 @@ namespace System.Security.Cryptography
         public override int KeySize { get { throw null; } set { } }
         public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
         protected override void Dispose(bool disposing) { }
-#if ectypes // types missing from netfx and net462 targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public override System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
         public override System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
         public override void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
@@ -294,7 +294,7 @@ namespace System.Security.Cryptography
         public void FromXmlString(string xml, ECKeyXmlFormat format) { throw null; }
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
-#if ectypes // types missing from netfx and net462 targeting pack
+#if FEATURE_ECPARAMETERS // types missing from netfx and net462 targeting pack
         public override void ImportParameters(System.Security.Cryptography.ECParameters parameters) { }
 #endif
         public byte[] SignData(byte[] data) { throw null; }
