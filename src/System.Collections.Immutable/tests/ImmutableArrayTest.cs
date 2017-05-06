@@ -1909,9 +1909,22 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        public void IStructuralEquatableEqualsNullComparerInvalid()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public void IStructuralEquatable_Equals_NullComparer_ShouldUseDefaultComparer()
         {
-            // This was not fixed for compatability reasons. See https://github.com/dotnet/corefx/issues/13410
+            Assert.Equal(
+                ((IStructuralEquatable)ImmutableArray.Create(1, 2, 3)).Equals(ImmutableArray.Create(1, 2, 3), EqualityComparer<object>.Default),
+                ((IStructuralEquatable)ImmutableArray.Create(1, 2, 3)).Equals(ImmutableArray.Create(1, 2, 3), null));
+
+            Assert.Equal(
+                ((IStructuralEquatable)ImmutableArray.Create(1, 2, 3)).Equals(null, EqualityComparer<object>.Default),
+                ((IStructuralEquatable)ImmutableArray.Create(1, 2, 3)).Equals(null, null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        public void IStructuralEquatable_Equals_NullComparer_ShouldUseDefaultComparer_netfx()
+        {
             Assert.Throws<NullReferenceException>(() => ((IStructuralEquatable)ImmutableArray.Create(1, 2, 3)).Equals(ImmutableArray.Create(1, 2, 3), comparer: null));
             Assert.Throws<NullReferenceException>(() => ((IStructuralEquatable)s_emptyDefault).Equals(other: null, comparer: null));
         }
@@ -1949,8 +1962,20 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
         [MemberData(nameof(Int32EnumerableData))]
-        public void IStructuralEquatableGetHashCodeNullComparerNonNullUnderlyingArrayInvalid(IEnumerable<int> source)
+        public void IStructuralEquatable_GetHashCode_NullComparer_ShouldUseDefaultComparer(IEnumerable<int> source)
+        {
+            var array = source.ToImmutableArray();
+            Assert.Equal(
+                ((IStructuralEquatable)array).GetHashCode(EqualityComparer<object>.Default),
+                ((IStructuralEquatable)array).GetHashCode(null));
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        [MemberData(nameof(Int32EnumerableData))]
+        public void IStructuralEquatable_GetHashCode_NullComparer_ShouldUseDefaultComparer_netfx(IEnumerable<int> source)
         {
             var array = source.ToImmutableArray();
             AssertExtensions.Throws<ArgumentNullException>("comparer", () => ((IStructuralEquatable)array).GetHashCode(comparer: null));
@@ -2008,8 +2033,27 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
-        [MemberData(nameof(IStructuralComparableCompareToNullComparerNullReferenceInvalidData))]
-        public void IStructuralComparableCompareToNullComparerNullReferenceInvalid(IEnumerable<int> source, object other)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        [MemberData(nameof(IStructuralComparable_CompareTo_NullComparer_ShouldUseDefaultComparer_Data))]
+        public void IStructuralComparable_CompareTo_NullComparer_ShouldUseDefaultComparer(IEnumerable<int> source, object other)
+        {
+            var array = source.ToImmutableArray();
+            Assert.Equal(
+                ((IStructuralComparable)array).CompareTo(other, Comparer<object>.Default),
+                ((IStructuralComparable)array).CompareTo(other, null));
+
+            if (other == null)
+            {
+                Assert.Equal(
+                    ((IStructuralComparable)array).CompareTo(s_emptyDefault, Comparer<object>.Default),
+                    ((IStructuralComparable)array).CompareTo(s_emptyDefault, null));
+            }
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18528 yet.")]
+        [MemberData(nameof(IStructuralComparable_CompareTo_NullComparer_ShouldUseDefaultComparer_Data))]
+        public void IStructuralComparable_CompareTo_NullComparer_ShouldUseDefaultComparer_netfx(IEnumerable<int> source, object other)
         {
             var array = source.ToImmutableArray();
             Assert.Throws<NullReferenceException>(() => ((IStructuralComparable)array).CompareTo(other, comparer: null));
@@ -2020,9 +2064,8 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        public static IEnumerable<object[]> IStructuralComparableCompareToNullComparerNullReferenceInvalidData()
+        public static IEnumerable<object[]> IStructuralComparable_CompareTo_NullComparer_ShouldUseDefaultComparer_Data()
         {
-            // This was not fixed for compatability reasons. See https://github.com/dotnet/corefx/issues/13410
             yield return new object[] { new[] { 1, 2, 3 }, new[] { 1, 2, 3 } };
             yield return new object[] { new[] { 1, 2, 3 }, ImmutableArray.Create(1, 2, 3) };
             // Cache this into a local so the comparands are reference-equal.
