@@ -728,7 +728,6 @@ namespace System.IO.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to get short path name
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public static void GetFullPath_Windows_83Paths()
         {
             // Create a temporary file name with a name longer than 8.3 such that it'll need to be shortened.
