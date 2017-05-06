@@ -92,6 +92,9 @@ namespace System.Net
             }
 
             ListenerPrefix lp = new ListenerPrefix(p);
+            if (lp.Host != "*" && lp.Host != "+" && Uri.CheckHostName(lp.Host) == UriHostNameType.Unknown)
+                throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_listener_host);
+
             if (lp.Path.IndexOf('%') != -1)
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 

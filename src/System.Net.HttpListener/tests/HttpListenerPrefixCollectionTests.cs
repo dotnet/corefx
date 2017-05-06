@@ -166,8 +166,11 @@ namespace System.Net.Tests
         }
 
         [Theory]
+        [InlineData("http://*/")]
+        [InlineData("http://+/")]
         [InlineData("http://localhost/")]
         [InlineData("https://localhost/")]
+        [InlineData("http://0.0.0.0/")]
         [InlineData("http://localhost:9200/")]
         [InlineData("https://localhost:9200/")]
         [InlineData("http://[fe80::70af:5aca:252a:3ca9]/")]
@@ -224,12 +227,29 @@ namespace System.Net.Tests
             }
         }
 
+        public static IEnumerable<object[]> InvalidPrefix_TestData()
+        {
+            yield return new object[] { "http://microsoft.com/" };
+            yield return new object[] { "http://[]/" };
+            yield return new object[] { "http://[::1%2]/" };
+            yield return new object[] { "http://[::]/" };
+            yield return new object[] { "http://localhost:-1/" };
+            yield return new object[] { "http://localhost:0/" };
+            yield return new object[] { "http://localhost:65536/" };
+            yield return new object[] { "http://localhost:trash/" };
+            yield return new object[] { "http://localhost/invalid%path/" };
+            yield return new object[] { "http://./" };
+            yield return new object[] { "http://\\/" };
+
+            // https://github.com/dotnet/corefx/issues/18128
+            if (PlatformDetection.IsWindows)
+            {
+                yield return new object[] { "http://192./" };
+            }
+        }
+
         [Theory]
-        [InlineData("http://microsoft.com/")]
-        //Managed implementation allows this. Is this a bad test? [InlineData("http://[]/")]
-        [InlineData("http://localhost:-1/")]
-        [InlineData("http://localhost:65536/")]
-        [InlineData("http://localhost:trash/")]
+        [MemberData(nameof(InvalidPrefix_TestData))]
         public void Add_InvalidPrefixNotStarted_ThrowsHttpListenerExceptionOnStart(string uriPrefix)
         {
             var listener = new HttpListener();
@@ -241,11 +261,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [InlineData("http://microsoft.com/")]
-        //Managed implementation allows this. Is this a bad test? [InlineData("http://[]/")]
-        [InlineData("http://localhost:-1/")]
-        [InlineData("http://localhost:65536/")]
-        [InlineData("http://localhost:65536/")]
+        [MemberData(nameof(InvalidPrefix_TestData))]
         public void Add_InvalidPrefixAlreadyStarted_ThrowsHttpListenerExceptionOnAdd(string uriPrefix)
         {
             using (var factory = new HttpListenerFactory())
@@ -268,10 +284,15 @@ namespace System.Net.Tests
         [InlineData("http://[[]/")]
         [InlineData("http://localhost:9200")]
         [InlineData("http://localhost/path")]
+        [InlineData("http://::/")]
+        [InlineData("http://::/")]
         public void Add_InvalidPrefix_ThrowsArgumentException(string uriPrefix)
         {
             var listener = new HttpListener();
             Assert.Throws<ArgumentException>("uriPrefix", () => listener.Prefixes.Add(uriPrefix));
+
+            // If the prefix was invalid, it shouldn't be added to the list.
+            Assert.Empty(listener.Prefixes);
         }
 
         [Fact]
@@ -279,6 +300,20 @@ namespace System.Net.Tests
         {
             var listener = new HttpListener();
             Assert.Throws<ArgumentNullException>("uriPrefix", () => listener.Prefixes.Add(null));
+        }
+
+        [Fact]
+        public void Add_LongHost_ThrowsArgumentOutOfRangeException()
+        {
+            var listener = new HttpListener();
+            string longPrefix = "http://" + new string('a', 256) + "/";
+            Assert.Throws<ArgumentOutOfRangeException>("hostName", () => listener.Prefixes.Add(longPrefix));
+
+            // Ouch: even though adding the prefix threw an exception, the prefix was still added.
+            Assert.Equal(1, listener.Prefixes.Count);
+            Assert.True(listener.Prefixes.Contains(longPrefix));
+
+            Assert.Throws<HttpListenerException>(() => listener.Start());
         }
 
         [Fact]
